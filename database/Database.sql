@@ -116,3 +116,14 @@ CREATE TABLE ClubApplications (
     FOREIGN KEY (UserID) REFERENCES Users(UserID),
     FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID)
 );
+INSERT INTO Permissions (PermissionID, PermissionName) VALUES
+(1, 'Admin'),
+(2, 'Student'),
+(3, 'IC_Officer');
+
+INSERT INTO Users (FullName, Email, Password, PermissionID, Status, ResetToken, TokenExpiry)
+VALUES 
+('Nguyễn Văn A', 'a@example.com', '123456', 2, 1, NULL, NULL),
+('Trần Thị B', 'b@example.com', '123456', 2, 1, NULL, NULL),
+('Lê Văn C', 'c@example.com', '123456', 2, 1, NULL, NULL),
+('Phạm Thị D', 'd@example.com', '123456', 2, 1, NULL, NULL);
