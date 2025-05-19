@@ -95,6 +95,6 @@ public class Event {
     public String toString() {
         return "Event{" + "eventID=" + eventID + ", eventName=" + eventName + ", description=" + description + ", eventDate=" + eventDate + ", location=" + location + ", clubID=" + clubID + ", isPublic=" + isPublic + ", urlGGForm=" + urlGGForm + '}';
     }
-    
-    
+
+
 }

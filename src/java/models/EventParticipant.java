@@ -53,6 +53,6 @@ public class EventParticipant {
     public String toString() {
         return "EventParticipant{" + "eventParticipantID=" + eventParticipantID + ", eventID=" + eventID + ", userID=" + userID + ", status=" + status + '}';
     }
-    
-    
+
+
 }

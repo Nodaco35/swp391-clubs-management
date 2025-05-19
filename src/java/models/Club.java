@@ -7,7 +7,6 @@ package models;
 import java.util.Date;
 
 /**
- *
  * @author NC PC
  */
 public class Club {
@@ -92,6 +91,6 @@ public class Club {
     public String toString() {
         return "Club{" + "clubID=" + clubID + ", clubName=" + clubName + ", description=" + description + ", establishedDate=" + establishedDate + ", contactPhone=" + contactPhone + ", contactGmail=" + contactGmail + ", contactURL=" + contactURL + '}';
     }
-    
-    
+
+
 }

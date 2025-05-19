@@ -86,6 +86,6 @@ public class UserClub {
     public String toString() {
         return "UserClub{" + "userClubID=" + userClubID + ", userID=" + userID + ", clubID=" + clubID + ", departmentID=" + departmentID + ", roleID=" + roleID + ", joinDate=" + joinDate + ", isActive=" + isActive + '}';
     }
-    
-    
+
+
 }

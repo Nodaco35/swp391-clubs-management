@@ -75,6 +75,6 @@ public class ClubApplication {
     public String toString() {
         return "ClubApplication{" + "applicationID=" + applicationID + ", userID=" + userID + ", clubID=" + clubID + ", reason=" + reason + ", status=" + status + ", submitDate=" + submitDate + '}';
     }
-    
-    
+
+
 }

@@ -94,6 +94,6 @@ public class User {
     public String toString() {
         return "User{" + "userID=" + userID + ", fullName=" + fullName + ", email=" + email + ", password=" + password + ", permissionID=" + permissionID + ", status=" + status + ", resetToken=" + resetToken + ", tokenExpiry=" + tokenExpiry + '}';
     }
-    
-    
+
+
 }

@@ -53,5 +53,5 @@ public class Department {
     public String toString() {
         return "Department{" + "departmentID=" + departmentID + ", departmentName=" + departmentName + ", description=" + description + ", clubID=" + clubID + '}';
     }
-    
+
 }

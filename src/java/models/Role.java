@@ -5,7 +5,6 @@
 package models;
 
 /**
- *
  * @author NC PC
  */
 public class Role {
@@ -40,6 +39,6 @@ public class Role {
     public String toString() {
         return "Role{" + "roleID=" + roleID + ", roleName=" + roleName + '}';
     }
-    
-    
+
+
 }

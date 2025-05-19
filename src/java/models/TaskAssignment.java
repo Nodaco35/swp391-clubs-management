@@ -53,5 +53,5 @@ public class TaskAssignment {
     public String toString() {
         return "TaskAssignment{" + "taskAssignmentID=" + taskAssignmentID + ", eventID=" + eventID + ", departmentID=" + departmentID + ", description=" + description + '}';
     }
-    
+
 }
