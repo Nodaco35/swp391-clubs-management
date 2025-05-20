@@ -11,7 +11,7 @@ public class DBConnection {
             Class.forName("com.mysql.cj.jdbc.Driver"); // chú ý driver mới của MySQL
             String url = "jdbc:mysql://localhost:3306/managerclub?useSSL=false&serverTimezone=UTC";
             String user = "root";
-            String password = "nodaco123";
+            String password = "Minhphuc7777";
             return DriverManager.getConnection(url, user, password);
         } catch (Exception e) {
             e.printStackTrace();
