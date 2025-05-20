@@ -1,10 +1,9 @@
-package dao;
+package dal;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import models.User;
-import dao.DBConnection;
 
 public class UserDAO {
 
