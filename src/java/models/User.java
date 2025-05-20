@@ -9,12 +9,13 @@ public class User {
     private boolean status;
     private String resetToken;
     private java.sql.Timestamp tokenExpiry;
+    private String MSSV;
 
     // Constructors
     public User() {
     }
 
-    public User(int userID, String fullName, String email, String password, int permissionID, boolean status, String resetToken, java.sql.Timestamp tokenExpiry) {
+    public User(int userID, String fullName, String email, String password, int permissionID, boolean status, String resetToken, java.sql.Timestamp tokenExpiry, String MSSV) {
         this.userID = userID;
         this.fullName = fullName;
         this.email = email;
@@ -23,8 +24,17 @@ public class User {
         this.status = status;
         this.resetToken = resetToken;
         this.tokenExpiry = tokenExpiry;
+        this.MSSV = MSSV;
     }
 
+    public String getMSSV() {
+        return MSSV;
+    }
+
+    public void setMSSV(String MSSV) {
+        this.MSSV = MSSV;
+    }
+    
     // Getters and Setters
     public int getUserID() {
         return userID;

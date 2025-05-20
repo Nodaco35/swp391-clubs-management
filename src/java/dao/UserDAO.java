@@ -68,4 +68,22 @@ public class UserDAO {
         return null;
     }
 
+    public static void update(String newName, String email, String id) {
+        String sql = "UPDATE `managerclub`.`users`\n"
+                + "SET\n"
+                + "  `FullName` = ?,\n"
+                + "  `Email` = ?\n"
+                + "WHERE `UserID` = ?;";
+
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setObject(1, newName);
+            ps.setObject(2, email);
+            ps.setObject(3, id);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
