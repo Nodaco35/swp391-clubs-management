@@ -5,7 +5,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class DBConnection {
+public class DBContext {
     public static Connection getConnection() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver"); // chú ý driver mới của MySQL

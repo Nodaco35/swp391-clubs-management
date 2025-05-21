@@ -4,7 +4,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import models.User;
-import dao.DBConnection;
+import dao.DBContext;
 
 public class UserDAO {
 
@@ -13,7 +13,7 @@ public class UserDAO {
 
         String sql = "SELECT * FROM Users";
 
-        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 User user = new User();
@@ -39,7 +39,7 @@ public class UserDAO {
     public static User getUserByEmailAndPassword(String email, String password) {
         String sql = "SELECT * FROM Users WHERE Email = ? AND Password = ?";
 
-        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, email);
             ps.setString(2, password);
