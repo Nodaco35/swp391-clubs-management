@@ -1,15 +1,17 @@
+<%-- 
+    Document   : footer
+    Created on : May 21, 2025, 3:44:27 PM
+    Author     : NC PC
+--%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@ page import="models.User" %>
-
 <!DOCTYPE html>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>JSP Page</title>
-        <link rel="stylesheet" href="../style/homepage.css"/>
     </head>
     <body>
-        
+        <h1>Hello World!</h1>
     </body>
 </html>
