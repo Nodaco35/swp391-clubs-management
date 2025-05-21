@@ -1,9 +1,9 @@
-
 package models;
 
-import java.security.Timestamp;
 
+import java.sql.Timestamp;
 
+// UserClub class (as provided previously)
 public class UserClub {
     private int userClubID;
     private int userID;
@@ -12,6 +12,9 @@ public class UserClub {
     private int roleID;
     private Timestamp joinDate;
     private boolean isActive;
+    // Additional fields for convenience
+    private String fullName;
+    private String email;
 
     public UserClub() {
     }
@@ -82,10 +85,26 @@ public class UserClub {
         this.isActive = isActive;
     }
 
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     @Override
     public String toString() {
-        return "UserClub{" + "userClubID=" + userClubID + ", userID=" + userID + ", clubID=" + clubID + ", departmentID=" + departmentID + ", roleID=" + roleID + ", joinDate=" + joinDate + ", isActive=" + isActive + '}';
+        return "UserClub{" + "userClubID=" + userClubID + ", userID=" + userID + ", clubID=" + clubID + 
+               ", departmentID=" + departmentID + ", roleID=" + roleID + ", joinDate=" + joinDate + 
+               ", isActive=" + isActive + ", fullName=" + fullName + ", email=" + email + '}';
     }
-    
-    
 }

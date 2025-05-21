@@ -1,0 +1,140 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : May 21, 2025, 1:56:15 PM
+    Author     : FPT Shop
+*/
+
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #00a6c0;
+    color: white;
+    padding: 10px 20px;
+}
+.header .logo {
+    font-size: 24px;
+    font-weight: bold;
+}
+.header .user-info {
+    display: flex;
+    align-items: center;
+}
+.header .user-info button {
+    background-color: #555;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+.nav {
+    background-color: #444;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: center;
+}
+.nav a {
+    color: white;
+    text-decoration: none;
+    margin: 0 15px;
+}
+.nav a:hover {
+    text-decoration: underline;
+}
+.search-filter {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+}
+.search-filter input {
+    padding: 5px;
+    width: 200px;
+}
+.search-filter button {
+    padding: 5px 10px;
+    background-color: #555;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+.content {
+    padding: 20px;
+}
+.content h2 {
+    text-align: center;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+table, th, td {
+    border: 1px solid #ddd;
+}
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+th {
+    background-color: #555;
+    color: white;
+}
+.actions a {
+    margin: 0 5px;
+    text-decoration: none;
+    color: #007bff;
+}
+.pagination {
+    text-align: center;
+    margin-top: 20px;
+}
+.pagination a {
+    margin: 0 5px;
+    text-decoration: none;
+    color: #007bff;
+}
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+}
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    width: 400px;
+}
+.modal-content h3 {
+    margin-top: 0;
+}
+.modal-content input, .modal-content select {
+    width: 100%;
+    padding: 5px;
+    margin: 5px 0;
+}
+.modal-content button {
+    padding: 5px 10px;
+    background-color: #555;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
