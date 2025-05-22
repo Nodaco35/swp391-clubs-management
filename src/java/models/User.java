@@ -1,7 +1,7 @@
 package models;
 
 public class User {
-    private int userID;
+    private String userID;
     private String fullName;
     private String email;
     private String password;
@@ -9,13 +9,13 @@ public class User {
     private boolean status;
     private String resetToken;
     private java.sql.Timestamp tokenExpiry;
-    private String MSSV;
+    private String dob;
 
     // Constructors
     public User() {
     }
 
-    public User(int userID, String fullName, String email, String password, int permissionID, boolean status, String resetToken, java.sql.Timestamp tokenExpiry, String MSSV) {
+    public User(String userID, String fullName, String email, String password, int permissionID, boolean status, String resetToken, java.sql.Timestamp tokenExpiry, String dob) {
         this.userID = userID;
         this.fullName = fullName;
         this.email = email;
@@ -24,23 +24,27 @@ public class User {
         this.status = status;
         this.resetToken = resetToken;
         this.tokenExpiry = tokenExpiry;
-        this.MSSV = MSSV;
+        this.dob = dob;
     }
 
-    public String getMSSV() {
-        return MSSV;
+    public String getDob() {
+        return dob;
     }
 
-    public void setMSSV(String MSSV) {
-        this.MSSV = MSSV;
+    public void setDob(String dob) {
+        this.dob = dob;
     }
+
+   
+
+    
     
     // Getters and Setters
-    public int getUserID() {
+    public String getUserID() {
         return userID;
     }
 
-    public void setUserID(int userID) {
+    public void setUserID(String userID) {
         this.userID = userID;
     }
 

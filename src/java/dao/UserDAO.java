@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import models.User;
-import dao.DBConnection;
+import dao.DBContext;
 
 public class UserDAO {
 
@@ -14,11 +14,11 @@ public class UserDAO {
 
         String sql = "SELECT * FROM Users";
 
-        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 User user = new User();
-                user.setUserID(rs.getInt("UserID"));
+                user.setUserID(rs.getString("UserID"));
                 user.setFullName(rs.getString("FullName"));
                 user.setEmail(rs.getString("Email"));
                 user.setPassword(rs.getString("Password"));
@@ -40,7 +40,7 @@ public class UserDAO {
     public static User getUserByEmailAndPassword(String email, String password) {
         String sql = "SELECT * FROM Users WHERE Email = ? AND Password = ?";
 
-        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, email);
             ps.setString(2, password);
@@ -48,7 +48,7 @@ public class UserDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     User user = new User();
-                    user.setUserID(rs.getInt("UserID"));
+                    user.setUserID(rs.getString("UserID"));
                     user.setFullName(rs.getString("FullName"));
                     user.setEmail(rs.getString("Email"));
                     user.setPassword(rs.getString("Password"));
@@ -69,13 +69,13 @@ public class UserDAO {
     }
 
     public static void update(String newName, String email, String id) {
-        String sql = "UPDATE `managerclub`.`users`\n"
+        String sql = "UPDATE `clubmanagementsystem`.`users`\n"
                 + "SET\n"
                 + "  `FullName` = ?,\n"
                 + "  `Email` = ?\n"
                 + "WHERE `UserID` = ?;";
 
-        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setObject(1, newName);
             ps.setObject(2, email);
             ps.setObject(3, id);
@@ -86,4 +86,40 @@ public class UserDAO {
         }
     }
 
+    public static User getUserById(String id) {
+        String sql = "SELECT *\n"
+                + "FROM `clubmanagementsystem`.`users`\n"
+                + "WHERE `users`.`UserID` = ?;";
+
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, id);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    User user = new User();
+                    user.setUserID(rs.getString("UserID"));
+                    user.setFullName(rs.getString("FullName"));
+                    user.setEmail(rs.getString("Email"));
+                    user.setPassword(rs.getString("Password"));
+                    user.setPermissionID(rs.getInt("PermissionID"));
+                    user.setStatus(rs.getBoolean("Status"));
+                    user.setResetToken(rs.getString("ResetToken"));
+                    user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
+
+                    return user;
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    
+    
+    
+    
 }
