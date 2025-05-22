@@ -12,6 +12,10 @@
         <servlet-name>HomeController</servlet-name>
         <servlet-class>controllers.HomeController</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>OtpController</servlet-name>
+        <servlet-class>controllers.OtpController</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/login</url-pattern>
@@ -24,5 +28,8 @@
         <servlet-name>HomeController</servlet-name>
         <url-pattern>/home</url-pattern>
     </servlet-mapping>
-    
+    <servlet-mapping>
+        <servlet-name>OtpController</servlet-name>
+        <url-pattern>/verifyCode</url-pattern>
+    </servlet-mapping>
 </web-app>

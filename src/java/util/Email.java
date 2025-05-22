@@ -4,15 +4,15 @@ import java.util.Date;
 
 import java.util.Properties;
 
-import javax.mail.Authenticator;
-import javax.mail.Message;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
+import jakarta.mail.Authenticator;
+import jakarta.mail.Message;
+import jakarta.mail.PasswordAuthentication;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.activation.DataHandler;
+import jakarta.activation.DataSource;
 
 public class Email {
     // Email: tungletest1.email@gmail.com
@@ -67,17 +67,17 @@ public class Email {
 
             // Gửi email
             Transport.send(msg);
-            System.out.println("Gửi email thành công");
+            
             return true;
         } catch (Exception e) {
-            System.out.println("Gặp lỗi trong quá trình gửi email");
+            
             e.printStackTrace();
             return false;
         }
     }
 
     public static void main(String[] args) {
-        Email.sendEmail("he181972dohuuduc@gmail.com", "tieu de", "noi dung");
+        Email.sendEmail("he181972dohuuduc@gmail.com", "OTP", "123456");
     }
 
 }

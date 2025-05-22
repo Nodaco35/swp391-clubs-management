@@ -4,19 +4,11 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/D:/FULearning/SU25/SWP/clubmanagement/src/java/controllers/HomeController.java</file>
-            <file>file:/D:/FULearning/SU25/SWP/clubmanagement/src/java/dao/UserDAO.java</file>
-            <file>file:/D:/FULearning/SU25/SWP/clubmanagement/src/java/models/Permission.java</file>
-            <file>file:/D:/FULearning/SU25/SWP/clubmanagement/src/java/controllers/LoginServlet.java</file>
-            <file>file:/D:/FULearning/SU25/SWP/clubmanagement/src/java/models/UserClub.java</file>
-            <file>file:/D:/FULearning/SU25/SWP/clubmanagement/src/java/util/Email.java</file>
-            <file>file:/D:/FULearning/SU25/SWP/clubmanagement/src/java/models/Club.java</file>
             <file>file:/D:/FULearning/SU25/SWP/clubmanagement/src/java/dao/DBContext2.java</file>
-            <file>file:/D:/FULearning/SU25/SWP/clubmanagement/web/view/homePage.jsp</file>
-            <file>file:/D:/FULearning/SU25/SWP/clubmanagement/src/java/models/User.java</file>
             <file>file:/D:/FULearning/SU25/SWP/clubmanagement/web/view/profile.jsp</file>
-            <file>file:/D:/FULearning/SU25/SWP/clubmanagement/src/java/models/Department.java</file>
+            <file>file:/D:/FULearning/SU25/SWP/clubmanagement/src/java/controllers/LoginServlet.java</file>
             <file>file:/D:/FULearning/SU25/SWP/clubmanagement/src/java/dao/DBContext.java</file>
-            <file>file:/D:/FULearning/SU25/SWP/clubmanagement/src/java/models/ClubApplication.java</file>
+            <file>file:/D:/FULearning/SU25/SWP/clubmanagement/src/java/util/Email.java</file>
         </group>
     </open-files>
 </project-private>
