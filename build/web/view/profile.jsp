@@ -97,6 +97,7 @@
             </form>
 
             <form action="verifyCode?action=sendOtp" method="POST">
+                <input type="hidden" name="type" value="Verify current email">
                 <div class="mb-3">
                     
                     <input type="hidden"  name="email" value="<%= user.getEmail() %>" readonly>

@@ -4,6 +4,7 @@
  */
 package controllers;
 
+import dao.UserDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -35,6 +36,11 @@ public class OtpController extends HttpServlet {
             case "sendOtp":
                 sendOtp(request, response);
                 break;
+            case "confirmOtp":
+                confirmAndRemoveOtp(request, response);
+
+                break;
+
             default:
                 throw new AssertionError();
         }
@@ -44,11 +50,12 @@ public class OtpController extends HttpServlet {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
         String email = request.getParameter("email");
-
+        String type = request.getParameter("type");
         // Tạo mã OTP ngẫu nhiên
         String otp = String.valueOf(100000 + new Random().nextInt(900000));
         session.setAttribute("otp", otp);
         session.setAttribute("otpEmail", email);
+        session.setAttribute("type", type);
 
         // Gửi email OTP
         String subject = "Verify OTP Email";
@@ -56,6 +63,46 @@ public class OtpController extends HttpServlet {
         Email.sendEmail(email, subject, content);
         session.setAttribute("user", user);
         request.getRequestDispatcher("view/verifyCode.jsp").forward(request, response);
+    }
+
+    private void confirmAndRemoveOtp(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+        String otpInput = request.getParameter("otp");
+        String otp = (String) session.getAttribute("otp");
+        String type = (String) session.getAttribute("type");
+        String otpEmail = (String) session.getAttribute("otpEmail");
+        String msg;
+        if (type.equals("Verify current email")) {
+            if (otpInput.equals(otp)) {
+                session.removeAttribute("otp");
+                session.removeAttribute("otpEmail");
+                session.removeAttribute("type");
+                session.setAttribute("user", user);
+                request.getRequestDispatcher("view/editEmail.jsp").forward(request, response);
+                return;
+            }
+        } else if (type.equals("Verify new email")) {
+            if (otpInput.equals(otp)) {
+                String id = request.getParameter("id");
+                
+                UserDAO.updateEmail(otpEmail, id);
+                msg = "Cập nhập thành công";
+                request.setAttribute("msg", msg);
+                session.removeAttribute("otp");
+                session.removeAttribute("otpEmail");
+                session.removeAttribute("type");
+                user = UserDAO.getUserById(id);
+                session.setAttribute("user", user);
+                request.getRequestDispatcher("view/profile.jsp").forward(request, response);
+                return;
+            }
+        }
+
+         msg = "Mã OTP không khớp!";
+        request.setAttribute("msg", msg);
+        request.getRequestDispatcher("view/verifyCode.jsp").forward(request, response);
+
     }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)

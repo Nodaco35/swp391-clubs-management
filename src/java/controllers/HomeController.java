@@ -71,14 +71,12 @@ public class HomeController extends HttpServlet {
         String newName = request.getParameter("name");
         String email = request.getParameter("email");
         String id = request.getParameter("id");
-        String otp = request.getParameter("otp");
+        
 
         String msg;
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
-        String storedOtp = (String) session.getAttribute("otp");
-        String otpEmail = (String) session.getAttribute("otpEmail");
-
+        
         // Kiểm tra định dạng email
         if (email.endsWith("@gmail.com") || email.endsWith("@fpt.edu.vn")) {
             UserDAO.update(newName, email, id);

@@ -5,6 +5,7 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page import="models.User" %>
 <!DOCTYPE html>
 <html>
     <head>
@@ -12,15 +13,41 @@
         <title>Verify Code</title>
     </head>
     <body>
-        <form action="verifyCode?action=comfirmOtp" method="POST">
+
+        <%String type = (String) session.getAttribute("type");
+        String email = (String) session.getAttribute("otpEmail");
+        User user = (User) session.getAttribute("user");
+        if(type.equals("Verify current email")){
+        %>
+        <div>Mã xác minh được gửi đến gmail: <%= email%></div>
+        <form action="verifyCode?action=confirmOtp" method="POST">
             <input type="text" name="otp" required>
             <input type="submit" value="Comfirm OTP">
         </form>
         
-        <form action="verifyCode?action=resendOtp" method="POST">
-            
-            
-        </form>
+
+        <% }else if(type.equals("Verify new email")) {%>
         
+        <div>Mã xác minh được gửi đến gmail mới: <%= email%></div>
+        <form action="verifyCode?action=confirmOtp" method="POST">
+            <input type="hidden" name="id" value="<%= user.getUserID()%>">
+            <input type="hidden" name="email" value="<%= email%>">
+            <input type="text" name="otp" required>
+            <input type="submit" value="Confirm OTP">
+        </form>
+        <%}%>
+        <form action="verifyCode?action=resendOtp" method="POST">
+
+
+        </form>
+
     </body>
+    <% String msg = (String) request.getAttribute("msg");
+        if(msg != null){
+    %>
+    <div><%= msg%></div>
+    <%
+    }
+    %>
+
 </html>
