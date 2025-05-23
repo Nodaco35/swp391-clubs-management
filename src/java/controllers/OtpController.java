@@ -40,7 +40,9 @@ public class OtpController extends HttpServlet {
                 confirmAndRemoveOtp(request, response);
 
                 break;
-
+            case "resendOtp":
+                resendOtp(request, response);
+                break;
             default:
                 throw new AssertionError();
         }
@@ -85,7 +87,7 @@ public class OtpController extends HttpServlet {
         } else if (type.equals("Verify new email")) {
             if (otpInput.equals(otp)) {
                 String id = request.getParameter("id");
-                
+
                 UserDAO.updateEmail(otpEmail, id);
                 msg = "Cập nhập thành công";
                 request.setAttribute("msg", msg);
@@ -99,10 +101,30 @@ public class OtpController extends HttpServlet {
             }
         }
 
-         msg = "Mã OTP không khớp!";
+        msg = "Mã OTP không khớp!";
         request.setAttribute("msg", msg);
         request.getRequestDispatcher("view/verifyCode.jsp").forward(request, response);
 
+    }
+
+    private void resendOtp(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        HttpSession session = request.getSession();
+        String email = (String) session.getAttribute("otpEmail");
+        String type = (String) session.getAttribute("type");
+        User user = (User) session.getAttribute("user");
+        session.removeAttribute("otp");
+
+        String otp = String.valueOf((int) (Math.random() * 900000) + 100000); // 6 số
+        session.setAttribute("otp", otp);
+
+        String subject = "Verify OTP Email";
+        String content = "Mã OTP của bạn là: <b>" + otp + "</b>. Vui lòng sử dụng mã này để xác nhận thay đổi email.";
+        Email.sendEmail(email, subject, content);
+        session.setAttribute("user", user);
+        session.setAttribute("type", type);
+        request.setAttribute("msg", "Mã OTP đã được gửi lại tới email: " +email);
+        request.getRequestDispatcher("view/verifyCode.jsp").forward(request, response);
     }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)

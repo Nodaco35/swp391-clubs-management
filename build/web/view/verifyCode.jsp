@@ -24,10 +24,10 @@
             <input type="text" name="otp" required>
             <input type="submit" value="Comfirm OTP">
         </form>
-        
+
 
         <% }else if(type.equals("Verify new email")) {%>
-        
+
         <div>Mã xác minh được gửi đến gmail mới: <%= email%></div>
         <form action="verifyCode?action=confirmOtp" method="POST">
             <input type="hidden" name="id" value="<%= user.getUserID()%>">
@@ -36,9 +36,9 @@
             <input type="submit" value="Confirm OTP">
         </form>
         <%}%>
-        <form action="verifyCode?action=resendOtp" method="POST">
-
-
+        <!-- Nút gửi lại mã OTP và đếm ngược -->
+        <form id="resendForm" action="verifyCode?action=resendOtp" method="POST">
+            <input type="submit" id="resendBtn" value="Gửi lại mã" disabled>
         </form>
 
     </body>
@@ -49,5 +49,19 @@
     <%
     }
     %>
+    <script>
+        let countdown = 59;
+        const resendBtn = document.getElementById('resendBtn');
 
+        const timer = setInterval(() => {
+            if (countdown <= 0) {
+                resendBtn.disabled = false;
+                resendBtn.value = "Gửi lại mã";
+                clearInterval(timer);
+            } else {
+                resendBtn.value = `Gửi lại mã (${countdown}s)`;
+                countdown--;
+            }
+        }, 1000);
+    </script>
 </html>
