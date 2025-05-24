@@ -55,7 +55,7 @@ public class UserDAO {
                     user.setStatus(rs.getBoolean("Status"));
                     user.setResetToken(rs.getString("ResetToken"));
                     user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
-
+                    user.setAvatar(rs.getString("AvatarSrc"));
                     return user;
                 }
             }
@@ -71,7 +71,7 @@ public class UserDAO {
         String sql = "UPDATE `clubmanagementsystem`.`users`\n"
                 + "SET\n"
                 + "  `FullName` = ?,\n"
-                + "  `Email` = ?\n"
+                + "  `AvatarSrc` = ?\n"
                 + "WHERE `UserID` = ?;";
 
         try (Connection conn = DBContext1.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -105,7 +105,7 @@ public class UserDAO {
                     user.setStatus(rs.getBoolean("Status"));
                     user.setResetToken(rs.getString("ResetToken"));
                     user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
-
+                    user.setAvatar(rs.getString("AvatarSrc"));
                     return user;
                 }
             }

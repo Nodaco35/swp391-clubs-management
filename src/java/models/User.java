@@ -10,12 +10,12 @@ public class User {
     private String resetToken;
     private java.sql.Timestamp tokenExpiry;
     private String dob;
-
+    private String avatar;
     // Constructors
     public User() {
     }
 
-    public User(String userID, String fullName, String email, String password, int permissionID, boolean status, String resetToken, java.sql.Timestamp tokenExpiry, String dob) {
+    public User(String userID, String fullName, String email, String password, int permissionID, boolean status, String resetToken, java.sql.Timestamp tokenExpiry, String dob, String avatar) {
         this.userID = userID;
         this.fullName = fullName;
         this.email = email;
@@ -25,8 +25,18 @@ public class User {
         this.resetToken = resetToken;
         this.tokenExpiry = tokenExpiry;
         this.dob = dob;
+        this.avatar = avatar;
     }
 
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    
     public String getDob() {
         return dob;
     }
