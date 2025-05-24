@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="6.0" xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
     <filter>
-        <filter-name>OtpCheck</filter-name>
-        <filter-class>filter.OtpCheck</filter-class>
+        <filter-name>ExtentionFileFilter</filter-name>
+        <filter-class>filter.ExtentionFileFilter</filter-class>
     </filter>
     <filter-mapping>
-        <filter-name>OtpCheck</filter-name>
-        <url-pattern>/view/editGmail.jsp</url-pattern>
+        <filter-name>ExtentionFileFilter</filter-name>
+        <url-pattern>/*</url-pattern>
     </filter-mapping>
     <servlet>
         <servlet-name>LoginServlet</servlet-name>
@@ -40,4 +40,7 @@
         <servlet-name>OtpController</servlet-name>
         <url-pattern>/verifyCode</url-pattern>
     </servlet-mapping>
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
 </web-app>

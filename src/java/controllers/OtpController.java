@@ -25,7 +25,10 @@ public class OtpController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        String action = request.getParameter("action");
+        if (action == null) {
+            resendOtp(request, response);
+        }
     }
 
     @Override
@@ -54,6 +57,10 @@ public class OtpController extends HttpServlet {
         String email = request.getParameter("email");
         String type = request.getParameter("type");
         // Tạo mã OTP ngẫu nhiên
+        session.removeAttribute("otp");
+        session.removeAttribute("otpEmail");
+        session.removeAttribute("type");
+
         String otp = String.valueOf(100000 + new Random().nextInt(900000));
         session.setAttribute("otp", otp);
         session.setAttribute("otpEmail", email);
@@ -64,7 +71,7 @@ public class OtpController extends HttpServlet {
         String content = "Mã OTP của bạn là: <b>" + otp + "</b>. Vui lòng sử dụng mã này để xác nhận thay đổi email.";
         Email.sendEmail(email, subject, content);
         session.setAttribute("user", user);
-        request.getRequestDispatcher("view/verifyCode.jsp").forward(request, response);
+        request.getRequestDispatcher("view/secure/verifyCode.jsp").forward(request, response);
     }
 
     private void confirmAndRemoveOtp(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -81,7 +88,7 @@ public class OtpController extends HttpServlet {
                 session.removeAttribute("otpEmail");
                 session.removeAttribute("type");
                 session.setAttribute("user", user);
-                request.getRequestDispatcher("view/editEmail.jsp").forward(request, response);
+                request.getRequestDispatcher("view/secure/editEmail.jsp").forward(request, response);
                 return;
             }
         } else if (type.equals("Verify new email")) {
@@ -103,7 +110,7 @@ public class OtpController extends HttpServlet {
 
         msg = "Mã OTP không khớp!";
         request.setAttribute("msg", msg);
-        request.getRequestDispatcher("view/verifyCode.jsp").forward(request, response);
+        request.getRequestDispatcher("view/secure/verifyCode.jsp").forward(request, response);
 
     }
 
@@ -123,8 +130,8 @@ public class OtpController extends HttpServlet {
         Email.sendEmail(email, subject, content);
         session.setAttribute("user", user);
         session.setAttribute("type", type);
-        request.setAttribute("msg", "Mã OTP đã được gửi lại tới email: " +email);
-        request.getRequestDispatcher("view/verifyCode.jsp").forward(request, response);
+        request.setAttribute("msg", "Mã OTP đã được gửi lại tới email: " + email);
+        request.getRequestDispatcher("view/secure/verifyCode.jsp").forward(request, response);
     }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
