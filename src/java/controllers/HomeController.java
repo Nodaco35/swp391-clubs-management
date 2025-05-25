@@ -15,7 +15,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import models.User;
 import util.Email;
 import java.util.Random;
@@ -65,17 +67,21 @@ public class HomeController extends HttpServlet {
     }
 
     
+
     private void update(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
 
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
-        
+        if (user == null) {
+            response.sendRedirect("login");
+            return;
+        }
 
         String id = user.getUserID();
         String email = user.getEmail();
         String newName = request.getParameter("name");
-        String avatarPath = user.getAvatar(); // Giữ ảnh cũ nếu không upload mới
+        String avatarPath = user.getAvatar();
 
         // Xử lý file ảnh nếu có
         Part filePart = request.getPart("avatar");
@@ -87,8 +93,8 @@ public class HomeController extends HttpServlet {
             if (!contentType.startsWith("image/")
                     || !(fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")
                     || fileName.endsWith(".png") || fileName.endsWith(".gif") || fileName.endsWith(".webp"))) {
-
                 request.setAttribute("msg", "Chỉ được upload file ảnh (.jpg, .png, .gif, .webp)");
+                request.setAttribute("msgType", "error");
                 request.getRequestDispatcher("view/profile.jsp").forward(request, response);
                 return;
             }
@@ -97,41 +103,53 @@ public class HomeController extends HttpServlet {
             String ext = fileName.substring(fileName.lastIndexOf("."));
             String newFileName = UUID.randomUUID().toString() + ext;
 
-            // Xác định đường dẫn ghi ảnh (trong build/web/img)
+            // Xác định đường dẫn ghi ảnh (trong web/img)
             String folder = "img";
-            String realPath = getServletContext().getRealPath("/") + folder;
-            System.out.println(" Đường dẫn thư mục ảnh: " + realPath);
+            String buildPath = getServletContext().getRealPath("/");
+            String webPath = buildPath.replace("build" + File.separator + "web", "web") + folder; // Đường dẫn tới web/img
+            String buildImgPath = buildPath + folder; // Đường dẫn tới build/web/img
 
-            File uploadDir = new File(realPath);
-            if (!uploadDir.exists()) {
-                uploadDir.mkdirs();
-                System.out.println(" Thư mục chưa có, đã tạo mới: " + realPath);
+            // Tạo thư mục web/img nếu chưa tồn tại
+            File webDir = new File(webPath);
+            if (!webDir.exists()) {
+                webDir.mkdirs();
             }
 
-            String uploadPath = realPath + File.separator + newFileName;
+            // Tạo thư mục build/web/img nếu chưa tồn tại
+            File buildDir = new File(buildImgPath);
+            if (!buildDir.exists()) {
+                buildDir.mkdirs();
+            }
+
+            // Lưu ảnh vào web/img
+            String webUploadPath = webPath + File.separator + newFileName;
             try {
-                filePart.write(uploadPath);
-                System.out.println(" Ghi ảnh thành công tại: " + uploadPath);
+                filePart.write(webUploadPath);
+
+                // Sao chép ảnh sang build/web/img
+                String buildUploadPath = buildImgPath + File.separator + newFileName;
+                Files.copy(new File(webUploadPath).toPath(), new File(buildUploadPath).toPath(), StandardCopyOption.REPLACE_EXISTING);
+
                 avatarPath = folder + "/" + newFileName;
             } catch (IOException e) {
-                System.out.println(" Lỗi ghi ảnh: " + e.getMessage());
                 e.printStackTrace();
+                request.setAttribute("msg", "Lỗi khi upload ảnh: " + e.getMessage());
+                request.setAttribute("msgType", "error");
+                request.getRequestDispatcher("view/profile.jsp").forward(request, response);
+                return;
             }
         }
 
         // Cập nhật thông tin vào DB
         UserDAO.update(newName, avatarPath, id);
-        System.out.println(" Đã cập nhật vào DB: " + newName + ", " + avatarPath);
 
         // Cập nhật lại session user
         User updatedUser = UserDAO.getUserById(id);
         session.setAttribute("user", updatedUser);
 
-        request.setAttribute("msg", " Cập nhật thành công");
+        request.setAttribute("msg", "Cập nhật thành công");
+        request.setAttribute("msgType", "success");
         request.getRequestDispatcher("view/profile.jsp").forward(request, response);
     }
-    
-    
-    
 
 }
