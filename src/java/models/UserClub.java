@@ -1,12 +1,12 @@
 
 package models;
 
-import java.security.Timestamp;
+import java.sql.Timestamp;
 
 
 public class UserClub {
     private int userClubID;
-    private int userID;
+    private String userID;
     private int clubID;
     private int departmentID;
     private int roleID;
@@ -16,7 +16,7 @@ public class UserClub {
     public UserClub() {
     }
 
-    public UserClub(int userClubID, int userID, int clubID, int departmentID, int roleID, Timestamp joinDate, boolean isActive) {
+    public UserClub(int userClubID, String userID, int clubID, int departmentID, int roleID, Timestamp joinDate, boolean isActive) {
         this.userClubID = userClubID;
         this.userID = userID;
         this.clubID = clubID;
@@ -34,11 +34,11 @@ public class UserClub {
         this.userClubID = userClubID;
     }
 
-    public int getUserID() {
+    public String getUserID() {
         return userID;
     }
 
-    public void setUserID(int userID) {
+    public void setUserID(String userID) {
         this.userID = userID;
     }
 
@@ -74,18 +74,11 @@ public class UserClub {
         this.joinDate = joinDate;
     }
 
-    public boolean isIsActive() {
+    public boolean isActive() {
         return isActive;
     }
 
-    public void setIsActive(boolean isActive) {
-        this.isActive = isActive;
+    public void setActive(boolean active) {
+        isActive = active;
     }
-
-    @Override
-    public String toString() {
-        return "UserClub{" + "userClubID=" + userClubID + ", userID=" + userID + ", clubID=" + clubID + ", departmentID=" + departmentID + ", roleID=" + roleID + ", joinDate=" + joinDate + ", isActive=" + isActive + '}';
-    }
-    
-    
 }

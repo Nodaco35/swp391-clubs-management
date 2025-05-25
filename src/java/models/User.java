@@ -1,10 +1,14 @@
 package models;
 
+import java.sql.Date;
+import java.sql.Timestamp;
+
 public class User {
-    private int userID;
+    private String userID;
     private String fullName;
     private String email;
     private String password;
+    private Date dateOfBirth;
     private int permissionID;
     private boolean status;
     private String resetToken;
@@ -14,23 +18,23 @@ public class User {
     public User() {
     }
 
-    public User(int userID, String fullName, String email, String password, int permissionID, boolean status, String resetToken, java.sql.Timestamp tokenExpiry) {
+    public User(String userID, String fullName, String email, String password, Date dateOfBirth, int permissionID, boolean status, String resetToken, Timestamp tokenExpiry) {
         this.userID = userID;
         this.fullName = fullName;
         this.email = email;
         this.password = password;
+        this.dateOfBirth = dateOfBirth;
         this.permissionID = permissionID;
         this.status = status;
         this.resetToken = resetToken;
         this.tokenExpiry = tokenExpiry;
     }
 
-    // Getters and Setters
-    public int getUserID() {
+    public String getUserID() {
         return userID;
     }
 
-    public void setUserID(int userID) {
+    public void setUserID(String userID) {
         this.userID = userID;
     }
 
@@ -58,6 +62,14 @@ public class User {
         this.password = password;
     }
 
+    public Date getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(Date dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
     public int getPermissionID() {
         return permissionID;
     }
@@ -82,18 +94,26 @@ public class User {
         this.resetToken = resetToken;
     }
 
-    public java.sql.Timestamp getTokenExpiry() {
+    public Timestamp getTokenExpiry() {
         return tokenExpiry;
     }
 
-    public void setTokenExpiry(java.sql.Timestamp tokenExpiry) {
+    public void setTokenExpiry(Timestamp tokenExpiry) {
         this.tokenExpiry = tokenExpiry;
     }
 
     @Override
     public String toString() {
-        return "User{" + "userID=" + userID + ", fullName=" + fullName + ", email=" + email + ", password=" + password + ", permissionID=" + permissionID + ", status=" + status + ", resetToken=" + resetToken + ", tokenExpiry=" + tokenExpiry + '}';
+        return "User{" +
+                "userID='" + userID + '\'' +
+                ", fullName='" + fullName + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", dateOfBirth=" + dateOfBirth +
+                ", permissionID=" + permissionID +
+                ", status=" + status +
+                ", resetToken='" + resetToken + '\'' +
+                ", tokenExpiry=" + tokenExpiry +
+                '}';
     }
-    
-    
 }

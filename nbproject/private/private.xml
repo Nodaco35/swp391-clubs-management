@@ -3,10 +3,17 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/swp391-clubs-manager/web/view/eventsPage/eventsPage.jsp</file>
+            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/swp391-clubs-manager/web/WEB-INF/web.xml</file>
+            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/swp391-clubs-manager/web/css/eventsPage.css</file>
+            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/swp391-clubs-manager/web/view/eventsPage/events.jsp</file>
             <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/swp391-clubs-manager/src/java/dal/UserDAO.java</file>
-            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/swp391-clubs-manager/web/registerEvents.jsp</file>
-            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/swp391-clubs-manager/web/eventsPage.jsp</file>
-            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/swp391-clubs-manager/src/java/dal/DBConnection.java</file>
+            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/swp391-clubs-manager/src/java/controller/LoginServlet.java</file>
+            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/swp391-clubs-manager/web/view/eventsPage/banner.jsp</file>
+            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/swp391-clubs-manager/web/view/eventsPage/footer.jsp</file>
+            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/swp391-clubs-manager/web/login.jsp</file>
+            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/swp391-clubs-manager/web/css/style.css</file>
+            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/swp391-clubs-manager/web/view/eventsPage/header.jsp</file>
         </group>
     </open-files>
 </project-private>
