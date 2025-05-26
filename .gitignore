@@ -1,1 +1,4 @@
 /build/
+*.class
+/dist/
+/.idea/
