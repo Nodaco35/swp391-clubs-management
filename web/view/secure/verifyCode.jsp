@@ -40,6 +40,10 @@
         <form id="resendForm" action="verifyCode?action=resendOtp" method="POST">
             <input type="submit" id="resendBtn" value="Gửi lại mã" disabled>
         </form>
+        
+        <form id="back" action="dashboard" method="GET">
+            <input type="submit" id="resendBtn" value="Hủy" disabled>
+        </form>
 
     </body>
     <% String msg = (String) request.getAttribute("msg");

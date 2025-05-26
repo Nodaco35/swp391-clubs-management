@@ -4,7 +4,7 @@
  */
 package controllers;
 
-import dao.UserDAO;
+import dao.UserDAO_DUC;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -74,7 +74,7 @@ public class HomeController extends HttpServlet {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
         if (user == null) {
-            response.sendRedirect("login");
+            response.sendRedirect("auth");
             return;
         }
 
@@ -141,10 +141,10 @@ public class HomeController extends HttpServlet {
         }
 
         // Cập nhật thông tin vào DB
-        UserDAO.update(newName, avatarPath, id);
+        UserDAO_DUC.update(newName, avatarPath, id);
 
         // Cập nhật lại session user
-        User updatedUser = UserDAO.getUserById(id);
+        User updatedUser = UserDAO_DUC.getUserById(id);
         session.setAttribute("user", updatedUser);
 
         request.setAttribute("msg", "Cập nhật thành công");

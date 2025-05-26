@@ -4,7 +4,7 @@
  */
 package controllers;
 
-import dao.UserDAO;
+import dao.UserDAO_DUC;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -95,13 +95,13 @@ public class OtpController extends HttpServlet {
             if (otpInput.equals(otp)) {
                 String id = request.getParameter("id");
 
-                UserDAO.updateEmail(otpEmail, id);
+                UserDAO_DUC.updateEmail(otpEmail, id);
                 msg = "Cập nhập thành công";
                 request.setAttribute("msg", msg);
                 session.removeAttribute("otp");
                 session.removeAttribute("otpEmail");
                 session.removeAttribute("type");
-                user = UserDAO.getUserById(id);
+                user = UserDAO_DUC.getUserById(id);
                 session.setAttribute("user", user);
                 request.getRequestDispatcher("view/profile.jsp").forward(request, response);
                 return;

@@ -14,7 +14,7 @@
     </head>
     <body>
         <%String msg = (String) request.getAttribute("msg");%>
-        <form action="login?action=login" method="POST">
+        <form action="auth?action=login" method="POST">
             Username: <input type="text" name="user">
             Password: <input type="password" name="password">
             <input type="submit" value="LOGIN">

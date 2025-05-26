@@ -31,7 +31,7 @@
             }
         %>
 
-        <form action="home" method="GET">
+        <form action="dashboard" method="GET">
             <input type="hidden" name="action" value="profile">
             <input type="submit" value="Show Profile">
         </form>

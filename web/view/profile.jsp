@@ -7,7 +7,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="models.User" %>
 <%@page import="models.Permission" %>
-<%@page import="dao.PermissionDAO" %>
+<%@page import="dao.PermissionDAO_DUC" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.util.Date" %>
 <!DOCTYPE html>
@@ -48,7 +48,7 @@
         <div class="profile-container">
             <h1>Thông tin cá nhân</h1>
 
-            <form action="home?action=update" method="POST" enctype="multipart/form-data">
+            <form action="dashboard?action=update" method="POST" enctype="multipart/form-data">
                 <div class="row">
                     <!-- Avatar Section -->
                     <div class="col-md-4">
@@ -79,7 +79,7 @@
                         </div>
 
                         <%  int perId = user.getPermissionID();
-                            Permission per = PermissionDAO.findByPerId(perId);%>
+                            Permission per = PermissionDAO_DUC.findByPerId(perId);%>
                         <div class="mb-3">
                             <label for="PermissionName" class="form-label">Quyền truy cập</label>
                             <input type="text" class="form-control" id="permissionName" name="PermissionName" value="<%=per.getPermissionName()%>" readonly>
@@ -104,7 +104,7 @@
                     <input type="submit" value="Thay đổi email" class="btn btn-secondary">
                 </div>
             </form>
-            <form action="home" method="GET">
+            <form action="dashboard" method="GET">
                 
                 <div class="mb-3">
                     <input type="submit" value="Quay lại trang chủ" class="btn btn-secondary">
