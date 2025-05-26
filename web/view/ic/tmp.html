@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IC Officer - Báo cáo hàng kỳ CLB</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #1e293b;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --info: #06b6d4;
+            --radius: 0.5rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background-color: var(--secondary);
+            color: white;
+            padding: 1.5rem;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 0.25rem;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius);
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .sidebar-menu a.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .sidebar-menu i {
+            font-size: 1.25rem;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+        }
+
+        .user-role {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: var(--surface);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--primary);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .stat-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .stat-icon.blue {
+            background-color: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+        }
+
+        .stat-icon.green {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .stat-icon.yellow {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .stat-icon.red {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-description {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .card {
+            background-color: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--background);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: rgba(16, 185, 129, 0.9);
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: rgba(245, 158, 11, 0.9);
+        }
+
+        .btn-error {
+            background-color: var(--error);
+            color: white;
+        }
+
+        .btn-error:hover {
+            background-color: rgba(239, 68, 68, 0.9);
+        }
+
+        .btn-info {
+            background-color: var(--info);
+            color: white;
+        }
+
+        .btn-info:hover {
+            background-color: rgba(6, 182, 212, 0.9);
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .filter-select {
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background-color: var(--surface);
+            font-size: 0.875rem;
+        }
+
+        .reports-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .report-card {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: all 0.2s;
+            background-color: var(--surface);
+        }
+
+        .report-card:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .report-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .report-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .report-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .report-club {
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .report-date {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .report-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-pending {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .badge-approved {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .badge-rejected {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .badge-overdue {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .report-body {
+            padding: 1.5rem;
+        }
+
+        .report-summary {
+            margin-bottom: 1rem;
+        }
+
+        .report-summary h4 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .report-summary p {
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .report-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .metric {
+            text-align: center;
+            padding: 0.75rem;
+            background-color: var(--background);
+            border-radius: var(--radius);
+        }
+
+        .metric-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .report-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border);
+            background-color: rgba(248, 250, 252, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .report-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--surface);
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background-color: var(--surface);
+            z-index: 1;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 0.25rem;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            position: sticky;
+            bottom: 0;
+            background-color: var(--surface);
+            z-index: 1;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-size: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .evaluation-section {
+            background-color: var(--background);
+            padding: 1rem;
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+        }
+
+        .evaluation-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .rating-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .rating-label {
+            min-width: 120px;
+            font-size: 0.875rem;
+        }
+
+        .rating-stars {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .star {
+            font-size: 1.25rem;
+            color: #d1d5db;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .star.active {
+            color: #fbbf24;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 0;
+                padding: 0;
+                overflow: hidden;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .user-profile {
+                align-self: flex-end;
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+
+            .report-metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-university"></i>
+                <h2>IC Officer Portal</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="#" class="active"><i class="fas fa-file-alt"></i> Báo cáo hàng kỳ</a></li>
+                <li><a href="#"><i class="fas fa-chart-line"></i> Thống kê hiệu suất</a></li>
+                <li><a href="#"><i class="fas fa-users"></i> Danh sách CLB</a></li>
+                <li><a href="#"><i class="fas fa-calendar-check"></i> Lịch báo cáo</a></li>
+                <li><a href="#"><i class="fas fa-bell"></i> Thông báo</a></li>
+                <li><a href="#"><i class="fas fa-cog"></i> Cài đặt</a></li>
+                <li><a href="#"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="header">
+                <h1 class="page-title">Báo cáo hàng kỳ CLB</h1>
+                <div class="user-profile">
+                    <div class="user-avatar">IC</div>
+                    <div class="user-info">
+                        <div class="user-name">Lê Văn Dũng</div>
+                        <div class="user-role">IC Officer</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-title">Báo cáo chờ duyệt</div>
+                        <div class="stat-icon yellow">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value">12</div>
+                    <div class="stat-description">Cần xem xét trong tuần này</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-title">Báo cáo đã duyệt</div>
+                        <div class="stat-icon green">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value">45</div>
+                    <div class="stat-description">Trong học kỳ này</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-title">CLB quá hạn</div>
+                        <div class="stat-icon red">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value">3</div>
+                    <div class="stat-description">Chưa nộp báo cáo</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-title">Tổng số CLB</div>
+                        <div class="stat-icon blue">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value">24</div>
+                    <div class="stat-description">Đang hoạt động</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Danh sách báo cáo hàng kỳ</h2>
+                    <div class="card-actions">
+                        <button class="btn btn-outline">
+                            <i class="fas fa-download"></i> Xuất báo cáo
+                        </button>
+                        <button class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Tạo nhắc nhở
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="filters">
+                        <div class="filter-group">
+                            <label class="filter-label">Trạng thái</label>
+                            <select class="filter-select" onchange="filterReports(this.value)">
+                                <option value="all">Tất cả</option>
+                                <option value="pending">Chờ duyệt</option>
+                                <option value="approved">Đã duyệt</option>
+                                <option value="rejected">Từ chối</option>
+                                <option value="overdue">Quá hạn</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Học kỳ</label>
+                            <select class="filter-select">
+                                <option value="2023-2024-1">HK1 2023-2024</option>
+                                <option value="2022-2023-2">HK2 2022-2023</option>
+                                <option value="2022-2023-1">HK1 2022-2023</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Loại CLB</label>
+                            <select class="filter-select">
+                                <option value="all">Tất cả</option>
+                                <option value="academic">Học thuật</option>
+                                <option value="sports">Thể thao</option>
+                                <option value="arts">Nghệ thuật</option>
+                                <option value="volunteer">Thiện nguyện</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="reports-grid" id="reportsGrid">
+                        <!-- Báo cáo chờ duyệt -->
+                        <div class="report-card" data-status="pending">
+                            <div class="report-header">
+                                <div class="report-meta">
+                                    <div>
+                                        <div class="report-title">Báo cáo hoạt động HK1 2023-2024</div>
+                                        <div class="report-club">Câu Lạc Bộ Tiếng Anh</div>
+                                        <div class="report-date">Nộp ngày: 15/11/2023</div>
+                                    </div>
+                                    <div class="report-status">
+                                        <span class="badge badge-pending">
+                                            <i class="fas fa-clock"></i> Chờ duyệt
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="report-body">
+                                <div class="report-summary">
+                                    <h4>Tóm tắt báo cáo</h4>
+                                    <p>CLB đã tổ chức 5 sự kiện lớn, tăng thành viên từ 35 lên 45 người. Đạt giải nhất cuộc thi English Contest cấp trường.</p>
+                                </div>
+                                <div class="report-metrics">
+                                    <div class="metric">
+                                        <div class="metric-value">45</div>
+                                        <div class="metric-label">Thành viên</div>
+                                    </div>
+                                    <div class="metric">
+                                        <div class="metric-value">5</div>
+                                        <div class="metric-label">Sự kiện</div>
+                                    </div>
+                                    <div class="metric">
+                                        <div class="metric-value">2.3M</div>
+                                        <div class="metric-label">Ngân sách (VND)</div>
+                                    </div>
+                                    <div class="metric">
+                                        <div class="metric-value">95%</div>
+                                        <div class="metric-label">Tham gia</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="report-footer">
+                                <div class="report-actions">
+                                    <button class="btn btn-outline btn-sm" onclick="openReportModal('report1')">
+                                        <i class="fas fa-eye"></i> Xem chi tiết
+                                    </button>
+                                    <button class="btn btn-success btn-sm">
+                                        <i class="fas fa-check"></i> Phê duyệt
+                                    </button>
+                                    <button class="btn btn-error btn-sm">
+                                        <i class="fas fa-times"></i> Từ chối
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Báo cáo chờ duyệt -->
+                        <div class="report-card" data-status="pending">
+                            <div class="report-header">
+                                <div class="report-meta">
+                                    <div>
+                                        <div class="report-title">Báo cáo hoạt động HK1 2023-2024</div>
+                                        <div class="report-club">Câu Lạc Bộ Lập Trình</div>
+                                        <div class="report-date">Nộp ngày: 14/11/2023</div>
+                                    </div>
+                                    <div class="report-status">
+                                        <span class="badge badge-pending">
+                                            <i class="fas fa-clock"></i> Chờ duyệt
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="report-body">
+                                <div class="report-summary">
+                                    <h4>Tóm tắt báo cáo</h4>
+                                    <p>Tổ chức 3 hackathon, 8 workshop về lập trình. Có 2 dự án được triển khai thực tế cho doanh nghiệp.</p>
+                                </div>
+                                <div class="report-metrics">
+                                    <div class="metric">
+                                        <div class="metric-value">38</div>
+                                        <div class="metric-label">Thành viên</div>
+                                    </div>
+                                    <div class="metric">
+                                        <div class="metric-value">11</div>
+                                        <div class="metric-label">Sự kiện</div>
+                                    </div>
+                                    <div class="metric">
+                                        <div class="metric-value">4.1M</div>
+                                        <div class="metric-label">Ngân sách (VND)</div>
+                                    </div>
+                                    <div class="metric">
+                                        <div class="metric-value">88%</div>
+                                        <div class="metric-label">Tham gia</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="report-footer">
+                                <div class="report-actions">
+                                    <button class="btn btn-outline btn-sm">
+                                        <i class="fas fa-eye"></i> Xem chi tiết
+                                    </button>
+                                    <button class="btn btn-success btn-sm">
+                                        <i class="fas fa-check"></i> Phê duyệt
+                                    </button>
+                                    <button class="btn btn-error btn-sm">
+                                        <i class="fas fa-times"></i> Từ chối
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Báo cáo đã duyệt -->
+                        <div class="report-card" data-status="approved">
+                            <div class="report-header">
+                                <div class="report-meta">
+                                    <div>
+                                        <div class="report-title">Báo cáo hoạt động HK2 2022-2023</div>
+                                        <div class="report-club">Câu Lạc Bộ Bóng Đá</div>
+                                        <div class="report-date">Duyệt ngày: 25/05/2023</div>
+                                    </div>
+                                    <div class="report-status">
+                                        <span class="badge badge-approved">
+                                            <i class="fas fa-check"></i> Đã duyệt
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="report-body">
+                                <div class="report-summary">
+                                    <h4>Tóm tắt báo cáo</h4>
+                                    <p>Tham gia 4 giải đấu, đạt giải 3 toàn đoàn. Tổ chức giải bóng đá sinh viên thu hút 200+ người tham gia.</p>
+                                </div>
+                                <div class="report-metrics">
+                                    <div class="metric">
+                                        <div class="metric-value">32</div>
+                                        <div class="metric-label">Thành viên</div>
+                                    </div>
+                                    <div class="metric">
+                                        <div class="metric-value">6</div>
+                                        <div class="metric-label">Sự kiện</div>
+                                    </div>
+                                    <div class="metric">
+                                        <div class="metric-value">1.8M</div>
+                                        <div class="metric-label">Ngân sách (VND)</div>
+                                    </div>
+                                    <div class="metric">
+                                        <div class="metric-value">92%</div>
+                                        <div class="metric-label">Tham gia</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="report-footer">
+                                <div class="report-actions">
+                                    <button class="btn btn-outline btn-sm">
+                                        <i class="fas fa-eye"></i> Xem chi tiết
+                                    </button>
+                                    <button class="btn btn-info btn-sm">
+                                        <i class="fas fa-star"></i> Đánh giá: 4.5/5
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CLB quá hạn -->
+                        <div class="report-card" data-status="overdue">
+                            <div class="report-header">
+                                <div class="report-meta">
+                                    <div>
+                                        <div class="report-title">Báo cáo hoạt động HK1 2023-2024</div>
+                                        <div class="report-club">Câu Lạc Bộ Cờ Vua</div>
+                                        <div class="report-date" style="color: var(--error);">Quá hạn: 10 ngày</div>
+                                    </div>
+                                    <div class="report-status">
+                                        <span class="badge badge-overdue">
+                                            <i class="fas fa-exclamation-triangle"></i> Quá hạn
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="report-body">
+                                <div class="report-summary">
+                                    <h4>Trạng thái</h4>
+                                    <p>CLB chưa nộp báo cáo hàng kỳ. Đã gửi 2 lần nhắc nhở qua email và điện thoại.</p>
+                                </div>
+                                <div class="report-metrics">
+                                    <div class="metric">
+                                        <div class="metric-value">18</div>
+                                        <div class="metric-label">Thành viên</div>
+                                    </div>
+                                    <div class="metric">
+                                        <div class="metric-value">-</div>
+                                        <div class="metric-label">Sự kiện</div>
+                                    </div>
+                                    <div class="metric">
+                                        <div class="metric-value">-</div>
+                                        <div class="metric-label">Ngân sách</div>
+                                    </div>
+                                    <div class="metric">
+                                        <div class="metric-value">-</div>
+                                        <div class="metric-label">Tham gia</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="report-footer">
+                                <div class="report-actions">
+                                    <button class="btn btn-warning btn-sm">
+                                        <i class="fas fa-bell"></i> Nhắc nhở
+                                    </button>
+                                    <button class="btn btn-error btn-sm">
+                                        <i class="fas fa-exclamation-triangle"></i> Cảnh báo
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Báo cáo từ chối -->
+                        <div class="report-card" data-status="rejected">
+                            <div class="report-header">
+                                <div class="report-meta">
+                                    <div>
+                                        <div class="report-title">Báo cáo hoạt động HK1 2023-2024</div>
+                                        <div class="report-club">Câu Lạc Bộ Nhiếp Ảnh</div>
+                                        <div class="report-date">Từ chối ngày: 12/11/2023</div>
+                                    </div>
+                                    <div class="report-status">
+                                        <span class="badge badge-rejected">
+                                            <i class="fas fa-times"></i> Từ chối
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="report-body">
+                                <div class="report-summary">
+                                    <h4>Lý do từ chối</h4>
+                                    <p>Thiếu thông tin chi tiết về ngân sách và kế hoạch hoạt động. Cần bổ sung báo cáo tài chính chi tiết.</p>
+                                </div>
+                                <div class="report-metrics">
+                                    <div class="metric">
+                                        <div class="metric-value">25</div>
+                                        <div class="metric-label">Thành viên</div>
+                                    </div>
+                                    <div class="metric">
+                                        <div class="metric-value">3</div>
+                                        <div class="metric-label">Sự kiện</div>
+                                    </div>
+                                    <div class="metric">
+                                        <div class="metric-value">?</div>
+                                        <div class="metric-label">Ngân sách</div>
+                                    </div>
+                                    <div class="metric">
+                                        <div class="metric-value">?</div>
+                                        <div class="metric-label">Tham gia</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="report-footer">
+                                <div class="report-actions">
+                                    <button class="btn btn-outline btn-sm">
+                                        <i class="fas fa-eye"></i> Xem chi tiết
+                                    </button>
+                                    <button class="btn btn-warning btn-sm">
+                                        <i class="fas fa-redo"></i> Yêu cầu nộp lại
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal xem chi tiết báo cáo -->
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Chi tiết báo cáo - Câu Lạc Bộ Tiếng Anh</h2>
+                <button class="modal-close" onclick="closeModal('reportModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Thông tin cơ bản</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <input type="text" class="form-control" value="Câu Lạc Bộ Tiếng Anh" readonly>
+                        <input type="text" class="form-control" value="HK1 2023-2024" readonly>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Người nộp báo cáo</label>
+                    <input type="text" class="form-control" value="Nguyễn Văn A - Chủ nhiệm CLB" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Tổng quan hoạt động</label>
+                    <textarea class="form-control" readonly>Trong Học kỳ 1 năm học 2023-2024, Câu Lạc Bộ Tiếng Anh đã tổ chức thành công 5 sự kiện lớn, tăng số lượng thành viên từ 35 lên 45, và đạt được nhiều thành tích đáng kể trong các cuộc thi tiếng Anh cấp trường và cấp thành phố.</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Các hoạt động đã thực hiện</label>
+                    <textarea class="form-control" readonly>1. English Speaking Contest (20/09/2023): 50 người tham gia
+2. Workshop "Public Speaking Skills" (15/10/2023): 35 người tham gia  
+3. Halloween Party (31/10/2023): 70 người tham gia
+4. English Movie Night (10/11/2023): 40 người tham gia
+5. English Debate Tournament (25/11/2023): 30 người tham gia</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Thành tích đạt được</label>
+                    <textarea class="form-control" readonly>1. Giải Nhất cuộc thi "University English Contest 2023"
+2. Top 3 CLB hoạt động tích cực nhất trường
+3. 5 thành viên đạt chứng chỉ IELTS trên 7.0
+4. Tăng 28% thành viên so với kỳ trước</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Báo cáo tài chính</label>
+                    <textarea class="form-control" readonly>- Ngân sách đầu kỳ: 5,000,000 VND
+- Thu từ hoạt động: 3,500,000 VND  
+- Chi cho hoạt động: 6,200,000 VND
+- Ngân sách còn lại: 2,300,000 VND
+- Tỷ lệ sử dụng ngân sách: 73%</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Kế hoạch học kỳ tới</label>
+                    <textarea class="form-control" readonly>1. Tổ chức English Camp (02/2024)
+2. Workshop series về kỹ năng phỏng vấn bằng tiếng Anh (03/2024)
+3. Cuộc thi hùng biện tiếng Anh cấp trường (04/2024)  
+4. Chương trình giao lưu với sinh viên quốc tế (05/2024)
+5. Mở rộng thành viên lên 60 người</textarea>
+                </div>
+
+                <div class="evaluation-section">
+                    <div class="evaluation-title">Đánh giá của IC Officer</div>
+                    
+                    <div class="rating-group">
+                        <span class="rating-label">Chất lượng báo cáo:</span>
+                        <div class="rating-stars">
+                            <span class="star active">★</span>
+                            <span class="star active">★</span>
+                            <span class="star active">★</span>
+                            <span class="star active">★</span>
+                            <span class="star">★</span>
+                        </div>
+                    </div>
+                    
+                    <div class="rating-group">
+                        <span class="rating-label">Hiệu quả hoạt động:</span>
+                        <div class="rating-stars">
+                            <span class="star active">★</span>
+                            <span class="star active">★</span>
+                            <span class="star active">★</span>
+                            <span class="star active">★</span>
+                            <span class="star active">★</span>
+                        </div>
+                    </div>
+                    
+                    <div class="rating-group">
+                        <span class="rating-label">Quản lý tài chính:</span>
+                        <div class="rating-stars">
+                            <span class="star active">★</span>
+                            <span class="star active">★</span>
+                            <span class="star active">★</span>
+                            <span class="star active">★</span>
+                            <span class="star">★</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Nhận xét và đề xuất</label>
+                    <textarea class="form-control" placeholder="Nhập nhận xét của bạn về báo cáo này..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('reportModal')">Đóng</button>
+                <button class="btn btn-error">Từ chối</button>
+                <button class="btn btn-success">Phê duyệt</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openReportModal(reportId) {
+            document.getElementById('reportModal').style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function filterReports(status) {
+            const cards = document.querySelectorAll('.report-card');
+            cards.forEach(card => {
+                if (status === 'all' || card.dataset.status === status) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Đóng modal khi click bên ngoài
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // Xử lý rating stars
+        document.querySelectorAll('.rating-stars').forEach(ratingGroup => {
+            const stars = ratingGroup.querySelectorAll('.star');
+            stars.forEach((star, index) => {
+                star.addEventListener('click', () => {
+                    stars.forEach((s, i) => {
+                        if (i <= index) {
+                            s.classList.add('active');
+                        } else {
+                            s.classList.remove('active');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

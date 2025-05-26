@@ -1,85 +1,40 @@
 
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-
-
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="vi">
-    <head>
-        <meta charset="UTF-8">
-        <title>Trang Câu Lạc Bộ</title>
-        <link rel="stylesheet" href="style/homepage.css">
-    </head>
-    <body>
-        <header class="navbar">
-            <div class="logo">LOGO</div>
-            <input type="text" class="search" placeholder="Tìm tên câu lạc bộ">
-            <div class="user-controls">
-                <span class="username">Name</span>
-                <button class="logout">Log out</button>
-                <%
-                    User user = (User) session.getAttribute("user");
-                %>
-                <%
-                    if (user == null) {
-                %>
-                <!-- Chưa đăng nhập -->
-                <a href="login" class="username">Đăng nhập</a>
-                <a href="register" class="logout">Đăng ký</a>
-                <%
-                    } else {
-                %>
-                <!-- Đã đăng nhập -->
-                <span class="username" class="username"><%= user.getFullName() %></span>
-                <a href="logout" class="logout">Log out</a>
-                <%
-                    }
-                %>
-            </div>
-        </header>
-
-        <nav class="menu">
-            <button class="active">Câu lạc bộ</button>
-            <button>Sự kiện</button>
-        </nav>
-
-        <div class="filter-bar">
-            Lọc <select name="filter">
-                <option value="all">Tất cả</option>
-                <option value="joined">Đã tham gia</option>
-            </select>
-
-        </div>
-
-        <main class="club-list">
-            <div class="club-card">
-                <div class="club-image">Hình ảnh</div>
-                <div class="club-info">
-                    <h3>Câu lạc bộ A</h3>
-                    <p>Mô tả về câu lạc bộ:</p>
-                    <p>Chủ nhiệm hiện tại:</p>
-                </div>
-            </div>
-
-            <div class="club-card">
-                <div class="club-image">Hình ảnh</div>
-                <div class="club-info">
-                    <h3>Câu lạc bộ B</h3>
-                    <p>Mô tả về câu lạc bộ:</p>
-                    <p>Chủ nhiệm hiện tại:</p>
-                </div>
-            </div>
-        </main>
-
-        <footer class="pagination">
-            <button class="active">1</button>
-            <button>2</button>
-            <button>3</button>
-            <button>4</button>
-            <button>5</button>
-        </footer>
-    </body>
-</html>
-
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniClub - Quản Lý Câu Lạc Bộ</title>
+    <meta name="description" content="Nền tảng quản lý câu lạc bộ sinh viên">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <jsp:include page="view/components/header.jsp" />
+    
+    <main>
+        <c:if test="${sessionScope.user==null}">
+        <jsp:include page="view/homepage/hero-section.jsp" />
+        </c:if>
+        <jsp:include page="view/homepage/featured-clubs.jsp" />
+        <jsp:include page="view/homepage/upcoming-events.jsp" />
+        <jsp:include page="view/homepage/statistics.jsp" />
+    </main>
+    
+    <jsp:include page="view/components/footer.jsp" />
+    
+    <!-- JavaScript -->
+    <script src="${pageContext.request.contextPath}/js/script.js"></script>
 </body>
 </html>
-

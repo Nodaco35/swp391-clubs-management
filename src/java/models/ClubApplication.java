@@ -1,24 +1,29 @@
 
 package models;
 
-import java.security.Timestamp;
+import java.sql.Timestamp;
 
 public class ClubApplication {
     private int applicationID;
-    private int userID;
-    private int clubID;
-    private String reason;
-    private String status; // ENUM('Pending','Approved','Rejected')*******
+    private String userID;
+    private String clubName;
+    private String description;
+    private String email;
+    private String phone;
+    private String status;
     private Timestamp submitDate;
 
-    public ClubApplication() {
-    }
+    // Constructors
+    public ClubApplication() {}
 
-    public ClubApplication(int applicationID, int userID, int clubID, String reason, String status, Timestamp submitDate) {
+    public ClubApplication(int applicationID, String userID, String clubName, String description,
+                           String email, String phone, String status, Timestamp submitDate) {
         this.applicationID = applicationID;
         this.userID = userID;
-        this.clubID = clubID;
-        this.reason = reason;
+        this.clubName = clubName;
+        this.description = description;
+        this.email = email;
+        this.phone = phone;
         this.status = status;
         this.submitDate = submitDate;
     }
@@ -31,28 +36,44 @@ public class ClubApplication {
         this.applicationID = applicationID;
     }
 
-    public int getUserID() {
+    public String getUserID() {
         return userID;
     }
 
-    public void setUserID(int userID) {
+    public void setUserID(String userID) {
         this.userID = userID;
     }
 
-    public int getClubID() {
-        return clubID;
+    public String getClubName() {
+        return clubName;
     }
 
-    public void setClubID(int clubID) {
-        this.clubID = clubID;
+    public void setClubName(String clubName) {
+        this.clubName = clubName;
     }
 
-    public String getReason() {
-        return reason;
+    public String getDescription() {
+        return description;
     }
 
-    public void setReason(String reason) {
-        this.reason = reason;
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getStatus() {
@@ -71,10 +92,6 @@ public class ClubApplication {
         this.submitDate = submitDate;
     }
 
-    @Override
-    public String toString() {
-        return "ClubApplication{" + "applicationID=" + applicationID + ", userID=" + userID + ", clubID=" + clubID + ", reason=" + reason + ", status=" + status + ", submitDate=" + submitDate + '}';
-    }
     
-    
+
 }
