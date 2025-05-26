@@ -1,7 +1,8 @@
 
 package models;
 
-import java.security.Timestamp;
+
+import java.util.Date;
 
 
 public class UserClub {
@@ -10,13 +11,15 @@ public class UserClub {
     private int clubID;
     private int departmentID;
     private int roleID;
-    private Timestamp joinDate;
+
+    private Date joinDate;
     private boolean isActive;
 
     public UserClub() {
     }
 
-    public UserClub(int userClubID, int userID, int clubID, int departmentID, int roleID, Timestamp joinDate, boolean isActive) {
+
+    public UserClub(int userClubID, int userID, int clubID, int departmentID, int roleID, Date joinDate, boolean isActive) {
         this.userClubID = userClubID;
         this.userID = userID;
         this.clubID = clubID;
@@ -66,11 +69,12 @@ public class UserClub {
         this.roleID = roleID;
     }
 
-    public Timestamp getJoinDate() {
+
+    public Date getJoinDate() {
         return joinDate;
     }
 
-    public void setJoinDate(Timestamp joinDate) {
+    public void setJoinDate(Date joinDate) {
         this.joinDate = joinDate;
     }
 

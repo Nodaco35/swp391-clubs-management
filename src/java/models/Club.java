@@ -1,35 +1,42 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package models;
+
 
 import java.util.Date;
 
-/**
- *
- * @author NC PC
- */
+
 public class Club {
     private int clubID;
+    private String clubImg;
+    private boolean isRecruiting;
     private String clubName;
     private String description;
     private Date establishedDate;
     private String contactPhone;
     private String contactGmail;
     private String contactURL;
-
+    private boolean clubStatus;
+    private String category; // Thêm trường category
+    private int memberCount; // Thêm trường memberCount
+    
     public Club() {
     }
-
-    public Club(int clubID, String clubName, String description, Date establishedDate, String contactPhone, String contactGmail, String contactURL) {
+    
+    public Club(int clubID, String clubImg, boolean isRecruiting, String clubName, String description, 
+                Date establishedDate, String contactPhone, String contactGmail, String contactURL, 
+                boolean clubStatus, String category, int memberCount) {
         this.clubID = clubID;
+        this.clubImg = clubImg;
+        this.isRecruiting = isRecruiting;
         this.clubName = clubName;
         this.description = description;
         this.establishedDate = establishedDate;
         this.contactPhone = contactPhone;
         this.contactGmail = contactGmail;
         this.contactURL = contactURL;
+        this.clubStatus = clubStatus;
+        this.category = category;
+        this.memberCount = memberCount;
     }
 
     public int getClubID() {
@@ -38,6 +45,22 @@ public class Club {
 
     public void setClubID(int clubID) {
         this.clubID = clubID;
+    }
+
+    public String getClubImg() {
+        return clubImg;
+    }
+
+    public void setClubImg(String clubImg) {
+        this.clubImg = clubImg;
+    }
+
+    public boolean isIsRecruiting() {
+        return isRecruiting;
+    }
+
+    public void setIsRecruiting(boolean isRecruiting) {
+        this.isRecruiting = isRecruiting;
     }
 
     public String getClubName() {
@@ -88,10 +111,28 @@ public class Club {
         this.contactURL = contactURL;
     }
 
-    @Override
-    public String toString() {
-        return "Club{" + "clubID=" + clubID + ", clubName=" + clubName + ", description=" + description + ", establishedDate=" + establishedDate + ", contactPhone=" + contactPhone + ", contactGmail=" + contactGmail + ", contactURL=" + contactURL + '}';
+    public boolean isClubStatus() {
+        return clubStatus;
     }
-    
-    
+
+    public void setClubStatus(boolean clubStatus) {
+        this.clubStatus = clubStatus;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public int getMemberCount() {
+        return memberCount;
+    }
+
+    public void setMemberCount(int memberCount) {
+        this.memberCount = memberCount;
+    }
+
 }

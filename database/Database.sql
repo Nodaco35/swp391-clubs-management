@@ -152,3 +152,31 @@ CREATE TABLE ApplicationResponses (
     FOREIGN KEY (ApplicationID) REFERENCES ClubApplications(ApplicationID) ON DELETE CASCADE,
     FOREIGN KEY (TemplateID) REFERENCES ApplicationFormTemplates(TemplateID) ON DELETE CASCADE
 );
+<<<<<<< HEAD
+=======
+
+-- Permissions
+INSERT INTO Permissions (PermissionName) VALUES ('Student'), ('Admin'), ('IC_Officer');
+
+-- Roles
+INSERT INTO Roles (RoleName) VALUES ('Chủ nhiệm'), ('Phó chủ nhiệm'), ('Thành viên');
+
+-- Users
+INSERT INTO Users (UserID, FullName, Email, Password, PermissionID, Status)
+VALUES 
+('U001', 'Nguyễn Văn A', 'a@example.com', '123456', 2, 1),
+('U002', 'Trần Thị B', 'b@example.com', '123456', 2, 1);
+
+-- Clubs
+INSERT INTO Clubs (ClubName, Description, ContactGmail)
+VALUES 
+('CLB CNTT', 'Câu lạc bộ Công nghệ thông tin', 'cntt@example.com'),
+('CLB Văn hóa', 'CLB về giao lưu và văn hóa', 'vh@example.com');
+
+-- UserClubs (chủ nhiệm CLB)
+INSERT INTO UserClubs (UserID, ClubID, DepartmentID, RoleID, JoinDate)
+VALUES 
+('U001', 1, 1, 1, NOW()),
+('U002', 2, 1, 1, NOW());
+
+>>>>>>> feature/homepage

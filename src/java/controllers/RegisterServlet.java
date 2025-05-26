@@ -4,6 +4,7 @@ import dao.UserDAO;
 import models.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
+
 import java.io.IOException;
 import java.util.regex.Pattern;
 
@@ -35,8 +36,8 @@ public class RegisterServlet extends HttpServlet {
             request.getRequestDispatcher("/view/Register.jsp").forward(request, response);
             return;
         }
-
-        if (UserDAO.getUserByEmail(email.trim()) != null) {
+        UserDAO ud = new UserDAO();
+        if (ud.getUserByEmail(email.trim()) != null) {
             request.setAttribute("error", "Email này đã được sử dụng!");
             request.setAttribute("fullName", fullName);
             request.setAttribute("email", email);
@@ -51,7 +52,7 @@ public class RegisterServlet extends HttpServlet {
         newUser.setPermissionID(1); // Default: Student
         newUser.setStatus(true);    // Active
 
-        boolean success = UserDAO.register(newUser);
+        boolean success = ud.register(newUser);
         if (success) {
             // Tự động đăng nhập
             HttpSession session = request.getSession();

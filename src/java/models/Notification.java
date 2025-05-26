@@ -1,7 +1,8 @@
 
 package models;
 
-import java.security.Timestamp;
+
+import java.sql.Timestamp;
 
 public class Notification {
     private int notificationID;

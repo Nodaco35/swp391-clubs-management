@@ -1,22 +1,31 @@
 
 package models;
 
-import java.security.Timestamp;
+import java.util.Date;
 
 public class Event {
     private int eventID;
     private String eventName;
     private String description;
-    private Timestamp eventDate;
+
+    private Date eventDate;
     private String location;
     private int clubID;
     private boolean isPublic;
     private String urlGGForm;
 
+    private int capacity;
+    private String status;
+    
+    // Thêm các trường bổ sung cho hiển thị
+    private String clubName;
+    private String clubImg;
+    
     public Event() {
     }
-
-    public Event(int eventID, String eventName, String description, Timestamp eventDate, String location, int clubID, boolean isPublic, String urlGGForm) {
+    
+    public Event(int eventID, String eventName, String description, Date eventDate, String location, 
+                int clubID, boolean isPublic, String urlGGForm, int capacity, String status) {
         this.eventID = eventID;
         this.eventName = eventName;
         this.description = description;
@@ -25,6 +34,9 @@ public class Event {
         this.clubID = clubID;
         this.isPublic = isPublic;
         this.urlGGForm = urlGGForm;
+
+        this.capacity = capacity;
+        this.status = status;
     }
 
     public int getEventID() {
@@ -51,11 +63,12 @@ public class Event {
         this.description = description;
     }
 
-    public Timestamp getEventDate() {
+
+    public Date getEventDate() {
         return eventDate;
     }
 
-    public void setEventDate(Timestamp eventDate) {
+    public void setEventDate(Date eventDate) {
         this.eventDate = eventDate;
     }
 
@@ -91,10 +104,36 @@ public class Event {
         this.urlGGForm = urlGGForm;
     }
 
-    @Override
-    public String toString() {
-        return "Event{" + "eventID=" + eventID + ", eventName=" + eventName + ", description=" + description + ", eventDate=" + eventDate + ", location=" + location + ", clubID=" + clubID + ", isPublic=" + isPublic + ", urlGGForm=" + urlGGForm + '}';
+
+    public int getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
     
+    public String getClubName() {
+        return clubName;
+    }
     
+    public void setClubName(String clubName) {
+        this.clubName = clubName;
+    }
+    
+    public String getClubImg() {
+        return clubImg;
+    }
+    
+    public void setClubImg(String clubImg) {
+        this.clubImg = clubImg;
+    }
 }
