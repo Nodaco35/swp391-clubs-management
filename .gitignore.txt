@@ -40,3 +40,17 @@ Thumbs.db
 # VS Code (nếu ai đó mở bằng VS Code)
 # =========================
 .vscode/
+
+# IntelliJ/NetBeans/IDE settings
+.idea/
+*.iml
+
+# Compiled class files
+*.class
+
+# WAR files
+*.war
+
+# NetBeans build folders
+/build/
+/dist/
