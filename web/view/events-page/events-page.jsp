@@ -197,14 +197,16 @@
 			<!-- Pagination Controls -->
 			<div class="pagination">
 				<c:if test="${currentPage > 1}">
-					<a href="events-page?key=${currentKeyword}&publicFilter=${currentPublicFilter}&sortByDate=${currentSortByDate}&page=${currentPage - 1}">Previous</a>
+					<a class="page-link"
+					   href="events-page?key=${currentKeyword}&publicFilter=${currentPublicFilter}&sortByDate=${currentSortByDate}&page=${currentPage - 1}">Previous</a>
 				</c:if>
 				<c:forEach begin="1" end="${totalPages}" var="i">
 					<a href="events-page?key=${currentKeyword}&publicFilter=${currentPublicFilter}&sortByDate=${currentSortByDate}&page=${i}"
-					   class="${i == currentPage ? 'active' : ''}">${i}</a>
+					   class="${i == currentPage ? 'active' : ''} page-link">${i}</a>
 				</c:forEach>
 				<c:if test="${currentPage < totalPages}">
-					<a href="events-page?key=${currentKeyword}&publicFilter=${currentPublicFilter}&sortByDate=${currentSortByDate}&page=${currentPage + 1}">Next</a>
+					<a class="page-link"
+					   href="events-page?key=${currentKeyword}&publicFilter=${currentPublicFilter}&sortByDate=${currentSortByDate}&page=${currentPage + 1}">Next</a>
 				</c:if>
 			</div>
 

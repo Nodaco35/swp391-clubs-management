@@ -370,7 +370,7 @@ body {
     display: flex;
     justify-content: center;
     gap: 1rem;
-    margin-bottom: 3rem;
+    margin-bottom: 24px;
     flex-wrap: wrap;
 }
 
@@ -411,6 +411,7 @@ body {
 
 .event-sort {
     min-width: 150px;
+    text-align: right;
 }
 
 .sort-select {
@@ -430,7 +431,17 @@ body {
 
 /* Events Info */
 .events-info {
-
+    border: 2px solid var(--border);
+    background: var(--card-bg);
+    color: var(--foreground);
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 24px;
 }
 
 /* Events Grid */
