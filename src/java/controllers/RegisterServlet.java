@@ -16,7 +16,7 @@ public class RegisterServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("/view/Register.jsp").forward(request, response);
+        request.getRequestDispatcher("/view/register.jsp").forward(request, response);
     }
 
     @Override
@@ -33,7 +33,7 @@ public class RegisterServlet extends HttpServlet {
             request.setAttribute("error", error);
             request.setAttribute("fullName", fullName);
             request.setAttribute("email", email);
-            request.getRequestDispatcher("/view/Register.jsp").forward(request, response);
+            request.getRequestDispatcher("/view/register.jsp").forward(request, response);
             return;
         }
         UserDAO ud = new UserDAO();
@@ -41,7 +41,7 @@ public class RegisterServlet extends HttpServlet {
             request.setAttribute("error", "Email này đã được sử dụng!");
             request.setAttribute("fullName", fullName);
             request.setAttribute("email", email);
-            request.getRequestDispatcher("/view/Register.jsp").forward(request, response);
+            request.getRequestDispatcher("/view/register.jsp").forward(request, response);
             return;
         }
 
@@ -62,15 +62,20 @@ public class RegisterServlet extends HttpServlet {
 
             int permissionID = newUser.getPermissionID();
             if (permissionID == 1) {
-                response.sendRedirect(request.getContextPath() + "/home");
-            } else {
-                response.sendRedirect(request.getContextPath() + "/view/dashboard.jsp");
+                // Chuyển hướng đến trang chủ - HomepageServlet
+                response.sendRedirect(request.getContextPath() + "/");
+            }
+            if(permissionID == 2){
+                response.sendRedirect(request.getContextPath() + "/admin");
+            }
+            if(permissionID == 3){
+                response.sendRedirect(request.getContextPath() + "/ic");
             }
         } else {
             request.setAttribute("error", "Đăng ký thất bại! Vui lòng thử lại.");
             request.setAttribute("fullName", fullName);
             request.setAttribute("email", email);
-            request.getRequestDispatcher("/view/Register.jsp").forward(request, response);
+            request.getRequestDispatcher("/view/register.jsp").forward(request, response);
         }
     }
 

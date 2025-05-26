@@ -148,21 +148,26 @@ public class UserDAO {
         return userList;
     }
 
-    private String generateNextUserId() throws SQLException {
-        String sql = "SELECT UserID FROM Users ORDER BY UserID DESC LIMIT 1";
+    private String generateNextUserId() {
+    String sql = "SELECT UserID FROM Users ORDER BY UserID DESC LIMIT 1";
 
-        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                String lastId = rs.getString("UserID"); // Ví dụ: "U005"
-                int numericPart = Integer.parseInt(lastId.substring(1)); // Cắt bỏ chữ 'U'
-                return String.format("U%03d", numericPart + 1); // Tăng và định dạng lại
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+    try (Connection conn = DBContext.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+
+        if (rs.next()) {
+            String lastId = rs.getString("UserID"); // Ví dụ: "U005"
+            int numericPart = Integer.parseInt(lastId.substring(1)); // Cắt bỏ chữ 'U'
+            return String.format("U%03d", numericPart + 1); // Tăng và định dạng lại
         }
 
-        return "U001"; // Nếu chưa có ai trong DB
+    } catch (SQLException | ClassNotFoundException e) {
+        e.printStackTrace();
     }
+
+    return "U001"; // Nếu chưa có ai trong DB
+}
+
 
     public boolean register(User user) {
         String newUserId = generateNextUserId(); // Tạo ID mới
@@ -182,13 +187,13 @@ public class UserDAO {
 
             return ps.executeUpdate() > 0;
 
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
         return false;
     }
 
-    public User getUserByEmailAndPassword(String email, String password) throws ClassNotFoundException {
+    public User getUserByEmailAndPassword(String email, String password)  {
         String sql = "SELECT * FROM Users WHERE Email = ? AND Password = ?";
 
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -212,7 +217,7 @@ public class UserDAO {
                 }
             }
 
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
 
