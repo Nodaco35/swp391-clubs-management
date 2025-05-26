@@ -59,18 +59,67 @@ public class EventsPageServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        EventsDAO dao = new EventsDAO();
-        String key = request.getParameter("key");
-        List<Events> events;
 
-        if (key == null || key.trim().isEmpty()) {
-            events = dao.getAllEvents();
-        } else {
-            events = dao.getEventsByKeyword(key.trim());
+        EventsDAO dao = new EventsDAO();
+
+        String keyword = request.getParameter("key");
+        String publicFilter = request.getParameter("publicFilter");
+        String sortByDate = request.getParameter("sortByDate");
+
+        if (publicFilter == null || publicFilter.isEmpty()) {
+            publicFilter = "all";
         }
-        System.out.println("Search keyword: " + key);
+
+        if (sortByDate == null || sortByDate.isEmpty()) {
+            sortByDate = "newest";
+        }
+
+        int page = 1;
+        int pageSize = 6;
+
+        try {
+            String pageParam = request.getParameter("page");
+            if (pageParam != null && !pageParam.isEmpty()) {
+                page = Integer.parseInt(pageParam);
+                if (page < 1) {
+                    page = 1;
+                }
+            }
+        } catch (NumberFormatException e) {
+            page = 1;
+        }
+
+        int offset = (page - 1) * pageSize;
+
+        List<Events> events = dao.searchEvents(keyword, publicFilter, sortByDate, pageSize, offset);
+
+        int totalEvents = dao.countEvents(keyword, publicFilter);
+        int totalPages = (int) Math.ceil((double) totalEvents / pageSize);
+
+        if (page > totalPages && totalPages > 0) {
+            page = totalPages;
+            offset = (page - 1) * pageSize;
+            events = dao.searchEvents(keyword, publicFilter, sortByDate, pageSize, offset);
+        }
 
         request.setAttribute("events", events);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalEvents", totalEvents);
+        request.setAttribute("pageSize", pageSize);
+
+        request.setAttribute("currentKeyword", keyword != null ? keyword : "");
+        request.setAttribute("currentPublicFilter", publicFilter);
+        request.setAttribute("currentSortByDate", sortByDate);
+
+        System.out.println("=== Search Parameters ===");
+        System.out.println("Keyword: " + keyword);
+        System.out.println("Public Filter: " + publicFilter);
+        System.out.println("Sort By: " + sortByDate);
+        System.out.println("Page: " + page + "/" + totalPages);
+        System.out.println("Total Events: " + totalEvents);
+        System.out.println("Events Found: " + events.size());
+
         request.getRequestDispatcher("view/events-page/events-page.jsp").forward(request, response);
     }
 

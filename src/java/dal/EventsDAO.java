@@ -205,4 +205,96 @@ public class EventsDAO {
         return listEvents;
     }
 
+    public List<Events> searchEvents(String keyword, String publicFilter, String sortByDate, int limit, int offset) {
+        List<Events> events = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT * FROM Events WHERE 1=1");
+
+        int paramIndex = 1;
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append(" AND EventName LIKE ?");
+        }
+
+        if (publicFilter != null && !publicFilter.equalsIgnoreCase("all")) {
+            if (publicFilter.equalsIgnoreCase("public")) {
+                sql.append(" AND IsPublic = TRUE");
+            } else if (publicFilter.equalsIgnoreCase("private")) {
+                sql.append(" AND IsPublic = FALSE");
+            }
+        }
+
+        if (sortByDate != null) {
+            if (sortByDate.equalsIgnoreCase("newest")) {
+                sql.append(" ORDER BY EventDate DESC");
+            } else if (sortByDate.equalsIgnoreCase("oldest")) {
+                sql.append(" ORDER BY EventDate ASC");
+            }
+        } else {
+            sql.append(" ORDER BY EventDate DESC");
+        }
+
+        sql.append(" LIMIT ? OFFSET ?");
+        System.out.println("Generated SQL: " + sql);
+
+        try (Connection connection = DBContext.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                ps.setString(paramIndex++, "%" + keyword + "%");
+            }
+            ps.setInt(paramIndex++, limit);
+            ps.setInt(paramIndex, offset);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Events event = new Events();
+                event.setEventID(rs.getInt("EventID"));
+                event.setEventName(rs.getString("EventName"));
+                event.setDescription(rs.getString("Description"));
+                event.setEventDate(rs.getTimestamp("EventDate"));
+                event.setLocation(rs.getString("Location"));
+                event.setClubID(rs.getInt("ClubID"));
+                event.setPublic(rs.getBoolean("IsPublic"));
+                event.setUrlGGForm(rs.getString("UrlGGForm"));
+                event.setCapacity(rs.getInt("Capacity"));
+                event.setStatus(rs.getString("Status"));
+                events.add(event);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error searching events: " + e.getMessage(), e);
+        }
+        System.out.println("Generated SQL: " + sql);
+        return events;
+    }
+
+    public int countEvents(String keyword, String publicFilter) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Events WHERE 1=1");
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append(" AND EventName LIKE ?");
+        }
+
+        if (publicFilter != null && !publicFilter.equalsIgnoreCase("all")) {
+            if (publicFilter.equalsIgnoreCase("public")) {
+                sql.append(" AND IsPublic = TRUE");
+            } else if (publicFilter.equalsIgnoreCase("private")) {
+                sql.append(" AND IsPublic = FALSE");
+            }
+        }
+
+        try (Connection connection = DBContext.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+            // Set parameter only if keyword is valid
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                ps.setString(1, "%" + keyword + "%");
+            }
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error counting events: " + e.getMessage(), e);
+        }
+        return 0;
+    }
+
 }

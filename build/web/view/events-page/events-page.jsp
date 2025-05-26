@@ -8,6 +8,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <html>
 <head>
 	<title>Events Page</title>
@@ -39,9 +40,9 @@
 
 		<nav class="main-nav">
 			<ul>
-				<li><a href="/">Trang Chủ</a></li>
-				<li><a href="/clubs">Câu Lạc Bộ</a></li>
-				<li><a href="/events-page" class="active">Sự Kiện</a></li>
+				<li><a href="">Trang Chủ</a></li>
+				<li><a href="">Câu Lạc Bộ</a></li>
+				<li><a href="${pageContext.request.contextPath}/events-page" class="active">Sự Kiện</a></li>
 			</ul>
 		</nav>
 
@@ -106,38 +107,44 @@
 			<div class="event-filters-wrapper">
 				<!-- Event Filter Buttons -->
 				<div class="event-filters">
-					<button class="filter-btn active" onclick="filterEvents('all')" data-filter="all">
+					<a href="events-page?key=${currentKeyword}&publicFilter=all&sortByDate=${currentSortByDate}"
+					   class="filter-btn ${currentPublicFilter == 'all' ? 'active' : ''}">
 						<i class="fas fa-globe"></i>
 						Tất Cả Sự Kiện
-					</button>
-					<button class="filter-btn" onclick="filterEvents('public')" data-filter="public">
+					</a>
+					<a href="events-page?key=${currentKeyword}&publicFilter=public&sortByDate=${currentSortByDate}"
+					   class="filter-btn ${currentPublicFilter == 'public' ? 'active' : ''}">
 						<i class="fas fa-users"></i>
 						Sự Kiện Công Khai
-					</button>
-					<button class="filter-btn" onclick="filterEvents('private')" data-filter="private">
+					</a>
+					<a href="events-page?key=${currentKeyword}&publicFilter=private&sortByDate=${currentSortByDate}"
+					   class="filter-btn ${currentPublicFilter == 'private' ? 'active' : ''}">
 						<i class="fas fa-lock"></i>
 						Sự Kiện Riêng Tư (Club)
-					</button>
+					</a>
 				</div>
 				<div class="event-sort">
-					<select id="sortSelect" class="sort-select" onchange="sortEvents(this.value)">
-						<option value="all">Tất Cả Trạng Thái</option>
-						<option value="newest">Mới Nhất</option>
-						<option value="oldest">Cũ Nhất</option>
-					</select>
-					<select id="statusSelect" class="sort-select" onchange="filterByStatus(this.value)">
-						<option value="all">Tất Cả Trạng Thái</option>
-						<option value="PENDING">Đang Chờ</option>
-						<option value="COMPLETED">Hoàn Thành</option>
+					<select id="sortSelect" class="sort-select" onchange="changeSort(this.value)">
+						<option value="newest" ${currentSortByDate == 'newest' ? 'selected' : ''}>Mới Nhất</option>
+						<option value="oldest" ${currentSortByDate == 'oldest' ? 'selected' : ''}>Cũ Nhất</option>
 					</select>
 				</div>
 			</div>
+
+			<!-- Events Info -->
+			<div class="events-info">
+				<p>Hiển thị ${fn:length(events)} trên tổng ${requestScope.totalEvents} sự kiện
+					<c:if test="${currentPage > 0 && totalPages > 0}">
+						- Trang ${currentPage}/${totalPages}
+					</c:if>
+				</p>
+			</div>
+
 			<!-- Events Grid -->
 			<div class="events-grid" id="eventsGrid">
 				<c:forEach var="e" items="${requestScope.events}">
-					<div class="event-card" data-filter="${e.isPublic() ? 'public' : 'private'}">
+					<div class="event-card">
 						<div class="event-image">
-							<!-- Placeholder icon for event image -->
 							<i class="fas fa-calendar-day"></i>
 							<span class="event-badge ${e.isPublic() ? 'badge-public' : 'badge-private'}">
 									${e.isPublic() ? 'Công khai' : 'Riêng tư'}
@@ -164,13 +171,20 @@
 								<strong>Club ID:</strong> ${e.clubID}
 							</div>
 							<div class="event-footer">
-								<span class="attendees">${e.status}</span>
-								<c:if test="${not empty e.urlGGForm}">
-									<a href="${e.urlGGForm}" class="register-btn" target="_blank">Đăng ký</a>
-								</c:if>
-								<c:if test="${empty e.urlGGForm}">
-									<button class="register-btn" disabled>Đăng ký</button>
-								</c:if>
+								<span class="attendees status-${fn:toLowerCase(e.status)}">${e.status}</span>
+								<c:choose>
+									<c:when test="${e.status == 'PENDING'}">
+										<button type="button" class="register-btn"
+										        onclick="registerEvent(${e.eventID})">
+											Đăng ký
+										</button>
+									</c:when>
+									<c:otherwise>
+										<button type="button" class="register-btn disabled" disabled>
+											Đã kết thúc
+										</button>
+									</c:otherwise>
+								</c:choose>
 							</div>
 						</div>
 					</div>
@@ -182,11 +196,16 @@
 
 			<!-- Pagination Controls -->
 			<div class="pagination">
-				<a href="/events?page=1" class="page-link active">1</a>
-				<a href="/events?page=2" class="page-link">2</a>
-				<a href="/events?page=3" class="page-link">3</a>
-				<a href="/events?page=4" class="page-link">4</a>
-				<a href="/events?page=5" class="page-link">5</a>
+				<c:if test="${currentPage > 1}">
+					<a href="events-page?key=${currentKeyword}&publicFilter=${currentPublicFilter}&sortByDate=${currentSortByDate}&page=${currentPage - 1}">Previous</a>
+				</c:if>
+				<c:forEach begin="1" end="${totalPages}" var="i">
+					<a href="events-page?key=${currentKeyword}&publicFilter=${currentPublicFilter}&sortByDate=${currentSortByDate}&page=${i}"
+					   class="${i == currentPage ? 'active' : ''}">${i}</a>
+				</c:forEach>
+				<c:if test="${currentPage < totalPages}">
+					<a href="events-page?key=${currentKeyword}&publicFilter=${currentPublicFilter}&sortByDate=${currentSortByDate}&page=${currentPage + 1}">Next</a>
+				</c:if>
 			</div>
 
 		</div>

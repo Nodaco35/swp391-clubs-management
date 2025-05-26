@@ -374,6 +374,10 @@ body {
     flex-wrap: wrap;
 }
 
+.event-filters a {
+    text-decoration: none;
+}
+
 .filter-btn {
     padding: 0.75rem 1.5rem;
     border: 2px solid var(--border);
@@ -424,6 +428,10 @@ body {
     color: var(--primary);
 }
 
+/* Events Info */
+.events-info {
+
+}
 
 /* Events Grid */
 .events-grid {
