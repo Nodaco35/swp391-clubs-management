@@ -6,6 +6,10 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="models.User" %>
+<%@page import="models.Permission" %>
+<%@page import="dao.PermissionDAO" %>
+<%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="java.util.Date" %>
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -27,6 +31,18 @@
     }
     String contextPath = request.getContextPath();
     String avatarPath = user.getAvatar() != null ? user.getAvatar() : "img/Hinh-anh-dai-dien-mac-dinh-Facebook.png";
+    String dobRaw = user.getDob(); // ví dụ: "2000-05-26"
+    String formattedDob = "";
+    try {
+        if (dobRaw != null && !dobRaw.isEmpty()) {
+            java.text.SimpleDateFormat fromFormat = new java.text.SimpleDateFormat("yyyy-MM-dd");
+            java.text.SimpleDateFormat toFormat = new java.text.SimpleDateFormat("dd/MM/yyyy");
+            java.util.Date dobDate = fromFormat.parse(dobRaw);
+            formattedDob = toFormat.format(dobDate);
+        }
+    } catch (Exception e) {
+        formattedDob = dobRaw; // fallback nếu lỗi
+    }
         %>
 
         <div class="profile-container">
@@ -57,7 +73,17 @@
                             <label for="name" class="form-label">Họ và tên</label>
                             <input type="text" class="form-control" id="name" name="name" value="<%= user.getFullName() %>" required>
                         </div>
+                        <div class="mb-3">
+                            <label for="dob" class="form-label">Ngày sinh</label>
+                            <input type="text" class="form-control" id="dob" name="dob" value="<%= formattedDob  %>" required>
+                        </div>
 
+                        <%  int perId = user.getPermissionID();
+                            Permission per = PermissionDAO.findByPerId(perId);%>
+                        <div class="mb-3">
+                            <label for="PermissionName" class="form-label">Quyền truy cập</label>
+                            <input type="text" class="form-control" id="permissionName" name="PermissionName" value="<%=per.getPermissionName()%>" readonly>
+                        </div>
                         <div class="mb-3">
                             <label for="gmail" class="form-label">Email</label>
                             <input type="gmail" class="form-control" id="gmail" value="<%= user.getEmail() %>" readonly>
@@ -76,6 +102,12 @@
                 <input type="hidden" name="email" value="<%= user.getEmail() %>">
                 <div class="mb-3">
                     <input type="submit" value="Thay đổi email" class="btn btn-secondary">
+                </div>
+            </form>
+            <form action="home" method="GET">
+                
+                <div class="mb-3">
+                    <input type="submit" value="Quay lại trang chủ" class="btn btn-secondary">
                 </div>
             </form>
 

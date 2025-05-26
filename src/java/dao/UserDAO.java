@@ -13,7 +13,7 @@ public class UserDAO {
 
         String sql = "SELECT * FROM Users";
 
-        try (Connection conn = DBContext1.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 User user = new User();
@@ -38,7 +38,7 @@ public class UserDAO {
 
     public static User getUserByEmailAndPassword(String email, String password) {
         String sql = "SELECT * FROM Users WHERE Email = ? AND Password = ?";
-        DBContext db = DBContext.getInstance();
+        DBContext_Duc db = DBContext_Duc.getInstance();
         try {
             PreparedStatement ps = db.connection.prepareStatement(sql);
             ps.setString(1, email);
@@ -55,6 +55,7 @@ public class UserDAO {
                     user.setStatus(rs.getBoolean("Status"));
                     user.setResetToken(rs.getString("ResetToken"));
                     user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
+                    user.setDob(rs.getString("DateOfBirth"));
                     user.setAvatar(rs.getString("AvatarSrc"));
                     return user;
                 }
@@ -74,7 +75,7 @@ public class UserDAO {
                 + "  `AvatarSrc` = ?\n"
                 + "WHERE `UserID` = ?;";
 
-        try (Connection conn = DBContext1.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setObject(1, newName);
             ps.setObject(2, email);
             ps.setObject(3, id);
@@ -90,7 +91,7 @@ public class UserDAO {
                 + "FROM `clubmanagementsystem`.`users`\n"
                 + "WHERE `users`.`UserID` = ?;";
 
-        try (Connection conn = DBContext1.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, id);
 
@@ -105,6 +106,7 @@ public class UserDAO {
                     user.setStatus(rs.getBoolean("Status"));
                     user.setResetToken(rs.getString("ResetToken"));
                     user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
+                    user.setDob(rs.getString("DateOfBirth"));
                     user.setAvatar(rs.getString("AvatarSrc"));
                     return user;
                 }
@@ -125,7 +127,7 @@ public class UserDAO {
                          `Email` = ?
                          
                          WHERE `UserID` = ?;""";
-        DBContext db = DBContext.getInstance();
+        DBContext_Duc db = DBContext_Duc.getInstance();
 
         try {
 
