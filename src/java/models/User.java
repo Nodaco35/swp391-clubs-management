@@ -11,7 +11,8 @@ public class User {
     private boolean status;
     private String resetToken;
     private Date tokenExpiry;
-    
+    private String dob;
+    private String avatar;
     public User() {
     }
     
@@ -28,6 +29,22 @@ public class User {
         this.tokenExpiry = tokenExpiry;
     }
 
+    public String getDob() {
+        return dob;
+    }
+
+    public void setDob(String dob) {
+        this.dob = dob;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+    
     public String getUserID() {
         return userID;
     }

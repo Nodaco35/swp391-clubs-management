@@ -20,6 +20,14 @@
         <servlet-name>ICServlet</servlet-name>
         <servlet-class>controllers.ICServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>ProfileController</servlet-name>
+        <servlet-class>controllers.ProfileController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>OtpController</servlet-name>
+        <servlet-class>controllers.OtpController</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>HomepageServlet</servlet-name>
         <url-pattern>/home</url-pattern>
@@ -49,6 +57,14 @@
     <servlet-mapping>
         <servlet-name>ICServlet</servlet-name>
         <url-pattern>/ic</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ProfileController</servlet-name>
+        <url-pattern>/profile</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>OtpController</servlet-name>
+        <url-pattern>/verifyCode</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

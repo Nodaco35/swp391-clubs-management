@@ -1,6 +1,5 @@
 package dao;
 
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -41,15 +40,95 @@ public class UserDAO {
             System.out.println("Error getting user by email: " + e.getMessage());
         } finally {
             try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-                if (conn != null) DBContext.closeConnection(conn);
+                if (rs != null) {
+                    rs.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    DBContext.closeConnection(conn);
+                }
             } catch (SQLException e) {
                 System.out.println("Error closing resources: " + e.getMessage());
             }
         }
 
         return user;
+    }
+
+    public static void update(String newName, String avatarPath, String id) {
+        String sql = "UPDATE `clubmanagementsystem`.`users`\n"
+                + "SET\n"
+                + "  `FullName` = ?,\n"
+                + "  `AvatarSrc` = ?\n"
+                + "WHERE `UserID` = ?;";
+        DBContext_Duc db = DBContext_Duc.getInstance();
+
+        try {
+            PreparedStatement ps = db.connection.prepareStatement(sql);
+            ps.setObject(1, newName);
+            ps.setObject(2, avatarPath);
+            ps.setObject(3, id);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static User getUserById(String id) {
+        String sql = "SELECT *\n"
+                + "FROM `clubmanagementsystem`.`users`\n"
+                + "WHERE `users`.`UserID` = ?;";
+        DBContext_Duc db = DBContext_Duc.getInstance();
+        try {
+            PreparedStatement ps = db.connection.prepareStatement(sql);
+            ps.setString(1, id);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    User user = new User();
+                    user.setUserID(rs.getString("UserID"));
+                    user.setFullName(rs.getString("FullName"));
+                    user.setEmail(rs.getString("Email"));
+                    user.setPassword(rs.getString("Password"));
+                    user.setPermissionID(rs.getInt("PermissionID"));
+                    user.setStatus(rs.getBoolean("Status"));
+                    user.setResetToken(rs.getString("ResetToken"));
+                    user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
+                    user.setDob(rs.getString("DateOfBirth"));
+                    user.setAvatar(rs.getString("AvatarSrc"));
+                    return user;
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static void updateEmail(String otpEmail, String id) {
+        String sql = """
+                         UPDATE `clubmanagementsystem`.`users`
+                         SET
+                         
+                         `Email` = ?
+                         
+                         WHERE `UserID` = ?;""";
+        DBContext_Duc db = DBContext_Duc.getInstance();
+
+        try {
+
+            PreparedStatement ps = db.connection.prepareStatement(sql);
+            ps.setObject(1, otpEmail);
+            ps.setObject(2, id);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean validateUser(String email, String password) {
@@ -75,9 +154,15 @@ public class UserDAO {
             System.out.println("Error validating user: " + e.getMessage());
         } finally {
             try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-                if (conn != null) DBContext.closeConnection(conn);
+                if (rs != null) {
+                    rs.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    DBContext.closeConnection(conn);
+                }
             } catch (SQLException e) {
                 System.out.println("Error closing resources: " + e.getMessage());
             }
@@ -105,9 +190,15 @@ public class UserDAO {
             System.out.println("Error getting total active users: " + e.getMessage());
         } finally {
             try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-                if (conn != null) DBContext.closeConnection(conn);
+                if (rs != null) {
+                    rs.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    DBContext.closeConnection(conn);
+                }
             } catch (SQLException e) {
                 System.out.println("Error closing resources: " + e.getMessage());
             }
@@ -120,7 +211,6 @@ public class UserDAO {
         List<User> userList = new ArrayList<>();
 
         String sql = "SELECT * FROM Users";
-
 
         try {
             Connection conn = DBContext.getConnection();
@@ -144,30 +234,29 @@ public class UserDAO {
             e.printStackTrace();
         }
 
-        if (userList.isEmpty()) return null;
+        if (userList.isEmpty()) {
+            return null;
+        }
         return userList;
     }
 
     private String generateNextUserId() {
-    String sql = "SELECT UserID FROM Users ORDER BY UserID DESC LIMIT 1";
+        String sql = "SELECT UserID FROM Users ORDER BY UserID DESC LIMIT 1";
 
-    try (Connection conn = DBContext.getConnection();
-         PreparedStatement ps = conn.prepareStatement(sql);
-         ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
-        if (rs.next()) {
-            String lastId = rs.getString("UserID"); // Ví dụ: "U005"
-            int numericPart = Integer.parseInt(lastId.substring(1)); // Cắt bỏ chữ 'U'
-            return String.format("U%03d", numericPart + 1); // Tăng và định dạng lại
+            if (rs.next()) {
+                String lastId = rs.getString("UserID"); // Ví dụ: "U005"
+                int numericPart = Integer.parseInt(lastId.substring(1)); // Cắt bỏ chữ 'U'
+                return String.format("U%03d", numericPart + 1); // Tăng và định dạng lại
+            }
+
+        } catch (SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
         }
 
-    } catch (SQLException | ClassNotFoundException e) {
-        e.printStackTrace();
+        return "U001"; // Nếu chưa có ai trong DB
     }
-
-    return "U001"; // Nếu chưa có ai trong DB
-}
-
 
     public boolean register(User user) {
         String newUserId = generateNextUserId(); // Tạo ID mới
@@ -193,7 +282,7 @@ public class UserDAO {
         return false;
     }
 
-    public User getUserByEmailAndPassword(String email, String password)  {
+    public User getUserByEmailAndPassword(String email, String password) {
         String sql = "SELECT * FROM Users WHERE Email = ? AND Password = ?";
 
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -212,7 +301,8 @@ public class UserDAO {
                     user.setStatus(rs.getBoolean("Status"));
                     user.setResetToken(rs.getString("ResetToken"));
                     user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
-
+                    user.setAvatar(rs.getString("AvatarSrc"));
+                    user.setDob(rs.getString("DateOfBirth"));
                     return user;
                 }
             }
@@ -225,5 +315,3 @@ public class UserDAO {
     }
 
 }
-     
-
