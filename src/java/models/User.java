@@ -1,6 +1,9 @@
 package models;
 import java.util.Date;
 
+
+import java.sql.Timestamp;
+
 public class User {
     private String userID;
     private String fullName;
@@ -14,9 +17,9 @@ public class User {
     
     public User() {
     }
-    
-    public User(String userID, String fullName, String email, String password, Date dateOfBirth, 
-               int permissionID, boolean status, String resetToken, Date tokenExpiry) {
+
+
+    public User(String userID, String fullName, String email, String password, Date dateOfBirth, int permissionID, boolean status, String resetToken, Timestamp tokenExpiry) {
         this.userID = userID;
         this.fullName = fullName;
         this.email = email;
@@ -92,6 +95,7 @@ public class User {
         this.resetToken = resetToken;
     }
 
+
     public Date getTokenExpiry() {
         return tokenExpiry;
     }
@@ -99,4 +103,5 @@ public class User {
     public void setTokenExpiry(Date tokenExpiry) {
         this.tokenExpiry = tokenExpiry;
     }
+
 }

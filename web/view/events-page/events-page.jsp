@@ -1,0 +1,219 @@
+<%--
+  Created by IntelliJ IDEA.
+  User: thuan
+  Date: 5/25/2025
+  Time: 10:50 AM
+  To change this template use File | Settings | File Templates.
+--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<html>
+<head>
+	<title>Events Page</title>
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/eventsPage.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+<header class="header">
+	<div class="container header-container">
+		<div class="logo">
+			<i class="fas fa-users"></i>
+			<span>UniClub</span>
+		</div>
+
+		<!-- Search Bar -->
+		<div class="search-container">
+			<div class="search-box">
+				<form action="events-page" method="get">
+					<i class="fas fa-search search-icon"></i>
+					<input type="text" id="searchInput" name="key" placeholder="Tìm kiếm sự kiện..."
+					       class="search-input">
+					<button type="submit" class="search-btn">
+						<i class="fas fa-search"></i>
+					</button>
+				</form>
+			</div>
+		</div>
+
+		<nav class="main-nav">
+			<ul>
+				<li><a href="">Trang Chủ</a></li>
+				<li><a href="">Câu Lạc Bộ</a></li>
+				<li><a href="${pageContext.request.contextPath}/events-page" class="active">Sự Kiện</a></li>
+			</ul>
+		</nav>
+
+		<div class="auth-buttons">
+			<c:choose>
+				<c:when test="${sessionScope.user != null}">
+					<div class="user-menu" id="userMenu">
+						<span id="userName">Hi, ${sessionScope.user.fullName}</span>
+						<a href="${pageContext.request.contextPath}/profile" class="btn btn-outline">
+							<i class="fa-solid fa-user"></i>
+						</a>
+						<form action="logout" method="post">
+							<input class="btn btn-primary" type="submit" value="Logout">
+						</form>
+					</div>
+				</c:when>
+				<c:otherwise>
+					<div class="guest-menu" id="guestMenu">
+						<a href="${pageContext.request.contextPath}/login" class="btn btn-outline">Đăng Nhập</a>
+						<a href="${pageContext.request.contextPath}/register" class="btn btn-primary">Đăng Ký</a>
+					</div>
+				</c:otherwise>
+			</c:choose>
+			<button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+				<i class="fas fa-bars"></i>
+			</button>
+		</div>
+	</div>
+
+	<!-- Mobile Menu -->
+	<div class="mobile-menu" id="mobileMenu">
+		<!-- <div class="mobile-search">
+			<div class="search-box">
+				<i class="fas fa-search search-icon"></i>
+				<input type="text" placeholder="Tìm kiếm sự kiện..." class="search-input">
+				<button class="search-btn">
+					<i class="fas fa-search"></i>
+				</button>
+			</div>
+		</div> -->
+		<nav class="mobile-nav">
+			<a href="/">Trang Chủ</a>
+			<a href="/clubs">Câu Lạc Bộ</a>
+			<a href="/events-page" class="active">Sự Kiện</a>
+		</nav>
+		<!-- <div class="mobile-auth">
+			<a href="/login" class="btn btn-outline">Đăng Nhập</a>
+			<a href="/register" class="btn btn-primary">Đăng Ký</a>
+		</div> -->
+	</div>
+</header>
+<main>
+	<c:if test="${sessionScope.user == null}">
+		<jsp:include page="banner.jsp"/>
+	</c:if>
+	<section class="events-section">
+		<div class="container">
+			<div class="section-header">
+				<h2>Sự Kiện Sắp Tới</h2>
+				<p>Khám phá các sự kiện thú vị và bổ ích đang chờ đón bạn</p>
+			</div>
+			<div class="event-filters-wrapper">
+				<!-- Event Filter Buttons -->
+				<div class="event-filters">
+					<a href="events-page?key=${currentKeyword}&publicFilter=all&sortByDate=${currentSortByDate}"
+					   class="filter-btn ${currentPublicFilter == 'all' ? 'active' : ''}">
+						<i class="fas fa-globe"></i>
+						Tất Cả Sự Kiện
+					</a>
+					<a href="events-page?key=${currentKeyword}&publicFilter=public&sortByDate=${currentSortByDate}"
+					   class="filter-btn ${currentPublicFilter == 'public' ? 'active' : ''}">
+						<i class="fas fa-users"></i>
+						Sự Kiện Công Khai
+					</a>
+					<a href="events-page?key=${currentKeyword}&publicFilter=private&sortByDate=${currentSortByDate}"
+					   class="filter-btn ${currentPublicFilter == 'private' ? 'active' : ''}">
+						<i class="fas fa-lock"></i>
+						Sự Kiện Riêng Tư (Club)
+					</a>
+				</div>
+				<div class="event-sort">
+					<select id="sortSelect" class="sort-select" onchange="changeSort(this.value)">
+						<option value="newest" ${currentSortByDate == 'newest' ? 'selected' : ''}>Mới Nhất</option>
+						<option value="oldest" ${currentSortByDate == 'oldest' ? 'selected' : ''}>Cũ Nhất</option>
+					</select>
+				</div>
+			</div>
+
+			<!-- Events Info -->
+			<div class="events-info">
+				<p>Hiển thị ${fn:length(events)} trên tổng ${requestScope.totalEvents} sự kiện
+					<c:if test="${currentPage > 0 && totalPages > 0}">
+						- Trang ${currentPage}/${totalPages}
+					</c:if>
+				</p>
+			</div>
+
+			<!-- Events Grid -->
+			<div class="events-grid" id="eventsGrid">
+				<c:forEach var="e" items="${requestScope.events}">
+					<div class="event-card">
+						<div class="event-image">
+							<i class="fas fa-calendar-day"></i>
+							<span class="event-badge ${e.isPublic() ? 'badge-public' : 'badge-private'}">
+									${e.isPublic() ? 'Công khai' : 'Riêng tư'}
+							</span>
+						</div>
+						<div class="event-content">
+							<h3 class="event-title">${e.eventName}</h3>
+							<p class="event-description">${e.description}</p>
+							<div class="event-details">
+								<div class="event-detail">
+									<i class="fas fa-calendar-alt"></i>
+									<span><fmt:formatDate value="${e.eventDate}" pattern="dd/MM/yyyy HH:mm"/></span>
+								</div>
+								<div class="event-detail">
+									<i class="fas fa-map-marker-alt"></i>
+									<span>${e.location}</span>
+								</div>
+								<div class="event-detail">
+									<i class="fas fa-users"></i>
+									<span>Sức chứa: ${e.capacity}</span>
+								</div>
+							</div>
+							<div class="event-club">
+								<strong>Club ID:</strong> ${e.clubID}
+							</div>
+							<div class="event-footer">
+								<span class="attendees status-${fn:toLowerCase(e.status)}">${e.status}</span>
+								<c:choose>
+									<c:when test="${e.status == 'PENDING'}">
+										<button type="button" class="register-btn"
+										        onclick="registerEvent(${e.eventID})">
+											Đăng ký
+										</button>
+									</c:when>
+									<c:otherwise>
+										<button type="button" class="register-btn disabled" disabled>
+											Đã kết thúc
+										</button>
+									</c:otherwise>
+								</c:choose>
+							</div>
+						</div>
+					</div>
+				</c:forEach>
+				<c:if test="${empty requestScope.events}">
+					<p class="no-events"><i class="fas fa-search search-icon">Không có sự kiện nào để hiển thị.</i></p>
+				</c:if>
+			</div>
+
+			<!-- Pagination Controls -->
+			<div class="pagination">
+				<c:if test="${currentPage > 1}">
+					<a class="page-link"
+					   href="events-page?key=${currentKeyword}&publicFilter=${currentPublicFilter}&sortByDate=${currentSortByDate}&page=${currentPage - 1}">Previous</a>
+				</c:if>
+				<c:forEach begin="1" end="${totalPages}" var="i">
+					<a href="events-page?key=${currentKeyword}&publicFilter=${currentPublicFilter}&sortByDate=${currentSortByDate}&page=${i}"
+					   class="${i == currentPage ? 'active' : ''} page-link">${i}</a>
+				</c:forEach>
+				<c:if test="${currentPage < totalPages}">
+					<a class="page-link"
+					   href="events-page?key=${currentKeyword}&publicFilter=${currentPublicFilter}&sortByDate=${currentSortByDate}&page=${currentPage + 1}">Next</a>
+				</c:if>
+			</div>
+
+		</div>
+	</section>
+</main>
+<jsp:include page="footer.jsp"/>
+<script src="${pageContext.request.contextPath}/js/script.js"></script>
+</body>
+</html>

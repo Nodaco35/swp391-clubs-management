@@ -1,2 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<<<<<<< HEAD
 <Context docBase="D:\FULearning\Spring2025\PRJ301\ASS\S1912Mobile\build\web" path="/s1912mobile"/>
+=======
+<Context docBase="D:\FULearning\Spring2025\PRJ301\ASS\HE186284_LeVanThuan\S1912Mobile\S1912Mobile\build\web" path="/s1912mobile"/>
+>>>>>>> feature/EventsPage
