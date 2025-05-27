@@ -81,7 +81,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="dob" class="form-label">Ngày sinh</label>
-                            <input type="text" class="form-control" id="dob" name="dob" value="<%= formattedDob  %>" required>
+                            <input type="text" class="form-control" id="dob" name="dob" value="<%= formattedDob  %>" readonly>
                         </div>
 
                         <%  int perId = user.getPermissionID();
@@ -110,7 +110,7 @@
                     <input type="submit" value="Thay đổi email" class="btn btn-secondary">
                 </div>
             </form>
-            
+
 
             <% String msg = (String) request.getAttribute("msg");
        if (msg != null) { %>
@@ -123,6 +123,9 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <!-- Custom JS -->
         <script>
+
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dob').setAttribute('max', today);
             // Preview avatar before upload
             document.getElementById('avatar').addEventListener('change', function (event) {
                 const file = event.target.files[0];

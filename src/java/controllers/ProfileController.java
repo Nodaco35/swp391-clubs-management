@@ -18,6 +18,10 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.UUID;
 import models.User;
 
@@ -38,8 +42,7 @@ public class ProfileController extends HttpServlet {
         String action = request.getParameter("action");
         if (action == null) {
             request.getRequestDispatcher("index.jsp").forward(request, response);
-        }
-        else if (action.equals("myProfile")) {
+        } else if (action.equals("myProfile")) {
             request.getRequestDispatcher("view/profile.jsp").forward(request, response);
             return;
         }
@@ -56,7 +59,7 @@ public class ProfileController extends HttpServlet {
             default:
                 throw new AssertionError();
         }
-        }
+    }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

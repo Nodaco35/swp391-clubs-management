@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import models.User;
@@ -67,6 +68,7 @@ public class UserDAO {
 
         try {
             PreparedStatement ps = db.connection.prepareStatement(sql);
+
             ps.setObject(1, newName);
             ps.setObject(2, avatarPath);
             ps.setObject(3, id);
