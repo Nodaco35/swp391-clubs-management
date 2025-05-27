@@ -92,7 +92,7 @@ public class ProfileController extends HttpServlet {
         String email = user.getEmail();
         String newName = request.getParameter("name");
         String avatarPath = user.getAvatar();
-
+        String dob = request.getParameter("dob");
         // Xử lý file ảnh nếu có
         Part filePart = request.getPart("avatar");
         if (filePart != null && filePart.getSize() > 0) {
@@ -151,7 +151,7 @@ public class ProfileController extends HttpServlet {
         }
 
         // Cập nhật thông tin vào DB
-        UserDAO.update(newName, avatarPath, id);
+        UserDAO.update(newName, avatarPath,dob, id);
 
         // Cập nhật lại session user
         User updatedUser = UserDAO.getUserById(id);

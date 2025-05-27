@@ -360,5 +360,49 @@ public class ClubDAO {
 
         return clubs;
     }
+    
+    public Club getClubById(int clubID) {
+        Club club = null;
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBContext.getConnection();
+            String query = "SELECT c.*, "
+                    + "(SELECT COUNT(*) FROM UserClubs uc WHERE uc.ClubID = c.ClubID AND uc.IsActive = 1) as MemberCount "
+                    + "FROM Clubs c WHERE c.ClubID = ? AND c.ClubStatus = 1";
+            stmt = conn.prepareStatement(query);
+            stmt.setInt(1, clubID);
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                club = new Club();
+                club.setClubID(rs.getInt("ClubID"));
+                club.setClubImg(rs.getString("ClubImg"));
+                club.setIsRecruiting(rs.getBoolean("IsRecruiting"));
+                club.setClubName(rs.getString("ClubName"));
+                club.setDescription(rs.getString("Description"));
+                club.setEstablishedDate(rs.getDate("EstablishedDate"));
+                club.setContactPhone(rs.getString("ContactPhone"));
+                club.setContactGmail(rs.getString("ContactGmail"));
+                club.setContactURL(rs.getString("ContactURL"));
+                club.setClubStatus(rs.getBoolean("ClubStatus"));
+                club.setCategory(getCategoryForClub(clubID));
+                club.setMemberCount(rs.getInt("MemberCount"));
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            System.out.println("Error getting club by ID: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (conn != null) DBContext.closeConnection(conn);
+            } catch (SQLException e) {
+                System.out.println("Error closing resources: " + e.getMessage());
+            }
+        }
+        return club;
+    }
 
 }

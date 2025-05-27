@@ -1,25 +1,22 @@
-
 package models;
-
 
 import java.util.Date;
 
-
 public class UserClub {
     private int userClubID;
-    private int userID;
+    private String userID;
     private int clubID;
     private int departmentID;
     private int roleID;
-
     private Date joinDate;
     private boolean isActive;
-
+    private String fullName; // Thêm trường fullName
+    private String roleName; // Thêm trường roleName
+    private String departmentName; // Thêm trường departmentName
     public UserClub() {
     }
 
-
-    public UserClub(int userClubID, int userID, int clubID, int departmentID, int roleID, Date joinDate, boolean isActive) {
+    public UserClub(int userClubID, String userID, int clubID, int departmentID, int roleID, Date joinDate, boolean isActive) {
         this.userClubID = userClubID;
         this.userID = userID;
         this.clubID = clubID;
@@ -37,11 +34,11 @@ public class UserClub {
         this.userClubID = userClubID;
     }
 
-    public int getUserID() {
+    public String getUserID() {
         return userID;
     }
 
-    public void setUserID(int userID) {
+    public void setUserID(String userID) {
         this.userID = userID;
     }
 
@@ -69,7 +66,6 @@ public class UserClub {
         this.roleID = roleID;
     }
 
-
     public Date getJoinDate() {
         return joinDate;
     }
@@ -86,10 +82,45 @@ public class UserClub {
         this.isActive = isActive;
     }
 
-    @Override
-    public String toString() {
-        return "UserClub{" + "userClubID=" + userClubID + ", userID=" + userID + ", clubID=" + clubID + ", departmentID=" + departmentID + ", roleID=" + roleID + ", joinDate=" + joinDate + ", isActive=" + isActive + '}';
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getRoleName() {
+        return roleName;
+    }
+
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
+
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
     }
     
     
+
+    @Override
+    public String toString() {
+        return "UserClub{" +
+                "userClubID=" + userClubID +
+                ", userID='" + userID + '\'' +
+                ", clubID=" + clubID +
+                ", departmentID=" + departmentID +
+                ", roleID=" + roleID +
+                ", joinDate=" + joinDate +
+                ", isActive=" + isActive +
+                ", fullName='" + fullName + '\'' +
+                ", roleName='" + roleName + '\'' +
+                ", departmentName='" + departmentName + '\'' +
+                '}';
+    }
 }
