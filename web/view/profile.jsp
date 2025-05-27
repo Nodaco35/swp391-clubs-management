@@ -37,18 +37,6 @@
     }
     String contextPath = request.getContextPath();
     String avatarPath = user.getAvatar() != null ? user.getAvatar() : "img/Hinh-anh-dai-dien-mac-dinh-Facebook.png";
-    String dobRaw = user.getDob(); // ví dụ: "2000-05-26"
-    String formattedDob = "";
-    try {
-        if (dobRaw != null && !dobRaw.isEmpty()) {
-            java.text.SimpleDateFormat fromFormat = new java.text.SimpleDateFormat("yyyy-MM-dd");
-            java.text.SimpleDateFormat toFormat = new java.text.SimpleDateFormat("dd/MM/yyyy");
-            java.util.Date dobDate = fromFormat.parse(dobRaw);
-            formattedDob = toFormat.format(dobDate);
-        }
-    } catch (Exception e) {
-        formattedDob = dobRaw; // fallback nếu lỗi
-    }
         %>
 
         <div class="profile-container">
@@ -81,10 +69,11 @@
                         </div>
                         <div class="mb-3">
                             <label for="dob" class="form-label">Ngày sinh</label>
-                            <input type="text" class="form-control" id="dob" name="dob" value="<%= formattedDob  %>" readonly>
+                            <input type="date" class="form-control" id="dob" name="dob" 
+                                   value="<%=(user.getDateOfBirth() != null) ? user.getDateOfBirth() : ""%>" required>
                         </div>
-
-                        <%  int perId = user.getPermissionID();
+                        <%
+                            int perId = user.getPermissionID();
                             Permission per = PermissionDAO.findByPerId(perId);%>
                         <div class="mb-3">
                             <label for="PermissionName" class="form-label">Quyền truy cập</label>

@@ -58,20 +58,22 @@ public class UserDAO {
         return user;
     }
 
-    public static void update(String newName, String avatarPath, String id) {
-        String sql = "UPDATE `clubmanagementsystem`.`users`\n"
-                + "SET\n"
-                + "  `FullName` = ?,\n"
-                + "  `AvatarSrc` = ?\n"
-                + "WHERE `UserID` = ?;";
+    public static void update(String newName, String avatarPath, String dob, String id) {
+        String sql = """
+                     UPDATE `clubmanagementsystem`.`users`
+                     SET
+                       `FullName` = ?,
+                       `AvatarSrc` = ?, `DateOfBirth` = ?
+                     WHERE `UserID` = ?;""";
         DBContext_Duc db = DBContext_Duc.getInstance();
-
+        
         try {
             PreparedStatement ps = db.connection.prepareStatement(sql);
 
             ps.setObject(1, newName);
             ps.setObject(2, avatarPath);
-            ps.setObject(3, id);
+            ps.setObject(3, dob);
+            ps.setObject(4, id);
             ps.executeUpdate();
 
         } catch (SQLException e) {
@@ -99,7 +101,7 @@ public class UserDAO {
                     user.setStatus(rs.getBoolean("Status"));
                     user.setResetToken(rs.getString("ResetToken"));
                     user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
-                    user.setDob(rs.getString("DateOfBirth"));
+                    user.setDateOfBirth(rs.getDate("DateOfBirth"));
                     user.setAvatar(rs.getString("AvatarSrc"));
                     return user;
                 }
@@ -304,7 +306,7 @@ public class UserDAO {
                     user.setResetToken(rs.getString("ResetToken"));
                     user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
                     user.setAvatar(rs.getString("AvatarSrc"));
-                    user.setDob(rs.getString("DateOfBirth"));
+                    user.setDateOfBirth(rs.getDate("DateOfBirth"));
                     return user;
                 }
             }

@@ -18,11 +18,16 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Date;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import models.User;
 
 /**
@@ -53,9 +58,15 @@ public class ProfileController extends HttpServlet {
             throws ServletException, IOException {
         String action = request.getParameter("action");
         switch (action) {
-            case "update":
-                update(request, response);
-                break;
+            case "update": {
+                try {
+                    update(request, response);
+                } catch (ParseException ex) {
+                    Logger.getLogger(ProfileController.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            break;
+
             default:
                 throw new AssertionError();
         }
@@ -83,7 +94,7 @@ public class ProfileController extends HttpServlet {
         return "Short description";
     }// </editor-fold>
 
-    private void update(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void update(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, ParseException {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
         if (user == null) {
@@ -95,6 +106,8 @@ public class ProfileController extends HttpServlet {
         String email = user.getEmail();
         String newName = request.getParameter("name");
         String avatarPath = user.getAvatar();
+
+        String dob = request.getParameter("dob"); // Ví dụ: "2023-12-25"
 
         // Xử lý file ảnh nếu có
         Part filePart = request.getPart("avatar");
@@ -154,7 +167,7 @@ public class ProfileController extends HttpServlet {
         }
 
         // Cập nhật thông tin vào DB
-        UserDAO.update(newName, avatarPath, id);
+        UserDAO.update(newName, avatarPath, dob, id);
 
         // Cập nhật lại session user
         User updatedUser = UserDAO.getUserById(id);
