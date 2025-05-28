@@ -37,7 +37,7 @@ public class EventDAO {
                 event.setEventDate(rs.getTimestamp("EventDate"));
                 event.setLocation(rs.getString("Location"));
                 event.setClubID(rs.getInt("ClubID"));
-                event.setIsPublic(rs.getBoolean("IsPublic"));
+                event.setPublic(rs.getBoolean("IsPublic"));
                 event.setUrlGGForm(rs.getString("URLGGForm"));
                 event.setCapacity(rs.getInt("Capacity"));
                 event.setStatus(rs.getString("Status"));
