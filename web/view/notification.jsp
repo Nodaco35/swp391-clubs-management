@@ -8,9 +8,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>UniCLUB - Thông báo</title>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
-
+        
         <!-- Font Awesome for icons -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+
         <style>
             html, body {
                 height: 100%;
@@ -45,52 +47,49 @@
             }
             main{
                 background-color: #f5f5f5;
-                margin: 0;
+                margin-top: 0px;
                 padding: 10px;
             }
 
             .container-thongbao {
                 width: 100%;
-                max-width: 800px;
+                max-width: 900px;
                 margin: 0 auto; /* Căn giữa container */
                 padding: 0 1rem;
             }
-
             .tabs {
                 display: flex;
-                justify-content: left; /* Căn giữa các tab */
+                justify-content: flex-start;
+                align-items: center;
+                gap: 16px;
+                margin-top: 10px;
+                padding-left: 10px;
             }
 
             .tabs a {
-                border: solid black 1px;
-                padding: 10px 20px;
+                padding: 6px 16px;
+                border: 1px solid #007bff;
+                border-radius: 8px;
                 text-decoration: none;
-                color: var(--foreground);
-                border-radius: 15px;
-                margin-right: 10px;
-                margin-bottom: 10px;
-                font-size: 0.875rem;
+                font-size: 14px;
                 font-weight: 500;
-                transition: all 0.2s;
-                background-color: rgba(216, 215, 206, 0.95);
+                color: #007bff;
+                background-color: #ffffff;
+                transition: all 0.2s ease;
+                margin-bottom: 5px
+            }
+
+            .tabs a:hover {
+                background-color: #007bff;
+                color: white;
             }
 
             .tabs a.active {
-                border-bottom: 2px solid var(--primary);
-                color: var(--primary);
+                background-color: #007bff;
+                color: white;
             }
 
-            .section {
-                margin-bottom: 0;
-            }
 
-            .section h2 {
-                font-size: 1.5rem;
-                margin-bottom: 10px;
-                text-align: left; /* Căn giữa tiêu đề */
-                font-family: 'Montserrat', sans-serif;
-                font-weight: 700;
-            }
 
             .notification {
                 display: flex;
@@ -98,7 +97,7 @@
                 justify-content: space-between;
                 background-color: white;
                 margin-bottom: 2px;
-                padding: 0 20px 0px 20px; 
+                padding: 0 20px 0px 20px;
                 border-radius: 12px;
                 border: 1px solid rgba(40, 59, 72, 0.2);
                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -176,12 +175,164 @@
             .btn-delete:hover {
                 color: #007bff; /* Đổi màu hover thành xanh để nhất quán */
             }
+
+            /* Icon bút chì */
+            .pencil-icon {
+                position: fixed;
+                top: 600px;
+                left: 20px;
+                background-color: #007bff;
+                color: white;
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                z-index: 1000;
+            }
+
+            /* Form thông báo */
+            .notification-form {
+                display: none;
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background-color: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+                width: 500px;
+                max-width: 90%;
+                z-index: 1001;
+            }
+
+            .notification-form h2 {
+                margin: 0 0 10px;
+                font-size: 18px;
+                color: #333;
+            }
+
+            .notification-form input,
+            .notification-form textarea {
+                width: 100%;
+                padding: 10px;
+                margin-bottom: 10px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                font-size: 14px;
+            }
+
+            .notification-form textarea {
+                height: 100px;
+                resize: vertical;
+            }
+
+            .notification-form .buttons {
+                display: flex;
+                justify-content: flex-end;
+                gap: 10px;
+            }
+
+            .notification-form button {
+                padding: 8px 16px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 14px;
+            }
+
+            .notification-form .send-btn {
+                background-color: #007bff;
+                color: white;
+            }
+
+            .notification-form .cancel-btn {
+                background-color: #f1f1f1;
+                color: #333;
+            }
+
+            /* Lớp phủ nền mờ */
+            .overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.4);
+                z-index: 1000;
+            }
+            .error-popup {
+                position: fixed;
+                top: 0%; /* Đưa lên gần sát top */
+                left: 50%;
+                transform: translate(-50%, 0); /* Giữ căn giữa theo chiều ngang */
+                width: 400px; /* Tăng chiều rộng */
+
+                padding: 10px;
+                max-width: 90%;
+                background-color: #fff;
+                border: 1px solid #e74c3c;
+
+                z-index: 2000; /* Tăng cao để đè lên header nếu cần */
+                display: none;
+                box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.3);
+                text-align: center;
+                border-radius: 8px;
+            }
+
+            .ok-btn {
+                margin-top: 10px;
+                background-color: #e74c3c;
+                color: #fff;
+                border: none;
+                padding: 8px 16px;
+                cursor: pointer;
+                display: inline-block;
+                margin: 20px auto 0;
+                border-radius: 10px;
+            }
+            /* Nền mờ toàn màn hình */
+            .error-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background-color: rgba(0, 0, 0, 0.4); /* Mờ nền */
+                z-index: 1999;
+            }
         </style>
     </head>
     <body>
         <jsp:include page="./components/header.jsp" />
+        <c:if test="${not empty error}">
+            <div class="error-overlay" id="errorOverlay"></div>
+            <div class="error-popup" id="errorPopup">
+                <h2>Lỗi</h2>
+                <p id="errorMessage"><c:out value="${error}" /></p>
+                <button class="ok-btn" onclick="hideError()">OK</button>
+            </div>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    document.getElementById("errorPopup").style.display = "block";
+                    document.getElementById("errorOverlay").style.display = "block";
+                });
+
+                function hideError() {
+                    document.getElementById("errorPopup").style.display = "none";
+                    document.getElementById("errorOverlay").style.display = "none";
+                }
+            </script>
+        </c:if>
 
         <main>
+
             <div class="container-thongbao">
                 <div class="tabs">
                     <a href="notification">Tất cả</a>
@@ -214,22 +365,46 @@
                         </div>
                     </div>
                 </c:forEach>
+                <!-- Icon bút chì -->
+                <div class="pencil-icon" onclick="showNotificationForm()">✏️</div>
 
-                <div id="detailModal" class="modal" style="display:none;">
-                    <div class="modal-content">
-                        <span class="close" onclick="closeModal()">×</span>
-                        <h3 id="detailTitle"></h3>
-                        <p><strong>Người gửi:</strong> <span id="detailSender"></span></p>
-                        <p><strong>Thời gian:</strong> <span id="detailTime"></span></p>
-                        <div id="detailContent" style="margin-top: 10px;"></div>
-                    </div>
+                <!-- Lớp phủ nền mờ -->
+                <div class="overlay" onclick="hideNotificationForm()"></div>
+
+                <!-- Form thông báo -->
+                <div class="notification-form" id="notificationForm">
+                    <h2>Gửi thông báo</h2>
+                    <form id="notificationFormElement" action="notification?action=sentNotification" method="POST">
+                        <input type="hidden" name="senderID" value="${user.userID}">
+                        <input type="text" name="receiverEmail" placeholder="Email người nhận">
+                        <input type="text" id="title" name="title" placeholder="Tiêu đề" required>
+                        <textarea id="content" name="content" placeholder="Nội dung thông báo" required></textarea>
+                        <div class="buttons">
+                            <button type="button" class="cancel-btn" onclick="hideNotificationForm()">Hủy</button>
+                            <button type="submit" class="send-btn">Gửi</button>
+                        </div>
+                    </form>
                 </div>
-            </div>
-        </main>
+            </div>   
+        </div>
+    </main>
+    <script>
+        function showNotificationForm() {
+            document.getElementById('notificationForm').style.display = 'block';
+            document.querySelector('.overlay').style.display = 'block';
+            document.getElementById('title').focus(); // Tập trung vào trường tiêu đề
+        }
 
-        <!-- JavaScript -->
-        <script src="${pageContext.request.contextPath}/js/script.js">
-        </script>
-        <jsp:include page="./components/footer.jsp" />
-    </body>
+        function hideNotificationForm() {
+            document.getElementById('notificationForm').style.display = 'none';
+            document.querySelector('.overlay').style.display = 'none';
+            document.getElementById('notificationFormElement').reset(); // Xóa dữ liệu form
+        }
+    </script>
+    <script src="${pageContext.request.contextPath}/js/script.js"></script>
+
+    <!-- JavaScript -->
+
+    <jsp:include page="./components/footer.jsp" />
+</body>
 </html>

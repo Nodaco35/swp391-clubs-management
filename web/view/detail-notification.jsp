@@ -131,11 +131,18 @@
             .btn-action:hover {
                 background-color: #e0e0e0;
             }
+            .btn-delete {
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-size: 1rem;
+                color: #666;
+            }
         </style>
     </head>
     <body>
         <jsp:include page="./components/header.jsp" />
-        
+
         <main>
             <div class="container-detail">
                 <div class="notification-header">
@@ -157,10 +164,14 @@
                 <div class="notification-actions">
                     <form action="notification">
                         <button class="btn-action">
-                            <i class="fa-solid fa-reply"></i> 
+                            <i class="fa-solid fa-reply"></i>Quay lại 
                         </button>
                     </form>
-
+                    <form action="notification?action=delete&id=${noti.notificationID}" method="POST">
+                        <button class="btn-action">
+                            <i class="fa-solid fa-trash"></i>Xóa
+                        </button>
+                    </form>  
                     <!--                    <button class="btn-action">
                                             <i class="fa-solid fa-forward"></i> 
                                         </button>-->

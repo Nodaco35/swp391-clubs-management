@@ -96,7 +96,7 @@ public class NotificationDAO {
             PreparedStatement ps = db.connection.prepareStatement(sql);
             ps.setObject(1, id);
             ResultSet rs = ps.executeQuery();
-            while (rs.next()) {                
+            while (rs.next()) {
                 Notification noti = new Notification();
                 noti.setNotificationID(rs.getInt("NotificationID"));
                 noti.setTitle(rs.getString("Title"));
@@ -112,6 +112,65 @@ public class NotificationDAO {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static List<Notification> findByUserIdAndStatus(String userID, String status) {
+        List<Notification> findByUserId = new ArrayList<>();
+
+        DBContext_Duc db = DBContext_Duc.getInstance();
+        String sql = """
+                     SELECT * FROM clubmanagementsystem.notifications
+                     where ReceiverID = ? and status = ?
+                     order by CreatedDate desc;
+                     ;""";
+        try {
+            PreparedStatement ps = db.connection.prepareStatement(sql);
+            ps.setObject(1, userID);
+            ps.setObject(2, status);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Notification notification = new Notification();
+                notification.setNotificationID(rs.getInt("NotificationID"));
+                notification.setTitle(rs.getString("Title"));
+                notification.setContent(rs.getString("Content"));
+                notification.setCreatedDate(rs.getTimestamp("CreatedDate"));
+                notification.setReceiverID(rs.getString("ReceiverID"));
+                notification.setPrioity(rs.getString("Priority"));
+                notification.setStatus(rs.getString("Status"));
+                notification.setSenderID(rs.getString("SenderID"));
+                findByUserId.add(notification);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return findByUserId != null ? findByUserId : null;
+    }
+
+    public static void sentToPerson(String senderID, String receiverID, String title, String content) {
+        DBContext_Duc db = DBContext_Duc.getInstance();
+        String sql = """
+                     INSERT INTO `clubmanagementsystem`.`notifications`
+                     (
+                     `Title`,
+                     `Content`,
+                     `ReceiverID`,
+                     `SenderID`)
+                     VALUES
+                     (
+                     ?,
+                     ?,
+                     ?,
+                     ?);""";
+        try {
+            PreparedStatement ps = db.connection.prepareStatement(sql);
+            ps.setObject(1, title);
+            ps.setObject(2, content);
+            ps.setObject(3, receiverID);
+            ps.setObject(4, senderID);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

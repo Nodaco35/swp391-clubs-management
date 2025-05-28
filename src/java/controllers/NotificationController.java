@@ -35,7 +35,10 @@ public class NotificationController extends HttpServlet {
         if (action == null) {
             myNotification(request, response);
             return;
+        } else if (action.equals("unreadNotifications")) {
+            myUnreadNotification(request, response);
         }
+
     }
 
     @Override
@@ -48,6 +51,9 @@ public class NotificationController extends HttpServlet {
                 break;
             case "detail":
                 markAsRead(request, response);
+                break;
+            case "sentNotification":
+                sentToPerson(request, response);
                 break;
         }
     }
@@ -76,12 +82,15 @@ public class NotificationController extends HttpServlet {
 
     private void myNotification(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         User user = (User) request.getSession().getAttribute("user");
+        if (user == null) {
+            response.sendRedirect("login");
+        }
         List<Notification> notifications = new ArrayList<>();
         notifications = NotificationDAO.findByUserId(user.getUserID());
         for (Notification n : notifications) {
             if (n.getSenderID() != null) {
                 User sender = UserDAO.getUserById(n.getSenderID());
-                
+
                 n.setSenderAvatar(sender.getAvatar());
                 n.setSenderName(sender.getFullName());
                 n.setSenderEmail(sender.getEmail());
@@ -107,23 +116,69 @@ public class NotificationController extends HttpServlet {
         NotificationDAO.markAsRead(id);
         User user = (User) request.getSession().getAttribute("user");
         Notification noti = NotificationDAO.findByNotificationID(id);
+        
         if (user == null) {
             response.sendRedirect("login");
         }
         if (noti.getSenderID() != null) {
-             User senderUser = UserDAO.getUserById(user.getUserID());
-             noti.setSenderName(senderUser.getFullName());
-             noti.setSenderAvatar(senderUser.getAvatar());
-             noti.setSenderEmail(senderUser.getEmail());
-        }else{
+            User senderUser = UserDAO.getUserById(noti.getSenderID());
+            noti.setSenderName(senderUser.getFullName());
+            noti.setSenderAvatar(senderUser.getAvatar());
+            noti.setSenderEmail(senderUser.getEmail());
+        } else {
             noti.setSenderName("UniClub");
-             noti.setSenderAvatar("img/avatar-he-thong.jpg");
+            noti.setSenderAvatar("img/avatar-he-thong.jpg");
             noti.setSenderEmail("funiccog3@gmail.com");
         }
         request.getSession().setAttribute("user", user);
         request.setAttribute("noti", noti);
         request.getRequestDispatcher("view/detail-notification.jsp").forward(request, response);
-        
+
+    }
+
+    private void myUnreadNotification(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        User user = (User) request.getSession().getAttribute("user");
+        List<Notification> notifications = new ArrayList<>();
+        String status = "UNREAD";
+        notifications = NotificationDAO.findByUserIdAndStatus(user.getUserID(), status);
+        for (Notification n : notifications) {
+            if (n.getSenderID() != null) {
+                User sender = UserDAO.getUserById(n.getSenderID());
+
+                n.setSenderAvatar(sender.getAvatar());
+                n.setSenderName(sender.getFullName());
+                n.setSenderEmail(sender.getEmail());
+            } else {
+                n.setSenderAvatar("img/avatar-he-thong.jpg");
+                n.setSenderName("UniClub");
+                n.setSenderEmail("funiccog3@gmail.com");
+            }
+        }
+        request.setAttribute("notifications", notifications);
+        request.getRequestDispatcher("view/notification.jsp").forward(request, response);
+    }
+
+    private void sentToPerson(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String senderID = request.getParameter("senderID");
+        String receiverEmail = request.getParameter("receiverEmail");
+        String title = request.getParameter("title");
+        String content = request.getParameter("content");
+
+        User receiverUser = UserDAO.getUserByEmail(receiverEmail);
+        if (receiverUser != null) {
+            if (receiverUser.getUserID() == senderID) {
+                String error = "Không thể tự gửi mail cho bản thân";
+                myNotification(request, response);
+            }
+            NotificationDAO.sentToPerson(senderID, receiverUser.getUserID(), title, content);
+            myNotification(request, response);
+        } else {
+            String error = "Không tìm thấy người nhận";
+            request.setAttribute("error", error);
+            request.setAttribute("title", title);
+            request.setAttribute("content", content);
+            myNotification(request, response);
+        }
     }
 
 }
