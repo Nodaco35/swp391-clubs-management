@@ -13,7 +13,7 @@
                 <li></li>
                 <li><a href="${pageContext.request.contextPath}/" class="${pageContext.request.servletPath == '/index.jsp' ? 'active' : ''}">Trang Chủ</a></li>
                 <li><a href="${pageContext.request.contextPath}/clubs" class="${pageContext.request.servletPath == '/clubs.jsp' ? 'active' : ''}">Câu Lạc Bộ</a></li>
-                <li><a href="${pageContext.request.contextPath}/events">Sự Kiện</a></li>
+                <li><a href="${pageContext.request.contextPath}/events-page">Sự Kiện</a></li>
             </ul>
         </nav>
         <div class="auth-buttons">

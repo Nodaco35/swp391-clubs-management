@@ -7,7 +7,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="models.User" %>
 <%@page import="models.Permission" %>
-<%@page import="dao.PermissionDAO" %>
+<%@page import="dal.PermissionDAO" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.util.Date" %>
 <!DOCTYPE html>

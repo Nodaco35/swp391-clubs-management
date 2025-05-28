@@ -2,39 +2,39 @@
 <web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
     <servlet>
         <servlet-name>HomepageServlet</servlet-name>
-        <servlet-class>controllers.HomepageServlet</servlet-class>
+        <servlet-class>controller.HomepageServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>LoginServlet</servlet-name>
-        <servlet-class>controllers.LoginServlet</servlet-class>
+        <servlet-class>controller.LoginServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>LogoutServlet</servlet-name>
-        <servlet-class>controllers.LogoutServlet</servlet-class>
+        <servlet-class>controller.LogoutServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>AdminServlet</servlet-name>
-        <servlet-class>controllers.AdminServlet</servlet-class>
+        <servlet-class>controller.AdminServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>ICServlet</servlet-name>
-        <servlet-class>controllers.ICServlet</servlet-class>
+        <servlet-class>controller.ICServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>ProfileController</servlet-name>
-        <servlet-class>controllers.ProfileController</servlet-class>
+        <servlet-class>controller.ProfileController</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>OtpController</servlet-name>
-        <servlet-class>controllers.OtpController</servlet-class>
+        <servlet-class>controller.OtpController</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>UserClubServlet</servlet-name>
-        <servlet-class>controllers.UserClubServlet</servlet-class>
+        <servlet-class>controller.UserClubServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>ClubDetailServlet</servlet-name>
-        <servlet-class>controllers.ClubDetailServlet</servlet-class>
+        <servlet-class>controller.ClubDetailServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>HomepageServlet</servlet-name>
@@ -56,7 +56,7 @@
     </servlet-mapping>
     <servlet>
         <servlet-name>RegisterServlet</servlet-name>
-        <servlet-class>controllers.RegisterServlet</servlet-class>
+        <servlet-class>controller.RegisterServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>RegisterServlet</servlet-name>
