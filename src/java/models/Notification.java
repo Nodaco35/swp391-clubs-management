@@ -9,12 +9,17 @@ public class Notification {
     private String title;
     private String content;
     private Timestamp createdDate;
-    private Integer receiverID; // Nullable
-
+    private String receiverID; // Nullable
+    private String prioity;
+    private String status;
+    private String senderID;
+    private String senderName;
+    private String senderAvatar;
+    private String senderEmail;
     public Notification() {
     }
 
-    public Notification(int notificationID, String title, String content, Timestamp createdDate, Integer receiverID) {
+    public Notification(int notificationID, String title, String content, Timestamp createdDate, String receiverID) {
         this.notificationID = notificationID;
         this.title = title;
         this.content = content;
@@ -22,6 +27,22 @@ public class Notification {
         this.receiverID = receiverID;
     }
 
+    public String getPrioity() {
+        return prioity;
+    }
+
+    public void setPrioity(String prioity) {
+        this.prioity = prioity;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    
     public int getNotificationID() {
         return notificationID;
     }
@@ -54,11 +75,11 @@ public class Notification {
         this.createdDate = createdDate;
     }
 
-    public Integer getReceiverID() {
+    public String getReceiverID() {
         return receiverID;
     }
 
-    public void setReceiverID(Integer receiverID) {
+    public void setReceiverID(String receiverID) {
         this.receiverID = receiverID;
     }
 
@@ -66,6 +87,40 @@ public class Notification {
     public String toString() {
         return "Notification{" + "notificationID=" + notificationID + ", title=" + title + ", content=" + content + ", createdDate=" + createdDate + ", receiverID=" + receiverID + '}';
     }
+
+    public String getSenderID() {
+        return senderID;
+    }
+
+    public void setSenderID(String senderID) {
+        this.senderID = senderID;
+    }
+
+    public String getSenderName() {
+        return senderName;
+    }
+
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
+    }
+
+    public String getSenderAvatar() {
+        return senderAvatar;
+    }
+
+    public void setSenderAvatar(String senderAvataSrc) {
+        this.senderAvatar = senderAvataSrc;
+    }
+
+    public String getSenderEmail() {
+        return senderEmail;
+    }
+
+    public void setSenderEmail(String senderEmail) {
+        this.senderEmail = senderEmail;
+    }
+    
+    
     
     
 }

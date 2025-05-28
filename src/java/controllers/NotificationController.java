@@ -1,0 +1,129 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
+ */
+package controllers;
+
+import dao.NotificationDAO;
+import dao.UserDAO;
+import java.io.IOException;
+import java.io.PrintWriter;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.List;
+import models.Notification;
+import models.User;
+
+/**
+ *
+ * @author Admin
+ */
+public class NotificationController extends HttpServlet {
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String action = request.getParameter("action");
+        User user = (User) request.getSession().getAttribute("user");
+
+        if (user == null) {
+            response.sendRedirect("login");
+        }
+        if (action == null) {
+            myNotification(request, response);
+            return;
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String action = request.getParameter("action");
+        switch (action) {
+            case "delete":
+                delete(request, response);
+                break;
+            case "detail":
+                markAsRead(request, response);
+                break;
+        }
+    }
+
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        try (PrintWriter out = response.getWriter()) {
+            /* TODO output your page here. You may use following sample code. */
+            out.println("<!DOCTYPE html>");
+            out.println("<html>");
+            out.println("<head>");
+            out.println("<title>Servlet NotificationController</title>");
+            out.println("</head>");
+            out.println("<body>");
+            out.println("<h1>Servlet NotificationController at " + request.getContextPath() + "</h1>");
+            out.println("</body>");
+            out.println("</html>");
+        }
+    }
+
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }// </editor-fold>
+
+    private void myNotification(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        User user = (User) request.getSession().getAttribute("user");
+        List<Notification> notifications = new ArrayList<>();
+        notifications = NotificationDAO.findByUserId(user.getUserID());
+        for (Notification n : notifications) {
+            if (n.getSenderID() != null) {
+                User sender = UserDAO.getUserById(n.getSenderID());
+                
+                n.setSenderAvatar(sender.getAvatar());
+                n.setSenderName(sender.getFullName());
+                n.setSenderEmail(sender.getEmail());
+            } else {
+                n.setSenderAvatar("img/avatar-he-thong.jpg");
+                n.setSenderName("UniClub");
+                n.setSenderEmail("funiccog3@gmail.com");
+            }
+        }
+        request.setAttribute("notifications", notifications);
+        request.getRequestDispatcher("view/notification.jsp").forward(request, response);
+
+    }
+
+    private void delete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        Integer id = Integer.parseInt(request.getParameter("id"));
+        NotificationDAO.delete(id);
+        myNotification(request, response);
+    }
+
+    private void markAsRead(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        Integer id = Integer.parseInt(request.getParameter("id"));
+        NotificationDAO.markAsRead(id);
+        User user = (User) request.getSession().getAttribute("user");
+        Notification noti = NotificationDAO.findByNotificationID(id);
+        if (user == null) {
+            response.sendRedirect("login");
+        }
+        if (noti.getSenderID() != null) {
+             User senderUser = UserDAO.getUserById(user.getUserID());
+             noti.setSenderName(senderUser.getFullName());
+             noti.setSenderAvatar(senderUser.getAvatar());
+             noti.setSenderEmail(senderUser.getEmail());
+        }else{
+            noti.setSenderName("UniClub");
+             noti.setSenderAvatar("img/avatar-he-thong.jpg");
+            noti.setSenderEmail("funiccog3@gmail.com");
+        }
+        request.getSession().setAttribute("user", user);
+        request.setAttribute("noti", noti);
+        request.getRequestDispatcher("view/detail-notification.jsp").forward(request, response);
+        
+    }
+
+}
