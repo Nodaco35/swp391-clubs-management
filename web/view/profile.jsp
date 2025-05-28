@@ -5,7 +5,7 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@page import="models.User" %>
+<%@page import="models.Users" %>
 <%@page import="models.Permission" %>
 <%@page import="dal.PermissionDAO" %>
 <%@ page import="java.text.SimpleDateFormat" %>
@@ -30,7 +30,7 @@
     <body>
         <jsp:include page="./components/header.jsp" />
         <%
-    User user = (User) session.getAttribute("user");
+    Users user = (Users) session.getAttribute("user");
     if (user == null) {
         response.sendRedirect("login");
         return;
@@ -78,7 +78,7 @@
                             Permission per = PermissionDAO.findByPerId(perId);%>
                         <div class="mb-3">
                             <label for="PermissionName" class="form-label">Quyền truy cập</label>
-                            <input type="text" class="form-control" id="permissionName" name="PermissionName" value="<%=per.getPermissionName()%>" readonly>
+                            <input type="text" class="form-control" id="permissionName" name="PermissionName" value="<%= (per != null) ? per.getPermissionName() : "" %>" readonly>
                         </div>
                         <div class="mb-3">
                             <label for="gmail" class="form-label">Email</label>
