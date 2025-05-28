@@ -37,9 +37,9 @@
 
 		<nav class="main-nav">
 			<ul>
-				<li><a href="/">Trang Chủ</a></li>
-				<li><a href="/clubs">Câu Lạc Bộ</a></li>
-				<li><a href="/events-page" class="active">Sự Kiện</a></li>
+				<li><a href="${pageContext.request.contextPath}/" class="${pageContext.request.servletPath == '/index.jsp' ? 'active' : ''}">Trang Chủ</a></li>
+				<li><a href="${pageContext.request.contextPath}/clubs" class="${pageContext.request.servletPath == '/clubs.jsp' ? 'active' : ''}">Câu Lạc Bộ</a></li>
+				<li><a href="${pageContext.request.contextPath}/events-page" class="${pageContext.request.servletPath == '/events-page.jsp' ? 'active' : ''}">Sự Kiện</a></li>
 			</ul>
 		</nav>
 
@@ -48,7 +48,7 @@
 				<c:when test="${sessionScope.user != null}">
 					<div class="user-menu" id="userMenu">
 						<span id="userName">Hi, ${sessionScope.user.fullName}</span>
-						<a href="${pageContext.request.contextPath}/profile" class="btn btn-outline">
+						<a href="${pageContext.request.contextPath}/profile?action=myProfile" class="btn btn-outline">
 							<i class="fa-solid fa-user"></i>
 						</a>
 						<form action="logout" method="post">
