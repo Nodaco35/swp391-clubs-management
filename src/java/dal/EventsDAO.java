@@ -33,7 +33,6 @@ public class EventsDAO {
                 event.setLocation(rs.getString("Location"));
                 event.setClubID(rs.getInt("ClubID"));
                 event.setPublic(rs.getBoolean("IsPublic"));
-                event.setUrlGGForm(rs.getString("UrlGGForm"));
                 event.setCapacity(rs.getInt("Capacity"));
                 event.setStatus(rs.getString("Status"));
                 events.add(event);
@@ -62,7 +61,6 @@ public class EventsDAO {
                 event.setLocation(rs.getString("Location"));
                 event.setClubID(rs.getInt("ClubID"));
                 event.setPublic(rs.getBoolean("IsPublic"));
-                event.setUrlGGForm(rs.getString("UrlGGForm"));
                 event.setCapacity(rs.getInt("Capacity"));
                 event.setStatus(rs.getString("Status"));
                 events.add(event);
@@ -124,7 +122,6 @@ public class EventsDAO {
                 e.setLocation(rs.getString("Location"));
                 e.setClubID(rs.getInt("ClubID"));
                 e.setPublic(rs.getBoolean("IsPublic"));
-                e.setUrlGGForm(rs.getString("URLGGForm"));
                 e.setCapacity(rs.getInt("Capacity"));
                 e.setStatus(rs.getString("Status"));
 
@@ -192,7 +189,6 @@ public class EventsDAO {
                 e.setLocation(rs.getString("Location"));
                 e.setClubID(rs.getInt("ClubID"));
                 e.setPublic(rs.getBoolean("IsPublic"));
-                e.setUrlGGForm(rs.getString("UrlGGForm"));
                 e.setCapacity(rs.getInt("Capacity"));
                 e.setStatus(rs.getString("Status"));
 
@@ -253,7 +249,6 @@ public class EventsDAO {
                 event.setLocation(rs.getString("Location"));
                 event.setClubID(rs.getInt("ClubID"));
                 event.setPublic(rs.getBoolean("IsPublic"));
-                event.setUrlGGForm(rs.getString("UrlGGForm"));
                 event.setCapacity(rs.getInt("Capacity"));
                 event.setStatus(rs.getString("Status"));
                 events.add(event);
