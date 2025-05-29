@@ -37,7 +37,11 @@ public class NotificationController extends HttpServlet {
             return;
         } else if (action.equals("unreadNotifications")) {
             myUnreadNotification(request, response);
+        } else if (action.equals("highNotifications")) {
+            myHighNotifications(request,response);
+            
         }
+        
 
     }
 
@@ -55,6 +59,7 @@ public class NotificationController extends HttpServlet {
             case "sentNotification":
                 sentToPerson(request, response);
                 break;
+                
         }
     }
 
@@ -179,6 +184,31 @@ public class NotificationController extends HttpServlet {
             request.setAttribute("content", content);
             myNotification(request, response);
         }
+    }
+
+    private void myHighNotifications(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        User user = (User) request.getSession().getAttribute("user");
+        if (user == null) {
+            response.sendRedirect("login");
+        }
+        List<Notification> notifications = new ArrayList<>();
+        String prioity = "HIGH";
+        notifications = NotificationDAO.findByUserIdAndImpotant(user.getUserID(), prioity);
+        for (Notification n : notifications) {
+            if (n.getSenderID() != null) {
+                User sender = UserDAO.getUserById(n.getSenderID());
+
+                n.setSenderAvatar(sender.getAvatar());
+                n.setSenderName(sender.getFullName());
+                n.setSenderEmail(sender.getEmail());
+            } else {
+                n.setSenderAvatar("img/avatar-he-thong.jpg");
+                n.setSenderName("UniClub");
+                n.setSenderEmail("funiccog3@gmail.com");
+            }
+        }
+        request.setAttribute("notifications", notifications);
+        request.getRequestDispatcher("view/notification.jsp").forward(request, response);
     }
 
 }

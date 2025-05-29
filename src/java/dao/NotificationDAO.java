@@ -173,4 +173,36 @@ public class NotificationDAO {
         }
     }
 
+    public static List<Notification> findByUserIdAndImpotant(String userID, String prioity) {
+        List<Notification> findByUserId = new ArrayList<>();
+
+        DBContext_Duc db = DBContext_Duc.getInstance();
+        String sql = """
+                     SELECT * FROM clubmanagementsystem.notifications
+                     where ReceiverID = ? and Priority = ?
+                     order by CreatedDate desc;
+                     ;""";
+        try {
+            PreparedStatement ps = db.connection.prepareStatement(sql);
+            ps.setObject(1, userID);
+            ps.setObject(2, prioity);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Notification notification = new Notification();
+                notification.setNotificationID(rs.getInt("NotificationID"));
+                notification.setTitle(rs.getString("Title"));
+                notification.setContent(rs.getString("Content"));
+                notification.setCreatedDate(rs.getTimestamp("CreatedDate"));
+                notification.setReceiverID(rs.getString("ReceiverID"));
+                notification.setPrioity(rs.getString("Priority"));
+                notification.setStatus(rs.getString("Status"));
+                notification.setSenderID(rs.getString("SenderID"));
+                findByUserId.add(notification);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return findByUserId != null ? findByUserId : null;
+    }
+
 }

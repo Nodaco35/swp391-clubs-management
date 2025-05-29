@@ -81,7 +81,11 @@ public class OtpController extends HttpServlet {
         String otp = (String) session.getAttribute("otp");
         String type = (String) session.getAttribute("type");
         String otpEmail = (String) session.getAttribute("otpEmail");
-        String msg;
+        String msg = "Email đã tồn tại";
+        if (UserDAO.getUserByEmail(otpEmail) != null) {
+            request.setAttribute("error", msg);
+            request.getRequestDispatcher("view/secure/verifyCode.jsp").forward(request, response);
+        }
         if (type.equals("Verify current email")) {
             if (otpInput.equals(otp)) {
                 session.removeAttribute("otp");
