@@ -56,10 +56,18 @@ public class OtpController extends HttpServlet {
         User user = (User) session.getAttribute("user");
         String email = request.getParameter("email");
         String type = request.getParameter("type");
+        String msg = "Email đã tồn tại!";
         // Tạo mã OTP ngẫu nhiên
         session.removeAttribute("otp");
         session.removeAttribute("otpEmail");
         session.removeAttribute("type");
+        if (type.equals("Verify new email")) {
+            if (UserDAO.getUserByEmail(email) != null) {
+                request.setAttribute("error", msg);
+                request.getRequestDispatcher("view/secure/editEmail.jsp").forward(request, response);
+                return;
+            }
+        }
 
         String otp = String.valueOf(100000 + new Random().nextInt(900000));
         session.setAttribute("otp", otp);
@@ -81,11 +89,8 @@ public class OtpController extends HttpServlet {
         String otp = (String) session.getAttribute("otp");
         String type = (String) session.getAttribute("type");
         String otpEmail = (String) session.getAttribute("otpEmail");
-        String msg = "Email đã tồn tại";
-        if (UserDAO.getUserByEmail(otpEmail) != null) {
-            request.setAttribute("error", msg);
-            request.getRequestDispatcher("view/secure/verifyCode.jsp").forward(request, response);
-        }
+        String msg;
+
         if (type.equals("Verify current email")) {
             if (otpInput.equals(otp)) {
                 session.removeAttribute("otp");

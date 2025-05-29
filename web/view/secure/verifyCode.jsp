@@ -26,7 +26,7 @@
         <% } %>
 
         <% String type = (String) session.getAttribute("type");
-           String error = (String) request.getAttribute("Email này đã tồn tại!");
+           
            String email = (String) session.getAttribute("otpEmail");
            User user = (User) session.getAttribute("user");
            if (type != null && type.equals("Verify current email")) { %>
@@ -61,9 +61,7 @@
                 </button>
             </form>
         <% } %>
-        <%if(error != null) {%>
-            <p class="text-center text-gray-600 mb-4"><%= error%></p>
-        <%}%>
+        
         <!-- Nút gửi lại mã OTP -->
         <form id="resendForm" action="verifyCode?action=resendOtp" method="POST" class="mt-4">
             <button type="submit" id="resendBtn" disabled

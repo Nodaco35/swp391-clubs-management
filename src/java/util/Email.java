@@ -18,8 +18,8 @@ public class Email {
     // Email: tungletest1.email@gmail.com
     // Password: nebeekfipcstxcox
 
-    static final String from = "funiccog3@gmail.com";
-    static final String password = "qpqkbalijdzflxqo";
+    static final String from = "ducdhhe181972@fpt.edu.vn";
+    static final String password = "nppn rydc onwb polm";
 
     public static boolean sendEmail(String to, String tieuDe, String noiDung) {
         // Properties : khai báo các thuộc tính
