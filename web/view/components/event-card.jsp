@@ -1,12 +1,10 @@
-    <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <div class="event-card">
     <div class="event-image">
-        <img src="${pageContext.request.contextPath}/images/events/${event.eventID}.jpg" 
-             alt="${event.eventName}" 
-             onerror="this.src='${pageContext.request.contextPath}/images/default-event.jpg'">
+        <i class="fas fa-calendar-day"></i>
     </div>
     <div class="event-content">
         <h3 class="event-title">${event.eventName}</h3>

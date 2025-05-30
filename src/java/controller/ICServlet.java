@@ -1,6 +1,7 @@
 package controller;
 
 import dal.ClubDAO;
+import dal.PeriodicReportDAO;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -8,6 +9,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.List;
+import models.PeriodicReport;
 
 /**
  *
@@ -38,31 +41,28 @@ public class ICServlet extends HttpServlet {
         String action = request.getParameter("action");
         if (action == null) {
             ClubDAO clubDAO = new ClubDAO();
-//            PeriodicReportDAO reportDAO = new PeriodicReportDAO();
-//
-//            // Thống kê cho IC Officer
-//            int pendingReports = reportDAO.countPendingReports();
-//            int approvedReports = reportDAO.countApprovedReports();
-//            int overdueClubs = reportDAO.countOverdueClubs();
-//            int totalActiveClubs = clubDAO.getTotalActiveClubs();
-//
-//            // Danh sách báo cáo
-//            List<PeriodicReport> pendingReportsList = reportDAO.getPendingReports();
-//            List<PeriodicReport> approvedReportsList = reportDAO.getApprovedReports(3);
-//            List<PeriodicReport> overdueReportsList = reportDAO.getOverdueReports();
-//            List<PeriodicReport> rejectedReportsList = reportDAO.getRejectedReports(2);
-//
-//            request.setAttribute("pendingReports", pendingReports);
-//            request.setAttribute("approvedReports", approvedReports);
-//            request.setAttribute("overdueClubs", overdueClubs);
-//            request.setAttribute("totalActiveClubs", totalActiveClubs);
-//
-//            request.setAttribute("pendingReportsList", pendingReportsList);
-//            request.setAttribute("approvedReportsList", approvedReportsList);
-//            request.setAttribute("overdueReportsList", overdueReportsList);
-//            request.setAttribute("rejectedReportsList", rejectedReportsList);
-            
-            request.getRequestDispatcher("view/ic/tmp.html").forward(request, response);
+            PeriodicReportDAO reportDAO = new PeriodicReportDAO();
+
+            // Thống kê
+            int pendingReports = reportDAO.countByStatus("PENDING");
+            int approvedReports = reportDAO.countByStatus("APPROVED");
+            int overdueClubs = reportDAO.countOverdueClubs();
+            int totalActiveClubs = clubDAO.getTotalActiveClubs();
+
+            // Danh sách báo cáo theo từng trạng thái
+            List<PeriodicReport> pendingReportsList = reportDAO.getReportsByStatus("PENDING");
+            List<PeriodicReport> approvedReportsList = reportDAO.getReportsByStatus("APPROVED");
+
+            // Truyền dữ liệu sang view
+            request.setAttribute("pendingReports", pendingReports);
+            request.setAttribute("approvedReports", approvedReports);
+            request.setAttribute("overdueClubs", overdueClubs);
+            request.setAttribute("totalActiveClubs", totalActiveClubs);
+
+            request.setAttribute("pendingReportsList", pendingReportsList);
+            request.setAttribute("approvedReportsList", approvedReportsList);
+
+            request.getRequestDispatcher("/view/ic/dashboard.jsp").forward(request, response);
         }
     }
 

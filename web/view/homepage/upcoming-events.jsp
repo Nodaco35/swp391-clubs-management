@@ -16,7 +16,7 @@
         </div>
         
         <div class="view-all">
-            <a href="${pageContext.request.contextPath}/events" class="btn btn-outline">Xem Tất Cả Sự Kiện</a>
+            <a href="${pageContext.request.contextPath}/events-page" class="btn btn-outline">Xem Tất Cả Sự Kiện</a>
         </div>
     </div>
 </section>

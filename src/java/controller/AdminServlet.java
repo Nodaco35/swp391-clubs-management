@@ -3,7 +3,7 @@ package controller;
 
 import dal.ClubApplicationDAO;
 import dal.ClubDAO;
-import dal.EventDAO;
+import dal.EventsDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -41,7 +41,7 @@ public class AdminServlet extends HttpServlet {
         
         if(action == null){
             ClubDAO clubDAO = new ClubDAO();
-            EventDAO eventDAO = new EventDAO();
+            EventsDAO eventDAO = new EventsDAO();
             int totalClubs = clubDAO.getTotalActiveClubs(); //
             int totalMembers = clubDAO.getTotalClubMembers(); //
             

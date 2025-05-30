@@ -9,6 +9,7 @@ import models.Events;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,163 +43,6 @@ public class EventsDAO {
         }
         System.out.println("Events size: " + events.size());
         return events;
-    }
-
-    public List<Events> getEventsByKeyword(String keyword) {
-        String sql = "select * from Events where EventName like ?";
-        List<Events> events = new ArrayList<Events>();
-        try {
-            Connection connection = DBContext.getConnection();
-            PreparedStatement ps = connection.prepareStatement(sql);
-            ps.setString(1, "%" + keyword + "%");
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                Events event = new Events();
-                event.setEventID(rs.getInt("EventID"));
-                event.setEventName(rs.getString("EventName"));
-                event.setDescription(rs.getString("Description"));
-                event.setEventDate(rs.getTimestamp("EventDate"));
-                event.setLocation(rs.getString("Location"));
-                event.setClubID(rs.getInt("ClubID"));
-                event.setPublic(rs.getBoolean("IsPublic"));
-                event.setCapacity(rs.getInt("Capacity"));
-                event.setStatus(rs.getString("Status"));
-                events.add(event);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return events;
-    }
-
-    public List<Events> searchEventsByFilters(
-            String publicFilter, // "all", "public", "private"
-            String statusFilter, // "all", "PENDING", "COMPLETED"
-            String sortByDate // "newest", "oldest", or null
-    ) {
-        List<Events> listEvents = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT * FROM Events WHERE 1=1");
-
-        // Filter IsPublic
-        if (publicFilter != null && !publicFilter.equalsIgnoreCase("all")) {
-            if (publicFilter.equalsIgnoreCase("public")) {
-                sql.append(" AND IsPublic = TRUE");
-            } else if (publicFilter.equalsIgnoreCase("private")) {
-                sql.append(" AND IsPublic = FALSE");
-            }
-        }
-
-        // Filter Status
-        if (statusFilter != null && !statusFilter.equalsIgnoreCase("all")) {
-            sql.append(" AND Status = ?");
-        }
-
-        // Sort by date
-        if (sortByDate != null) {
-            if (sortByDate.equalsIgnoreCase("newest")) {
-                sql.append(" ORDER BY EventDate DESC");
-            } else if (sortByDate.equalsIgnoreCase("oldest")) {
-                sql.append(" ORDER BY EventDate ASC");
-            }
-        }
-
-        try {
-            Connection connection = DBContext.getConnection();
-            PreparedStatement ps = connection.prepareStatement(sql.toString());
-
-            int paramIndex = 1;
-            if (statusFilter != null && !statusFilter.equalsIgnoreCase("all")) {
-                ps.setString(paramIndex++, statusFilter);
-            }
-
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                Events e = new Events();
-                e.setEventID(rs.getInt("EventID"));
-                e.setEventName(rs.getString("EventName"));
-                e.setDescription(rs.getString("Description"));
-                e.setEventDate(rs.getTimestamp("EventDate"));
-                e.setLocation(rs.getString("Location"));
-                e.setClubID(rs.getInt("ClubID"));
-                e.setPublic(rs.getBoolean("IsPublic"));
-                e.setCapacity(rs.getInt("Capacity"));
-                e.setStatus(rs.getString("Status"));
-
-                listEvents.add(e);
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            throw new RuntimeException(ex);
-        }
-
-        return listEvents;
-    }
-
-    public List<Events> searchEventsByFiltersAndKeyword(String keyword, String publicFilter, String statusFilter, String sortByDate) {
-        List<Events> listEvents = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT * FROM Events WHERE 1=1");
-
-        // keyword search
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            sql.append(" AND EventName LIKE ?");
-        }
-
-        // public filter
-        if (publicFilter != null && !publicFilter.equalsIgnoreCase("all")) {
-            if (publicFilter.equalsIgnoreCase("public")) {
-                sql.append(" AND IsPublic = TRUE");
-            } else if (publicFilter.equalsIgnoreCase("private")) {
-                sql.append(" AND IsPublic = FALSE");
-            }
-        }
-
-        // status filter
-        if (statusFilter != null && !statusFilter.equalsIgnoreCase("all")) {
-            sql.append(" AND Status = ?");
-        }
-
-        // sort
-        if (sortByDate != null) {
-            if (sortByDate.equalsIgnoreCase("newest")) {
-                sql.append(" ORDER BY EventDate DESC");
-            } else if (sortByDate.equalsIgnoreCase("oldest")) {
-                sql.append(" ORDER BY EventDate ASC");
-            }
-        }
-
-        try {
-            Connection connection = DBContext.getConnection();
-            PreparedStatement ps = connection.prepareStatement(sql.toString());
-
-            int index = 1;
-            if (keyword != null && !keyword.trim().isEmpty()) {
-                ps.setString(index++, "%" + keyword.trim() + "%");
-            }
-            if (statusFilter != null && !statusFilter.equalsIgnoreCase("all")) {
-                ps.setString(index++, statusFilter);
-            }
-
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                Events e = new Events();
-                e.setEventID(rs.getInt("EventID"));
-                e.setEventName(rs.getString("EventName"));
-                e.setDescription(rs.getString("Description"));
-                e.setEventDate(rs.getTimestamp("EventDate"));
-                e.setLocation(rs.getString("Location"));
-                e.setClubID(rs.getInt("ClubID"));
-                e.setPublic(rs.getBoolean("IsPublic"));
-                e.setCapacity(rs.getInt("Capacity"));
-                e.setStatus(rs.getString("Status"));
-
-                listEvents.add(e);
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            throw new RuntimeException(ex);
-        }
-        return listEvents;
     }
 
     public List<Events> searchEvents(String keyword, String publicFilter, String sortByDate, int limit, int offset) {
@@ -290,6 +134,136 @@ public class EventsDAO {
             throw new RuntimeException("Error counting events: " + e.getMessage(), e);
         }
         return 0;
+    }
+    
+    public List<Events> getUpcomingEvents(int limit) {
+        List<Events> events = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBContext.getConnection();
+            String query = """
+                           SELECT e.*, c.ClubName, c.ClubImg FROM Events e 
+                           JOIN Clubs c ON e.ClubID = c.ClubID 
+                           WHERE  e.IsPublic = 1
+                           ORDER BY e.EventDate ASC LIMIT ? ;
+                           """;
+
+            stmt = conn.prepareStatement(query);
+            stmt.setInt(1, limit);
+            rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Events event = new Events();
+                event.setEventID(rs.getInt("EventID"));
+                event.setEventName(rs.getString("EventName"));
+                event.setDescription(rs.getString("Description"));
+                event.setEventDate(rs.getTimestamp("EventDate"));
+                event.setLocation(rs.getString("Location"));
+                event.setClubID(rs.getInt("ClubID"));
+                event.setPublic(rs.getBoolean("IsPublic"));
+                event.setCapacity(rs.getInt("Capacity"));
+                event.setStatus(rs.getString("Status"));
+
+                // Thêm thông tin câu lạc bộ
+                event.setClubName(rs.getString("ClubName"));
+                event.setClubImg(rs.getString("ClubImg"));
+
+                events.add(event);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting upcoming events: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    DBContext.closeConnection(conn);
+                }
+            } catch (SQLException e) {
+                System.out.println("Error closing resources: " + e.getMessage());
+            }
+        }
+
+        return events;
+    }
+
+    public int getTotalEvents() {
+        int count = 0;
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBContext.getConnection();
+            String query = "SELECT COUNT(*) FROM Events WHERE Status = 'COMPLETED'";
+            stmt = conn.prepareStatement(query);
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting total events: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    DBContext.closeConnection(conn);
+                }
+            } catch (SQLException e) {
+                System.out.println("Error closing resources: " + e.getMessage());
+            }
+        }
+
+        return count;
+    }
+
+    public int countUpcomingEvents() {
+        int count = 0;
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBContext.getConnection();
+            String sql = "SELECT COUNT(*) FROM Events WHERE Status = 'PENDING' AND EventDate >= NOW()";
+            stmt = conn.prepareStatement(sql);
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error counting upcoming events: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    DBContext.closeConnection(conn);
+                }
+            } catch (SQLException e) {
+                System.out.println("Error closing resources: " + e.getMessage());
+            }
+        }
+
+        return count;
     }
 
 }

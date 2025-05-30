@@ -28,7 +28,7 @@
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <body>
-        <jsp:include page="./components/header.jsp" />
+        <jsp:include page="./events-page/header.jsp" />
         <%
     Users user = (Users) session.getAttribute("user");
     if (user == null) {

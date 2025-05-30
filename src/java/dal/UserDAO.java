@@ -208,7 +208,7 @@ public class UserDAO {
         return count;
     }
 
-    public List<Users> getAllUsers() throws ClassNotFoundException {
+    public List<Users> getAllUsers() {
         List<Users> userList = new ArrayList<>();
 
         String sql = "SELECT * FROM Users";
