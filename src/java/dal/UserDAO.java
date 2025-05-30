@@ -35,6 +35,7 @@ public class UserDAO {
                 user.setStatus(rs.getBoolean("Status"));
                 user.setResetToken(rs.getString("ResetToken"));
                 user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
+                user.setAvatar(rs.getString("AvatarSrc"));
             }
         } catch (SQLException e) {
             System.out.println("Error getting user by email: " + e.getMessage());

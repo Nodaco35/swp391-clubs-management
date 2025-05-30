@@ -5,7 +5,7 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@page import="models.User" %>
+<%@page import="models.Users" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -27,7 +27,7 @@
 
         <% String type = (String) session.getAttribute("type");
            String email = (String) session.getAttribute("otpEmail");
-           User user = (User) session.getAttribute("user");
+           Users user = (Users) session.getAttribute("user");
            if (type != null && type.equals("Verify current email")) { %>
             <p class="text-center text-gray-600 mb-4">Mã xác minh đã được gửi đến: <strong><%= email %></strong></p>
             <form action="verifyCode?action=confirmOtp" method="POST" class="space-y-4">

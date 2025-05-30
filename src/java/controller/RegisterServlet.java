@@ -55,6 +55,7 @@ public class RegisterServlet extends HttpServlet {
         boolean success = ud.register(newUser);
         if (success) {
             // Tự động đăng nhập
+            newUser = ud.getUserByEmail(newUser.getEmail());
             HttpSession session = request.getSession();
             session.setAttribute("user", newUser);
             session.setAttribute("permissionID", newUser.getPermissionID());
