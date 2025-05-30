@@ -9,13 +9,16 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/formBuilder.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 <body>
+<jsp:include page="/view/events-page/header.jsp" />
 <div class="container">
-    <!-- Header -->
-    <header class="header">
+    <section class="form-header">
         <div class="header-content">
             <div class="header-left">
                 <h1 class="title">Form Builder</h1>
@@ -33,36 +36,54 @@
                 <button id="publishBtn" class="btn btn-primary">Xuất bản</button>
             </div>
         </div>
-    </header>
+    </section>
 
     <main class="main-content">
         <!-- Thông báo lưu thất bại-->
         <c:if test="${param.error == 'true'}">
-            <div id="saveSuccessAlert" class="alert alert-danger" style="display: none;">
+            <div id="saveErrorAlert" class="alert alert-danger">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
                     <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="8" x2="12" y2="12"></line>
-                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
                 </svg>
                 <div class="alert-content">
                     <h4 class="alert-title">Lưu thất bại</h4>
-                    <p class="alert-description">Đã xảy ra lỗi khi lưu form. Vui lòng thử lại sau!</p>
+                    <p class="alert-description">
+                        <c:choose>
+                            <c:when test="${not empty param.message}">
+                                ${param.message}
+                            </c:when>
+                            <c:otherwise>
+                                Đã xảy ra lỗi khi lưu form. Vui lòng thử lại sau!
+                            </c:otherwise>
+                        </c:choose>
+                    </p>
                 </div>
             </div>
         </c:if>
         <!-- Thông báo lưu thành công -->
         <c:if test="${param.success == 'true'}">
-        <div id="saveSuccessAlert" class="alert alert-success" style="display: none;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <div class="alert-content">
-                <h4 class="alert-title">Đã lưu thành công</h4>
-                <p class="alert-description">Form của bạn đã được lưu thành công.</p>
+            <div id="saveSuccessAlert" class="alert alert-success">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                <div class="alert-content">
+                    <h4 class="alert-title">
+                        <c:choose>
+                            <c:when test="${param.action == 'publish'}">Đã xuất bản thành công</c:when>
+                            <c:otherwise>Đã lưu thành công</c:otherwise>
+                        </c:choose>
+                    </h4>
+                    <p class="alert-description">
+                        <c:choose>
+                            <c:when test="${param.action == 'publish'}">Form của bạn đã được xuất bản và có thể sử dụng.</c:when>
+                            <c:otherwise>Form của bạn đã được lưu thành công.</c:otherwise>
+                        </c:choose>
+                    </p>
+                </div>
             </div>
-        </div>
         </c:if>
 
         <!-- Tabs -->
@@ -81,11 +102,14 @@
                         <div class="card-content">
                             <div class="form-group">
                                 <label class="form-label">Chọn loại form:</label>
-                                <select id="formType" name="eventType" class="form-select mb-2" onchange="toggleEventField(this)" required> <!-- Ẩn/hiện tên sự kiện khi chọn loại form-->
+                                <select id="formType" name="eventType" class="form-select mb-2" onchange="toggleEventField(this)" required>
                                     <option value="">Chọn loại form</option>
                                     <option value="event">Đăng ký tham gia sự kiện</option>
                                     <option value="member">Đăng ký làm thành viên</option>
                                 </select>
+                                <div class="error-feedback" id="formTypeError" style="color: #dc3545; font-size: 0.875rem; margin-top: 5px; display: none;">
+                                    Vui lòng chọn loại form
+                                </div>
                                 <div id="eventNameField" class="mb-2" style="display: none;">
                                     <label class="form-label">Tên sự kiện:</label>
                                     <input type="text" name="eventName" class="form-input" placeholder="Nhập tên sự kiện">
@@ -93,8 +117,6 @@
                             </div>
                         </div>
                     </div>
-
-
                 <!-- Questions Section -->
                 <div class="section-header">
                     <h2 class="section-title">Câu hỏi (<span id="questionCount">3</span>/20)</h2>
@@ -374,7 +396,8 @@
         <div class="dialog-header">
             <h3 class="dialog-title">Xuất bản form</h3>
             <button class="dialog-close" aria-label="Close">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
