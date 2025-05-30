@@ -79,17 +79,24 @@ public class UserClubServlet extends HttpServlet {
             request.setAttribute("editUserClub", uc);
         }
         if ("search".equals(action)) {
-            String keyWords = request.getParameter("search");
-            userClubs = userClubDAO.searchUserClubsByKeyWord(clubID, keyWords, page, pageSize);
-            if (userClubs != null) {
-                request.setAttribute("userClubs", userClubs);
-                request.setAttribute("message", "Tìm kiếm thành công");
-            } else {
-                request.setAttribute("error", "không tìm thấy");
-            }
-        }
+    String keyWords = request.getParameter("search");
 
-        request.getRequestDispatcher("./view/admin/user-club.jsp").forward(request, response);
+    if (keyWords == null || keyWords.trim().isEmpty()) {
+        userClubs = userClubDAO.getAllUserClubsByClubId(clubID, page, pageSize);
+        request.setAttribute("userClubs", userClubs);
+    } else {
+        userClubs = userClubDAO.searchUserClubsByKeyWord(clubID, keyWords, page, pageSize);
+
+        if (userClubs != null && !userClubs.isEmpty()) {
+            request.setAttribute("userClubs", userClubs);
+            request.setAttribute("message", "Tìm kiếm thành công");
+        } else {
+            request.setAttribute("message", "Không tìm thấy");
+        }
+    }
+}
+
+        request.getRequestDispatcher("./view/clubs-page/user-club.jsp").forward(request, response);
     }
 
     @Override
