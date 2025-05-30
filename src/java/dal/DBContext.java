@@ -10,9 +10,9 @@ public class DBContext {
     public static Connection getConnection() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver"); // chú ý driver mới của MySQL
-            String url = "jdbc:mysql://localhost:3306/ClubManagementSystem?useSSL=false&serverTimezone=UTC";
+            String url = "jdbc:mysql://localhost:3306/ClubsManagementSystem?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
             String user = "root";
-            String password = "nodaco123";
+            String password = "Vinh19102005";
             return DriverManager.getConnection(url, user, password);
         } catch (Exception e) {
             e.printStackTrace();
