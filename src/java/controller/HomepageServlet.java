@@ -1,7 +1,7 @@
 package controller;
 
 import dal.ClubDAO;
-import dal.EventDAO;
+import dal.EventsDAO;
 
 import java.io.IOException;
 import java.util.List;
@@ -28,7 +28,7 @@ public class HomepageServlet extends HttpServlet {
         request.setAttribute("featuredClubs", featuredClubs);
         
         // Lấy dữ liệu sự kiện sắp tới
-        EventDAO eventDAO = new EventDAO();
+        EventsDAO eventDAO = new EventsDAO();
         List<Events> upcomingEvents = eventDAO.getUpcomingEvents(4);
         request.setAttribute("upcomingEvents", upcomingEvents);
         
