@@ -39,7 +39,6 @@
     <servlet-mapping>
         <servlet-name>HomepageServlet</servlet-name>
         <url-pattern>/home</url-pattern>
-        <url-pattern>/index</url-pattern>
         <url-pattern/>
     </servlet-mapping>
     <servlet-mapping>

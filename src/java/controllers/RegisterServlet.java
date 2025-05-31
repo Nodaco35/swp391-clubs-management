@@ -5,7 +5,6 @@ import models.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
 import util.EmailService;
-
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -33,7 +32,6 @@ public class RegisterServlet extends HttpServlet {
         String password = request.getParameter("password");
         String confirmPassword = request.getParameter("confirmPassword");
         String dateOfBirthStr = request.getParameter("dateOfBirth");
-
         String error = validateInput(fullName, email, password, confirmPassword, dateOfBirthStr);
         if (error != null) {
             request.setAttribute("error", error);
@@ -56,8 +54,7 @@ public class RegisterServlet extends HttpServlet {
         User newUser = new User();
         newUser.setFullName(fullName.trim());
         newUser.setEmail(email.trim().toLowerCase());
-        newUser.setPassword(password.trim());
-        
+        newUser.setPassword(password.trim());      
         // Xử lý ngày sinh
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -80,7 +77,6 @@ public class RegisterServlet extends HttpServlet {
             // Tạo token xác minh và thời gian hết hạn
             String verificationToken = EmailService.generateVerificationToken();
             java.util.Date tokenExpiry = EmailService.generateTokenExpiryTime();
-            
             // Lưu token vào database và đánh dấu tài khoản chưa kích hoạt
             boolean tokenUpdated = ud.updateVerificationToken(email.trim(), verificationToken, tokenExpiry);
             
@@ -116,38 +112,29 @@ public class RegisterServlet extends HttpServlet {
         if (fullName == null || fullName.trim().length() < 2 || fullName.trim().length() > 100) {
             return "Họ tên phải từ 2 đến 100 ký tự!";
         }
-
         if (email == null || email.trim().isEmpty()) {
             return "Vui lòng nhập email!";
         }
         if (email.trim().length() > 255 || !pattern.matcher(email.trim()).matches()) {
             return "Vui lòng sử dụng email@fpt.edu.vn";
         }
-        
         if (dateOfBirth == null || dateOfBirth.trim().isEmpty()) {
             return "Vui lòng nhập ngày sinh!";
         }
-        
-        // Kiểm tra định dạng ngày sinh
+        // Kiểm tra định dạng ngày sinh yyyy-MM-dd
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             sdf.setLenient(false);
-            Date dob = sdf.parse(dateOfBirth);
-            
-            // Đã loại bỏ phần kiểm tra độ tuổi từ 16 tuổi trở lên
-
+            sdf.parse(dateOfBirth);
         } catch (ParseException e) {
-            return "Ngày sinh không hợp lệ!";
+            return "Ngày sinh không hợp lệ! (định dạng yyyy-MM-dd)";
         }
-
         if (password == null || password.length() < 6) {
             return "Mật khẩu phải có ít nhất 6 ký tự!";
         }
-
         if (!password.equals(confirmPassword)) {
             return "Xác nhận mật khẩu không khớp!";
         }
-
         return null;
     }
 }

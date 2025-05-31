@@ -51,12 +51,11 @@
             </div>
         </nav>
 
-        <!-- Main Content -->
-        <div class="main-container">
-            <div class="banner-section">
-                <h1 class="banner-text">BANNER</h1>
-            </div>
-
+<!-- Main Content -->
+<div class="main-container">
+    <div class="banner-section">
+        <h1 class="banner-text">BANNER</h1>
+    </div>
             <div class="form-section">
                 <div class="form-header">
                     <h2 class="form-title">Hello !</h2>
@@ -159,3 +158,4 @@
         <script src="${pageContext.request.contextPath}/js/auth.js"></script>
     </body>
 </html>
+

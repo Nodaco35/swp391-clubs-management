@@ -16,7 +16,9 @@ import java.util.logging.Logger;
 
 public class UserDAO {
 
-    private static final Logger LOGGER = Logger.getLogger(UserDAO.class.getName());    public static User getUserByEmail(String email) {
+    private static final Logger LOGGER = Logger.getLogger(UserDAO.class.getName());
+
+    public static User getUserByEmail(String email) {
         User user = null;
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -24,8 +26,7 @@ public class UserDAO {
 
         try {
             conn = DBContext.getConnection();
-            // Đã xóa điều kiện Status = 1 để có thể lấy cả tài khoản chưa kích hoạt
-            String query = "SELECT * FROM Users WHERE Email = ?";
+            String query = "SELECT * FROM Users WHERE Email = ? AND Status = 1";
             stmt = conn.prepareStatement(query);
             stmt.setString(1, email);
             rs = stmt.executeQuery();
@@ -282,7 +283,8 @@ public class UserDAO {
             } else {
                 ps.setNull(5, java.sql.Types.DATE);
                 LOGGER.log(Level.WARNING, "Ngày sinh là null");
-            }            ps.setInt(6, user.getPermissionID());
+            }
+            ps.setInt(6, user.getPermissionID());
             ps.setBoolean(7, user.isStatus());
             LOGGER.log(Level.INFO, "SQL Statement: {0} với UserID={1}", new Object[]{sql, userID});
             

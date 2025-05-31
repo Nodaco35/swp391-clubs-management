@@ -76,7 +76,6 @@ public class User {
     public void setPassword(String password) {
         this.password = password;
     }
-
     public Date getDateOfBirth() {
         return dateOfBirth;
     }
@@ -115,4 +114,5 @@ public class User {
         this.tokenExpiry = tokenExpiry;
     }
 
-    }
+}
+
