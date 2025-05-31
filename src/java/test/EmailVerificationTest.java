@@ -1,8 +1,8 @@
 package test;
 
 import util.EmailService;
-import models.User;
-import dao.UserDAO;
+import models.Users;
+import dal.UserDAO;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,7 +36,7 @@ public class EmailVerificationTest {
         
         // Test 3: Tạo User giả cho việc thử nghiệm
         LOGGER.log(Level.INFO, "Test 3: Kiểm tra tạo User mô phỏng");
-        User testUser = createTestUser(testEmail);
+        Users testUser = createTestUser(testEmail);
         LOGGER.log(Level.INFO, "Đã tạo người dùng test: {0}", testUser.getEmail());
         
         // Test 4: Gửi email xác minh
@@ -63,8 +63,8 @@ public class EmailVerificationTest {
         LOGGER.log(Level.INFO, "4. Sau khi xác minh, đăng nhập với email và mật khẩu để xác nhận tài khoản đã được kích hoạt");
     }
     
-    private static User createTestUser(String email) {
-        User user = new User();
+    private static Users createTestUser(String email) {
+        Users user = new Users();
         user.setFullName("Người Dùng Test");
         user.setEmail(email);
         user.setPassword("password123");

@@ -4,9 +4,7 @@
 
 <div class="event-card">
     <div class="event-image">
-        <img src="${pageContext.request.contextPath}/images/events/${event.eventID}.jpg" 
-             alt="${event.eventName}" 
-             onerror="this.src='${pageContext.request.contextPath}/images/default-event.jpg'">
+        <i class="fas fa-calendar-day"></i>
     </div>
     <div class="event-content">
         <h3 class="event-title">${event.eventName}</h3>

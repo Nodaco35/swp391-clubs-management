@@ -167,10 +167,10 @@
                                 <tbody>
                                     <c:forEach items="${recentlyApprovedClubs}" var="club">
                                         <tr>
-                                            <td>#CLB${club.clubId}</td>
+                                            <td>#CLB${club.clubID}</td>
                                             <td>${club.clubName}</td>
-                                            <td>${club.presidentName}</td>
-                                            <td>${club.formattedFoundingDate}</td>
+                                            <td></td>
+                                            <td>${club.establishedDate}</td>
                                             <td>${club.memberCount}</td>
                                             <td>
                                                 <span class="badge badge-approved">

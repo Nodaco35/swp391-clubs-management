@@ -3,17 +3,19 @@
 
 <header class="header">
     <div class="container header-container">
-        <div class="logo">
-            <i class="fas fa-users"></i>
-            <span>UniClub</span>
-        </div>
+        <a href="${pageContext.request.contextPath}/">
+            <div class="logo">
+                <i class="fas fa-users"></i>
+                <span>UniClub</span>
+            </div>
+        </a>
         <nav class="main-nav">
             <ul>
                 <li></li>
                 <li></li>
-                <li><a href="${pageContext.request.contextPath}/" class="${pageContext.request.servletPath == '/index.jsp' ? 'active' : ''}">Trang Chủ</a></li>
-                <li><a href="${pageContext.request.contextPath}/clubs" class="${pageContext.request.servletPath == '/clubs.jsp' ? 'active' : ''}">Câu Lạc Bộ</a></li>
-                <li><a href="${pageContext.request.contextPath}/events">Sự Kiện</a></li>
+                <li><a href="${pageContext.request.contextPath}/" class="filter-option active">Trang Chủ</a></li>
+                <li><a href="${pageContext.request.contextPath}/clubs" class="filter-option">Câu Lạc Bộ</a></li>
+                <li><a href="${pageContext.request.contextPath}/events-page" class="filter-option">Sự Kiện</a></li>
             </ul>
         </nav>
         <div class="auth-buttons">
