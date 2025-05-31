@@ -14,7 +14,7 @@
                 redirectUrl = "/view/IC_Officer/dashboard.jsp";
                 break;
             default:
-                redirectUrl = "/view/Login.jsp";
+                redirectUrl = "/view/login.jsp";
         }
         response.sendRedirect(request.getContextPath() + redirectUrl);
         return;

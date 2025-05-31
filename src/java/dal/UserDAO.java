@@ -11,6 +11,32 @@ import models.Users;
 
 public class UserDAO {
 
+    public Users getUserByID(String userID) {
+        String sql = "SELECT * FROM Users WHERE UserID = ?";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, userID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                Users user = new Users();
+                user.setUserID(rs.getString("UserID"));
+                user.setFullName(rs.getString("FullName"));
+                user.setEmail(rs.getString("Email"));
+                user.setPassword(rs.getString("Password"));
+                user.setDateOfBirth(rs.getDate("DateOfBirth"));
+                user.setPermissionID(rs.getInt("PermissionID"));
+                user.setStatus(rs.getBoolean("Status"));
+                user.setResetToken(rs.getString("ResetToken"));
+                user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
+                return user;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static Users getUserByEmail(String email) {
         Users user = null;
         Connection conn = null;

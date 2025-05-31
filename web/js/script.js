@@ -63,3 +63,8 @@ document.addEventListener('DOMContentLoaded', function() {
 function changeSort(value) {
     window.location.href = `events-page?key=${currentKeyword}&publicFilter=${currentPublicFilter}&sortByDate=${value}`;
 }
+
+function toggleMobileMenu() {
+    const mobileMenu = document.getElementById("mobileMenu");
+    mobileMenu.classList.toggle("active");
+}

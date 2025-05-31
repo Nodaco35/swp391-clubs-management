@@ -13,6 +13,21 @@ import models.Roles;
 
 public class UserClubDAO {
 
+    public boolean isUserMemberOfClub(int clubID, String userID) {
+        String sql = "SELECT 1 FROM UserClubs WHERE ClubID = ? AND UserID = ? AND IsActive = 1";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, clubID);
+            ps.setString(2, userID);
+            ResultSet rs = ps.executeQuery();
+            return rs.next(); // true nếu là thành viên
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public boolean isClubPresident(String userID, int clubID) {
         Connection conn = null;
         PreparedStatement stmt = null;

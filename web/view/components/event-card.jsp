@@ -22,7 +22,7 @@
                 ${event.location}
             </div>
         </div>
-        <p class="event-description">${event.description}</p>
+<%--        <p class="event-description">${event.description}</p>--%>
         <div class="event-footer">
             <div class="event-club">
                 <div class="event-club-image">

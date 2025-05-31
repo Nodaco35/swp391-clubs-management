@@ -37,6 +37,9 @@ public class HomepageServlet extends HttpServlet {
         int totalMembers = clubDAO.getTotalClubMembers();
         int totalEvents = eventDAO.getTotalEvents();
         int totalDepartments = clubDAO.getTotalDepartments();
+
+        String currentPath = request.getServletPath();
+        request.setAttribute("currentPath", currentPath);
         
         request.setAttribute("totalClubs", totalClubs);
         request.setAttribute("totalMembers", totalMembers);

@@ -40,6 +40,14 @@
         <servlet-name>EventsPageServlet</servlet-name>
         <servlet-class>controller.EventsPageServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>EventDetailServlet</servlet-name>
+        <servlet-class>controller.EventDetailServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>RegistrationEvent</servlet-name>
+        <servlet-class>controller.RegistrationEvent</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>HomepageServlet</servlet-name>
         <url-pattern>/home</url-pattern>
@@ -89,6 +97,14 @@
     <servlet-mapping>
         <servlet-name>EventsPageServlet</servlet-name>
         <url-pattern>/events-page</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>EventDetailServlet</servlet-name>
+        <url-pattern>/event-detail</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RegistrationEvent</servlet-name>
+        <url-pattern>/registration-event</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

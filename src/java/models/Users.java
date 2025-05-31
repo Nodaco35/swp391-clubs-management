@@ -13,6 +13,7 @@ public class Users {
     private Date tokenExpiry;
     private String dob;
     private String avatar;
+
     public Users() {
     }
     

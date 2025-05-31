@@ -4,6 +4,8 @@
  */
 package dal;
 
+import models.EventOwnerInfo;
+import models.EventStats;
 import models.Events;
 
 import java.sql.Connection;
@@ -29,6 +31,7 @@ public class EventsDAO {
                 Events event = new Events();
                 event.setEventID(rs.getInt("EventID"));
                 event.setEventName(rs.getString("EventName"));
+                event.setEventImg(rs.getString("EventImg"));
                 event.setDescription(rs.getString("Description"));
                 event.setEventDate(rs.getTimestamp("EventDate"));
                 event.setLocation(rs.getString("Location"));
@@ -45,9 +48,66 @@ public class EventsDAO {
         return events;
     }
 
+    public Events getEventByID(int id) {
+        String sql = "SELECT * FROM Events WHERE EventID = ?";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                Events event = new Events();
+                event.setEventID(rs.getInt("EventID"));
+                event.setEventName(rs.getString("EventName"));
+                event.setEventImg(rs.getString("EventImg"));
+                event.setDescription(rs.getString("Description"));
+                event.setEventDate(rs.getTimestamp("EventDate"));
+                event.setLocation(rs.getString("Location"));
+                event.setClubID(rs.getInt("ClubID"));
+                event.setPublic(rs.getBoolean("IsPublic"));
+                event.setCapacity(rs.getInt("Capacity"));
+                event.setStatus(rs.getString("Status"));
+                return event;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
+    public List<Events> getEventsByClubID(int clubID, int eventID) {
+        List<Events> events = new ArrayList<>();
+        String sql = "SELECT * FROM Events WHERE ClubID = ? and eventID <> ?";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, clubID);
+            ps.setInt(2, eventID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Events event = new Events();
+                event.setEventID(rs.getInt("EventID"));
+                event.setEventName(rs.getString("EventName"));
+                event.setEventImg(rs.getString("EventImg"));
+                event.setDescription(rs.getString("Description"));
+                event.setEventDate(rs.getTimestamp("EventDate"));
+                event.setLocation(rs.getString("Location"));
+                event.setClubID(rs.getInt("ClubID"));
+                event.setPublic(rs.getBoolean("IsPublic"));
+                event.setCapacity(rs.getInt("Capacity"));
+                event.setStatus(rs.getString("Status"));
+                events.add(event);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return events;
+    }
+
+
     public List<Events> searchEvents(String keyword, String publicFilter, String sortByDate, int limit, int offset) {
         List<Events> events = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT * FROM Events WHERE 1=1");
+        StringBuilder sql = new StringBuilder("SELECT e.*, c.ClubName FROM Events e JOIN Clubs c ON e.ClubID = c.ClubID WHERE 1=1");
 
         int paramIndex = 1;
         if (keyword != null && !keyword.trim().isEmpty()) {
@@ -73,10 +133,10 @@ public class EventsDAO {
         }
 
         sql.append(" LIMIT ? OFFSET ?");
-        System.out.println("Generated SQL: " + sql);
 
-        try (Connection connection = DBContext.getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql.toString());
             if (keyword != null && !keyword.trim().isEmpty()) {
                 ps.setString(paramIndex++, "%" + keyword + "%");
             }
@@ -88,6 +148,7 @@ public class EventsDAO {
                 Events event = new Events();
                 event.setEventID(rs.getInt("EventID"));
                 event.setEventName(rs.getString("EventName"));
+                event.setEventImg(rs.getString("EventImg"));
                 event.setDescription(rs.getString("Description"));
                 event.setEventDate(rs.getTimestamp("EventDate"));
                 event.setLocation(rs.getString("Location"));
@@ -95,9 +156,11 @@ public class EventsDAO {
                 event.setPublic(rs.getBoolean("IsPublic"));
                 event.setCapacity(rs.getInt("Capacity"));
                 event.setStatus(rs.getString("Status"));
+
+                event.setClubName(rs.getString("ClubName"));
                 events.add(event);
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             throw new RuntimeException("Error searching events: " + e.getMessage(), e);
         }
         System.out.println("Generated SQL: " + sql);
@@ -119,8 +182,9 @@ public class EventsDAO {
             }
         }
 
-        try (Connection connection = DBContext.getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql.toString());
             // Set parameter only if keyword is valid
             if (keyword != null && !keyword.trim().isEmpty()) {
                 ps.setString(1, "%" + keyword + "%");
@@ -130,12 +194,91 @@ public class EventsDAO {
             if (rs.next()) {
                 return rs.getInt(1);
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             throw new RuntimeException("Error counting events: " + e.getMessage(), e);
         }
         return 0;
     }
-    
+
+    public EventStats getSpotsLeftEvent(int eventID) {
+        String sql = "SELECT (e.Capacity - COUNT(ep.EventParticipantID)) AS SpotsLeft, COUNT(ep.EventParticipantID) AS RegisteredCount " +
+                "FROM Events e " +
+                "LEFT JOIN EventParticipants ep ON e.EventID = ep.EventID AND (ep.Status = 'REGISTERED' OR ep.Status = 'ATTENDED' OR ep.Status = 'ABSENT') " +
+                "WHERE e.EventID = ? " +
+                "GROUP BY e.Capacity";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, eventID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                int spotsLeft = rs.getInt("SpotsLeft");
+                int registeredCount = rs.getInt("RegisteredCount");
+                return new EventStats(spotsLeft, registeredCount);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error counting spots: " + e.getMessage(), e);
+        }
+        return new EventStats(0, 0);
+    }
+
+    public boolean registerParticipant(int eventID, String userID) {
+        String sql = "INSERT INTO EventParticipants (EventID, UserID, Status) VALUES (?, ?, 'REGISTERED')";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, eventID);
+            ps.setString(2, userID);
+
+            int rows = ps.executeUpdate();
+            return rows > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean isUserRegistered(int eventID, String userID) {
+        String sql = "SELECT * FROM EventParticipants WHERE EventID = ? AND UserID = ?";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, eventID);
+            ps.setString(2, userID);
+            return ps.executeQuery().next();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public EventOwnerInfo getEventOwnerInfo(int eventId) {
+        String sql = "SELECT u.FullName, u.Email, c.ClubName FROM Events e " +
+                "JOIN Clubs c ON e.ClubID = c.ClubID " +
+                "JOIN UserClubs uc ON uc.ClubID = c.ClubID " +
+                "JOIN Users u ON uc.UserID = u.UserID " +
+                "WHERE uc.RoleID = 1 AND e.EventID = ?";
+
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, eventId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                String fullName = rs.getString("FullName");
+                String clubName = rs.getString("ClubName");
+                String email = rs.getString("Email");
+                return new EventOwnerInfo(fullName, email, clubName);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error retrieving event owner info: " + e.getMessage(), e);
+        }
+
+        return null;
+    }
+
+
     public List<Events> getUpcomingEvents(int limit) {
         List<Events> events = new ArrayList<>();
         Connection conn = null;
@@ -145,11 +288,11 @@ public class EventsDAO {
         try {
             conn = DBContext.getConnection();
             String query = """
-                           SELECT e.*, c.ClubName, c.ClubImg FROM Events e 
-                           JOIN Clubs c ON e.ClubID = c.ClubID 
-                           WHERE  e.IsPublic = 1
-                           ORDER BY e.EventDate ASC LIMIT ? ;
-                           """;
+                    SELECT e.*, c.ClubName, c.ClubImg FROM Events e 
+                    JOIN Clubs c ON e.ClubID = c.ClubID 
+                    WHERE  e.IsPublic = 1
+                    ORDER BY e.EventDate ASC LIMIT ? ;
+                    """;
 
             stmt = conn.prepareStatement(query);
             stmt.setInt(1, limit);
