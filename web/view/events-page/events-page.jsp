@@ -1,3 +1,4 @@
+
 <%--
   Created by IntelliJ IDEA.
   User: thuan
@@ -183,7 +184,7 @@
                                         </div>
                                     </div>
                                     <div class="event-club">
-                                        <strong>Club ID:</strong> ${e.clubID}
+                                        <strong>Club Name:</strong> ${e.clubName}
                                     </div>
                                     <div class="event-footer">
                                         <span class="attendees status-${fn:toLowerCase(e.status)}">${e.status}</span>

@@ -30,7 +30,7 @@
 					<i class="fas fa-search search-icon"></i>
 					<input type="text" id="searchInput" name="key" placeholder="Tìm kiếm sự kiện..."
 					       class="search-input">
-					<button type="submit" class="search-btn">
+					<button type="reset" class="search-btn">
 						<i class="fas fa-search"></i>
 					</button>
 				</form>
@@ -40,22 +40,13 @@
 		<nav class="main-nav">
 			<ul>
 				<li>
-					<a href="${pageContext.request.contextPath}/"
-					   class="${currentPath == '/' ? 'active' : ''}">
-						Trang Chủ
-					</a>
+					<a href="${pageContext.request.contextPath}/">Trang Chủ</a>
 				</li>
 				<li>
-					<a href="${pageContext.request.contextPath}/clubs"
-					   class="${fn:contains(currentPath, '/clubs') ? 'active' : ''}">
-						Câu Lạc Bộ
-					</a>
+					<a href="${pageContext.request.contextPath}/clubs">Câu Lạc Bộ</a>
 				</li>
 				<li>
-					<a href="${pageContext.request.contextPath}/events-page"
-					   class="${fn:contains(currentPath, '/events-page') ? 'active' : ''}">
-						Sự Kiện
-					</a>
+					<a href="${pageContext.request.contextPath}/events-page">Sự Kiện</a>
 				</li>
 			</ul>
 		</nav>
@@ -169,7 +160,7 @@
 						</div>
 					</c:if>
 					<form id="registrationForm" class="registration-form" action="registration-event" method="post">
-						<input type="hidden" name="eventID" value="${event.eventID}" />
+						<input type="hidden" name="eventID" value="${event.eventID}"/>
 						<!-- Personal Information -->
 						<div class="form-section">
 							<h4 class="section-title">
@@ -196,10 +187,10 @@
 									<input type="email" id="email" name="email" required
 									       placeholder="example@student.edu.vn" value="${userDetails.email}" readonly>
 								</div>
-<%--								<div class="form-group">--%>
-<%--									<label for="phone">Số điện thoại <span class="required">*</span></label>--%>
-<%--									<input type="tel" id="phone" name="phone" required placeholder="0123456789">--%>
-<%--								</div>--%>
+								<%--								<div class="form-group">--%>
+								<%--									<label for="phone">Số điện thoại <span class="required">*</span></label>--%>
+								<%--									<input type="tel" id="phone" name="phone" required placeholder="0123456789">--%>
+								<%--								</div>--%>
 							</div>
 						</div>
 
@@ -209,7 +200,8 @@
 								Một số câu hỏi
 							</h4>
 							<div class="form-group">
-								<label for="faculty">Bạn biết đến sự kiện này qua đâu <span class="required">*</span></label>
+								<label for="faculty">Bạn biết đến sự kiện này qua đâu <span
+										class="required">*</span></label>
 								<select id="faculty" name="faculty" required>
 									<option value="mxh">Mạng xã hội</option>
 									<option value="fr">Bạn bè</option>
@@ -219,11 +211,13 @@
 							</div>
 							<div class="form-group">
 								<label for="reasonJoin">Lý do bạn muốn tham gia sự kiện này là gì?</label>
-								<textarea id="reasonJoin" name="reasonJoin" rows="3" placeholder="Chia sẻ lý do bạn quan tâm đến sự kiện này..."></textarea>
+								<textarea id="reasonJoin" name="reasonJoin" rows="3"
+								          placeholder="Chia sẻ lý do bạn quan tâm đến sự kiện này..."></textarea>
 							</div>
 
 							<div class="form-group">
-								<label for="experienceLevel">Bạn đã có kinh nghiệm gì liên quan đến chủ đề sự kiện chưa?</label>
+								<label for="experienceLevel">Bạn đã có kinh nghiệm gì liên quan đến chủ đề sự kiện
+									chưa?</label>
 								<select id="experienceLevel" name="experienceLevel">
 									<option value="none">Chưa có</option>
 									<option value="basic">Có biết sơ qua</option>
@@ -233,13 +227,10 @@
 							</div>
 
 							<div class="form-group">
-								<label for="suggestions">Bạn có đề xuất hoặc mong muốn nào cho các sự kiện trong tương lai không?</label>
-								<textarea id="suggestions" name="suggestions" rows="3" placeholder="Ý tưởng, chủ đề, diễn giả bạn muốn..."></textarea>
-							</div>
-
-							<div class="form-group">
-								<label for="questions">Bạn có câu hỏi nào muốn gửi trước cho BTC/speaker không?</label>
-								<textarea id="questions" name="questions" rows="3" placeholder="Gửi câu hỏi trước giúp chúng tôi chuẩn bị nội dung tốt hơn..."></textarea>
+								<label for="suggestions">Bạn có đề xuất hoặc mong muốn nào cho các sự kiện trong tương
+									lai không?</label>
+								<textarea id="suggestions" name="suggestions" rows="3"
+								          placeholder="Ý tưởng, chủ đề, diễn giả bạn muốn..."></textarea>
 							</div>
 
 							<div class="form-group">
@@ -255,10 +246,35 @@
 								<label class="checkbox-item terms-checkbox">
 									<input type="checkbox" name="agreeTerms" required>
 									<span class="checkmark"></span>
-									<span class="terms-text">
-                                            Tôi đồng ý với <a href="#" class="terms-link">điều khoản và điều kiện</a>
-                                            của sự kiện và cam kết tham gia đầy đủ.
-                                        </span>
+									<span class="terms-text">Tôi đồng ý với <a href="#" class="terms-link" onclick="openTermsModal(event)">điều khoản và điều kiện</a> của sự kiện và cam kết tham gia đầy đủ.</span>
+								</label>
+							</div>
+						</div>
+
+						<!-- Modal for Terms -->
+						<div id="termsModal" class="modal">
+							<div class="modal-content">
+								<span class="close" onclick="closeTermsModal()">&times;</span>
+								<h3>Điều khoản và Điều kiện</h3>
+								<p>
+									Khi tham gia sự kiện, bạn đồng ý tuân thủ nội quy và cam kết tham gia đầy đủ, đúng
+									giờ...
+								</p>
+								<ul>
+									<li>Tham gia đầy đủ các buổi hoạt động và không bỏ lỡ lịch trình đã đăng ký.</li>
+									<li>Tuân thủ quy định về trang phục và an toàn trong suốt thời gian diễn ra sự kiện.</li>
+									<li>Tôn trọng các thành viên khác và ban tổ chức, không gây mất trật tự.</li>
+									<li>Không được phép mang theo các vật dụng gây nguy hiểm hoặc cấm tại địa điểm tổ chức.</li>
+									<li>Ban tổ chức có quyền từ chối hoặc loại bỏ người tham gia nếu vi phạm các quy định.</li>
+									<li>Mọi thay đổi hoặc hủy bỏ sự kiện sẽ được thông báo trước qua email hoặc thông báo chính thức.</li>
+									<li>Bạn cam kết tham gia đầy đủ và chịu trách nhiệm về việc đăng ký của mình.</li>
+								</ul>
+								<p>
+									Nếu có bất kỳ câu hỏi hoặc yêu cầu hỗ trợ, vui lòng liên hệ với ban tổ chức qua email hoặc số điện thoại được cung cấp.
+								</p>
+								<label style="display: flex; align-items: center; margin-top: 15px; font-size: 0.95rem; cursor: pointer;">
+									<input type="checkbox" id="confirmRead" style="margin-right: 8px;">
+									Tôi đã đọc và đồng ý với điều khoản và điều kiện
 								</label>
 							</div>
 						</div>
@@ -266,7 +282,8 @@
 						<!-- Submit Buttons -->
 						<div class="form-actions">
 							<button type="button" class="btn-secondary">
-								<a href="${pageContext.request.contextPath}/event-detail?id=${e.eventID}"><i class="fas fa-arrow-left"></i> Quay lại</a>
+								<a href="${pageContext.request.contextPath}/event-detail?id=${e.eventID}"><i
+										class="fas fa-arrow-left"></i> Quay lại</a>
 							</button>
 							<button type="submit" class="btn-primary">
 								<i class="fas fa-check"></i>
@@ -296,5 +313,22 @@
 		</div>
 	</div>
 </footer>
+<script>
+    function openTermsModal(event) {
+        event.preventDefault();
+        document.getElementById("termsModal").style.display = "block";
+    }
+
+    function closeTermsModal() {
+        document.getElementById("termsModal").style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById("termsModal");
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
 </body>
 </html>

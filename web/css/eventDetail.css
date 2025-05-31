@@ -758,6 +758,19 @@ body {
     cursor: not-allowed;
 }
 
+.login-warning {
+    background-color: #ffe6e6;
+    border: 1px solid #ff9999;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 10px 0;
+    font-size: 14px;
+}
+.login-warning a {
+    color: #cc0000;
+    text-decoration: underline;
+}
+
 
 /* Footer */
 .footer {

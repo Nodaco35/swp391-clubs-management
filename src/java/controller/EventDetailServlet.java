@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import models.EventOwnerInfo;
 import models.EventStats;
 import models.Events;
 import models.Users;
@@ -71,6 +72,8 @@ public class EventDetailServlet extends HttpServlet {
                 HttpSession session = request.getSession();
                 Users currentUser = (Users) session.getAttribute("user");
                 boolean isMember = false;
+                boolean isLoggedIn = currentUser != null;
+                request.setAttribute("isLoggedIn", isLoggedIn);
 
                 if (!e.isPublic() && currentUser != null) {
                     isMember = userClubDAO.isUserMemberOfClub(e.getClubID(), currentUser.getUserID());
@@ -78,6 +81,8 @@ public class EventDetailServlet extends HttpServlet {
 
                 List<Events> relatedEvents = eventDAO.getEventsByClubID(e.getClubID(), id);
                 EventStats stats = eventDAO.getSpotsLeftEvent(id);
+                EventOwnerInfo ownerInfo = eventDAO.getEventOwnerInfo(id);
+                request.setAttribute("ownerInfo", ownerInfo);
                 request.setAttribute("relatedEvents", relatedEvents);
                 request.setAttribute("event", e);
                 request.setAttribute("registeredCount", stats.getRegisteredCount());

@@ -4,6 +4,7 @@
  */
 package dal;
 
+import models.EventOwnerInfo;
 import models.EventStats;
 import models.Events;
 
@@ -106,7 +107,7 @@ public class EventsDAO {
 
     public List<Events> searchEvents(String keyword, String publicFilter, String sortByDate, int limit, int offset) {
         List<Events> events = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT * FROM Events WHERE 1=1");
+        StringBuilder sql = new StringBuilder("SELECT e.*, c.ClubName FROM Events e JOIN Clubs c ON e.ClubID = c.ClubID WHERE 1=1");
 
         int paramIndex = 1;
         if (keyword != null && !keyword.trim().isEmpty()) {
@@ -155,6 +156,8 @@ public class EventsDAO {
                 event.setPublic(rs.getBoolean("IsPublic"));
                 event.setCapacity(rs.getInt("Capacity"));
                 event.setStatus(rs.getString("Status"));
+
+                event.setClubName(rs.getString("ClubName"));
                 events.add(event);
             }
         } catch (SQLException e) {
@@ -179,7 +182,7 @@ public class EventsDAO {
             }
         }
 
-        try  {
+        try {
             Connection connection = DBContext.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql.toString());
             // Set parameter only if keyword is valid
@@ -249,6 +252,31 @@ public class EventsDAO {
         return false;
     }
 
+    public EventOwnerInfo getEventOwnerInfo(int eventId) {
+        String sql = "SELECT u.FullName, u.Email, c.ClubName FROM Events e " +
+                "JOIN Clubs c ON e.ClubID = c.ClubID " +
+                "JOIN UserClubs uc ON uc.ClubID = c.ClubID " +
+                "JOIN Users u ON uc.UserID = u.UserID " +
+                "WHERE uc.RoleID = 1 AND e.EventID = ?";
+
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, eventId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                String fullName = rs.getString("FullName");
+                String clubName = rs.getString("ClubName");
+                String email = rs.getString("Email");
+                return new EventOwnerInfo(fullName, email, clubName);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error retrieving event owner info: " + e.getMessage(), e);
+        }
+
+        return null;
+    }
 
 
     public List<Events> getUpcomingEvents(int limit) {
@@ -260,11 +288,11 @@ public class EventsDAO {
         try {
             conn = DBContext.getConnection();
             String query = """
-                           SELECT e.*, c.ClubName, c.ClubImg FROM Events e 
-                           JOIN Clubs c ON e.ClubID = c.ClubID 
-                           WHERE  e.IsPublic = 1
-                           ORDER BY e.EventDate ASC LIMIT ? ;
-                           """;
+                    SELECT e.*, c.ClubName, c.ClubImg FROM Events e 
+                    JOIN Clubs c ON e.ClubID = c.ClubID 
+                    WHERE  e.IsPublic = 1
+                    ORDER BY e.EventDate ASC LIMIT ? ;
+                    """;
 
             stmt = conn.prepareStatement(query);
             stmt.setInt(1, limit);

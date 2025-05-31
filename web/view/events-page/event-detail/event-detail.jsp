@@ -32,7 +32,7 @@
 					<i class="fas fa-search search-icon"></i>
 					<input type="text" id="searchInput" name="key" placeholder="Tìm kiếm sự kiện..."
 					       class="search-input">
-					<button type="submit" class="search-btn">
+					<button type="reset" class="search-btn">
 						<i class="fas fa-search"></i>
 					</button>
 				</form>
@@ -42,22 +42,13 @@
 		<nav class="main-nav">
 			<ul>
 				<li>
-					<a href="${pageContext.request.contextPath}/"
-					   class="${currentPath == '/' ? 'active' : ''}">
-						Trang Chủ
-					</a>
+					<a href="${pageContext.request.contextPath}/">Trang Chủ</a>
 				</li>
 				<li>
-					<a href="${pageContext.request.contextPath}/clubs"
-					   class="${fn:contains(currentPath, '/clubs') ? 'active' : ''}">
-						Câu Lạc Bộ
-					</a>
+					<a href="${pageContext.request.contextPath}/clubs">Câu Lạc Bộ</a>
 				</li>
 				<li>
-					<a href="${pageContext.request.contextPath}/events-page"
-					   class="${fn:contains(currentPath, '/events-page') ? 'active' : ''}">
-						Sự Kiện
-					</a>
+					<a href="${pageContext.request.contextPath}/events-page">Sự Kiện</a>
 				</li>
 			</ul>
 		</nav>
@@ -203,19 +194,22 @@
 					</div>
 
 					<!-- Organizer Info -->
+
 					<div class="organizer-info">
+						<c:set var="ownerInfo" value="${requestScope.ownerInfo}"/>
 						<div class="organizer-avatar">
 							<i class="fas fa-user"></i>
 						</div>
 						<div class="organizer-details">
-							<h4>Nguyễn Văn A</h4>
-							<p>Người tổ chức • Câu lạc bộ Lập trình</p>
+							<h4>${ownerInfo.fullName}</h4>
+							<p>Người tổ chức • ${ownerInfo.clubName}</p>
 						</div>
-						<a href="mailto:nguyenvana@email.com" class="contact-btn">
+						<a href="mailto:${ownerInfo.email}" class="contact-btn">
 							<i class="fas fa-envelope"></i>
 							Liên hệ
 						</a>
 					</div>
+
 
 					<!-- Related Events -->
 					<div class="events-grid" id="eventsGrid">
@@ -295,9 +289,18 @@
 							<c:when test="${e.status == 'PENDING' || e.status == 'Pending'}">
 								<c:choose>
 									<c:when test="${e.isPublic() || isMember}">
-										<a href="${pageContext.request.contextPath}/registration-event?id=${e.eventID}" class="register-btn-primary">
-											<i class="fas fa-user-plus"></i> Đăng ký ngay
-										</a>
+										<c:if test="${!isLoggedIn}">
+											<span class="register-btn-finish disabled"><i
+													class="fas fa-exclamation-circle"
+													style="color: red;"></i> Bạn cần <a
+													href="${pageContext.request.contextPath}/login">đăng nhập</a> để có thể đăng ký tham gia sự kiện.</span>
+										</c:if>
+										<c:if test="${isLoggedIn}">
+											<a href="${pageContext.request.contextPath}/registration-event?id=${e.eventID}"
+											   class="register-btn-primary">
+												<i class="fas fa-user-plus"></i> Đăng ký ngay
+											</a>
+										</c:if>
 									</c:when>
 									<c:otherwise>
 										<button type="button" class="register-btn-finish disabled" disabled>

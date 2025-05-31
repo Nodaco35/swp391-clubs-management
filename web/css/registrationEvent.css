@@ -743,6 +743,99 @@ body {
     }
 }
 
+/* Modal Container */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.6); /* nền mờ đậm hơn */
+    backdrop-filter: blur(4px); /* làm mờ nền phía sau */
+    transition: opacity 0.3s ease;
+}
+
+/* Modal Content Box */
+.modal-content {
+    background-color: #ffffff;
+    margin: 8% auto;
+    padding: 25px 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 480px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    position: relative;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+    animation: slideDown 0.3s ease forwards;
+}
+
+/* Animation cho modal */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Close Button */
+.modal .close {
+    color: #555;
+    position: absolute;
+    top: 12px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    user-select: none;
+}
+.modal .close:hover {
+    color: #ff3b3b;
+}
+
+/* Tiêu đề */
+.modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #222;
+}
+
+/* Nội dung đoạn văn */
+.modal-content p {
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+
+/* Danh sách */
+.modal-content ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    margin-bottom: 12px;
+    color: #444;
+}
+
+.modal-content ul li {
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+/* Responsive cho màn nhỏ */
+@media screen and (max-width: 400px) {
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+        border-radius: 10px;
+    }
+}
 
 /* Footer */
 .footer {

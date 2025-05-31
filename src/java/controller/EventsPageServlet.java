@@ -99,6 +99,9 @@ public class EventsPageServlet extends HttpServlet {
             events = dao.searchEvents(keyword, publicFilter, sortByDate, pageSize, offset);
         }
 
+        String currentPath = request.getServletPath();
+        request.setAttribute("currentPath", currentPath);
+
         request.setAttribute("events", events);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
