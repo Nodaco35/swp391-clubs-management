@@ -22,6 +22,7 @@ public class NotificationDAO {
         String sql = """
                      SELECT * FROM clubmanagementsystem.notifications
                      where ReceiverID = ?
+                     AND CreatedDate >= NOW() - INTERVAL 30 DAY
                      order by CreatedDate desc;
                      ;""";
         try {
@@ -122,6 +123,7 @@ public class NotificationDAO {
         String sql = """
                      SELECT * FROM clubmanagementsystem.notifications
                      where ReceiverID = ? and status = ?
+                     AND CreatedDate >= NOW() - INTERVAL 30 DAY
                      order by CreatedDate desc;
                      ;""";
         try {
@@ -181,6 +183,7 @@ public class NotificationDAO {
         String sql = """
                      SELECT * FROM clubmanagementsystem.notifications
                      where ReceiverID = ? and Priority = ?
+                     AND CreatedDate >= NOW() - INTERVAL 30 DAY
                      order by CreatedDate desc;
                      ;""";
         try {
@@ -213,12 +216,14 @@ public class NotificationDAO {
         String sql = """
                      SELECT * FROM clubmanagementsystem.notifications
                      where SenderID = ?
+                     AND CreatedDate >= NOW() - INTERVAL 30 DAY
                      order by CreatedDate desc;
+                      
                      ;""";
         try {
             PreparedStatement ps = db.connection.prepareStatement(sql);
             ps.setObject(1, userID);
-            
+
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Notification notification = new Notification();
@@ -236,6 +241,49 @@ public class NotificationDAO {
             e.printStackTrace();
         }
         return findByUserId != null ? findByUserId : null;
+    }
+
+    public static List<Notification> search(String userID, String keywords) {
+        List<Notification> search = new ArrayList<>();
+        String sql = """
+                     SELECT `notifications`.`NotificationID`,
+                            `notifications`.`Title`,
+                            `notifications`.`Content`,
+                            `notifications`.`CreatedDate`,
+                            `notifications`.`ReceiverID`,
+                            `notifications`.`SenderID`,
+                            `notifications`.`Priority`,
+                            `notifications`.`Status`
+                     FROM `clubmanagementsystem`.`notifications`
+                     WHERE `ReceiverID` = ?
+                       AND (
+                            `Title` LIKE CONCAT('%', ?, '%') OR
+                            `Content` LIKE CONCAT('%', ?, '%')
+                       )
+                     ORDER BY `CreatedDate` DESC""";
+        DBContext_Duc db = DBContext_Duc.getInstance();
+        try {
+            PreparedStatement ps = db.connection.prepareStatement(sql);
+            ps.setObject(1, userID);
+            ps.setObject(2, keywords);
+            ps.setObject(3, keywords);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Notification notification = new Notification();
+                notification.setNotificationID(rs.getInt("NotificationID"));
+                notification.setTitle(rs.getString("Title"));
+                notification.setContent(rs.getString("Content"));
+                notification.setCreatedDate(rs.getTimestamp("CreatedDate"));
+                notification.setReceiverID(rs.getString("ReceiverID"));
+                notification.setPrioity(rs.getString("Priority"));
+                notification.setStatus(rs.getString("Status"));
+                notification.setSenderID(rs.getString("SenderID"));
+                search.add(notification);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return search;
     }
 
 }

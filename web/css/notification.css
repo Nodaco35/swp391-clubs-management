@@ -77,7 +77,35 @@ body {
     color: white;
 }
 
+/* Search box in main section */
+.container-thongbao .search-box {
+    background: #ffffff; /* White background for search bar in main */
+    position: relative;
+    display: flex;
+    align-items: center;
+    border-radius: 25px;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border); /* Added border */
+}
 
+.container-thongbao .search-box:focus-within {
+    box-shadow: 0 0 0 2px var(--primary);
+}
+
+.container-thongbao .search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    padding: 0.5rem;
+    font-size: 1rem;
+    color: #000000; /* Black text color */
+}
+
+.container-thongbao .search-input::placeholder {
+    color: var(--text-light);
+}
 
 .notification {
     display: flex;

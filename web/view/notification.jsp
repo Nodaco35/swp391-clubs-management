@@ -40,7 +40,19 @@
         <main>
 
             <div class="container-thongbao">
-                
+                <!-- Search Bar -->
+                <div class="container-thongbao">
+                    <div class="search-box">
+                        <form action="notification?action=search" method="POST">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="searchInput" name="key" placeholder="Tìm kiếm thông báo..."
+                                   class="search-input">
+                            <button type="submit" class="search-btn">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
                 <div class="tabs">
                     <a href="notification">Tất cả</a>
                     <a href="notification?action=unreadNotifications">Chưa đọc</a>
@@ -49,37 +61,47 @@
 
                 </div>
 
-                <c:forEach var="noti" items="${notifications}">
-                    <div class="notification ${noti.status == 'UNREAD' ? 'unread' : 'read'}" id="noti-${noti.notificationID}" onclick="showDetail('${noti.notificationID}', '${noti.title}', '${type == 'send' ? noti.receiverName : noti.senderName}', '${noti.createdDate}', '${noti.content.replace('\'', '\\\'')}')">
-                        <div class="notification-left">
-                            <!-- Hiển thị avatar dựa trên type -->
-                            <img src="${type == 'send' ? noti.receiverAvatar : noti.senderAvatar}" alt="Avatar" />
+                <%-- Notification list --%>
+                <c:choose>
+                    <c:when test="${empty notifications}">
+                        <div class="no-events">
+                            Không tìm thấy thông báo nào
                         </div>
+                    </c:when>
+                    <c:otherwise>
+                        <c:forEach var="noti" items="${notifications}">
+                            <div class="notification ${noti.status == 'UNREAD' ? 'unread' : 'read'}" id="noti-${noti.notificationID}" onclick="showDetail('${noti.notificationID}', '${noti.title}', '${type == 'send' ? noti.receiverName : noti.senderName}', '${noti.createdDate}', '${noti.content.replace('\'', '\\\'')}')">
+                                <div class="notification-left">
+                                    <!-- Hiển thị avatar dựa trên type -->
+                                    <img src="${type == 'send' ? noti.receiverAvatar : noti.senderAvatar}" alt="Avatar" />
+                                </div>
 
-                        <div class="notification-middle">
-                            <!-- Hiển thị tên và email dựa trên type -->
-                            <div class="sender-name">
-                                ${type == 'send' ? noti.receiverName : noti.senderName}
-                                (${type == 'send' ? noti.receiverEmail : noti.senderEmail})
+                                <div class="notification-middle">
+                                    <!-- Hiển thị tên và email dựa trên type -->
+                                    <div class="sender-name">
+                                        ${type == 'send' ? noti.receiverName : noti.senderName}
+                                        (${type == 'send' ? noti.receiverEmail : noti.senderEmail})
+                                    </div>
+                                    <div class="email-title">${noti.title}</div>
+                                    <div class="notification-time">${noti.createdDate}</div>
+                                </div>
+
+                                <div class="notification-right">
+                                    <form action="notification?action=detail&id=${noti.notificationID}" method="POST">
+                                        <button class="btn-delete">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                    </form>
+                                    <form action="notification?action=delete&id=${noti.notificationID}" method="POST">
+                                        <button class="btn-delete">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </form>  
+                                </div>
                             </div>
-                            <div class="email-title">${noti.title}</div>
-                            <div class="notification-time">${noti.createdDate}</div>
-                        </div>
-
-                        <div class="notification-right">
-                            <form action="notification?action=detail&id=${noti.notificationID}" method="POST">
-                                <button class="btn-delete">
-                                    <i class="fa-solid fa-eye"></i>
-                                </button>
-                            </form>
-                            <form action="notification?action=delete&id=${noti.notificationID}" method="POST">
-                                <button class="btn-delete">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </form>  
-                        </div>
-                    </div>
-                </c:forEach>
+                        </c:forEach>
+                    </c:otherwise>
+                </c:choose>
 
                 <!-- Icon bút chì -->
                 <div class="pencil-icon" onclick="showNotificationForm()">✏️</div>

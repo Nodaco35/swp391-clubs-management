@@ -23,7 +23,7 @@ import util.Email;
  * @author Admin
  */
 public class OtpController extends HttpServlet {
-
+    private int cnt = 0;
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -54,6 +54,7 @@ public class OtpController extends HttpServlet {
     }
 
     private void sendOtp(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        cnt = 0;
         HttpSession session = request.getSession();
         Users user = (Users) session.getAttribute("user");
         String email = request.getParameter("email");
@@ -118,15 +119,20 @@ public class OtpController extends HttpServlet {
                 return;
             }
         }
-
-        msg = "Mã OTP không khớp!";
+        cnt++;
+        if (cnt == 4) {
+            session.removeAttribute("user");
+            response.sendRedirect("index.jsp");
+            return;
+        }
+        msg = "Mã OTP không khớp(hãy thực hiện gửi lại nếu nhập sai quá 3 lần sẽ đăng xuất tài khoản)!";
         request.setAttribute("msg", msg);
         request.getRequestDispatcher("view/secure/verifyCode.jsp").forward(request, response);
 
     }
 
     private void resendOtp(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
+        cnt = 0;
         HttpSession session = request.getSession();
         String email = (String) session.getAttribute("otpEmail");
         String type = (String) session.getAttribute("type");

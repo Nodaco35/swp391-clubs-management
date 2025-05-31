@@ -62,7 +62,9 @@ public class NotificationController extends HttpServlet {
             case "sentNotification":
                 sentToPerson(request, response);
                 break;
-
+            case "search":
+                search(request, response);
+                break;
         }
     }
 
@@ -91,7 +93,7 @@ public class NotificationController extends HttpServlet {
     private void myNotification(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Users user = (Users) request.getSession().getAttribute("user");
         if (user == null) {
-            response.sendRedirect("login");
+            response.sendRedirect("index.jsp");
         }
         List<Notification> notifications = new ArrayList<>();
         notifications = NotificationDAO.findByUserId(user.getUserID());
@@ -127,7 +129,7 @@ public class NotificationController extends HttpServlet {
         Notification noti = NotificationDAO.findByNotificationID(id);
 
         if (user == null) {
-            response.sendRedirect("login");
+            response.sendRedirect("index.jsp");
         }
         if (!noti.getReceiverID().equals(user.getUserID())) {
             Users receiver = UserDAO.getUserById(noti.getReceiverID());
@@ -190,7 +192,7 @@ public class NotificationController extends HttpServlet {
                 myNotification(request, response);
             }
             NotificationDAO.sentToPerson(senderID, receiverUser.getUserID(), title, content);
-            myNotification(request, response);
+            sendNotifications(request, response);
         } else {
             String error = "Không tìm thấy người nhận";
             request.setAttribute("error", error);
@@ -203,7 +205,7 @@ public class NotificationController extends HttpServlet {
     private void myHighNotifications(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Users user = (Users) request.getSession().getAttribute("user");
         if (user == null) {
-            response.sendRedirect("login");
+            response.sendRedirect("index.jsp");
         }
         List<Notification> notifications = new ArrayList<>();
         String prioity = "HIGH";
@@ -228,7 +230,7 @@ public class NotificationController extends HttpServlet {
     private void sendNotifications(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         Users user = (Users) request.getSession().getAttribute("user");
         if (user == null) {
-            response.sendRedirect("login");
+            response.sendRedirect("index.jsp");
         }
         List<Notification> notifications = new ArrayList<>();
 
@@ -247,11 +249,36 @@ public class NotificationController extends HttpServlet {
         request.getRequestDispatcher("view/notification.jsp").forward(request, response);
     }
 
-    public static void main(String[] args) {
-        
+    
 
-        Notification  notifications = NotificationDAO.findByNotificationID(7); 
-        System.out.println(notifications);
-      
+    private void search(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String key_raw = request.getParameter("key");
+        
+        if (key_raw == null) {
+            myNotification(request, response);
+            return;
+        }
+        Users user = (Users) request.getSession().getAttribute("user");
+        if (user == null) {
+            response.sendRedirect("index.jsp");
+        }
+        List<Notification> notifications = new ArrayList<>();
+        notifications = NotificationDAO.search(user.getUserID(), key_raw.trim());
+        for (Notification n : notifications) {
+            if (n.getSenderID() != null) {
+                Users sender = UserDAO.getUserById(n.getSenderID());
+                n.setSenderAvatar(sender.getAvatar());
+                n.setSenderName(sender.getFullName());
+                n.setSenderEmail(sender.getEmail());
+            } else {
+                n.setSenderAvatar("img/avatar-he-thong.jpg");
+                n.setSenderName("UniClub");
+                n.setSenderEmail("funiclubs@gmail.com");
+            }
+        }
+        request.setAttribute("notifications", notifications);
+        request.getRequestDispatcher("view/notification.jsp").forward(request, response);
+        
     }
+   
 }
