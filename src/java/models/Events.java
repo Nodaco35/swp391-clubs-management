@@ -6,13 +6,14 @@ import java.util.Date;
 public class Events {
     private int eventID;
     private String eventName;
+    private String eventImg;
     private String description;
 
     private Date eventDate;
     private String location;
     private int clubID;
     private boolean isPublic;
-    private String urlGGForm;
+    private int formTemplateID;
 
     private int capacity;
     private String status;
@@ -23,20 +24,29 @@ public class Events {
     
     public Events() {
     }
-    
-    public Events(int eventID, String eventName, String description, Date eventDate, String location,
-                  int clubID, boolean isPublic, String urlGGForm, int capacity, String status) {
+
+    public Events(int eventID, String eventName, String eventImg, String description, Date eventDate, String location, int clubID, boolean isPublic, int formTemplateID, int capacity, String status, String clubName, String clubImg) {
         this.eventID = eventID;
         this.eventName = eventName;
+        this.eventImg = eventImg;
         this.description = description;
         this.eventDate = eventDate;
         this.location = location;
         this.clubID = clubID;
         this.isPublic = isPublic;
-        this.urlGGForm = urlGGForm;
-
+        this.formTemplateID = formTemplateID;
         this.capacity = capacity;
         this.status = status;
+        this.clubName = clubName;
+        this.clubImg = clubImg;
+    }
+
+    public int getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
     }
 
     public int getEventID() {
@@ -55,6 +65,14 @@ public class Events {
         this.eventName = eventName;
     }
 
+    public String getEventImg() {
+        return eventImg;
+    }
+
+    public void setEventImg(String eventImg) {
+        this.eventImg = eventImg;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -62,7 +80,6 @@ public class Events {
     public void setDescription(String description) {
         this.description = description;
     }
-
 
     public Date getEventDate() {
         return eventDate;
@@ -92,25 +109,16 @@ public class Events {
         return isPublic;
     }
 
-    public void setPublic(boolean isPublic) {
-        this.isPublic = isPublic;
+    public void setPublic(boolean aPublic) {
+        isPublic = aPublic;
     }
 
-    public String getUrlGGForm() {
-        return urlGGForm;
+    public int getFormTemplateID() {
+        return formTemplateID;
     }
 
-    public void setUrlGGForm(String urlGGForm) {
-        this.urlGGForm = urlGGForm;
-    }
-
-
-    public int getCapacity() {
-        return capacity;
-    }
-
-    public void setCapacity(int capacity) {
-        this.capacity = capacity;
+    public void setFormTemplateID(int formTemplateID) {
+        this.formTemplateID = formTemplateID;
     }
 
     public String getStatus() {
@@ -120,15 +128,15 @@ public class Events {
     public void setStatus(String status) {
         this.status = status;
     }
-    
+
     public String getClubName() {
         return clubName;
     }
-    
+
     public void setClubName(String clubName) {
         this.clubName = clubName;
     }
-    
+
     public String getClubImg() {
         return clubImg;
     }

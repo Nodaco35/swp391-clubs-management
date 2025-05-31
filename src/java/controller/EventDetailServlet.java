@@ -5,21 +5,23 @@
 
 package controller;
 
-import dal.EventsDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
+
+import dal.EventsDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.List;
+import models.EventStats;
 import models.Events;
 
 /**
  *
  * @author LE VAN THUAN
  */
-public class EventsPageServlet extends HttpServlet {
+public class EventDetailServlet extends HttpServlet {
    
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -36,10 +38,10 @@ public class EventsPageServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet EventsPageServlet</title>");  
+            out.println("<title>Servlet EventDetailServlet</title>");  
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet EventsPageServlet at " + request.getContextPath () + "</h1>");
+            out.println("<h1>Servlet EventDetailServlet at " + request.getContextPath () + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -55,69 +57,27 @@ public class EventsPageServlet extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        EventsDAO dao = new EventsDAO();
-
-        String keyword = request.getParameter("key");
-        String publicFilter = request.getParameter("publicFilter");
-        String sortByDate = request.getParameter("sortByDate");
-
-        if (publicFilter == null || publicFilter.isEmpty()) {
-            publicFilter = "all";
-        }
-
-        if (sortByDate == null || sortByDate.isEmpty()) {
-            sortByDate = "newest";
-        }
-
-        int page = 1;
-        int pageSize = 8;
-
+    throws ServletException, IOException {
+        String eventID = request.getParameter("id");
+        EventsDAO eventDAO = new EventsDAO();
         try {
-            String pageParam = request.getParameter("page");
-            if (pageParam != null && !pageParam.isEmpty()) {
-                page = Integer.parseInt(pageParam);
-                if (page < 1) {
-                    page = 1;
-                }
+            int id = Integer.parseInt(eventID);
+            Events e = eventDAO.getEventByID(id);
+            if(e != null) {
+                List<Events> relatedEvents = eventDAO.getEventsByClubID(e.getClubID(), id);
+                EventStats stats = eventDAO.getSpotsLeftEvent(id);
+                request.setAttribute("relatedEvents", relatedEvents);
+                request.setAttribute("event", e);
+                request.setAttribute("registeredCount", stats.getRegisteredCount());
+                request.setAttribute("spotsLeft", stats.getSpotsLeft());
+                request.getRequestDispatcher("view/events-page/event-detail/event-detail.jsp").forward(request, response);
+            } else {
+                response.sendRedirect(request.getContextPath() + "/event-page");
             }
-        } catch (NumberFormatException e) {
-            page = 1;
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-
-        int offset = (page - 1) * pageSize;
-
-        List<Events> events = dao.searchEvents(keyword, publicFilter, sortByDate, pageSize, offset);
-
-        int totalEvents = dao.countEvents(keyword, publicFilter);
-        int totalPages = (int) Math.ceil((double) totalEvents / pageSize);
-
-        if (page > totalPages && totalPages > 0) {
-            page = totalPages;
-            offset = (page - 1) * pageSize;
-            events = dao.searchEvents(keyword, publicFilter, sortByDate, pageSize, offset);
-        }
-
-        request.setAttribute("events", events);
-        request.setAttribute("currentPage", page);
-        request.setAttribute("totalPages", totalPages);
-        request.setAttribute("totalEvents", totalEvents);
-        request.setAttribute("pageSize", pageSize);
-
-        request.setAttribute("currentKeyword", keyword != null ? keyword : "");
-        request.setAttribute("currentPublicFilter", publicFilter);
-        request.setAttribute("currentSortByDate", sortByDate);
-
-        System.out.println("=== Search Parameters ===");
-        System.out.println("Keyword: " + keyword);
-        System.out.println("Public Filter: " + publicFilter);
-        System.out.println("Sort By: " + sortByDate);
-        System.out.println("Page: " + page + "/" + totalPages);
-        System.out.println("Total Events: " + totalEvents);
-        System.out.println("Events Found: " + events.size());
-
-        request.getRequestDispatcher("view/events-page/events-page.jsp").forward(request, response);
     }
 
     /** 
