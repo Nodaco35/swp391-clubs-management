@@ -143,9 +143,7 @@
                                 <option value="newest" ${currentSortByDate == 'newest' ? 'selected' : ''}>Mới Nhất</option>
                                 <option value="oldest" ${currentSortByDate == 'oldest' ? 'selected' : ''}>Cũ Nhất</option>
                             </select>
-
                         </div>
-
                     </div>
 
                     <!-- Events Info -->
@@ -185,7 +183,7 @@
                                         </div>
                                     </div>
                                     <div class="event-club">
-                                        <strong>Club ID:</strong> ${e.clubName}
+                                        <strong>Club ID:</strong> ${e.clubID}
                                     </div>
                                     <div class="event-footer">
                                         <span class="attendees status-${fn:toLowerCase(e.status)}">${e.status}</span>
@@ -237,5 +235,10 @@
                 window.location.href = "event-detail?id=" + eventID;
             }
         </script>
+        <script>
+            const currentKeyword = '${fn:escapeXml(currentKeyword)}';
+            const currentPublicFilter = '${currentPublicFilter}';
+        </script>
+
     </body>
 </html>

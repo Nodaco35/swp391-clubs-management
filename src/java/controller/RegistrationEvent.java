@@ -119,7 +119,7 @@ public class RegistrationEvent extends HttpServlet {
 
         boolean agreed = request.getParameter("agreeTerms") != null;
 
-        if (!agreed || fullName == null || studentId == null || email == null || phone == null || eventIDRaw == null) {
+        if (!agreed || fullName == null || studentId == null || email == null || eventIDRaw == null) {
             request.setAttribute("message", "❗ Vui lòng điền đầy đủ thông tin và đồng ý điều khoản.");
             request.setAttribute("messageType", "error");
             request.getRequestDispatcher("view/events-page/event-detail/registration-event.jsp").forward(request, response);

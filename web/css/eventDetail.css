@@ -559,6 +559,20 @@ body {
     gap: 0.5rem;
 }
 
+.register-btn-finish {
+    padding: 0.75rem 2rem;
+    background: var(--card-bg);
+    color: var(--primary);
+    border: none;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 .register-btn-primary a {
     text-decoration: none;
 }

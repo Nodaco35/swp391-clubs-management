@@ -594,6 +594,11 @@ body {
     color: var(--secondary-foreground);
 }
 
+.btn-secondary a {
+    color: var(--secondary-foreground);
+    text-decoration: none;
+}
+
 .btn-secondary:hover {
     background: #1e2a35;
 }
@@ -605,9 +610,21 @@ body {
     margin: 10px auto;
     width: 80%;
 }
-.form-message.success { background-color: #d4edda; color: #155724; }
-.form-message.error { background-color: #f8d7da; color: #721c24; }
-.form-message.info { background-color: #fff3cd; color: #856404; }
+
+.form-message.success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.form-message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.form-message.info {
+    background-color: #fff3cd;
+    color: #856404;
+}
 
 
 /* Validation Styles */
@@ -725,7 +742,6 @@ body {
         transform: translateY(0);
     }
 }
-
 
 
 /* Footer */

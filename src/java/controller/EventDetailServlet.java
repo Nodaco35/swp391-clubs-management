@@ -10,12 +10,15 @@ import java.io.PrintWriter;
 import java.util.List;
 
 import dal.EventsDAO;
+import dal.UserClubDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import models.EventStats;
 import models.Events;
+import models.Users;
 
 /**
  *
@@ -60,16 +63,30 @@ public class EventDetailServlet extends HttpServlet {
     throws ServletException, IOException {
         String eventID = request.getParameter("id");
         EventsDAO eventDAO = new EventsDAO();
+        UserClubDAO userClubDAO = new UserClubDAO();
         try {
             int id = Integer.parseInt(eventID);
             Events e = eventDAO.getEventByID(id);
             if(e != null) {
+                HttpSession session = request.getSession();
+                Users currentUser = (Users) session.getAttribute("user");
+                boolean isMember = false;
+
+                if (!e.isPublic() && currentUser != null) {
+                    isMember = userClubDAO.isUserMemberOfClub(e.getClubID(), currentUser.getUserID());
+                }
+
                 List<Events> relatedEvents = eventDAO.getEventsByClubID(e.getClubID(), id);
                 EventStats stats = eventDAO.getSpotsLeftEvent(id);
                 request.setAttribute("relatedEvents", relatedEvents);
                 request.setAttribute("event", e);
                 request.setAttribute("registeredCount", stats.getRegisteredCount());
                 request.setAttribute("spotsLeft", stats.getSpotsLeft());
+                request.setAttribute("isMember", isMember);
+                System.out.println("Event: " + e.getEventName());
+                System.out.println("Is Member: " + isMember);
+                System.out.println("Spots left: " + stats.getSpotsLeft());
+
                 request.getRequestDispatcher("view/events-page/event-detail/event-detail.jsp").forward(request, response);
             } else {
                 response.sendRedirect(request.getContextPath() + "/event-page");

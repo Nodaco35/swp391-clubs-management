@@ -163,7 +163,11 @@
 						<h3><i class="fas fa-user-plus"></i> Thông tin đăng ký</h3>
 						<p>Vui lòng điền đầy đủ thông tin để hoàn tất đăng ký</p>
 					</div>
-
+					<c:if test="${not empty message}">
+						<div class="form-message ${messageType}">
+								${message}
+						</div>
+					</c:if>
 					<form id="registrationForm" class="registration-form" action="registration-event" method="post">
 						<input type="hidden" name="eventID" value="${event.eventID}" />
 						<!-- Personal Information -->
@@ -177,12 +181,12 @@
 								<div class="form-group">
 									<label for="fullName">Họ và tên <span class="required">*</span></label>
 									<input type="text" id="fullName" name="fullName" required
-									       placeholder="Nhập họ và tên đầy đủ" value="${userDetails.fullName}">
+									       placeholder="Nhập họ và tên đầy đủ" value="${userDetails.fullName}" readonly>
 								</div>
 								<div class="form-group">
 									<label for="studentId">Mã sinh viên <span class="required">*</span></label>
 									<input type="text" id="studentId" name="studentId" required
-									       placeholder="Ví dụ: 2021001234" value="${userDetails.userID}" >
+									       placeholder="Ví dụ: 2021001234" value="${userDetails.userID}" readonly>
 								</div>
 							</div>
 
@@ -190,12 +194,58 @@
 								<div class="form-group">
 									<label for="email">Email <span class="required">*</span></label>
 									<input type="email" id="email" name="email" required
-									       placeholder="example@student.edu.vn" value="${userDetails.email}">
+									       placeholder="example@student.edu.vn" value="${userDetails.email}" readonly>
 								</div>
-								<div class="form-group">
-									<label for="phone">Số điện thoại <span class="required">*</span></label>
-									<input type="tel" id="phone" name="phone" required placeholder="0123456789">
-								</div>
+<%--								<div class="form-group">--%>
+<%--									<label for="phone">Số điện thoại <span class="required">*</span></label>--%>
+<%--									<input type="tel" id="phone" name="phone" required placeholder="0123456789">--%>
+<%--								</div>--%>
+							</div>
+						</div>
+
+						<div class="form-section">
+							<h4 class="section-title">
+								<i class="fas fa-info-circle"></i>
+								Một số câu hỏi
+							</h4>
+							<div class="form-group">
+								<label for="faculty">Bạn biết đến sự kiện này qua đâu <span class="required">*</span></label>
+								<select id="faculty" name="faculty" required>
+									<option value="mxh">Mạng xã hội</option>
+									<option value="fr">Bạn bè</option>
+									<option value="web">Truyền thông</option>
+									<option value="other">Khác</option>
+								</select>
+							</div>
+							<div class="form-group">
+								<label for="reasonJoin">Lý do bạn muốn tham gia sự kiện này là gì?</label>
+								<textarea id="reasonJoin" name="reasonJoin" rows="3" placeholder="Chia sẻ lý do bạn quan tâm đến sự kiện này..."></textarea>
+							</div>
+
+							<div class="form-group">
+								<label for="experienceLevel">Bạn đã có kinh nghiệm gì liên quan đến chủ đề sự kiện chưa?</label>
+								<select id="experienceLevel" name="experienceLevel">
+									<option value="none">Chưa có</option>
+									<option value="basic">Có biết sơ qua</option>
+									<option value="intermediate">Có một chút kinh nghiệm</option>
+									<option value="advanced">Đã có nhiều kinh nghiệm</option>
+								</select>
+							</div>
+
+							<div class="form-group">
+								<label for="suggestions">Bạn có đề xuất hoặc mong muốn nào cho các sự kiện trong tương lai không?</label>
+								<textarea id="suggestions" name="suggestions" rows="3" placeholder="Ý tưởng, chủ đề, diễn giả bạn muốn..."></textarea>
+							</div>
+
+							<div class="form-group">
+								<label for="questions">Bạn có câu hỏi nào muốn gửi trước cho BTC/speaker không?</label>
+								<textarea id="questions" name="questions" rows="3" placeholder="Gửi câu hỏi trước giúp chúng tôi chuẩn bị nội dung tốt hơn..."></textarea>
+							</div>
+
+							<div class="form-group">
+								<label for="expectations">Bạn mong muốn học được gì từ sự kiện này?</label>
+								<textarea id="expectations" name="expectations" rows="4"
+								          placeholder="Chia sẻ mong muốn và mục tiêu của bạn..."></textarea>
 							</div>
 						</div>
 
@@ -212,11 +262,6 @@
 								</label>
 							</div>
 						</div>
-						<c:if test="${not empty message}">
-							<div class="form-message ${messageType}">
-									${message}
-							</div>
-						</c:if>
 
 						<!-- Submit Buttons -->
 						<div class="form-actions">
