@@ -25,28 +25,26 @@ public class ResendVerificationServlet extends HttpServlet {
             request.setAttribute("error", "Email không được để trống!");
             request.getRequestDispatcher("/view/login.jsp").forward(request, response);
             return;
-        }
-        
-        UserDAO userDAO = new UserDAO();
-        User user = userDAO.getUserByEmail(email.trim());
+        }        User user = UserDAO.getUserByEmail(email.trim());
         
         if (user == null) {
             request.setAttribute("error", "Email không tồn tại trong hệ thống!");
             request.getRequestDispatcher("/view/login.jsp").forward(request, response);
             return;
-        }        // Nếu tài khoản đã được kích hoạt
+        }
+        
+        // Nếu tài khoản đã được kích hoạt
         if (user.isStatus()) {
             request.setAttribute("info", "Tài khoản của bạn đã được kích hoạt. Bạn có thể đăng nhập bình thường.");
             request.getRequestDispatcher("/view/login.jsp").forward(request, response);
             return;
         }
-        
-        // Tạo token mới
+          // Tạo token mới
         String verificationToken = EmailService.generateVerificationToken();
         Date tokenExpiry = EmailService.generateTokenExpiryTime();
         
         // Cập nhật token vào database
-        boolean tokenUpdated = userDAO.updateVerificationToken(email.trim(), verificationToken, tokenExpiry);
+        boolean tokenUpdated = UserDAO.updateVerificationToken(email.trim(), verificationToken, tokenExpiry);
         
         if (tokenUpdated) {
             // Gửi lại email xác minh
@@ -69,5 +67,11 @@ public class ResendVerificationServlet extends HttpServlet {
         }
         
         request.getRequestDispatcher("/view/login.jsp").forward(request, response);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        doGet(request, response);
     }
 }

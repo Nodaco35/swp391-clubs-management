@@ -26,7 +26,7 @@ public class UserDAO {
 
         try {
             conn = DBContext.getConnection();
-            String query = "SELECT * FROM Users WHERE Email = ? AND Status = 1";
+            String query = "SELECT * FROM Users WHERE Email = ?";
             stmt = conn.prepareStatement(query);
             stmt.setString(1, email);
             rs = stmt.executeQuery();
@@ -342,7 +342,7 @@ public class UserDAO {
      * @param expiryDate Thời gian hết hạn của token
      * @return true nếu cập nhật thành công, false nếu thất bại
      */
-    public boolean updateVerificationToken(String email, String token, java.util.Date expiryDate) {
+    public static boolean updateVerificationToken(String email, String token, java.util.Date expiryDate) {
         String sql = "UPDATE Users SET ResetToken = ?, TokenExpiry = ?, Status = ? WHERE Email = ?";
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
