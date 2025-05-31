@@ -276,6 +276,7 @@ public class NotificationController extends HttpServlet {
                 n.setSenderEmail("funiclubs@gmail.com");
             }
         }
+        request.setAttribute("key", key_raw);
         request.setAttribute("notifications", notifications);
         request.getRequestDispatcher("view/notification.jsp").forward(request, response);
         

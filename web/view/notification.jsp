@@ -46,7 +46,7 @@
                         <form action="notification?action=search" method="POST">
                             <i class="fas fa-search search-icon"></i>
                             <input type="text" id="searchInput" name="key" placeholder="Tìm kiếm thông báo..."
-                                   class="search-input">
+                                    class="search-input" value="${param.key != null ? param.key : ''}">
                             <button type="submit" class="search-btn">
                                 <i class="fas fa-search"></i>
                             </button>
