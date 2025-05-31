@@ -77,10 +77,25 @@
     <servlet-mapping>
         <servlet-name>UserClubServlet</servlet-name>
         <url-pattern>/club-members</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
+    </servlet-mapping>    <servlet-mapping>
         <servlet-name>ClubDetailServlet</servlet-name>
         <url-pattern>/club-detail</url-pattern>
+    </servlet-mapping>
+      <servlet>
+        <servlet-name>VerifyAccountServlet</servlet-name>
+        <servlet-class>controllers.VerifyAccountServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>VerifyAccountServlet</servlet-name>
+        <url-pattern>/verify</url-pattern>
+    </servlet-mapping>
+      <servlet>
+        <servlet-name>ResendVerificationServlet</servlet-name>
+        <servlet-class>controllers.ResendVerificationServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ResendVerificationServlet</servlet-name>
+        <url-pattern>/resend-verification</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

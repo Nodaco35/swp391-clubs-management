@@ -30,6 +30,7 @@
         <!-- CSS với context path -->
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+        
     </head>
     <body>
         <!-- Navigation Header -->
@@ -60,19 +61,38 @@
                 <div class="form-header">
                     <h2 class="form-title">Hello !</h2>
                     <h3 class="form-subtitle">Welcome.</h3>
-                </div>
-
-                <!-- Error Alert -->
+                </div>                <!-- Error Alert -->
                 <% if (request.getAttribute("error") != null) {%>
                 <div class="alert alert-error">
-                    <%= request.getAttribute("error")%>
+                    <div style="display: flex; align-items: center;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span><%= request.getAttribute("error")%></span>
+                    </div>
+                    <% if (request.getAttribute("unverifiedEmail") != null && request.getAttribute("error").toString().toLowerCase().contains("chưa được xác minh")) { %>
+                    <div class="resend-link">
+                        <a href="${pageContext.request.contextPath}/resend-verification?email=<%= request.getAttribute("unverifiedEmail") %>" class="verify-btn">
+                            <i class="fas fa-paper-plane"></i> Gửi lại email xác minh
+                        </a>
+                    </div>
+                    <% } %>
                 </div>
                 <% } %>
-
-                <!-- Success Alert -->
+                
                 <% if (request.getAttribute("success") != null) {%>
                 <div class="alert alert-success">
-                    <%= request.getAttribute("success")%>
+                    <i class="fas fa-check-circle"></i> <%= request.getAttribute("success")%>
+                </div>
+                <% if (request.getAttribute("success").toString().contains("email xác nhận") || request.getAttribute("success").toString().contains("email xác minh")) { %>
+                <div class="verification-instructions">
+                    <p><i class="fas fa-info-circle"></i> Vui lòng kiểm tra hộp thư đến và thư mục spam để xác minh tài khoản.</p>
+                    <p>Liên kết xác minh có hiệu lực trong 24 giờ.</p>
+                </div>
+                <% } %>
+                <% }%>
+                
+                <% if (request.getAttribute("warning") != null) {%>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i> <%= request.getAttribute("warning")%>
                 </div>
                 <% }%>
 

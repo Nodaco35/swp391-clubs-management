@@ -107,13 +107,12 @@ public class User {
 
     public void setResetToken(String resetToken) {
         this.resetToken = resetToken;
-    }
-
-    public Date getTokenExpiry() {
+    }    public Date getTokenExpiry() {
         return tokenExpiry;
     }
 
     public void setTokenExpiry(Date tokenExpiry) {
         this.tokenExpiry = tokenExpiry;
     }
-}
+
+    }

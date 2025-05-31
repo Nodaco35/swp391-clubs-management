@@ -72,11 +72,12 @@ public class LoginServlet extends HttpServlet {
             throws ServletException, IOException {
         PrintWriter out = response.getWriter();
         String user = request.getParameter("email");
-        String password = request.getParameter("password");
-        UserDAO ud = new UserDAO();
-        User user_find = ud.getUserByEmailAndPassword(user, password);
-        if (user_find == null) {
+        String password = request.getParameter("password");        UserDAO ud = new UserDAO();        User user_find = ud.getUserByEmailAndPassword(user, password);        if (user_find == null) {
             request.setAttribute("error", "Sai tài khoản hoặc mật khẩu");
+            request.getRequestDispatcher("view/login.jsp").forward(request, response);} else if (!user_find.isStatus()) {
+            // Kiểm tra nếu tài khoản chưa xác minh
+            request.setAttribute("error", "Tài khoản chưa được xác minh. Vui lòng kiểm tra email để xác minh tài khoản.");
+            request.setAttribute("unverifiedEmail", user);
             request.getRequestDispatcher("view/login.jsp").forward(request, response);
         } else {
             // Tạo session

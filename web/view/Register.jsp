@@ -70,12 +70,17 @@
                 <div class="alert alert-error">
                     <%= request.getAttribute("error")%>
                 </div>
-                <% } %>
-
-                <!-- Success Alert -->
+                <% } %>                <!-- Success Alert -->
                 <% if (request.getAttribute("success") != null) {%>
                 <div class="alert alert-success">
                     <%= request.getAttribute("success")%>
+                </div>
+                <% }%>
+                
+                <!-- Email Notification Alert -->
+                <% if (request.getAttribute("emailNotification") != null) {%>
+                <div class="alert alert-info">
+                    <%= request.getAttribute("emailNotification")%>
                 </div>
                 <% }%>
 
@@ -90,15 +95,24 @@
                             value="<%= request.getAttribute("fullName") != null ? request.getAttribute("fullName") : ""%>"
                             required
                             >
-                    </div>
-
-                    <div class="form-group">
+                    </div>                    <div class="form-group">
                         <input 
                             type="email" 
                             name="email" 
                             class="form-input"
                             placeholder="Enter Email"
                             value="<%= request.getAttribute("email") != null ? request.getAttribute("email") : ""%>"
+                            required
+                            >
+                    </div>
+                    
+                    <div class="form-group">
+                        <input 
+                            type="date" 
+                            name="dateOfBirth" 
+                            class="form-input"
+                            placeholder="Date of Birth"
+                            value="<%= request.getAttribute("dateOfBirth") != null ? request.getAttribute("dateOfBirth") : ""%>"
                             required
                             >
                     </div>
