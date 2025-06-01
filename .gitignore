@@ -1,8 +1,28 @@
-/build/
-<<<<<<< HEAD
 *.class
-/dist/
-/.idea/
-=======
-/dist/
->>>>>>> e9556b96282972a80c6fc5d9199d3e8e57b654f2
+*.jar
+*.war
+*.log
+
+# NetBeans
+nbbuild/
+build/
+dist/
+nbdist/
+.nb-gradle/
+nbproject/private/
+nbproject/Makefile-*.mk
+nbproject/Package-*.bash
+.LCK*
+
+# IntelliJ
+.idea/
+*.iml
+*.iws
+out/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VSCode
+.vscode/
