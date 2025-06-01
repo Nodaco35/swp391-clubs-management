@@ -1,53 +1,50 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
+ */
+
 package controller;
 
-import dal.UserDAO;
-
 import java.io.IOException;
-
 import java.io.PrintWriter;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-import models.Users;
 
 /**
- * @author NC PC
+ *
+ * @author Vinh
  */
-public class LoginServlet extends HttpServlet {
-
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
+public class MyClubServlet extends HttpServlet {
+   
+    /** 
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet LoginServlet</title>");
+            out.println("<title>Servlet MyClub</title>");  
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet LoginServlet at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet MyClub at " + request.getContextPath () + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
-    }
+    } 
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
+    /** 
      * Handles the HTTP <code>GET</code> method.
-     *
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
@@ -55,13 +52,12 @@ public class LoginServlet extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        request.getRequestDispatcher("view/login.jsp").forward(request, response);
-    }
+    throws ServletException, IOException {
+        request.getRequestDispatcher("view/student/myClub.jsp").forward(request, response);
+    } 
 
-    /**
+    /** 
      * Handles the HTTP <code>POST</code> method.
-     *
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
@@ -69,36 +65,12 @@ public class LoginServlet extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        PrintWriter out = response.getWriter();
-        String user = request.getParameter("email");
-        String password = request.getParameter("password");
-        UserDAO ud = new UserDAO();
-        Users user_find = ud.getUserByEmailAndPassword(user, password);
-        if (user_find == null) {
-            request.setAttribute("error", "Sai tài khoản hoặc mật khẩu");
-            request.getRequestDispatcher("view/login.jsp").forward(request, response);
-        } else {
-            // Tạo session
-            HttpSession session = request.getSession();
-            session.setAttribute("user", user_find);
-            session.setAttribute("userId", user_find.getUserID());
-            if (user_find.getPermissionID() == 1) {
-                // Chuyển hướng đến trang chủ - HomepageServlet
-                response.sendRedirect(request.getContextPath() + "/");
-            }
-            if(user_find.getPermissionID() == 2){
-                response.sendRedirect(request.getContextPath() + "/admin");
-            }
-            if(user_find.getPermissionID() == 3){
-                response.sendRedirect(request.getContextPath() + "/ic");
-            }
-        }
+    throws ServletException, IOException {
+        processRequest(request, response);
     }
 
-    /**
+    /** 
      * Returns a short description of the servlet.
-     *
      * @return a String containing servlet description
      */
     @Override

@@ -25,6 +25,7 @@
                         <span>Xin chào, ${sessionScope.user.fullName}</span>
                         <a href="${pageContext.request.contextPath}/profile?action=myProfile" class="btn btn-outline">Tài Khoản</a>
                         <a href="${pageContext.request.contextPath}/logout" class="btn btn-outline">Đăng Xuất</a>
+                        <a href="${pageContext.request.contextPath}/my-club" class="btn btn-outline">Câu lạc bộ của tôi</a>
                     </div>
                 </c:when>
                 <c:otherwise>

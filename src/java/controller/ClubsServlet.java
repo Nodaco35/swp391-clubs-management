@@ -10,10 +10,10 @@ import jakarta.servlet.http.HttpSession;
 import models.Clubs;
 import models.Users;
 import models.UserClub;
-
 import java.io.IOException;
+import java.util.List;
 
-public class ClubDetailServlet extends HttpServlet {
+public class ClubsServlet extends HttpServlet {
 
     private ClubDAO clubDAO;
     private UserClubDAO userClubDAO;
@@ -25,9 +25,46 @@ public class ClubDetailServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String path = request.getServletPath();
+
+        if ("/club-detail".equals(path)) {
+            // Handle club detail view
+            handleClubDetail(request, response);
+        } else {
+            // Handle clubs list view (default to /clubs)
+            handleClubsList(request, response);
+        }
+    }
+
+    private void handleClubsList(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        // Get category parameter, default to "all"
+        String category = request.getParameter("category");
+        if (category == null || category.isEmpty()) {
+            category = "all";
+        }
+
+        // Fetch clubs based on category
+        List<Clubs> clubs = clubDAO.getClubsByCategory(category);
+        request.setAttribute("clubs", clubs);
+        request.setAttribute("selectedCategory", category);
+
+        // Forward to clubs.jsp
+        request.getRequestDispatcher("view/clubs-page/club-management.jsp").forward(request, response);
+    }
+
+    private void handleClubDetail(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         // Lấy clubID từ tham số
-        int clubID = Integer.parseInt(request.getParameter("id"));
+        int clubID;
+        try {
+            clubID = Integer.parseInt(request.getParameter("id"));
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid club ID");
+            return;
+        }
 
         // Lấy thông tin câu lạc bộ
         Clubs club = clubDAO.getClubById(clubID);
@@ -62,7 +99,6 @@ public class ClubDetailServlet extends HttpServlet {
         request.setAttribute("userClub", userClub);
 
         // Chuyển tiếp đến club-detail.jsp
-        request.getRequestDispatcher("./view/admin/club-detail.jsp").forward(request, response);
-
+        request.getRequestDispatcher("/view/clubs-page/club-detail.jsp").forward(request, response);
     }
 }
