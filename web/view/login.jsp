@@ -19,7 +19,7 @@
         <ul class="nav-menu">
             <li><a href="${pageContext.request.contextPath}/">Home</a></li>
             <li><a href="${pageContext.request.contextPath}/clubs">Clubs</a></li>
-            <li><a href="${pageContext.request.contextPath}/events">Events</a></li>
+            <li><a href="${pageContext.request.contextPath}/events-page">Events</a></li>
             <li><a href="${pageContext.request.contextPath}/contact">Contact</a></li>
         </ul>
     </div>

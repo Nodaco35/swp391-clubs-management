@@ -66,14 +66,12 @@
                     <c:choose>
                         <c:when test="${sessionScope.user != null}">
                             <div class="user-menu" id="userMenu">
-
                                 <a href="${pageContext.request.contextPath}/notification" class="btn btn-outline">
                                     <i class="fa-solid fa-bell"></i>
                                 </a>
                                 <a href="${pageContext.request.contextPath}/profile?action=myProfile" class="btn btn-outline">
                                     <i class="fa-solid fa-user"></i>
                                 </a>
-
                                 <form action="logout" method="post">
                                     <input class="btn btn-primary" type="submit" value="Logout">
                                 </form>
