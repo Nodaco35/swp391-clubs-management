@@ -71,7 +71,7 @@ public class ClubDAO {
         return clubs;
     }
 
-    public List<Clubs> getClubsByCategory(String category, int limit) {
+    public List<Clubs> getClubsByCategory(String category) {
         List<Clubs> clubs = new ArrayList<>();
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -79,29 +79,22 @@ public class ClubDAO {
 
         try {
             conn = DBContext.getConnection();
-
             String query;
             if ("all".equalsIgnoreCase(category)) {
                 query = "SELECT c.*, "
                         + "(SELECT COUNT(*) FROM UserClubs uc WHERE uc.ClubID = c.ClubID AND uc.IsActive = 1) as MemberCount "
                         + "FROM Clubs c "
                         + "WHERE c.ClubStatus = 1 "
-                        + "ORDER BY c.ClubName "
-                        + "LIMIT ?";
+                        + "ORDER BY c.ClubName";
                 stmt = conn.prepareStatement(query);
-                stmt.setInt(1, limit);
             } else {
-                // Giả định có trường Category trong bảng Clubs
-                // Nếu không có, bạn cần điều chỉnh logic truy vấn
                 query = "SELECT c.*, "
                         + "(SELECT COUNT(*) FROM UserClubs uc WHERE uc.ClubID = c.ClubID AND uc.IsActive = 1) as MemberCount "
                         + "FROM Clubs c "
                         + "WHERE c.ClubStatus = 1 AND c.Category = ? "
-                        + "ORDER BY c.ClubName "
-                        + "LIMIT ?";
+                        + "ORDER BY c.ClubName";
                 stmt = conn.prepareStatement(query);
                 stmt.setString(1, category);
-                stmt.setInt(2, limit);
             }
 
             rs = stmt.executeQuery();
@@ -118,32 +111,21 @@ public class ClubDAO {
                 club.setContactGmail(rs.getString("ContactGmail"));
                 club.setContactURL(rs.getString("ContactURL"));
                 club.setClubStatus(rs.getBoolean("ClubStatus"));
-
-                // Giả định có trường Category trong bảng Clubs
-                club.setCategory(getCategoryForClub(rs.getInt("ClubID")));
-
+                club.setCategory(rs.getString("Category"));
                 club.setMemberCount(rs.getInt("MemberCount"));
-
                 clubs.add(club);
             }
         } catch (SQLException e) {
             System.out.println("Error getting clubs by category: " + e.getMessage());
         } finally {
             try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (conn != null) {
-                    DBContext.closeConnection(conn);
-                }
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (conn != null) DBContext.closeConnection(conn);
             } catch (SQLException e) {
                 System.out.println("Error closing resources: " + e.getMessage());
             }
         }
-
         return clubs;
     }
 

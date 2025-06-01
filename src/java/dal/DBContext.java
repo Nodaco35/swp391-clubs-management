@@ -13,6 +13,7 @@ public class DBContext {
             String url = "jdbc:mysql://localhost:3306/ClubsManagementSystem?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
             String user = "root";
             String password = "Vinh19102005";
+
             return DriverManager.getConnection(url, user, password);
         } catch (Exception e) {
             e.printStackTrace();

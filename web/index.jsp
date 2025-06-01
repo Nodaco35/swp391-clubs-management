@@ -10,6 +10,7 @@
     <meta name="description" content="Nền tảng quản lý câu lạc bộ sinh viên">
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/eventsPage.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/eventsPage.css"/>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
