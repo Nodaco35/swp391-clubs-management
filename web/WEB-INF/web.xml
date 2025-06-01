@@ -44,6 +44,10 @@
         <servlet-name>MyClub</servlet-name>
         <servlet-class>controller.MyClubServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>FormManagementServlet</servlet-name>
+        <servlet-class>controller.FormManagementServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>HomepageServlet</servlet-name>
         <url-pattern>/home</url-pattern>
@@ -97,6 +101,10 @@
     <servlet-mapping>
         <servlet-name>MyClub</servlet-name>
         <url-pattern>/my-club</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>FormManagementServlet</servlet-name>
+        <url-pattern>/formManagement</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
