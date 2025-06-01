@@ -57,13 +57,18 @@
 			<c:choose>
 				<c:when test="${sessionScope.user != null}">
 					<div class="user-menu" id="userMenu">
-						<span id="userName">Hi, ${sessionScope.user.fullName}</span>
+
+						<a href="${pageContext.request.contextPath}/notification" class="btn btn-outline">
+							<i class="fa-solid fa-bell"></i>
+						</a>
 						<a href="${pageContext.request.contextPath}/profile?action=myProfile" class="btn btn-outline">
 							<i class="fa-solid fa-user"></i>
 						</a>
+
 						<form action="logout" method="post">
 							<input class="btn btn-primary" type="submit" value="Logout">
 						</form>
+						<a href="${pageContext.request.contextPath}/my-club" class="btn btn-primary">MyClub</a>
 					</div>
 				</c:when>
 				<c:otherwise>
@@ -286,33 +291,45 @@
 							Xem sự kiện khác
 						</a>
 						<c:choose>
-							<c:when test="${e.status == 'PENDING' || e.status == 'Pending'}">
+							<c:when test="${!isLoggedIn}">
+                                        <span class="register-btn-finish disabled">
+                                            <i class="fas fa-exclamation-circle" style="color: red;"></i>Bạn cần <a
+		                                        href="${pageContext.request.contextPath}/login">đăng nhập</a> để có thể đăng ký tham gia sự kiện.
+                                        </span>
+							</c:when>
+							<c:otherwise>
 								<c:choose>
-									<c:when test="${e.isPublic() || isMember}">
-										<c:if test="${!isLoggedIn}">
-											<span class="register-btn-finish disabled"><i
-													class="fas fa-exclamation-circle"
-													style="color: red;"></i> Bạn cần <a
-													href="${pageContext.request.contextPath}/login">đăng nhập</a> để có thể đăng ký tham gia sự kiện.</span>
-										</c:if>
-										<c:if test="${isLoggedIn}">
-											<a href="${pageContext.request.contextPath}/registration-event?id=${e.eventID}"
-											   class="register-btn-primary">
-												<i class="fas fa-user-plus"></i> Đăng ký ngay
-											</a>
-										</c:if>
+									<c:when test="${e.status == 'PENDING' || e.status == 'Pending'}">
+										<c:choose>
+											<c:when test="${e.isPublic() || isMember}">
+												<c:choose>
+													<c:when test="${spotsLeft > 0}">
+														<a href="${pageContext.request.contextPath}/registration-event?id=${e.eventID}"
+														   class="register-btn-primary">
+															<i class="fas fa-user-plus"></i> Đăng ký ngay
+														</a>
+													</c:when>
+													<c:otherwise>
+														<button type="button" class="register-btn-finish disabled"
+														        disabled>
+															Sự kiện đã đủ số lượng đăng ký
+														</button>
+													</c:otherwise>
+												</c:choose>
+											</c:when>
+											<c:otherwise>
+												<button type="button" class="register-btn-finish disabled" disabled>
+													Sự kiện nội bộ - Chỉ dành cho thành viên CLB
+												</button>
+											</c:otherwise>
+										</c:choose>
 									</c:when>
 									<c:otherwise>
 										<button type="button" class="register-btn-finish disabled" disabled>
-											Sự kiện nội bộ - Chỉ dành cho thành viên CLB
+											Đã kết thúc
 										</button>
 									</c:otherwise>
 								</c:choose>
-							</c:when>
-							<c:otherwise>
-								<button type="button" class="register-btn-finish disabled" disabled>
-									Đã kết thúc
-								</button>
 							</c:otherwise>
 						</c:choose>
 					</div>

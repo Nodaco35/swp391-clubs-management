@@ -55,13 +55,18 @@
 			<c:choose>
 				<c:when test="${sessionScope.user != null}">
 					<div class="user-menu" id="userMenu">
-						<span id="userName">Hi, ${sessionScope.user.fullName}</span>
+
+						<a href="${pageContext.request.contextPath}/notification" class="btn btn-outline">
+							<i class="fa-solid fa-bell"></i>
+						</a>
 						<a href="${pageContext.request.contextPath}/profile?action=myProfile" class="btn btn-outline">
 							<i class="fa-solid fa-user"></i>
 						</a>
+
 						<form action="logout" method="post">
 							<input class="btn btn-primary" type="submit" value="Logout">
 						</form>
+						<a href="${pageContext.request.contextPath}/my-club" class="btn btn-primary">MyClub</a>
 					</div>
 				</c:when>
 				<c:otherwise>
@@ -246,7 +251,8 @@
 								<label class="checkbox-item terms-checkbox">
 									<input type="checkbox" name="agreeTerms" required>
 									<span class="checkmark"></span>
-									<span class="terms-text">Tôi đồng ý với <a href="#" class="terms-link" onclick="openTermsModal(event)">điều khoản và điều kiện</a> của sự kiện và cam kết tham gia đầy đủ.</span>
+									<span class="terms-text">Tôi đồng ý với <a href="#" class="terms-link"
+									                                           onclick="openTermsModal(event)">điều khoản và điều kiện</a> của sự kiện và cam kết tham gia đầy đủ.</span>
 								</label>
 							</div>
 						</div>
@@ -262,15 +268,24 @@
 								</p>
 								<ul>
 									<li>Tham gia đầy đủ các buổi hoạt động và không bỏ lỡ lịch trình đã đăng ký.</li>
-									<li>Tuân thủ quy định về trang phục và an toàn trong suốt thời gian diễn ra sự kiện.</li>
+									<li>Tuân thủ quy định về trang phục và an toàn trong suốt thời gian diễn ra sự
+										kiện.
+									</li>
 									<li>Tôn trọng các thành viên khác và ban tổ chức, không gây mất trật tự.</li>
-									<li>Không được phép mang theo các vật dụng gây nguy hiểm hoặc cấm tại địa điểm tổ chức.</li>
-									<li>Ban tổ chức có quyền từ chối hoặc loại bỏ người tham gia nếu vi phạm các quy định.</li>
-									<li>Mọi thay đổi hoặc hủy bỏ sự kiện sẽ được thông báo trước qua email hoặc thông báo chính thức.</li>
+									<li>Không được phép mang theo các vật dụng gây nguy hiểm hoặc cấm tại địa điểm tổ
+										chức.
+									</li>
+									<li>Ban tổ chức có quyền từ chối hoặc loại bỏ người tham gia nếu vi phạm các quy
+										định.
+									</li>
+									<li>Mọi thay đổi hoặc hủy bỏ sự kiện sẽ được thông báo trước qua email hoặc thông
+										báo chính thức.
+									</li>
 									<li>Bạn cam kết tham gia đầy đủ và chịu trách nhiệm về việc đăng ký của mình.</li>
 								</ul>
 								<p>
-									Nếu có bất kỳ câu hỏi hoặc yêu cầu hỗ trợ, vui lòng liên hệ với ban tổ chức qua email hoặc số điện thoại được cung cấp.
+									Nếu có bất kỳ câu hỏi hoặc yêu cầu hỗ trợ, vui lòng liên hệ với ban tổ chức qua
+									email hoặc số điện thoại được cung cấp.
 								</p>
 								<label style="display: flex; align-items: center; margin-top: 15px; font-size: 0.95rem; cursor: pointer;">
 									<input type="checkbox" id="confirmRead" style="margin-right: 8px;">
@@ -323,7 +338,7 @@
         document.getElementById("termsModal").style.display = "none";
     }
 
-    window.onclick = function(event) {
+    window.onclick = function (event) {
         const modal = document.getElementById("termsModal");
         if (event.target === modal) {
             modal.style.display = "none";
