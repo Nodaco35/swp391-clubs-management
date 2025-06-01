@@ -106,4 +106,46 @@ public class ApplicationFormTemplateDAO {
         }
         return templates;
     }
+    // Thêm method mới vào ApplicationFormTemplateDAO
+public List<ApplicationFormTemplate> getFormTemplatesByFormIdentifier(String formIdentifier) {
+    List<ApplicationFormTemplate> templates = new ArrayList<>();
+    String sql = "SELECT * FROM ApplicationFormTemplates WHERE Title LIKE ? AND Published = 1 ORDER BY TemplateID";
+    
+    try (Connection conn = DBContext.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        
+        ps.setString(1, "%###" + formIdentifier + "%");
+        ResultSet rs = ps.executeQuery();
+        
+        while (rs.next()) {
+            ApplicationFormTemplate template = new ApplicationFormTemplate();
+            template.setTemplateId(rs.getInt("TemplateID"));
+            template.setClubId(rs.getInt("ClubID"));
+            template.setFormType(rs.getString("FormType"));
+            template.setTitle(rs.getString("Title"));
+            template.setFieldName(rs.getString("FieldName"));
+            template.setFieldType(rs.getString("FieldType"));
+            template.setRequired(rs.getBoolean("Required"));
+            template.setOptions(rs.getString("Options"));
+            template.setPublished(rs.getBoolean("Published"));
+            templates.add(template);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    
+    return templates;
+}
+
+// Thêm method để lấy form identifier từ title
+public String getFormIdentifierFromTitle(String title) {
+    if (title != null && title.contains("###")) {
+        String[] parts = title.split("###");
+        if (parts.length > 1) {
+            return parts[1];
+        }
+    }
+    return null;
+}
+
 }

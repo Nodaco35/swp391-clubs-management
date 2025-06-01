@@ -13,6 +13,23 @@
             <file>file:/D:/FULearning/SU25/test/swp391-clubs-management/src/java/controller/OtpController.java</file>
             <file>file:/D:/FULearning/SU25/test/swp391-clubs-management/web/view/notification.jsp</file>
             <file>file:/D:/FULearning/SU25/test/swp391-clubs-management/web/css/notification.css</file>
+            <file>file:/D:/tmp/swp391-clubs-management/web/view/login.jsp</file>
+            <file>file:/D:/tmp/swp391-clubs-management/web/view/register.jsp</file>
+            <file>file:/D:/tmp/swp391-clubs-management/src/java/dao/DBContext.java</file>
+            <file>file:/D:/tmp/swp391-clubs-management/src/java/dao/DBContext_Duc.java</file>
+            <file>file:/D:/tmp/swp391-clubs-management/src/java/dao/UserDAO.java</file>
+            <file>file:/D:/tmp/swp391-clubs-management/src/java/test/EmailServiceTest.java</file>
+            <file>file:/D:/tmp/swp391-clubs-management/src/java/test/EmailVerificationTest.java</file>
+            <file>file:/D:/tmp/swp391-clubs-management/src/java/controllers/ResendVerificationServlet.java</file>
+            <file>file:/D:/tmp/swp391-clubs-management/src/java/controllers/VerifyAccountServlet.java</file>
+            <file>file:/D:/tmp/swp391-clubs-management/web/WEB-INF/web.xml</file>
+            <file>file:/D:/tmp/swp391-clubs-management/src/java/controllers/OtpController.java</file>
+            <file>file:/D:/tmp/swp391-clubs-management/web/css/auth.css</file>
+            <file>file:/D:/tmp/swp391-clubs-management/src/java/controllers/RegisterServlet.java</file>
+            <file>file:/D:/tmp/swp391-clubs-management/src/java/controllers/LoginServlet.java</file>
+            <file>file:/C:/SU25/SWP/Trash/Club_Management/src/java/controller/ICServlet.java</file>
+            <file>file:/C:/SU25/SWP/Trash/Club_Management/src/java/dal/PeriodicReportDAO.java</file>
+            <file>file:/C:/SU25/SWP/Trash/Club_Management/web/view/ic/dashboard.jsp</file>
         </group>
     </open-files>
 </project-private>

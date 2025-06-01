@@ -271,6 +271,45 @@ body {
     gap: 0.5rem;
 }
 
+/* Breadcrumb enhancements */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.breadcrumb-separator {
+    color: var(--text-light);
+    font-weight: bold;
+}
+
+.breadcrumb-current {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.breadcrumb-section {
+    background: var(--card-bg);
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+
+.breadcrumb-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-light);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.breadcrumb-link:hover {
+    color: var(--primary);
+}
+
 /* Hero Section */
 .hero {
     background: linear-gradient(135deg, var(--secondary) 0%, var(--accent) 100%);

@@ -13,6 +13,7 @@ public class Users {
     private Date tokenExpiry;
     private String dob;
     private String avatar;
+
     public Users() {
     }
     
@@ -76,7 +77,6 @@ public class Users {
     public void setPassword(String password) {
         this.password = password;
     }
-
     public Date getDateOfBirth() {
         return dateOfBirth;
     }
@@ -107,13 +107,13 @@ public class Users {
 
     public void setResetToken(String resetToken) {
         this.resetToken = resetToken;
-    }
-
-    public Date getTokenExpiry() {
+    }    public Date getTokenExpiry() {
         return tokenExpiry;
     }
 
     public void setTokenExpiry(Date tokenExpiry) {
         this.tokenExpiry = tokenExpiry;
     }
+
 }
+

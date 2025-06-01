@@ -1,15 +1,48 @@
 package dal;
 
+import dal.DBContext;
+import models.Users;
+
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-
-import models.Users;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class UserDAO {
+
+    public Users getUserByID(String userID) {
+        String sql = "SELECT * FROM Users WHERE UserID = ?";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, userID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                Users user = new Users();
+                user.setUserID(rs.getString("UserID"));
+                user.setFullName(rs.getString("FullName"));
+                user.setEmail(rs.getString("Email"));
+                user.setPassword(rs.getString("Password"));
+                user.setDateOfBirth(rs.getDate("DateOfBirth"));
+                user.setPermissionID(rs.getInt("PermissionID"));
+                user.setStatus(rs.getBoolean("Status"));
+                user.setResetToken(rs.getString("ResetToken"));
+                user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
+                return user;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private static final Logger LOGGER = Logger.getLogger(UserDAO.class.getName());
 
     public static Users getUserByEmail(String email) {
         Users user = null;
@@ -19,7 +52,7 @@ public class UserDAO {
 
         try {
             conn = DBContext.getConnection();
-            String query = "SELECT * FROM Users WHERE Email = ? AND Status = 1";
+            String query = "SELECT * FROM Users WHERE Email = ?";
             stmt = conn.prepareStatement(query);
             stmt.setString(1, email);
             rs = stmt.executeQuery();
@@ -258,30 +291,42 @@ public class UserDAO {
         }
 
         return "U001"; // Nếu chưa có ai trong DB
-    }
-
-    public boolean register(Users user) {
-        String newUserId = generateNextUserId(); // Tạo ID mới
-
-        String sql = "INSERT INTO Users (UserID, FullName, Email, Password, PermissionID) VALUES (?, ?, ?, ?, ?)";
-        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            if (conn == null) {
-                return false;
-            }
-
-            ps.setString(1, newUserId);
+    }    public boolean register(Users user) {
+        String sql = "INSERT INTO Users (UserID, FullName, Email, Password, DateOfBirth, PermissionID, Status) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            LOGGER.log(Level.INFO, "Bắt đầu đăng ký cho người dùng: {0}", user.getEmail());
+            
+            // Tạo UserID
+            String userID = generateNextUserId();
+            ps.setString(1, userID);
             ps.setString(2, user.getFullName());
             ps.setString(3, user.getEmail());
-            ps.setString(4, user.getPassword()); // Hash nếu cần
-            ps.setInt(5, user.getPermissionID());
-
-            return ps.executeUpdate() > 0;
-
-        } catch (SQLException e) {
+            ps.setString(4, user.getPassword());
+            // Convert java.util.Date to java.sql.Date
+            if (user.getDateOfBirth() != null) {
+                ps.setDate(5, new Date(user.getDateOfBirth().getTime()));
+                LOGGER.log(Level.INFO, "Ngày sinh được đặt: {0}", user.getDateOfBirth());
+            } else {
+                ps.setNull(5, java.sql.Types.DATE);
+                LOGGER.log(Level.WARNING, "Ngày sinh là null");
+            }
+            ps.setInt(6, user.getPermissionID());
+            ps.setBoolean(7, user.isStatus());
+            LOGGER.log(Level.INFO, "SQL Statement: {0} với UserID={1}", new Object[]{sql, userID});
+            
+            int rowsAffected = ps.executeUpdate();
+            LOGGER.log(Level.INFO, "Kết quả đăng ký: {0} dòng bị ảnh hưởng", rowsAffected);
+            return rowsAffected > 0;
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Lỗi SQL khi đăng ký người dùng: {0}", ex.getMessage());
+            ex.printStackTrace();
+            return false;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Lỗi không xác định khi đăng ký người dùng: {0}", e.getMessage());
             e.printStackTrace();
+            return false;
         }
-        return false;
     }
 
     public Users getUserByEmailAndPassword(String email, String password) {
@@ -316,4 +361,121 @@ public class UserDAO {
         return null;
     }
 
+    /**
+     * Cập nhật token xác minh và thời gian hết hạn cho một tài khoản
+     *
+     * @param email     Email của tài khoản
+     * @param token     Token xác minh
+     * @param expiryDate Thời gian hết hạn của token
+     * @return true nếu cập nhật thành công, false nếu thất bại
+     */
+    public static boolean updateVerificationToken(String email, String token, java.util.Date expiryDate) {
+        String sql = "UPDATE Users SET ResetToken = ?, TokenExpiry = ?, Status = ? WHERE Email = ?";
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            if (conn == null) {
+                return false;
+            }
+
+            ps.setString(1, token);
+            ps.setTimestamp(2, new Timestamp(expiryDate.getTime()));
+            ps.setBoolean(3, false); // Tài khoản chưa kích hoạt
+            ps.setString(4, email);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * Xác minh tài khoản dựa trên token
+     *
+     * @param token Token xác minh
+     * @return true nếu xác minh thành công, false nếu thất bại hoặc token không hợp lệ
+     */
+    public boolean verifyAccount(String token) {
+        // Đầu tiên kiểm tra token có tồn tại và chưa hết hạn
+        Users user = getUserByToken(token);
+
+        if (user == null) {
+            return false; // Token không tồn tại
+        }
+
+        if (user.getTokenExpiry() == null || new java.util.Date().after(user.getTokenExpiry())) {
+            return false; // Token đã hết hạn
+        }
+
+        // Nếu token hợp lệ, kích hoạt tài khoản
+        String sql = "UPDATE Users SET Status = ?, ResetToken = NULL, TokenExpiry = NULL WHERE ResetToken = ?";
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            if (conn == null) {
+                return false;
+            }
+
+            ps.setBoolean(1, true); // Kích hoạt tài khoản
+            ps.setString(2, token);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * Lấy thông tin người dùng dựa trên token
+     *
+     * @param token Token cần tìm
+     * @return Đối tượng User nếu tìm thấy, null nếu không tìm thấy
+     */
+    public Users getUserByToken(String token) {
+        Users user = null;
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBContext.getConnection();
+            String query = "SELECT * FROM Users WHERE ResetToken = ?";
+            stmt = conn.prepareStatement(query);
+            stmt.setString(1, token);
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                user = new Users();
+                user.setUserID(rs.getString("UserID"));
+                user.setFullName(rs.getString("FullName"));
+                user.setEmail(rs.getString("Email"));
+                user.setPassword(rs.getString("Password"));
+                user.setDateOfBirth(rs.getDate("DateOfBirth"));
+                user.setPermissionID(rs.getInt("PermissionID"));
+                user.setStatus(rs.getBoolean("Status"));
+                user.setResetToken(rs.getString("ResetToken"));
+                user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting user by token: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    DBContext.closeConnection(conn);
+                }
+            } catch (SQLException e) {
+                System.out.println("Error closing resources: " + e.getMessage());
+            }
+        }
+
+        return user;
+    }
 }

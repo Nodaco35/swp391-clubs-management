@@ -13,6 +13,21 @@ import models.Roles;
 
 public class UserClubDAO {
 
+    public boolean isUserMemberOfClub(int clubID, String userID) {
+        String sql = "SELECT 1 FROM UserClubs WHERE ClubID = ? AND UserID = ? AND IsActive = 1";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, clubID);
+            ps.setString(2, userID);
+            ResultSet rs = ps.executeQuery();
+            return rs.next(); // true nếu là thành viên
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public boolean isClubPresident(String userID, int clubID) {
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -563,5 +578,88 @@ public class UserClubDAO {
             System.out.println("Error in searchUserClubsByKeyWord: " + e.getMessage());
         }
         return members;
+    }
+
+    public UserClub getUserClubByUserId(String userID) {
+        UserClub userClub = null;
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBContext.getConnection();
+            String query = """
+                SELECT uc.UserClubID, uc.UserID, uc.ClubID, uc.DepartmentID, uc.RoleID, 
+                       uc.JoinDate, uc.IsActive, u.FullName, r.RoleName, cd.DepartmentName
+                FROM UserClubs uc
+                JOIN Users u ON uc.UserID = u.UserID
+                JOIN Roles r ON uc.RoleID = r.RoleID
+                JOIN ClubDepartments cd ON uc.DepartmentID = cd.DepartmentID
+                WHERE uc.UserID = ? AND uc.IsActive = 1
+                ORDER BY uc.RoleID ASC
+                LIMIT 1
+            """;
+            stmt = conn.prepareStatement(query);
+            stmt.setString(1, userID);
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                userClub = new UserClub();
+                userClub.setUserClubID(rs.getInt("UserClubID"));
+                userClub.setUserID(rs.getString("UserID"));
+                userClub.setClubID(rs.getInt("ClubID"));
+                userClub.setDepartmentID(rs.getInt("DepartmentID"));
+                userClub.setRoleID(rs.getInt("RoleID"));
+                userClub.setJoinDate(rs.getTimestamp("JoinDate"));
+                userClub.setIsActive(rs.getBoolean("IsActive"));
+                userClub.setFullName(rs.getString("FullName"));
+                userClub.setRoleName(rs.getString("RoleName"));
+                userClub.setDepartmentName(rs.getString("DepartmentName"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting user club by user ID: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (conn != null) DBContext.closeConnection(conn);
+            } catch (SQLException e) {
+                System.out.println("Error closing resources: " + e.getMessage());
+            }
+        }
+        return userClub;
+    }
+
+    public boolean hasManagementRole(String userID) {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBContext.getConnection();
+            String query = """
+                SELECT COUNT(*) as count
+                FROM UserClubs uc
+                WHERE uc.UserID = ? AND uc.RoleID BETWEEN 1 AND 5 AND uc.IsActive = 1
+            """;
+            stmt = conn.prepareStatement(query);
+            stmt.setString(1, userID);
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("count") > 0;
+            }
+        } catch (SQLException e) {
+            System.out.println("Error checking management role: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (conn != null) DBContext.closeConnection(conn);
+            } catch (SQLException e) {
+                System.out.println("Error closing resources: " + e.getMessage());
+            }
+        }
+        return false;
     }
 }

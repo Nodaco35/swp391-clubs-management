@@ -16,7 +16,7 @@ import jakarta.activation.DataSource;
 
 public class Email {
     // Email: tungletest1.email@gmail.com
-    // Password: nebeekfipcstxcox
+    // Password: qthj sgph dnkf swvz
 
     static final String from = "funiclubs@gmail.com";
     static final String password = "bojr shol moip wdsr";

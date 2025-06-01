@@ -72,7 +72,7 @@ public class EventsPageServlet extends HttpServlet {
         }
 
         int page = 1;
-        int pageSize = 6;
+        int pageSize = 8;
 
         try {
             String pageParam = request.getParameter("page");
@@ -98,6 +98,9 @@ public class EventsPageServlet extends HttpServlet {
             offset = (page - 1) * pageSize;
             events = dao.searchEvents(keyword, publicFilter, sortByDate, pageSize, offset);
         }
+
+        String currentPath = request.getServletPath();
+        request.setAttribute("currentPath", currentPath);
 
         request.setAttribute("events", events);
         request.setAttribute("currentPage", page);

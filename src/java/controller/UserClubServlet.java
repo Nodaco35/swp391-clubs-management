@@ -89,7 +89,7 @@ public class UserClubServlet extends HttpServlet {
             }
         }
 
-        request.getRequestDispatcher("./view/admin/user-club.jsp").forward(request, response);
+        request.getRequestDispatcher("./view/clubs-page/user-club.jsp").forward(request, response);
     }
 
     @Override
