@@ -14,6 +14,7 @@ public class DBContext {
             String user = "root";
             String password = "root";
 
+
             return DriverManager.getConnection(url, user, password);
         } catch (Exception e) {
             e.printStackTrace();
