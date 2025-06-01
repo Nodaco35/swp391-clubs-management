@@ -36,10 +36,6 @@
         <servlet-name>UserClubServlet</servlet-name>
         <servlet-class>controller.UserClubServlet</servlet-class>
     </servlet>
-<!--    <servlet>-->
-<!--        <servlet-name>ClubDetailServlet</servlet-name>-->
-<!--        <servlet-class>controller.ClubDetailServlet</servlet-class>-->
-<!--    </servlet>-->
     <servlet>
         <servlet-name>EventsPageServlet</servlet-name>
         <servlet-class>controller.EventsPageServlet</servlet-class>
@@ -95,6 +91,10 @@
         <url-pattern>/clubs</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
+        <servlet-name>ClubsServlet</servlet-name>
+        <url-pattern>/club-detail</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
         <servlet-name>HomepageServlet</servlet-name>
         <url-pattern>/home</url-pattern>
         <url-pattern>/index</url-pattern>
@@ -132,10 +132,6 @@
         <servlet-name>UserClubServlet</servlet-name>
         <url-pattern>/club-members</url-pattern>
     </servlet-mapping>
-<!--    <servlet-mapping>-->
-<!--        <servlet-name>ClubDetailServlet</servlet-name>-->
-<!--        <url-pattern>/club-detail</url-pattern>-->
-<!--    </servlet-mapping>-->
     <servlet-mapping>
         <servlet-name>EventsPageServlet</servlet-name>
         <url-pattern>/events-page</url-pattern>

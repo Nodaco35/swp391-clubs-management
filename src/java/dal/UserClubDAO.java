@@ -42,7 +42,8 @@ public class UserClubDAO {
             rs = stmt.executeQuery();
 
             if (rs.next()) {
-                return rs.getInt("RoleID") == 1;
+                int roleID = rs.getInt("RoleID");
+                return roleID == 1 || roleID == 2;
             }
         } catch (SQLException e) {
             System.out.println("Error checking club president: " + e.getMessage());
@@ -99,7 +100,80 @@ public class UserClubDAO {
         }
         return false;
     }
+    
+    // Kiểm tra xem câu lạc bộ đã có chủ nhiệm (RoleID = 1) chưa
+    public boolean hasClubPresident(int clubID) {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
 
+        try {
+            conn = DBContext.getConnection();
+            String query = "SELECT COUNT(*) FROM UserClubs WHERE ClubID = ? AND RoleID = 1 AND IsActive = 1";
+            stmt = conn.prepareStatement(query);
+            stmt.setInt(1, clubID);
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            System.out.println("Error checking club president existence: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    DBContext.closeConnection(conn);
+                }
+            } catch (SQLException e) {
+                System.out.println("Error closing resources: " + e.getMessage());
+            }
+        }
+        return false;
+    }
+
+    // Kiểm tra xem ban đã có trưởng ban (RoleID = 3) chưa
+    public boolean hasDepartmentHead(int clubID, int departmentID) {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBContext.getConnection();
+            String query = "SELECT COUNT(*) FROM UserClubs WHERE ClubID = ? AND DepartmentID = ? AND RoleID = 3 AND IsActive = 1";
+            stmt = conn.prepareStatement(query);
+            stmt.setInt(1, clubID);
+            stmt.setInt(2, departmentID);
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            System.out.println("Error checking department head existence: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    DBContext.closeConnection(conn);
+                }
+            } catch (SQLException e) {
+                System.out.println("Error closing resources: " + e.getMessage());
+            }
+        }
+        return false;
+    }
+    
     public List<UserClub> getAllUserClubsByClubId(int clubID, int page, int pageSize) {
         List<UserClub> userClubs = new ArrayList<>();
         String query = """
@@ -493,7 +567,14 @@ public class UserClubDAO {
 
         try {
             conn = DBContext.getConnection();
-            String query = "SELECT * FROM UserClubs WHERE UserID = ? AND ClubID = ? AND IsActive = 1";
+            String query = """
+                SELECT uc.*, u.FullName, r.RoleName, d.DepartmentName 
+                FROM UserClubs uc
+                JOIN Users u ON uc.UserID = u.UserID
+                JOIN Roles r ON uc.RoleID = r.RoleID
+                JOIN ClubDepartments d ON uc.DepartmentID = d.DepartmentID
+                WHERE uc.UserID = ? AND uc.ClubID = ? AND uc.IsActive = 1
+            """;
             stmt = conn.prepareStatement(query);
             stmt.setString(1, userID);
             stmt.setInt(2, clubID);
@@ -508,20 +589,17 @@ public class UserClubDAO {
                 userClub.setRoleID(rs.getInt("RoleID"));
                 userClub.setJoinDate(rs.getTimestamp("JoinDate"));
                 userClub.setIsActive(rs.getBoolean("IsActive"));
+                userClub.setFullName(rs.getString("FullName"));
+                userClub.setRoleName(rs.getString("RoleName"));
+                userClub.setDepartmentName(rs.getString("DepartmentName"));
             }
         } catch (SQLException e) {
             System.out.println("Error getting user club: " + e.getMessage());
         } finally {
             try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (conn != null) {
-                    DBContext.closeConnection(conn);
-                }
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (conn != null) DBContext.closeConnection(conn);
             } catch (SQLException e) {
                 System.out.println("Error closing resources: " + e.getMessage());
             }

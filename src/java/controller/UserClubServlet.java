@@ -40,13 +40,11 @@ public class UserClubServlet extends HttpServlet {
             return;
         }
 
-        // Kiểm tra quyền chủ nhiệm
         if (!userClubDAO.isClubPresident(user.getUserID(), clubID)) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "You are not authorized to manage this club");
             return;
         }
 
-        // Xử lý phân trang và tìm kiếm
         String search = request.getParameter("search") != null ? request.getParameter("search") : "";
         int page = request.getParameter("page") != null ? Integer.parseInt(request.getParameter("page")) : 1;
         int pageSize = 3;
@@ -55,13 +53,11 @@ public class UserClubServlet extends HttpServlet {
         int totalRecords = userClubDAO.countUserClubs(clubID, search);
         int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
 
-        // Lấy danh sách departments và roles để thêm/sửa
         List<Department> departments = userClubDAO.getDepartmentsByClubId(clubID);
         List<Roles> roles = userClubDAO.getRoles();
 
         String clubName = userClubDAO.getClubNameById(clubID);
 
-        // Đặt thuộc tính để sử dụng trong JSP
         request.setAttribute("userClubs", userClubs);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
@@ -71,7 +67,6 @@ public class UserClubServlet extends HttpServlet {
         request.setAttribute("departments", departments);
         request.setAttribute("roles", roles);
 
-        // Xử lý chỉnh sửa
         String action = request.getParameter("action");
         if ("edit".equals(action)) {
             int userClubID = Integer.parseInt(request.getParameter("id"));
@@ -80,12 +75,19 @@ public class UserClubServlet extends HttpServlet {
         }
         if ("search".equals(action)) {
             String keyWords = request.getParameter("search");
-            userClubs = userClubDAO.searchUserClubsByKeyWord(clubID, keyWords, page, pageSize);
-            if (userClubs != null) {
+
+            if (keyWords == null || keyWords.trim().isEmpty()) {
+                userClubs = userClubDAO.getAllUserClubsByClubId(clubID, page, pageSize);
                 request.setAttribute("userClubs", userClubs);
-                request.setAttribute("message", "Tìm kiếm thành công");
             } else {
-                request.setAttribute("error", "không tìm thấy");
+                userClubs = userClubDAO.searchUserClubsByKeyWord(clubID, keyWords, page, pageSize);
+
+                if (userClubs != null && !userClubs.isEmpty()) {
+                    request.setAttribute("userClubs", userClubs);
+                    request.setAttribute("message", "Tìm kiếm thành công");
+                } else {
+                    request.setAttribute("message", "Không tìm thấy");
+                }
             }
         }
 
@@ -102,50 +104,133 @@ public class UserClubServlet extends HttpServlet {
             return;
         }
 
-        int clubID = Integer.parseInt(request.getParameter("clubID"));
+        int clubID;
+        try {
+            clubID = Integer.parseInt(request.getParameter("clubID"));
+        } catch (NumberFormatException e) {
+            request.setAttribute("error", "ID câu lạc bộ không hợp lệ!");
+            doGet(request, response);
+            return;
+        }
+
         if (!userClubDAO.isClubPresident(user.getUserID(), clubID)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "You are not authorized to manage this club");
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền quản lý câu lạc bộ này!");
             return;
         }
 
         String action = request.getParameter("action");
 
         if ("add".equals(action)) {
-            String userID = request.getParameter("userID");
-            // Kiểm tra xem thành viên đã tồn tại trong câu lạc bộ chưa
+            String userID = request.getParameter("userID").trim();
+            int roleID;
+            int departmentID;
+            try {
+                roleID = Integer.parseInt(request.getParameter("roleID"));
+                departmentID = Integer.parseInt(request.getParameter("departmentID"));
+            } catch (NumberFormatException e) {
+                request.setAttribute("error", "Vai trò hoặc ban không hợp lệ!");
+                doGet(request, response);
+                return;
+            }
+
+            if (roleID == 1 || roleID == 2) {
+                departmentID = 3;
+            } else if (departmentID != 1 && departmentID != 2) {
+                request.setAttribute("error", "Vai trò này chỉ được thuộc Ban 1 hoặc Ban 2!");
+                doGet(request, response);
+                return;
+            }
+
             if (userClubDAO.isUserClubExists(userID, clubID)) {
                 request.setAttribute("error", "Thành viên đã tồn tại trong câu lạc bộ này!");
+            }
+            else if (roleID == 1 && userClubDAO.hasClubPresident(clubID)) {
+                request.setAttribute("error", "Câu lạc bộ đã có chủ nhiệm!");
+            }
+            else if (roleID == 3 && userClubDAO.hasDepartmentHead(clubID, departmentID)) {
+                request.setAttribute("error", "Ban này đã có trưởng ban!");
             } else {
                 UserClub uc = new UserClub();
                 uc.setUserID(userID);
                 uc.setClubID(clubID);
-                uc.setDepartmentID(Integer.parseInt(request.getParameter("departmentID")));
-                uc.setRoleID(Integer.parseInt(request.getParameter("roleID")));
-                uc.setIsActive(Boolean.parseBoolean(request.getParameter("isActive")));
-                int newUserClubID = userClubDAO.addUserClub(uc);
-                if (newUserClubID != -1) {
-                    request.setAttribute("message", "Thêm thành viên thành công! ID: " + newUserClubID);
-                } else {
-                    request.setAttribute("error", "Thêm thành viên thất bại!");
+                uc.setDepartmentID(departmentID);
+                uc.setRoleID(roleID);
+                uc.setIsActive(request.getParameter("isActive") != null);
+                try {
+                    int newUserClubID = userClubDAO.addUserClub(uc);
+                    if (newUserClubID != -1) {
+                        request.setAttribute("message", "Thêm thành viên thành công! ID: " + newUserClubID);
+                    } else {
+                        request.setAttribute("error", "Thêm thành viên thất bại! Vui lòng kiểm tra dữ liệu đầu vào.");
+                    }
+                } catch (Exception e) {
+                    request.setAttribute("error", "Lỗi khi thêm thành viên: " + e.getMessage());
                 }
             }
         } else if ("update".equals(action)) {
-            UserClub uc = new UserClub();
-            uc.setUserClubID(Integer.parseInt(request.getParameter("userClubID")));
-            uc.setDepartmentID(Integer.parseInt(request.getParameter("departmentID")));
-            uc.setRoleID(Integer.parseInt(request.getParameter("roleID")));
-            uc.setIsActive(Boolean.parseBoolean(request.getParameter("isActive")));
-            if (userClubDAO.updateUserClub(uc)) {
-                request.setAttribute("message", "Cập nhật thành viên thành công!");
+            int userClubID;
+            int roleID;
+            int departmentID;
+            try {
+                userClubID = Integer.parseInt(request.getParameter("userClubID"));
+                roleID = Integer.parseInt(request.getParameter("roleID"));
+                departmentID = Integer.parseInt(request.getParameter("departmentID"));
+            } catch (NumberFormatException e) {
+                request.setAttribute("error", "Dữ liệu không hợp lệ!");
+                doGet(request, response);
+                return;
+            }
+
+            if (roleID == 1 || roleID == 2) {
+                departmentID = 3; 
+            } else if (departmentID != 1 && departmentID != 2) {
+                request.setAttribute("error", "Vai trò này chỉ được thuộc Ban 1 hoặc Ban 2!");
+                doGet(request, response);
+                return;
+            }
+
+            UserClub currentUc = userClubDAO.getUserClubById(userClubID);
+
+            if (roleID == 1 && userClubDAO.hasClubPresident(clubID) && currentUc.getRoleID() != 1) {
+                request.setAttribute("error", "Câu lạc bộ đã có chủ nhiệm!");
+            }
+            else if (roleID == 3 && departmentID != 0 && userClubDAO.hasDepartmentHead(clubID, departmentID) &&
+                     currentUc.getRoleID() != 3) {
+                request.setAttribute("error", "Ban này đã có trưởng ban!");
             } else {
-                request.setAttribute("error", "Cập nhật thành viên thất bại!");
+                UserClub uc = new UserClub();
+                uc.setUserClubID(userClubID);
+                uc.setDepartmentID(departmentID);
+                uc.setRoleID(roleID);
+                uc.setIsActive(request.getParameter("isActive") != null);
+                try {
+                    if (userClubDAO.updateUserClub(uc)) {
+                        request.setAttribute("message", "Cập nhật thành viên thành công!");
+                    } else {
+                        request.setAttribute("error", "Cập nhật thành viên thất bại! Vui lòng kiểm tra dữ liệu đầu vào.");
+                    }
+                } catch (Exception e) {
+                    request.setAttribute("error", "Lỗi khi cập nhật thành viên: " + e.getMessage());
+                }
             }
         } else if ("delete".equals(action)) {
-            int userClubID = Integer.parseInt(request.getParameter("userClubID"));
-            if (userClubDAO.deleteUserClub(userClubID)) {
-                request.setAttribute("message", "Xóa thành viên thành công!");
-            } else {
-                request.setAttribute("error", "Xóa thành viên thất bại!");
+            int userClubID;
+            try {
+                userClubID = Integer.parseInt(request.getParameter("userClubID"));
+            } catch (NumberFormatException e) {
+                request.setAttribute("error", "ID thành viên không hợp lệ!");
+                doGet(request, response);
+                return;
+            }
+
+            try {
+                if (userClubDAO.deleteUserClub(userClubID)) {
+                    request.setAttribute("message", "Xóa thành viên thành công!");
+                } else {
+                    request.setAttribute("error", "Xóa thành viên thất bại!");
+                }
+            } catch (Exception e) {
+                request.setAttribute("error", "Lỗi khi xóa thành viên: " + e.getMessage());
             }
         }
 
