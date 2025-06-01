@@ -44,9 +44,12 @@ public class ApplicationFormTemplate {
     public String getFieldType() { return fieldType; }
     public void setFieldType(String fieldType) { this.fieldType = fieldType; }
     public boolean isRequired() { return isRequired; }
-    public void setRequired(boolean isRequired) { this.isRequired = isRequired; }
+    public void setIsRequired(boolean isRequired) { this.isRequired = isRequired; }
     public String getOptions() { return options; }
     public void setOptions(String options) { this.options = options; }
     public boolean isPublished() { return published; }
     public void setPublished(boolean published) { this.published = published; }
+    public String getClassName() {
+        return this.getClass().getName();
+    }
 }

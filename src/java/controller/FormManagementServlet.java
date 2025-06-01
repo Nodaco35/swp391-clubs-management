@@ -48,62 +48,28 @@ public class FormManagementServlet extends HttpServlet {
         HttpSession session = request.getSession();
         String userId = (String) session.getAttribute("userID");
         try{
-        // Kiểm tra quyền truy cập (chỉ cho roleId 1-7)
+        // Kiểm tra quyền truy cập (chỉ cho roleId 1-3)
         UserClub userClub = userClubDAO.getUserClubByUserId(userId);
-        if (userClub == null || userClub.getRoleID() < 1 || userClub.getRoleID() > 7) {
+        if (userClub == null || userClub.getRoleID() < 1 || userClub.getRoleID() > 3) {
             response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied");
             return;
         }
             int clubId = userClub.getClubID();
 
-            // Tách thành 2 danh sách lưu form
-            List<Map<String, Object>> savedForms = new ArrayList<>();
-            List<Map<String, Object>> publishedForms = new ArrayList<>();
+            ApplicationFormTemplateDAO templateDAO = new ApplicationFormTemplateDAO();
+        List<Map<String, Object>> savedForms = templateDAO.getFormsByClubAndStatus(clubId, false);
+        List<Map<String, Object>> publishedForms = templateDAO.getFormsByClubAndStatus(clubId, true);
 
-            // form đã lưu (published = 0)
-            List<ApplicationFormTemplate> savedTemplates = templateDAO.getTemplatesByClubAndStatus(clubId, false);
-            for (ApplicationFormTemplate template : savedTemplates) {
-                Map<String, Object> formData = new HashMap<>();
-                formData.put("templateId", template.getTemplateId());
-                formData.put("title", template.getTitle());
-                formData.put("formType", template.getFormType());
-                formData.put("clubId", template.getClubId());
-                formData.put("eventId", template.getEventId());
-                formData.put("published", false);
-                savedForms.add(formData);
-            }
+        request.setAttribute("savedForms", savedForms);
+        request.setAttribute("publishedForms", publishedForms);
+        request.setAttribute("savedFormsCount", savedForms.size());
+        request.setAttribute("publishedFormsCount", publishedForms.size());
 
-            // form đã xuất bản (Published = 1)
-            List<ApplicationFormTemplate> publishedTemplates = templateDAO.getTemplatesByClubAndStatus(clubId, true);
-            for (ApplicationFormTemplate template : publishedTemplates) {
-                Map<String, Object> formData = new HashMap<>();
-                formData.put("templateId", template.getTemplateId());
-                formData.put("title", template.getTitle());
-                formData.put("formType", template.getFormType());
-                formData.put("clubId", template.getClubId());
-                formData.put("eventId", template.getEventId());
-                formData.put("published", true);
-
-                // Get response count for published forms
-                int responseCount = responseDAO.getResponseCountByTemplateId(template.getTemplateId());
-                formData.put("responseCount", responseCount);
-
-                publishedForms.add(formData);
-            }
-
-            // Set attributes for JSP
-            request.setAttribute("savedForms", savedForms);
-            request.setAttribute("publishedForms", publishedForms);
-            request.setAttribute("savedFormsCount", savedForms.size());
-            request.setAttribute("publishedFormsCount", publishedForms.size());
-
-            request.getRequestDispatcher("/view/student/chairman/formManagement.jsp")
-                    .forward(request, response);
+        request.getRequestDispatcher("/view/student/chairman/formManagement.jsp")
+                .forward(request, response);;
 
         } catch (SQLException e) {
-             e.printStackTrace();
-            LOGGER.log(Level.SEVERE, "SQL Error in FormManagementServlet doGet for user: " + userId, e);
-            
+             e.printStackTrace();            
             // Encode error message for URL
             String errorMessage = "Lỗi SQL: " + e.getMessage();
             try {
@@ -111,7 +77,6 @@ public class FormManagementServlet extends HttpServlet {
             } catch (UnsupportedEncodingException ex) {
                 errorMessage = "Có lỗi xảy ra khi tải dữ liệu form";
             }
-            
             response.sendRedirect(request.getContextPath() + "/my-club?error=form_management_error&message=" + errorMessage);
             return;
         }
@@ -129,13 +94,14 @@ public class FormManagementServlet extends HttpServlet {
     throws ServletException, IOException {
         HttpSession session = request.getSession();
         String userId = (String) session.getAttribute("userID");
-        // Kiểm tra quyền truy cập (chỉ cho roleId 1-7)
+        try{
+        // Kiểm tra quyền truy cập (chỉ cho roleId 1-3)
         UserClub userClub = userClubDAO.getUserClubByUserId(userId);
-        if (userClub == null || userClub.getRoleID() < 1 || userClub.getRoleID() > 7) {
+        if (userClub == null || userClub.getRoleID() < 1 || userClub.getRoleID() > 3) {
             response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied");
             return;
         }
-         String action = request.getParameter("action");
+        String action = request.getParameter("action");
         String templateIdStr = request.getParameter("templateId");
         
         if (templateIdStr == null || templateIdStr.trim().isEmpty()) {
@@ -145,44 +111,48 @@ public class FormManagementServlet extends HttpServlet {
 
         int templateId;
         try {
-            templateId = Integer.parseInt(templateIdStr);
-        } catch (NumberFormatException e) {
-            sendJsonResponse(response, false, "Template ID không hợp lệ.");
-            return;
-        }
-
-        LOGGER.info("Processing action: " + action + " for templateId: " + templateId + " by user: " + userId);
-
-        try {
-            // Kiểm tra quyền sở hữu template
+                templateId = Integer.parseInt(templateIdStr);
+            } catch (NumberFormatException e) {
+                sendJsonResponse(response, false, "Template ID không hợp lệ.");
+                return;
+            }
+// Lấy title của form từ templateId
             ApplicationFormTemplate template = templateDAO.getTemplateById(templateId);
             if (template == null) {
                 sendJsonResponse(response, false, "Form không tồn tại.");
                 return;
             }
+            String title = template.getTitle();
 
+            // Kiểm tra quyền sở hữu
             if (template.getClubId() != userClub.getClubID()) {
                 sendJsonResponse(response, false, "Bạn không có quyền thao tác với form này.");
                 return;
             }
 
+            boolean success = false;
+            String message = "";
             switch (action) {
                 case "publish":
-                    handlePublish(templateId, response);
+                    success = templateDAO.publishFormsByTitle(title);
+                    message = success ? "Form đã được xuất bản thành công!" : "Không thể xuất bản form.";
                     break;
                 case "unpublish":
-                    handleUnpublish(templateId, response);
+                    success = templateDAO.unpublishFormsByTitle(title);
+                    message = success ? "Form đã được hủy xuất bản thành công!" : "Không thể hủy xuất bản form.";
                     break;
                 case "delete":
-                    handleDelete(templateId, response);
+                    success = templateDAO.deleteFormsByTitle(title);
+                    message = success ? "Form đã được xóa thành công!" : "Không thể xóa form.";
                     break;
                 default:
                     sendJsonResponse(response, false, "Hành động không hợp lệ.");
-                    break;
+                    return;
             }
 
+            sendJsonResponse(response, success, message);
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Error processing action: " + action + " for templateId: " + templateId, e);
+            LOGGER.log(Level.SEVERE, "Error processing action in FormManagementServlet", e);
             sendJsonResponse(response, false, "Có lỗi xảy ra: " + e.getMessage());
         }
     }

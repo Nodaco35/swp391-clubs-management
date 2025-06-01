@@ -48,7 +48,7 @@
                     <form class="flex w-full md:w-auto gap-2" action="${pageContext.request.contextPath}/club-members" method="post">
                         <input type="hidden" name="clubID" value="${clubID}">
                         <input type="hidden" name="action" value="search">
-                        <input type="text" name="search" value="${search}" placeholder="Tìm kiếm..." class="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" name="search" value="${search}" placeholder="Tìm kiếm theo tên thành viên..." class="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">Tìm kiếm</button>
                     </form>
                     <button type="button" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition" onclick="toggleAddForm()">Thêm thành viên</button>
@@ -197,7 +197,7 @@
                 // Xóa tất cả tùy chọn hiện tại
                 departmentSelect.innerHTML = '';
 
-                if (roleID == '1' || roleID == '2') {
+                if (roleID === '1' || roleID === '2') {
                     const option = document.createElement('option');
                     option.value = '3';
                     option.text = 'Ban Chủ nhiệm';
@@ -214,8 +214,8 @@
                 }
 
                 // Đặt giá trị mặc định
-                departmentSelect.value = (roleID == '1' || roleID == '2') ? '3' :
-                    (currentDepartmentID && (currentDepartmentID == '1' || currentDepartmentID == '2') ? currentDepartmentID :
+                departmentSelect.value = (roleID === '1' || roleID ==='2') ? '3' :
+                    (currentDepartmentID && (currentDepartmentID === '1' || currentDepartmentID === '2') ? currentDepartmentID :
                     (departments.length > 0 ? '1' : ''));
             }
 
@@ -282,7 +282,7 @@
                 document.getElementById('roleID').value = roleID;
                 document.getElementById('isActive').checked = isActive;
                 updateDepartmentOptions();
-                document.getElementById('departmentID').value = (roleID == 1 || roleID == 2) ? '3' : departmentID;
+                document.getElementById('departmentID').value = (roleID === 1 || roleID === 2) ? '3' : departmentID;
             }
 
             // Ẩn form
@@ -310,13 +310,13 @@
                     return;
                 }
 
-                if ((roleID == '1' || roleID == '2') && departmentID != '3') {
+                if ((roleID === '1' || roleID === '2') && departmentID !== '3') {
                     alert('Chủ nhiệm và phó chủ nhiệm phải thuộc Ban Chủ nhiệm!');
                     e.preventDefault();
                     return;
                 }
 
-                if (roleID != '1' && roleID != '2' && (departmentID != '1' && departmentID != '2')) {
+                if (roleID !== '1' && roleID !== '2' && (departmentID !== '1' && departmentID !== '2')) {
                     alert('Vai trò này chỉ được thuộc Ban 1 hoặc Ban 2!');
                     e.preventDefault();
                     return;

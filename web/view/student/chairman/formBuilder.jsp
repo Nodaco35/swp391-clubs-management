@@ -94,12 +94,36 @@
             </div>
             <!-- Edit tab Content -->
             <div id="editTab" class="tab-content active">
-                    <!-- Basic Info Card -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">Đơn đăng ký</h2>
-                        </div>
-                        <div class="card-content">
+                <!-- Basic Info Card -->
+                <div class="card">
+                    <c:if test="${not empty formQuestions}">
+                        <script>
+                            window.existingQuestions = [
+                                <c:forEach var="question" items="${formQuestions}" varStatus="status">
+                                {
+                                    id: "${question.templateId}", // TemplateID để xác định câu hỏi
+                                    type: "${question.fieldType.toLowerCase()}", // Chuyển thành chữ thường để khớp với form
+                                    label: "${question.fieldName}", // Tên câu hỏi
+                                    required: ${question.isRequired()}, // Có bắt buộc hay không
+                                    options: ${question.options != null ? '"' + question.options + '"' : 'null'} // Tùy chọn nếu có
+                                }<c:if test="${not status.last}">,</c:if>
+                                </c:forEach>
+                            ];
+
+                            // Hàm để hiển thị các câu hỏi đã lưu
+                            document.addEventListener("DOMContentLoaded", function() {
+                                if (window.existingQuestions && window.existingQuestions.length > 0) {
+                                    window.existingQuestions.forEach(function(q) {
+                                        addQuestion(q.type, q.label, q.required, q.options, q.id);
+                                    });
+                                }
+                            });
+                        </script>
+                    </c:if>
+                    <div class="card-header">
+                        <h2 class="card-title">Đơn đăng ký</h2>
+                    </div>
+                    <div class="card-content">
                             <div class="form-group">
                                 <label class="form-label">Chọn loại form:</label>
                                 <select id="formType" name="eventType" class="form-select mb-2" onchange="toggleEventField(this)" required>

@@ -149,6 +149,15 @@ public class ApplicationFormTemplateDAO {
             return rowsAffected > 0;
         }
     }
+    public boolean publishFormsByTitle(String title) throws SQLException {
+    connection = DBContext.getConnection();
+    String sql = "UPDATE ApplicationFormTemplates SET Published = 1 WHERE Title = ?";
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setString(1, title);
+        int rowsAffected = stmt.executeUpdate();
+        return rowsAffected > 0;
+    }
+}
 
     // Hủy xuất bản form (đổi Published từ 1 thành 0)
     public boolean unpublishTemplate(int templateId) throws SQLException {
@@ -160,6 +169,15 @@ public class ApplicationFormTemplateDAO {
             return rowsAffected > 0;
         }
     }
+    public boolean unpublishFormsByTitle(String title) throws SQLException {
+    connection = DBContext.getConnection();
+    String sql = "UPDATE ApplicationFormTemplates SET Published = 0 WHERE Title = ?";
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setString(1, title);
+        int rowsAffected = stmt.executeUpdate();
+        return rowsAffected > 0;
+    }
+}
 
     // Xóa template theo ID
     public boolean deleteTemplate(int templateId) throws SQLException {
@@ -171,6 +189,15 @@ public class ApplicationFormTemplateDAO {
             return rowsAffected > 0;
         }
     }
+    public boolean deleteFormsByTitle(String title) throws SQLException {
+    connection = DBContext.getConnection();
+    String sql = "DELETE FROM ApplicationFormTemplates WHERE Title = ?";
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setString(1, title);
+        int rowsAffected = stmt.executeUpdate();
+        return rowsAffected > 0;
+    }
+}
     
     // Lấy danh sách templates theo danh sách IDs
     public List<ApplicationFormTemplate> getTemplatesByIds(List<Integer> templateIds) throws SQLException {
@@ -210,31 +237,58 @@ public class ApplicationFormTemplateDAO {
         return templates;
     }
 
-    // Method mới để lấy form templates grouped by form (không duplicate)
+    // Method mới để lấy form templates grouped by form
     public List<Map<String, Object>> getFormsByClubAndStatus(int clubId, boolean published) throws SQLException {
-        connection = DBContext.getConnection();
-        List<Map<String, Object>> forms = new ArrayList<>();
-        String sql = "SELECT DISTINCT TemplateID, Title, FormType, ClubID, EventID, Published " +
-                    "FROM ApplicationFormTemplates WHERE ClubID = ? AND Published = ? " +
-                    "GROUP BY Title, FormType, ClubID, EventID, Published " +
-                    "ORDER BY MAX(TemplateID) DESC";
-        
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, clubId);
-            stmt.setBoolean(2, published);
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Map<String, Object> form = new HashMap<>();
-                    form.put("templateId", rs.getInt("TemplateID"));
-                    form.put("title", rs.getString("Title"));
-                    form.put("formType", rs.getString("FormType"));
-                    form.put("clubId", rs.getInt("ClubID"));
-                    form.put("eventId", rs.getObject("EventID"));
-                    form.put("published", rs.getBoolean("Published"));
-                    forms.add(form);
-                }
+    connection = DBContext.getConnection();
+    List<Map<String, Object>> forms = new ArrayList<>();
+    String sql = "SELECT DISTINCT Title, FormType, ClubID, EventID, Published, MAX(TemplateID) as TemplateID " +
+                 "FROM ApplicationFormTemplates " +
+                 "WHERE ClubID = ? AND Published = ? " +
+                 "GROUP BY Title, FormType, ClubID, EventID, Published " +
+                 "ORDER BY MAX(TemplateID) DESC";
+    
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setInt(1, clubId);
+        stmt.setBoolean(2, published);
+        try (ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                Map<String, Object> form = new HashMap<>();
+                form.put("templateId", rs.getInt("TemplateID"));
+                form.put("title", rs.getString("Title"));
+                form.put("formType", rs.getString("FormType"));
+                form.put("clubId", rs.getInt("ClubID"));
+                form.put("eventId", rs.getObject("EventID"));
+                form.put("published", rs.getBoolean("Published"));
+                forms.add(form);
             }
         }
-        return forms;
     }
+    return forms;
+}
+    public List<ApplicationFormTemplate> getTemplatesByTitle(String title) throws SQLException {
+    List<ApplicationFormTemplate> templates = new ArrayList<>();
+    Connection connection = DBContext.getConnection(); // Ensure connection is established
+    String sql = "SELECT * FROM ApplicationFormTemplates WHERE Title = ?";
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setString(1, title);
+        try (ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                ApplicationFormTemplate template = new ApplicationFormTemplate();
+                template.setTemplateId(rs.getInt("TemplateID"));
+                template.setClubId(rs.getInt("ClubID"));
+                template.setEventId(rs.getObject("EventID") != null ? rs.getInt("EventID") : null);
+                template.setFormType(rs.getString("FormType"));
+                template.setTitle(rs.getString("Title"));
+                template.setFieldName(rs.getString("FieldName"));
+                template.setFieldType(rs.getString("FieldType"));
+                template.setIsRequired(rs.getBoolean("IsRequired"));
+                template.setOptions(rs.getString("Options"));
+                template.setPublished(rs.getBoolean("Published"));
+                templates.add(template);
+            }
+        }
+    }
+    return templates;
+}
+    
 }

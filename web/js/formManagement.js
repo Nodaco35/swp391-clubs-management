@@ -123,48 +123,6 @@ document.addEventListener("DOMContentLoaded", () => {
     })
   })
 
-  // Generate QR Code
-  const generateQrButtons = document.querySelectorAll(".generate-qr")
-  const qrModal = document.getElementById("qrModal")
-  const qrCanvas = document.getElementById("qrCanvas")
-
-  generateQrButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const templateId = button.getAttribute("data-template-id")
-      const publicLink = `${window.location.origin}${contextPath}/public/form/${templateId}`
-
-      // Clear previous QR code
-      qrCanvas.innerHTML = ""
-
-      // Generate new QR code using QRCode library
-      const QRCode = window.QRCode // Declare QRCode variable here
-      if (typeof QRCode !== "undefined") {
-        QRCode.toCanvas(
-            qrCanvas,
-            publicLink,
-            {
-              width: 256,
-              margin: 2,
-              color: {
-                dark: "#000000",
-                light: "#FFFFFF",
-              },
-            },
-            (error) => {
-              if (error) {
-                console.error(error)
-                showToast("Không thể tạo QR code", "error")
-              } else {
-                qrModal.style.display = "block"
-              }
-            },
-        )
-      } else {
-        showToast("QR Code library chưa được tải", "error")
-      }
-    })
-  })
-
   // Modal event handlers
   function setupModalHandlers() {
     // Delete modal
@@ -205,28 +163,6 @@ document.addEventListener("DOMContentLoaded", () => {
       })
     }
 
-    // QR modal
-    const closeQr = document.querySelector(".close-qr")
-    const downloadQr = document.querySelector(".download-qr")
-
-    if (closeQr) {
-      closeQr.addEventListener("click", () => {
-        qrModal.style.display = "none"
-      })
-    }
-
-    if (downloadQr) {
-      downloadQr.addEventListener("click", () => {
-        const canvas = qrCanvas.querySelector("canvas")
-        if (canvas) {
-          const link = document.createElement("a")
-          link.download = "form-qr-code.png"
-          link.href = canvas.toDataURL()
-          link.click()
-        }
-      })
-    }
-
     // Close modals with X button
     document.querySelectorAll(".close").forEach((closeBtn) => {
       closeBtn.addEventListener("click", () => {
@@ -238,7 +174,6 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("click", (event) => {
       if (event.target === deleteModal) deleteModal.style.display = "none"
       if (event.target === unpublishModal) unpublishModal.style.display = "none"
-      if (event.target === qrModal) qrModal.style.display = "none"
     })
   }
 

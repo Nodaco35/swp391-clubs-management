@@ -32,6 +32,20 @@ document.addEventListener("DOMContentLoaded", () => {
   // Templates
   const questionTemplate = document.getElementById("questionTemplate").innerHTML
   const optionTemplate = document.getElementById("optionTemplate").innerHTML
+  
+    // Load existing questions if available
+    console.log("Existing Questions:", window.existingQuestions);
+    if (window.existingQuestions) {
+        questionCount = window.existingQuestions.length;
+        questionCountElement.textContent = questionCount;
+        window.existingQuestions.forEach((questionData, index) => {
+            const questionCard = createQuestionCard(questionData, index + 1);
+            questionsList.appendChild(questionCard);
+            addQuestionEventListeners(questionCard);
+        });
+        // Xóa các câu hỏi mặc định nếu có dữ liệu chỉnh sửa
+        document.querySelectorAll(".question-card.required-question").forEach(card => card.remove());
+    }
 
   // Show success alerts on page load
   if (saveSuccessAlert) {
@@ -153,11 +167,65 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     })
   })
+  
+  function createQuestionCard(questionData, number) {
+    const id = questionData.id || "q" + Date.now();
+    const html = questionTemplate.replace(/{{id}}/g, id).replace(/{{number}}/g, number);
 
-  // Functions
-  function showAlert(alertElement) {
-    if (alertElement) {
-      alertElement.style.display = "flex"
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+    const questionCard = tempDiv.firstElementChild;
+
+    const labelInput = questionCard.querySelector(".question-label");
+    labelInput.value = questionData.label || "Câu hỏi mới";
+
+    const typeSelect = questionCard.querySelector(".question-type");
+    typeSelect.value = questionData.type.toLowerCase() || "text";
+
+    const requiredCheckbox = questionCard.querySelector(".question-required");
+    requiredCheckbox.checked = questionData.required || false;
+
+    const placeholderInput = questionCard.querySelector(".question-placeholder");
+    if (placeholderInput) {
+        placeholderInput.value = questionData.placeholder || "";
+    }
+
+    if (questionData.type === "Info" && questionData.options) {
+        try {
+            const infoData = JSON.parse(questionData.options);
+            const contentTextarea = questionCard.querySelector(".question-content");
+            if (contentTextarea) {
+                contentTextarea.value = infoData.content || "";
+            }
+            if (infoData.image) {
+                questionCard.dataset.imageData = infoData.image;
+                const imagePreview = questionCard.querySelector(".uploaded-image-preview");
+                if (imagePreview) {
+                    imagePreview.src = infoData.image;
+                    const previewContainer = questionCard.querySelector(".image-preview-container");
+                    if (previewContainer) previewContainer.style.display = "block";
+                    const uploadPlaceholder = questionCard.querySelector(".upload-placeholder");
+                    if (uploadPlaceholder) uploadPlaceholder.style.display = "none";
+                }
+            }
+        } catch (e) {
+            console.error("Error parsing options for info question:", e);
+        }
+    } else if (["Radio", "Checkbox", "Dropdown"].includes(questionData.type) && questionData.options) {
+        const options = typeof questionData.options === "string" ? JSON.parse(questionData.options) : questionData.options;
+        options.forEach((option, index) => {
+            addOption(questionCard, option.value || `Tùy chọn ${index + 1}`);
+        });
+    }
+
+    toggleQuestionFields(questionCard, questionData.type.toLowerCase() || "text");
+    return questionCard;
+}
+
+    // Functions
+    function showAlert(alertElement) {
+        if (alertElement) {
+            alertElement.style.display = "flex"
       setTimeout(() => {
         alertElement.style.display = "none"
       }, 3000)

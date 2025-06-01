@@ -76,10 +76,6 @@
                                     <h3 class="form-title">${form.title}</h3>
                                     <div class="form-meta">
                                         <div class="meta-item">
-                                            <i class="fas fa-calendar"></i>
-                                            <span>Tạo lúc: Hôm nay</span>
-                                        </div>
-                                        <div class="meta-item">
                                             <i class="fas fa-eye-slash"></i>
                                             <span>Chưa công khai</span>
                                         </div>
@@ -126,10 +122,6 @@
                                 <div class="form-content">
                                     <h3 class="form-title">${form.title}</h3>
                                     <div class="form-meta">
-                                        <div class="meta-item">
-                                            <i class="fas fa-calendar"></i>
-                                            <span>Xuất bản: Hôm nay</span>
-                                        </div>
                                         <div class="meta-item responses">
                                             <i class="fas fa-users"></i>
                                             <span>${form.responseCount} phản hồi</span>
