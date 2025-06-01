@@ -1,22 +1,23 @@
 package controller;
 
 import dal.UserDAO;
-
-import java.io.IOException;
-
-import java.io.PrintWriter;
-
+import models.Users;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import models.Users;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.regex.Pattern;
 
 /**
  * @author NC PC
  */
 public class LoginServlet extends HttpServlet {
+
+    private static final String EMAIL_PATTERN = "^[a-zA-Z0-9._%+-]+@fpt\\.edu\\.vn$";
+    private static final Pattern pattern = Pattern.compile(EMAIL_PATTERN);
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -26,8 +27,7 @@ public class LoginServlet extends HttpServlet {
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+     */    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
@@ -57,9 +57,7 @@ public class LoginServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.getRequestDispatcher("view/login.jsp").forward(request, response);
-    }
-
-    /**
+    }    /**
      * Handles the HTTP <code>POST</code> method.
      *
      * @param request servlet request
@@ -70,32 +68,68 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        PrintWriter out = response.getWriter();
-        String user = request.getParameter("email");
+        String email = request.getParameter("email");
         String password = request.getParameter("password");
+
+        // Kiểm tra input
+        if (email == null || password == null || email.trim().isEmpty() || password.trim().isEmpty()) {
+            request.setAttribute("error", "Vui lòng nhập đầy đủ email và mật khẩu!");
+            request.setAttribute("email", email);
+            request.getRequestDispatcher("view/login.jsp").forward(request, response);
+            return;
+        }
+
+        // Kiểm tra định dạng email
+        if (!pattern.matcher(email).matches()) {
+            request.setAttribute("error", "Email không hợp lệ (phải dùng @fpt.edu.vn)!");
+            request.setAttribute("email", email);
+            request.getRequestDispatcher("view/login.jsp").forward(request, response);
+            return;
+        }
+
+        // Xác thực người dùng
         UserDAO ud = new UserDAO();
-        Users user_find = ud.getUserByEmailAndPassword(user, password);
-        if (user_find == null) {
+        Users user_find = ud.getUserByEmailAndPassword(email.trim(), password.trim());
+          if (user_find == null) {
             request.setAttribute("error", "Sai tài khoản hoặc mật khẩu");
+            request.setAttribute("email", email);
+            request.getRequestDispatcher("view/login.jsp").forward(request, response);
+        } else if (!user_find.isStatus()) {
+            // Kiểm tra nếu tài khoản chưa xác minh
+            request.setAttribute("error", "Tài khoản chưa được xác minh. Vui lòng kiểm tra email để xác minh tài khoản.");
+            request.setAttribute("unverifiedEmail", email);
+            
+            // Thêm phần HTML cho nút gửi lại email xác minh
+            String resendButton = "<div class='resend-verification'>" +
+                                 "<p>Không nhận được email? <a href='" + request.getContextPath() + 
+                                 "/resend-verification?email=" + email + "'>Gửi lại email xác minh</a></p></div>";
+            request.setAttribute("resendVerification", resendButton);
+            
             request.getRequestDispatcher("view/login.jsp").forward(request, response);
         } else {
             // Tạo session
             HttpSession session = request.getSession();
             session.setAttribute("user", user_find);
-            session.setAttribute("userId", user_find.getUserID());
+
+            session.setAttribute("fullName", user_find.getFullName());
+            session.setAttribute("permissionID", user_find.getPermissionID());
+            session.setAttribute("userID", user_find.getUserID());
+            session.setMaxInactiveInterval(30 * 60); // 30 phút
+
+            // Điều hướng theo quyền
             if (user_find.getPermissionID() == 1) {
                 // Chuyển hướng đến trang chủ - HomepageServlet
                 response.sendRedirect(request.getContextPath() + "/");
-            }
-            if(user_find.getPermissionID() == 2){
+            } else if (user_find.getPermissionID() == 2) {
                 response.sendRedirect(request.getContextPath() + "/admin");
-            }
-            if(user_find.getPermissionID() == 3){
+            } else if (user_find.getPermissionID() == 3) {
                 response.sendRedirect(request.getContextPath() + "/ic");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/");
             }
         }
     }
-
+    
     /**
      * Returns a short description of the servlet.
      *
@@ -103,7 +137,6 @@ public class LoginServlet extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
+        return "LoginServlet handles user authentication";
+    }
 }

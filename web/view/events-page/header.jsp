@@ -7,6 +7,7 @@
 --%>
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html>
     <head>
@@ -37,10 +38,24 @@
 
                 <nav class="main-nav">
                     <ul>
-                        <li><a href="${pageContext.request.contextPath}/" class="${pageContext.request.servletPath != '/' ? '' : 'active'}">Trang Chủ</a></li>
-                        <li><a href="${pageContext.request.contextPath}/clubs" class="${pageContext.request.servletPath != '/clubs' ? '' : 'active'}">Câu Lạc Bộ</a></li>
-                        <li><a href="${pageContext.request.contextPath}/events-page" class="${pageContext.request.servletPath != '/events-page' ? '' : 'active'}">Sự Kiện</a></li>
- 
+                        <li>
+                            <a href="${pageContext.request.contextPath}/"
+                               class="${currentPath == '/' ? 'active' : ''}">
+                                Trang Chủ
+                            </a>
+                        </li>
+                        <li>
+                            <a href="${pageContext.request.contextPath}/clubs"
+                               class="${fn:contains(currentPath, '/clubs') ? 'active' : ''}">
+                                Câu Lạc Bộ
+                            </a>
+                        </li>
+                        <li>
+                            <a href="${pageContext.request.contextPath}/events-page"
+                               class="${fn:contains(currentPath, '/events-page') ? 'active' : ''}">
+                                Sự Kiện
+                            </a>
+                        </li>
                     </ul>
                 </nav>
 
@@ -48,10 +63,14 @@
                     <c:choose>
                         <c:when test="${sessionScope.user != null}">
                             <div class="user-menu" id="userMenu">
-                                <span id="userName">Hi, ${sessionScope.user.fullName}</span>
+                              
+                                <a href="${pageContext.request.contextPath}/notification" class="btn btn-outline">
+                                    <i class="fa-solid fa-bell"></i>
+                                </a>
                                 <a href="${pageContext.request.contextPath}/profile?action=myProfile" class="btn btn-outline">
                                     <i class="fa-solid fa-user"></i>
                                 </a>
+                                
                                 <form action="logout" method="post">
                                     <input class="btn btn-primary" type="submit" value="Logout">
                                 </form>

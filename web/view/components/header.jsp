@@ -16,6 +16,7 @@
                 <li><a href="${pageContext.request.contextPath}/" class="filter-option active">Trang Chủ</a></li>
                 <li><a href="${pageContext.request.contextPath}/clubs" class="filter-option">Câu Lạc Bộ</a></li>
                 <li><a href="${pageContext.request.contextPath}/events-page" class="filter-option">Sự Kiện</a></li>
+                
             </ul>
         </nav>
         <div class="auth-buttons">

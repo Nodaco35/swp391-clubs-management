@@ -46,6 +46,7 @@ body {
     top: 0;
     z-index: 1000;
     border-bottom: 1px solid var(--border);
+    
 }
 
 .header-container {
@@ -91,7 +92,7 @@ body {
     background: var(--accent);
     box-shadow: 0 0 0 2px var(--primary);
 }
-
+    
 .search-icon {
     color: var(--text-light);
     margin-right: 0.5rem;
@@ -268,6 +269,45 @@ body {
 .mobile-auth {
     display: flex;
     gap: 0.5rem;
+}
+
+/* Breadcrumb enhancements */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.breadcrumb-separator {
+    color: var(--text-light);
+    font-weight: bold;
+}
+
+.breadcrumb-current {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.breadcrumb-section {
+    background: var(--card-bg);
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+
+.breadcrumb-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-light);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.breadcrumb-link:hover {
+    color: var(--primary);
 }
 
 /* Hero Section */

@@ -33,16 +33,19 @@
         <servlet-class>controller.UserClubServlet</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>ClubDetailServlet</servlet-name>
-        <servlet-class>controller.ClubDetailServlet</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>EventsPageServlet</servlet-name>
         <servlet-class>controller.EventsPageServlet</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>MyClub</servlet-name>
-        <servlet-class>controller.MyClubServlet</servlet-class>
+        <servlet-name>NotificationController</servlet-name>
+        <servlet-class>controller.NotificationController</servlet-class>
+
+        <servlet-name>EventDetailServlet</servlet-name>
+        <servlet-class>controller.EventDetailServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>RegistrationEvent</servlet-name>
+        <servlet-class>controller.RegistrationEvent</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>FormManagementServlet</servlet-name>
@@ -51,7 +54,6 @@
     <servlet-mapping>
         <servlet-name>HomepageServlet</servlet-name>
         <url-pattern>/home</url-pattern>
-        <url-pattern>/index</url-pattern>
         <url-pattern/>
     </servlet-mapping>
     <servlet-mapping>
@@ -89,18 +91,41 @@
     <servlet-mapping>
         <servlet-name>UserClubServlet</servlet-name>
         <url-pattern>/club-members</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
+
+    </servlet-mapping>    <servlet-mapping>
         <servlet-name>ClubDetailServlet</servlet-name>
         <url-pattern>/club-detail</url-pattern>
     </servlet-mapping>
+      <servlet>
+        <servlet-name>VerifyAccountServlet</servlet-name>
+        <servlet-class>controllers.VerifyAccountServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>VerifyAccountServlet</servlet-name>
+        <url-pattern>/verify</url-pattern>
+    </servlet-mapping>
+      <servlet>
+        <servlet-name>ResendVerificationServlet</servlet-name>
+        <servlet-class>controllers.ResendVerificationServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ResendVerificationServlet</servlet-name>
+        <url-pattern>/resend-verification</url-pattern>
     <servlet-mapping>
         <servlet-name>EventsPageServlet</servlet-name>
         <url-pattern>/events-page</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>MyClub</servlet-name>
-        <url-pattern>/my-club</url-pattern>
+        <servlet-name>NotificationController</servlet-name>
+        <url-pattern>/notification</url-pattern>
+   </servlet-mapping>
+   <servlet-mapping>
+        <servlet-name>EventDetailServlet</servlet-name>
+        <url-pattern>/event-detail</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RegistrationEvent</servlet-name>
+        <url-pattern>/registration-event</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>FormManagementServlet</servlet-name>

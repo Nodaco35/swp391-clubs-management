@@ -16,10 +16,10 @@ import jakarta.activation.DataSource;
 
 public class Email {
     // Email: tungletest1.email@gmail.com
-    // Password: nebeekfipcstxcox
+    // Password: qthj sgph dnkf swvz
 
-    static final String from = "funiccog3@gmail.com";
-    static final String password = "qpqkbalijdzflxqo";
+    static final String from = "funiclubs@gmail.com";
+    static final String password = "bojr shol moip wdsr";
 
     public static boolean sendEmail(String to, String tieuDe, String noiDung) {
         // Properties : khai báo các thuộc tính
@@ -79,5 +79,5 @@ public class Email {
     public static void main(String[] args) {
         Email.sendEmail("he181972dohuuduc@gmail.com", "OTP", "123456");
     }
-
+    
 }
