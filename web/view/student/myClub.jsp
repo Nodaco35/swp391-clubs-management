@@ -21,7 +21,7 @@
 
         <div class="actions-section">
             <h3>Quản lý Form</h3>
-            <a href="${pageContext.request.contextPath}/form-builder/manage" class="action-btn">
+            <a href="${pageContext.request.contextPath}/formManagement" class="action-btn">
                 <i class="fas fa-list-alt"></i> Quản Lý Các Form
             </a>
             <a href="${pageContext.request.contextPath}/formBuilder" class="action-btn">

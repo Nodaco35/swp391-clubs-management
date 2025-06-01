@@ -3,7 +3,9 @@ package dal;
 import models.ApplicationFormTemplate;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ApplicationFormTemplateDAO {
     private Connection connection;
@@ -106,46 +108,133 @@ public class ApplicationFormTemplateDAO {
         }
         return templates;
     }
-    // Thêm method mới vào ApplicationFormTemplateDAO
-public List<ApplicationFormTemplate> getFormTemplatesByFormIdentifier(String formIdentifier) {
-    List<ApplicationFormTemplate> templates = new ArrayList<>();
-    String sql = "SELECT * FROM ApplicationFormTemplates WHERE Title LIKE ? AND Published = 1 ORDER BY TemplateID";
-    
-    try (Connection conn = DBContext.getConnection();
-         PreparedStatement ps = conn.prepareStatement(sql)) {
-        
-        ps.setString(1, "%###" + formIdentifier + "%");
-        ResultSet rs = ps.executeQuery();
-        
-        while (rs.next()) {
-            ApplicationFormTemplate template = new ApplicationFormTemplate();
-            template.setTemplateId(rs.getInt("TemplateID"));
-            template.setClubId(rs.getInt("ClubID"));
-            template.setFormType(rs.getString("FormType"));
-            template.setTitle(rs.getString("Title"));
-            template.setFieldName(rs.getString("FieldName"));
-            template.setFieldType(rs.getString("FieldType"));
-            template.setRequired(rs.getBoolean("Required"));
-            template.setOptions(rs.getString("Options"));
-            template.setPublished(rs.getBoolean("Published"));
-            templates.add(template);
+    // Lấy forms theo club và trạng thái published
+    public List<ApplicationFormTemplate> getTemplatesByClubAndStatus(int clubId, boolean published) throws SQLException {
+        connection = DBContext.getConnection();
+        List<ApplicationFormTemplate> templates = new ArrayList<>();
+        String sql = "SELECT DISTINCT TemplateID, ClubID, EventID, FormType, Title, FieldName, FieldType, IsRequired, Options, Published " +
+                    "FROM ApplicationFormTemplates WHERE ClubID = ? AND Published = ? " +
+                    "GROUP BY TemplateID, ClubID, EventID, FormType, Title, FieldName, FieldType, IsRequired, Options, Published " +
+                    "ORDER BY TemplateID DESC";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, clubId);
+            stmt.setBoolean(2, published);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    templates.add(new ApplicationFormTemplate(
+                            rs.getInt("TemplateID"),
+                            rs.getInt("ClubID"),
+                            rs.getObject("EventID") != null ? rs.getInt("EventID") : null,
+                            rs.getString("FormType"),
+                            rs.getString("Title"),
+                            rs.getString("FieldName"),
+                            rs.getString("FieldType"),
+                            rs.getBoolean("IsRequired"),
+                            rs.getString("Options"),
+                            rs.getBoolean("Published")
+                    ));
+                }
+            }
         }
-    } catch (SQLException e) {
-        e.printStackTrace();
+        return templates;
     }
     
-    return templates;
-}
-
-// Thêm method để lấy form identifier từ title
-public String getFormIdentifierFromTitle(String title) {
-    if (title != null && title.contains("###")) {
-        String[] parts = title.split("###");
-        if (parts.length > 1) {
-            return parts[1];
+    // Xuất bản form (chỉ đổi Published từ 0 thành 1)
+    public boolean publishTemplate(int templateId) throws SQLException {
+        connection = DBContext.getConnection();
+        String sql = "UPDATE ApplicationFormTemplates SET Published = 1 WHERE TemplateID = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, templateId);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
         }
     }
-    return null;
-}
 
+    // Hủy xuất bản form (đổi Published từ 1 thành 0)
+    public boolean unpublishTemplate(int templateId) throws SQLException {
+        connection = DBContext.getConnection();
+        String sql = "UPDATE ApplicationFormTemplates SET Published = 0 WHERE TemplateID = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, templateId);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        }
+    }
+
+    // Xóa template theo ID
+    public boolean deleteTemplate(int templateId) throws SQLException {
+        connection = DBContext.getConnection();
+        String sql = "DELETE FROM ApplicationFormTemplates WHERE TemplateID = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, templateId);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        }
+    }
+    
+    // Lấy danh sách templates theo danh sách IDs
+    public List<ApplicationFormTemplate> getTemplatesByIds(List<Integer> templateIds) throws SQLException {
+        if (templateIds == null || templateIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        connection = DBContext.getConnection();
+        List<ApplicationFormTemplate> templates = new ArrayList<>();
+        
+        // Tạo placeholder cho IN clause
+        String placeholders = String.join(",", templateIds.stream().map(id -> "?").toArray(String[]::new));
+        String sql = "SELECT * FROM ApplicationFormTemplates WHERE TemplateID IN (" + placeholders + ") ORDER BY TemplateID";
+        
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            for (int i = 0; i < templateIds.size(); i++) {
+                stmt.setInt(i + 1, templateIds.get(i));
+            }
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    templates.add(new ApplicationFormTemplate(
+                            rs.getInt("TemplateID"),
+                            rs.getInt("ClubID"),
+                            rs.getObject("EventID") != null ? rs.getInt("EventID") : null,
+                            rs.getString("FormType"),
+                            rs.getString("Title"),
+                            rs.getString("FieldName"),
+                            rs.getString("FieldType"),
+                            rs.getBoolean("IsRequired"),
+                            rs.getString("Options"),
+                            rs.getBoolean("Published")
+                    ));
+                }
+            }
+        }
+        return templates;
+    }
+
+    // Method mới để lấy form templates grouped by form (không duplicate)
+    public List<Map<String, Object>> getFormsByClubAndStatus(int clubId, boolean published) throws SQLException {
+        connection = DBContext.getConnection();
+        List<Map<String, Object>> forms = new ArrayList<>();
+        String sql = "SELECT DISTINCT TemplateID, Title, FormType, ClubID, EventID, Published " +
+                    "FROM ApplicationFormTemplates WHERE ClubID = ? AND Published = ? " +
+                    "GROUP BY Title, FormType, ClubID, EventID, Published " +
+                    "ORDER BY MAX(TemplateID) DESC";
+        
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, clubId);
+            stmt.setBoolean(2, published);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> form = new HashMap<>();
+                    form.put("templateId", rs.getInt("TemplateID"));
+                    form.put("title", rs.getString("Title"));
+                    form.put("formType", rs.getString("FormType"));
+                    form.put("clubId", rs.getInt("ClubID"));
+                    form.put("eventId", rs.getObject("EventID"));
+                    form.put("published", rs.getBoolean("Published"));
+                    forms.add(form);
+                }
+            }
+        }
+        return forms;
+    }
 }
