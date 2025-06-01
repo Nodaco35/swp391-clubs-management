@@ -1,3 +1,4 @@
+
 <%--
   Created by IntelliJ IDEA.
   User: thuan
@@ -89,15 +90,6 @@
 
             <!-- Mobile Menu -->
             <div class="mobile-menu" id="mobileMenu">
-                <!-- <div class="mobile-search">
-                        <div class="search-box">
-                                <i class="fas fa-search search-icon"></i>
-                                <input type="text" placeholder="Tìm kiếm sự kiện..." class="search-input">
-                                <button class="search-btn">
-                                        <i class="fas fa-search"></i>
-                                </button>
-                        </div>
-                </div> -->
                 <nav class="mobile-nav">
                     <ul>
                         <li><a href="${pageContext.request.contextPath}/" class="${pageContext.request.servletPath == '/index.jsp' ? 'active' : ''}">Trang Chủ</a></li>
@@ -105,16 +97,22 @@
                         <li><a href="${pageContext.request.contextPath}/events-page" class="${pageContext.request.servletPath == '/events-page.jsp' ? 'active' : ''}">Sự Kiện</a></li>
                     </ul>
                 </nav>
-                <!-- <div class="mobile-auth">
-                        <a href="/login" class="btn btn-outline">Đăng Nhập</a>
-                        <a href="/register" class="btn btn-primary">Đăng Ký</a>
-                </div> -->
             </div>
         </header>
         <main>
             <c:if test="${sessionScope.user == null}">
                 <jsp:include page="banner.jsp"/>
             </c:if>
+            <section class="breadcrumb-section">
+                <div class="container">
+                    <nav class="breadcrumb">
+                        <a href="${pageContext.request.contextPath}/events-page" class="breadcrumb-link">
+                            <i class="fas fa-calendar"></i>
+                            Danh sách sự kiện
+                        </a>
+                    </nav>
+                </div>
+            </section>
             <section class="events-section">
                 <div class="container">
                     <div class="section-header">
@@ -124,6 +122,7 @@
                     <div class="event-filters-wrapper">
                         <!-- Event Filter Buttons -->
                         <div class="event-filters">
+                            <a href="${pageContext.request.contextPath}/events-page" class="filter-btn"><i class="fa-solid fa-arrow-rotate-right"></i></a>
                             <a href="events-page?key=${currentKeyword}&publicFilter=all&sortByDate=${currentSortByDate}"
                                class="filter-btn ${currentPublicFilter == 'all' ? 'active' : ''}">
                                 <i class="fas fa-globe"></i>
@@ -160,7 +159,7 @@
                     <!-- Events Grid -->
                     <div class="events-grid" id="eventsGrid">
                         <c:forEach var="e" items="${requestScope.events}">
-                            <div class="event-card">
+                            <div class="event-card" onclick="redirectToDetail('${e.eventID}')">
                                 <div class="event-image">
                                     <i class="fas fa-calendar-day"></i>
                                     <span class="event-badge ${e.isPublic() ? 'badge-public' : 'badge-private'}">
@@ -169,7 +168,7 @@
                                 </div>
                                 <div class="event-content">
                                     <h3 class="event-title">${e.eventName}</h3>
-                                    <p class="event-description">${e.description}</p>
+<%--                                    <p class="event-description">${e.description}</p>--%>
                                     <div class="event-details">
                                         <div class="event-detail">
                                             <i class="fas fa-calendar-alt"></i>
@@ -185,7 +184,7 @@
                                         </div>
                                     </div>
                                     <div class="event-club">
-                                        <strong>Club ID:</strong> ${e.clubID}
+                                        <strong>Club Name:</strong> ${e.clubName}
                                     </div>
                                     <div class="event-footer">
                                         <span class="attendees status-${fn:toLowerCase(e.status)}">${e.status}</span>
@@ -232,5 +231,15 @@
         </main>
         <jsp:include page="footer.jsp"/>
         <script src="${pageContext.request.contextPath}/js/script.js"></script>
+        <script>
+            function redirectToDetail(eventID) {
+                window.location.href = "event-detail?id=" + eventID;
+            }
+        </script>
+        <script>
+            const currentKeyword = '${fn:escapeXml(currentKeyword)}';
+            const currentPublicFilter = '${currentPublicFilter}';
+        </script>
+
     </body>
 </html>

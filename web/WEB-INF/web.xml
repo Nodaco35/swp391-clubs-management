@@ -37,8 +37,12 @@
         <servlet-class>controller.EventsPageServlet</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>MyClub</servlet-name>
-        <servlet-class>controller.MyClubServlet</servlet-class>
+        <servlet-name>EventDetailServlet</servlet-name>
+        <servlet-class>controller.EventDetailServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>RegistrationEvent</servlet-name>
+        <servlet-class>controller.RegistrationEvent</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>HomepageServlet</servlet-name>
@@ -87,8 +91,12 @@
         <url-pattern>/events-page</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>MyClub</servlet-name>
-        <url-pattern>/my-club</url-pattern>
+        <servlet-name>EventDetailServlet</servlet-name>
+        <url-pattern>/event-detail</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RegistrationEvent</servlet-name>
+        <url-pattern>/registration-event</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
