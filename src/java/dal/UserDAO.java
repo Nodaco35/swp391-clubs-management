@@ -110,35 +110,62 @@ public class UserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    public static Users getUserById(String id) {
-        String sql = "SELECT *\n"
-                + "FROM `clubmanagementsystem`.`users`\n"
-                + "WHERE `users`.`UserID` = ?;";
-        DBContext_Duc db = DBContext_Duc.getInstance();
+    }    public static Users getUserById(String id) {
+        String sql = "SELECT * FROM users WHERE UserID = ?";
+        
+        // Thử kết nối với DBContext_Duc
         try {
-            PreparedStatement ps = db.connection.prepareStatement(sql);
-            ps.setString(1, id);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    Users user = new Users();
-                    user.setUserID(rs.getString("UserID"));
-                    user.setFullName(rs.getString("FullName"));
-                    user.setEmail(rs.getString("Email"));
-                    user.setPassword(rs.getString("Password"));
-                    user.setPermissionID(rs.getInt("PermissionID"));
-                    user.setStatus(rs.getBoolean("Status"));
-                    user.setResetToken(rs.getString("ResetToken"));
-                    user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
-                    user.setDateOfBirth(rs.getDate("DateOfBirth"));
-                    user.setAvatar(rs.getString("AvatarSrc"));
-                    return user;
+            DBContext_Duc db = DBContext_Duc.getInstance();
+            
+            // Kiểm tra kết nối không null
+            if (db.connection != null) {
+                try (PreparedStatement ps = db.connection.prepareStatement(sql)) {
+                    ps.setString(1, id);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            Users user = new Users();
+                            user.setUserID(rs.getString("UserID"));
+                            user.setFullName(rs.getString("FullName"));
+                            user.setEmail(rs.getString("Email"));
+                            user.setPassword(rs.getString("Password"));
+                            user.setPermissionID(rs.getInt("PermissionID"));
+                            user.setStatus(rs.getBoolean("Status"));
+                            user.setResetToken(rs.getString("ResetToken"));
+                            user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
+                            user.setDateOfBirth(rs.getDate("DateOfBirth"));
+                            user.setAvatar(rs.getString("AvatarSrc"));
+                            return user;
+                        }
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                // Nếu kết nối từ DBContext_Duc null, thử dùng DBContext thay thế
+                try (Connection conn = DBContext.getConnection();
+                     PreparedStatement ps = conn.prepareStatement(sql)) {
+                    ps.setString(1, id);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            Users user = new Users();
+                            user.setUserID(rs.getString("UserID"));
+                            user.setFullName(rs.getString("FullName"));
+                            user.setEmail(rs.getString("Email"));
+                            user.setPassword(rs.getString("Password"));
+                            user.setPermissionID(rs.getInt("PermissionID"));
+                            user.setStatus(rs.getBoolean("Status"));
+                            user.setResetToken(rs.getString("ResetToken"));
+                            user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
+                            user.setDateOfBirth(rs.getDate("DateOfBirth"));
+                            user.setAvatar(rs.getString("AvatarSrc"));
+                            return user;
+                        }
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
             }
-
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -477,5 +504,80 @@ public class UserDAO {
         }
 
         return user;
+    }
+
+    /**
+     * Cập nhật mật khẩu cho người dùng
+     *
+     * @param userID ID của người dùng
+     * @param currentPassword Mật khẩu hiện tại
+     * @param newPassword Mật khẩu mới
+     * @return true nếu cập nhật thành công, false nếu thất bại hoặc mật khẩu hiện tại không đúng
+     */    public static boolean updatePassword(String userID, String currentPassword, String newPassword) {
+        // Kiểm tra mật khẩu hiện tại
+        Users user = getUserById(userID);
+        if (user == null || !user.getPassword().equals(currentPassword)) {
+            return false; // Mật khẩu hiện tại không đúng
+        }
+
+        // Sử dụng phương thức changePassword đã được cải tiến để cập nhật mật khẩu
+        return changePassword(userID, newPassword);
+    }
+
+    /**
+     * Kiểm tra mật khẩu hiện tại của người dùng
+     * 
+     * @param userID ID người dùng
+     * @param password Mật khẩu cần kiểm tra
+     * @return true nếu mật khẩu đúng, false nếu mật khẩu sai
+     */
+    public static boolean checkPassword(String userID, String password) {
+        Users user = getUserById(userID);
+        if (user == null) {
+            return false;
+        }
+        return user.getPassword().equals(password);
+    }
+
+    /**
+     * Thay đổi mật khẩu người dùng
+     * 
+     * @param userID ID người dùng
+     * @param newPassword Mật khẩu mới
+     * @return true nếu thay đổi thành công, false nếu thất bại
+     */    public static boolean changePassword(String userID, String newPassword) {
+        String sql = "UPDATE users SET Password = ? WHERE UserID = ?";
+        
+        // Thử với DBContext_Duc
+        DBContext_Duc db = DBContext_Duc.getInstance();
+        if (db.connection != null) {
+            try {
+                PreparedStatement ps = db.connection.prepareStatement(sql);
+                ps.setString(1, newPassword);
+                ps.setString(2, userID);
+                int rowsAffected = ps.executeUpdate();
+                return rowsAffected > 0;
+            } catch (SQLException e) {
+                LOGGER.log(Level.SEVERE, "Lỗi khi cập nhật mật khẩu với DBContext_Duc: {0}", e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        
+        // Nếu kết nối DBContext_Duc thất bại, thử với DBContext
+        try (Connection conn = DBContext.getConnection()) {
+            if (conn != null) {
+                try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                    ps.setString(1, newPassword);
+                    ps.setString(2, userID);
+                    int rowsAffected = ps.executeUpdate();
+                    return rowsAffected > 0;
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi cập nhật mật khẩu với DBContext: {0}", e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return false;
     }
 }

@@ -549,7 +549,77 @@ body {
     margin-left: 8px;
 }
 
-/* Responsive Design */
+/* CSS cho trang đổi mật khẩu */
+.password-container {
+    max-width: 600px;
+    margin: 50px auto;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.password-container h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.btn-back {
+    margin-top: 20px;
+    display: block;
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: #6c757d;
+    border-color: #6c757d;
+    transition: background-color 0.3s;
+}
+
+.btn-back:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+#passwordChangeForm .btn-primary {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    transition: background-color 0.3s;
+}
+
+#passwordChangeForm .btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+.form-text {
+    font-size: 13px;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+#passwordMatchError {
+    font-size: 14px;
+    margin-top: 5px;
+    color: #dc3545;
+}
+
+/* Responsive styling for password container */
+@media (max-width: 768px) {
+    .password-container {
+        max-width: 90%;
+        padding: 20px;
+        margin: 30px auto;
+    }
+}
+
 @media (max-width: 768px) {
     .nav-menu {
         display: none;

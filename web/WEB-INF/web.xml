@@ -81,10 +81,13 @@
     <servlet>
         <servlet-name>VerifyAccountServlet</servlet-name>
         <servlet-class>controller.VerifyAccountServlet</servlet-class>
-    </servlet>
-    <servlet>
+    </servlet>    <servlet>
         <servlet-name>ResendVerificationServlet</servlet-name>
         <servlet-class>controller.ResendVerificationServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ChangePasswordServlet</servlet-name>
+        <servlet-class>controller.ChangePasswordServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>
@@ -166,10 +169,13 @@
     <servlet-mapping>
         <servlet-name>VerifyAccountServlet</servlet-name>
         <url-pattern>/verify</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
+    </servlet-mapping>    <servlet-mapping>
         <servlet-name>ResendVerificationServlet</servlet-name>
         <url-pattern>/resend-verification</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ChangePasswordServlet</servlet-name>
+        <url-pattern>/change-password</url-pattern>
     </servlet-mapping>
 
     <session-config>

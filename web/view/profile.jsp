@@ -37,9 +37,7 @@
     String contextPath = request.getContextPath();
     String avatarPath = user.getAvatar() != null ? user.getAvatar() : "img/Hinh-anh-dai-dien-mac-dinh-Facebook.png";
     
-        %>
-
-        <div class="profile-container">
+        %>        <div class="profile-container">
             <h1>Thông tin cá nhân</h1>
 
             <form action="profile?action=update" method="POST" enctype="multipart/form-data">
@@ -92,26 +90,60 @@
                 </div>
             </form>
 
-            <form action="verifyCode?action=sendOtp" method="POST">
-                <input type="hidden" name="type" value="Verify current email">
-                <input type="hidden" name="email" value="<%= user.getEmail() %>">
-                <div class="mb-3">
-                    <input type="submit" value="Thay đổi email" class="btn btn-secondary">
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <form action="verifyCode?action=sendOtp" method="POST">
+                        <input type="hidden" name="type" value="Verify current email">
+                        <input type="hidden" name="email" value="<%= user.getEmail() %>">
+                        <div class="mb-3">
+                            <button type="submit" class="btn btn-secondary w-100">
+                                <i class="fas fa-envelope"></i> Thay đổi email
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            </form>
-
-
-            <% String msg = (String) request.getAttribute("msg");
-       if (msg != null) { %>
-            <div class="alert alert-info"><%= msg %></div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <a href="change-password" class="btn btn-primary w-100">
+                            <i class="fas fa-key"></i> Đổi mật khẩu
+                        </a>
+                    </div>
+                </div>
+            </div>            <% 
+               // Kiểm tra thông báo từ request
+               String msg = (String) request.getAttribute("msg");
+               String msgType = (String) request.getAttribute("msgType");
+               
+               // Nếu không có trong request, kiểm tra trong session
+               if (msg == null) {
+                   msg = (String) session.getAttribute("msg");
+                   msgType = (String) session.getAttribute("msgType");
+                   // Xóa thông báo khỏi session sau khi đã lấy ra
+                   if (msg != null) {
+                       session.removeAttribute("msg");
+                       session.removeAttribute("msgType");
+                   }
+               }
+               
+               // Hiển thị thông báo nếu có
+               if (msg != null) { 
+                   String alertClass = "alert-info";
+                   if (msgType != null && msgType.equals("error")) {
+                       alertClass = "alert-danger";
+                   } else if (msgType != null && msgType.equals("success")) {
+                       alertClass = "alert-success";
+                   }
+            %>
+            <div id="alertMessage" class="alert <%= alertClass %>">
+                <%= msg %>
+                <button type="button" class="btn-close float-end" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
             <% } %>
         </div>
 
 
         <!-- Bootstrap JS -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-        <!-- Custom JS -->
-        <script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>        <!-- Custom JS -->        <script>
             // Preview avatar before upload
             document.getElementById('avatar').addEventListener('change', function (event) {
                 const file = event.target.files[0];
@@ -123,6 +155,21 @@
                     reader.readAsDataURL(file);
                 }
             });
+            
+            // Tự động ẩn thông báo sau 5 giây
+            const alertMessage = document.getElementById('alertMessage');
+            if (alertMessage) {
+                setTimeout(function() {
+                    // Tạo hiệu ứng fade out
+                    alertMessage.style.transition = 'opacity 1s';
+                    alertMessage.style.opacity = '0';
+                    
+                    // Sau khi fade out hoàn thành, ẩn hoàn toàn phần tử
+                    setTimeout(function() {
+                        alertMessage.style.display = 'none';
+                    }, 1000);
+                }, 5000); // Hiển thị trong 5 giây
+            }
         </script>
         <jsp:include page="./components/footer.jsp" />
 

@@ -35,11 +35,11 @@ public class FormBuilderServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
 
-        String userId = (String) session.getAttribute("userId");
+        String userId = (String) session.getAttribute("userID");
         // Kiểm tra quyền truy cập (chỉ cho roleId 1-7)
         UserClub userClub = userClubDAO.getUserClubByUserId(userId);
         if (userClub == null || userClub.getRoleID() < 1 || userClub.getRoleID() > 7) {
-            response.sendRedirect(request.getContextPath() + "/dashboard?error=access_denied");
+            response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied");
             return;
         }
         LOGGER.info("User " + userId + " accessing form builder with role " + userClub.getRoleID() + " in club " + userClub.getClubID());
@@ -53,7 +53,7 @@ public class FormBuilderServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
 
-        String userId = (String) session.getAttribute("userId");
+        String userId = (String) session.getAttribute("userID");
 
         // Lấy thông tin user club từ session hoặc database
         UserClub userClub = (UserClub) session.getAttribute("userClub");

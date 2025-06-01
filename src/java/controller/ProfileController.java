@@ -43,9 +43,7 @@ public class ProfileController extends HttpServlet {
             request.getRequestDispatcher("view/profile.jsp").forward(request, response);
             return;
         }
-    }
-
-    @Override
+    }    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getParameter("action");
@@ -160,6 +158,14 @@ public class ProfileController extends HttpServlet {
         request.setAttribute("msg", "Cập nhật thành công");
         request.setAttribute("msgType", "success");
         request.getRequestDispatcher("view/profile.jsp").forward(request, response);
+    }    
+    /**
+     * Phương thức này chỉ để giữ tương thích ngược.
+     * Hiện tại chức năng đổi mật khẩu đã chuyển sang ChangePasswordServlet
+     */
+    private void changePassword(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // Chuyển hướng đến trang đổi mật khẩu mới
+        response.sendRedirect("change-password");
     }
 
 }

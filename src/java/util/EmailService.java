@@ -114,7 +114,7 @@ public class EmailService {
                     Message.RecipientType.TO,
                     InternetAddress.parse(toEmail)
             );
-            message.setSubject("Xác nhận đăng ký tài khoản - Hệ thống Quản lý Câu lạc bộ FPT");
+            message.setSubject("Account Verification – FPT Club Management System");
             
             // Tạo URL xác nhận
             String verificationUrl = baseUrl + contextPath + "/verify?token=" + verificationToken;
@@ -133,7 +133,7 @@ public class EmailService {
                     + "<p style='background-color: #f5f5f5; padding: 10px; border-radius: 4px;'>" + verificationUrl + "</p>"
                     + "<p>Lưu ý: Liên kết xác nhận này sẽ hết hạn sau 24 giờ.</p>"
                     + "<p>Nếu bạn không thực hiện yêu cầu đăng ký này, vui lòng bỏ qua email.</p>"
-                    + "<p>Thân mến,<br>Ban quản trị CLB FPT</p>"
+                    + "<p>Thân mến,<br>Ban quản trị CMS</p>"
                     + "</div>";
             
             message.setContent(htmlContent, "text/html; charset=UTF-8");
