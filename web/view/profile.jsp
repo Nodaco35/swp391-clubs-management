@@ -23,8 +23,7 @@
     </head>
     <link rel="stylesheet" href="./css/profileStyle.css"/>
     <!-- CSS -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
-
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/eventsPage.css"/>
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <body>
@@ -100,7 +99,7 @@
                     <input type="submit" value="Thay đổi email" class="btn btn-secondary">
                 </div>
             </form>
-            
+
 
             <% String msg = (String) request.getAttribute("msg");
        if (msg != null) { %>

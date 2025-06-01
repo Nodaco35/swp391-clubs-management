@@ -37,6 +37,9 @@
         <servlet-class>controller.EventsPageServlet</servlet-class>
     </servlet>
     <servlet>
+        <servlet-name>NotificationController</servlet-name>
+        <servlet-class>controller.NotificationController</servlet-class>
+
         <servlet-name>EventDetailServlet</servlet-name>
         <servlet-class>controller.EventDetailServlet</servlet-class>
     </servlet>
@@ -84,9 +87,7 @@
     <servlet-mapping>
         <servlet-name>UserClubServlet</servlet-name>
         <url-pattern>/club-members</url-pattern>
-<<<<<<< HEAD
-    </servlet-mapping>
-=======
+
     </servlet-mapping>    <servlet-mapping>
         <servlet-name>ClubDetailServlet</servlet-name>
         <url-pattern>/club-detail</url-pattern>
@@ -106,12 +107,15 @@
     <servlet-mapping>
         <servlet-name>ResendVerificationServlet</servlet-name>
         <url-pattern>/resend-verification</url-pattern>
->>>>>>> origin/feature/Login
     <servlet-mapping>
         <servlet-name>EventsPageServlet</servlet-name>
         <url-pattern>/events-page</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
+        <servlet-name>NotificationController</servlet-name>
+        <url-pattern>/notification</url-pattern>
+   </servlet-mapping>
+   <servlet-mapping>
         <servlet-name>EventDetailServlet</servlet-name>
         <url-pattern>/event-detail</url-pattern>
     </servlet-mapping>

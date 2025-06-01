@@ -46,6 +46,7 @@ body {
     top: 0;
     z-index: 1000;
     border-bottom: 1px solid var(--border);
+    
 }
 
 .header-container {
@@ -91,7 +92,7 @@ body {
     background: var(--accent);
     box-shadow: 0 0 0 2px var(--primary);
 }
-
+    
 .search-icon {
     color: var(--text-light);
     margin-right: 0.5rem;

@@ -74,6 +74,7 @@ public class RegisterServlet extends HttpServlet {
         boolean success = ud.register(newUser);
         LOGGER.log(Level.INFO, "Kết quả đăng ký: {0}", success ? "Thành công" : "Thất bại");
         if (success) {
+
             // Tạo token xác minh và thời gian hết hạn
             String verificationToken = EmailService.generateVerificationToken();
             java.util.Date tokenExpiry = EmailService.generateTokenExpiryTime();
