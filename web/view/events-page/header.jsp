@@ -40,6 +40,7 @@
                         <li><a href="${pageContext.request.contextPath}/" class="${pageContext.request.servletPath != '/' ? '' : 'active'}">Trang Chủ</a></li>
                         <li><a href="${pageContext.request.contextPath}/clubs" class="${pageContext.request.servletPath != '/clubs' ? '' : 'active'}">Câu Lạc Bộ</a></li>
                         <li><a href="${pageContext.request.contextPath}/events-page" class="${pageContext.request.servletPath != '/events-page' ? '' : 'active'}">Sự Kiện</a></li>
+ 
                     </ul>
                 </nav>
 
@@ -54,6 +55,7 @@
                                 <form action="logout" method="post">
                                     <input class="btn btn-primary" type="submit" value="Logout">
                                 </form>
+                                <a href="${pageContext.request.contextPath}/my-club" class="btn btn-primary">MyClub</a>
                             </div>
                         </c:when>
                         <c:otherwise>

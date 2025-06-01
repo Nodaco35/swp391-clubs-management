@@ -417,7 +417,7 @@ a:hover {
 /* FormBuilder Specific Styles */
 
 /* Header */
-.header {
+.form-header {
   position: sticky;
   top: 0;
   z-index: 50;
