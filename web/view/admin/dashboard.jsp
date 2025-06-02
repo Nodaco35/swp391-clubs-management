@@ -81,9 +81,15 @@
                     <div class="card-header">
                         <h2 class="card-title">Đơn đề xuất thành lập CLB mới</h2>
                         <div class="card-actions">
-                            <button class="btn btn-outline">
-                                <i class="fas fa-filter"></i> Lọc
-                            </button>
+                            <div class="filter-group">
+                                <label class="filter-label">Lọc theo trạng thái</label>
+                                <select class="filter-select" onchange="filterApplications(this.value)">
+                                    <option value="all">Tất cả</option>
+                                    <option value="PENDING">Chờ duyệt</option>
+                                    <option value="APPROVED">Đã duyệt</option>
+                                    <option value="REJECTED">Từ chối</option>
+                                </select>
+                            </div>
                             <button class="btn btn-outline">
                                 <i class="fas fa-download"></i> Xuất
                             </button>
@@ -103,8 +109,9 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    <!-- Đơn chờ duyệt -->
                                     <c:forEach items="${pendingClubRequests}" var="request">
-                                        <tr>
+                                        <tr data-status="PENDING">
                                             <td>#CLB${request.applicationID}</td>
                                             <td>${request.clubName}</td>
                                             <td>${request.userID}</td>
@@ -132,6 +139,55 @@
                                         </tr>
                                     </c:forEach>
 
+                                    <!-- Đơn đã duyệt -->
+                                    <c:forEach items="${approvedClubRequests}" var="request">
+                                        <tr data-status="APPROVED">
+                                            <td>#CLB${request.applicationID}</td>
+                                            <td>${request.clubName}</td>
+                                            <td>${request.userID}</td>
+                                            <td>
+                                                <fmt:formatDate value="${request.submitDate}" pattern="dd/MM/yyyy HH:mm" />
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-approved">
+                                                    <i class="fas fa-check"></i> Đã duyệt
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="table-actions">
+                                                    <button class="btn btn-icon btn-outline" onclick="openModal('viewProposalModal${request.applicationID}')">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+
+                                    <!-- Đơn bị từ chối -->
+                                    <c:forEach items="${rejectedClubRequests}" var="request">
+                                        <tr data-status="REJECTED">
+                                            <td>#CLB${request.applicationID}</td>
+                                            <td>${request.clubName}</td>
+                                            <td>${request.userID}</td>
+                                            <td>
+                                                <fmt:formatDate value="${request.submitDate}" pattern="dd/MM/yyyy HH:mm" />
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-rejected">
+                                                    <i class="fas fa-times"></i> Từ chối
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="table-actions">
+                                                    <button class="btn btn-icon btn-outline" onclick="openModal('viewProposalModal${request.applicationID}')">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+
+
                                 </tbody>
                             </table>
                         </div>
@@ -140,11 +196,16 @@
 
                 <div class="card">
                     <div class="card-header">
-                        <h2 class="card-title">CLB mới thành lập</h2>
+
+                        <h2 class="card-title">Câu lạc bộ</h2>
+
                         <div class="card-actions">
-                            <button class="btn btn-outline">
-                                <i class="fas fa-filter"></i> Lọc
-                            </button>
+                            <label class="filter-label">Trạng thái</label>
+                            <select class="filter-select" onchange="filterClubs(this.value)">
+                                <option value="all">Tất cả</option>
+                                <option value="active">Hoạt động</option>
+                                <option value="inactive">Ngừng hoạt động</option>
+                            </select>
                             <button class="btn btn-primary">
                                 <i class="fas fa-plus"></i> Thêm CLB
                             </button>
@@ -165,8 +226,9 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <c:forEach items="${recentlyApprovedClubs}" var="club">
-                                        <tr>
+                                    <!-- CLB đang hoạt động -->
+                                    <c:forEach items="${activeClubs}" var="club">
+                                        <tr data-status="active">
                                             <td>#CLB${club.clubID}</td>
                                             <td>${club.clubName}</td>
                                             <td></td>
@@ -179,17 +241,41 @@
                                             </td>
                                             <td>
                                                 <div class="table-actions">
-                                                    <button class="btn btn-icon btn-outline" onclick="viewClub(${club.clubId})">
+                                                    <button class="btn btn-icon btn-outline" onclick="viewClub(${club.clubID})">
                                                         <i class="fas fa-eye"></i>
                                                     </button>
-                                                    <button class="btn btn-icon btn-outline" onclick="editClub(${club.clubId})">
+                                                    <button class="btn btn-icon btn-outline" onclick="editClub(${club.clubID})">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
                                                 </div>
                                             </td>
                                         </tr>
                                     </c:forEach>
+
+                                    <!-- CLB không hoạt động -->
+                                    <c:forEach items="${inactiveClubs}" var="club">
+                                        <tr data-status="inactive">
+                                            <td>#CLB${club.clubID}</td>
+                                            <td>${club.clubName}</td>
+                                            <td></td>
+                                            <td>${club.establishedDate}</td>
+                                            <td>${club.memberCount}</td>
+                                            <td>
+                                                <span class="badge badge-rejected">
+                                                    <i class="fas fa-times"></i> Ngừng hoạt động
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="table-actions">
+                                                    <button class="btn btn-icon btn-outline" onclick="viewClub(${club.clubID})">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
                                 </tbody>
+
                             </table>
                         </div>
                     </div>
@@ -197,36 +283,37 @@
             </main>
         </div>
 
-        <!-- Modal xem đơn đề xuất -->
-        <c:forEach items="${pendingClubRequests}" var="request">
-            <div id="viewProposalModal${request.requestId}" class="modal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="modal-title">Đơn đề xuất thành lập CLB</h2>
-                        <button class="modal-close" onclick="closeModal('viewProposalModal${request.requestId}')">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <!-- Chi tiết đơn đề xuất -->
-                        <div class="form-group">
-                            <label class="form-label">ID đơn</label>
-                            <input type="text" class="form-control" value="#CLB${request.requestId}" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Tên CLB</label>
-                            <input type="text" class="form-control" value="${request.clubName}" readonly>
-                        </div>
-                        <!-- Các trường khác -->
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-outline" onclick="closeModal('viewProposalModal${request.requestId}')">Đóng</button>
-                        <button class="btn btn-error" onclick="rejectRequest(${request.requestId})">Từ chối</button>
-                        <button class="btn btn-success" onclick="approveRequest(${request.requestId})">Phê duyệt</button>
-                    </div>
-                </div>
-            </div>
-        </c:forEach>
+        <script>
+            function filterApplications(status) {
+                // Chọn tất cả các hàng có thuộc tính data-status (cả PENDING, APPROVED, REJECTED)
+                const rows = document.querySelectorAll('tbody tr[data-status]');
 
-        <!-- JavaScript -->
-        <script src="${pageContext.request.contextPath}/js/admin-dashboard.js"></script>
+                rows.forEach(row => {
+                    const rowStatus = row.getAttribute('data-status');
+
+                    // Hiển thị nếu trạng thái trùng hoặc đang chọn "Tất cả"
+                    const shouldShow = (status === 'all' || rowStatus === status);
+                    row.style.display = shouldShow ? '' : 'none';
+                });
+            }
+
+            // Đóng modal khi click ra ngoài (nếu bạn có modal sử dụng class 'modal')
+            window.onclick = function (event) {
+                if (event.target.classList.contains('modal')) {
+                    event.target.style.display = 'none';
+                }
+            };
+        </script>
+        <script>
+            function filterClubs(status) {
+                const rows = document.querySelectorAll('tbody tr[data-status]');
+                rows.forEach(row => {
+                    const rowStatus = row.getAttribute('data-status');
+                    const show = (status === 'all' || rowStatus === status);
+                    row.style.display = show ? '' : 'none';
+                });
+            }
+        </script>
+
     </body>
 </html>
