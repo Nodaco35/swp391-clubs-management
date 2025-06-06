@@ -12,7 +12,7 @@ public class DBContext {
             Class.forName("com.mysql.cj.jdbc.Driver"); // chú ý driver mới của MySQL
             String url = "jdbc:mysql://localhost:3306/ClubManagementSystem?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
             String user = "root";
-            String password = "nodaco123";
+            String password = "Vinh19102005";
 
             return DriverManager.getConnection(url, user, password);
         } catch (Exception e) {
@@ -29,5 +29,14 @@ public class DBContext {
                 System.out.println("Error closing connection: " + e.getMessage());
             }
         }
+    }
+    public static void main(String[] args) {
+        Connection conn = DBContext.getConnection();
+        if (conn != null) {
+            System.out.println("Connection successful!");
+        } else {
+            System.out.println("Connection failed!");
+        }
+        DBContext.closeConnection(conn);
     }
 }
