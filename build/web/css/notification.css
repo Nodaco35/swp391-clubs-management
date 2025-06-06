@@ -1,0 +1,322 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+    background-color: #f5f5f5;
+    padding: 10px;
+    margin-top: 0px;
+}
+
+footer {
+    margin-top: auto;
+    padding: 0;
+    background-color: #1d1d1d;
+    color: white;
+    text-align: center;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--background);
+    color: var(--foreground);
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+.container-thongbao {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    background-color: #f5f5f5;
+}
+
+.tabs-search-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.tabs {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.tabs a {
+    padding: 6px 16px;
+    border: 1px solid #007bff;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    color: #007bff;
+    background-color: #ffffff;
+    transition: all 0.2s ease;
+    margin-bottom: 5px;
+    margin-top: 5px;
+}
+
+.tabs a:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.tabs a.active {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Search box in main section */
+.container-thongbao .search-box {
+    background: #ffffff; /* White background for search bar in main */
+    position: relative;
+    display: flex;
+    align-items: center;
+    border-radius: 25px;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border); /* Added border */
+}
+
+.container-thongbao .search-box:focus-within {
+    box-shadow: 0 0 0 2px var(--primary);
+}
+
+.container-thongbao .search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    padding: 0.5rem;
+    font-size: 1rem;
+    color: #000000; /* Black text color */
+}
+
+.container-thongbao .search-input::placeholder {
+    color: var(--text-light);
+}
+
+.notification {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: white;
+    margin-bottom: 2px;
+    padding: 0 20px 0px 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(40, 59, 72, 0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    gap: 10px;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.notification.unread {
+    background-color: #f8fafc;
+    border-left: 4px solid var(--primary, #007bff);
+    transform: scale(1.02);
+}
+
+.notification.read .notification-middle * {
+    opacity: 0.6;
+    font-weight: 400;
+}
+
+.notification-left img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.notification-middle {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.sender-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #222;
+}
+
+.email-title {
+    font-weight: 500;
+    color: #000;
+    font-size: 0.95rem;
+    margin: 3px 0;
+}
+
+.notification-time {
+    font-size: 0.75rem;
+    color: #888;
+}
+
+.notification-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+    min-width: 40px;
+}
+
+.unread-dot {
+    width: 10px;
+    height: 10px;
+    background-color: var(--primary, blue);
+    border-radius: 50%;
+}
+
+.btn-delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #666;
+}
+
+.btn-delete:hover {
+    color: #007bff;
+}
+
+.pencil-icon {
+    position: fixed;
+    top: 600px;
+    left: 20px;
+    background-color: #007bff;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 1000;
+}
+
+.notification-form {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    width: 500px;
+    max-width: 90%;
+    z-index: 1001;
+}
+
+.notification-form h2 {
+    margin: 0 0 10px;
+    font-size: 18px;
+    color: #333;
+}
+
+.notification-form input,
+.notification-form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.notification-form textarea {
+    height: 100px;
+    resize: vertical;
+}
+
+.notification-form .buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.notification-form button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.notification-form .send-btn {
+    background-color: #007bff;
+    color: white;
+}
+
+.notification-form .cancel-btn {
+    background-color: #f1f1f1;
+    color: #333;
+}
+
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.4);
+    z-index: 1000;
+}
+
+.error-popup {
+    position: fixed;
+    top: 0%;
+    left: 50%;
+    transform: translate(-50%, 0);
+    width: 400px;
+    padding: 10px;
+    max-width: 90%;
+    background-color: #fff;
+    border: 1px solid #e74c3c;
+    z-index: 2000;
+    display: none;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    border-radius: 8px;
+}
+
+.ok-btn {
+    margin-top: 10px;
+    background-color: #e74c3c;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    display: inline-block;
+    margin: 20px auto 0;
+    border-radius: 10px;
+}
+
+.error-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1999;
+}

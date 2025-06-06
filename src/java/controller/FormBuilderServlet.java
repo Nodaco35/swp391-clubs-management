@@ -10,15 +10,22 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.annotation.WebServlet;
 import models.ApplicationFormTemplate;
 import models.UserClub;
-import models.Users;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONException;
+
 
 @WebServlet(name = "FormBuilderServlet", urlPatterns = {"/formBuilder"})
 public class FormBuilderServlet extends HttpServlet {
@@ -28,78 +35,95 @@ public class FormBuilderServlet extends HttpServlet {
 
     @Override
     public void init() {
-        formTemplateDAO = new ApplicationFormTemplateDAO();
+        formTemplateDAO = new ApplicationFormTemplateDAO(); // Khởi tạo DAO
         userClubDAO = new UserClubDAO();
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
-
         String userId = (String) session.getAttribute("userID");
 
-        // Kiểm tra quyền truy cập (chỉ cho roleId 1-3)
         UserClub userClub = userClubDAO.getUserClubByUserId(userId);
         if (userClub == null || userClub.getRoleID() < 1 || userClub.getRoleID() > 3) {
-            response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied");
+            response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền truy cập chức năng này.", StandardCharsets.UTF_8.name()));
             return;
         }
-        // Lưu thông tin club vào session để sử dụng
         session.setAttribute("userClub", userClub);
-        // Xử lý khi chỉnh sửa form với templateId
-    String templateIdStr = request.getParameter("templateId");
-    if (templateIdStr != null && !templateIdStr.isEmpty()) {
-        try {
-            int templateId = Integer.parseInt(templateIdStr);
-            ApplicationFormTemplate template = formTemplateDAO.getTemplateById(templateId);
-            if (template != null) {
-                String title = template.getTitle();
-                // Giả định bạn đã thêm phương thức getTemplatesByTitle trong ApplicationFormTemplateDAO
-                List<ApplicationFormTemplate> formQuestions = formTemplateDAO.getTemplatesByTitle(title);
-                request.setAttribute("formQuestions", formQuestions);
-                if (formQuestions != null) {
-                    for (ApplicationFormTemplate q : formQuestions) {
-                        System.out.println("Question: " + q.getFieldName() + ", isRequired: " + q.isRequired());
+
+        String templateIdStr = request.getParameter("templateId");
+
+        if (templateIdStr != null && !templateIdStr.isEmpty()) {
+            try {
+                // templateIdStr có thể là ID của một câu hỏi bất kỳ trong form, dùng để lấy title
+                int representativeTemplateId = Integer.parseInt(templateIdStr);
+                ApplicationFormTemplate representativeQuestion = formTemplateDAO.getTemplateById(representativeTemplateId);
+
+                if (representativeQuestion != null) {
+                    String formTitle = representativeQuestion.getTitle();
+                    String formType = representativeQuestion.getFormType(); // 'Club' hoặc 'Event'
+                    int clubIdForForm = representativeQuestion.getClubId();
+
+                    // Chỉ cho phép chỉnh sửa form của club hiện tại
+                    if (clubIdForForm != userClub.getClubID()) {
+                        response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền chỉnh sửa form này.", StandardCharsets.UTF_8.name()));
+                        return;
                     }
+
+                    // Lấy tất cả các câu hỏi (ApplicationFormTemplate) có cùng title và clubId
+                    List<ApplicationFormTemplate> formQuestions = formTemplateDAO.getTemplatesByGroup(formTitle, clubIdForForm, representativeTemplateId);
+
+                    if (formQuestions != null && !formQuestions.isEmpty()) {
+                        LOGGER.info("Found " + formQuestions.size() + " questions for title: " + formTitle);
+                    } else {
+                        LOGGER.warning("No questions found for title: " + formTitle + " and clubId: " + clubIdForForm);
+                    }
+
+                    request.setAttribute("formTitleToEdit", formTitle);
+                    request.setAttribute("formTypeToEdit", formType);
+                    request.setAttribute("formQuestions", formQuestions);
+                    // editingTemplateId ở đây có thể hiểu là ID đại diện cho form đang sửa,
+                    request.setAttribute("editingTemplateId", representativeTemplateId); // ID của một câu hỏi trong form
+
                 } else {
-                    System.out.println("formQuestions is null");
+                    LOGGER.warning("Representative template with ID " + representativeTemplateId + " not found.");
+                    request.setAttribute("errorMessage", "Không tìm thấy mẫu form với ID cung cấp.");
                 }
-                request.setAttribute("formTitle", title);
-                request.setAttribute("formType", template.getFormType());
+            } catch (NumberFormatException e) {
+                LOGGER.log(Level.SEVERE, "Invalid templateId format: " + templateIdStr, e);
+                request.setAttribute("errorMessage", "ID mẫu form không hợp lệ.");
+            } catch (SQLException e) {
+                LOGGER.log(Level.SEVERE, "Error loading form data for editing", e);
+                request.setAttribute("errorMessage", "Không thể tải dữ liệu form: " + e.getMessage());
             }
-        } catch (NumberFormatException e) {
-            LOGGER.log(Level.SEVERE, "Invalid templateId format: " + templateIdStr, e);
-            request.setAttribute("errorMessage", "ID mẫu form không hợp lệ.");
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Error loading form data", e);
-            request.setAttribute("errorMessage", "Không thể tải dữ liệu form: " + e.getMessage());
+        } else {
+            LOGGER.info("Creating a new form.");
         }
-    }
         request.getRequestDispatcher("/view/student/chairman/formBuilder.jsp").forward(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
-
         String userId = (String) session.getAttribute("userID");
 
-        // Lấy thông tin user club từ session hoặc database
         UserClub userClub = (UserClub) session.getAttribute("userClub");
         if (userClub == null) {
             userClub = userClubDAO.getUserClubByUserId(userId);
+            if (userClub != null) {
+                session.setAttribute("userClub", userClub);
+            }
         }
 
-        // Kiểm tra quyền truy cập
         if (userClub == null || userClub.getRoleID() < 1 || userClub.getRoleID() > 3) {
-            response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied");
+            response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền truy cập chức năng này.", StandardCharsets.UTF_8.name()));
             return;
         }
 
         String action = request.getParameter("action");
         int clubId = userClub.getClubID();
 
-        LOGGER.info("Processing form action: " + action + " for user: " + userId + " in club: " + clubId);
+        LOGGER.info("FormBuilderServlet doPost: action=" + action + ", clubId=" + clubId);
 
         if ("save".equals(action) || "publish".equals(action)) {
             try {
@@ -111,103 +135,143 @@ public class FormBuilderServlet extends HttpServlet {
                 response.sendRedirect(redirectPath);
 
             } catch (SQLException ex) {
-                LOGGER.log(Level.SEVERE, "Error saving form for user " + userId + " in club " + clubId, ex);
-                response.sendRedirect(request.getContextPath() + "/formBuilder?error=true&message=" + URLEncoder.encode(ex.getMessage(), "UTF-8"));
-            } catch (Exception ex) {
-                LOGGER.log(Level.SEVERE, "Unexpected error in form builder", ex);
-                response.sendRedirect(request.getContextPath() + "/formBuilder?error=true&message=" + URLEncoder.encode("Đã xảy ra lỗi không mong muốn", "UTF-8"));
+                LOGGER.log(Level.SEVERE, "SQL Error saving form for user " + userId + " in club " + clubId, ex);
+                response.sendRedirect(request.getContextPath() + "/formBuilder?error=true&message=" + URLEncoder.encode("Lỗi cơ sở dữ liệu: " + ex.getMessage(), StandardCharsets.UTF_8.name()));
+            } catch (JSONException ex) {
+                LOGGER.log(Level.SEVERE, "JSON Error processing form data", ex);
+                response.sendRedirect(request.getContextPath() + "/formBuilder?error=true&message=" + URLEncoder.encode("Lỗi xử lý dữ liệu JSON: " + ex.getMessage(), StandardCharsets.UTF_8.name()));
+            }
+            catch (Exception ex) {
+                LOGGER.log(Level.SEVERE, "Unexpected error in form builder (doPost)", ex);
+                response.sendRedirect(request.getContextPath() + "/formBuilder?error=true&message=" + URLEncoder.encode("Đã xảy ra lỗi không mong muốn: " + ex.getMessage(), StandardCharsets.UTF_8.name()));
             }
         }
     }
 
-    private void saveForm(HttpServletRequest request, int clubId, boolean publish) throws SQLException {
-        String formTitle = request.getParameter("formTitle");
-        String formType = request.getParameter("formType");
+    private void saveForm(HttpServletRequest request, int clubId, boolean publish) throws SQLException, JSONException {
+        String formTitleFromInput = request.getParameter("formTitle");
+        String formTypeClient = request.getParameter("formType"); // "member" hoặc "event"
         String questionsJson = request.getParameter("questions");
-        String templateIdStr = request.getParameter("templateId");
-        LOGGER.info("Saving form - Title: " + formTitle + ", Type: " + formType + ", ClubID: " + clubId + ", Publish: " + publish);
+        String editingTemplateIdStr = request.getParameter("editingTemplateId"); // ID của một câu hỏi trong form đang sửa, hoặc null/empty nếu tạo mới
 
-        // Validate input
-        if (formTitle == null || formTitle.trim().isEmpty()) {
-            throw new SQLException("Tiêu đề form không được để trống");
+
+        if (formTitleFromInput == null || formTitleFromInput.trim().isEmpty()) throw new SQLException("Tiêu đề form không được để trống.");
+        if (formTypeClient == null || formTypeClient.trim().isEmpty()) throw new SQLException("Loại form không được để trống.");
+        if (questionsJson == null || questionsJson.trim().isEmpty()) throw new SQLException("Dữ liệu câu hỏi không hợp lệ.");
+
+        JSONArray questionsArray = new JSONArray(questionsJson);
+        String dbFormType = "member".equalsIgnoreCase(formTypeClient) ? "Club" : "Event";
+
+        // Xác định title thực sự của form (quan trọng khi đổi tên form)
+        String originalFormTitleForEdit = formTitleFromInput; // Mặc định là title mới từ input
+        if (editingTemplateIdStr != null && !editingTemplateIdStr.isEmpty()) {
+            try {
+                int repId = Integer.parseInt(editingTemplateIdStr);
+                ApplicationFormTemplate repQuestion = formTemplateDAO.getTemplateById(repId);
+                if (repQuestion != null && repQuestion.getClubId() == clubId) {
+                    originalFormTitleForEdit = repQuestion.getTitle(); // Lấy title gốc từ DB
+                } else {
+                    LOGGER.warning("Editing ID " + editingTemplateIdStr + " not found or does not belong to club " + clubId + ". Treating as new title.");
+                }
+            } catch (NumberFormatException e) {
+                LOGGER.warning("Invalid editingTemplateIdStr: " + editingTemplateIdStr + ". Treating as new title.");
+            }
         }
 
-        if (formType == null || formType.trim().isEmpty()) {
-            throw new SQLException("Loại form không được để trống");
+
+        List<Integer> existingDbQuestionIds = new ArrayList<>();
+        int editingTemplateId = -1;
+        if (editingTemplateIdStr != null && !editingTemplateIdStr.isEmpty()) {
+            try {
+                editingTemplateId = Integer.parseInt(editingTemplateIdStr);
+
+                // === SỬA: Lấy TemplateID lớn nhất (true max) của form cũ, thay vì dùng editingTemplateId ===
+                int trueMaxId = formTemplateDAO.getMaxTemplateIdForForm(originalFormTitleForEdit, clubId);
+                existingDbQuestionIds = formTemplateDAO
+                        .getTemplateIdsByGroup(originalFormTitleForEdit, clubId, trueMaxId);
+
+            } catch (NumberFormatException e) {
+                LOGGER.warning("Invalid editingTemplateIdStr in saveForm: " + editingTemplateIdStr);
+            }
         }
 
-        if (questionsJson == null || questionsJson.trim().isEmpty()) {
-            throw new SQLException("Dữ liệu câu hỏi không hợp lệ: questionsJson rỗng hoặc null");
-        }
 
-        JSONArray questions = new JSONArray(questionsJson);
-        if (questions.length() == 0) {
-            throw new SQLException("Danh sách câu hỏi rỗng");
-        }
+        Set<Integer> processedQuestionIds = new HashSet<>();
 
-        // Xóa các bản ghi cũ với Title này nếu đang chỉnh sửa
-        if (templateIdStr != null && !templateIdStr.isEmpty()) {
-            formTemplateDAO.deleteFormsByTitle(formTitle);
-        }
+        for (int i = 0; i < questionsArray.length(); i++) {
+            JSONObject q = questionsArray.getJSONObject(i);
+            ApplicationFormTemplate template = new ApplicationFormTemplate();
+            template.setClubId(clubId);
+            template.setFormType(dbFormType);
+            template.setTitle(formTitleFromInput); // Luôn dùng title mới từ input
+            template.setFieldName(q.getString("label"));
+            template.setFieldType(mapFieldTypeClientToServer(q.getString("type")));
+            template.setIsRequired(q.getBoolean("required"));
 
-        for (int i = 0; i < questions.length(); i++) {
-                JSONObject q = questions.getJSONObject(i);
-                ApplicationFormTemplate template = new ApplicationFormTemplate();
-                template.setClubId(clubId);
-                template.setFormType(formType.equals("member") ? "Club" : "Event");
-                template.setTitle(formTitle);
-                template.setFieldName(q.getString("label"));
-                template.setFieldType(mapFieldType(q.getString("type")));
-                template.setIsRequired(q.getBoolean("required"));
-
-                // Xử lý options
-                String optionsString = null;
-                if (q.has("options")) {
-                    Object optionsObj = q.get("options");
-                    if (optionsObj instanceof JSONArray) {
-                        // Nếu là JSONArray (cho radio, checkbox, select)
-                        JSONArray optionsArray = (JSONArray) optionsObj;
-                        StringBuilder optionsBuilder = new StringBuilder();
-                        for (int j = 0; j < optionsArray.length(); j++) {
-                            JSONObject option = optionsArray.getJSONObject(j);
-                            if (j > 0) optionsBuilder.append(",");
-                            optionsBuilder.append(option.getString("value"));
-                        }
-                        optionsString = optionsBuilder.toString();
+            String optionsString = null;
+            if (q.has("options")) {
+                Object optionsObj = q.get("options");
+                if (optionsObj instanceof JSONArray) {
+                    JSONArray clientOptionsArray = (JSONArray) optionsObj;
+                    StringBuilder sb = new StringBuilder();
+                    for (int j = 0; j < clientOptionsArray.length(); j++) {
+                        JSONObject opt = clientOptionsArray.getJSONObject(j);
+                        if (j > 0) sb.append(";;"); // SỬA: Dùng ;; làm phân tách
+                        sb.append(opt.getString("value"));
+                    }
+                    optionsString = sb.toString();
                 } else if (optionsObj instanceof String) {
-                    // Nếu là String (cho info type với JSON content)
-                    optionsString = (String) optionsObj;
+                    optionsString = (String) optionsObj; // Cho 'info' type
                 }
             }
             template.setOptions(optionsString);
             template.setPublished(publish);
-            if (templateIdStr != null && !templateIdStr.isEmpty()) {
-                int templateId = Integer.parseInt(templateIdStr);
-                template.setTemplateId(templateId);
 
+            String clientId = q.getString("id"); // ID từ client: có thể là DB ID (số) hoặc temp ID (chuỗi)
+            int currentQuestionDbId = -1;
+            try {
+                currentQuestionDbId = Integer.parseInt(clientId);
+            } catch (NumberFormatException e) {
+                // clientId không phải là số, tức là câu hỏi mới
+            }
+
+            if (currentQuestionDbId != -1 && existingDbQuestionIds.contains(currentQuestionDbId)) {
+                // Câu hỏi đã tồn tại -> Cập nhật
+                template.setTemplateId(currentQuestionDbId);
+                formTemplateDAO.updateTemplate(template);
+                processedQuestionIds.add(currentQuestionDbId);
+                LOGGER.fine("Updated question ID: " + currentQuestionDbId + " with new title: " + formTitleFromInput);
             } else {
-                formTemplateDAO.saveFormTemplate(template); // Thêm mới nếu chưa có
+                int newId = formTemplateDAO.saveFormTemplateAndGetId(template); // Giả sử DAO trả về ID
+                LOGGER.fine("Saved new question with ID: " + newId + " for title: " + formTitleFromInput);
+            }
+        }
+
+        if (editingTemplateIdStr != null && !editingTemplateIdStr.isEmpty()) {
+            for (int dbId : existingDbQuestionIds) {
+                if (!processedQuestionIds.contains(dbId)) {
+                    formTemplateDAO.deleteTemplate(dbId);
+                }
             }
 
         }
-
-
-        LOGGER.info("Successfully saved form with " + questions.length() + " questions");
+        LOGGER.info("Successfully saved/updated form '" + formTitleFromInput + "' with " + questionsArray.length() + " questions processed.");
     }
 
-    private String mapFieldType(String jsType) {
-        switch (jsType) {
+
+    private String mapFieldTypeClientToServer(String jsType) {
+        switch (jsType.toLowerCase()) {
             case "text": return "Text";
             case "textarea": return "Textarea";
             case "email": return "Email";
-            case "select": return "Dropdown";
-            case "tel": return "PhoneNumber";
             case "number": return "Number";
             case "date": return "Date";
             case "radio": return "Radio";
             case "checkbox": return "Checkbox";
             case "info": return "Info";
-            default: return "Text";
+            default:
+                LOGGER.warning("Unknown JS field type: " + jsType + ". Defaulting to Text.");
+                return "Text";
         }
     }
 }
