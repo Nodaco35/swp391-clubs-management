@@ -134,10 +134,7 @@
                                 <div class="error-feedback" id="formTypeError" style="color: #dc3545; font-size: 0.875rem; margin-top: 5px; display: none;">
                                     Vui lòng chọn loại form
                                 </div>
-                                <div id="eventNameField" class="mb-2" style="display: none;">
-                                    <label class="form-label">Tên sự kiện:</label>
-                                    <input type="text" name="eventName" class="form-input" placeholder="Nhập tên sự kiện">
-                                </div>
+                                
                             </div>
                         </div>
                     </div>
