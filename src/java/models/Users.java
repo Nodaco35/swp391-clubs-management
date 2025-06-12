@@ -13,6 +13,7 @@ public class Users {
     private Date tokenExpiry;
     private String dob;
     private String avatar;
+    private String perName;
 
     public Users() {
     }
@@ -115,5 +116,18 @@ public class Users {
         this.tokenExpiry = tokenExpiry;
     }
 
+    public String getPerName() {
+        return perName;
+    }
+
+    public void setPerName(String perName) {
+        this.perName = perName;
+    }
+
+    @Override
+    public String toString() {
+        return "Users{" + "userID=" + userID + ", fullName=" + fullName + ", email=" + email + ", password=" + password + ", dateOfBirth=" + dateOfBirth + ", permissionID=" + permissionID + ", status=" + status + ", resetToken=" + resetToken + ", tokenExpiry=" + tokenExpiry + ", dob=" + dob + ", avatar=" + avatar + ", perName=" + perName + '}';
+    }
+    
 }
 

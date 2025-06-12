@@ -4,16 +4,21 @@ import dal.ClubApplicationDAO;
 import dal.ClubDAO;
 import dal.CreatedClubApplicationsDAO;
 import dal.EventsDAO;
+import dal.PermissionDAO;
+import dal.UserDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Date;
 import java.util.List;
 import models.Clubs;
 import models.ClubApplication;
 import models.CreatedClubApplications;
+import models.Permission;
+import models.Users;
 
 public class AdminServlet extends HttpServlet {
 
@@ -72,7 +77,10 @@ public class AdminServlet extends HttpServlet {
             request.setAttribute("inactiveClubs", inactiveClubs);
 
             request.getRequestDispatcher("/view/admin/dashboard.jsp").forward(request, response);
-        }
+        } else if (action.equals("manageAccounts")) {
+            showAllUser(request, response);
+        } 
+
     }
 
     /**
@@ -86,7 +94,14 @@ public class AdminServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        String action = request.getParameter("action");
+        switch (action) {
+            case "insert":
+                insertUser(request, response);
+                break;
+            default:
+                throw new AssertionError();
+        }
     }
 
     /**
@@ -98,5 +113,50 @@ public class AdminServlet extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+
+    private void showAllUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        int page = 1;
+        int recordsPerPage = 7;
+
+        if (request.getParameter("page") != null) {
+            page = Integer.parseInt(request.getParameter("page"));
+        }
+
+        List<Users> users = UserDAO.findUsersByPage((page - 1) * recordsPerPage, recordsPerPage);
+        int totalRecords = UserDAO.countAllUsers();
+        int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
+
+        request.setAttribute("list", users);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
+        request.getRequestDispatcher("view/admin/users.jsp").forward(request, response);
+    }
+
+    private void insertUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String fullName = request.getParameter("fullName");
+        String email = request.getParameter("email"); 
+        String password = request.getParameter("password");
+        String dateOfBirth = request.getParameter("dateOfBirth");
+        int permissionID = Integer.parseInt(request.getParameter("permissionID"));
+        String status = request.getParameter("status");
+        
+        
+        
+       
+        if (UserDAO.getUserByEmail(email) != null) {
+            request.setAttribute("error", "Email đã tồn tại. Vui lòng sử dụng email khác.");
+            request.setAttribute("formFullName", fullName);
+            request.setAttribute("formEmail", email);
+            request.setAttribute("formPassword", password);
+            request.setAttribute("formDateOfBirth", dateOfBirth);
+            request.setAttribute("formPermissionID", permissionID);
+            request.setAttribute("formStatus", status);
+            // Chuyển hướng lại trang manageAccounts
+            showAllUser(request, response);
+            return;
+        }
+        UserDAO.insertByAdmin(fullName, email, password, dateOfBirth, permissionID);
+        showAllUser(request, response);
+    }
 
 }

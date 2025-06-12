@@ -15,11 +15,10 @@ import jakarta.activation.DataHandler;
 import jakarta.activation.DataSource;
 
 public class Email {
-    // Email: tungletest1.email@gmail.com
-    // Password: qthj sgph dnkf swvz
+    
 
     static final String from = "funiclubs@gmail.com";
-    static final String password = "bojr shol moip wdsr";
+    static final String password = "pxdq kibm yyub xnvp";
 
     public static boolean sendEmail(String to, String tieuDe, String noiDung) {
         // Properties : khai báo các thuộc tính

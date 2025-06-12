@@ -15,6 +15,99 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class UserDAO {
+// Lấy danh sách người dùng theo phân trang
+
+    public static List<Users> findUsersByPage(int offset, int noOfRecords) {
+        List<Users> list = new ArrayList<>();
+        String sql = """
+        SELECT u.*, p.PermissionName
+        FROM Users u
+        JOIN Permissions p ON u.PermissionID = p.PermissionID
+        ORDER BY u.UserID ASC
+        LIMIT ? OFFSET ?
+    """;
+
+        try (PreparedStatement ps = DBContext_Duc.getInstance().connection.prepareStatement(sql)) {
+            ps.setInt(1, noOfRecords);
+            ps.setInt(2, offset);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Users user = new Users();
+                user.setUserID(rs.getString("UserID"));
+                user.setFullName(rs.getString("FullName"));
+                user.setEmail(rs.getString("Email"));
+                user.setPassword(rs.getString("Password"));
+                user.setDateOfBirth(rs.getDate("DateOfBirth"));
+                user.setPermissionID(rs.getInt("PermissionID"));
+                user.setStatus(rs.getBoolean("Status"));
+                user.setResetToken(rs.getString("ResetToken"));
+                user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
+                user.setAvatar(rs.getString("AvatarSrc"));
+                user.setPerName(rs.getString("PermissionName"));
+                list.add(user);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+// Đếm tổng số người dùng
+    public static int countAllUsers() {
+        String sql = "SELECT COUNT(*) FROM Users";
+        try (PreparedStatement ps = DBContext_Duc.getInstance().connection.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public static void insertByAdmin(String fullName, String email, String password, String dateOfBirth, int permissionID) {
+        DBContext_Duc db = DBContext_Duc.getInstance();
+        
+        String sql = """
+                     INSERT INTO `clubmanagementsystem`.`users`
+                     (`UserID`,
+                     `FullName`,
+                     `Email`,
+                     `Password`,
+                     `AvatarSrc`,
+                     `DateOfBirth`,
+                     `PermissionID`,
+                     `Status`)
+                     VALUES
+                     (?,
+                     ?,
+                     ?,
+                     ?,
+                     ?,
+                     ?,
+                     ?,
+                     ?);""";
+        try {
+            if (dateOfBirth.equals("")) {
+                dateOfBirth = null;
+            }
+            PreparedStatement ps = db.connection.prepareStatement(sql);
+            String userID = generateNextUserId();
+            ps.setObject(1, userID);
+            ps.setObject(2, fullName);
+            ps.setObject(3, email);
+            ps.setObject(4, password);
+            ps.setObject(5, "img/Hinh-anh-dai-dien-mac-dinh-Facebook.jpg");
+            ps.setObject(6, dateOfBirth);
+            ps.setObject(7, permissionID);
+            ps.setObject(8, 1);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     public Users getUserByID(String userID) {
         String sql = "SELECT * FROM Users WHERE UserID = ?";
@@ -110,13 +203,15 @@ public class UserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }    public static Users getUserById(String id) {
+    }
+
+    public static Users getUserById(String id) {
         String sql = "SELECT * FROM users WHERE UserID = ?";
-        
+
         // Thử kết nối với DBContext_Duc
         try {
             DBContext_Duc db = DBContext_Duc.getInstance();
-            
+
             // Kiểm tra kết nối không null
             if (db.connection != null) {
                 try (PreparedStatement ps = db.connection.prepareStatement(sql)) {
@@ -142,8 +237,7 @@ public class UserDAO {
                 }
             } else {
                 // Nếu kết nối từ DBContext_Duc null, thử dùng DBContext thay thế
-                try (Connection conn = DBContext.getConnection();
-                     PreparedStatement ps = conn.prepareStatement(sql)) {
+                try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
                     ps.setString(1, id);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (rs.next()) {
@@ -302,7 +396,7 @@ public class UserDAO {
         return userList;
     }
 
-    private String generateNextUserId() {
+    private static String generateNextUserId() {
         String sql = "SELECT UserID FROM Users ORDER BY UserID DESC LIMIT 1";
 
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
@@ -318,12 +412,13 @@ public class UserDAO {
         }
 
         return "U001"; // Nếu chưa có ai trong DB
-    }    public boolean register(Users user) {
+    }
+
+    public boolean register(Users user) {
         String sql = "INSERT INTO Users (UserID, FullName, Email, Password, DateOfBirth, PermissionID, Status) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             LOGGER.log(Level.INFO, "Bắt đầu đăng ký cho người dùng: {0}", user.getEmail());
-            
+
             // Tạo UserID
             String userID = generateNextUserId();
             ps.setString(1, userID);
@@ -341,7 +436,7 @@ public class UserDAO {
             ps.setInt(6, user.getPermissionID());
             ps.setBoolean(7, user.isStatus());
             LOGGER.log(Level.INFO, "SQL Statement: {0} với UserID={1}", new Object[]{sql, userID});
-            
+
             int rowsAffected = ps.executeUpdate();
             LOGGER.log(Level.INFO, "Kết quả đăng ký: {0} dòng bị ảnh hưởng", rowsAffected);
             return rowsAffected > 0;
@@ -391,8 +486,8 @@ public class UserDAO {
     /**
      * Cập nhật token xác minh và thời gian hết hạn cho một tài khoản
      *
-     * @param email     Email của tài khoản
-     * @param token     Token xác minh
+     * @param email Email của tài khoản
+     * @param token Token xác minh
      * @param expiryDate Thời gian hết hạn của token
      * @return true nếu cập nhật thành công, false nếu thất bại
      */
@@ -421,7 +516,8 @@ public class UserDAO {
      * Xác minh tài khoản dựa trên token
      *
      * @param token Token xác minh
-     * @return true nếu xác minh thành công, false nếu thất bại hoặc token không hợp lệ
+     * @return true nếu xác minh thành công, false nếu thất bại hoặc token không
+     * hợp lệ
      */
     public boolean verifyAccount(String token) {
         // Đầu tiên kiểm tra token có tồn tại và chưa hết hạn
@@ -512,8 +608,10 @@ public class UserDAO {
      * @param userID ID của người dùng
      * @param currentPassword Mật khẩu hiện tại
      * @param newPassword Mật khẩu mới
-     * @return true nếu cập nhật thành công, false nếu thất bại hoặc mật khẩu hiện tại không đúng
-     */    public static boolean updatePassword(String userID, String currentPassword, String newPassword) {
+     * @return true nếu cập nhật thành công, false nếu thất bại hoặc mật khẩu
+     * hiện tại không đúng
+     */
+    public static boolean updatePassword(String userID, String currentPassword, String newPassword) {
         // Kiểm tra mật khẩu hiện tại
         Users user = getUserById(userID);
         if (user == null || !user.getPassword().equals(currentPassword)) {
@@ -526,7 +624,7 @@ public class UserDAO {
 
     /**
      * Kiểm tra mật khẩu hiện tại của người dùng
-     * 
+     *
      * @param userID ID người dùng
      * @param password Mật khẩu cần kiểm tra
      * @return true nếu mật khẩu đúng, false nếu mật khẩu sai
@@ -541,13 +639,14 @@ public class UserDAO {
 
     /**
      * Thay đổi mật khẩu người dùng
-     * 
+     *
      * @param userID ID người dùng
      * @param newPassword Mật khẩu mới
      * @return true nếu thay đổi thành công, false nếu thất bại
-     */    public static boolean changePassword(String userID, String newPassword) {
+     */
+    public static boolean changePassword(String userID, String newPassword) {
         String sql = "UPDATE users SET Password = ? WHERE UserID = ?";
-        
+
         // Thử với DBContext_Duc
         DBContext_Duc db = DBContext_Duc.getInstance();
         if (db.connection != null) {
@@ -562,7 +661,7 @@ public class UserDAO {
                 e.printStackTrace();
             }
         }
-        
+
         // Nếu kết nối DBContext_Duc thất bại, thử với DBContext
         try (Connection conn = DBContext.getConnection()) {
             if (conn != null) {
@@ -577,7 +676,8 @@ public class UserDAO {
             LOGGER.log(Level.SEVERE, "Lỗi khi cập nhật mật khẩu với DBContext: {0}", e.getMessage());
             e.printStackTrace();
         }
-        
+
         return false;
     }
+
 }
