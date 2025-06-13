@@ -1,19 +1,18 @@
 package dal;
 
-import models.ApplicationFormTemplate;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import models.ApplicationFormTemplate;
 
 public class ApplicationFormTemplateDAO {
-    private Connection connection;
-    // Thêm mẫu form mới
+    private Connection connection;    // Thêm mẫu form mới
     public void saveFormTemplate(ApplicationFormTemplate template) throws SQLException {
         connection = DBContext.getConnection();
-        String sql = "INSERT INTO ApplicationFormTemplates (ClubID, EventID, FormType, Title, FieldName, FieldType, IsRequired, Options, Published) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO ApplicationFormTemplates (ClubID, EventID, FormType, Title, FieldName, FieldType, IsRequired, Options, Published, DisplayOrder) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, template.getClubId());
             if (template.getEventId() != null) {
@@ -28,17 +27,16 @@ public class ApplicationFormTemplateDAO {
             stmt.setBoolean(7, template.isRequired());
             stmt.setString(8, template.getOptions());
             stmt.setBoolean(9, template.isPublished());
+            stmt.setInt(10, template.getDisplayOrder());
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw e;
         }
-    }
-
-    // Cập nhật mẫu form
+    }    // Cập nhật mẫu form
     public void updateTemplate(ApplicationFormTemplate template) throws SQLException {
         connection = DBContext.getConnection();
         String sql = "UPDATE ApplicationFormTemplates SET ClubID = ?, EventID = ?, FormType = ?, Title = ?, FieldName = ?, " +
-                "FieldType = ?, IsRequired = ?, Options = ?, Published = ? WHERE TemplateID = ?";
+                "FieldType = ?, IsRequired = ?, Options = ?, Published = ?, DisplayOrder = ? WHERE TemplateID = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, template.getClubId());
             if (template.getEventId() != null) {
@@ -53,12 +51,11 @@ public class ApplicationFormTemplateDAO {
             stmt.setBoolean(7, template.isRequired());
             stmt.setString(8, template.getOptions());
             stmt.setBoolean(9, template.isPublished());
-            stmt.setInt(10, template.getTemplateId());
+            stmt.setInt(10, template.getDisplayOrder());
+            stmt.setInt(11, template.getTemplateId());
             stmt.executeUpdate();
         }
-    }
-
-    // Lấy mẫu form theo ID
+    }    // Lấy mẫu form theo ID
     public ApplicationFormTemplate getTemplateById(int templateId) throws SQLException {
         connection = DBContext.getConnection();
         String sql = "SELECT * FROM ApplicationFormTemplates WHERE TemplateID = ?";
@@ -76,65 +73,41 @@ public class ApplicationFormTemplateDAO {
                             rs.getString("FieldType"),
                             rs.getBoolean("IsRequired"),
                             rs.getString("Options"),
-                            rs.getBoolean("Published")
+                            rs.getBoolean("Published"),
+                            rs.getInt("DisplayOrder")
                     );
                 }
             }
         }
         return null;
-    }
-
-    // Lấy tất cả mẫu form của một CLB
+    }    // Lấy tất cả mẫu form của một CLB
     public List<ApplicationFormTemplate> getTemplatesByClub(int clubId) throws SQLException {
         connection = DBContext.getConnection();
         List<ApplicationFormTemplate> templates = new ArrayList<>();
-        String sql = "SELECT * FROM ApplicationFormTemplates WHERE ClubID = ?";
+        String sql = "SELECT * FROM ApplicationFormTemplates WHERE ClubID = ? ORDER BY Title, DisplayOrder";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, clubId);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    templates.add(new ApplicationFormTemplate(
-                            rs.getInt("TemplateID"),
-                            rs.getInt("ClubID"),
-                            rs.getObject("EventID") != null ? rs.getInt("EventID") : null,
-                            rs.getString("FormType"),
-                            rs.getString("Title"),
-                            rs.getString("FieldName"),
-                            rs.getString("FieldType"),
-                            rs.getBoolean("IsRequired"),
-                            rs.getString("Options"),
-                            rs.getBoolean("Published")
-                    ));
+                    templates.add(mapRowToTemplate(rs));
                 }
             }
         }
         return templates;
-    }
-    // Lấy forms theo club và trạng thái published
+    }    // Lấy forms theo club và trạng thái published
     public List<ApplicationFormTemplate> getTemplatesByClubAndStatus(int clubId, boolean published) throws SQLException {
         connection = DBContext.getConnection();
         List<ApplicationFormTemplate> templates = new ArrayList<>();
-        String sql = "SELECT DISTINCT TemplateID, ClubID, EventID, FormType, Title, FieldName, FieldType, IsRequired, Options, Published " +
+        String sql = "SELECT DISTINCT TemplateID, ClubID, EventID, FormType, Title, FieldName, FieldType, IsRequired, Options, Published, DisplayOrder " +
                 "FROM ApplicationFormTemplates WHERE ClubID = ? AND Published = ? " +
-                "GROUP BY TemplateID, ClubID, EventID, FormType, Title, FieldName, FieldType, IsRequired, Options, Published " +
-                "ORDER BY TemplateID DESC";
+                "GROUP BY TemplateID, ClubID, EventID, FormType, Title, FieldName, FieldType, IsRequired, Options, Published, DisplayOrder " +
+                "ORDER BY Title, DisplayOrder";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, clubId);
             stmt.setBoolean(2, published);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    templates.add(new ApplicationFormTemplate(
-                            rs.getInt("TemplateID"),
-                            rs.getInt("ClubID"),
-                            rs.getObject("EventID") != null ? rs.getInt("EventID") : null,
-                            rs.getString("FormType"),
-                            rs.getString("Title"),
-                            rs.getString("FieldName"),
-                            rs.getString("FieldType"),
-                            rs.getBoolean("IsRequired"),
-                            rs.getString("Options"),
-                            rs.getBoolean("Published")
-                    ));
+                    templates.add(mapRowToTemplate(rs));
                 }
             }
         }
@@ -234,13 +207,11 @@ public class ApplicationFormTemplateDAO {
         }
         return templates;
     }
-
-
     // Thêm mẫu form mới và trả về ID được tạo
     public int saveFormTemplateAndGetId(ApplicationFormTemplate template) throws SQLException {
         connection = DBContext.getConnection();
-        String sql = "INSERT INTO ApplicationFormTemplates (ClubID, EventID, FormType, Title, FieldName, FieldType, IsRequired, Options, Published) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO ApplicationFormTemplates (ClubID, EventID, FormType, Title, FieldName, FieldType, IsRequired, Options, Published, DisplayOrder) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setInt(1, template.getClubId());
             if (template.getEventId() != null) {
@@ -255,6 +226,7 @@ public class ApplicationFormTemplateDAO {
             stmt.setBoolean(7, template.isRequired());
             stmt.setString(8, template.getOptions());
             stmt.setBoolean(9, template.isPublished());
+            stmt.setInt(10, template.getDisplayOrder());
 
             int affectedRows = stmt.executeUpdate();
             if (affectedRows == 0) {
@@ -272,8 +244,7 @@ public class ApplicationFormTemplateDAO {
         } catch (SQLException e) {
             throw e;
         }
-    }
-    private ApplicationFormTemplate mapRowToTemplate(ResultSet rs) throws SQLException {
+    }    private ApplicationFormTemplate mapRowToTemplate(ResultSet rs) throws SQLException {
         return new ApplicationFormTemplate(
                 rs.getInt("TemplateID"),
                 rs.getInt("ClubID"),
@@ -284,12 +255,12 @@ public class ApplicationFormTemplateDAO {
                 rs.getString("FieldType"),
                 rs.getBoolean("IsRequired"),
                 rs.getString("Options"),
-                rs.getBoolean("Published")
+                rs.getBoolean("Published"),
+                rs.getInt("DisplayOrder")
         );
-    }
-    public List<ApplicationFormTemplate> getTemplatesByGroup(String title, int clubId, int maxTemplateId) {
+    }    public List<ApplicationFormTemplate> getTemplatesByGroup(String title, int clubId, int maxTemplateId) {
         List<ApplicationFormTemplate> templates = new ArrayList<>();
-        String sql = "SELECT * FROM ApplicationFormTemplates WHERE Title = ? AND ClubID = ? AND TemplateID <= ? ORDER BY TemplateID ASC";
+        String sql = "SELECT * FROM ApplicationFormTemplates WHERE Title = ? AND ClubID = ? AND TemplateID <= ? ORDER BY DisplayOrder ASC, TemplateID ASC";
 
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -309,6 +280,7 @@ public class ApplicationFormTemplateDAO {
                     template.setIsRequired(rs.getBoolean("IsRequired"));
                     template.setOptions(rs.getString("Options"));
                     template.setPublished(rs.getBoolean("Published"));
+                    template.setDisplayOrder(rs.getInt("DisplayOrder"));
                     templates.add(template);
                 }
             }
@@ -356,5 +328,24 @@ public class ApplicationFormTemplateDAO {
             e.printStackTrace();
         }
         return -1;
+    }    // Lấy tất cả câu hỏi đã publish theo (title, clubId)
+    public List<ApplicationFormTemplate> getPublishedTemplatesByGroup(String title, int clubId) throws SQLException {
+        List<ApplicationFormTemplate> templates = new ArrayList<>();
+        // Mở kết nối mới
+        connection = DBContext.getConnection();
+        String sql = "SELECT * FROM ApplicationFormTemplates " +
+                "WHERE Title = ? AND ClubID = ? AND Published = 1 " +
+                "ORDER BY DisplayOrder ASC, TemplateID ASC";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, title);
+            ps.setInt(2, clubId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    // Sử dụng helper mapRowToTemplate để tránh lặp code
+                    templates.add(mapRowToTemplate(rs));
+                }
+            }
+        }
+        return templates;
     }
 }

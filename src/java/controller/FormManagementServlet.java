@@ -114,7 +114,7 @@ public class FormManagementServlet extends HttpServlet {
                 sendJsonResponse(response, false, "Template ID không hợp lệ.");
                 return;
             }
-// Lấy title của form từ templateId
+            // Lấy title của form từ templateId
             ApplicationFormTemplate template = templateDAO.getTemplateById(templateId);
             if (template == null) {
                 sendJsonResponse(response, false, "Form không tồn tại.");

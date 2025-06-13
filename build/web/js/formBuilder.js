@@ -305,7 +305,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (typeof window.updatePreview === "function") window.updatePreview()
     newQuestionCard.querySelector(".question-label")?.focus()
   }
-
   function createQuestionCard(qData, number) {
     const domId = "qLoaded" + qData.id
     console.log(
@@ -326,18 +325,58 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     questionCard.dataset.id = domId
     questionCard.dataset.originalId = qData.id
+    
+    // Kiểm tra xem câu hỏi có phải là câu hỏi bắt buộc không
+    const requiredQuestionIds = getRequiredQuestionIds();
+    const isFixedRequiredQuestion = 
+        requiredQuestionIds.includes(qData.id) || 
+        (qData.label === "Họ và tên" && qData.type === "text") || 
+        (qData.label === "Email" && qData.type === "email") || 
+        (qData.label.includes("Chọn ban") && qData.type === "radio");
+    
+    // Thêm các câu hỏi bắt buộc vào data-required-type để dễ xác định sau này
+    if (isFixedRequiredQuestion) {
+      if (qData.label === "Họ và tên") questionCard.dataset.requiredType = "fullname";
+      else if (qData.label === "Email") questionCard.dataset.requiredType = "email";
+      else if (qData.label.includes("Chọn ban")) questionCard.dataset.requiredType = "department";
+      
+      // Thêm class required-question để áp dụng CSS
+      questionCard.classList.add("required-question");
+      
+      // Thêm badge "Cố định" cho câu hỏi bắt buộc
+      const questionHeader = questionCard.querySelector(".question-header");
+      if (questionHeader && !questionHeader.querySelector(".required-badge")) {
+        const requiredBadge = document.createElement("span");
+        requiredBadge.classList.add("required-badge");
+        requiredBadge.textContent = "Cố định";
+        questionHeader.appendChild(requiredBadge);
+      }
+    }
 
     const labelInput = questionCard.querySelector(".question-label")
-    if (labelInput) labelInput.value = qData.label || "Câu hỏi"
+    if (labelInput) {
+      labelInput.value = qData.label || "Câu hỏi";
+    }
+    
     const typeSelect = questionCard.querySelector(".question-type")
-    if (typeSelect) typeSelect.value = qData.type || "text"
+    if (typeSelect) {
+      typeSelect.value = qData.type || "text";
+      if (isFixedRequiredQuestion) {
+        typeSelect.disabled = true;
+      }
+    }
+    
     const requiredCheckbox = questionCard.querySelector(".question-required")
     if (requiredCheckbox) {
-      requiredCheckbox.checked = qData.required || false
-      requiredCheckbox.id = `required-${domId}`
+      requiredCheckbox.checked = qData.required || isFixedRequiredQuestion || false;
+      requiredCheckbox.id = `required-${domId}`;
+      if (isFixedRequiredQuestion) {
+        requiredCheckbox.disabled = true;
+      }
       const labelForRequired = questionCard.querySelector(`label[for="required-{{id}}"]`)
       if (labelForRequired) labelForRequired.setAttribute("for", `required-${domId}`)
     }
+    
     const placeholderInput = questionCard.querySelector(".question-placeholder")
     if (placeholderInput && qData.placeholder) placeholderInput.value = qData.placeholder
 
@@ -411,19 +450,46 @@ document.addEventListener("DOMContentLoaded", () => {
       placeholderGroup.style.display = "block"
     }
   }
-
   function addQuestionEventListeners(questionCard) {
     const isHardcodedRequiredQuestion = questionCard.classList.contains("required-question")
     console.log(
         `formBuilder.js: addQuestionEventListeners cho card: ${questionCard.dataset.id}, isHardcodedRequired: ${isHardcodedRequiredQuestion}`,
     )
 
-    const typeSelect = questionCard.querySelector(".question-type")
-    if (typeSelect)
+    // Kiểm tra loại câu hỏi bắt buộc
+    const requiredType = questionCard.dataset.requiredType || "";
+    const labelInput = questionCard.querySelector(".question-label");
+    const typeSelect = questionCard.querySelector(".question-type");
+    
+    // Xác định lại loại câu hỏi bắt buộc nếu chưa có trong dataset
+    if (isHardcodedRequiredQuestion && !requiredType && labelInput && typeSelect) {
+      if (labelInput.value === "Họ và tên" && typeSelect.value === "text") {
+        questionCard.dataset.requiredType = "fullname";
+      } else if (labelInput.value === "Email" && typeSelect.value === "email") {
+        questionCard.dataset.requiredType = "email";
+      } else if (labelInput.value.includes("Chọn ban") && typeSelect.value === "radio") {
+        questionCard.dataset.requiredType = "department";
+      }
+    }
+
+    if (typeSelect) {
       typeSelect.addEventListener("change", function () {
         toggleQuestionFields(questionCard, this.value)
         if (typeof window.updatePreview === "function") window.updatePreview()
       })
+      // Vô hiệu hóa typeSelect nếu là câu hỏi bắt buộc
+      if (isHardcodedRequiredQuestion) {
+        typeSelect.disabled = true
+      }
+    }
+    
+    // Đánh dấu và vô hiệu hóa checkbox required nếu là câu hỏi bắt buộc
+    const requiredCheckbox = questionCard.querySelector(".question-required")
+    if (requiredCheckbox && isHardcodedRequiredQuestion) {
+      requiredCheckbox.checked = true;
+      requiredCheckbox.disabled = true;
+    }
+    
     setupImageUpload(questionCard)
     const addOptionBtn = questionCard.querySelector(".add-option")
     if (addOptionBtn) {
@@ -444,6 +510,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (moveUpBtn) moveUpBtn.disabled = true
       if (moveDownBtn) moveDownBtn.disabled = true
       if (deleteBtn) deleteBtn.disabled = true
+      if (duplicateBtn) duplicateBtn.disabled = true
     } else {
       if (moveUpBtn) moveUpBtn.disabled = false
       if (moveDownBtn) moveDownBtn.disabled = false
@@ -641,18 +708,23 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function getFormData() {
-    const questions = []
-    if (!questionsList) return questions
-    console.log("formBuilder.js: Bắt đầu getFormData.")
-    questionsList.querySelectorAll(".question-card").forEach((card, index) => {
+    const questions = [];
+    if (!questionsList) return questions;
+    console.log("formBuilder.js: Bắt đầu getFormData.");
+    
+    // Lấy tất cả question cards theo thứ tự DOM hiện tại sau khi kéo thả
+    const cards = Array.from(questionsList.querySelectorAll(".question-card"));
+    
+    // Lặp qua tất cả cards và thu thập dữ liệu
+    cards.forEach((card, index) => {
       const typeSelect = card.querySelector(".question-type"),
           labelInput = card.querySelector(".question-label"),
-          requiredCheckbox = card.querySelector(".question-required")
+          requiredCheckbox = card.querySelector(".question-required");
       if (!typeSelect || !labelInput || !requiredCheckbox) {
         console.warn(
             `formBuilder.js: Thiếu trường trong question card (index ${index}), data-id: ${card.dataset.id}. Bỏ qua.`,
-        )
-        return
+        );
+        return;
       }
 
       const questionData = {
@@ -661,26 +733,27 @@ document.addEventListener("DOMContentLoaded", () => {
         label: labelInput.value,
         required: requiredCheckbox.checked,
         placeholder: card.querySelector(".question-placeholder")?.value || "",
-      }
+        displayOrder: index // Lưu thứ tự hiển thị hiện tại
+      };
 
       if (questionData.type === "info") {
         questionData.options = JSON.stringify({
           content: card.querySelector(".question-content")?.value || "",
           image: card.dataset.imageData || "",
-        })
+        });
       } else if (["radio", "checkbox", "select"].includes(questionData.type)) {
-        questionData.options = []
+        questionData.options = [];
         card.querySelectorAll(".option-item").forEach((optItem) => {
           questionData.options.push({
             id: optItem.dataset.id,
             value: optItem.querySelector(".option-value")?.value || "",
-          })
-        })
+          });
+        });
       }
-      questions.push(questionData)
-    })
-    console.log("formBuilder.js: getFormData thu thập được:", JSON.parse(JSON.stringify(questions)))
-    return questions
+      questions.push(questionData);
+    });
+    console.log("formBuilder.js: getFormData thu thập được:", JSON.parse(JSON.stringify(questions)));
+    return questions;
   }
 
   window.updatePreview = function updatePreview() {
@@ -771,28 +844,6 @@ document.addEventListener("DOMContentLoaded", () => {
         input.appendChild(wrapper)
       })
         break;
-        const defaultOpt = document.createElement("option")
-        defaultOpt.textContent = q.placeholder || "Chọn một tùy chọn"
-        defaultOpt.value = ""
-        input.appendChild(defaultOpt)
-
-        if (Array.isArray(q.options)) {
-          q.options.forEach((opt) => {
-            if (opt && typeof opt.value !== "undefined") {
-              // Ensure opt and opt.value exist
-              const optionEl = document.createElement("option")
-              optionEl.value = opt.value
-              optionEl.textContent = opt.value
-              console.log(`  Adding option to preview: value='${opt.value}', text='${opt.value}'`)
-              input.appendChild(optionEl)
-            } else {
-              console.warn("  Skipping invalid option for preview:", opt)
-            }
-          })
-        } else {
-          console.warn(`  q.options is not an array for select preview (ID=${q.id}):`, q.options)
-        }
-        break
     }
     return input
   }
@@ -803,3 +854,79 @@ function toggleEventField(selectElement) {
   const eventNameField = document.getElementById("eventNameField")
   if (eventNameField) eventNameField.style.display = selectElement.value === "event" ? "block" : "none"
 }
+  
+  // Hàm lấy ID của các câu hỏi bắt buộc (từ DB hoặc từ dữ liệu ban đầu)
+  function getRequiredQuestionIds() {
+    if (!window.existingQuestions || !Array.isArray(window.existingQuestions)) {
+      return [];
+    }
+    
+    return window.existingQuestions
+      .filter(q => 
+        (q.label === "Họ và tên" && q.type === "text") || 
+        (q.label === "Email" && q.type === "email") || 
+        (q.label.includes("Chọn ban") && q.type === "radio")
+      )
+      .map(q => q.id);
+  }
+
+  // Hàm bảo vệ các câu hỏi bắt buộc
+  function protectRequiredQuestions() {
+    if (!questionsList) return;
+    
+    const allCards = Array.from(questionsList.querySelectorAll(".question-card"));
+    
+    allCards.forEach(card => {
+      const labelInput = card.querySelector(".question-label");
+      const typeSelect = card.querySelector(".question-type");
+      
+      if (!labelInput || !typeSelect) return;
+      
+      const isFullnameQuestion = labelInput.value === "Họ và tên" && typeSelect.value === "text";
+      const isEmailQuestion = labelInput.value === "Email" && typeSelect.value === "email";
+      const isDepartmentQuestion = labelInput.value.includes("Chọn ban") && typeSelect.value === "radio";
+      
+      if (isFullnameQuestion || isEmailQuestion || isDepartmentQuestion) {
+        // Đánh dấu là câu hỏi bắt buộc
+        card.classList.add("required-question");
+        
+        // Đánh dấu loại câu hỏi bắt buộc
+        if (isFullnameQuestion) card.dataset.requiredType = "fullname";
+        else if (isEmailQuestion) card.dataset.requiredType = "email";
+        else if (isDepartmentQuestion) card.dataset.requiredType = "department";
+        
+        // Thêm badge nếu chưa có
+        const questionHeader = card.querySelector(".question-header");
+        if (questionHeader && !questionHeader.querySelector(".required-badge")) {
+          const requiredBadge = document.createElement("span");
+          requiredBadge.classList.add("required-badge");
+          requiredBadge.textContent = "Cố định";
+          questionHeader.appendChild(requiredBadge);
+        }
+        
+        // Vô hiệu hóa các nút chức năng
+        const allButtons = card.querySelectorAll(".question-actions button");
+        allButtons.forEach(btn => btn.disabled = true);
+        
+        // Chỉ đặt readonly cho nhãn Họ và tên và Email
+        if (isFullnameQuestion || isEmailQuestion) {
+          labelInput.readOnly = true;
+        }
+        
+        // Vô hiệu hóa loại câu hỏi cho tất cả câu hỏi bắt buộc
+        typeSelect.disabled = true;
+        
+        const requiredCheckbox = card.querySelector(".question-required");
+        if (requiredCheckbox) {
+          requiredCheckbox.checked = true;
+          requiredCheckbox.disabled = true;
+        }
+      }
+    });
+    console.log("formBuilder.js: Đã bảo vệ các câu hỏi bắt buộc");
+  }
+  
+  // Gọi hàm bảo vệ câu hỏi bắt buộc sau khi load form
+  if (window.existingQuestions && Array.isArray(window.existingQuestions) && window.existingQuestions.length > 0) {
+    setTimeout(protectRequiredQuestions, 500); // Đợi 500ms để đảm bảo DOM đã được tạo hoàn chỉnh
+  }

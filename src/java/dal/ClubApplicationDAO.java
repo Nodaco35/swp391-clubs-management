@@ -1,6 +1,7 @@
 package dal;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -45,46 +46,29 @@ public class ClubApplicationDAO {
 
         return count;
     }
-
-    public List<ClubApplication> getPendingRequests(int limit) {
-    List<ClubApplication> list = new ArrayList<>();
-    Connection conn = null;
-    PreparedStatement stmt = null;
-    ResultSet rs = null;
-
-    try {
-        conn = DBContext.getConnection();
-        String sql = "SELECT * FROM ClubApplications WHERE Status = 'PENDING' ORDER BY SubmitDate DESC LIMIT ?";
-        stmt = conn.prepareStatement(sql);
-        stmt.setInt(1, limit);
-        rs = stmt.executeQuery();
-
-        while (rs.next()) {
-            ClubApplication app = new ClubApplication();
-            app.setApplicationID(rs.getInt("ApplicationID"));
-            app.setUserID(rs.getString("UserID"));
-            app.setClubName(rs.getString("ClubName"));
-            app.setDescription(rs.getString("Description"));
-            app.setEmail(rs.getString("Email"));
-            app.setPhone(rs.getString("Phone"));
-            app.setStatus(rs.getString("Status"));
-            app.setSubmitDate(rs.getTimestamp("SubmitDate"));
-
-            list.add(app);
-        }
-    } catch (SQLException e) {
-        System.out.println("Error getting pending club applications: " + e.getMessage());
-    } finally {
-        try {
-            if (rs != null) rs.close();
-            if (stmt != null) stmt.close();
-            if (conn != null) DBContext.closeConnection(conn);
-        } catch (SQLException e) {
-            System.out.println("Error closing resources: " + e.getMessage());
+    public void saveClubApplication(ClubApplication app) throws SQLException {
+        Connection conn = DBContext.getConnection();
+        String sql = "INSERT INTO ClubApplications (UserID, ClubID, Email, EventID, ResponseID, Status, SubmitDate) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, app.getUserId());
+            ps.setInt(2, app.getClubId());
+            ps.setString(3, app.getEmail());
+            if (app.getEventId() != null) {
+                ps.setInt(4, app.getEventId());
+            } else {
+                ps.setNull(4, java.sql.Types.INTEGER);
+            }
+            ps.setInt(5, app.getResponseId());
+            ps.setString(6, app.getStatus());
+            if (app.getSubmitDate() != null) {
+                ps.setTimestamp(7, (java.sql.Timestamp) app.getSubmitDate());
+            } else {
+                ps.setNull(7, java.sql.Types.TIMESTAMP);
+            }
+            ps.executeUpdate();
         }
     }
 
-    return list;
-}
+    
 
 }
