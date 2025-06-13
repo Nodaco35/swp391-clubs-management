@@ -11,11 +11,15 @@ public class ApplicationFormTemplate {
     private boolean isRequired;
     private String options; // JSON hoặc text
     private boolean published;
+    private int displayOrder; // Thứ tự hiển thị của câu hỏi trong form
 
-    public ApplicationFormTemplate() {}
+    public ApplicationFormTemplate() {}    public ApplicationFormTemplate(int templateId, int clubId, Integer eventId, String formType, String title,
+                                   String fieldName, String fieldType, boolean isRequired, String options, boolean published) {
+        this(templateId, clubId, eventId, formType, title, fieldName, fieldType, isRequired, options, published, 0);
+    }
 
     public ApplicationFormTemplate(int templateId, int clubId, Integer eventId, String formType, String title,
-                                   String fieldName, String fieldType, boolean isRequired, String options, boolean published) {
+                                   String fieldName, String fieldType, boolean isRequired, String options, boolean published, int displayOrder) {
         this.templateId = templateId;
         this.clubId = clubId;
         this.eventId = eventId;
@@ -26,6 +30,7 @@ public class ApplicationFormTemplate {
         this.isRequired = isRequired;
         this.options = options;
         this.published = published;
+        this.displayOrder = displayOrder;
     }
 
     // Getters và Setters
@@ -46,9 +51,10 @@ public class ApplicationFormTemplate {
     public boolean isRequired() { return isRequired; }
     public void setIsRequired(boolean isRequired) { this.isRequired = isRequired; }
     public String getOptions() { return options; }
-    public void setOptions(String options) { this.options = options; }
-    public boolean isPublished() { return published; }
+    public void setOptions(String options) { this.options = options; }    public boolean isPublished() { return published; }
     public void setPublished(boolean published) { this.published = published; }
+    public int getDisplayOrder() { return displayOrder; }
+    public void setDisplayOrder(int displayOrder) { this.displayOrder = displayOrder; }
     public String getClassName() {
         return this.getClass().getName();
     }

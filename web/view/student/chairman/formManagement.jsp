@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý Form - UniClub</title>
+    <title>Form Management - UniClub</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -129,7 +129,7 @@
                                     </div>
                                     <div class="form-link">
                                         <input type="text" class="public-link" readonly 
-                                               value="${pageContext.request.scheme}://${pageContext.request.serverName}:${pageContext.request.serverPort}${pageContext.request.contextPath}/public/form/${form.templateId}">
+                                               value="${pageContext.request.scheme}://${pageContext.request.serverName}:${pageContext.request.serverPort}${pageContext.request.contextPath}/applicationForm?templateId=${form.templateId}">
                                     </div>
                                 </div>
                                 <div class="form-actions">
@@ -144,11 +144,10 @@
                                             data-form-title="${form.title}">
                                         <i class="fas fa-eye-slash"></i> Hủy xuất bản
                                     </button>
-                                    <button class="btn btn-danger btn-sm delete-form" 
-                                            data-template-id="${form.templateId}" 
-                                            data-form-title="${form.title}">
-                                        <i class="fas fa-trash"></i> Xóa
-                                    </button>
+                                        <a class="btn btn-sm btn-primary"
+                                           href="${pageContext.request.contextPath}/applicationForm?templateId=${form.templateId}">
+                                            Xem form
+                                        </a>
                                 </div>
                             </div>
                         </c:forEach>
