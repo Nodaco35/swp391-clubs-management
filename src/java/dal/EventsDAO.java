@@ -77,7 +77,21 @@ public class EventsDAO {
 
     public List<Events> getEventsByClubID(int clubID) {
         List<Events> events = new ArrayList<>();
-        String sql = "SELECT * FROM Events WHERE ClubID = ?";
+        String sql = """
+                    SELECT e.*, 
+                           COUNT(ep.EventParticipantID) AS RegisteredCount,
+                           (e.Capacity - COUNT(ep.EventParticipantID)) AS SpotsLeft
+                    FROM Events e
+                    LEFT JOIN EventParticipants ep 
+                        ON e.EventID = ep.EventID 
+                        AND (ep.Status = 'REGISTERED' OR ep.Status = 'ATTENDED' OR ep.Status = 'ABSENT')
+                    WHERE e.ClubID = ?
+                    GROUP BY e.EventID, e.EventName, e.EventImg, e.Description, 
+                             e.EventDate, e.Location, e.ClubID, e.IsPublic, 
+                             e.FormTemplateID, e.Capacity, e.Status
+                    ORDER BY e.EventDate DESC
+                """;
+
         try {
             Connection connection = DBContext.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -93,8 +107,11 @@ public class EventsDAO {
                 event.setLocation(rs.getString("Location"));
                 event.setClubID(rs.getInt("ClubID"));
                 event.setPublic(rs.getBoolean("IsPublic"));
+                event.setFormTemplateID(rs.getInt("FormTemplateID"));
                 event.setCapacity(rs.getInt("Capacity"));
                 event.setStatus(rs.getString("Status"));
+                event.setRegistered(rs.getInt("RegisteredCount"));
+                event.setSpotsLeft(rs.getInt("SpotsLeft"));
                 events.add(event);
             }
         } catch (SQLException e) {
@@ -102,6 +119,7 @@ public class EventsDAO {
         }
         return events;
     }
+
 
     public List<Events> getEventsByClubID(int clubID, int eventID) {
         List<Events> events = new ArrayList<>();
@@ -363,7 +381,6 @@ public class EventsDAO {
         }
         return 0;
     }
-
 
 
     public List<Events> getUpcomingEvents(int limit) {

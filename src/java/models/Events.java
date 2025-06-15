@@ -22,6 +22,11 @@ public class Events {
     private String clubName;
     private String clubImg;
     
+    //Them de tinh so nguoi da tham gia su kien
+    private int registered;
+    private int spotsLeft;
+
+
     public Events() {
     }
 
@@ -144,4 +149,21 @@ public class Events {
     public void setClubImg(String clubImg) {
         this.clubImg = clubImg;
     }
+
+    public int getRegistered() {
+        return registered;
+    }
+
+    public void setRegistered(int registered) {
+        this.registered = registered;
+    }
+
+    public int getSpotsLeft() {
+        return spotsLeft;
+    }
+
+    public void setSpotsLeft(int spotsLeft) {
+        this.spotsLeft = spotsLeft;
+    }
+
 }

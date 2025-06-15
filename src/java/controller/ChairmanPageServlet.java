@@ -70,6 +70,8 @@ public class ChairmanPageServlet extends HttpServlet {
         Users user = (Users) session.getAttribute("user");
 
         String action = request.getParameter("action");
+        String subaction = request.getParameter("subaction");
+
         if (action == null) {
             action = "overview";
         }
@@ -78,33 +80,54 @@ public class ChairmanPageServlet extends HttpServlet {
             String userID = user.getUserID();
             ClubInfo club = clubDAO.getClubChairman(userID);
             int clubID = clubDAO.getClubIDByUserID(userID);
-            int totalUpcoming = eventDAO.countUpcomingEvents(clubID);
-            int totalOngoing = eventDAO.countOngoingEvents(clubID);
-            int totalPast = eventDAO.countPastEvents(clubID);
-
-            request.setAttribute("totalUpcoming", totalUpcoming);
-            request.setAttribute("totalOngoing", totalOngoing);
-            request.setAttribute("totalPast", totalPast);
 
             request.setAttribute("club", club);
             request.setAttribute("totalMembers", clubDAO.getTotalClubMembers(clubID));
             request.setAttribute("totalEvents", eventDAO.getTotalEvents(clubID));
             request.setAttribute("totalDepartments", clubDAO.getTotalDepartments(clubID));
 
-            // Nếu cần dữ liệu cho tab events
-            if (action.equals("myclub-events")) {
-                List<Events> myClubEvents = eventDAO.getEventsByClubID(clubID);
-                request.setAttribute("myClubEvents", myClubEvents);
+            if ("myclub-events".equals(action)) {
+                if ("add".equals(subaction)) {
+                    request.getRequestDispatcher("view/student/chairman/add-event.jsp").forward(request, response);
+                    return;
+
+                } else if ("edit".equals(subaction)) {
+                    int eventID = Integer.parseInt(request.getParameter("eventID"));
+                    Events event = eventDAO.getEventByID(eventID);
+                    request.setAttribute("event", event);
+                    request.getRequestDispatcher("view/student/chairman/edit-event.jsp").forward(request, response);
+                    return;
+
+//                } else if ("assign-task".equals(subaction)) {
+//                    int eventID = Integer.parseInt(request.getParameter("eventID"));
+//                    List<Department> departments = clubDAO.getDepartmentsByClubID(clubID);
+//                    request.setAttribute("departments", departments);
+//                    request.setAttribute("eventID", eventID);
+//                    request.getRequestDispatcher("view/student/chairman/assign-task.jsp").forward(request, response);
+//                    return;
+
+                } else {
+                    // Không có subaction hoặc không hợp lệ -> load danh sách sự kiện
+                    List<Events> myClubEvents = eventDAO.getEventsByClubID(clubID);
+                    int totalUpcoming = eventDAO.countUpcomingEvents(clubID);
+                    int totalOngoing = eventDAO.countOngoingEvents(clubID);
+                    int totalPast = eventDAO.countPastEvents(clubID);
+
+                    request.setAttribute("totalUpcoming", totalUpcoming);
+                    request.setAttribute("totalOngoing", totalOngoing);
+                    request.setAttribute("totalPast", totalPast);
+                    request.setAttribute("myClubEvents", myClubEvents);
+                }
             }
 
-
-            // Nếu cần dữ liệu cho tab tasks, xử lý tương tự ở đây
+            // Tương tự, bạn có thể xử lý thêm cho các action khác (vd: "tasks", "members", v.v.)
         }
 
-        // Forward tới JSP chính
+        // Luôn set lại action để JSP biết tab nào được chọn
         request.setAttribute("action", action);
         request.getRequestDispatcher("view/student/chairman/chairman-page.jsp").forward(request, response);
     }
+
 
     /**
      * Handles the HTTP <code>POST</code> method.

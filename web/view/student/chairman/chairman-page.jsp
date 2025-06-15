@@ -123,84 +123,24 @@
 
     </header>
     <main class="dashboard-content">
-<%--        <!-- Overview Tab -->--%>
-<%--        <div id="overview-tab" class="tab-content active">--%>
-<%--            <!-- Club Statistics -->--%>
-<%--            <section class="stats-section">--%>
-<%--                <h2>Thống kê tổng quan</h2>--%>
-<%--                <div class="stats-grid">--%>
-<%--                    <div class="stat-card">--%>
-<%--                        <div class="stat-icon departments">--%>
-<%--                            <i class="fas fa-sitemap"></i>--%>
-<%--                        </div>--%>
-<%--                        <div class="stat-content">--%>
-<%--                            <h3 id="totalDepartments">${totalDepartments}</h3>--%>
-<%--                            <p>Các ban</p>--%>
-<%--                        </div>--%>
-<%--                    </div>--%>
-<%--                    <div class="stat-card">--%>
-<%--                        <div class="stat-icon members">--%>
-<%--                            <i class="fas fa-users"></i>--%>
-<%--                        </div>--%>
-<%--                        <div class="stat-content">--%>
-<%--                            <h3 id="totalMembers">${totalMembers}</h3>--%>
-<%--                            <p>Thành viên</p>--%>
-<%--                        </div>--%>
-<%--                    </div>--%>
-<%--                    <div class="stat-card">--%>
-<%--                        <div class="stat-icon events">--%>
-<%--                            <i class="fas fa-calendar"></i>--%>
-<%--                        </div>--%>
-<%--                        <div class="stat-content">--%>
-<%--                            <h3 id="totalEvents">${totalEvents}</h3>--%>
-<%--                            <p>Sự kiện</p>--%>
-<%--                        </div>--%>
-<%--                    </div>--%>
-<%--                    <div class="stat-card">--%>
-<%--                        <div class="stat-icon active-tasks">--%>
-<%--                            <i class="fas fa-tasks"></i>--%>
-<%--                        </div>--%>
-<%--                        <div class="stat-content">--%>
-<%--                            <h3 id="activeTasks">8</h3>--%>
-<%--                            <p>Nhiệm vụ đang thực hiện</p>--%>
-<%--                        </div>--%>
-<%--                    </div>--%>
-<%--                </div>--%>
-<%--            </section>--%>
-
-<%--&lt;%&ndash;            <!-- Departments Overview -->&ndash;%&gt;--%>
-<%--&lt;%&ndash;            <section class="departments-overview">&ndash;%&gt;--%>
-<%--&lt;%&ndash;                <h2>Các ban trong CLB</h2>&ndash;%&gt;--%>
-<%--&lt;%&ndash;                <div class="departments-grid" id="departmentsGrid">&ndash;%&gt;--%>
-<%--&lt;%&ndash;                    <!-- Departments will be populated by JavaScript -->&ndash;%&gt;--%>
-<%--&lt;%&ndash;                </div>&ndash;%&gt;--%>
-<%--&lt;%&ndash;            </section>&ndash;%&gt;--%>
-
-<%--&lt;%&ndash;            <!-- Recent Activities -->&ndash;%&gt;--%>
-<%--&lt;%&ndash;            <section class="recent-activities">&ndash;%&gt;--%>
-<%--&lt;%&ndash;                <h2>Hoạt động gần đây</h2>&ndash;%&gt;--%>
-<%--&lt;%&ndash;                <div class="activities-list" id="activitiesList">&ndash;%&gt;--%>
-<%--&lt;%&ndash;                    <!-- Recent activities will be populated by JavaScript -->&ndash;%&gt;--%>
-<%--&lt;%&ndash;                </div>&ndash;%&gt;--%>
-<%--&lt;%&ndash;            </section>&ndash;%&gt;--%>
-<%--        </div>--%>
 
     <c:choose>
         <c:when test="${action == 'overview'}">
-            <jsp:include page="view/student/chairman/overview.jsp" />
+            <jsp:include page="overview.jsp" />
         </c:when>
         <c:when test="${action == 'myclub-events'}">
-            <jsp:include page="view/student/chairman/myclub-events.jsp" />
+            <jsp:include page="myclub-events.jsp" />
         </c:when>
         <c:when test="${action == 'tasks'}">
-            <jsp:include page="view/student/chairman/tasks.jsp" />
+            <jsp:include page="tasks.jsp" />
         </c:when>
         <c:otherwise>
-            <jsp:include page="view/student/chairman/overview.jsp" />
+            <jsp:include page="overview.jsp" />
         </c:otherwise>
     </c:choose>
 
 
     </main>
+    <script src="../../../js/chairmanPage.js"></script>
     </body>
 </html>
