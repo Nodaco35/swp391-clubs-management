@@ -102,7 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
   copyLinkButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const templateId = button.getAttribute("data-template-id")
-      const publicLink = `${window.location.origin}${contextPath}/public/form/${templateId}`
+      const publicLink = `${window.location.origin}${contextPath}/applicationForm?templateId=${templateId}`
 
       navigator.clipboard
           .writeText(publicLink)
@@ -115,7 +115,6 @@ document.addEventListener("DOMContentLoaded", () => {
           })
     })
   })
-
   // Modal event handlers
   function setupModalHandlers() {
     // Delete modal
