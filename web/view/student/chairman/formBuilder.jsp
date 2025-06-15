@@ -1,9 +1,5 @@
-<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"  %>
-<%-- Import lớp tiện ích StringEscapeUtils --%>
-<%@ page import="util.StringEscapeUtils" %>
-<%@ page import="models.ApplicationFormTemplate" %> <%-- Import model ApplicationFormTemplate --%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -13,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/formBuilder.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
@@ -25,9 +22,7 @@
         <div class="header-content">
             <div class="header-left">
                 <h1 class="title">Form Builder</h1>
-                <input type="text" id="formTitle" class="input-title"
-                       value="${not empty formTitleToEdit ? fn:escapeXml(formTitleToEdit) : 'Đơn đăng ký mới'}"
-                       placeholder="Tiêu đề form" required>
+                <input type="text" id="formTitle" class="input-title" value="Đơn đăng ký" placeholder="Tiêu đề form" required>
             </div>
             <div class="header-actions">
                 <button id="saveBtn" class="btn btn-outline">
@@ -57,7 +52,7 @@
                     <p class="alert-description">
                         <c:choose>
                             <c:when test="${not empty param.message}">
-                                ${fn:escapeXml(param.message)}
+                                ${param.message}
                             </c:when>
                             <c:otherwise>
                                 Đã xảy ra lỗi khi lưu form. Vui lòng thử lại sau!
@@ -103,43 +98,52 @@
                 <div class="card">
                     <c:if test="${not empty formQuestions}">
                         <script>
-                            console.log("JSP: Bắt đầu tạo window.existingQuestions.");
                             window.existingQuestions = [
-                                <c:forEach var="q_item" items="${formQuestions}" varStatus="status">
-                                <c:set var="question" value="${q_item}" scope="page"/>
+                                <c:forEach var="question" items="${formQuestions}" varStatus="status">
                                 {
-                                    id: "${fn:escapeXml(question.templateId)}", // Đây là ID từ DB
-                                    type: "${fn:toLowerCase(fn:escapeXml(question.fieldType))}",
-                                    label: '<%= StringEscapeUtils.escapeJavaScript(((ApplicationFormTemplate)pageContext.getAttribute("question")).getFieldName()) %>',
-                                    required: ${question.isRequired()},
-                                    options: <%= ((ApplicationFormTemplate)pageContext.getAttribute("question")).getOptions() != null ? "'" + StringEscapeUtils.escapeJavaScript(((ApplicationFormTemplate)pageContext.getAttribute("question")).getOptions()) + "'" : "null" %>
+                                    id: "${question.templateId}", // TemplateID để xác định câu hỏi
+                                    type: "${question.fieldType.toLowerCase()}", // Chuyển thành chữ thường để khớp với form
+                                    label: "${question.fieldName}", // Tên câu hỏi
+                                    required: ${question.isRequired()}, // Có bắt buộc hay không
+                                    options: ${question.options != null ? '"' + question.options + '"' : 'null'} // Tùy chọn nếu có
                                 }<c:if test="${not status.last}">,</c:if>
                                 </c:forEach>
                             ];
-                            const replacer = (key, value) => (typeof value === 'undefined' ? null : value);
-                            console.log("JSP: window.existingQuestions được tạo:", JSON.stringify(window.existingQuestions, replacer, 2));
+
+                            // Hàm để hiển thị các câu hỏi đã lưu
+                            document.addEventListener("DOMContentLoaded", function() {
+                                if (window.existingQuestions && window.existingQuestions.length > 0) {
+                                    window.existingQuestions.forEach(function(q) {
+                                        addQuestion(q.type, q.label, q.required, q.options, q.id);
+                                    });
+                                }
+                            });
                         </script>
                     </c:if>
                     <div class="card-header">
                         <h2 class="card-title">Đơn đăng ký</h2>
                     </div>
                     <div class="card-content">
-                        <div class="form-group">
-                            <label class="form-label">Chọn loại form:</label>
-                            <select id="formType" name="formType" class="form-select mb-2" onchange="toggleEventField(this)" required>
-                                <option value="">Chọn loại form</option>
-                                <option value="event" ${formTypeToEdit == 'Event' ? 'selected' : ''}>Đăng ký tham gia sự kiện</option>
-                                <option value="member" ${formTypeToEdit == 'Club' ? 'selected' : ''}>Đăng ký làm thành viên</option>
-                            </select>
-                            <div class="error-feedback" id="formTypeError" style="color: #dc3545; font-size: 0.875rem; margin-top: 5px; display: none;">
-                                Vui lòng chọn loại form
+                            <div class="form-group">
+                                <label class="form-label">Chọn loại form:</label>
+                                <select id="formType" name="eventType" class="form-select mb-2" onchange="toggleEventField(this)" required>
+                                    <option value="">Chọn loại form</option>
+                                    <option value="event">Đăng ký tham gia sự kiện</option>
+                                    <option value="member">Đăng ký làm thành viên</option>
+                                </select>
+                                <div class="error-feedback" id="formTypeError" style="color: #dc3545; font-size: 0.875rem; margin-top: 5px; display: none;">
+                                    Vui lòng chọn loại form
+                                </div>
+                                <div id="eventNameField" class="mb-2" style="display: none;">
+                                    <label class="form-label">Tên sự kiện:</label>
+                                    <input type="text" name="eventName" class="form-input" placeholder="Nhập tên sự kiện">
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
                 <!-- Questions Section -->
                 <div class="section-header">
-                    <h2 class="section-title">Câu hỏi (<span id="questionCount">0</span>/20)</h2>
+                    <h2 class="section-title">Câu hỏi (<span id="questionCount">3</span>/20)</h2>
                     <div class="section-actions">
                         <button id="addInfoBtn" class="btn btn-outline">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
@@ -176,9 +180,8 @@
 
                 <!-- Questions List -->
                 <div id="questionsList" class="questions-list">
-                    <%-- Các câu hỏi mặc định. JS sẽ xóa nếu có existingQuestions và tạo lại từ dữ liệu. --%>
                     <!-- Question 1: Họ và tên (Required) -->
-                    <div class="card question-card required-question" data-id="qDefault1" draggable="true">
+                    <div class="card question-card required-question" data-id="q1" draggable="true">
                         <div class="card-header">
                             <div class="question-header">
                                 <div class="drag-handle">
@@ -236,12 +239,12 @@
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Placeholder</label>
-                                <input type="text" class="form-input question-placeholder" value="Nhập câu trả lời của bạn">
+                                <input type="text" class="form-input question-placeholder" value="Nhập họ và tên của bạn">
                             </div>
                             <div class="form-group">
                                 <div class="checkbox-wrapper">
-                                    <input type="checkbox" id="required-qDefault1" class="question-required" checked>
-                                    <label for="required-qDefault1">Bắt buộc</label>
+                                    <input type="checkbox" id="required-q1" class="question-required" checked>
+                                    <label for="required-q1">Bắt buộc</label>
                                 </div>
                             </div>
                         </div>
@@ -306,12 +309,12 @@
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Placeholder</label>
-                                <input type="text" class="form-input question-placeholder" value="Nhập câu trả lời của bạn">
+                                <input type="text" class="form-input question-placeholder" value="Nhập địa chỉ email của bạn">
                             </div>
                             <div class="form-group">
                                 <div class="checkbox-wrapper">
-                                    <input type="checkbox" id="required-qDefault2" class="question-required" checked>
-                                    <label for="required-qDefault3">Bắt buộc</label>
+                                    <input type="checkbox" id="required-q2" class="question-required" checked>
+                                    <label for="required-q2">Bắt buộc</label>
                                 </div>
                             </div>
                         </div>
@@ -376,12 +379,12 @@
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Placeholder</label>
-                                <input type="text" class="form-input question-placeholder" value="Nhập câu trả lời của bạn">
+                                <input type="text" class="form-input question-placeholder" value="Nhập mã số sinh viên của bạn">
                             </div>
                             <div class="form-group">
                                 <div class="checkbox-wrapper">
-                                    <input type="checkbox" id="required-qDefault3" class="question-required" checked>
-                                    <label for="required-qDefault3">Bắt buộc</label>
+                                    <input type="checkbox" id="required-q3" class="question-required" checked>
+                                    <label for="required-q3">Bắt buộc</label>
                                 </div>
                             </div>
                         </div>
@@ -491,10 +494,12 @@
                         <option value="text" selected>Văn bản ngắn</option>
                         <option value="textarea">Văn bản dài</option>
                         <option value="email">Email</option>
+                        <option value="tel">Số điện thoại</option>
                         <option value="number">Số</option>
                         <option value="date">Ngày</option>
                         <option value="radio">Trắc nghiệm (một lựa chọn)</option>
                         <option value="checkbox">Hộp kiểm (nhiều lựa chọn)</option>
+                        <option value="select">Danh sách thả xuống</option>
                         <option value="info">Thông tin (chỉ đọc)</option>
                     </select>
                 </div>
@@ -579,37 +584,12 @@
         </button>
     </div>
 </template>
+<script src="${pageContext.request.contextPath}/js/formBuilder.js"></script>
 <form id="formBuilderForm" action="${pageContext.request.contextPath}/formBuilder" method="post" style="display: none;">
     <input type="hidden" id="action" name="action">
     <input type="hidden" id="formTitleHidden" name="formTitle">
     <input type="hidden" id="formTypeHidden" name="formType">
     <input type="hidden" id="questionsHidden" name="questions">
-    <c:if test="${not empty param.templateId}">
-        <input type="hidden" name="editingTemplateId" value="${param.templateId}" />
-    </c:if>
 </form>
-<%-- Truyền editingTemplateId nếu đang ở chế độ chỉnh sửa --%>
-<c:if test="${not empty editingTemplateId}">
-    <input type="hidden" name="editingTemplateId" value="${fn:escapeXml(editingTemplateId)}">
-</c:if>
-</form>
-
-<script src="${pageContext.request.contextPath}/js/formBuilder.js"></script>
-<script>
-    // Đảm bảo toggleEventField được gọi sau khi DOM sẵn sàng và formType đã có giá trị (nếu có)
-    document.addEventListener('DOMContentLoaded', function() {
-        const formTypeSelect = document.getElementById('formType');
-        if (formTypeSelect && formTypeSelect.value) {
-            toggleEventField(formTypeSelect);
-        }
-        // Cập nhật lại preview nếu đang ở tab preview khi tải trang
-        if (document.querySelector('.tab-item[data-tab="preview"].active')) {
-            const updatePreviewFunc = window.updatePreview; // Giả sử updatePreview được expose global hoặc có cách gọi khác
-            if (typeof updatePreviewFunc === 'function') {
-                updatePreviewFunc();
-            }
-        }
-    });
-</script>
 </body>
 </html>

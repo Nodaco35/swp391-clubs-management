@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -115,7 +116,15 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("permissionID", user_find.getPermissionID());
             session.setAttribute("userID", user_find.getUserID());
             session.setMaxInactiveInterval(30 * 60); // 30 phút
+            boolean isChairman = ud.isChairman(user_find.getUserID());
+            List<Integer> myEventIDs = ud.getEventIDsOfChairman(user_find.getUserID());
+            session.setAttribute("myEventIDs", myEventIDs);
+            System.out.println("Danh sách sự kiện của chủ nhiệm " + user_find.getUserID() + ": " + myEventIDs);
 
+            System.out.println("Đăng nhập: " + user_find.getUserID());
+            System.out.println("Is chairman? " + isChairman);
+
+              session.setAttribute("isChairman", isChairman);
             // Điều hướng theo quyền
             if (user_find.getPermissionID() == 1) {
                 // Chuyển hướng đến trang chủ - HomepageServlet

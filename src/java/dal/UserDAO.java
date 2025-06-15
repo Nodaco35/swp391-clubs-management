@@ -42,6 +42,47 @@ public class UserDAO {
         return null;
     }
 
+    public List<Integer> getEventIDsOfChairman(String userID) {
+        List<Integer> eventIDs = new ArrayList<>();
+
+        String sql = "SELECT e.EventID " +
+                "FROM Events e " +
+                "JOIN Clubs c ON e.ClubID = c.ClubID " +
+                "JOIN UserClubs uc ON c.ClubID = uc.ClubID " +
+                "WHERE uc.UserID = ? AND uc.RoleID = 1";
+
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, userID);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    eventIDs.add(rs.getInt("EventID"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return eventIDs;
+    }
+
+
+    public boolean isChairman(String userID) {
+        String sql = "SELECT 1 FROM UserClubs WHERE UserID = ? AND RoleID = 1 AND IsActive = 1 LIMIT 1";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, userID);
+            ResultSet rs = ps.executeQuery();
+            return rs.next(); // có ít nhất 1 dòng là true
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     private static final Logger LOGGER = Logger.getLogger(UserDAO.class.getName());
 
     public static Users getUserByEmail(String email) {
