@@ -215,7 +215,10 @@
 						</a>
 					</div>
 
-
+					<h3 class="section-title">
+						<i class="fas fa-info-circle"></i>
+						Sự kiện liên quan
+					</h3>
 					<!-- Related Events -->
 					<div class="events-grid" id="eventsGrid">
 						<c:forEach var="e" items="${requestScope.relatedEvents}">

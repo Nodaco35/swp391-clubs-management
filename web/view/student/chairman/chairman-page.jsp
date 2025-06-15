@@ -10,7 +10,7 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <html>
 <head>
-    <title>Events Page</title>
+    <title>Chairman Page</title>
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/chairmanPage.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -98,89 +98,107 @@
                 </ul>
             </nav>
         </div>
-        <div class="club-header">
-            <div class="club-info">
-                <div class="club-avatar">
-                    <i class="fas fa-laptop-code"></i>
-                </div>
-                <div class="club-details">
-                    <h1>CLB Công nghệ</h1>
-                    <p>Chủ nhiệm: Nguyễn Văn An</p>
+        <c:if test="${not empty club}">
+            <div class="club-header">
+                <div class="club-info">
+                    <div class="club-avatar">
+                        <img src="${pageContext.request.contextPath}${club.clubImg}" alt="${club.clubName}" style="width: 60px; height: 60px; border-radius: 50%;">
+                    </div>
+                    <div class="club-details">
+                        <h1>${club.clubName}</h1>
+                        <p>Chủ nhiệm: ${club.clubChairmanName}</p>
+                    </div>
                 </div>
             </div>
-        </div>
+        </c:if>
+
         <nav class="dashboard-nav">
             <ul>
-                <li><a href="#" class="nav-item active" data-tab="overview"><i class="fas fa-tachometer-alt"></i> Tổng
-                    quan</a></li>
-                <li><a href="#" class="nav-item" data-tab="events"><i class="fas fa-calendar-alt"></i> Sự kiện</a></li>
-                <li><a href="#" class="nav-item" data-tab="tasks"><i class="fas fa-tasks"></i> Công việc</a></li>
-                <li><a href="#" class="nav-item" data-tab="members"><i class="fas fa-users"></i> Thành viên</a></li>
+                <li><a href="chairman-page?action=overview" class="nav-item ${action == 'overview' ? 'active' : ''}"><i class="fas fa-tachometer-alt"></i> Tổng quan</a></li>
+                <li><a href="chairman-page?action=myclub-events" class="nav-item ${action == 'myclub-events' ? 'active' : ''}"><i class="fas fa-calendar-check"></i> Quản lý sự kiện</a></li>
+                <li><a href="chairman-page?action=tasks" class="nav-item ${action == 'tasks' ? 'active' : ''}"><i class="fas fa-tasks"></i> Công việc</a></li>
             </ul>
         </nav>
+
+
     </header>
     <main class="dashboard-content">
-        <!-- Overview Tab -->
-        <div id="overview-tab" class="tab-content active">
-            <!-- Club Statistics -->
-            <section class="stats-section">
-                <h2>Thống kê tổng quan</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon departments">
-                            <i class="fas fa-sitemap"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="totalDepartments">${totalDepartments}</h3>
-                            <p>Các ban</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon members">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="totalMembers">${totalMembers}</h3>
-                            <p>Thành viên</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon events">
-                            <i class="fas fa-calendar"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="totalEvents">${totalEvents}</h3>
-                            <p>Sự kiện</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon active-tasks">
-                            <i class="fas fa-tasks"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="activeTasks">8</h3>
-                            <p>Nhiệm vụ đang thực hiện</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-<%--            <!-- Departments Overview -->--%>
-<%--            <section class="departments-overview">--%>
-<%--                <h2>Các ban trong CLB</h2>--%>
-<%--                <div class="departments-grid" id="departmentsGrid">--%>
-<%--                    <!-- Departments will be populated by JavaScript -->--%>
+<%--        <!-- Overview Tab -->--%>
+<%--        <div id="overview-tab" class="tab-content active">--%>
+<%--            <!-- Club Statistics -->--%>
+<%--            <section class="stats-section">--%>
+<%--                <h2>Thống kê tổng quan</h2>--%>
+<%--                <div class="stats-grid">--%>
+<%--                    <div class="stat-card">--%>
+<%--                        <div class="stat-icon departments">--%>
+<%--                            <i class="fas fa-sitemap"></i>--%>
+<%--                        </div>--%>
+<%--                        <div class="stat-content">--%>
+<%--                            <h3 id="totalDepartments">${totalDepartments}</h3>--%>
+<%--                            <p>Các ban</p>--%>
+<%--                        </div>--%>
+<%--                    </div>--%>
+<%--                    <div class="stat-card">--%>
+<%--                        <div class="stat-icon members">--%>
+<%--                            <i class="fas fa-users"></i>--%>
+<%--                        </div>--%>
+<%--                        <div class="stat-content">--%>
+<%--                            <h3 id="totalMembers">${totalMembers}</h3>--%>
+<%--                            <p>Thành viên</p>--%>
+<%--                        </div>--%>
+<%--                    </div>--%>
+<%--                    <div class="stat-card">--%>
+<%--                        <div class="stat-icon events">--%>
+<%--                            <i class="fas fa-calendar"></i>--%>
+<%--                        </div>--%>
+<%--                        <div class="stat-content">--%>
+<%--                            <h3 id="totalEvents">${totalEvents}</h3>--%>
+<%--                            <p>Sự kiện</p>--%>
+<%--                        </div>--%>
+<%--                    </div>--%>
+<%--                    <div class="stat-card">--%>
+<%--                        <div class="stat-icon active-tasks">--%>
+<%--                            <i class="fas fa-tasks"></i>--%>
+<%--                        </div>--%>
+<%--                        <div class="stat-content">--%>
+<%--                            <h3 id="activeTasks">8</h3>--%>
+<%--                            <p>Nhiệm vụ đang thực hiện</p>--%>
+<%--                        </div>--%>
+<%--                    </div>--%>
 <%--                </div>--%>
 <%--            </section>--%>
 
-<%--            <!-- Recent Activities -->--%>
-<%--            <section class="recent-activities">--%>
-<%--                <h2>Hoạt động gần đây</h2>--%>
-<%--                <div class="activities-list" id="activitiesList">--%>
-<%--                    <!-- Recent activities will be populated by JavaScript -->--%>
-<%--                </div>--%>
-<%--            </section>--%>
-        </div>
+<%--&lt;%&ndash;            <!-- Departments Overview -->&ndash;%&gt;--%>
+<%--&lt;%&ndash;            <section class="departments-overview">&ndash;%&gt;--%>
+<%--&lt;%&ndash;                <h2>Các ban trong CLB</h2>&ndash;%&gt;--%>
+<%--&lt;%&ndash;                <div class="departments-grid" id="departmentsGrid">&ndash;%&gt;--%>
+<%--&lt;%&ndash;                    <!-- Departments will be populated by JavaScript -->&ndash;%&gt;--%>
+<%--&lt;%&ndash;                </div>&ndash;%&gt;--%>
+<%--&lt;%&ndash;            </section>&ndash;%&gt;--%>
+
+<%--&lt;%&ndash;            <!-- Recent Activities -->&ndash;%&gt;--%>
+<%--&lt;%&ndash;            <section class="recent-activities">&ndash;%&gt;--%>
+<%--&lt;%&ndash;                <h2>Hoạt động gần đây</h2>&ndash;%&gt;--%>
+<%--&lt;%&ndash;                <div class="activities-list" id="activitiesList">&ndash;%&gt;--%>
+<%--&lt;%&ndash;                    <!-- Recent activities will be populated by JavaScript -->&ndash;%&gt;--%>
+<%--&lt;%&ndash;                </div>&ndash;%&gt;--%>
+<%--&lt;%&ndash;            </section>&ndash;%&gt;--%>
+<%--        </div>--%>
+
+    <c:choose>
+        <c:when test="${action == 'overview'}">
+            <jsp:include page="view/student/chairman/overview.jsp" />
+        </c:when>
+        <c:when test="${action == 'myclub-events'}">
+            <jsp:include page="view/student/chairman/myclub-events.jsp" />
+        </c:when>
+        <c:when test="${action == 'tasks'}">
+            <jsp:include page="view/student/chairman/tasks.jsp" />
+        </c:when>
+        <c:otherwise>
+            <jsp:include page="view/student/chairman/overview.jsp" />
+        </c:otherwise>
+    </c:choose>
 
 
     </main>
