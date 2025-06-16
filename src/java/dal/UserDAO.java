@@ -66,9 +66,9 @@ public class UserDAO {
         return 0;
     }
 
-    public static void insertByAdmin(String fullName, String email, String password, String dateOfBirth, int permissionID) {
+    public static void insertByAdmin(String fullName, String email, String password, String dateOfBirth, int permissionID, String status) {
         DBContext_Duc db = DBContext_Duc.getInstance();
-        
+
         String sql = """
                      INSERT INTO `clubmanagementsystem`.`users`
                      (`UserID`,
@@ -92,6 +92,13 @@ public class UserDAO {
             if (dateOfBirth.equals("")) {
                 dateOfBirth = null;
             }
+            int status_raw;
+            if (status.equals("true")) {
+                status_raw = 1;
+
+            } else {
+                status_raw = 0;
+            }
             PreparedStatement ps = db.connection.prepareStatement(sql);
             String userID = generateNextUserId();
             ps.setObject(1, userID);
@@ -101,12 +108,176 @@ public class UserDAO {
             ps.setObject(5, "img/Hinh-anh-dai-dien-mac-dinh-Facebook.jpg");
             ps.setObject(6, dateOfBirth);
             ps.setObject(7, permissionID);
-            ps.setObject(8, 1);
+            ps.setObject(8, status_raw);
             ps.executeUpdate();
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public static boolean updateAccountByAdmin(String userID, String new_name, String new_email, String new_password, String new_dob, int new_permissionID, int status) {
+        String sql = """
+                     UPDATE `clubmanagementsystem`.`users`
+                     SET
+                     
+                     `FullName` = ?,
+                     `Email` = ?,
+                     `Password` = ?,
+                     
+                     `DateOfBirth` = ?,
+                     `PermissionID` = ?,
+                     `Status` = ?   
+                     
+                     WHERE `UserID` = ?;""";
+        DBContext_Duc db = DBContext_Duc.getInstance();
+        try {
+            PreparedStatement ps = db.connection.prepareStatement(sql);
+            ps.setObject(1, new_name);
+            ps.setObject(2, new_email);
+            ps.setObject(3, new_password);
+            ps.setObject(4, new_dob);
+            ps.setObject(5, new_permissionID);
+            ps.setObject(6, status);
+            ps.setObject(7, userID);
+            int rs = ps.executeUpdate();
+            return rs > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static void changeActiveAccountByAdmin(String userID) {
+        String sql = """
+                     UPDATE `clubmanagementsystem`.`users`
+                     SET
+                     
+                     `Status` = 0
+                     
+                     WHERE `UserID` = ?;""";
+        DBContext_Duc db = DBContext_Duc.getInstance();
+        try {
+            PreparedStatement ps = db.connection.prepareStatement(sql);
+            ps.setObject(1, userID);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static List<Users> findUsersByPageAndPerID(int perID, int offset, int noOfRecords) {
+        List<Users> list = new ArrayList<>();
+        String sql = """
+        SELECT u.*, p.PermissionName
+        FROM Users u
+        JOIN Permissions p ON u.PermissionID = p.PermissionID
+        WHERE u.PermissionID = ?
+        ORDER BY u.UserID ASC
+        LIMIT ? OFFSET ?
+    """;
+
+        try (PreparedStatement ps = DBContext_Duc.getInstance().connection.prepareStatement(sql)) {
+            ps.setInt(1, perID);
+            ps.setInt(2, noOfRecords);
+            ps.setInt(3, offset);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Users user = new Users();
+                user.setUserID(rs.getString("UserID"));
+                user.setFullName(rs.getString("FullName"));
+                user.setEmail(rs.getString("Email"));
+                user.setPassword(rs.getString("Password"));
+                user.setDateOfBirth(rs.getDate("DateOfBirth"));
+                user.setPermissionID(rs.getInt("PermissionID"));
+                user.setStatus(rs.getBoolean("Status"));
+                user.setResetToken(rs.getString("ResetToken"));
+                user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
+                user.setAvatar(rs.getString("AvatarSrc"));
+                user.setPerName(rs.getString("PermissionName"));
+                list.add(user);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public static int countUsersByPermissionID(int permissionID) {
+        String sql = "SELECT COUNT(*) FROM Users WHERE PermissionID = ?";
+        try (PreparedStatement ps = DBContext_Duc.getInstance().connection.prepareStatement(sql)) {
+            ps.setInt(1, permissionID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+    // Tìm kiếm người dùng theo query với phân trang
+
+    public static List<Users> searchUsersByQuery(String query, int offset, int noOfRecords) {
+        List<Users> list = new ArrayList<>();
+        String sql = """
+        SELECT u.*, p.PermissionName
+        FROM Users u
+        JOIN Permissions p ON u.PermissionID = p.PermissionID
+        WHERE u.FullName LIKE ? OR u.Email LIKE ? OR u.UserID LIKE ?
+        ORDER BY u.UserID ASC
+        LIMIT ? OFFSET ?
+    """;
+
+        try (PreparedStatement ps = DBContext_Duc.getInstance().connection.prepareStatement(sql)) {
+            String searchPattern = "%" + query + "%";
+            ps.setString(1, searchPattern);
+            ps.setString(2, searchPattern);
+            ps.setString(3, searchPattern);
+            ps.setInt(4, noOfRecords);
+            ps.setInt(5, offset);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Users user = new Users();
+                user.setUserID(rs.getString("UserID"));
+                user.setFullName(rs.getString("FullName"));
+                user.setEmail(rs.getString("Email"));
+                user.setPassword(rs.getString("Password"));
+                user.setDateOfBirth(rs.getDate("DateOfBirth"));
+                user.setPermissionID(rs.getInt("PermissionID"));
+                user.setStatus(rs.getBoolean("Status"));
+                user.setResetToken(rs.getString("ResetToken"));
+                user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
+                user.setAvatar(rs.getString("AvatarSrc"));
+                user.setPerName(rs.getString("PermissionName"));
+                list.add(user);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+// Đếm số người dùng khớp với query
+    public static int countUsersByQuery(String query) {
+        String sql = """
+        SELECT COUNT(*)
+        FROM Users
+        WHERE FullName LIKE ? OR Email LIKE ? OR UserID LIKE ?
+    """;
+        try (PreparedStatement ps = DBContext_Duc.getInstance().connection.prepareStatement(sql)) {
+            String searchPattern = "%" + query + "%";
+            ps.setString(1, searchPattern);
+            ps.setString(2, searchPattern);
+            ps.setString(3, searchPattern);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     public Users getUserByID(String userID) {
