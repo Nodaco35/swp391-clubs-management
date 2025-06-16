@@ -673,10 +673,17 @@ a:hover {
 }
 
 /* Required Questions Styles */
-.required-question .delete {
+.required-question:not([data-required-type="department"]) .delete {
   opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;
+}
+
+/* Ensure department question delete button is always enabled */
+.required-question[data-required-type="department"] .delete {
+  opacity: 1;
+  cursor: pointer;
+  pointer-events: auto;
 }
 
 .required-badge {

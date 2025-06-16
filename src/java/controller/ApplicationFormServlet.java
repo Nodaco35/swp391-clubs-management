@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpSession;
 import models.ApplicationFormTemplate;
 import models.ApplicationResponse;
 import models.ClubApplication;
+import models.Users;
 
 /**
  *
@@ -25,12 +26,14 @@ public class ApplicationFormServlet extends HttpServlet {
     private ApplicationFormTemplateDAO formDAO;
     private ApplicationResponseDAO responseDAO;
     private ClubApplicationDAO clubDAO;
+    private UserDAO userDAO;
    
     @Override
     public void init() throws ServletException {
         formDAO = new ApplicationFormTemplateDAO();
         responseDAO = new ApplicationResponseDAO();
         clubDAO = new ClubApplicationDAO();
+        userDAO = new UserDAO();
     }
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -255,26 +258,18 @@ public class ApplicationFormServlet extends HttpServlet {
             
             System.out.println("Debug - Đặt thời gian gửi đơn: " + currentTimestamp);
             
-            // Tìm email từ các câu trả lời form
-            String email = null;
+            // Lấy thông tin người dùng từ cơ sở dữ liệu
+            Users user = userDAO.getUserByID(userId);
+            String email = "";
             
-            // Lặp qua các câu hỏi để tìm trường email
-            for (ApplicationFormTemplate question : questions) {
-                if ("Email".equalsIgnoreCase(question.getFieldType())) {
-                    String fieldName = "ans_" + question.getTemplateId();
-                    String value = request.getParameter(fieldName);
-                    if (value != null && !value.isEmpty() && value.contains("@")) {
-                        email = value;
-                        System.out.println("Debug - Đã tìm thấy email từ form: " + email);
-                        break;
-                    }
-                }
-            }
-            
-            // Nếu không tìm thấy trong form, sử dụng email từ session
-            if (email == null || email.isEmpty()) {
+            if (user != null) {
+                // Lấy email từ thông tin người dùng trong cơ sở dữ liệu
+                email = user.getEmail();
+                System.out.println("Debug - Đã lấy email từ cơ sở dữ liệu: " + email);
+            } else {
+                // Nếu không tìm thấy người dùng, sử dụng email từ session nếu có
                 email = (String) session.getAttribute("userEmail");
-                System.out.println("Debug - Sử dụng email từ session: " + email);
+                System.out.println("Debug - Không tìm thấy user từ DB, sử dụng email từ session: " + email);
             }
             
             // Đặt email, đảm bảo không null

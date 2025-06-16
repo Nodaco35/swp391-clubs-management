@@ -49,10 +49,26 @@ public class MyClubServlet extends HttpServlet {
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
-     */
-    @Override
+     */    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
+        // Lấy thông tin người dùng từ session
+        jakarta.servlet.http.HttpSession session = request.getSession();
+        String userId = (String) session.getAttribute("userID");
+        
+        if (userId != null) {
+            // Import UserClubDAO
+            dal.UserClubDAO userClubDAO = new dal.UserClubDAO();
+            
+            // Lấy thông tin UserClub cho người dùng (nếu đã là thành viên CLB)
+            models.UserClub userClub = userClubDAO.getUserClubByUserId(userId);
+            
+            // Đặt userClub vào request để JSP có thể truy cập
+            if (userClub != null) {
+                session.setAttribute("userClub", userClub);
+            }
+        }
+        
         request.getRequestDispatcher("view/student/myClub.jsp").forward(request, response);
     } 
 

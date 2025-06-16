@@ -107,6 +107,25 @@ function validateForm() {
     form.querySelectorAll('.error-message').forEach(msg => msg.remove());
     form.querySelectorAll('.input-error').forEach(field => field.classList.remove('input-error'));
     
+    // Kiểm tra loại form để quyết định việc xác thực
+    const formType = document.querySelector('input[name="formType"]')?.value || 
+                    (document.location.search.includes('event') ? 'event' : 'member');
+    const isEventForm = formType === 'event';
+    
+    // Tìm câu hỏi "Chọn ban"
+    const departmentQuestions = Array.from(document.querySelectorAll('.form-group')).filter(group => {
+        const label = group.querySelector('.form-label');
+        return label && label.textContent.includes('Chọn ban');
+    });
+    
+    // Nếu là form event, bỏ qua xác thực bắt buộc cho câu hỏi chọn ban
+    if (isEventForm && departmentQuestions.length > 0) {
+        departmentQuestions.forEach(group => {
+            const inputs = group.querySelectorAll('input[required]');
+            inputs.forEach(input => input.required = false);
+        });
+    }
+    
     // Thực hiện xác minh tùy chỉnh cho đầu vào tệp vì chúng không hoạt động với xác minh HTML5
     const requiredFileInputs = form.querySelectorAll('input[type="file"][required]');
     let allFilesValid = true;
@@ -210,6 +229,11 @@ function submitApplication() {
 
     console.log('Debug: Đang thu thập dữ liệu từ biểu mẫu...');
 
+    // Kiểm tra loại form
+    const formType = document.querySelector('input[name="formType"]')?.value || 
+                    (document.location.search.includes('event') ? 'event' : 'member');
+    const isEventForm = formType === 'event';
+
     // Hiển thị chỉ báo đang tải
     const submitBtn = document.getElementById('submitBtn');
     const loadingIndicator = document.getElementById('loadingIndicator');
@@ -220,6 +244,17 @@ function submitApplication() {
     Array.from(form.elements).forEach(el => {
         if (!el.name || !el.name.startsWith('ans_')) return;
         const key = el.name.substring(4);
+
+        // Kiểm tra xem có phải câu hỏi chọn ban không
+        const isSelectDepartment = el.closest('.form-group') && 
+            el.closest('.form-group').querySelector('label') && 
+            el.closest('.form-group').querySelector('label').textContent.includes('Chọn ban');
+        
+        // Bỏ qua câu hỏi chọn ban nếu đây là form sự kiện
+        if (isEventForm && isSelectDepartment) {
+            console.log(`Debug: Bỏ qua câu hỏi chọn ban '${key}' vì đây là form sự kiện`);
+            return;
+        }
 
         switch (el.type) {
             case 'checkbox':
