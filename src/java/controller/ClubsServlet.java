@@ -1,5 +1,6 @@
 package controller;
 
+import dal.ClubCreationPermissionDAO;
 import dal.ClubDAO;
 import dal.UserClubDAO;
 import jakarta.servlet.ServletException;
@@ -17,23 +18,34 @@ public class ClubsServlet extends HttpServlet {
 
     private ClubDAO clubDAO;
     private UserClubDAO userClubDAO;
+     private ClubCreationPermissionDAO permissionDAO;
 
     @Override
     public void init() throws ServletException {
         clubDAO = new ClubDAO();
         userClubDAO = new UserClubDAO();
+        permissionDAO = new ClubCreationPermissionDAO();
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String path = request.getServletPath();
+        String action = request.getParameter("action");
 
         if ("/club-detail".equals(path)) {
             handleClubDetail(request, response);
+        } else if (action != null && (action.equals("addFavorite") || action.equals("removeFavorite"))) {
+            handleFavoriteAction(request, response);
         } else {
             handleClubsList(request, response);
         }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        doGet(request, response);
     }
 
     private void handleClubsList(HttpServletRequest request, HttpServletResponse response)
@@ -54,30 +66,71 @@ public class ClubsServlet extends HttpServlet {
         int pageSize = 3;
 
         List<Clubs> clubs;
+        int totalClubs;
         HttpSession session = request.getSession();
         Users user = (Users) session.getAttribute("user");
         String userID = (user != null) ? user.getUserID() : null;
 
-        if ("myClubs".equalsIgnoreCase(category)) {
-            if (user == null || userID == null) {
-                clubs = clubDAO.getClubsByCategory("all", page, pageSize);
-                category = "all";
-            } else {
-                clubs = clubDAO.getUserClubs(userID, page, pageSize);
-            }
-        } else {
-            clubs = clubDAO.getClubsByCategory(category, page, pageSize);
+        // Check if user has any clubs and favorite clubs
+        boolean hasClubs = false;
+        boolean hasFavoriteClubs = false;
+        if (userID != null) {
+            int userClubCount = clubDAO.getTotalClubsByCategory("myClubs", userID);
+            hasClubs = userClubCount > 0;
+            int favoriteClubCount = clubDAO.getTotalFavoriteClubs(userID);
+            hasFavoriteClubs = favoriteClubCount > 0;
         }
 
-        int totalClubs = clubDAO.getTotalClubsByCategory(category, userID);
-        int totalPages = (int) Math.ceil((double) totalClubs / pageSize);
+        // Handle favoriteClubs category
+        if ("favoriteClubs".equalsIgnoreCase(category)) {
+            if (user == null || userID == null) {
+                clubs = clubDAO.getClubsByCategory("all", page, pageSize);
+                totalClubs = clubDAO.getTotalClubsByCategory("all", null);
+                category = "all";
+            } else {
+                clubs = clubDAO.getFavoriteClubs(userID, page, pageSize);
+                totalClubs = clubDAO.getTotalFavoriteClubs(userID);
+            }
+        } else {
+            // Handle myClubs and other categories
+            if ("myClubs".equalsIgnoreCase(category)) {
+                if (user == null || userID == null) {
+                    clubs = clubDAO.getClubsByCategory("all", page, pageSize);
+                    totalClubs = clubDAO.getTotalClubsByCategory("all", null);
+                    category = "all";
+                } else {
+                    clubs = clubDAO.getUserClubs(userID, page, pageSize);
+                    totalClubs = clubDAO.getTotalClubsByCategory("myClubs", userID);
+                }
+            } else {
+                clubs = clubDAO.getClubsByCategory(category, page, pageSize);
+                totalClubs = clubDAO.getTotalClubsByCategory(category, userID);
+            }
+        }
 
+        // Set favorite status for each club
+        if (userID != null) {
+            for (Clubs club : clubs) {
+                boolean isFavorite = clubDAO.isFavoriteClub(userID, club.getClubID());
+                club.setFavorite(isFavorite);
+            }
+        }
+
+        int totalPages = (int) Math.ceil((double) totalClubs / pageSize);
+        
+        
+        // Check for club creation permission
+        boolean hasPermission = user != null && permissionDAO.hasActiveClubPermission(userID);
+        
         request.setAttribute("clubs", clubs);
         request.setAttribute("selectedCategory", category);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("pageSize", pageSize);
-
+        request.setAttribute("hasClubs", hasClubs);
+        request.setAttribute("hasFavoriteClubs", hasFavoriteClubs);
+        request.setAttribute("hasPermission", hasPermission);
+        
         request.getRequestDispatcher("view/clubs-page/club-management.jsp").forward(request, response);
     }
 
@@ -101,23 +154,74 @@ public class ClubsServlet extends HttpServlet {
         Users user = (Users) session.getAttribute("user");
         boolean isMember = false;
         boolean isPresident = false;
+        boolean isFavorite = false;
         UserClub userClub = null;
 
+        // Set favorite status
         if (user != null) {
-            userClub = userClubDAO.getUserClub(user.getUserID(), clubID);
+            String userID = user.getUserID();
+            userClub = userClubDAO.getUserClub(userID, clubID);
             if (userClub != null && userClub.isIsActive()) {
                 isMember = true;
                 if (userClub.getRoleID() == 1 || userClub.getRoleID() == 2) {
                     isPresident = true;
                 }
             }
+            isFavorite = clubDAO.isFavoriteClub(userID, clubID);
+            club.setFavorite(isFavorite);
         }
-
+        
+        // Check for club creation permission
+        boolean hasPermission = user != null && permissionDAO.hasActiveClubPermission(user.getUserID());
         request.setAttribute("club", club);
         request.setAttribute("isMember", isMember);
         request.setAttribute("isPresident", isPresident);
         request.setAttribute("userClub", userClub);
-
+        request.setAttribute("hasPermission", hasPermission);
+        
         request.getRequestDispatcher("/view/clubs-page/club-detail.jsp").forward(request, response);
+    }
+
+    private void handleFavoriteAction(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Users user = (Users) session.getAttribute("user");
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String action = request.getParameter("action");
+        int clubID;
+        try {
+            clubID = Integer.parseInt(request.getParameter("clubID"));
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid club ID");
+            return;
+        }
+
+        String userID = user.getUserID();
+        boolean success = false;
+
+        if ("addFavorite".equals(action)) {
+            success = clubDAO.addFavoriteClub(userID, clubID);
+        } else if ("removeFavorite".equals(action)) {
+            success = clubDAO.removeFavoriteClub(userID, clubID);
+        }
+
+        if (success) {
+            String referer = request.getHeader("Referer");
+            String category = request.getParameter("category");
+            if ("removeFavorite".equals(action) && "favoriteClubs".equalsIgnoreCase(category)) {
+                int favoriteClubCount = clubDAO.getTotalFavoriteClubs(userID);
+                if (favoriteClubCount == 0) {
+                    response.sendRedirect(request.getContextPath() + "/clubs?category=all");
+                    return;
+                }
+            }
+            response.sendRedirect(referer != null ? referer : request.getContextPath() + "/clubs?category=" + (category != null ? category : "all"));
+        } else {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error processing favorite action");
+        }
     }
 }

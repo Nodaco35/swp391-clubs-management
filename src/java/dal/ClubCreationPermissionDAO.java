@@ -70,5 +70,18 @@ public class ClubCreationPermissionDAO {
         return hasActive;
     }
 
-    
+    public void markPermissionAsUsed(String userId) {
+        try {
+            Connection conn = DBContext.getConnection();
+            PreparedStatement ps = conn.prepareStatement(
+                    "UPDATE ClubCreationPermissions SET Status = 'USED', UsedDate = NOW() WHERE UserID = ? AND Status = 'ACTIVE'"
+            );
+            ps.setString(1, userId);
+            ps.executeUpdate();
+            ps.close();
+            DBContext.closeConnection(conn);
+        } catch (SQLException e) {
+            System.out.println("Error marking permission as used: " + e.getMessage());
+        }
+    }
 }

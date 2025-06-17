@@ -12,7 +12,7 @@ public class DBContext {
             Class.forName("com.mysql.cj.jdbc.Driver"); // chú ý driver mới của MySQL
             String url = "jdbc:mysql://localhost:3306/ClubManagementSystem?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
             String user = "root";
-            String password = "Thuylinh0203";
+            String password = "Minhphuc7777";
 
             return DriverManager.getConnection(url, user, password);
         } catch (Exception e) {

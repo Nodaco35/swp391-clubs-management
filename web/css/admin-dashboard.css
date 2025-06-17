@@ -735,6 +735,7 @@ textarea.form-control {
         grid-template-columns: 1fr;
     }
 }
+
 .badge-admin {
     background-color: rgba(239, 68, 68, 0.1);
     color: var(--destructive);
@@ -1008,6 +1009,7 @@ tbody tr:hover {
     .stats-grid {
         grid-template-columns: 1fr;
     }
+}
 .toggle-switch {
     position: relative;
     width: 50px;

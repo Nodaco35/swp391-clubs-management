@@ -141,6 +141,13 @@
                                 <i class="fas fa-lock"></i>
                                 Sự Kiện Riêng Tư (Club)
                             </a>
+                            <c:if test="${not empty sessionScope.user && hasFavoriteEvents}">
+                                <a href="events-page?key=${currentKeyword}&publicFilter=favoriteEvents&sortByDate=${currentSortByDate}"
+                                   class="filter-btn ${currentPublicFilter == 'favoriteEvents' ? 'active' : ''}">
+                                    <i class="fas fa-heart"></i>
+                                    Sự Kiện Yêu Thích
+                                </a>
+                            </c:if>           
                         </div>
                         <div class="event-sort">
                             <select id="sortSelect" class="sort-select" onchange="changeSort(this.value)">
@@ -191,6 +198,24 @@
                                     </div>
                                     <div class="event-footer">
                                         <span class="attendees status-${fn:toLowerCase(e.status)}">${e.status}</span>
+                                        <!-- Nút yêu thích -->
+                                    <c:choose>
+                                        <c:when test="${sessionScope.user != null}">
+                                            <c:set var="isFavorite" value="${favoriteEvents.contains(e.eventID)}" />
+                                            <form action="${pageContext.request.contextPath}/events-page" method="get" style="display: inline;">
+                                                <input type="hidden" name="eventID" value="${e.eventID}">
+                                                <input type="hidden" name="action" value="${isFavorite ? 'removeFavorite' : 'addFavorite'}">
+                                                <button type="submit" class="btn btn-outline" title="${isFavorite ? 'Bỏ yêu thích' : 'Yêu thích'}">
+                                                    <i class="fa${isFavorite ? 's' : 'r'} fa-heart"></i>
+                                                </button>
+                                            </form>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <a href="${pageContext.request.contextPath}/login" class="btn btn-outline" title="Đăng nhập để yêu thích">
+                                                <i class="far fa-heart"></i>
+                                            </a>
+                                        </c:otherwise>
+                                    </c:choose>
                                         <c:choose>
                                             <c:when test="${e.status == 'PENDING' || e.status == 'Pending'}">
                                                 <button type="button" class="register-btn"

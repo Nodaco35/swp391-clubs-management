@@ -17,7 +17,16 @@
         
         <div class="clubs-grid">
             <c:forEach items="${featuredClubs}" var="club">
-                <c:set var="club" value="${club}" scope="request"/>
+                <% 
+                    // Lấy clubID từ club
+                    int clubID = ((models.Clubs) pageContext.getAttribute("club")).getClubID();
+                    // Lấy câu lạc bộ từ session nếu có
+                    models.Clubs sessionClub = (models.Clubs) session.getAttribute("currentClub_" + clubID);
+                    // Nếu không có trong session, sử dụng club từ loop
+                    models.Clubs displayClub = sessionClub != null ? sessionClub : (models.Clubs) pageContext.getAttribute("club");
+                    // Đặt displayClub vào request để sử dụng trong club-card.jsp
+                    request.setAttribute("club", displayClub);
+                %>
                 <jsp:include page="../components/club-card.jsp"/>
             </c:forEach>
         </div>
