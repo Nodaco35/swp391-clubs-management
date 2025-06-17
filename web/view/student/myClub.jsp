@@ -16,15 +16,12 @@
         <i class="fas fa-arrow-left"></i>
     </a>
 
-    <div class="container">
-
-
-        <div class="actions-section">
+    <div class="container">        <div class="actions-section">
             <h3>Quản lý Form</h3>
-            <a href="${pageContext.request.contextPath}/formManagement" class="action-btn">
+            <a href="${pageContext.request.contextPath}/formManagement?clubId=${userClub.clubID}" class="action-btn">
                 <i class="fas fa-list-alt"></i> Quản Lý Các Form
             </a>
-            <a href="${pageContext.request.contextPath}/formBuilder" class="action-btn">
+            <a href="${pageContext.request.contextPath}/formBuilder?clubId=${userClub.clubID}" class="action-btn">
                 <i class="fas fa-plus"></i> Tạo Form Mới
             </a>
         </div>

@@ -1,7 +1,5 @@
 package dal;
 
-import models.UserClub;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import models.Department;
 import models.Roles;
+import models.UserClub;
 
 public class UserClubDAO {
 
@@ -665,14 +664,14 @@ public class UserClubDAO {
         ResultSet rs = null;
 
         try {
-            conn = DBContext.getConnection();
-            String query = """
-                SELECT uc.UserClubID, uc.UserID, uc.ClubID, uc.DepartmentID, uc.RoleID, 
-                       uc.JoinDate, uc.IsActive, u.FullName, r.RoleName, cd.DepartmentName
+            conn = DBContext.getConnection();            String query = """
+                SELECT uc.UserClubID, uc.UserID, uc.ClubID, uc.ClubDepartmentID, uc.RoleID, 
+                       uc.JoinDate, uc.IsActive, u.FullName, r.RoleName, d.DepartmentName
                 FROM UserClubs uc
                 JOIN Users u ON uc.UserID = u.UserID
                 JOIN Roles r ON uc.RoleID = r.RoleID
-                JOIN ClubDepartments cd ON uc.DepartmentID = cd.DepartmentID
+                JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
+                JOIN Departments d ON cd.DepartmentID = d.DepartmentID
                 WHERE uc.UserID = ? AND uc.IsActive = 1
                 ORDER BY uc.RoleID ASC
                 LIMIT 1
@@ -686,7 +685,7 @@ public class UserClubDAO {
                 userClub.setUserClubID(rs.getInt("UserClubID"));
                 userClub.setUserID(rs.getString("UserID"));
                 userClub.setClubID(rs.getInt("ClubID"));
-                userClub.setDepartmentID(rs.getInt("DepartmentID"));
+                userClub.setDepartmentID(rs.getInt("ClubDepartmentID"));
                 userClub.setRoleID(rs.getInt("RoleID"));
                 userClub.setJoinDate(rs.getTimestamp("JoinDate"));
                 userClub.setIsActive(rs.getBoolean("IsActive"));
@@ -739,5 +738,83 @@ public class UserClubDAO {
             }
         }
         return false;
+    }    /**
+     * Check if a user has a management role in a specific club (roleID between 1-3)
+     * If clubId is null, get the first club where user has a management role
+     * @param userID The user ID to check
+     * @param clubId The club ID to check, can be null
+     * @return UserClub object with user's role in the specified club, or null if user has no management role
+     */
+    public UserClub getUserClubManagementRole(String userID, Integer clubId) {
+        UserClub userClub = null;
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBContext.getConnection();
+            String query;
+            
+            if (clubId != null) {
+                // If clubId is provided, check for that specific club
+                query = """
+                    SELECT uc.UserClubID, uc.UserID, uc.ClubID, uc.ClubDepartmentID, uc.RoleID, 
+                           uc.JoinDate, uc.IsActive, u.FullName, r.RoleName, d.DepartmentName
+                    FROM UserClubs uc
+                    JOIN Users u ON uc.UserID = u.UserID
+                    JOIN Roles r ON uc.RoleID = r.RoleID
+                    JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
+                    JOIN Departments d ON cd.DepartmentID = d.DepartmentID
+                    WHERE uc.UserID = ? AND uc.ClubID = ? AND uc.RoleID BETWEEN 1 AND 3 AND uc.IsActive = 1
+                    ORDER BY uc.RoleID ASC
+                    LIMIT 1
+                """;
+                stmt = conn.prepareStatement(query);
+                stmt.setString(1, userID);
+                stmt.setInt(2, clubId);
+            } else {
+                // If clubId is not provided, get the first club with management role
+                query = """
+                    SELECT uc.UserClubID, uc.UserID, uc.ClubID, uc.ClubDepartmentID, uc.RoleID, 
+                           uc.JoinDate, uc.IsActive, u.FullName, r.RoleName, d.DepartmentName
+                    FROM UserClubs uc
+                    JOIN Users u ON uc.UserID = u.UserID
+                    JOIN Roles r ON uc.RoleID = r.RoleID
+                    JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
+                    JOIN Departments d ON cd.DepartmentID = d.DepartmentID
+                    WHERE uc.UserID = ? AND uc.RoleID BETWEEN 1 AND 3 AND uc.IsActive = 1
+                    ORDER BY uc.RoleID ASC
+                    LIMIT 1
+                """;
+                stmt = conn.prepareStatement(query);
+                stmt.setString(1, userID);
+            }
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                userClub = new UserClub();
+                userClub.setUserClubID(rs.getInt("UserClubID"));
+                userClub.setUserID(rs.getString("UserID"));
+                userClub.setClubID(rs.getInt("ClubID"));
+                userClub.setDepartmentID(rs.getInt("ClubDepartmentID"));
+                userClub.setRoleID(rs.getInt("RoleID"));
+                userClub.setJoinDate(rs.getTimestamp("JoinDate"));
+                userClub.setIsActive(rs.getBoolean("IsActive"));
+                userClub.setFullName(rs.getString("FullName"));
+                userClub.setRoleName(rs.getString("RoleName"));
+                userClub.setDepartmentName(rs.getString("DepartmentName"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error checking management role in club: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (conn != null) DBContext.closeConnection(conn);
+            } catch (SQLException e) {
+                System.out.println("Error closing resources: " + e.getMessage());
+            }
+        }
+        return userClub;
     }
 }

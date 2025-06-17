@@ -1,6 +1,7 @@
 package controller;
 
 import dal.ApplicationFormTemplateDAO;
+import dal.ApplicationResponseDAO;
 import dal.ClubDepartmentDAO;
 import dal.UserClubDAO;
 import jakarta.servlet.ServletException;
@@ -29,30 +30,42 @@ import org.json.JSONException;
 
 
 @WebServlet(name = "FormBuilderServlet", urlPatterns = {"/formBuilder"})
-public class FormBuilderServlet extends HttpServlet {
-    private ApplicationFormTemplateDAO formTemplateDAO;
+public class FormBuilderServlet extends HttpServlet {    private ApplicationFormTemplateDAO formTemplateDAO;
     private UserClubDAO userClubDAO;
     private ClubDepartmentDAO departmentDAO;
-    private static final Logger LOGGER = Logger.getLogger(FormBuilderServlet.class.getName());
-
-    @Override
+    private ApplicationResponseDAO responseDAO;
+    private static final Logger LOGGER = Logger.getLogger(FormBuilderServlet.class.getName());    @Override
     public void init() {
         formTemplateDAO = new ApplicationFormTemplateDAO(); // Khởi tạo DAO
         userClubDAO = new UserClubDAO();
         departmentDAO = new ClubDepartmentDAO(); // Khởi tạo DAO cho ClubDepartments
-    }
-
-    @Override
+        responseDAO = new ApplicationResponseDAO(); // Khởi tạo Response DAO
+    }@Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
         String userId = (String) session.getAttribute("userID");
         if (userId == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
+        }        
+        
+        // Lấy clubId từ request parameter nếu có
+        String clubIdParam = request.getParameter("clubId");
+        Integer clubId = null;
+        
+        if (clubIdParam != null && !clubIdParam.isEmpty()) {
+            try {
+                clubId = Integer.parseInt(clubIdParam);
+            } catch (NumberFormatException e) {
+                response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied&message=" + URLEncoder.encode("ID CLB không hợp lệ.", StandardCharsets.UTF_8.name()));
+                return;
+            }
         }
-        UserClub userClub = userClubDAO.getUserClubByUserId(userId);
-        if (userClub == null || userClub.getRoleID() < 1 || userClub.getRoleID() > 3) {
-            response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền truy cập chức năng này.", StandardCharsets.UTF_8.name()));
+        
+        // Kiểm tra quyền truy cập (chỉ cho roleId 1-3) trong CLB cụ thể
+        UserClub userClub = userClubDAO.getUserClubManagementRole(userId, clubId);
+        if (userClub == null) {
+            response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền quản lý form trong CLB này.", StandardCharsets.UTF_8.name()));
             return;
         }
         session.setAttribute("userClub", userClub);
@@ -67,9 +80,7 @@ public class FormBuilderServlet extends HttpServlet {
             try {
                 //ID của một câu hỏi bất kỳ trong form, dùng để lấy title
                 int representativeTemplateId = Integer.parseInt(templateIdStr);
-                ApplicationFormTemplate representativeQuestion = formTemplateDAO.getTemplateById(representativeTemplateId);
-
-                if (representativeQuestion != null) {
+                ApplicationFormTemplate representativeQuestion = formTemplateDAO.getTemplateById(representativeTemplateId);                if (representativeQuestion != null) {
                     String formTitle = representativeQuestion.getTitle();
                     String formType = representativeQuestion.getFormType(); // 'Club' hoặc 'Event'
                     int clubIdForForm = representativeQuestion.getClubId();
@@ -78,6 +89,18 @@ public class FormBuilderServlet extends HttpServlet {
                     if (clubIdForForm != userClub.getClubID()) {
                         response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền chỉnh sửa form này.", StandardCharsets.UTF_8.name()));
                         return;
+                    }                    // Kiểm tra xem form đã có phản hồi nào chưa
+                    boolean formHasResponses = false;
+                    try {
+                        formHasResponses = responseDAO.hasResponsesByFormTitle(formTitle, clubIdForForm);
+                        if (formHasResponses) {
+                            // Nếu form đã có phản hồi, không cho phép chỉnh sửa và chuyển hướng về trang quản lý với thông báo
+                            response.sendRedirect(request.getContextPath() + "/formManagement?clubId=" + clubIdForForm + "&error=edit_denied&message=" + 
+                                URLEncoder.encode("Không thể chỉnh sửa form đã có người điền. Vui lòng tạo form mới.", StandardCharsets.UTF_8.name()));
+                            return;
+                        }
+                    } catch (Exception e) {
+                        LOGGER.log(Level.SEVERE, "Error checking form responses: " + e.getMessage(), e);
                     }
 
                     // Lấy tất cả các câu hỏi (ApplicationFormTemplate) có cùng title và clubId
@@ -130,32 +153,46 @@ public class FormBuilderServlet extends HttpServlet {
         }
 
         String action = request.getParameter("action");
-        int clubId = userClub.getClubID();
-
-        if ("save".equals(action) || "publish".equals(action)) {
+        int clubId = userClub.getClubID();        if ("save".equals(action) || "publish".equals(action)) {
             try {
+                // Kiểm tra formTitle trước
+                String formTitle = request.getParameter("formTitle");
+                String editingTemplateIdStr = request.getParameter("editingTemplateId");
+                boolean isEditing = editingTemplateIdStr != null && !editingTemplateIdStr.isEmpty();
+                
+                // Nếu đang chỉnh sửa form hiện có, cần kiểm tra xem form có phản hồi chưa
+                if (isEditing) {
+                    try {
+                        int representativeTemplateId = Integer.parseInt(editingTemplateIdStr);
+                        ApplicationFormTemplate template = formTemplateDAO.getTemplateById(representativeTemplateId);
+                        
+                        if (template != null) {                            boolean formHasResponses = responseDAO.hasResponsesByFormTitle(template.getTitle(), template.getClubId());
+                            if (formHasResponses) {
+                                // Nếu form đã có phản hồi, không cho phép chỉnh sửa và chuyển hướng về trang quản lý với thông báo
+                                response.sendRedirect(request.getContextPath() + "/formManagement?clubId=" + clubId + "&error=edit_denied&message=" + 
+                                    URLEncoder.encode("Không thể chỉnh sửa form đã có người điền. Vui lòng tạo form mới.", StandardCharsets.UTF_8.name()));
+                                return;
+                            }
+                        }
+                    } catch (SQLException e) {
+                        LOGGER.log(Level.SEVERE, "Error checking form responses: " + e.getMessage(), e);
+                    }
+                }
+                
                 saveForm(request, clubId, "publish".equals(action));
                 String redirectPath = request.getContextPath() + "/formBuilder?success=true";
                 if ("publish".equals(action)) {
                     redirectPath += "&action=publish";
                 }
-                response.sendRedirect(redirectPath);
-
-            } catch (SQLException ex) {
-                LOGGER.log(Level.SEVERE, "SQL Error saving form for user " + userId + " in club " + clubId, ex);
-                response.sendRedirect(request.getContextPath() + "/formBuilder?error=true&message=" + URLEncoder.encode("Lỗi: " + ex.getMessage(), StandardCharsets.UTF_8.name()));
-            } catch (JSONException ex) {
-                LOGGER.log(Level.SEVERE, "JSON Error processing form data", ex);
-                response.sendRedirect(request.getContextPath() + "/formBuilder?error=true&message=" + URLEncoder.encode("Lỗi xử lý dữ liệu JSON: " + ex.getMessage(), StandardCharsets.UTF_8.name()));
-            }
-            catch (Exception ex) {
-                LOGGER.log(Level.SEVERE, "Unexpected error in form builder (doPost)", ex);
-                response.sendRedirect(request.getContextPath() + "/formBuilder?error=true&message=" + URLEncoder.encode("Đã xảy ra lỗi không mong muốn: " + ex.getMessage(), StandardCharsets.UTF_8.name()));
+                response.sendRedirect(redirectPath);            } catch (Exception ex) {
+                LOGGER.log(Level.SEVERE, "Error in form builder (doPost): " + ex.getMessage(), ex);
+                response.sendRedirect(request.getContextPath() + "/formBuilder?error=true&message=" + 
+                    URLEncoder.encode("Đã xảy ra lỗi không mong muốn: " + ex.getMessage(), StandardCharsets.UTF_8.name()));
             }
         }
     }
 
-    private void saveForm(HttpServletRequest request, int clubId, boolean publish) throws SQLException, JSONException {
+    private void saveForm(HttpServletRequest request, int clubId, boolean publish) throws Exception {
         String formTitleFromInput = request.getParameter("formTitle");
         String formTypeClient = request.getParameter("formType"); // "member" hoặc "event"
         String questionsJson = request.getParameter("questions");
@@ -201,8 +238,7 @@ public class FormBuilderServlet extends HttpServlet {
         }
 
 
-        Set<Integer> processedQuestionIds = new HashSet<>();        // Kiểm tra các câu hỏi bắt buộc phải có: "Họ và tên", "Email", và một câu hỏi chọn ban (có thể có nhiều nhãn khác nhau)
-        // Chúng ta sẽ sử dụng loại câu hỏi để xác định thay vì chỉ dựa vào nhãn
+        Set<Integer> processedQuestionIds = new HashSet<>();   
         Set<String> foundRequiredTypes = new HashSet<>();
         
         // Duyệt qua các câu hỏi từ form
@@ -280,10 +316,9 @@ public class FormBuilderServlet extends HttpServlet {
                 int newId = formTemplateDAO.saveFormTemplateAndGetId(template); // Giả sử DAO trả về ID
                 LOGGER.fine("Saved new question with ID: " + newId + " for title: " + formTitleFromInput);
             }        }
-        
-        // Kiểm tra xem đã có đủ các loại câu hỏi bắt buộc chưa
-        if (!foundRequiredTypes.contains("fullname") || !foundRequiredTypes.contains("email") || !foundRequiredTypes.contains("department")) {
-            throw new SQLException("Form phải bao gồm các câu hỏi bắt buộc: Họ và tên, Email và câu hỏi chọn ban");
+          // Kiểm tra câu hỏi "Chọn ban" chỉ bắt buộc cho form member
+        if ("member".equals(formTypeClient) && !foundRequiredTypes.contains("department")) {
+            throw new SQLException("Form đăng ký thành viên phải bao gồm câu hỏi chọn ban");
         }
 
         if (editingTemplateIdStr != null && !editingTemplateIdStr.isEmpty()) {

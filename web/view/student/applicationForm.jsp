@@ -49,6 +49,7 @@ System.out.println("ApplicationForm.jsp: Đang hiển thị " + questions.size()
             <h1>${formTitle}</h1>
             <c:if test="${param.success == 'true'}">
                 <div class="alert alert-success">
+                    <i class="fas fa-check-circle" style="font-size: 1.5rem; color: var(--success-color);"></i>
                     <div class="alert-content">
                         <h4 class="alert-title">Đăng ký thành công!</h4>
                         <p class="alert-description">Đơn đăng ký của bạn đã được lưu lại.</p>
@@ -57,6 +58,7 @@ System.out.println("ApplicationForm.jsp: Đang hiển thị " + questions.size()
             </c:if>
             <c:if test="${param.error == 'true'}">
                 <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 1.5rem; color: var(--error-color);"></i>
                     <div class="alert-content">
                         <h4 class="alert-title">Đăng ký thất bại</h4>
                         <p class="alert-description">${param.message}</p>
@@ -69,21 +71,45 @@ System.out.println("ApplicationForm.jsp: Đang hiển thị " + questions.size()
             <form id="applicationForm" action="${pageContext.request.contextPath}/applicationForm" method="post">
                 <input type="hidden" name="templateId" value="${templateId}">
                 <input type="hidden" name="clubId" value="${clubId}">
+                <input type="hidden" name="formType" value="${formType}">
                 <c:if test="${not empty eventId}">
                     <input type="hidden" name="eventId" value="${eventId}">
                 </c:if>
                 <input type="hidden" name="responsesJson" id="responsesJson" value="">
                 
+                <div class="form-description">
+                    <p>Vui lòng điền đầy đủ thông tin bên dưới để hoàn thành đơn đăng ký.</p>
+                </div>
+                
                 <c:forEach var="question" items="${questions}">
-                    <div class="form-group" data-template-id="${question.getTemplateId()}" data-display-order="${question.getDisplayOrder()}">
-                        <c:choose>
+                    <%-- Xác định xem câu hỏi này có phải là câu hỏi chọn ban hay không --%>
+                    <% 
+                        ApplicationFormTemplate q = (ApplicationFormTemplate)pageContext.getAttribute("question");
+                        String fieldName = q.getFieldName();
+                        boolean isDepartmentQuestion = fieldName != null && fieldName.contains("Chọn ban");
+                        
+                        if (isDepartmentQuestion) {
+                            pageContext.setAttribute("isDepartmentQuestion", true);
+                        } else {
+                            pageContext.setAttribute("isDepartmentQuestion", false);
+                        }
+                        
+                        String formType = (String)request.getAttribute("formType");
+                        boolean isEventForm = "event".equals(formType);
+                        pageContext.setAttribute("isEventForm", isEventForm);
+                    %>
+
+                    <div class="form-group question-card" data-template-id="${question.getTemplateId()}" data-display-order="${question.getDisplayOrder()}" 
+                        <c:if test="${isDepartmentQuestion && isEventForm}">style="display: none;"</c:if>>
+                    
+                    <c:choose>
                             <%-- Xử lý trường thông tin (info) --%>
                             <c:when test="${question.getFieldType() eq 'Info'}">
                                 <div class="info-field">
                                     <%-- Kiểm tra nếu Options là JSON --%>
                                     <% try { 
-                                        ApplicationFormTemplate q = (ApplicationFormTemplate)pageContext.getAttribute("question");
-                                        String options = q.getOptions();
+                                        ApplicationFormTemplate infoQuestion = (ApplicationFormTemplate)pageContext.getAttribute("question");
+                                        String options = infoQuestion.getOptions();
                                         String content = null; // Mặc định là null - sẽ không hiển thị nếu không có nội dung
                                         String imageData = null;
                                         
@@ -148,6 +174,7 @@ System.out.println("ApplicationForm.jsp: Đang hiển thị " + questions.size()
                             <c:otherwise>
                                 <label class="form-label${question.isRequired() ? ' required-label' : ''}" for="ans_${question.getTemplateId()}">
                                     ${question.getFieldName()}
+                                    <c:if test="${question.isRequired()}"><span class="required-mark">*</span></c:if>
                                 </label>
                                 
                                 <c:choose>
@@ -179,8 +206,8 @@ System.out.println("ApplicationForm.jsp: Đang hiển thị " + questions.size()
                                     <c:when test="${question.getFieldType() eq 'Date'}">
                                         <%-- Kiểm tra nếu Options chứa giới hạn ngày tháng dạng JSON --%>
                                         <% 
-                                            ApplicationFormTemplate q = (ApplicationFormTemplate)pageContext.getAttribute("question");
-                                            String options = q.getOptions();
+                                            ApplicationFormTemplate dateQuestion = (ApplicationFormTemplate)pageContext.getAttribute("question");
+                                            String options = dateQuestion.getOptions();
                                             String minDate = null;
                                             String maxDate = null;
                                             
@@ -218,8 +245,8 @@ System.out.println("ApplicationForm.jsp: Đang hiển thị " + questions.size()
                                         <div class="checkbox-group" style="display: flex; flex-direction: column; gap: 10px;">
                                             <%-- Xử lý options với phương thức tập trung --%>
                                             <% 
-                                                ApplicationFormTemplate q = (ApplicationFormTemplate)pageContext.getAttribute("question");
-                                                String options = q.getOptions();
+                                                ApplicationFormTemplate checkboxQuestion = (ApplicationFormTemplate)pageContext.getAttribute("question");
+                                                String options = checkboxQuestion.getOptions();
                                                 
                                                 // Sử dụng phương thức tiện ích mới để xử lý tất cả định dạng tùy chọn
                                                 List<String> checkboxOptionsList = JsonUtils.parseFormBuilderOptions(options);
@@ -253,8 +280,8 @@ System.out.println("ApplicationForm.jsp: Đang hiển thị " + questions.size()
                                         <div class="radio-group" style="display: flex; flex-direction: column; gap: 10px;">
                                             <%-- Xử lý options với phương thức tập trung --%>
                                             <% 
-                                                ApplicationFormTemplate q = (ApplicationFormTemplate)pageContext.getAttribute("question");
-                                                String options = q.getOptions();
+                                                ApplicationFormTemplate radioQuestion = (ApplicationFormTemplate)pageContext.getAttribute("question");
+                                                String options = radioQuestion.getOptions();
                                                 
                                                 // Sử dụng phương thức tiện ích mới để xử lý tất cả định dạng tùy chọn
                                                 List<String> radioOptionsList = JsonUtils.parseFormBuilderOptions(options);
@@ -287,8 +314,8 @@ System.out.println("ApplicationForm.jsp: Đang hiển thị " + questions.size()
                                     <c:when test="${question.getFieldType() eq 'Number'}">
                                         <%-- Kiểm tra nếu Options chứa giới hạn số dạng JSON --%>
                                         <% 
-                                            ApplicationFormTemplate q = (ApplicationFormTemplate)pageContext.getAttribute("question");
-                                            String options = q.getOptions();
+                                            ApplicationFormTemplate numberQuestion = (ApplicationFormTemplate)pageContext.getAttribute("question");
+                                            String options = numberQuestion.getOptions();
                                             String minValue = null;
                                             String maxValue = null;
                                             String step = "1";
@@ -370,7 +397,10 @@ System.out.println("ApplicationForm.jsp: Đang hiển thị " + questions.size()
                 </c:forEach>
                 
                 <div class="form-actions">
-                    <button type="button" id="submitBtn" class="btn btn-primary btn-submit" onclick="validateForm()">Gửi đơn</button>
+                    <button type="button" id="submitBtn" class="submit-button" onclick="validateForm()">
+                        <i class="fas fa-paper-plane" style="margin-right: 8px;"></i>
+                        Gửi đơn đăng ký
+                    </button>
                     <div id="loadingIndicator" class="loading-indicator" style="display: none;">
                         <div class="spinner"></div>
                         <span>Đang xử lý...</span>

@@ -1,9 +1,10 @@
 package models;
 
 /**
- * Model class for ClubDepartments table
+ * Model class for ClubDepartments table with Departments relationship
  */
 public class ClubDepartment {
+    private int clubDepartmentId;
     private int departmentId;
     private String departmentName;
     private boolean departmentStatus;
@@ -12,6 +13,14 @@ public class ClubDepartment {
     
     public ClubDepartment() {
         // Default constructor
+    }
+
+    public int getClubDepartmentId() {
+        return clubDepartmentId;
+    }
+
+    public void setClubDepartmentId(int clubDepartmentId) {
+        this.clubDepartmentId = clubDepartmentId;
     }
 
     public int getDepartmentId() {
@@ -53,11 +62,11 @@ public class ClubDepartment {
     public void setClubId(int clubId) {
         this.clubId = clubId;
     }
-    
-    @Override
+      @Override
     public String toString() {
         return "ClubDepartment{" + 
-                "departmentId=" + departmentId + 
+                "clubDepartmentId=" + clubDepartmentId +
+                ", departmentId=" + departmentId + 
                 ", departmentName='" + departmentName + '\'' + 
                 ", departmentStatus=" + departmentStatus + 
                 ", description='" + description + '\'' + 
