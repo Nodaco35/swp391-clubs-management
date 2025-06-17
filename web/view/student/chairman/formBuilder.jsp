@@ -124,6 +124,7 @@
                         <h2 class="card-title">Đơn đăng ký</h2>
                     </div>
                     <div class="card-content">
+
                         <div class="form-group">
                             <label class="form-label">Chọn loại form:</label>
                             <select id="formType" name="formType" class="form-select mb-2" onchange="toggleEventField(this)" required>

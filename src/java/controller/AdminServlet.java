@@ -1,19 +1,23 @@
 package controller;
 
 import dal.ClubApplicationDAO;
+import dal.ClubCreationPermissionDAO;
 import dal.ClubDAO;
 import dal.CreatedClubApplicationsDAO;
 import dal.EventsDAO;
+import dal.UserDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import models.Clubs;
 import models.ClubApplication;
 import models.CreatedClubApplications;
+import models.Users;
 
 public class AdminServlet extends HttpServlet {
 
@@ -37,6 +41,8 @@ public class AdminServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        UserDAO ud = new UserDAO();
         String action = request.getParameter("action");
         if (action == null || action.isBlank() || action.isEmpty()) {
             ClubDAO clubDAO = new ClubDAO();
@@ -72,7 +78,7 @@ public class AdminServlet extends HttpServlet {
             request.setAttribute("inactiveClubs", inactiveClubs);
 
             request.getRequestDispatcher("/view/admin/dashboard.jsp").forward(request, response);
-        }
+        } 
     }
 
     /**
@@ -86,7 +92,8 @@ public class AdminServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        HttpSession session = request.getSession();
+
     }
 
     /**
