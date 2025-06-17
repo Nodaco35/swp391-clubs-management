@@ -17,11 +17,16 @@ public class Events {
 
     private int capacity;
     private String status;
-    
+
     // Thêm các trường bổ sung cho hiển thị
     private String clubName;
     private String clubImg;
-    
+
+    //Them de tinh so nguoi da tham gia su kien
+    private int registered;
+    private int spotsLeft;
+
+
     public Events() {
     }
 
@@ -140,8 +145,25 @@ public class Events {
     public String getClubImg() {
         return clubImg;
     }
-    
+
     public void setClubImg(String clubImg) {
         this.clubImg = clubImg;
     }
+
+    public int getRegistered() {
+        return registered;
+    }
+
+    public void setRegistered(int registered) {
+        this.registered = registered;
+    }
+
+    public int getSpotsLeft() {
+        return spotsLeft;
+    }
+
+    public void setSpotsLeft(int spotsLeft) {
+        this.spotsLeft = spotsLeft;
+    }
+
 }
