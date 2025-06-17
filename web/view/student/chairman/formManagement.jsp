@@ -26,11 +26,12 @@
                     <i class="fas fa-plus"></i> Tạo Form Mới
                 </a>
             </div>
-        </div>
-
-        <!-- Search and Filter -->
+        </div>        <!-- Search and Filter -->
         <div class="search-section">
             <div class="filter-section">
+                <label for="formTypeFilter">
+                    <i class="fas fa-filter"></i> Lọc theo loại form:
+                </label>
                 <select id="formTypeFilter">
                     <option value="">Tất cả loại form</option>
                     <option value="Club">Đăng ký thành viên</option>
@@ -203,13 +204,11 @@
     <div id="successToast" class="toast success">
         <i class="fas fa-check-circle"></i>
         <span class="toast-message"></span>
-    </div>
-
-    <div id="errorToast" class="toast error">
+    </div>    <div id="errorToast" class="toast error">
         <i class="fas fa-exclamation-circle"></i>
         <span class="toast-message"></span>
     </div>
 
-    <script src="${pageContext.request.contextPath}/js/formManagement.js"></script>
+    <script src="${pageContext.request.contextPath}/js/formManagement.js?v=<%= System.currentTimeMillis() %>"></script>
 </body>
 </html>
