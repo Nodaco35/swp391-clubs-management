@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee                              http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+<<<<<<< feature/grantPermission-i2
     <filter>
         <filter-name>AuthFilter</filter-name>
         <filter-class>filters.AuthFilter</filter-class>
@@ -9,6 +10,8 @@
         <url-pattern>/admin/*</url-pattern>
         <url-pattern>/ic/*</url-pattern>
     </filter-mapping>
+=======
+>>>>>>> main
     <servlet>
         <servlet-name>HomepageServlet</servlet-name>
         <servlet-class>controller.HomepageServlet</servlet-class>
@@ -89,6 +92,13 @@
         <servlet-name>ChangePasswordServlet</servlet-name>
         <servlet-class>controller.ChangePasswordServlet</servlet-class>
     </servlet>
+<<<<<<< feature/grantPermission-i2
+=======
+    <servlet>
+        <servlet-name>ApplicationFormServlet</servlet-name>
+        <servlet-class>controller.ApplicationFormServlet</servlet-class>
+    </servlet>
+>>>>>>> main
     <servlet-mapping>
         <servlet-name>ClubsServlet</servlet-name>
         <url-pattern>/clubs</url-pattern>
@@ -176,6 +186,13 @@
         <servlet-name>ChangePasswordServlet</servlet-name>
         <url-pattern>/change-password</url-pattern>
     </servlet-mapping>
+<<<<<<< feature/grantPermission-i2
+=======
+    <servlet-mapping>
+        <servlet-name>ApplicationFormServlet</servlet-name>
+        <url-pattern>/applicationForm</url-pattern>
+    </servlet-mapping>
+>>>>>>> main
     <session-config>
         <session-timeout>
             30

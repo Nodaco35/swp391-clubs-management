@@ -1,9 +1,8 @@
-
 package dal;
-import models.ApplicationResponse;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import models.ApplicationResponse;
 
 public class ApplicationResponseDAO {
     private Connection connection;
@@ -293,6 +292,32 @@ public class ApplicationResponseDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt("count") > 0;
+                }
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Kiểm tra xem một form có phản hồi nào từ người dùng hay không
+     * @param formTitle Tên của form
+     * @param clubId ID của câu lạc bộ
+     * @return true nếu form đã có ít nhất một phản hồi, false nếu chưa có phản hồi
+     * @throws SQLException 
+     */
+    public boolean hasResponsesByFormTitle(String formTitle, int clubId) throws SQLException {
+        connection = DBContext.getConnection();
+        String sql = "SELECT COUNT(*) FROM ApplicationResponses r " +
+                     "INNER JOIN ApplicationFormTemplates t ON r.TemplateID = t.TemplateID " +
+                     "WHERE t.Title = ? AND t.ClubID = ?";
+        
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, formTitle);
+            ps.setInt(2, clubId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
                 }
             }
         }

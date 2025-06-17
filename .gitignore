@@ -45,3 +45,5 @@ Thumbs.db
 # VS Code (nếu ai đó mở bằng VS Code)
 # =========================
 .vscode/
+src/java/dal/DBContext.java
+src/java/dal/DBContext.java
