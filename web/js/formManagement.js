@@ -13,29 +13,78 @@ document.addEventListener("DOMContentLoaded", () => {
       button.classList.add("active")
       const tabId = button.getAttribute("data-tab")
       document.getElementById(`${tabId}-tab`).classList.add("active")
-    })
-  })
 
-  // Search and filter functionality
-  const formTypeFilter = document.getElementById("formTypeFilter")
-
-  function filterForms() {
-    const selectedType = formTypeFilter.value
-    const formCards = document.querySelectorAll(".form-card")
-
-    formCards.forEach((card) => {
-      const title = card.getAttribute("data-form-title").toLowerCase()
-      const type = card.getAttribute("data-form-type")
-      const matchesType = !selectedType || type === selectedType
-
-      if (matchesSearch && matchesType) {
-        card.style.display = "block"
-      } else {
-        card.style.display = "none"
+      // Re-apply filter after tab switch
+      if (formTypeFilter) {
+        filterForms()
       }
     })
+  })
+  // Search and filter functionality
+  const formTypeFilter = document.getElementById("formTypeFilter")
+  
+  // Định nghĩa hàm filterForms ngoài event listener để tránh lỗi
+  function filterForms() {
+    if (!formTypeFilter) return; // Kiểm tra tồn tại của formTypeFilter
+    
+    const selectedType = formTypeFilter.value
+    const formCards = document.querySelectorAll(".form-card")
+    const formsGrids = document.querySelectorAll(".forms-grid")
+    
+    console.log("Filtering forms by type:", selectedType);
+
+    // Apply or remove filtered class to the form grids
+    formsGrids.forEach(grid => {
+      if (selectedType) {
+        grid.classList.add('filtered')
+      } else {
+        grid.classList.remove('filtered')
+      }
+    })
+    
+    let visibleCount = 0
+    // Áp dụng bộ lọc cho từng thẻ form
+    formCards.forEach((card) => {
+      const type = card.getAttribute("data-form-type")
+      // Kiểm tra nếu loại form khớp với bộ lọc hoặc không có bộ lọc nào được chọn
+      const shouldShow = !selectedType || type === selectedType
+      
+      if (shouldShow) {
+        card.style.display = "block"
+        card.classList.add('show')
+        visibleCount++
+      } else {
+        card.style.display = "none"
+        card.classList.remove('show')
+      }
+    })
+    
+    // Show a message if no matching forms
+    const currentTab = document.querySelector('.tab-content.active')
+    let emptyMessage = currentTab.querySelector('.filter-empty-state')
+    
+    if (visibleCount === 0 && selectedType) {
+      if (!emptyMessage) {
+        emptyMessage = document.createElement('div')
+        emptyMessage.className = 'empty-state filter-empty-state'
+        emptyMessage.innerHTML = `
+          <i class="fas fa-filter"></i>
+          <h3>Không có form loại "${selectedType === 'Club' ? 'Đăng ký thành viên' : 'Đăng ký sự kiện'}"</h3>
+          <p>Thử chọn loại form khác hoặc tạo form mới.</p>
+        `
+        currentTab.querySelector('.forms-grid').appendChild(emptyMessage)
+      }
+    } else if (emptyMessage) {
+      emptyMessage.remove()
+    }
   }
-  if (formTypeFilter) formTypeFilter.addEventListener("change", filterForms)
+  
+  // Thêm sự kiện change cho bộ lọc
+  if (formTypeFilter) {
+    formTypeFilter.addEventListener("change", filterForms)
+    // Gọi filterForms ngay lập tức để áp dụng bất kỳ bộ lọc nào được chọn sẵn
+    filterForms()
+  }
 
   // Get context path for proper URL construction
   const contextPath = window.location.pathname.substring(0, window.location.pathname.indexOf("/", 2)) || ""
@@ -102,7 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
   copyLinkButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const templateId = button.getAttribute("data-template-id")
-      const publicLink = `${window.location.origin}${contextPath}/public/form/${templateId}`
+      const publicLink = `${window.location.origin}${contextPath}/applicationForm?templateId=${templateId}`
 
       navigator.clipboard
           .writeText(publicLink)
@@ -115,7 +164,6 @@ document.addEventListener("DOMContentLoaded", () => {
           })
     })
   })
-
   // Modal event handlers
   function setupModalHandlers() {
     // Delete modal

@@ -80,9 +80,13 @@
         <servlet-name>ChangePasswordServlet</servlet-name>
         <servlet-class>controller.ChangePasswordServlet</servlet-class>
     </servlet>
-    <servlet>
+   <servlet>
         <servlet-name>MyClubController</servlet-name>
         <servlet-class>controller.MyClubController</servlet-class>
+    </servlet>
+    <servlet>
+       <servlet-name>ApplicationFormServlet</servlet-name>
+        <servlet-class>controller.ApplicationFormServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>ClubsServlet</servlet-name>
@@ -170,6 +174,10 @@
     <servlet-mapping>
         <servlet-name>ChangePasswordServlet</servlet-name>
         <url-pattern>/change-password</url-pattern>
+    </servlet-mapping>
+      <servlet-mapping>
+        <servlet-name>ApplicationFormServlet</servlet-name>
+        <url-pattern>/applicationForm</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>MyClubController</servlet-name>

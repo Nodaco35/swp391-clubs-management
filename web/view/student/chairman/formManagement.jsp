@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý Form - UniClub</title>
+    <title>Form Management - UniClub</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -26,11 +26,12 @@
                     <i class="fas fa-plus"></i> Tạo Form Mới
                 </a>
             </div>
-        </div>
-
-        <!-- Search and Filter -->
+        </div>        <!-- Search and Filter -->
         <div class="search-section">
             <div class="filter-section">
+                <label for="formTypeFilter">
+                    <i class="fas fa-filter"></i> Lọc theo loại form:
+                </label>
                 <select id="formTypeFilter">
                     <option value="">Tất cả loại form</option>
                     <option value="Club">Đăng ký thành viên</option>
@@ -129,7 +130,7 @@
                                     </div>
                                     <div class="form-link">
                                         <input type="text" class="public-link" readonly 
-                                               value="${pageContext.request.scheme}://${pageContext.request.serverName}:${pageContext.request.serverPort}${pageContext.request.contextPath}/public/form/${form.templateId}">
+                                               value="${pageContext.request.scheme}://${pageContext.request.serverName}:${pageContext.request.serverPort}${pageContext.request.contextPath}/applicationForm?templateId=${form.templateId}">
                                     </div>
                                 </div>
                                 <div class="form-actions">
@@ -144,11 +145,10 @@
                                             data-form-title="${form.title}">
                                         <i class="fas fa-eye-slash"></i> Hủy xuất bản
                                     </button>
-                                    <button class="btn btn-danger btn-sm delete-form" 
-                                            data-template-id="${form.templateId}" 
-                                            data-form-title="${form.title}">
-                                        <i class="fas fa-trash"></i> Xóa
-                                    </button>
+                                        <a class="btn btn-sm btn-primary"
+                                           href="${pageContext.request.contextPath}/applicationForm?templateId=${form.templateId}">
+                                            Xem form
+                                        </a>
                                 </div>
                             </div>
                         </c:forEach>
@@ -204,13 +204,11 @@
     <div id="successToast" class="toast success">
         <i class="fas fa-check-circle"></i>
         <span class="toast-message"></span>
-    </div>
-
-    <div id="errorToast" class="toast error">
+    </div>    <div id="errorToast" class="toast error">
         <i class="fas fa-exclamation-circle"></i>
         <span class="toast-message"></span>
     </div>
 
-    <script src="${pageContext.request.contextPath}/js/formManagement.js"></script>
+    <script src="${pageContext.request.contextPath}/js/formManagement.js?v=<%= System.currentTimeMillis() %>"></script>
 </body>
 </html>
