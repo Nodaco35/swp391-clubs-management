@@ -22,7 +22,7 @@
     </head>
     <body>
         <div class="dashboard">
-            <jsp:include page="components/admin-sidebar.jsp" />
+            <jsp:include page="components/ic-sidebar.jsp" />
 
             <main class="main-content">
                 <!-- Header giống Admin Dashboard -->
@@ -46,7 +46,7 @@
 
                         <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                             <!-- Form search -->
-                            <form action="admin" method="get" class="search-form" style="display: flex; align-items: center; gap: 10px;">
+                            <form action="ic" method="get" class="search-form" style="display: flex; align-items: center; gap: 10px;">
                                 <input type="hidden" name="action" value="findUserById">
                                 <input type="text" name="userSearchID" value="${requestScope.userSearchID}" class="search-input" placeholder="Nhập ID người dùng...">
                                 <button class="btn btn-primary" type="submit">
@@ -155,7 +155,7 @@
                                             </c:if>
                                             <c:if test="${userFind.permissionID == 1 && activePermissionCount!=0}">
                                                 <th>
-                                                    <a href="${pageContext.request.contextPath}/admin?action=DeleteByUserId&id=${userFind.userID}" 
+                                                    <a href="${pageContext.request.contextPath}/ic?action=DeleteByUserId&id=${userFind.userID}" 
                                                        class="btn btn-error" 
                                                        onclick="return confirm('Bạn có chắc chắn muốn huỷ quyền tạo CLB của người dùng này không?');">
                                                         <i class="fas fa-trash-alt"></i> Huỷ quyền
@@ -174,7 +174,7 @@
                         <c:if test="${userFind != null}">
                             <c:if test="${userFind.permissionID == 1}">
                                 <button class="btn btn-primary" type="button"
-                                        onclick="window.location.href = '${pageContext.request.contextPath}/admin?action=grantPermisstionForUser&id=${userFind.userID}'"
+                                        onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=grantPermisstionForUser&id=${userFind.userID}'"
                                         >
                                     <i class="fa-solid fa-check"></i> Thêm quyền tạo câu lạc bộ
                                 </button>
@@ -185,4 +185,36 @@
             </main>
         </div>
     </body>
+
+    <style>
+
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            transition: box-shadow 0.2s, border-color 0.2s;
+            min-width: 200px;
+        }
+
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
+        }
+        
+        .card{
+            padding-bottom: 20px;
+            margin-top: 20px;
+        }
+
+    </style>
 </html>

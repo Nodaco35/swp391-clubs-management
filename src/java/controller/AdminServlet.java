@@ -78,50 +78,7 @@ public class AdminServlet extends HttpServlet {
             request.setAttribute("inactiveClubs", inactiveClubs);
 
             request.getRequestDispatcher("/view/admin/dashboard.jsp").forward(request, response);
-        } else if (action.equals("grantPermission")) {
-            request.getRequestDispatcher("view/admin/grantPermission.jsp").forward(request, response);
-        } else if (action.equals("grantPermisstionForUser")) {
-            // Xử lý cấp quyền
-            ClubCreationPermissionDAO ccp = new ClubCreationPermissionDAO();
-            String userId = (String) request.getParameter("id"); // hoặc lấy từ param nếu bạn truyền userID
-            String adminId = ((Users) session.getAttribute("user")).getUserID();
-
-            Users userFind = ud.getUserByID(userId);
-
-            ccp.insertClubPermission(userId, adminId);
-
-            int numberOfPermissions = ccp.countActiveClubPermission(userId);
-            request.setAttribute("activePermissionCount", numberOfPermissions);
-            request.setAttribute("userFind", userFind);
-            request.setAttribute("userSearchID", userId);
-
-            // Forward về trang grantPermission.jsp (giả sử bạn forward lại)
-            request.getRequestDispatcher("view/admin/grantPermission.jsp").forward(request, response);
-        } else if (action.equals("findUserById")) {
-
-            String userSearchID = request.getParameter("userSearchID");
-            Users userFind = ud.getUserByID(userSearchID);
-            ClubCreationPermissionDAO ccp = new ClubCreationPermissionDAO();
-            int numberOfPermissions = ccp.countActiveClubPermission(userSearchID);
-            request.setAttribute("activePermissionCount", numberOfPermissions);
-            request.setAttribute("userFind", userFind);
-            request.setAttribute("userSearchID", userSearchID);
-
-            request.getRequestDispatcher("view/admin/grantPermission.jsp").forward(request, response);
-        } else if (action.equals("DeleteByUserId")) {
-            ClubCreationPermissionDAO ccp = new ClubCreationPermissionDAO();
-            String userId = (String) request.getParameter("id");
-            ccp.revokeClubPermission(userId);
-
-            int numberOfPermissions = ccp.countActiveClubPermission(userId);
-
-            Users userFind = ud.getUserByID(userId);
-            request.setAttribute("activePermissionCount", numberOfPermissions);
-            request.setAttribute("userFind", userFind);
-            request.setAttribute("userSearchID", userId);
-
-            request.getRequestDispatcher("view/admin/grantPermission.jsp").forward(request, response);
-        }
+        } 
     }
 
     /**

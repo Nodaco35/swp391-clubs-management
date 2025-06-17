@@ -227,7 +227,6 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: var(--radius);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     margin-bottom: 2rem;
-    padding-bottom: 30px;
 }
 
 .search-form .btn-primary {

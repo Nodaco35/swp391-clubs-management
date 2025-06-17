@@ -1,7 +1,9 @@
 package controller;
 
+import dal.ClubCreationPermissionDAO;
 import dal.ClubDAO;
 import dal.PeriodicReportDAO;
+import dal.UserDAO;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -9,8 +11,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import models.PeriodicReport;
+import models.Users;
 
 /**
  *
@@ -38,6 +42,8 @@ public class ICServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        UserDAO ud = new UserDAO();
         String action = request.getParameter("action");
         if (action == null) {
             ClubDAO clubDAO = new ClubDAO();
@@ -63,6 +69,49 @@ public class ICServlet extends HttpServlet {
             request.setAttribute("approvedReportsList", approvedReportsList);
 
             request.getRequestDispatcher("/view/ic/dashboard.jsp").forward(request, response);
+        } else if (action.equals("grantPermission")) {
+            request.getRequestDispatcher("view/ic/grantPermission.jsp").forward(request, response);
+        } else if (action.equals("grantPermisstionForUser")) {
+            // Xử lý cấp quyền
+            ClubCreationPermissionDAO ccp = new ClubCreationPermissionDAO();
+            String userId = (String) request.getParameter("id"); // hoặc lấy từ param nếu bạn truyền userID
+            String adminId = ((Users) session.getAttribute("user")).getUserID();
+
+            Users userFind = ud.getUserByID(userId);
+
+            ccp.insertClubPermission(userId, adminId);
+
+            int numberOfPermissions = ccp.countActiveClubPermission(userId);
+            request.setAttribute("activePermissionCount", numberOfPermissions);
+            request.setAttribute("userFind", userFind);
+            request.setAttribute("userSearchID", userId);
+
+            // Forward về trang grantPermission.jsp (giả sử bạn forward lại)
+            request.getRequestDispatcher("view/ic/grantPermission.jsp").forward(request, response);
+        } else if (action.equals("findUserById")) {
+
+            String userSearchID = request.getParameter("userSearchID");
+            Users userFind = ud.getUserByID(userSearchID);
+            ClubCreationPermissionDAO ccp = new ClubCreationPermissionDAO();
+            int numberOfPermissions = ccp.countActiveClubPermission(userSearchID);
+            request.setAttribute("activePermissionCount", numberOfPermissions);
+            request.setAttribute("userFind", userFind);
+            request.setAttribute("userSearchID", userSearchID);
+
+            request.getRequestDispatcher("view/ic/grantPermission.jsp").forward(request, response);
+        } else if (action.equals("DeleteByUserId")) {
+            ClubCreationPermissionDAO ccp = new ClubCreationPermissionDAO();
+            String userId = (String) request.getParameter("id");
+            ccp.revokeClubPermission(userId);
+
+            int numberOfPermissions = ccp.countActiveClubPermission(userId);
+
+            Users userFind = ud.getUserByID(userId);
+            request.setAttribute("activePermissionCount", numberOfPermissions);
+            request.setAttribute("userFind", userFind);
+            request.setAttribute("userSearchID", userId);
+
+            request.getRequestDispatcher("view/ic/grantPermission.jsp").forward(request, response);
         }
     }
 
