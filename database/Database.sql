@@ -239,6 +239,32 @@ INSERT INTO Events (EventName, EventImg, Description, EventDate, Location, ClubI
 ('FPTU Dance Battle 2024', 'images/events/dancebattle2024.jpg', 'Cuộc thi nhảy thể hiện tài năng của sinh viên.', '2024-11-30 18:00:00', 'Sân khấu chính, Campus TP.HCM', 7, TRUE, 150, 'COMPLETED'),
 ('Cuộc Thi Tranh Biện 2024', 'images/events/debate2024.jpg', 'Cuộc thi tranh biện về các chủ đề học thuật và xã hội.', '2024-12-01 09:00:00', 'Phòng hội thảo C1, Campus Hà Nội', 8, TRUE, 65, 'COMPLETED');
 
+-- Sự kiện PENDING (sau ngày hôm nay)
+UPDATE Events SET EventDate = '2025-06-30 09:00:00', Status = 'PENDING' WHERE EventID = 1;
+UPDATE Events SET EventDate = '2025-07-01 19:00:00', Status = 'PENDING' WHERE EventID = 2;
+UPDATE Events SET EventDate = '2025-07-25 08:00:00', Status = 'PENDING' WHERE EventID = 6;
+UPDATE Events SET EventDate = '2025-06-28 13:00:00', Status = 'PENDING' WHERE EventID = 7;
+UPDATE Events SET EventDate = '2025-07-05 08:00:00', Status = 'PENDING' WHERE EventID = 8;
+UPDATE Events SET EventDate = '2025-07-31 10:00:00', Status = 'PENDING' WHERE EventID = 9;
+
+-- Sự kiện PROCESSING (hôm nay)
+UPDATE Events SET EventDate = '2025-06-19 08:00:00', Status = 'PROCESSING' WHERE EventID = 3;
+
+-- Sự kiện COMPLETED (trước ngày hôm nay)
+UPDATE Events SET EventDate = '2025-06-10 07:00:00', Status = 'COMPLETED' WHERE EventID = 4;
+UPDATE Events SET EventDate = '2025-06-01 09:00:00', Status = 'COMPLETED' WHERE EventID = 5;
+UPDATE Events SET EventDate = '2025-06-05 10:00:00', Status = 'COMPLETED' WHERE EventID = 10;
+UPDATE Events SET EventDate = '2024-01-20 10:00:00', Status = 'COMPLETED' WHERE EventID = 11;
+UPDATE Events SET EventDate = '2024-11-20 08:00:00', Status = 'COMPLETED' WHERE EventID = 12;
+UPDATE Events SET EventDate = '2024-12-10 19:00:00', Status = 'COMPLETED' WHERE EventID = 13;
+UPDATE Events SET EventDate = '2024-07-15 07:00:00', Status = 'COMPLETED' WHERE EventID = 14;
+UPDATE Events SET EventDate = '2024-11-25 09:00:00', Status = 'COMPLETED' WHERE EventID = 15;
+UPDATE Events SET EventDate = '2024-12-05 14:00:00', Status = 'COMPLETED' WHERE EventID = 16;
+UPDATE Events SET EventDate = '2024-12-15 10:00:00', Status = 'COMPLETED' WHERE EventID = 17;
+UPDATE Events SET EventDate = '2024-11-15 14:00:00', Status = 'COMPLETED' WHERE EventID = 18;
+UPDATE Events SET EventDate = '2024-11-30 18:00:00', Status = 'COMPLETED' WHERE EventID = 19;
+UPDATE Events SET EventDate = '2024-12-01 09:00:00', Status = 'COMPLETED' WHERE EventID = 20;
+
 UPDATE Events SET Description = 'FPTU Showcase 2025 Chung Kết là sự kiện nghệ thuật lớn nhất trong năm, nơi quy tụ những tiết mục đặc sắc từ các vòng thi trước đó trên khắp các cơ sở FPTU toàn quốc. Với chủ đề ''Bùng cháy đam mê, lan tỏa cảm hứng'', chương trình không chỉ là sân chơi thể hiện tài năng mà còn là nơi gắn kết cộng đồng sinh viên thông qua âm nhạc, vũ đạo, sân khấu hóa, và các màn trình diễn đỉnh cao. Khán giả sẽ được mãn nhãn với hệ thống âm thanh ánh sáng hiện đại, tương tác sân khấu chuyên nghiệp và đặc biệt là những khoảnh khắc thăng hoa của tuổi trẻ. Sự kiện dự kiến thu hút hàng trăm sinh viên và khách mời, tạo nên một đêm diễn bùng nổ, đầy cảm xúc.' WHERE EventID = 1;
 UPDATE Events SET Description = 'Lễ Hội Âm Nhạc Tết 2025 mang đến không gian âm nhạc sống động kết hợp tinh hoa truyền thống và xu hướng hiện đại. Người tham dự sẽ được thưởng thức những tiết mục dân gian hòa quyện với âm nhạc điện tử, rap, ballad… từ các câu lạc bộ nghệ thuật sinh viên. Không khí ngày Tết lan tỏa qua các gian hàng trò chơi dân gian, trình diễn áo dài, và các hoạt động giao lưu văn hóa vùng miền. Đây là dịp để sinh viên FPTU cùng nhau đón Tết sớm, lan tỏa niềm vui và gắn kết cộng đồng.' WHERE EventID = 2;
 UPDATE Events SET Description = 'Thử Thách Lập Trình FPTU 2025 là sân chơi trí tuệ quy tụ những bạn trẻ đam mê công nghệ và giải thuật. Các đội thi sẽ đối mặt với các bài toán lập trình thực tiễn liên quan đến xử lý dữ liệu, trí tuệ nhân tạo, và bảo mật. Cuộc thi không chỉ rèn luyện kỹ năng coding mà còn thúc đẩy tư duy phản biện, làm việc nhóm và sáng tạo giải pháp. Bên cạnh đó, chương trình còn có workshop chia sẻ kinh nghiệm từ các chuyên gia, tạo môi trường học hỏi bổ ích.' WHERE EventID = 3;
