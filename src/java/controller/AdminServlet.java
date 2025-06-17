@@ -56,16 +56,6 @@ public class AdminServlet extends HttpServlet {
 
             int upcomingEventsCount = eventDAO.countUpcomingEvents();
 
-            String permissionID = request.getParameter("permissionID");
-            String query = request.getParameter("query");
-            String pageParam = request.getParameter("page");
-            if (permissionID != null && !permissionID.isEmpty()) {
-                filterByPermission(request, response);
-            } else if (query != null && !query.trim().isEmpty()) {
-                search(request, response);
-            } else {
-                showAllUser(request, response);
-            }
             List<CreatedClubApplications> pendingClubRequests = ccaDAO.getPendingRequests(10);
             List<CreatedClubApplications> approvedClubRequests = ccaDAO.getRequestsByStatus("APPROVED");
             List<CreatedClubApplications> rejectedClubRequests = ccaDAO.getRequestsByStatus("REJECTED");
@@ -88,6 +78,7 @@ public class AdminServlet extends HttpServlet {
 
             request.getRequestDispatcher("/view/admin/dashboard.jsp").forward(request, response);
         } else if (action.equals("manageAccounts")) {
+
             showAllUser(request, response);
         } else if (action.equals("filter")) {
             filterByPermission(request, response);
@@ -141,7 +132,7 @@ public class AdminServlet extends HttpServlet {
         if (request.getParameter("page") != null) {
             page = Integer.parseInt(request.getParameter("page"));
         }
-
+        
         List<Users> users = UserDAO.findUsersByPage((page - 1) * recordsPerPage, recordsPerPage);
         int totalRecords = UserDAO.countAllUsers();
         int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
