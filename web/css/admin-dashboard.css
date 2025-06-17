@@ -1008,6 +1008,7 @@ tbody tr:hover {
     .stats-grid {
         grid-template-columns: 1fr;
     }
+}
 .toggle-switch {
     position: relative;
     width: 50px;
