@@ -6,10 +6,88 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import models.ClubInfo;
 import models.Clubs;
 import models.Department;
 
 public class ClubDAO {
+
+    public ClubInfo getClubChairman(String userID) {
+        String sql = "SELECT c.ClubID, c.ClubName, c.ClubImg, u.FullName AS ClubChairmanName " +
+                "FROM UserClubs uc " +
+                "JOIN Clubs c ON uc.ClubID = c.ClubID " +
+                "JOIN Users u ON uc.UserID = u.UserID " +
+                "WHERE uc.UserID = ? AND uc.RoleID = 1 AND uc.IsActive = 1";
+
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, userID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                ClubInfo club = new ClubInfo();
+                club.setClubID(rs.getInt("ClubID"));
+                club.setClubName(rs.getString("ClubName"));
+                club.setClubImg(rs.getString("ClubImg"));
+                club.setClubChairmanName(rs.getString("ClubChairmanName"));
+                return club;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
+    public int getClubIDByUserID(String userID) {
+        String sql = "SELECT ClubID FROM UserClubs WHERE UserID = ? AND RoleID = 1 AND IsActive = 1";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, userID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("ClubID");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    public int getTotalClubMembers(int clubID) {
+        String sql = "SELECT COUNT(*) FROM UserClubs WHERE ClubID = ? AND IsActive = 1";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, clubID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int getTotalDepartments(int clubID) {
+        String sql = "SELECT COUNT(*) FROM ClubDepartments WHERE ClubID = ?";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, clubID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+
 
     public List<Clubs> getFeaturedClubs(int limit) {
         List<Clubs> clubs = new ArrayList<>();

@@ -75,6 +75,51 @@ public class EventsDAO {
         return null;
     }
 
+    public List<Events> getEventsByClubID(int clubID) {
+        List<Events> events = new ArrayList<>();
+        String sql = """
+                    SELECT e.*, 
+                           COUNT(ep.EventParticipantID) AS RegisteredCount,
+                           (e.Capacity - COUNT(ep.EventParticipantID)) AS SpotsLeft
+                    FROM Events e
+                    LEFT JOIN EventParticipants ep 
+                        ON e.EventID = ep.EventID 
+                        AND (ep.Status = 'REGISTERED' OR ep.Status = 'ATTENDED' OR ep.Status = 'ABSENT')
+                    WHERE e.ClubID = ?
+                    GROUP BY e.EventID, e.EventName, e.EventImg, e.Description, 
+                             e.EventDate, e.Location, e.ClubID, e.IsPublic, 
+                             e.FormTemplateID, e.Capacity, e.Status
+                    ORDER BY e.EventDate DESC
+                """;
+
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, clubID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Events event = new Events();
+                event.setEventID(rs.getInt("EventID"));
+                event.setEventName(rs.getString("EventName"));
+                event.setEventImg(rs.getString("EventImg"));
+                event.setDescription(rs.getString("Description"));
+                event.setEventDate(rs.getTimestamp("EventDate"));
+                event.setLocation(rs.getString("Location"));
+                event.setClubID(rs.getInt("ClubID"));
+                event.setPublic(rs.getBoolean("IsPublic"));
+                event.setFormTemplateID(rs.getInt("FormTemplateID"));
+                event.setCapacity(rs.getInt("Capacity"));
+                event.setStatus(rs.getString("Status"));
+                event.setRegistered(rs.getInt("RegisteredCount"));
+                event.setSpotsLeft(rs.getInt("SpotsLeft"));
+                events.add(event);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return events;
+    }
+
     public List<Events> getEventsByClubID(int clubID, int eventID) {
         List<Events> events = new ArrayList<>();
         String sql = "SELECT * FROM Events WHERE ClubID = ? and eventID <> ?";
@@ -277,6 +322,65 @@ public class EventsDAO {
 
         return null;
     }
+
+    public int getTotalEvents(int clubID) {
+        String sql = "SELECT COUNT(*) FROM Events WHERE ClubID = ?";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, clubID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int countUpcomingEvents(int clubID) {
+        String sql = "SELECT COUNT(*) FROM Events WHERE ClubID = ? AND EventDate > NOW()";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, clubID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int countOngoingEvents(int clubID) {
+        String sql = "SELECT COUNT(*) FROM Events WHERE ClubID = ? AND DATE(EventDate) = CURDATE()";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, clubID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int countPastEvents(int clubID) {
+        String sql = "SELECT COUNT(*) FROM Events WHERE ClubID = ? AND EventDate < NOW() AND DATE(EventDate) != CURDATE()";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, clubID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
 
 
     public List<Events> getUpcomingEvents(int limit) {
