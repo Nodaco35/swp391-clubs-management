@@ -22,7 +22,6 @@ public class NotificationDAO {
         String sql = """
                      SELECT * FROM clubmanagementsystem.notifications
                      where ReceiverID = ?
-                     AND CreatedDate >= NOW() - INTERVAL 30 DAY
                      order by CreatedDate desc;
                      ;""";
         try {
@@ -284,6 +283,33 @@ public class NotificationDAO {
             e.printStackTrace();
         }
         return search;
+    }
+
+    public static List<Notification> findRecentByUserID(String userID) {
+        List<Notification> findRecentByUserID = new ArrayList<>();
+        String sql = """
+                     SELECT NotificationID, Title, Content, CreatedDate, ReceiverID, Priority, Status 
+                     FROM Notifications WHERE CreatedDate >= DATE_SUB(NOW(), INTERVAL 7 DAY) AND ReceiverID = ?
+                     ORDER BY CreatedDate DESC""";
+        try {
+            PreparedStatement ps = DBContext_Duc.getInstance().connection.prepareStatement(sql);
+            ps.setObject(1, userID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Notification notification = new Notification();
+                notification.setNotificationID(rs.getInt("NotificationID"));
+                notification.setTitle(rs.getString("Title"));
+                notification.setContent(rs.getString("Content"));
+                notification.setCreatedDate(rs.getTimestamp("CreatedDate"));
+                notification.setReceiverID(rs.getString("ReceiverID"));
+                notification.setPrioity(rs.getString("Priority"));
+                notification.setStatus(rs.getString("Status"));
+                
+                findRecentByUserID.add(notification);
+            }
+        } catch (Exception e) {
+        }
+        return findRecentByUserID;
     }
 
 }

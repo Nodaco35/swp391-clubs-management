@@ -13,6 +13,40 @@ import models.Roles;
 
 public class UserClubDAO {
 
+    public static List<UserClub> findByUserID(String userID) {
+        String sql = """
+                    SELECT uc.*, r.RoleName, d.DepartmentName , c.ClubImg, c.ClubName
+                    FROM UserClubs uc
+                    JOIN clubs c on uc.ClubID = c.ClubID
+                    JOIN Roles r ON uc.RoleID = r.RoleID
+                    JOIN ClubDepartments d ON uc.DepartmentID = d.DepartmentID
+                    WHERE uc.UserID = ?""";
+        List<UserClub> findByUserID = new ArrayList<>();
+        try {
+            PreparedStatement ps = DBContext_Duc.getInstance().connection.prepareStatement(sql);
+            ps.setObject(1, userID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                UserClub uc = new UserClub();
+                uc.setUserClubID(rs.getInt("UserClubID"));
+                uc.setUserID(rs.getString("UserID"));
+                uc.setClubID(rs.getInt("ClubID"));
+                uc.setDepartmentID(rs.getInt("DepartmentID"));
+                uc.setRoleID(rs.getInt("RoleID"));
+                uc.setJoinDate(rs.getTimestamp("JoinDate"));
+                uc.setIsActive(rs.getBoolean("IsActive"));
+                uc.setRoleName(rs.getString("RoleName"));
+                uc.setDepartmentName(rs.getString("DepartmentName"));
+                uc.setClubImg(rs.getString("ClubImg"));
+                uc.setClubName(rs.getString("ClubName"));
+                findByUserID.add(uc);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return findByUserID;
+    }
+
     public boolean isUserMemberOfClub(int clubID, String userID) {
         String sql = "SELECT 1 FROM UserClubs WHERE ClubID = ? AND UserID = ? AND IsActive = 1";
         try {
@@ -64,7 +98,7 @@ public class UserClubDAO {
         }
         return false;
     }
-    
+
     public boolean isUserClubExists(String userID, int clubID) {
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -100,7 +134,7 @@ public class UserClubDAO {
         }
         return false;
     }
-    
+
     // Kiểm tra xem câu lạc bộ đã có chủ nhiệm (RoleID = 1) chưa
     public boolean hasClubPresident(int clubID) {
         Connection conn = null;
@@ -173,7 +207,7 @@ public class UserClubDAO {
         }
         return false;
     }
-    
+
     public List<UserClub> getAllUserClubsByClubId(int clubID, int page, int pageSize) {
         List<UserClub> userClubs = new ArrayList<>();
         String query = """
@@ -216,22 +250,22 @@ public class UserClubDAO {
 
         return userClubs;
     }
-    
-    public String getClubNameById(int clubID) {
-    String clubName = null;
-    String query = "SELECT ClubName FROM Clubs WHERE ClubID = ?";
 
-    try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
-        stmt.setInt(1, clubID);
-        ResultSet rs = stmt.executeQuery();
-        if (rs.next()) {
-            clubName = rs.getString("ClubName");
+    public String getClubNameById(int clubID) {
+        String clubName = null;
+        String query = "SELECT ClubName FROM Clubs WHERE ClubID = ?";
+
+        try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, clubID);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                clubName = rs.getString("ClubName");
+            }
+        } catch (Exception e) {
+            System.out.println("Error in getClubNameById: " + e.getMessage());
         }
-    } catch (Exception e) {
-        System.out.println("Error in getClubNameById: " + e.getMessage());
+        return clubName;
     }
-    return clubName;
-}
 
     public List<UserClub> searchUserClubsByClubId(int clubID, String search, int page, int pageSize) {
         List<UserClub> userClubs = new ArrayList<>();
@@ -597,9 +631,15 @@ public class UserClubDAO {
             System.out.println("Error getting user club: " + e.getMessage());
         } finally {
             try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-                if (conn != null) DBContext.closeConnection(conn);
+                if (rs != null) {
+                    rs.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    DBContext.closeConnection(conn);
+                }
             } catch (SQLException e) {
                 System.out.println("Error closing resources: " + e.getMessage());
             }
@@ -698,9 +738,15 @@ public class UserClubDAO {
             System.out.println("Error getting user club by user ID: " + e.getMessage());
         } finally {
             try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-                if (conn != null) DBContext.closeConnection(conn);
+                if (rs != null) {
+                    rs.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    DBContext.closeConnection(conn);
+                }
             } catch (SQLException e) {
                 System.out.println("Error closing resources: " + e.getMessage());
             }
@@ -731,9 +777,15 @@ public class UserClubDAO {
             System.out.println("Error checking management role: " + e.getMessage());
         } finally {
             try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-                if (conn != null) DBContext.closeConnection(conn);
+                if (rs != null) {
+                    rs.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    DBContext.closeConnection(conn);
+                }
             } catch (SQLException e) {
                 System.out.println("Error closing resources: " + e.getMessage());
             }

@@ -13,6 +13,9 @@ public class UserClub {
     private String fullName; // Thêm trường fullName
     private String roleName; // Thêm trường roleName
     private String departmentName; // Thêm trường departmentName
+    private String ClubImg;
+    private String ClubName;
+            
     public UserClub() {
     }
 
@@ -25,6 +28,24 @@ public class UserClub {
         this.joinDate = joinDate;
         this.isActive = isActive;
     }
+
+    public String getClubName() {
+        return ClubName;
+    }
+
+    public void setClubName(String ClubName) {
+        this.ClubName = ClubName;
+    }
+
+    
+    public String getClubImg() {
+        return ClubImg;
+    }
+
+    public void setClubImg(String ClubImg) {
+        this.ClubImg = ClubImg;
+    }
+    
 
     public int getUserClubID() {
         return userClubID;
@@ -105,22 +126,14 @@ public class UserClub {
     public void setDepartmentName(String departmentName) {
         this.departmentName = departmentName;
     }
-    
-    
 
     @Override
     public String toString() {
-        return "UserClub{" +
-                "userClubID=" + userClubID +
-                ", userID='" + userID + '\'' +
-                ", clubID=" + clubID +
-                ", departmentID=" + departmentID +
-                ", roleID=" + roleID +
-                ", joinDate=" + joinDate +
-                ", isActive=" + isActive +
-                ", fullName='" + fullName + '\'' +
-                ", roleName='" + roleName + '\'' +
-                ", departmentName='" + departmentName + '\'' +
-                '}';
+        return "UserClub{" + "userClubID=" + userClubID + ", userID=" + userID + ", clubID=" + clubID + ", departmentID=" + departmentID + ", roleID=" + roleID + ", joinDate=" + joinDate + ", isActive=" + isActive + ", fullName=" + fullName + ", roleName=" + roleName + ", departmentName=" + departmentName + ", ClubImg=" + ClubImg + ", ClubName=" + ClubName + '}';
     }
+    
+    
+
+   
+    
 }

@@ -11,7 +11,10 @@ public class ClubApplication {
     private String email;
     private String phone;
     private String status;
+    
     private Timestamp submitDate;
+    private int clubID;
+    private String userName;
 
     // Constructors
     public ClubApplication() {}
@@ -28,6 +31,23 @@ public class ClubApplication {
         this.submitDate = submitDate;
     }
 
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    
+    public int getClubID() {
+        return clubID;
+    }
+
+    public void setClubID(int clubID) {
+        this.clubID = clubID;
+    }
+    
     public int getApplicationID() {
         return applicationID;
     }
@@ -92,6 +112,13 @@ public class ClubApplication {
         this.submitDate = submitDate;
     }
 
+    @Override
+    public String toString() {
+        return "ClubApplication{" + "applicationID=" + applicationID + ", userID=" + userID + ", clubName=" + clubName + ", description=" + description + ", email=" + email + ", phone=" + phone + ", status=" + status + ", submitDate=" + submitDate + ", clubID=" + clubID + ", userName=" + userName + '}';
+    }
+
+    
+    
     
 
 }
