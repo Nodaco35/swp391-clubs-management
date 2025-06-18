@@ -122,19 +122,12 @@
                                 </div>
                                 <div class="form-content">
                                     <h3 class="form-title">${form.title}</h3>
-                                    <div class="form-meta">
-                                        <div class="meta-item responses">
-                                            <i class="fas fa-users"></i>
-                                            <span>${form.responseCount} phản hồi</span>
-                                        </div>
-                                    </div>
                                     <div class="form-link">
                                         <input type="text" class="public-link" readonly 
                                                value="${pageContext.request.scheme}://${pageContext.request.serverName}:${pageContext.request.serverPort}${pageContext.request.contextPath}/applicationForm?templateId=${form.templateId}">
                                     </div>
-                                </div>
-                                <div class="form-actions">
-                                    <button class="btn btn-info btn-sm view-responses" data-template-id="${form.templateId}">
+                                </div>                                <div class="form-actions">
+                                    <button class="btn btn-info btn-sm view-responses" data-template-id="${form.templateId}" data-club-id="${param.clubId}" data-form-type="${form.formType eq 'Event' ? 'event' : 'member'}">
                                         <i class="fas fa-chart-bar"></i> Xem phản hồi
                                     </button>
                                     <button class="btn btn-outline btn-sm copy-link" data-template-id="${form.templateId}">

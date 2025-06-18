@@ -136,13 +136,14 @@ document.addEventListener("DOMContentLoaded", () => {
       deleteModal.style.display = "block"
     })
   })
-
   // View responses
   const viewResponsesButtons = document.querySelectorAll(".view-responses")
   viewResponsesButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const templateId = button.getAttribute("data-template-id")
-      window.location.href = `${contextPath}/formResponses?templateId=${templateId}`
+      const clubId = button.getAttribute("data-club-id")
+      const formType = button.getAttribute("data-form-type")
+      window.location.href = `${contextPath}/formResponses?templateId=${templateId}&clubId=${clubId}&formType=${formType}`
     })
   })
 

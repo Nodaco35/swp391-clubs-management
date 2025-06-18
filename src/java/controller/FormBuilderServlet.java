@@ -65,7 +65,7 @@ public class FormBuilderServlet extends HttpServlet {    private ApplicationForm
         // Kiểm tra quyền truy cập (chỉ cho roleId 1-3) trong CLB cụ thể
         UserClub userClub = userClubDAO.getUserClubManagementRole(userId, clubId);
         if (userClub == null) {
-            response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền quản lý form trong CLB này.", StandardCharsets.UTF_8.name()));
+            response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền quản lý form.", StandardCharsets.UTF_8.name()));
             return;
         }
         session.setAttribute("userClub", userClub);

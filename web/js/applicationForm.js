@@ -93,6 +93,105 @@ function setupRequiredFields() {
             }
         });
     });
+    
+    // Thiết lập xử lý cho các nhóm checkbox bắt buộc
+    setupCheckboxGroupValidation();
+}
+
+/**
+ * Thiết lập xác thực cho nhóm checkbox bắt buộc
+ * Nhóm checkbox bắt buộc yêu cầu ít nhất một tùy chọn được chọn
+ */
+function setupCheckboxGroupValidation() {
+    // Nhóm các checkbox theo name attribute
+    const checkboxGroups = {};
+    
+    // Tìm tất cả các checkbox có thuộc tính data-is-required="true"
+    document.querySelectorAll('input[type="checkbox"][data-is-required="true"]').forEach(checkbox => {
+        const name = checkbox.name;
+        const templateId = name.substring(4); // Bỏ tiền tố "ans_"
+        
+        if (!checkboxGroups[name]) {
+            checkboxGroups[name] = {
+                checkboxes: [],
+                validator: document.getElementById(`validator_${templateId}`),
+                errorMessage: document.getElementById(`error-msg-${templateId}`),
+                container: document.getElementById(`checkbox-group-${templateId}`)
+            };
+        }
+        
+        checkboxGroups[name].checkboxes.push(checkbox);
+        
+        // Thêm sự kiện xử lý khi checkbox được click
+        checkbox.addEventListener('change', function() {
+            const group = checkboxGroups[this.name];
+            const isAnyChecked = group.checkboxes.some(cb => cb.checked);
+            
+            // Update validator
+            if (group.validator) {
+                if (isAnyChecked) {
+                    group.validator.value = "valid";
+                    group.validator.setCustomValidity('');
+                    
+                    // Xóa các lớp và thông báo lỗi
+                    if (group.errorMessage) {
+                        group.errorMessage.style.display = 'none';
+                    }
+                    if (group.container) {
+                        group.container.classList.remove('has-error');
+                    }
+                } else {
+                    group.validator.value = "";
+                    group.validator.setCustomValidity('Vui lòng chọn ít nhất một tùy chọn');
+                    
+                    // Hiển thị lỗi
+                    if (group.errorMessage) {
+                        group.errorMessage.style.display = 'block';
+                    }
+                    if (group.container) {
+                        group.container.classList.add('has-error');
+                    }
+                }
+            }
+            
+            // Cập nhật trạng thái hiển thị của tất cả checkbox trong nhóm
+            group.checkboxes.forEach(cb => {
+                if (isAnyChecked) {
+                    // Xóa style lỗi
+                    cb.classList.remove('input-error');
+                    const label = cb.nextElementSibling;
+                    if (label && label.tagName === 'LABEL') {
+                        label.style.color = ''; // Đặt lại màu mặc định
+                    }
+                } else {
+                    // Thêm style lỗi
+                    cb.classList.add('input-error');
+                    const label = cb.nextElementSibling;
+                    if (label && label.tagName === 'LABEL') {
+                        label.style.color = 'var(--error-color)';
+                    }
+                }
+            });
+            
+            console.log(`Debug: Nhóm checkbox '${this.name}' - có tùy chọn được chọn: ${isAnyChecked}`);
+        });
+    });
+    
+    // Khởi tạo trạng thái ban đầu cho tất cả nhóm checkbox
+    Object.values(checkboxGroups).forEach(group => {
+        const isAnyChecked = group.checkboxes.some(cb => cb.checked);
+        if (group.validator) {
+            if (isAnyChecked) {
+                group.validator.value = "valid";
+                group.validator.setCustomValidity('');
+            } else {
+                group.validator.value = "";
+                group.validator.setCustomValidity('Vui lòng chọn ít nhất một tùy chọn');
+            }
+        }
+    });
+    
+    console.log(`Debug: Đã thiết lập xác thực cho ${Object.keys(checkboxGroups).length} nhóm checkbox bắt buộc`);
 }
 
 /**
@@ -104,8 +203,16 @@ function validateForm() {
     if (!form) return;
     
     // Xóa tất cả thông báo lỗi hiện có trước khi xác minh lại
-    form.querySelectorAll('.error-message').forEach(msg => msg.remove());
+    form.querySelectorAll('.error-message').forEach(msg => {
+        if (msg.style) msg.style.display = 'none';
+    });
     form.querySelectorAll('.input-error').forEach(field => field.classList.remove('input-error'));
+    form.querySelectorAll('.checkbox-group.has-error').forEach(group => group.classList.remove('has-error'));
+    
+    // Đặt lại màu cho các nhãn checkbox
+    form.querySelectorAll('input[type="checkbox"] + label').forEach(label => {
+        label.style.color = '';
+    });
     
     // Kiểm tra loại form để quyết định việc xác thực
     const formType = document.querySelector('input[name="formType"]')?.value || 
@@ -172,36 +279,72 @@ function validateForm() {
                 console.log(`Debug: Lỗi trường radio bắt buộc '${groupName}'`);
             }
         }
-    });
-    
-    // Xác minh cho các nhóm checkbox có ít nhất một phần tử có thuộc tính bắt buộc
+    });      // Xác minh cho các nhóm checkbox cần ít nhất một lựa chọn khi nhóm đó là required
     const checkboxGroups = {};
-    form.querySelectorAll('input[type="checkbox"][required]').forEach(checkbox => {
-        if (!checkboxGroups[checkbox.name]) {
-            checkboxGroups[checkbox.name] = { elements: [], isValid: false };
+    
+    // Tìm tất cả các checkbox và nhóm chúng theo name
+    form.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+        const name = checkbox.name;
+        if (!checkboxGroups[name]) {
+            // Xác định xem nhóm này có là required hay không bằng thuộc tính data-is-required
+            const isRequired = checkbox.getAttribute('data-is-required') === 'true';
+            checkboxGroups[name] = { 
+                elements: [], 
+                isValid: !isRequired, // Nếu không phải required thì mặc định là valid
+                isRequired: isRequired 
+            };
         }
-        checkboxGroups[checkbox.name].elements.push(checkbox);
         
-        // Nếu ít nhất một checkbox được chọn, nhóm là hợp lệ
+        checkboxGroups[name].elements.push(checkbox);
+        
+        // Nếu có ít nhất một checkbox được chọn, nhóm được coi là hợp lệ
         if (checkbox.checked) {
-            checkboxGroups[checkbox.name].isValid = true;
+            checkboxGroups[name].isValid = true;
         }
     });
     
-    // Kiểm tra xem có nhóm checkbox nào không hợp lệ không
+    // Kiểm tra từng nhóm checkbox
     Object.keys(checkboxGroups).forEach(groupName => {
         const group = checkboxGroups[groupName];
-        // Nếu không có checkbox nào được chọn và trường là bắt buộc
-        if (!group.isValid) {
-            group.elements[0].classList.add('input-error');
-            const checkboxContainer = group.elements[0].closest('.checkbox-options');
+          // Chỉ xác thực các nhóm có thuộc tính required
+        if (group.isRequired && !group.isValid) {
+            // Đánh dấu nhóm không hợp lệ bằng cách thêm lớp error cho tất cả checkbox trong nhóm
+            group.elements.forEach(cb => {
+                cb.classList.add('input-error');
+                // Thêm style cho label đi kèm
+                const label = cb.nextElementSibling;
+                if (label && label.tagName === 'LABEL') {
+                    label.style.color = 'var(--error-color)';
+                }
+            });
+            
+            // Tìm container gần nhất và thêm thông báo lỗi
+            const checkboxContainer = group.elements[0].closest('.checkbox-group');
             if (checkboxContainer) {
-                const errorMsg = document.createElement('div');
-                errorMsg.className = 'error-message';
-                errorMsg.textContent = 'Vui lòng chọn ít nhất một tùy chọn';
-                checkboxContainer.appendChild(errorMsg);
+                // Thêm lớp has-error cho container
+                checkboxContainer.classList.add('has-error');
+                
+                // Tìm hoặc hiển thị thông báo lỗi có sẵn
+                let errorMsg = checkboxContainer.querySelector('.error-message');
+                if (errorMsg) {
+                    errorMsg.style.display = 'block';
+                } else {
+                    // Nếu không có, tạo mới
+                    errorMsg = document.createElement('div');
+                    errorMsg.className = 'error-message';
+                    errorMsg.textContent = 'Vui lòng chọn ít nhất một tùy chọn';
+                    checkboxContainer.appendChild(errorMsg);
+                }
+                
+                // Tìm validator hidden field và đánh dấu là invalid
+                const templateId = groupName.substring(4); // Bỏ "ans_"
+                const validator = document.getElementById(`validator_${templateId}`);
+                if (validator) {
+                    validator.setCustomValidity('Vui lòng chọn ít nhất một tùy chọn');
+                }
+                
                 allFilesValid = false;
-                console.log(`Debug: Lỗi nhóm checkbox bắt buộc '${groupName}'`);
+                console.log(`Debug: Lỗi nhóm checkbox bắt buộc '${groupName}' - cần chọn ít nhất một tùy chọn`);
             }
         }
     });
