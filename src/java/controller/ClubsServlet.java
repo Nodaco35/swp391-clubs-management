@@ -18,7 +18,7 @@ public class ClubsServlet extends HttpServlet {
 
     private ClubDAO clubDAO;
     private UserClubDAO userClubDAO;
-     private ClubCreationPermissionDAO permissionDAO;
+    private ClubCreationPermissionDAO permissionDAO;
 
     @Override
     public void init() throws ServletException {
@@ -74,11 +74,13 @@ public class ClubsServlet extends HttpServlet {
         // Check if user has any clubs and favorite clubs
         boolean hasClubs = false;
         boolean hasFavoriteClubs = false;
+        boolean hasPendingRequest = false;
         if (userID != null) {
             int userClubCount = clubDAO.getTotalClubsByCategory("myClubs", userID);
             hasClubs = userClubCount > 0;
             int favoriteClubCount = clubDAO.getTotalFavoriteClubs(userID);
             hasFavoriteClubs = favoriteClubCount > 0;
+            hasPendingRequest = permissionDAO.hasPendingRequest(userID);
         }
 
         // Handle favoriteClubs category
@@ -117,11 +119,10 @@ public class ClubsServlet extends HttpServlet {
         }
 
         int totalPages = (int) Math.ceil((double) totalClubs / pageSize);
-        
-        
+
         // Check for club creation permission
         boolean hasPermission = user != null && permissionDAO.hasActiveClubPermission(userID);
-        
+
         request.setAttribute("clubs", clubs);
         request.setAttribute("selectedCategory", category);
         request.setAttribute("currentPage", page);
@@ -130,7 +131,8 @@ public class ClubsServlet extends HttpServlet {
         request.setAttribute("hasClubs", hasClubs);
         request.setAttribute("hasFavoriteClubs", hasFavoriteClubs);
         request.setAttribute("hasPermission", hasPermission);
-        
+        request.setAttribute("hasPendingRequest", hasPendingRequest);
+
         request.getRequestDispatcher("view/clubs-page/club-management.jsp").forward(request, response);
     }
 
@@ -170,7 +172,7 @@ public class ClubsServlet extends HttpServlet {
             isFavorite = clubDAO.isFavoriteClub(userID, clubID);
             club.setFavorite(isFavorite);
         }
-        
+
         // Check for club creation permission
         boolean hasPermission = user != null && permissionDAO.hasActiveClubPermission(user.getUserID());
         request.setAttribute("club", club);
@@ -178,7 +180,7 @@ public class ClubsServlet extends HttpServlet {
         request.setAttribute("isPresident", isPresident);
         request.setAttribute("userClub", userClub);
         request.setAttribute("hasPermission", hasPermission);
-        
+
         request.getRequestDispatcher("/view/clubs-page/club-detail.jsp").forward(request, response);
     }
 

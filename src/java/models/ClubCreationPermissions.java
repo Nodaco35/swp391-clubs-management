@@ -1,34 +1,26 @@
+
 package models;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public class ClubCreationPermissions {
-
-    private int permissionID;
+    private int id;
     private String userID;
+    private String userName; // For display purposes
     private String status;
-    private String grantedBy;
-    private Date grantedDate;
-    private Date usedDate;
+    private LocalDateTime requestDate;
+    private LocalDateTime processedDate;
+    private String processedBy;
+    private LocalDateTime grantedDate;
+    private LocalDateTime usedDate;
 
-    public ClubCreationPermissions() {
+    // Getters and Setters
+    public int getId() {
+        return id;
     }
 
-    public ClubCreationPermissions(int permissionID, String userID, String status, String grantedBy, Date grantedDate, Date usedDate) {
-        this.permissionID = permissionID;
-        this.userID = userID;
-        this.status = status;
-        this.grantedBy = grantedBy;
-        this.grantedDate = grantedDate;
-        this.usedDate = usedDate;
-    }
-
-    public int getPermissionID() {
-        return permissionID;
-    }
-
-    public void setPermissionID(int permissionID) {
-        this.permissionID = permissionID;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getUserID() {
@@ -39,6 +31,14 @@ public class ClubCreationPermissions {
         this.userID = userID;
     }
 
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
     public String getStatus() {
         return status;
     }
@@ -47,28 +47,43 @@ public class ClubCreationPermissions {
         this.status = status;
     }
 
-    public String getGrantedBy() {
-        return grantedBy;
+    public LocalDateTime getRequestDate() {
+        return requestDate;
     }
 
-    public void setGrantedBy(String grantedBy) {
-        this.grantedBy = grantedBy;
+    public void setRequestDate(LocalDateTime requestDate) {
+        this.requestDate = requestDate;
     }
 
-    public Date getGrantedDate() {
+    public LocalDateTime getProcessedDate() {
+        return processedDate;
+    }
+
+    public void setProcessedDate(LocalDateTime processedDate) {
+        this.processedDate = processedDate;
+    }
+
+    public String getProcessedBy() {
+        return processedBy;
+    }
+
+    public void setProcessedBy(String processedBy) {
+        this.processedBy = processedBy;
+    }
+
+    public LocalDateTime getGrantedDate() {
         return grantedDate;
     }
 
-    public void setGrantedDate(Date grantedDate) {
+    public void setGrantedDate(LocalDateTime grantedDate) {
         this.grantedDate = grantedDate;
     }
 
-    public Date getUsedDate() {
+    public LocalDateTime getUsedDate() {
         return usedDate;
     }
 
-    public void setUsedDate(Date usedDate) {
+    public void setUsedDate(LocalDateTime usedDate) {
         this.usedDate = usedDate;
     }
-
 }

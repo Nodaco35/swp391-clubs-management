@@ -152,6 +152,10 @@
         <url-pattern>/events-page</url-pattern>
     </servlet-mapping>
     <!-- ✅ Mapping thêm cho các servlet mới -->
+    <servlet>
+        <servlet-name>StudentServlet</servlet-name>
+        <servlet-class>controller.StudentServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>NotificationController</servlet-name>
         <url-pattern>/notification</url-pattern>
@@ -199,6 +203,10 @@
     <servlet-mapping>
         <servlet-name>CreateClubServlet</servlet-name>
         <url-pattern>/create-club</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>StudentServlet</servlet-name>
+        <url-pattern>/student</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
