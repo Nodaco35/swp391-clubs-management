@@ -180,6 +180,7 @@
                                     <i class="fas fa-calendar-alt"></i>
                                     <span><fmt:formatDate value="${e.eventDate}" pattern="dd/MM/yyyy HH:mm"/></span>
                                 </div>
+
                                 <div class="event-detail">
                                     <i class="fas fa-map-marker-alt"></i>
                                     <span>${e.location}</span>

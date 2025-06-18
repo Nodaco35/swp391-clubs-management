@@ -135,8 +135,8 @@ public class UserClubServlet extends HttpServlet {
 
             if (roleID == 1 || roleID == 2) {
                 departmentID = 3;
-            } else if (departmentID != 1 && departmentID != 2) {
-                request.setAttribute("error", "Vai trò này chỉ được thuộc Ban 1 hoặc Ban 2!");
+            } else if (departmentID ==3) {
+                request.setAttribute("error", "Vai trò này chỉ thuộc các ban còn lại!");
                 doGet(request, response);
                 return;
             }
@@ -153,7 +153,7 @@ public class UserClubServlet extends HttpServlet {
                 UserClub uc = new UserClub();
                 uc.setUserID(userID);
                 uc.setClubID(clubID);
-                uc.setDepartmentID(departmentID);
+                uc.setClubDepartmentID(departmentID);
                 uc.setRoleID(roleID);
                 uc.setIsActive(request.getParameter("isActive") != null);
                 try {
@@ -183,8 +183,8 @@ public class UserClubServlet extends HttpServlet {
 
             if (roleID == 1 || roleID == 2) {
                 departmentID = 3; 
-            } else if (departmentID != 1 && departmentID != 2) {
-                request.setAttribute("error", "Vai trò này chỉ được thuộc Ban 1 hoặc Ban 2!");
+            } else if (departmentID == 3 ) {
+                request.setAttribute("error", "Vai trò này chỉ thuộc các ban còn lại!");
                 doGet(request, response);
                 return;
             }
@@ -200,7 +200,7 @@ public class UserClubServlet extends HttpServlet {
             } else {
                 UserClub uc = new UserClub();
                 uc.setUserClubID(userClubID);
-                uc.setDepartmentID(departmentID);
+                uc.setClubDepartmentID(departmentID);
                 uc.setRoleID(roleID);
                 uc.setIsActive(request.getParameter("isActive") != null);
                 try {

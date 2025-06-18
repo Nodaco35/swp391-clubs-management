@@ -101,6 +101,10 @@
         <servlet-name>ChairmanPageServlet</servlet-name>
         <servlet-class>controller.ChairmanPageServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>CreateClubServlet</servlet-name>
+        <servlet-class>controller.CreateClubServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ClubsServlet</servlet-name>
         <url-pattern>/clubs</url-pattern>
@@ -152,6 +156,10 @@
         <url-pattern>/events-page</url-pattern>
     </servlet-mapping>
     <!-- ✅ Mapping thêm cho các servlet mới -->
+    <servlet>
+        <servlet-name>StudentServlet</servlet-name>
+        <servlet-class>controller.StudentServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>NotificationController</servlet-name>
         <url-pattern>/notification</url-pattern>
@@ -197,8 +205,17 @@
         <url-pattern>/applicationForm</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
+<<<<<<< HEAD
+        <servlet-name>CreateClubServlet</servlet-name>
+        <url-pattern>/create-club</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>StudentServlet</servlet-name>
+        <url-pattern>/student</url-pattern>
+=======
         <servlet-name>ChairmanPageServlet</servlet-name>
         <url-pattern>/chairman-page</url-pattern>
+>>>>>>> origin/main
     </servlet-mapping>
     <session-config>
         <session-timeout>

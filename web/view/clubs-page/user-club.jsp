@@ -78,7 +78,7 @@
                                     <td class="p-3 border-b">${uc.joinDate}</td>
                                     <td class="p-3 border-b">${uc.isActive ? 'Hoạt động' : 'Không hoạt động'}</td>
                                     <td class="p-3 border-b flex gap-2">
-                                        <button class="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition" onclick="toggleEditForm(${uc.userClubID}, '${uc.userID}', ${uc.departmentID}, ${uc.roleID}, ${uc.isActive})">Sửa</button>
+                                        <button class="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition" onclick="toggleEditForm(${uc.userClubID}, '${uc.userID}', ${uc.clubDepartmentID}, ${uc.roleID}, ${uc.isActive})">Sửa</button>
                                         <form action="${pageContext.request.contextPath}/club-members" method="post" class="inline">
                                             <input type="hidden" name="clubID" value="${clubID}">
                                             <input type="hidden" name="userClubID" value="${uc.userClubID}">
@@ -106,17 +106,17 @@
                         </div>
 
                         <div>
-                        <label for="departmentID" class="block text-sm font-medium text-gray-700">Ban:</label>
-                        <select name="departmentID" id="departmentID" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <c:forEach var="dept" items="${departments}">
-                                <option value="${dept.departmentID}">${dept.departmentName}</option>
-                            </c:forEach>
-                        </select>
-                    </div>
+                            <label for="departmentID" class="block text-sm font-medium text-gray-700">Ban:</label>
+                            <select name="departmentID" id="departmentID" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="updateRoleOptions()">
+                                <c:forEach var="dept" items="${departments}">
+                                    <option value="${dept.departmentID}">${dept.departmentName}</option>
+                                </c:forEach>
+                            </select>
+                        </div>
 
                         <div>
                             <label for="roleID" class="block text-sm font-medium text-gray-700">Vai trò:</label>
-                            <select name="roleID" id="roleID" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="updateDepartmentOptions()">
+                            <select name="roleID" id="roleID" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <c:forEach var="role" items="${roles}">
                                     <option value="${role.roleID}">${role.roleName}</option>
                                 </c:forEach>
@@ -170,6 +170,11 @@
                     { id: ${dept.departmentID}, name: "${dept.departmentName}" }${loop.last ? '' : ','}
                 </c:forEach>
             ];
+            const roles = [
+                <c:forEach var="role" items="${roles}" varStatus="loop">
+                    { id: ${role.roleID}, name: "${role.roleName}" }${loop.last ? '' : ','}
+                </c:forEach>
+            ];
 
             // Ẩn form khi tải trang
             document.addEventListener('DOMContentLoaded', function () {
@@ -182,41 +187,46 @@
                         ${editUserClub.roleID},
                         ${editUserClub.isActive}
                     );
-                    updateDepartmentOptions();
+                    updateRoleOptions();
                 </c:if>
                 <c:if test="${not empty error}">
                     document.getElementById('errorModal').classList.remove('hidden');
                 </c:if>
             });
 
-            function updateDepartmentOptions() {
-                const roleID = document.getElementById('roleID').value;
-                const departmentSelect = document.getElementById('departmentID');
-                const currentDepartmentID = departmentSelect.value;
+            function updateRoleOptions() {
+                const departmentID = document.getElementById('departmentID').value;
+                const roleSelect = document.getElementById('roleID');
+                const currentRoleID = roleSelect.value;
 
                 // Xóa tất cả tùy chọn hiện tại
-                departmentSelect.innerHTML = '';
+                roleSelect.innerHTML = '';
 
-                if (roleID === '1' || roleID === '2') {
-                    const option = document.createElement('option');
-                    option.value = '3';
-                    option.text = 'Ban Chủ nhiệm';
-                    departmentSelect.appendChild(option);
-                } else {
-                    departments.forEach(dept => {
-                        if (dept.id === 1 || dept.id === 2) {
+                if (departmentID === '3') {
+                    // Chỉ hiển thị vai trò Chủ nhiệm (1) và Phó chủ nhiệm (2) cho Ban Chủ nhiệm
+                    roles.forEach(role => {
+                        if (role.id === 1 || role.id === 2) {
                             const option = document.createElement('option');
-                            option.value = dept.id;
-                            option.text = dept.name;
-                            departmentSelect.appendChild(option);
+                            option.value = role.id;
+                            option.text = role.name;
+                            roleSelect.appendChild(option);
+                        }
+                    });
+                } else {
+                    // Chỉ hiển thị vai trò Thành viên (3) và Trưởng ban (4) cho các ban khác
+                    roles.forEach(role => {
+                        if (role.id === 3 || role.id === 4) {
+                            const option = document.createElement('option');
+                            option.value = role.id;
+                            option.text = role.name;
+                            roleSelect.appendChild(option);
                         }
                     });
                 }
 
                 // Đặt giá trị mặc định
-                departmentSelect.value = (roleID === '1' || roleID ==='2') ? '3' :
-                    (currentDepartmentID && (currentDepartmentID === '1' || currentDepartmentID === '2') ? currentDepartmentID :
-                    (departments.length > 0 ? '1' : ''));
+                roleSelect.value = currentRoleID && roleSelect.querySelector(`option[value="${currentRoleID}"]`) ? currentRoleID : 
+                    (departmentID === '3' ? '1' : '3');
             }
 
             function toggleAddForm() {
@@ -257,8 +267,8 @@
                 document.getElementById('formData').reset();
                 document.getElementById('userClubID').value = '';
                 document.getElementById('isActive').checked = true;
-                document.getElementById('roleID').value = departments.length > 0 ? '4' : '1'; // Mặc định trưởng ban nếu có ban
-                updateDepartmentOptions();
+                document.getElementById('departmentID').value = departments.length > 0 ? '1' : '';
+                updateRoleOptions();
                 currentEditUserClubID = null;
             }
 
@@ -279,10 +289,10 @@
 
                 document.getElementById('userClubID').value = userClubID;
                 document.getElementById('userID').value = userID;
-                document.getElementById('roleID').value = roleID;
+                document.getElementById('departmentID').value = departmentID;
                 document.getElementById('isActive').checked = isActive;
-                updateDepartmentOptions();
-                document.getElementById('departmentID').value = (roleID === 1 || roleID === 2) ? '3' : departmentID;
+                updateRoleOptions();
+                document.getElementById('roleID').value = roleID;
             }
 
             // Ẩn form
@@ -310,14 +320,14 @@
                     return;
                 }
 
-                if ((roleID === '1' || roleID === '2') && departmentID !== '3') {
-                    alert('Chủ nhiệm và phó chủ nhiệm phải thuộc Ban Chủ nhiệm!');
+                if (departmentID === '3' && !(roleID === '1' || roleID === '2')) {
+                    alert('Ban Chủ nhiệm chỉ cho phép vai trò Chủ nhiệm hoặc Phó chủ nhiệm!');
                     e.preventDefault();
                     return;
                 }
 
-                if (roleID !== '1' && roleID !== '2' && (departmentID !== '1' && departmentID !== '2')) {
-                    alert('Vai trò này chỉ được thuộc Ban 1 hoặc Ban 2!');
+                if (departmentID !== '3' && !(roleID === '3' || roleID === '4')) {
+                    alert('Các ban khác chỉ cho phép vai trò Thành viên hoặc Trưởng ban!');
                     e.preventDefault();
                     return;
                 }

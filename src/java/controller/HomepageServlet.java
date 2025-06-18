@@ -2,18 +2,17 @@ package controller;
 
 import dal.ClubDAO;
 import dal.EventsDAO;
-
-import java.io.IOException;
-import java.util.List;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.io.PrintWriter;
 import models.Clubs;
 import models.Events;
 import models.Users;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
 
 public class HomepageServlet extends HttpServlet {
 
@@ -25,6 +24,18 @@ public class HomepageServlet extends HttpServlet {
         // Lấy dữ liệu câu lạc bộ nổi bật
         ClubDAO clubDAO = new ClubDAO();
         List<Clubs> featuredClubs = clubDAO.getFeaturedClubs(6);
+        
+        // Set favorite status for each featured club
+        HttpSession session = request.getSession();
+        Users user = (Users) session.getAttribute("user");
+        String userID = (user != null) ? user.getUserID() : null;
+        if (userID != null) {
+            for (Clubs club : featuredClubs) {
+                boolean isFavorite = clubDAO.isFavoriteClub(userID, club.getClubID());
+                club.setFavorite(isFavorite);
+            }
+        }
+        
         request.setAttribute("featuredClubs", featuredClubs);
         
         // Lấy dữ liệu sự kiện sắp tới
@@ -46,22 +57,19 @@ public class HomepageServlet extends HttpServlet {
         request.setAttribute("totalEvents", totalEvents);
         request.setAttribute("totalDepartments", totalDepartments);
         
-        HttpSession session = request.getSession();
-        Users user = (Users)session.getAttribute("user");
-        
-        if(user==null || user.getPermissionID()==1){
-        // Forward request đến trang index.jsp
-        request.getRequestDispatcher("index.jsp").forward(request, response);
-        }else if(user.getPermissionID() == 2){
+        if (user == null || user.getPermissionID() == 1) {
+            // Forward request đến trang index.jsp
+            request.getRequestDispatcher("index.jsp").forward(request, response);
+        } else if (user.getPermissionID() == 2) {
             response.sendRedirect(request.getContextPath() + "/admin");
-        }else if(user.getPermissionID() == 3){
+        } else if (user.getPermissionID() == 3) {
             response.sendRedirect(request.getContextPath() + "/ic");
         }
-        
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        doGet(request, response);
     }
 }

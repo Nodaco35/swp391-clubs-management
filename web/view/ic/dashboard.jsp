@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -31,6 +32,18 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Hiển thị thông báo nếu có -->
+                <c:if test="${not empty message}">
+                    <div class="alert alert-success" style="margin-bottom: 15px;">
+                        <i class="fas fa-check-circle"></i> ${message}
+                    </div>
+                </c:if>
+                <c:if test="${not empty error}">
+                    <div class="alert alert-warning" style="margin-bottom: 15px;">
+                        <i class="fas fa-exclamation-circle"></i> ${error}
+                    </div>
+                </c:if>
 
                 <div class="stats-grid">
                     <div class="stat-card">
@@ -72,6 +85,19 @@
                         </div>
                         <div class="stat-value">${totalActiveClubs}</div>
                         <div class="stat-description">Đang hoạt động</div>
+                    </div>
+                    <!-- Card cho quản lý đơn xin quyền -->
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-title">Đơn xin quyền tạo CLB</div>
+                            <div class="stat-icon purple">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value">
+                            <a href="${pageContext.request.contextPath}/ic?action=grantPermission">${pendingRequests != null ? fn:length(pendingRequests) : 0}</a>
+                        </div>
+                        <div class="stat-description">Đơn đang chờ duyệt</div>
                     </div>
                 </div>
 
@@ -137,7 +163,6 @@
                                         <a class="btn btn-success btn-sm" href="ic?action=markAsRead&id=${report.reportId}">
                                             <i class="fas fa-check"></i> Đánh dấu là đã đọc
                                         </a>
-
                                     </div>
                                 </div>
                             </div>
@@ -183,9 +208,7 @@
                                 </div>          
                             </div>
                         </c:forEach>
-
                     </div>
-
                 </div>
             </main>
         </div>
@@ -235,7 +258,5 @@
                 });
             });
         </script>
-
-
     </body>
 </html>
