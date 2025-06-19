@@ -111,7 +111,7 @@
                                 <tbody>
                                     <!-- Đơn chờ duyệt -->
                                     <c:forEach items="${pendingClubRequests}" var="request">
-                                        <tr data-status="PENDING">
+                                        <tr request-status="PENDING">
                                             <td>#CLB${request.applicationID}</td>
                                             <td>${request.clubName}</td>
                                             <td>${request.userID}</td>
@@ -141,7 +141,7 @@
 
                                     <!-- Đơn đã duyệt -->
                                     <c:forEach items="${approvedClubRequests}" var="request">
-                                        <tr data-status="APPROVED">
+                                        <tr request-status="APPROVED">
                                             <td>#CLB${request.applicationID}</td>
                                             <td>${request.clubName}</td>
                                             <td>${request.userID}</td>
@@ -165,7 +165,7 @@
 
                                     <!-- Đơn bị từ chối -->
                                     <c:forEach items="${rejectedClubRequests}" var="request">
-                                        <tr data-status="REJECTED">
+                                        <tr request-status="REJECTED">
                                             <td>#CLB${request.applicationID}</td>
                                             <td>${request.clubName}</td>
                                             <td>${request.userID}</td>
@@ -286,10 +286,10 @@
         <script>
             function filterApplications(status) {
                 // Chọn tất cả các hàng có thuộc tính data-status (cả PENDING, APPROVED, REJECTED)
-                const rows = document.querySelectorAll('tbody tr[data-status]');
+                const rows = document.querySelectorAll('tbody tr[request-status]');
 
                 rows.forEach(row => {
-                    const rowStatus = row.getAttribute('data-status');
+                    const rowStatus = row.getAttribute('request-status');
 
                     // Hiển thị nếu trạng thái trùng hoặc đang chọn "Tất cả"
                     const shouldShow = (status === 'all' || rowStatus === status);

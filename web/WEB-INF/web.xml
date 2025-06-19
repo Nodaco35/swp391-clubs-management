@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee                              http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+    <filter>
+        <filter-name>AuthFilter</filter-name>
+        <filter-class>filters.AuthFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>AuthFilter</filter-name>
+        <url-pattern>/admin/*</url-pattern>
+        <url-pattern>/ic/*</url-pattern>
+    </filter-mapping>
     <servlet>
         <servlet-name>HomepageServlet</servlet-name>
         <servlet-class>controller.HomepageServlet</servlet-class>
@@ -84,6 +93,21 @@
         <servlet-name>MyClubController</servlet-name>
         <servlet-class>controller.MyClubController</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>ApplicationFormServlet</servlet-name>
+        <servlet-class>controller.ApplicationFormServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ChairmanPageServlet</servlet-name>
+        <servlet-class>controller.ChairmanPageServlet</servlet-class>
+    </servlet>    <servlet>
+        <servlet-name>CreateClubServlet</servlet-name>
+        <servlet-class>controller.CreateClubServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>FormResponsesServlet</servlet-name>
+        <servlet-class>controller.FormResponsesServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ClubsServlet</servlet-name>
         <url-pattern>/clubs</url-pattern>
@@ -134,7 +158,10 @@
         <servlet-name>EventsPageServlet</servlet-name>
         <url-pattern>/events-page</url-pattern>
     </servlet-mapping>
-    <!-- ✅ Mapping thêm cho các servlet mới -->
+    <servlet>
+        <servlet-name>StudentServlet</servlet-name>
+        <servlet-class>controller.StudentServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>NotificationController</servlet-name>
         <url-pattern>/notification</url-pattern>
@@ -174,6 +201,25 @@
     <servlet-mapping>
         <servlet-name>MyClubController</servlet-name>
         <url-pattern>/myclub</url-pattern>
+    </servlet-mapping>    <servlet-mapping>
+        <servlet-name>ApplicationFormServlet</servlet-name>
+        <url-pattern>/applicationForm</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CreateClubServlet</servlet-name>
+        <url-pattern>/create-club</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>StudentServlet</servlet-name>
+        <url-pattern>/student</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ChairmanPageServlet</servlet-name>
+        <url-pattern>/chairman-page</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>FormResponsesServlet</servlet-name>
+        <url-pattern>/formResponses</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

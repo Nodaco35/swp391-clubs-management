@@ -1,8 +1,26 @@
-CREATE DATABASE ClubManagementSystem
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
+
+-- ========================================
+-- CREATE DATABASE (MySQL style)
+-- ========================================
+DROP DATABASE IF EXISTS ClubManagementSystem;
+CREATE DATABASE ClubManagementSystem CHARACTER SET utf8mb4 COLLATE=utf8mb4_unicode_ci;
 USE ClubManagementSystem;
 
+-- ========================================
+-- SEMESTER / TERM
+-- ========================================
+CREATE TABLE Semesters (
+    TermID VARCHAR(10) PRIMARY KEY, -- Ví dụ: SU25,   SP25,         FA24 
+    TermName VARCHAR(50), --           Summer 2025,   Spring 2025,  Fall2024
+    StartDate DATE NOT NULL,
+    EndDate DATE NOT NULL,
+    Status ENUM('ACTIVE', 'INACTIVE') DEFAULT 'ACTIVE'
+);
+
+
+-- ========================================
+-- USERS, CLUBS, AND ROLES
+-- ========================================
 CREATE TABLE Permissions (
     PermissionID INT PRIMARY KEY AUTO_INCREMENT,
     PermissionName VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -33,8 +51,29 @@ INSERT INTO Users (UserID, FullName, Email, Password, PermissionID, Status) VALU
 ('U008', 'Lý Thị H', 'h@fpt.edu.vn', '123456', 1, 1),
 ('U009', 'Trịnh Văn I', 'i@fpt.edu.vn', '123456', 1, 1),
 ('U010', 'Mai Thị J', 'j@fpt.edu.vn', '123456', 1, 1),
+('U011', 'Nguyễn Văn K', 'k@fpt.edu.vn', '123456', 1, 1),
+('U012', 'Trần Thị L', 'l@fpt.edu.vn', '123456', 1, 1),
+('U013', 'Phạm Văn M', 'm@fpt.edu.vn', '123456', 1, 1),
+('U014', 'Đỗ Thị N', 'n@fpt.edu.vn', '123456', 1, 1),
+('U015', 'Vũ Văn O', 'o@fpt.edu.vn', '123456', 1, 1),
+('U016', 'Lý Thị P', 'p@fpt.edu.vn', '123456', 1, 1),
+('U017', 'Nguyễn Văn Q', 'q@fpt.edu.vn', '123456', 1, 1),
+('U018', 'Trần Thị R', 'r@fpt.edu.vn', '123456', 1, 1),
+('U019', 'Phạm Văn S', 's@fpt.edu.vn', '123456', 1, 1),
+('U020', 'Đỗ Thị T', 't@fpt.edu.vn', '123456', 1, 1),
+('U021', 'Lê Văn U', 'u@fpt.edu.vn', '123456', 1, 1),
+('U022', 'Nguyễn Thị V', 'v@fpt.edu.vn', '123456', 1, 1),
+('U023', 'Lê Văn W', 'w@fpt.edu.vn', '123456', 1, 1),
+('U024', 'Phạm Thị X', 'x@fpt.edu.vn', '123456', 1, 1),
+('U025', 'Nguyễn Văn Y', 'y@fpt.edu.vn', '123456', 1, 1),
+('U026', 'Trần Thị Z', 'z@fpt.edu.vn', '123456', 1, 1),
+('U027', 'Bùi Thị A1', 'a1@fpt.edu.vn', '123456', 1, 1),
+('U028', 'Đặng Văn B1', 'b1@fpt.edu.vn', '123456', 1, 1),
+('U029', 'Nguyễn Văn C1', 'c1@fpt.edu.vn', '123456', 1, 1),
+('U030', 'Trần Thị D1', 'd1@fpt.edu.vn', '123456', 1, 1),
 ('U003', 'Ngô Văn C', 'c@fpt.edu.vn', '123456', 2, 1),
 ('U004', 'Lê Văn D', 'd@fpt.edu.vn', '123456', 3, 1);
+
 
 
 CREATE TABLE Roles (
@@ -47,8 +86,6 @@ INSERT INTO Roles (RoleID, RoleName, Description) VALUES
 (2, 'Phó chủ nhiệm', 'Hỗ trợ chủ nhiệm quản lý CLB'),
 (3, 'Trưởng ban', 'Quản lý các ban trong câu lạc bộ’'),
 (4, 'Thành viên', 'Thành viên chính thức của CLB');
-
-
 
 
 CREATE TABLE Clubs (
@@ -77,30 +114,47 @@ INSERT INTO Clubs (ClubImg, IsRecruiting, ClubName, Description, EstablishedDate
 
 
 
-
-CREATE TABLE ClubDepartments (
+CREATE TABLE Departments (
     DepartmentID INT PRIMARY KEY AUTO_INCREMENT,
     DepartmentName VARCHAR(50) NOT NULL,
     DepartmentStatus BOOLEAN DEFAULT 1,
-    Description VARCHAR(200),
-    ClubID INT,
-    FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID) ON DELETE CASCADE
+    Description VARCHAR(200)
 );
-INSERT INTO ClubDepartments (ClubID, DepartmentName, Description) VALUES
-(1, 'Ban Huấn Luyện', 'Huấn luyện và đào tạo'),
-(1, 'Ban Sự Kiện', 'Tổ chức sự kiện'),
-(2, 'Ban Huấn Luyện', '...'),
-(2, 'Ban Sự Kiện', '...'),
-(3, 'Ban Học Thuật', '...'),
-(3, 'Ban Sự Kiện', '...'),
-(4, 'Ban Dự Án', '...'),
-(4, 'Ban Đào Tạo', '...'),
-(5, 'Ban Dự Án', '...'),
-(5, 'Ban Truyền Thông', '...'),
-(6, 'Ban Biểu Diễn', '...'),
-(6, 'Ban Đào Tạo', '...'),
-(7, 'Ban Biểu Diễn', 'Chuyên biểu diễn và dàn dựng'),
-(8, 'Ban Học Thuật', 'Phụ trách học thuật tranh biện');
+INSERT INTO Departments (DepartmentName, Description) VALUES
+('Ban Nội dung', ''),
+('Ban Truyền thông', ''),
+('Ban Chủ nhiệm', ''),
+('Ban Chuyên môn', ''),
+('Ban Hậu cần', ''),
+('Ban Đối ngoại', '');
+
+CREATE TABLE ClubDepartments (
+    ClubDepartmentID INT PRIMARY KEY AUTO_INCREMENT,
+    DepartmentID INT NOT NULL,
+    ClubID INT,
+    FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID),
+    FOREIGN KEY (DepartmentID) REFERENCES Departments(DepartmentID)
+);
+
+INSERT INTO ClubDepartments (DepartmentID, ClubID) VALUES
+(3, 1),  -- ClubDepartmentID = 1 → Ban Chủ nhiệm của CLB 1
+(2, 1),  -- ClubDepartmentID = 2 → Ban Truyền thông của CLB 1
+(3, 2),  -- ClubDepartmentID = 3 → Ban Chủ nhiệm của CLB 2
+(4, 2),  -- ClubDepartmentID = 4 → Ban Chuyên môn của CLB 2
+(5, 1),  -- ClubDepartmentID = 5 → Ban Hậu cần của CLB 1
+(6, 2),  -- ClubDepartmentID = 6 → Ban Đối ngoại của CLB 2
+(3, 3),  -- ClubDepartmentID = 7 → Ban Chủ nhiệm của CLB 3
+(3, 4),  -- ClubDepartmentID = 8 → Ban Chủ nhiệm của CLB 4
+(3, 5),  -- ClubDepartmentID = 9 → Ban Chủ nhiệm của CLB 5
+(3, 6),  -- ClubDepartmentID = 10 → Ban Chủ nhiệm của CLB 6
+(3, 7),  -- ClubDepartmentID = 11 → Ban Chủ nhiệm của CLB 7
+(3, 8),  -- ClubDepartmentID = 12 → Ban Chủ nhiệm của CLB 8
+(4, 4),  -- ClubDepartmentID = 13 → Ban Chuyên môn của CLB 4
+(2, 4),  -- ClubDepartmentID = 14 → Ban Truyền thông của CLB 4
+(1, 4),  -- ClubDepartmentID = 15 → Ban Nội dung của CLB 4
+(1, 5),  -- ClubDepartmentID = 16 → Ban Nội dung của CLB 5
+(5, 4),  -- ClubDepartmentID = 17 → Ban Hậu cần của CLB 4
+(6, 4);  -- ClubDepartmentID = 18 → Ban Đối ngoại của CLB 4
 
 
 
@@ -108,33 +162,60 @@ CREATE TABLE UserClubs (
     UserClubID INT PRIMARY KEY AUTO_INCREMENT,
     UserID VARCHAR(10) NOT NULL,
     ClubID INT NOT NULL,
-    DepartmentID INT,
+    ClubDepartmentID INT NOT NULL,
     RoleID INT NOT NULL,
     JoinDate DATETIME NOT NULL,
     IsActive BOOLEAN DEFAULT 1,
     FOREIGN KEY (UserID) REFERENCES Users(UserID),
     FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID),
-    FOREIGN KEY (DepartmentID) REFERENCES ClubDepartments(DepartmentID),
+    FOREIGN KEY (ClubDepartmentID) REFERENCES ClubDepartments(ClubDepartmentID),
     FOREIGN KEY (RoleID) REFERENCES Roles(RoleID)
 );
-INSERT INTO UserClubs (UserID, ClubID, DepartmentID, RoleID, JoinDate) VALUES
-('U001', 1, null, 1, '2020-09-01'),
-('U001', 3, 5, 3, '2021-01-15'),
-('U002', 2, 3, 2, '2020-10-05'),
-('U002', 5, 9, 3, '2021-02-20'),
-('U003', 3, 6, 1, '2020-11-10'),
-('U003', 4, 7, 3, '2021-03-25'),
-('U004', 5, 10, 2, '2020-12-15'),
-('U004', 6, 11, 3, '2021-04-30'),
-('U005', 2, 3, 1, '2021-07-01'),
-('U006', 4, 7, 1, '2021-07-02'),
-('U007', 5, 9, 1, '2021-07-03'),
-('U008', 6, 11, 1, '2021-07-04'),
-('U009', 7, 13, 1, '2021-07-05'),
-('U010', 8, 14, 1, '2021-07-06');
+
+INSERT INTO UserClubs (UserID, ClubID, ClubDepartmentID, RoleID, JoinDate) VALUES
+('U001', 1, 1, 1, '2020-09-01'), -- Chủ nhiệm CLB 1, Ban Chủ nhiệm
+('U002', 1, 5, 3, '2021-01-15'), -- Trưởng ban Hậu cần CLB 1
+('U002', 2, 3, 2, '2020-10-05'), -- Phó chủ nhiệm CLB 2, Ban Truyền thông
+('U003', 2, 4, 3, '2021-02-20'), -- Trưởng ban Chuyên môn CLB 2
+('U003', 1, 1, 2, '2020-11-10'), -- Phó chủ nhiệm CLB 1, Ban Chủ nhiệm
+('U004', 1, 2, 3, '2021-03-25'), -- Trưởng ban Nội dung CLB 1
+('U005', 2, 6, 3, '2021-04-30'), -- Trưởng ban Đối ngoại CLB 2
+('U006', 2, 3, 1, '2021-07-01'), -- Chủ nhiệm CLB 2, Ban Truyền thông
+('U007', 1, 5, 4, '2021-07-03'), -- Thành viên Ban Hậu cần CLB 1
+('U008', 2, 6, 4, '2021-07-04'), -- Thành viên Ban Đối ngoại CLB 2
+('U009', 1, 2, 4, '2021-07-05'), -- Thành viên Ban Nội dung CLB 1
+('U010', 2, 4, 4, '2021-07-06'), -- Thành viên Ban Chuyên môn CLB 2
+('U011', 3, 7, 1, '2021-08-01'), -- Chủ nhiệm CLB 3, Ban Chủ nhiệm
+('U012', 4, 8, 1, '2021-08-02'), -- Chủ nhiệm CLB 4, Ban Chủ nhiệm
+('U013', 5, 9, 1, '2021-08-03'), -- Chủ nhiệm CLB 5, Ban Chủ nhiệm
+('U014', 6, 10, 1, '2021-08-04'), -- Chủ nhiệm CLB 6, Ban Chủ nhiệm
+('U015', 7, 11, 1, '2021-08-05'), -- Chủ nhiệm CLB 7, Ban Chủ nhiệm
+('U016', 8, 12, 1, '2021-08-06'), -- Chủ nhiệm CLB 8, Ban Chủ nhiệm
+('U017', 4, 13, 4, '2021-08-10'), -- Thành viên Ban Chuyên môn CLB 4
+('U018', 4, 14, 4, '2021-08-10'), -- Thành viên Ban Truyền thông CLB 4
+('U019', 4, 13, 4, '2021-08-11'), -- Thành viên Ban Chuyên môn CLB 4
+('U020', 4, 14, 4, '2021-08-11'), -- Thành viên Ban Truyền thông CLB 4
+('U021', 4, 13, 4, '2021-08-12'), -- Thành viên Ban Chuyên môn CLB 4
+('U022', 4, 15, 3, '2021-09-01'), -- Trưởng ban Nội dung CLB 4
+('U023', 4, 14, 3, '2021-09-01'), -- Trưởng ban Truyền thông CLB 4
+('U024', 4, 13, 3, '2021-09-01'), -- Trưởng ban Chuyên môn CLB 4
+('U022', 4, 8, 4, '2021-09-01'), -- Thành viên Ban Chủ nhiệm CLB 4 (trưởng ban kiêm thành viên Ban Chủ nhiệm)
+('U023', 4, 8, 4, '2021-09-01'), -- Thành viên Ban Chủ nhiệm CLB 4
+('U024', 4, 8, 4, '2021-09-01'), -- Thành viên Ban Chủ nhiệm CLB 4
+('U025', 4, 16, 3, '2021-09-01'), -- Trưởng ban Hậu cần CLB 4
+('U026', 4, 16, 4, '2021-09-01'), -- Thành viên Ban Hậu cần CLB 4
+('U025', 4, 15, 4, '2021-09-01'), -- Thành viên Ban Nội dung CLB 4
+('U012', 4, 8, 1, '2021-09-01'), -- Chủ nhiệm CLB 4, Ban Chủ nhiệm (có thể duplicate kiểm tra)
+('U027', 4, 17, 3, '2021-09-01'), -- Trưởng ban Đối ngoại CLB 4
+('U028', 4, 17, 4, '2021-09-01'), -- Thành viên Ban Đối ngoại CLB 4
+('U029', 4, 18, 3, '2021-09-05'), -- Trưởng ban Ban Đối ngoại CLB 4
+('U030', 4, 18, 4, '2021-09-06'); -- Thành viên Ban Đối ngoại CLB 4
 
 
 
+-- ========================================
+-- APPLICATIONS
+-- ========================================
 CREATE TABLE ApplicationFormTemplates (
     TemplateID INT PRIMARY KEY AUTO_INCREMENT,
     ClubID INT NOT NULL,
@@ -142,16 +223,20 @@ CREATE TABLE ApplicationFormTemplates (
     FormType ENUM('Club', 'Event', 'Other') NOT NULL,
     Title VARCHAR(100) NOT NULL,
     FieldName VARCHAR(50),
-    FieldType ENUM('Text', 'Textarea', 'Dropdown', 'PhoneNumber', 'Number', 'Date', 'Checkbox', 'Info', 'Email','Radio'),
+    FieldType ENUM('Text', 'Textarea', 'Number', 'Date', 'Checkbox', 'Info', 'Email','Radio'),
     IsRequired BOOLEAN DEFAULT 1,
     Options LONGTEXT,
     Published BOOLEAN NOT NULL DEFAULT 0,
+    DisplayOrder INT DEFAULT 0,
     CONSTRAINT fk_formtemplate_club FOREIGN KEY (ClubID) 
         REFERENCES Clubs(ClubID) ON DELETE CASCADE
     -- EventID sẽ được xử lý sau khi bảng Events được tạo
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 
+-- ========================================
+-- EVENTS
+-- ========================================
 CREATE TABLE Events (
     EventID INT PRIMARY KEY AUTO_INCREMENT,
     EventName VARCHAR(100) NOT NULL,
@@ -163,7 +248,7 @@ CREATE TABLE Events (
     IsPublic BOOLEAN DEFAULT 0,
     FormTemplateID INT,
     Capacity INT,
-    Status ENUM('Pending', 'Completed'),
+    Status ENUM('Pending','Processing', 'Completed'),
     FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID),
     FOREIGN KEY (FormTemplateID) REFERENCES ApplicationFormTemplates(TemplateID)
 );
@@ -179,6 +264,27 @@ INSERT INTO Events (EventName, EventImg, Description, EventDate, Location, ClubI
 ('Giải Bóng Đá Sinh Viên FPTU 2025', 'images/events/football2025.jpg', 'Giải đấu bóng đá thường niên dành cho sinh viên toàn trường.', '2025-03-25 08:00:00', 'Sân vận động, Campus Hà Nội', 1, TRUE, 120, 'PENDING'),
 ('Ngày Hội Âm Nhạc FPTU 2025', 'images/events/musicday2025.jpg', 'Ngày hội với các màn trình diễn âm nhạc và hoạt động tương tác.', '2025-05-20 10:00:00', 'Sân khấu ngoài trời, Campus Cần Thơ', 6, FALSE, 250, 'PENDING'),
 ('Hackathon Đổi Mới AI', 'images/events/aihackathon2025.jpg', 'Cuộc thi phát triển các giải pháp trí tuệ nhân tạo sáng tạo.', '2025-06-05 08:00:00', 'Phòng máy tính, Campus Hà Nội', 4, TRUE, 45, 'PENDING'),
+('Workshop: Xây dựng Website với Spring Boot','/images/events/springboot_workshop.jpg',
+  'Buổi workshop chuyên sâu dành cho các thành viên Câu Lạc Bộ Lập Trình nhằm giúp làm quen với cách xây dựng website sử dụng Spring Boot – một framework mạnh mẽ trong Java. 
+  Trong sự kiện này, các bạn sẽ được hướng dẫn từng bước từ cấu hình dự án, kết nối cơ sở dữ liệu, tới việc triển khai các chức năng cơ bản như login, CRUD, API REST. 
+  Ngoài ra, chúng tôi cũng sẽ tổ chức phần Q&A và thực hành trực tiếp trên máy, khuyến khích mọi người mang laptop để tham gia coding ngay tại sự kiện.',
+  '2025-06-20 14:00:00',
+  'Phòng Lab 302, Tòa nhà A, FPTU',
+  4,
+  0,
+  100,
+  'Pending'),
+('Cuộc thi Code War: Thử thách thuật toán',
+  '/images/events/codewar.jpg',
+  'Code War là một cuộc thi lập trình được tổ chức bởi Câu Lạc Bộ Lập Trình nhằm nâng cao khả năng tư duy thuật toán và kỹ năng giải quyết vấn đề của sinh viên. 
+  Cuộc thi gồm nhiều vòng với các mức độ từ cơ bản đến nâng cao, người chơi sẽ thi đấu cá nhân trong khoảng thời gian giới hạn để giải quyết các bài toán lập trình bằng ngôn ngữ tuỳ chọn.
+  Sự kiện cũng là nơi gặp gỡ, học hỏi giữa những bạn trẻ yêu thích công nghệ và có đam mê với lập trình.',
+  '2025-06-25 09:00:00',
+  'Hội trường Innovation Lab, FPTU',
+  4,
+  1,
+  120,
+  'Pending'),
 -- Sự kiện đã hoàn thành (Completed) trong năm 2024
 ('Lễ Hội Làng Tết 2024', 'images/events/villagefest2024.jpg', 'Sự kiện tái hiện không khí Tết truyền thống với các tiết mục âm nhạc và nhảy.', '2024-01-20 10:00:00', 'Campus Đà Nẵng', 6, TRUE, 500, 'COMPLETED'),
 ('Trại Lập Trình FPTU 2024', 'images/events/codingbootcamp2024.jpg', 'Trại huấn luyện chuyên sâu về kỹ thuật lập trình nâng cao.', '2024-11-20 08:00:00', 'Phòng máy tính, Campus TP.HCM', 4, TRUE, 60, 'COMPLETED'),
@@ -190,6 +296,32 @@ INSERT INTO Events (EventName, EventImg, Description, EventDate, Location, ClubI
 ('Hội Thảo Phát Triển Web 2024', 'images/events/webdev2024.jpg', 'Hội thảo thực hành về công nghệ phát triển web hiện đại.', '2024-11-15 14:00:00', 'Phòng hội thảo A2, Campus Đà Nẵng', 4, TRUE, 50, 'COMPLETED'),
 ('FPTU Dance Battle 2024', 'images/events/dancebattle2024.jpg', 'Cuộc thi nhảy thể hiện tài năng của sinh viên.', '2024-11-30 18:00:00', 'Sân khấu chính, Campus TP.HCM', 7, TRUE, 150, 'COMPLETED'),
 ('Cuộc Thi Tranh Biện 2024', 'images/events/debate2024.jpg', 'Cuộc thi tranh biện về các chủ đề học thuật và xã hội.', '2024-12-01 09:00:00', 'Phòng hội thảo C1, Campus Hà Nội', 8, TRUE, 65, 'COMPLETED');
+
+-- Sự kiện PENDING (sau ngày hôm nay)
+UPDATE Events SET EventDate = '2025-06-30 09:00:00', Status = 'PENDING' WHERE EventID = 1;
+UPDATE Events SET EventDate = '2025-07-01 19:00:00', Status = 'PENDING' WHERE EventID = 2;
+UPDATE Events SET EventDate = '2025-07-25 08:00:00', Status = 'PENDING' WHERE EventID = 6;
+UPDATE Events SET EventDate = '2025-06-28 13:00:00', Status = 'PENDING' WHERE EventID = 7;
+UPDATE Events SET EventDate = '2025-07-05 08:00:00', Status = 'PENDING' WHERE EventID = 8;
+UPDATE Events SET EventDate = '2025-07-31 10:00:00', Status = 'PENDING' WHERE EventID = 9;
+
+-- Sự kiện PROCESSING (hôm nay)
+UPDATE Events SET EventDate = '2025-06-19 08:00:00', Status = 'PROCESSING' WHERE EventID = 3;
+
+-- Sự kiện COMPLETED (trước ngày hôm nay)
+UPDATE Events SET EventDate = '2025-06-10 07:00:00', Status = 'COMPLETED' WHERE EventID = 4;
+UPDATE Events SET EventDate = '2025-06-01 09:00:00', Status = 'COMPLETED' WHERE EventID = 5;
+UPDATE Events SET EventDate = '2025-06-05 10:00:00', Status = 'COMPLETED' WHERE EventID = 10;
+UPDATE Events SET EventDate = '2024-01-20 10:00:00', Status = 'COMPLETED' WHERE EventID = 11;
+UPDATE Events SET EventDate = '2024-11-20 08:00:00', Status = 'COMPLETED' WHERE EventID = 12;
+UPDATE Events SET EventDate = '2024-12-10 19:00:00', Status = 'COMPLETED' WHERE EventID = 13;
+UPDATE Events SET EventDate = '2024-07-15 07:00:00', Status = 'COMPLETED' WHERE EventID = 14;
+UPDATE Events SET EventDate = '2024-11-25 09:00:00', Status = 'COMPLETED' WHERE EventID = 15;
+UPDATE Events SET EventDate = '2024-12-05 14:00:00', Status = 'COMPLETED' WHERE EventID = 16;
+UPDATE Events SET EventDate = '2024-12-15 10:00:00', Status = 'COMPLETED' WHERE EventID = 17;
+UPDATE Events SET EventDate = '2024-11-15 14:00:00', Status = 'COMPLETED' WHERE EventID = 18;
+UPDATE Events SET EventDate = '2024-11-30 18:00:00', Status = 'COMPLETED' WHERE EventID = 19;
+UPDATE Events SET EventDate = '2024-12-01 09:00:00', Status = 'COMPLETED' WHERE EventID = 20;
 
 UPDATE Events SET Description = 'FPTU Showcase 2025 Chung Kết là sự kiện nghệ thuật lớn nhất trong năm, nơi quy tụ những tiết mục đặc sắc từ các vòng thi trước đó trên khắp các cơ sở FPTU toàn quốc. Với chủ đề ''Bùng cháy đam mê, lan tỏa cảm hứng'', chương trình không chỉ là sân chơi thể hiện tài năng mà còn là nơi gắn kết cộng đồng sinh viên thông qua âm nhạc, vũ đạo, sân khấu hóa, và các màn trình diễn đỉnh cao. Khán giả sẽ được mãn nhãn với hệ thống âm thanh ánh sáng hiện đại, tương tác sân khấu chuyên nghiệp và đặc biệt là những khoảnh khắc thăng hoa của tuổi trẻ. Sự kiện dự kiến thu hút hàng trăm sinh viên và khách mời, tạo nên một đêm diễn bùng nổ, đầy cảm xúc.' WHERE EventID = 1;
 UPDATE Events SET Description = 'Lễ Hội Âm Nhạc Tết 2025 mang đến không gian âm nhạc sống động kết hợp tinh hoa truyền thống và xu hướng hiện đại. Người tham dự sẽ được thưởng thức những tiết mục dân gian hòa quyện với âm nhạc điện tử, rap, ballad… từ các câu lạc bộ nghệ thuật sinh viên. Không khí ngày Tết lan tỏa qua các gian hàng trò chơi dân gian, trình diễn áo dài, và các hoạt động giao lưu văn hóa vùng miền. Đây là dịp để sinh viên FPTU cùng nhau đón Tết sớm, lan tỏa niềm vui và gắn kết cộng đồng.' WHERE EventID = 2;
@@ -212,8 +344,6 @@ UPDATE Events SET Description = 'Ngày Hội Đổi Mới Sáng Tạo FPTU là s
 UPDATE Events SET Description = 'Chương Trình Tri Ân Ngày Nhà Giáo Việt Nam 20/11 là dịp sinh viên gửi lời cảm ơn đến thầy cô qua các tiết mục văn nghệ, viết thư tay, tặng quà, và các hoạt động gắn kết. Sự kiện mang không khí ấm áp, xúc động, thể hiện tinh thần “tôn sư trọng đạo” và sự trân trọng công lao của người làm giáo dục.' WHERE EventID = 19;
 UPDATE Events SET Description = 'Hành Trình Khám Phá Bản Thân là chuỗi hoạt động trải nghiệm như trekking, dã ngoại, thử thách nhóm giúp sinh viên khám phá giá trị cá nhân, tăng cường kỹ năng mềm và xây dựng tinh thần đồng đội. Các hoạt động được thiết kế kết hợp giữa vui chơi, thử thách và chia sẻ giúp người tham gia hiểu rõ bản thân và định hướng tương lai.' WHERE EventID = 20;
 
-
-
 CREATE TABLE EventParticipants (
     EventParticipantID INT PRIMARY KEY AUTO_INCREMENT,
     EventID INT,
@@ -232,32 +362,75 @@ INSERT INTO EventParticipants (EventID, UserID, Status) VALUES
 (4, 'U002', 'REGISTERED'),
 (4, 'U004', 'REGISTERED');
 
-
-
-CREATE TABLE TaskAssignment (
-    TaskAssignmentID INT PRIMARY KEY AUTO_INCREMENT,
-    EventID INT NOT NULL,
-    DepartmentID INT NOT NULL,
-    Description TEXT,
-    TaskName VARCHAR(100),
-    DueDate DATETIME,
-    Status ENUM('PENDING', 'COMPLETED'),
-    FOREIGN KEY (EventID) REFERENCES Events(EventID),
-    FOREIGN KEY (DepartmentID) REFERENCES ClubDepartments(DepartmentID)
+-- ================================================================================
+-- ========================================
+-- TASK ASSIGNMENTS
+-- ========================================
+CREATE TABLE TaskAssignmentDepartment (
+    	TaskAssignmentDepartmentID INT PRIMARY KEY AUTO_INCREMENT,
+    	EventID INT NOT NULL,
+	Term ENUM('Trước sự kiện', 'Trong sự kiện', 'Sau sự kiện'),
+	TermStart DATE,
+	TermEnd DATE,
+   	Description TEXT,
+  	TaskName VARCHAR(100),
+	Status ENUM('ToDo','Processing','Review','Approved'),
+	StartedDate DATE, 
+	DueDate DATE,
+	FOREIGN KEY (EventID) REFERENCES Events(EventID)
 );
-INSERT INTO TaskAssignment (EventID, DepartmentID, TaskName, Description, DueDate, Status) VALUES
-(1, 1, 'Chuẩn bị sân bãi', 'Kiểm tra và chuẩn bị sân bãi cho giải đấu', '2023-12-10 12:00:00', 'PENDING'),
-(1, 2, 'Truyền thông sự kiện', 'Đăng bài quảng cáo sự kiện trên các kênh truyền thông', '2023-12-05 12:00:00', 'PENDING'),
-(2, 7, 'Chuẩn bị tài liệu', 'Chuẩn bị tài liệu và slide cho workshop', '2023-11-15 12:00:00', 'PENDING'),
-(2, 8, 'Đăng ký người tham dự', 'Quản lý danh sách đăng ký tham dự workshop', '2023-11-18 12:00:00', 'PENDING'),
-(3, 11, 'Chuẩn bị âm thanh', 'Kiểm tra và chuẩn bị hệ thống âm thanh cho đêm nhạc', '2023-11-20 12:00:00', 'PENDING'),
-(3, 12, 'Trang trí sân khấu', 'Trang trí sân khấu cho đêm nhạc', '2023-11-22 12:00:00', 'PENDING'),
-(4, 9, 'Chuẩn bị quà tặng', 'Chuẩn bị quà tặng cho các em nhỏ', '2023-12-05 12:00:00', 'PENDING'),
-(4, 10, 'Lên kế hoạch di chuyển', 'Lên kế hoạch di chuyển và logistics cho chiến dịch', '2023-12-08 12:00:00', 'PENDING');
 
+CREATE TABLE TaskAssignmentDepartmentResponser (
+	TaskAssignmentDepartmentResponserID INT PRIMARY KEY AUTO_INCREMENT,
+	ClubDepartmentID INT NOT NULL,
+	TaskAssignmentDepartmentID INT NOT NULL,
+	FOREIGN KEY (TaskAssignmentDepartmentID) REFERENCES TaskAssignmentDepartment(TaskAssignmentDepartmentID),
+	FOREIGN KEY (ClubDepartmentID) REFERENCES ClubDepartments(ClubDepartmentID)
 
+);
 
+CREATE TABLE TaskAssignmentMember (
+	TaskAssignmentDepartmentID INT PRIMARY KEY AUTO_INCREMENT,
+	TaskAssignmentDepartmentResponserID INT NOT NULL,
+	Description TEXT,
+	TaskName VARCHAR(100),
+   	Status ENUM('ToDo','Processing','Review','Approved'),
+	StartedDate DATE, 
+   	DueDate DATETIME,
+	FOREIGN KEY (TaskAssignmentDepartmentResponserID) REFERENCES TaskAssignmentDepartmentResponser(TaskAssignmentDepartmentResponserID)
+);
 
+CREATE TABLE TaskAssignmentMemberResponser (
+    TaskAssignmentMemberResponserID INT PRIMARY KEY AUTO_INCREMENT,
+    TaskAssignmentMember INT NOT NULL,
+    MemberID VARCHAR(10) NOT NULL,
+    FOREIGN KEY (TaskAssignmentMember) REFERENCES TaskAssignmentMember(TaskAssignmentDepartmentID),
+    FOREIGN KEY (MemberID) REFERENCES Users(UserID)
+);
+
+-- ================================================================================
+-- ========================================
+-- MEETINGS
+-- ========================================
+CREATE TABLE ClubMeeting (
+	ClubMeetingID INT PRIMARY KEY AUTO_INCREMENT,
+	ClubID INT NOT NULL,
+	URLMeeting varchar(50),
+	StartedTime DATETIME 
+);
+
+CREATE TABLE DepartmentMeeting (
+	DepartmentMeetingID INT PRIMARY KEY AUTO_INCREMENT,
+	DepartmentID INT NOT NULL,
+URLMeeting varchar(50),
+StartedTime DATETIME,
+FOREIGN KEY (DepartmentID) REFERENCES Departments(DepartmentID)
+);
+
+-- ================================================================================
+-- ========================================
+-- NOTIFICATIONS
+-- ========================================
 CREATE TABLE Notifications (
     NotificationID INT PRIMARY KEY AUTO_INCREMENT,
     Title VARCHAR(200) NOT NULL,
@@ -308,6 +481,7 @@ CREATE TABLE ApplicationResponses (
     FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (EventID) REFERENCES Events(EventID) ON DELETE SET NULL ON UPDATE CASCADE
 );
+
 CREATE TABLE ClubApplications (
     ApplicationID INT PRIMARY KEY AUTO_INCREMENT,
     UserID VARCHAR(10),
@@ -329,6 +503,10 @@ INSERT INTO ClubApplications (UserID, ClubID, Email, Status, SubmitDate) VALUES
 ('U004', 7, 'd@gmail.com', 'PENDING', '2023-11-04 14:00:00');
 
 
+-- ================================================================================
+-- ========================================
+-- PERIODIC REPORTS
+-- ========================================
 CREATE TABLE PeriodicClubReport (
     ReportID INT PRIMARY KEY AUTO_INCREMENT,
     ClubID INT NOT NULL,
@@ -337,50 +515,114 @@ CREATE TABLE PeriodicClubReport (
     SubmissionDate DATETIME,
     Status ENUM('PENDING', 'APPROVED') DEFAULT 'PENDING',
     FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID),
-    FOREIGN KEY (SubmittedBy) REFERENCES Users(UserID)
+    FOREIGN KEY (SubmittedBy) REFERENCES Users(UserID),
+   FOREIGN KEY (Term) REFERENCES Semesters(TermID)
 );
 
--- INSERT mẫu
-INSERT INTO PeriodicClubReport (ClubID, SubmittedBy, Term, SubmissionDate, Status)
-VALUES
-(1, 'U001', 'SP25', NOW(), 'PENDING'),
-(3, 'U003', 'SP25', NOW(), 'APPROVED'),
-(5, 'U004', 'SP25', NOW(), 'APPROVED');
-
-CREATE TABLE PeriodicReportMemberStats (
-    ReportMemberID INT PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE PeriodicReport_MemberAchievements (
+    AchievementID INT PRIMARY KEY AUTO_INCREMENT,
     ReportID INT,
-    UserID VARCHAR(10),
-    RoleNote VARCHAR(50),
+    MemberID VARCHAR(10),
+    Role VARCHAR(100), -- ví dụ: Chủ nhiệm, Trưởng ban,...
+    ProgressPoint INT,
     FOREIGN KEY (ReportID) REFERENCES PeriodicClubReport(ReportID),
-    FOREIGN KEY (UserID) REFERENCES Users(UserID)
+    FOREIGN KEY (MemberID) REFERENCES Users(UserID)
 );
-
--- INSERT mẫu
-INSERT INTO PeriodicReportMemberStats (ReportID, UserID, RoleNote)
-VALUES
-(1, 'U001', 'Chủ nhiệm'),
-(1, 'U002', 'Thành viên'),
-(2, 'U003', 'Chủ nhiệm'),
-(2, 'U004', 'Thành viên'),
-(3, 'U002', 'Thành viên');
 
 CREATE TABLE PeriodicReportEvents (
     ReportEventID INT PRIMARY KEY AUTO_INCREMENT,
     ReportID INT,
     EventName VARCHAR(100),
     EventDate DATETIME,
-    Description TEXT,
     EventType ENUM('Internal', 'Public'),
     ParticipantCount INT,
     ProofLink VARCHAR(100),
     FOREIGN KEY (ReportID) REFERENCES PeriodicClubReport(ReportID)
 );
 
--- INSERT mẫu
-INSERT INTO PeriodicReportEvents (ReportID, EventName, EventDate, Description, EventType, ParticipantCount, ProofLink)
-VALUES
-(1, 'Giao lưu thể thao tháng 3', '2023-03-15 08:00:00', 'Trận bóng giao hữu nội bộ', 'Internal', 20, 'https://imgur.com/sport.jpg'),
-(1, 'Tập huấn CLB', '2023-04-05 10:00:00', 'Đào tạo thành viên mới', 'Internal', 15, 'https://imgur.com/training.jpg'),
-(2, 'Hội thảo kỹ năng', '2023-03-25 14:00:00', 'Học cách thuyết trình hiệu quả', 'Public', 50, 'https://imgur.com/workshop.jpg'),
-(3, 'Chiến dịch Xuân tình nguyện', '2023-04-10 07:00:00', 'Tặng quà cho trẻ em vùng cao', 'Public', 40, 'https://imgur.com/xuantinhnguyen.jpg');
+CREATE TABLE ClubCreationPermissions (
+    PermissionID INT PRIMARY KEY AUTO_INCREMENT,
+    UserID VARCHAR(10) NOT NULL,
+    Status ENUM('ACTIVE', 'USED', 'INACTIVE') DEFAULT 'ACTIVE',
+    GrantedBy VARCHAR(10),
+    GrantedDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UsedDate DATETIME NULL,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    FOREIGN KEY (GrantedBy) REFERENCES Users(UserID)
+);
+
+
+CREATE TABLE ActivedMemberClubs (
+    ActiveID INT PRIMARY KEY AUTO_INCREMENT,
+    UserID VARCHAR(10) NOT NULL,
+    ClubID INT NOT NULL,
+    ActiveDate DATE NOT NULL,
+    LeaveDate DATE DEFAULT NULL, -- NULL nếu vẫn còn hoạt động
+    IsActive BOOLEAN DEFAULT TRUE,
+
+    FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID)
+);
+
+-- ================================================================================
+-- ========================================
+-- FAVORITES
+-- ========================================
+CREATE TABLE FavoriteClubs (
+    FavoriteID INT PRIMARY KEY AUTO_INCREMENT,
+    UserID VARCHAR(10) NOT NULL,
+    ClubID INT NOT NULL,
+    AddedDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE,
+    FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID) ON DELETE CASCADE,
+    UNIQUE (UserID, ClubID) -- Đảm bảo mỗi người dùng chỉ thêm một CLB yêu thích một lần
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+INSERT INTO FavoriteClubs (UserID, ClubID, AddedDate) VALUES
+('U001', 1, '2025-06-08 16:00:00'),
+('U001', 3, '2025-06-08 16:05:00'),
+('U002', 2, '2025-06-08 16:10:00'),
+('U002', 5, '2025-06-08 16:15:00');
+
+CREATE TABLE FavoriteEvents (
+    FavoriteEventID INT PRIMARY KEY AUTO_INCREMENT,
+    UserID VARCHAR(10) NOT NULL,
+    EventID INT NOT NULL,
+    AddedDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE,
+    FOREIGN KEY (EventID) REFERENCES Events(EventID) ON DELETE CASCADE,
+    UNIQUE (UserID, EventID) -- Đảm bảo mỗi người dùng chỉ thêm một sự kiện yêu thích một lần
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+INSERT INTO FavoriteEvents (UserID, EventID, AddedDate) VALUES
+('U001', 1, '2025-06-15 10:00:00'),
+('U001', 3, '2025-06-15 10:05:00'),
+('U002', 2, '2025-06-15 10:10:00'),
+('U002', 5, '2025-06-15 10:15:00');
+
+-- ================================================================================
+-- ========================================
+-- FEEDBACK
+-- ========================================
+CREATE TABLE Feedbacks (
+    FeedbackID INT PRIMARY KEY AUTO_INCREMENT,
+    EventID INT NOT NULL,
+    UserID VARCHAR(10) NOT NULL,
+    IsAnonymous BOOLEAN DEFAULT FALSE,
+    Rating INT NOT NULL CHECK (Rating BETWEEN 1 AND 5), -- Tổng quan
+    Content TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+    
+    -- 9 câu hỏi đánh giá chi tiết (1–5 điểm)
+    Q1_Organization INT CHECK (Q1_Organization BETWEEN 1 AND 5),
+    Q2_Communication INT CHECK (Q2_Communication BETWEEN 1 AND 5),
+    Q3_Support INT CHECK (Q3_Support BETWEEN 1 AND 5),
+    Q4_Relevance INT CHECK (Q4_Relevance BETWEEN 1 AND 5),
+    Q5_Welcoming INT CHECK (Q5_Welcoming BETWEEN 1 AND 5),
+    Q6_Value INT CHECK (Q6_Value BETWEEN 1 AND 5),
+    Q7_Timing INT CHECK (Q7_Timing BETWEEN 1 AND 5),
+    Q8_Participation INT CHECK (Q8_Participation BETWEEN 1 AND 5),
+    Q9_WillingnessToReturn INT CHECK (Q9_WillingnessToReturn BETWEEN 1 AND 5),
+
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (EventID) REFERENCES Events(EventID) ON DELETE CASCADE,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

@@ -28,7 +28,6 @@
                         <li><a href="#notifications" class="text-blue-500 hover:text-blue-700 block py-2 px-4 rounded">Thông Báo Gần Đây</a></li>
                         <li><a href="#calendar" class="text-blue-500 hover:text-blue-700 block py-2 px-4 rounded">Lịch Công Việc</a></li>
                         <li><a href="#upcoming-events" class="text-blue-500 hover:text-blue-700 block py-2 px-4 rounded">Sự Kiện Sắp Tới</a></li>
-
                         <c:set var="isLeader" value="false" />
                         <c:forEach items="${userclubs}" var="uc">
                             <c:if test="${not empty uc and uc.roleID == 1}">
@@ -291,6 +290,7 @@
                     </c:if>
                 </div>
             </main>
+
         </div>
 
 

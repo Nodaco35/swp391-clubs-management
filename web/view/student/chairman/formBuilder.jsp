@@ -124,6 +124,7 @@
                         <h2 class="card-title">Đơn đăng ký</h2>
                     </div>
                     <div class="card-content">
+
                         <div class="form-group">
                             <label class="form-label">Chọn loại form:</label>
                             <select id="formType" name="formType" class="form-select mb-2" onchange="toggleEventField(this)" required>
@@ -172,13 +173,10 @@
                         <h4 class="alert-title">Đã đạt giới hạn</h4>
                         <p class="alert-description">Bạn đã đạt đến giới hạn 20 câu hỏi cho mỗi form.</p>
                     </div>
-                </div>
-
-                <!-- Questions List -->
+                </div>                <!-- Questions List -->
                 <div id="questionsList" class="questions-list">
-                    <%-- Các câu hỏi mặc định. JS sẽ xóa nếu có existingQuestions và tạo lại từ dữ liệu. --%>
-                    <!-- Question 1: Họ và tên (Required) -->
-                    <div class="card question-card required-question" data-id="qDefault1" draggable="true">
+                    <%-- Các câu hỏi mặc định. JS sẽ xóa nếu có existingQuestions và tạo lại từ dữ liệu. --%>          
+                    <!-- Question 1: Chọn ban muốn vào CLB (Required) -->                    <div class="card question-card required-question" data-id="qDepartment" data-required-type="department" draggable="true">
                         <div class="card-header">
                             <div class="question-header">
                                 <div class="drag-handle">
@@ -192,28 +190,27 @@
                                     </svg>
                                 </div>
                                 <span class="question-number">1</span>
-                                <span class="required-badge">Cố định</span>
+                                <span class="required-badge">Bắt buộc</span>
                             </div>
                             <div class="question-actions">
-                                <button class="btn-icon move-up " title="Di chuyển lên" >
+                                <button class="btn-icon move-up" title="Di chuyển lên" disabled>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <line x1="12" y1="19" x2="12" y2="5"></line>
                                         <polyline points="5 12 12 5 19 12"></polyline>
                                     </svg>
                                 </button>
-                                <button class="btn-icon move-down " title="Di chuyển xuống" >
+                                <button class="btn-icon move-down" title="Di chuyển xuống" disabled>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <line x1="12" y1="5" x2="12" y2="19"></line>
                                         <polyline points="19 12 12 19 5 12"></polyline>
                                     </svg>
                                 </button>
-                                <button class="btn-icon duplicate" title="Nhân bản">
+                                <button class="btn-icon duplicate" title="Nhân bản" disabled>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                                         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                                     </svg>
-                                </button>
-                                <button class="btn-icon delete " title="Xóa" >
+                                </button>                                <button class="btn-icon delete" title="Xóa">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <polyline points="3 6 5 6 21 6"></polyline>
                                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -221,167 +218,41 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="card-content">
-                            <div class="form-row">
+                        <div class="card-content"><div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Nhãn câu hỏi</label>
-                                    <input type="text" class="form-input question-label" value="Họ và tên">
+                                    <input type="text" class="form-input question-label" value="Chọn ban muốn vào CLB">
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Loại câu hỏi</label>
-                                    <select class="form-select question-type">
-                                        <option value="text" selected>Văn bản ngắn</option>
+                                    <select class="form-select question-type" disabled>
+                                        <option value="radio" selected>Trắc nghiệm (một lựa chọn)</option>
                                     </select>
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label class="form-label">Placeholder</label>
-                                <input type="text" class="form-input question-placeholder" value="Nhập câu trả lời của bạn">
+                            <div class="form-group options-container" style="display: block;">
+                                <label class="form-label">Tùy chọn</label>
+                                <div class="options-list">
+                                    <c:forEach var="department" items="${clubDepartments}" varStatus="status">
+                                        <div class="option-item" data-id="opt-dept-${department.departmentId}">
+                                            <div class="option-header">
+                                                <span class="option-number">${status.count}.</span>
+                                                <input type="text" class="form-input option-value" value="${department.departmentName}" readonly>                                                
+                                                <button class="btn-icon delete-option" title="Xóa tùy chọn">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </c:forEach>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <div class="checkbox-wrapper">
-                                    <input type="checkbox" id="required-qDefault1" class="question-required" checked>
-                                    <label for="required-qDefault1">Bắt buộc</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Question 2: Email (Required) -->
-                    <div class="card question-card required-question" data-id="q2" draggable="true">
-                        <div class="card-header">
-                            <div class="question-header">
-                                <div class="drag-handle ">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="9" cy="12" r="1"></circle>
-                                        <circle cx="9" cy="5" r="1"></circle>
-                                        <circle cx="9" cy="19" r="1"></circle>
-                                        <circle cx="15" cy="12" r="1"></circle>
-                                        <circle cx="15" cy="5" r="1"></circle>
-                                        <circle cx="15" cy="19" r="1"></circle>
-                                    </svg>
-                                </div>
-                                <span class="question-number">2</span>
-                                <span class="required-badge">Cố định</span>
-                            </div>
-                            <div class="question-actions">
-                                <button class="btn-icon move-up " title="Di chuyển lên" >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <line x1="12" y1="19" x2="12" y2="5"></line>
-                                        <polyline points="5 12 12 5 19 12"></polyline>
-                                    </svg>
-                                </button>
-                                <button class="btn-icon move-down " title="Di chuyển xuống" >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                                        <polyline points="19 12 12 19 5 12"></polyline>
-                                    </svg>
-                                </button>
-                                <button class="btn-icon duplicate" title="Nhân bản">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                    </svg>
-                                </button>
-                                <button class="btn-icon delete " title="Xóa" >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="3 6 5 6 21 6"></polyline>
-                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label">Nhãn câu hỏi</label>
-                                    <input type="text" class="form-input question-label" value="Email">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Loại câu hỏi</label>
-                                    <select class="form-select question-type">
-                                        <option value="email" selected>Email</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Placeholder</label>
-                                <input type="text" class="form-input question-placeholder" value="Nhập câu trả lời của bạn">
-                            </div>
-                            <div class="form-group">
-                                <div class="checkbox-wrapper">
-                                    <input type="checkbox" id="required-qDefault2" class="question-required" checked>
-                                    <label for="required-qDefault3">Bắt buộc</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Question 3: Mã số sinh viên (Required) -->
-                    <div class="card question-card required-question" data-id="q3" draggable="true">
-                        <div class="card-header">
-                            <div class="question-header">
-                                <div class="drag-handle ">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="9" cy="12" r="1"></circle>
-                                        <circle cx="9" cy="5" r="1"></circle>
-                                        <circle cx="9" cy="19" r="1"></circle>
-                                        <circle cx="15" cy="12" r="1"></circle>
-                                        <circle cx="15" cy="5" r="1"></circle>
-                                        <circle cx="15" cy="19" r="1"></circle>
-                                    </svg>
-                                </div>
-                                <span class="question-number">3</span>
-                                <span class="required-badge">Cố định</span>
-                            </div>
-                            <div class="question-actions">
-                                <button class="btn-icon move-up " title="Di chuyển lên" >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <line x1="12" y1="19" x2="12" y2="5"></line>
-                                        <polyline points="5 12 12 5 19 12"></polyline>
-                                    </svg>
-                                </button>
-                                <button class="btn-icon move-down " title="Di chuyển xuống" >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                                        <polyline points="19 12 12 19 5 12"></polyline>
-                                    </svg>
-                                </button>
-                                <button class="btn-icon duplicate" title="Nhân bản">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                    </svg>
-                                </button>
-                                <button class="btn-icon delete " title="Xóa" >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="3 6 5 6 21 6"></polyline>
-                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label">Nhãn câu hỏi</label>
-                                    <input type="text" class="form-input question-label" value="Mã số sinh viên">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Loại câu hỏi</label>
-                                    <select class="form-select question-type">
-                                        <option value="text" selected>Văn bản ngắn</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Placeholder</label>
-                                <input type="text" class="form-input question-placeholder" value="Nhập câu trả lời của bạn">
-                            </div>
-                            <div class="form-group">
-                                <div class="checkbox-wrapper">
-                                    <input type="checkbox" id="required-qDefault3" class="question-required" checked>
-                                    <label for="required-qDefault3">Bắt buộc</label>
+                                    <input type="checkbox" id="required-qDepartment" class="question-required" checked disabled>
+                                    <label for="required-qDepartment">Bắt buộc</label>
                                 </div>
                             </div>
                         </div>

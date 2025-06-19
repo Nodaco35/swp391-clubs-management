@@ -38,25 +38,46 @@ public class FormManagementServlet extends HttpServlet {
         templateDAO = new ApplicationFormTemplateDAO();
         responseDAO = new ApplicationResponseDAO();
         userClubDAO = new UserClubDAO();
-    }
-
-    @Override
+    }    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
         HttpSession session = request.getSession();
         String userId = (String) session.getAttribute("userID");
-        try{
-        // Kiểm tra quyền truy cập (chỉ cho roleId 1-3)
-        UserClub userClub = userClubDAO.getUserClubByUserId(userId);
-        if (userClub == null || userClub.getRoleID() < 1 || userClub.getRoleID() > 3) {
-            response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền truy cập chức năng này.", StandardCharsets.UTF_8.name()));
+        if (userId == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-            int clubId = userClub.getClubID();
+        
+        // Lấy clubId từ request parameter
+        String clubIdParam = request.getParameter("clubId");
+        Integer clubId = null;
+        
+        if (clubIdParam != null && !clubIdParam.isEmpty()) {
+            try {
+                clubId = Integer.parseInt(clubIdParam);
+            } catch (NumberFormatException e) {
+                response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied&message=" + URLEncoder.encode("ID CLB không hợp lệ.", StandardCharsets.UTF_8.name()));
+                return;
+            }
+        }
+          try {
+            // Kiểm tra nếu clubId là null thì redirect về my-club
+            if (clubId == null) {
+                response.sendRedirect(request.getContextPath() + "/my-club?error=invalid_club&message=" + 
+                    URLEncoder.encode("Vui lòng chọn câu lạc bộ để quản lý form.", StandardCharsets.UTF_8.name()));
+                return;
+            }
 
-            ApplicationFormTemplateDAO templateDAO = new ApplicationFormTemplateDAO();
-        List<Map<String, Object>> savedForms = templateDAO.getFormsByClubAndStatus(clubId, false);
-        List<Map<String, Object>> publishedForms = templateDAO.getFormsByClubAndStatus(clubId, true);
+            // Kiểm tra quyền truy cập trong club cụ thể (chỉ cho roleId 1-3)
+            UserClub userClub = userClubDAO.getUserClubManagementRole(userId, clubId);
+            if (userClub == null) {
+                response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền quản lý form.", StandardCharsets.UTF_8.name()));
+                return;
+            }            
+            session.setAttribute("userClub", userClub);
+            // Use the templateDAO already initialized
+            List<Map<String, Object>> savedForms = templateDAO.getFormsByClubAndStatus(clubId, false);
+            List<Map<String, Object>> publishedForms = templateDAO.getFormsByClubAndStatus(clubId, true);
 
         request.setAttribute("savedForms", savedForms);
         request.setAttribute("publishedForms", publishedForms);
@@ -114,7 +135,7 @@ public class FormManagementServlet extends HttpServlet {
                 sendJsonResponse(response, false, "Template ID không hợp lệ.");
                 return;
             }
-// Lấy title của form từ templateId
+            // Lấy title của form từ templateId
             ApplicationFormTemplate template = templateDAO.getTemplateById(templateId);
             if (template == null) {
                 sendJsonResponse(response, false, "Form không tồn tại.");

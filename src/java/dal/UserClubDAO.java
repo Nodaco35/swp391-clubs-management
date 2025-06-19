@@ -31,7 +31,7 @@ public class UserClubDAO {
                 uc.setUserClubID(rs.getInt("UserClubID"));
                 uc.setUserID(rs.getString("UserID"));
                 uc.setClubID(rs.getInt("ClubID"));
-                uc.setDepartmentID(rs.getInt("DepartmentID"));
+                uc.setClubDepartmentID(rs.getInt("DepartmentID"));
                 uc.setRoleID(rs.getInt("RoleID"));
                 uc.setJoinDate(rs.getTimestamp("JoinDate"));
                 uc.setIsActive(rs.getBoolean("IsActive"));
@@ -179,7 +179,13 @@ public class UserClubDAO {
 
         try {
             conn = DBContext.getConnection();
-            String query = "SELECT COUNT(*) FROM UserClubs WHERE ClubID = ? AND DepartmentID = ? AND RoleID = 3 AND IsActive = 1";
+            String query = "SELECT COUNT(*) \n"
+                    + "FROM UserClubs uc\n"
+                    + "JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID\n"
+                    + "WHERE uc.ClubID = ? \n"
+                    + "AND cd.DepartmentID = ? \n"
+                    + "AND uc.RoleID = 3 \n"
+                    + "AND uc.IsActive = 1;";
             stmt = conn.prepareStatement(query);
             stmt.setInt(1, clubID);
             stmt.setInt(2, departmentID);
@@ -215,7 +221,8 @@ public class UserClubDAO {
         FROM UserClubs uc
         JOIN Users u ON uc.UserID = u.UserID
         JOIN Roles r ON uc.RoleID = r.RoleID
-        JOIN ClubDepartments d ON uc.DepartmentID = d.DepartmentID
+        JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
+        JOIN Departments d ON cd.DepartmentID = d.DepartmentID
         WHERE uc.ClubID = ? AND uc.IsActive = 1
         ORDER BY uc.JoinDate DESC
         LIMIT ? OFFSET ?
@@ -226,26 +233,26 @@ public class UserClubDAO {
             stmt.setInt(1, clubID);
             stmt.setInt(2, pageSize);
             stmt.setInt(3, (page - 1) * pageSize);
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                UserClub uc = new UserClub();
-                uc.setUserClubID(rs.getInt("UserClubID"));
-                uc.setUserID(rs.getString("UserID"));
-                uc.setClubID(rs.getInt("ClubID"));
-                uc.setDepartmentID(rs.getInt("DepartmentID"));
-                uc.setRoleID(rs.getInt("RoleID"));
-                uc.setJoinDate(rs.getTimestamp("JoinDate"));
-                uc.setIsActive(rs.getBoolean("IsActive"));
-                uc.setFullName(rs.getString("FullName"));
-                //uc.setEmail(rs.getString("Email"));
-                uc.setRoleName(rs.getString("RoleName"));
-                uc.setDepartmentName(rs.getString("DepartmentName"));
-                userClubs.add(uc);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    UserClub uc = new UserClub();
+                    uc.setUserClubID(rs.getInt("UserClubID"));
+                    uc.setUserID(rs.getString("UserID"));
+                    uc.setClubID(rs.getInt("ClubID"));
+                    uc.setClubDepartmentID(rs.getInt("ClubDepartmentID"));
+                    uc.setRoleID(rs.getInt("RoleID"));
+                    uc.setJoinDate(rs.getTimestamp("JoinDate"));
+                    uc.setIsActive(rs.getBoolean("IsActive"));
+                    uc.setFullName(rs.getString("FullName"));
+                    // uc.setEmail(rs.getString("Email")); // Uncomment if Email is added to query
+                    uc.setRoleName(rs.getString("RoleName"));
+                    uc.setDepartmentName(rs.getString("DepartmentName"));
+                    userClubs.add(uc);
+                }
             }
-
-        } catch (Exception e) {
-            System.out.println("Error in getAllUserClubsByClubId: " + e.getMessage());
+        } catch (SQLException e) {
+            System.err.println("Error in getAllUserClubsByClubId: " + e.getMessage());
+            throw new RuntimeException("Database error occurred while retrieving user clubs", e);
         }
 
         return userClubs;
@@ -274,7 +281,8 @@ public class UserClubDAO {
         FROM UserClubs uc
         JOIN Users u ON uc.UserID = u.UserID
         JOIN Roles r ON uc.RoleID = r.RoleID
-        JOIN ClubDepartments d ON uc.DepartmentID = d.DepartmentID
+        JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
+        JOIN Departments d ON cd.DepartmentID = d.DepartmentID
         WHERE uc.ClubID = ? AND uc.IsActive = 1
         AND (u.FullName LIKE ? OR uc.UserID LIKE ?)
         ORDER BY uc.JoinDate DESC
@@ -295,7 +303,7 @@ public class UserClubDAO {
                 uc.setUserClubID(rs.getInt("UserClubID"));
                 uc.setUserID(rs.getString("UserID"));
                 uc.setClubID(rs.getInt("ClubID"));
-                uc.setDepartmentID(rs.getInt("DepartmentID"));
+                uc.setClubDepartmentID(rs.getInt("ClubDepartmentID"));
                 uc.setRoleID(rs.getInt("RoleID"));
                 uc.setJoinDate(rs.getTimestamp("JoinDate"));
                 uc.setIsActive(rs.getBoolean("IsActive"));
@@ -369,7 +377,8 @@ public class UserClubDAO {
                 FROM UserClubs uc
                 JOIN Users u ON uc.UserID = u.UserID
                 JOIN Roles r ON uc.RoleID = r.RoleID
-                JOIN ClubDepartments d ON uc.DepartmentID = d.DepartmentID
+                JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
+                JOIN Departments d ON cd.DepartmentID = d.DepartmentID
                 WHERE uc.UserClubID = ?
             """;
             stmt = conn.prepareStatement(query);
@@ -381,7 +390,7 @@ public class UserClubDAO {
                 uc.setUserClubID(rs.getInt("UserClubID"));
                 uc.setUserID(rs.getString("UserID"));
                 uc.setClubID(rs.getInt("ClubID"));
-                uc.setDepartmentID(rs.getInt("DepartmentID"));
+                uc.setClubDepartmentID(rs.getInt("ClubDepartmentID"));
                 uc.setRoleID(rs.getInt("RoleID"));
                 uc.setJoinDate(rs.getTimestamp("JoinDate"));
                 uc.setIsActive(rs.getBoolean("IsActive"));
@@ -418,13 +427,13 @@ public class UserClubDAO {
         try {
             conn = DBContext.getConnection();
             String query = """
-                INSERT INTO UserClubs (UserID, ClubID, DepartmentID, RoleID, JoinDate, IsActive)
+                INSERT INTO UserClubs (UserID, ClubID, ClubDepartmentID, RoleID, JoinDate, IsActive)
                 VALUES (?, ?, ?, ?, NOW(), ?)
             """;
             stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);
             stmt.setString(1, uc.getUserID());
             stmt.setInt(2, uc.getClubID());
-            stmt.setInt(3, uc.getDepartmentID());
+            stmt.setInt(3, uc.getClubDepartmentID());
             stmt.setInt(4, uc.getRoleID());
             stmt.setBoolean(5, uc.isIsActive());
             int rows = stmt.executeUpdate();
@@ -462,11 +471,11 @@ public class UserClubDAO {
             conn = DBContext.getConnection();
             String query = """
                 UPDATE UserClubs 
-                SET DepartmentID = ?, RoleID = ?, IsActive = ?
+                SET ClubDepartmentID = ?, RoleID = ?, IsActive = ?
                 WHERE UserClubID = ?
             """;
             stmt = conn.prepareStatement(query);
-            stmt.setInt(1, uc.getDepartmentID());
+            stmt.setInt(1, uc.getClubDepartmentID());
             stmt.setInt(2, uc.getRoleID());
             stmt.setBoolean(3, uc.isIsActive());
             stmt.setInt(4, uc.getUserClubID());
@@ -524,7 +533,14 @@ public class UserClubDAO {
 
         try {
             conn = DBContext.getConnection();
-            String query = "SELECT DepartmentID, DepartmentName FROM ClubDepartments WHERE ClubID = ? AND DepartmentStatus = 1;";
+            String query =
+                    """
+                    SELECT cd.DepartmentID, d.DepartmentName 
+                    FROM ClubDepartments cd
+                    JOIN Departments d ON cd.DepartmentID = d.DepartmentID
+                    WHERE cd.ClubID = ? AND d.DepartmentStatus = 1
+                    """
+                    ;
             stmt = conn.prepareStatement(query);
             stmt.setInt(1, clubID);
             rs = stmt.executeQuery();
@@ -606,7 +622,8 @@ public class UserClubDAO {
                 FROM UserClubs uc
                 JOIN Users u ON uc.UserID = u.UserID
                 JOIN Roles r ON uc.RoleID = r.RoleID
-                JOIN ClubDepartments d ON uc.DepartmentID = d.DepartmentID
+                JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
+                JOIN Departments d ON cd.DepartmentID = d.DepartmentID
                 WHERE uc.UserID = ? AND uc.ClubID = ? AND uc.IsActive = 1
             """;
             stmt = conn.prepareStatement(query);
@@ -619,7 +636,7 @@ public class UserClubDAO {
                 userClub.setUserClubID(rs.getInt("UserClubID"));
                 userClub.setUserID(rs.getString("UserID"));
                 userClub.setClubID(rs.getInt("ClubID"));
-                userClub.setDepartmentID(rs.getInt("DepartmentID"));
+                userClub.setClubDepartmentID(rs.getInt("ClubDepartmentID"));
                 userClub.setRoleID(rs.getInt("RoleID"));
                 userClub.setJoinDate(rs.getTimestamp("JoinDate"));
                 userClub.setIsActive(rs.getBoolean("IsActive"));
@@ -653,7 +670,7 @@ public class UserClubDAO {
         SELECT uc.UserClubID,
                uc.UserID,
                uc.ClubID,
-               uc.DepartmentID,
+               uc.ClubDepartmentID,
                uc.RoleID,
                uc.JoinDate,
                uc.IsActive,
@@ -663,7 +680,8 @@ public class UserClubDAO {
         FROM UserClubs uc
         JOIN Users u ON uc.UserID = u.UserID
         JOIN Roles r ON uc.RoleID = r.RoleID
-        JOIN ClubDepartments d ON uc.DepartmentID = d.DepartmentID
+        JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
+        JOIN Departments d ON cd.DepartmentID = d.DepartmentID
         WHERE uc.ClubID = ?
           AND u.FullName LIKE ?
         ORDER BY uc.JoinDate DESC
@@ -682,7 +700,7 @@ public class UserClubDAO {
                     member.setUserClubID(rs.getInt("UserClubID"));
                     member.setUserID(rs.getString("UserID"));
                     member.setClubID(rs.getInt("ClubID"));
-                    member.setDepartmentID(rs.getInt("DepartmentID"));
+                    member.setClubDepartmentID(rs.getInt("ClubDepartmentID"));
                     member.setRoleID(rs.getInt("RoleID"));
                     member.setJoinDate(rs.getTimestamp("JoinDate"));
                     member.setIsActive(rs.getBoolean("IsActive"));
@@ -707,12 +725,13 @@ public class UserClubDAO {
         try {
             conn = DBContext.getConnection();
             String query = """
-                SELECT uc.UserClubID, uc.UserID, uc.ClubID, uc.DepartmentID, uc.RoleID, 
-                       uc.JoinDate, uc.IsActive, u.FullName, r.RoleName, cd.DepartmentName
+                SELECT uc.UserClubID, uc.UserID, uc.ClubID, uc.ClubDepartmentID, uc.RoleID, 
+                       uc.JoinDate, uc.IsActive, u.FullName, r.RoleName, d.DepartmentName
                 FROM UserClubs uc
                 JOIN Users u ON uc.UserID = u.UserID
                 JOIN Roles r ON uc.RoleID = r.RoleID
-                JOIN ClubDepartments cd ON uc.DepartmentID = cd.DepartmentID
+                JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
+                JOIN Departments d ON cd.DepartmentID = d.DepartmentID
                 WHERE uc.UserID = ? AND uc.IsActive = 1
                 ORDER BY uc.RoleID ASC
                 LIMIT 1
@@ -726,7 +745,7 @@ public class UserClubDAO {
                 userClub.setUserClubID(rs.getInt("UserClubID"));
                 userClub.setUserID(rs.getString("UserID"));
                 userClub.setClubID(rs.getInt("ClubID"));
-                userClub.setDepartmentID(rs.getInt("DepartmentID"));
+                userClub.setClubDepartmentID(rs.getInt("ClubDepartmentID"));
                 userClub.setRoleID(rs.getInt("RoleID"));
                 userClub.setJoinDate(rs.getTimestamp("JoinDate"));
                 userClub.setIsActive(rs.getBoolean("IsActive"));
@@ -786,10 +805,90 @@ public class UserClubDAO {
                 if (conn != null) {
                     DBContext.closeConnection(conn);
                 }
+
             } catch (SQLException e) {
                 System.out.println("Error closing resources: " + e.getMessage());
             }
         }
         return false;
+    }
+    /**
+     * Check if a user has a management role in a specific club (roleID between 1-3)
+     * If clubId is null, get the first club where user has a management role
+     * @param userID The user ID to check
+     * @param clubId The club ID to check, can be null
+     * @return UserClub object with user's role in the specified club, or null if user has no management role
+     */
+    public UserClub getUserClubManagementRole(String userID, Integer clubId) {
+        UserClub userClub = null;
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBContext.getConnection();
+            String query;
+            
+            if (clubId != null) {
+                // If clubId is provided, check for that specific club
+                query = """
+                    SELECT uc.UserClubID, uc.UserID, uc.ClubID, uc.ClubDepartmentID, uc.RoleID, 
+                           uc.JoinDate, uc.IsActive, u.FullName, r.RoleName, d.DepartmentName
+                    FROM UserClubs uc
+                    JOIN Users u ON uc.UserID = u.UserID
+                    JOIN Roles r ON uc.RoleID = r.RoleID
+                    JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
+                    JOIN Departments d ON cd.DepartmentID = d.DepartmentID
+                    WHERE uc.UserID = ? AND uc.ClubID = ? AND uc.RoleID BETWEEN 1 AND 3 AND uc.IsActive = 1
+                    ORDER BY uc.RoleID ASC
+                    LIMIT 1
+                """;
+                stmt = conn.prepareStatement(query);
+                stmt.setString(1, userID);
+                stmt.setInt(2, clubId);
+            } else {
+                // If clubId is not provided, get the first club with management role
+                query = """
+                    SELECT uc.UserClubID, uc.UserID, uc.ClubID, uc.ClubDepartmentID, uc.RoleID, 
+                           uc.JoinDate, uc.IsActive, u.FullName, r.RoleName, d.DepartmentName
+                    FROM UserClubs uc
+                    JOIN Users u ON uc.UserID = u.UserID
+                    JOIN Roles r ON uc.RoleID = r.RoleID
+                    JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
+                    JOIN Departments d ON cd.DepartmentID = d.DepartmentID
+                    WHERE uc.UserID = ? AND uc.RoleID BETWEEN 1 AND 3 AND uc.IsActive = 1
+                    ORDER BY uc.RoleID ASC
+                    LIMIT 1
+                """;
+                stmt = conn.prepareStatement(query);
+                stmt.setString(1, userID);
+            }
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                userClub = new UserClub();
+                userClub.setUserClubID(rs.getInt("UserClubID"));
+                userClub.setUserID(rs.getString("UserID"));
+                userClub.setClubID(rs.getInt("ClubID"));
+                userClub.setClubDepartmentID(rs.getInt("ClubDepartmentID"));
+                userClub.setRoleID(rs.getInt("RoleID"));
+                userClub.setJoinDate(rs.getTimestamp("JoinDate"));
+                userClub.setIsActive(rs.getBoolean("IsActive"));
+                userClub.setFullName(rs.getString("FullName"));
+                userClub.setRoleName(rs.getString("RoleName"));
+                userClub.setDepartmentName(rs.getString("DepartmentName"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error checking management role in club: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (conn != null) DBContext.closeConnection(conn);
+            } catch (SQLException e) {
+                System.out.println("Error closing resources: " + e.getMessage());
+            }
+        }
+        return userClub;
     }
 }

@@ -174,7 +174,23 @@ public class NotificationDAO {
             e.printStackTrace();
         }
     }
-
+    
+    public static void sentToPerson1(String senderID, String receiverID, String title, String content, String priority) {
+        String sql = "INSERT INTO clubmanagementsystem.notifications (Title, Content, ReceiverID, SenderID, Priority) " +
+                     "VALUES (?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = DBContext.getConnection().prepareStatement(sql)) {
+            ps.setString(1, title);
+            ps.setString(2, content);
+            ps.setString(3, receiverID);
+            ps.setString(4, senderID);
+            ps.setString(5, priority);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    
     public static List<Notification> findByUserIdAndImpotant(String userID, String prioity) {
         List<Notification> findByUserId = new ArrayList<>();
 

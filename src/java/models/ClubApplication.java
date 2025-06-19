@@ -1,36 +1,38 @@
-
 package models;
 
 import java.sql.Timestamp;
+import java.util.Date;
 
+/**
+ * Model class for ClubApplications table
+ */
 public class ClubApplication {
-    private int applicationID;
-    private String userID;
-    private String clubName;
-    private String description;
+    private int applicationId;
+    private String userId;
+    private int clubId;
     private String email;
-    private String phone;
+    private Integer eventId;        // nullable
+    private int responseId;
     private String status;
-    
     private Timestamp submitDate;
     private int clubID;
     private String userName;
+    private String clubName;
 
-    // Constructors
-    public ClubApplication() {}
-
-    public ClubApplication(int applicationID, String userID, String clubName, String description,
-                           String email, String phone, String status, Timestamp submitDate) {
-        this.applicationID = applicationID;
-        this.userID = userID;
-        this.clubName = clubName;
-        this.description = description;
-        this.email = email;
-        this.phone = phone;
-        this.status = status;
-        this.submitDate = submitDate;
+    public String getClubName() {
+        return clubName;
     }
 
+    public void setClubName(String clubName) {
+        this.clubName = clubName;
+    }
+    
+    
+
+
+    public ClubApplication() {
+        // default constructor
+    }
     public String getUserName() {
         return userName;
     }
@@ -49,35 +51,27 @@ public class ClubApplication {
     }
     
     public int getApplicationID() {
-        return applicationID;
+        return applicationId;
     }
 
-    public void setApplicationID(int applicationID) {
-        this.applicationID = applicationID;
+    public void setApplicationId(int applicationId) {
+        this.applicationId = applicationId;
     }
 
-    public String getUserID() {
-        return userID;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setUserID(String userID) {
-        this.userID = userID;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
-    public String getClubName() {
-        return clubName;
+    public int getClubId() {
+        return clubId;
     }
 
-    public void setClubName(String clubName) {
-        this.clubName = clubName;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
+    public void setClubId(int clubId) {
+        this.clubId = clubId;
     }
 
     public String getEmail() {
@@ -88,12 +82,20 @@ public class ClubApplication {
         this.email = email;
     }
 
-    public String getPhone() {
-        return phone;
+    public Integer getEventId() {
+        return eventId;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setEventId(Integer eventId) {
+        this.eventId = eventId;
+    }
+
+    public int getResponseId() {
+        return responseId;
+    }
+
+    public void setResponseId(int responseId) {
+        this.responseId = responseId;
     }
 
     public String getStatus() {
@@ -104,7 +106,7 @@ public class ClubApplication {
         this.status = status;
     }
 
-    public Timestamp getSubmitDate() {
+    public Date getSubmitDate() {
         return submitDate;
     }
 
@@ -114,11 +116,17 @@ public class ClubApplication {
 
     @Override
     public String toString() {
-        return "ClubApplication{" + "applicationID=" + applicationID + ", userID=" + userID + ", clubName=" + clubName + ", description=" + description + ", email=" + email + ", phone=" + phone + ", status=" + status + ", submitDate=" + submitDate + ", clubID=" + clubID + ", userName=" + userName + '}';
-    }
 
-    
-    
-    
+        return "ClubApplication{" +
+                "applicationId=" + applicationId +
+                ", userId='" + userId + '\'' +
+                ", clubId=" + clubId +
+                ", email='" + email + '\'' +
+                ", eventId=" + eventId +
+                ", responseId=" + responseId +
+                ", status='" + status + '\'' +
+                ", submitDate=" + submitDate +
+                '}';
+    }
 
 }
