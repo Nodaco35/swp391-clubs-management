@@ -5,6 +5,7 @@
 package controller;
 
 import dal.ClubApplicationDAO;
+import dal.ClubMeetingDAO;
 import dal.EventsDAO;
 import dal.NotificationDAO;
 import dal.TaskAssignmentDAO;
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import models.ClubApplication;
+import models.ClubMeeting;
 import models.Events;
 import models.Notification;
 import models.TaskAssignment;
@@ -43,7 +45,7 @@ public class MyClubController extends HttpServlet {
             if (userclubs.isEmpty()) {
                 error = "Bạn chưa tham gia bất cứ câu lạc bộ nào!";
                 request.setAttribute("error", error);
-                response.sendRedirect(request.getContextPath() + "/clubs");
+                response.sendRedirect(request.getContextPath() + "/");
                 return;
             }
             
@@ -51,23 +53,36 @@ public class MyClubController extends HttpServlet {
             
             int countPendingApplication = ClubApplicationDAO.countpendingApplicationsFindByClub(user.getUserID());
             
+            
+            // mới
+            int countUpcomingMeeting = ClubMeetingDAO.countByUserID(user.getUserID());
+            
             List<Notification> recentNotifications = NotificationDAO.findRecentByUserID(user.getUserID());
 
             List<Events> upcomingEvents = EventsDAO.findByUCID(user.getUserID());
 
             List<ClubApplication> pendingApplications = ClubApplicationDAO.pendingApplicationsFindByClub(user.getUserID());
-
+            //tạm thời đang chờ db 
             List<TaskAssignment> todoLists = TaskAssignmentDAO.findByUserID(user.getUserID());
             
+            
+            //mới
+            List<ClubMeeting> clubmeetings = ClubMeetingDAO.findByUserID(user.getUserID());
             
 
             request.setAttribute("userclubs", userclubs);
             request.setAttribute("recentNotifications", recentNotifications);
             request.setAttribute("upcomingEvents", upcomingEvents);
+            
+            //mới
+            request.setAttribute("countUpcomingMeeting", countUpcomingMeeting);
             request.setAttribute("pendingApplications", pendingApplications);
             request.setAttribute("todoList", todoLists);
             request.setAttribute("countTodoLists", countTodoLists);
             request.setAttribute("countPendingApplication", countPendingApplication);
+            
+           //mới
+            request.setAttribute("clubmeetings", clubmeetings);
             request.getRequestDispatcher("view/student/myClub.jsp").forward(request, response);
         }
     }
