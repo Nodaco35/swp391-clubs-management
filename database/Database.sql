@@ -172,44 +172,56 @@ CREATE TABLE UserClubs (
     FOREIGN KEY (RoleID) REFERENCES Roles(RoleID)
 );
 
-INSERT INTO UserClubs (UserID, ClubID, ClubDepartmentID, RoleID, JoinDate) VALUES
-('U001', 1, 1, 1, '2020-09-01'), -- Chủ nhiệm CLB 1, Ban Chủ nhiệm
-('U002', 1, 5, 3, '2021-01-15'), -- Trưởng ban Hậu cần CLB 1
-('U002', 2, 3, 2, '2020-10-05'), -- Phó chủ nhiệm CLB 2, Ban Truyền thông
-('U003', 2, 4, 3, '2021-02-20'), -- Trưởng ban Chuyên môn CLB 2
-('U003', 1, 1, 2, '2020-11-10'), -- Phó chủ nhiệm CLB 1, Ban Chủ nhiệm
-('U004', 1, 2, 3, '2021-03-25'), -- Trưởng ban Nội dung CLB 1
-('U005', 2, 6, 3, '2021-04-30'), -- Trưởng ban Đối ngoại CLB 2
-('U006', 2, 3, 1, '2021-07-01'), -- Chủ nhiệm CLB 2, Ban Truyền thông
-('U007', 1, 5, 4, '2021-07-03'), -- Thành viên Ban Hậu cần CLB 1
-('U008', 2, 6, 4, '2021-07-04'), -- Thành viên Ban Đối ngoại CLB 2
-('U009', 1, 2, 4, '2021-07-05'), -- Thành viên Ban Nội dung CLB 1
-('U010', 2, 4, 4, '2021-07-06'), -- Thành viên Ban Chuyên môn CLB 2
-('U011', 3, 7, 1, '2021-08-01'), -- Chủ nhiệm CLB 3, Ban Chủ nhiệm
-('U012', 4, 8, 1, '2021-08-02'), -- Chủ nhiệm CLB 4, Ban Chủ nhiệm
-('U013', 5, 9, 1, '2021-08-03'), -- Chủ nhiệm CLB 5, Ban Chủ nhiệm
-('U014', 6, 10, 1, '2021-08-04'), -- Chủ nhiệm CLB 6, Ban Chủ nhiệm
-('U015', 7, 11, 1, '2021-08-05'), -- Chủ nhiệm CLB 7, Ban Chủ nhiệm
-('U016', 8, 12, 1, '2021-08-06'), -- Chủ nhiệm CLB 8, Ban Chủ nhiệm
-('U017', 4, 13, 4, '2021-08-10'), -- Thành viên Ban Chuyên môn CLB 4
-('U018', 4, 14, 4, '2021-08-10'), -- Thành viên Ban Truyền thông CLB 4
-('U019', 4, 13, 4, '2021-08-11'), -- Thành viên Ban Chuyên môn CLB 4
-('U020', 4, 14, 4, '2021-08-11'), -- Thành viên Ban Truyền thông CLB 4
-('U021', 4, 13, 4, '2021-08-12'), -- Thành viên Ban Chuyên môn CLB 4
-('U022', 4, 15, 3, '2021-09-01'), -- Trưởng ban Nội dung CLB 4
-('U023', 4, 14, 3, '2021-09-01'), -- Trưởng ban Truyền thông CLB 4
-('U024', 4, 13, 3, '2021-09-01'), -- Trưởng ban Chuyên môn CLB 4
-('U022', 4, 8, 4, '2021-09-01'), -- Thành viên Ban Chủ nhiệm CLB 4 (trưởng ban kiêm thành viên Ban Chủ nhiệm)
-('U023', 4, 8, 4, '2021-09-01'), -- Thành viên Ban Chủ nhiệm CLB 4
-('U024', 4, 8, 4, '2021-09-01'), -- Thành viên Ban Chủ nhiệm CLB 4
-('U025', 4, 16, 3, '2021-09-01'), -- Trưởng ban Hậu cần CLB 4
-('U026', 4, 16, 4, '2021-09-01'), -- Thành viên Ban Hậu cần CLB 4
-('U025', 4, 15, 4, '2021-09-01'), -- Thành viên Ban Nội dung CLB 4
-('U012', 4, 8, 1, '2021-09-01'), -- Chủ nhiệm CLB 4, Ban Chủ nhiệm (có thể duplicate kiểm tra)
-('U027', 4, 17, 3, '2021-09-01'), -- Trưởng ban Đối ngoại CLB 4
-('U028', 4, 17, 4, '2021-09-01'), -- Thành viên Ban Đối ngoại CLB 4
-('U029', 4, 18, 3, '2021-09-05'), -- Trưởng ban Ban Đối ngoại CLB 4
-('U030', 4, 18, 4, '2021-09-06'); -- Thành viên Ban Đối ngoại CLB 4
+
+INSERT INTO UserClubs (UserID, ClubID, ClubDepartmentID, RoleID, JoinDate, IsActive) VALUES
+('U001', 1, 1, 1, '2020-09-01', 1), -- Chủ nhiệm CLB 1, Ban Chủ nhiệm
+('U001', 1, 1, 3, '2020-09-01', 1), -- Chủ nhiệm kiêm Trưởng ban Chủ nhiệm CLB 1
+('U002', 1, 5, 3, '2021-01-15', 1), -- Trưởng ban Hậu cần CLB 1
+('U002', 1, 1, 4, '2021-01-15', 1), -- Trưởng ban Hậu cần là thành viên Ban Chủ nhiệm CLB 1
+('U002', 2, 3, 2, '2020-10-05', 1), -- Phó chủ nhiệm CLB 2, Ban Chủ nhiệm
+('U003', 2, 4, 3, '2021-02-20', 1), -- Trưởng ban Chuyên môn CLB 2
+('U003', 2, 3, 4, '2021-02-20', 1), -- Trưởng ban Chuyên môn là thành viên Ban Chủ nhiệm CLB 2
+('U003', 1, 1, 2, '2020-11-10', 1), -- Phó chủ nhiệm CLB 1, Ban Chủ nhiệm
+('U004', 1, 2, 3, '2021-03-25', 1), -- Trưởng ban Truyền thông CLB 1
+('U004', 1, 1, 4, '2021-03-25', 1), -- Trưởng ban Truyền thông là thành viên Ban Chủ nhiệm CLB 1
+('U005', 2, 6, 3, '2021-04-30', 1), -- Trưởng ban Đối ngoại CLB 2
+('U005', 2, 3, 4, '2021-04-30', 1), -- Trưởng ban Đối ngoại là thành viên Ban Chủ nhiệm CLB 2
+('U006', 2, 3, 1, '2021-07-01', 1), -- Chủ nhiệm CLB 2, Ban Chủ nhiệm
+('U006', 2, 3, 3, '2021-07-01', 1), -- Chủ nhiệm kiêm Trưởng ban Chủ nhiệm CLB 2
+('U007', 1, 5, 4, '2021-07-03', 1), -- Thành viên Ban Hậu cần CLB 1
+('U008', 2, 6, 4, '2021-07-04', 1), -- Thành viên Ban Đối ngoại CLB 2
+('U009', 1, 2, 4, '2021-07-05', 1), -- Thành viên Ban Truyền thông CLB 1
+('U010', 2, 4, 4, '2021-07-06', 1), -- Thành viên Ban Chuyên môn CLB 2
+('U011', 3, 7, 1, '2021-08-01', 1), -- Chủ nhiệm CLB 3, Ban Chủ nhiệm
+('U011', 3, 7, 3, '2021-08-01', 1), -- Chủ nhiệm kiêm Trưởng ban Chủ nhiệm CLB 3
+('U012', 4, 8, 1, '2021-08-02', 1), -- Chủ nhiệm CLB 4, Ban Chủ nhiệm
+('U012', 4, 8, 3, '2021-08-02', 1), -- Chủ nhiệm kiêm Trưởng ban Chủ nhiệm CLB 4
+('U013', 5, 9, 1, '2021-08-03', 1), -- Chủ nhiệm CLB 5, Ban Chủ nhiệm
+('U013', 5, 9, 3, '2021-08-03', 1), -- Chủ nhiệm kiêm Trưởng ban Chủ nhiệm CLB 5
+('U014', 6, 10, 1, '2021-08-04', 1), -- Chủ nhiệm CLB 6, Ban Chủ nhiệm
+('U014', 6, 10, 3, '2021-08-04', 1), -- Chủ nhiệm kiêm Trưởng ban Chủ nhiệm CLB 6
+('U015', 7, 11, 1, '2021-08-05', 1), -- Chủ nhiệm CLB 7, Ban Chủ nhiệm
+('U015', 7, 11, 3, '2021-08-05', 1), -- Chủ nhiệm kiêm Trưởng ban Chủ nhiệm CLB 7
+('U016', 8, 12, 1, '2021-08-06', 1), -- Chủ nhiệm CLB 8, Ban Chủ nhiệm
+('U016', 8, 12, 3, '2021-08-06', 1), -- Chủ nhiệm kiêm Trưởng ban Chủ nhiệm CLB 8
+('U017', 4, 13, 4, '2021-08-10', 1), -- Thành viên Ban Chuyên môn CLB 4
+('U018', 4, 14, 4, '2021-08-10', 1), -- Thành viên Ban Truyền thông CLB 4
+('U019', 4, 13, 4, '2021-08-11', 1), -- Thành viên Ban Chuyên môn CLB 4
+('U020', 4, 14, 4, '2021-08-11', 1), -- Thành viên Ban Truyền thông CLB 4
+('U021', 4, 13, 4, '2021-08-12', 1), -- Thành viên Ban Chuyên môn CLB 4
+('U022', 4, 15, 3, '2021-09-01', 1), -- Trưởng ban Nội dung CLB 4
+('U022', 4, 8, 4, '2021-09-01', 1), -- Trưởng ban Nội dung là thành viên Ban Chủ nhiệm CLB 4
+('U023', 4, 14, 3, '2021-05-01', 1), -- Trưởng ban Truyền thông CLB 4 (adjusted JoinDate to keep earliest)
+('U023', 4, 8, 4, '2021-05-01', 1), -- Trưởng ban Truyền thông là thành viên Ban Chủ nhiệm CLB 4
+('U024', 4, 13, 3, '2021-05-01', 1), -- Trưởng ban Chuyên môn CLB 4 (kept U015, removed U017 as duplicate)
+('U024', 4, 8, 4, '2021-05-01', 1), -- Trưởng ban Chuyên môn là thành viên Ban Chủ nhiệm CLB 4
+('U025', 4, 17, 3, '2021-05-01', 1), -- Trưởng ban Hậu cần CLB 4 (kept U015, removed U027 as duplicate)
+('U025', 4, 8, 4, '2021-05-01', 1), -- Trưởng ban Hậu cần là thành viên Ban Chủ nhiệm CLB 4
+('U026', 4, 17, 4, '2021-09-01', 1), -- Thành viên Ban Hậu cần CLB 4
+('U027', 4, 18, 3, '2021-09-01', 1), -- Trưởng ban Đối ngoại CLB 4 (kept U027, removed U029)
+('U027', 4, 8, 4, '2021-09-01', 1), -- Trưởng ban Đối ngoại là thành viên Ban Chủ nhiệm CLB 4
+('U028', 4, 18, 4, '2021-09-01', 1), -- Thành viên Ban Đối ngoại CLB 4
+('U030', 4, 15, 4, '2021-05-06', 1); -- Thành viên Ban Nội dung CLB 4 (corrected ClubDepartmentID from 18 to 15)
 
 
 
