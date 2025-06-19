@@ -227,6 +227,27 @@ INSERT INTO Events (EventName, EventImg, Description, EventDate, Location, ClubI
 ('Giải Bóng Đá Sinh Viên FPTU 2025', 'images/events/football2025.jpg', 'Giải đấu bóng đá thường niên dành cho sinh viên toàn trường.', '2025-03-25 08:00:00', 'Sân vận động, Campus Hà Nội', 1, TRUE, 120, 'PENDING'),
 ('Ngày Hội Âm Nhạc FPTU 2025', 'images/events/musicday2025.jpg', 'Ngày hội với các màn trình diễn âm nhạc và hoạt động tương tác.', '2025-05-20 10:00:00', 'Sân khấu ngoài trời, Campus Cần Thơ', 6, FALSE, 250, 'PENDING'),
 ('Hackathon Đổi Mới AI', 'images/events/aihackathon2025.jpg', 'Cuộc thi phát triển các giải pháp trí tuệ nhân tạo sáng tạo.', '2025-06-05 08:00:00', 'Phòng máy tính, Campus Hà Nội', 4, TRUE, 45, 'PENDING'),
+('Workshop: Xây dựng Website với Spring Boot','/images/events/springboot_workshop.jpg',
+  'Buổi workshop chuyên sâu dành cho các thành viên Câu Lạc Bộ Lập Trình nhằm giúp làm quen với cách xây dựng website sử dụng Spring Boot – một framework mạnh mẽ trong Java. 
+  Trong sự kiện này, các bạn sẽ được hướng dẫn từng bước từ cấu hình dự án, kết nối cơ sở dữ liệu, tới việc triển khai các chức năng cơ bản như login, CRUD, API REST. 
+  Ngoài ra, chúng tôi cũng sẽ tổ chức phần Q&A và thực hành trực tiếp trên máy, khuyến khích mọi người mang laptop để tham gia coding ngay tại sự kiện.',
+  '2025-06-20 14:00:00',
+  'Phòng Lab 302, Tòa nhà A, FPTU',
+  4,
+  0,
+  100,
+  'Pending'),
+('Cuộc thi Code War: Thử thách thuật toán',
+  '/images/events/codewar.jpg',
+  'Code War là một cuộc thi lập trình được tổ chức bởi Câu Lạc Bộ Lập Trình nhằm nâng cao khả năng tư duy thuật toán và kỹ năng giải quyết vấn đề của sinh viên. 
+  Cuộc thi gồm nhiều vòng với các mức độ từ cơ bản đến nâng cao, người chơi sẽ thi đấu cá nhân trong khoảng thời gian giới hạn để giải quyết các bài toán lập trình bằng ngôn ngữ tuỳ chọn.
+  Sự kiện cũng là nơi gặp gỡ, học hỏi giữa những bạn trẻ yêu thích công nghệ và có đam mê với lập trình.',
+  '2025-06-25 09:00:00',
+  'Hội trường Innovation Lab, FPTU',
+  4,
+  1,
+  120,
+  'Pending'),
 -- Sự kiện đã hoàn thành (Completed) trong năm 2024
 ('Lễ Hội Làng Tết 2024', 'images/events/villagefest2024.jpg', 'Sự kiện tái hiện không khí Tết truyền thống với các tiết mục âm nhạc và nhảy.', '2024-01-20 10:00:00', 'Campus Đà Nẵng', 6, TRUE, 500, 'COMPLETED'),
 ('Trại Lập Trình FPTU 2024', 'images/events/codingbootcamp2024.jpg', 'Trại huấn luyện chuyên sâu về kỹ thuật lập trình nâng cao.', '2024-11-20 08:00:00', 'Phòng máy tính, Campus TP.HCM', 4, TRUE, 60, 'COMPLETED'),
