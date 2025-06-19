@@ -68,7 +68,7 @@
 						<form action="logout" method="post">
 							<input class="btn btn-primary" type="submit" value="Logout">
 						</form>
-						<a href="${pageContext.request.contextPath}/my-club" class="btn btn-primary">MyClub</a>
+						<a href="${pageContext.request.contextPath}/myclub" class="btn btn-primary">MyClub</a>
 					</div>
 				</c:when>
 				<c:otherwise>

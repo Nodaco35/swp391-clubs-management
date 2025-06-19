@@ -20,6 +20,38 @@ import java.util.List;
  */
 public class EventsDAO {
 
+    public static List<Events> findByUCID(String userID) {
+        List<Events> findByUCID = new ArrayList<>();
+        String sql = """
+                     SELECT e.*
+                     FROM Events e
+                     JOIN UserClubs uc ON e.ClubID = uc.ClubID                     
+                     WHERE uc.UserID = ? and e.EventDate >= NOW()
+                     ORDER BY e.EventDate ASC;""";
+        try {
+            PreparedStatement ps = DBContext_Duc.getInstance().connection.prepareStatement(sql);
+            ps.setObject(1, userID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Events event = new Events();
+                event.setEventID(rs.getInt("EventID"));
+                event.setEventName(rs.getString("EventName"));
+                event.setEventImg(rs.getString("EventImg"));
+                event.setDescription(rs.getString("Description"));
+                event.setEventDate(rs.getTimestamp("EventDate"));
+                event.setLocation(rs.getString("Location"));
+                event.setClubID(rs.getInt("ClubID"));
+                event.setPublic(rs.getBoolean("IsPublic"));
+                event.setCapacity(rs.getInt("Capacity"));
+                event.setStatus(rs.getString("Status"));
+                findByUCID.add(event);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return findByUCID;
+    }
+
     public List<Events> getAllEvents() {
         List<Events> events = new ArrayList<Events>();
         String sql = "select * from Events";

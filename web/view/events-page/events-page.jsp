@@ -24,15 +24,69 @@
             <span>UniClub</span>
         </div>
 
-        <!-- Search Bar -->
-        <div class="search-container">
-            <div class="search-box">
-                <form action="events-page" method="get">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="searchInput" name="key" placeholder="Tìm kiếm sự kiện..."
-                           class="search-input">
-                    <button type="submit" class="search-btn">
-                        <i class="fas fa-search"></i>
+                <!-- Search Bar -->
+                <div class="search-container">
+                    <div class="search-box">
+                        <form action="events-page" method="get">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="searchInput" name="key" placeholder="Tìm kiếm sự kiện..."
+                                   class="search-input">
+                            <button type="submit" class="search-btn">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <nav class="main-nav">
+                    <ul>
+                        <li>
+                            <a href="${pageContext.request.contextPath}/"
+                               class="${currentPath == '/' ? 'active' : ''}">
+                                Trang Chủ
+                            </a>
+                        </li>
+                        <li>
+                            <a href="${pageContext.request.contextPath}/clubs"
+                               class="${fn:contains(currentPath, '/clubs') ? 'active' : ''}">
+                                Câu Lạc Bộ
+                            </a>
+                        </li>
+                        <li>
+                            <a href="${pageContext.request.contextPath}/events-page"
+                               class="${fn:contains(currentPath, '/events-page') ? 'active' : ''}">
+                                Sự Kiện
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+
+                <div class="auth-buttons">
+                    <c:choose>
+                        <c:when test="${sessionScope.user != null}">
+                            <div class="user-menu" id="userMenu">
+                                <a href="${pageContext.request.contextPath}/notification" class="btn btn-outline">
+                                    <i class="fa-solid fa-bell"></i>
+                                </a>
+                                <a href="${pageContext.request.contextPath}/profile?action=myProfile" class="btn btn-outline">
+                                    <i class="fa-solid fa-user"></i>
+                                </a>
+                                <form action="logout" method="post">
+                                    <input class="btn btn-primary" type="submit" value="Logout">
+                                </form>
+                                <a href="${pageContext.request.contextPath}/myclub" class="btn btn-primary">MyClub</a>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="guest-menu" id="guestMenu">
+                                <a href="${pageContext.request.contextPath}/login" class="btn btn-outline">Đăng Nhập</a>
+                                <a href="${pageContext.request.contextPath}/register" class="btn btn-primary">Đăng Ký</a>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                    <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                        <i class="fas fa-bars"></i>
+
                     </button>
                 </form>
             </div>

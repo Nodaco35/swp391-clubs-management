@@ -1,5 +1,7 @@
 package models;
 
+import java.sql.Timestamp;
+
 /**
  * Extended model class for ClubApplications that includes additional fields from joins
  * Used to merge data from ClubApplications, ApplicationResponses, Users, and ApplicationFormTemplates
@@ -18,14 +20,14 @@ public class ClubApplicationExtended extends ClubApplication {
     // Constructor tạo từ ClubApplication
     public ClubApplicationExtended(ClubApplication app) {
         super();
-        this.setApplicationId(app.getApplicationId());
+        this.setApplicationId(app.getApplicationID());
         this.setUserId(app.getUserId());
         this.setClubId(app.getClubId());
         this.setEmail(app.getEmail());
         this.setEventId(app.getEventId());
         this.setResponseId(app.getResponseId());
         this.setStatus(app.getStatus());
-        this.setSubmitDate(app.getSubmitDate());
+        this.setSubmitDate((Timestamp) app.getSubmitDate());
     }
     
     // Getters and setters
@@ -72,7 +74,7 @@ public class ClubApplicationExtended extends ClubApplication {
     @Override
     public String toString() {
         return "ClubApplicationExtended{" +
-                "applicationId=" + getApplicationId() +
+                "applicationId=" + getApplicationID()+
                 ", userId='" + getUserId() + '\'' +
                 ", fullName='" + fullName + '\'' +
                 ", email='" + getEmail() + '\'' +

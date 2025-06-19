@@ -1,5 +1,6 @@
 package models;
 
+import java.sql.Timestamp;
 import java.util.Date;
 
 /**
@@ -13,13 +14,43 @@ public class ClubApplication {
     private Integer eventId;        // nullable
     private int responseId;
     private String status;
-    private Date submitDate;
+    private Timestamp submitDate;
+    private int clubID;
+    private String userName;
+    private String clubName;
+
+    public String getClubName() {
+        return clubName;
+    }
+
+    public void setClubName(String clubName) {
+        this.clubName = clubName;
+    }
+    
+    
+
 
     public ClubApplication() {
         // default constructor
     }
+    public String getUserName() {
+        return userName;
+    }
 
-    public int getApplicationId() {
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    
+    public int getClubID() {
+        return clubID;
+    }
+
+    public void setClubID(int clubID) {
+        this.clubID = clubID;
+    }
+    
+    public int getApplicationID() {
         return applicationId;
     }
 
@@ -79,12 +110,13 @@ public class ClubApplication {
         return submitDate;
     }
 
-    public void setSubmitDate(Date submitDate) {
+    public void setSubmitDate(Timestamp submitDate) {
         this.submitDate = submitDate;
     }
 
     @Override
     public String toString() {
+
         return "ClubApplication{" +
                 "applicationId=" + applicationId +
                 ", userId='" + userId + '\'' +
@@ -96,4 +128,5 @@ public class ClubApplication {
                 ", submitDate=" + submitDate +
                 '}';
     }
+
 }
