@@ -28,6 +28,7 @@ CREATE TABLE Permissions (
 );
 INSERT INTO Permissions (PermissionName) VALUES ('Student'), ('Admin'), ('IC_Officer');
 
+
 CREATE TABLE Users (
     UserID VARCHAR(10) PRIMARY KEY,
     FullName VARCHAR(100) NOT NULL,
@@ -61,8 +62,19 @@ INSERT INTO Users (UserID, FullName, Email, Password, PermissionID, Status) VALU
 ('U019', 'Phạm Văn S', 's@fpt.edu.vn', '123456', 1, 1),
 ('U020', 'Đỗ Thị T', 't@fpt.edu.vn', '123456', 1, 1),
 ('U021', 'Lê Văn U', 'u@fpt.edu.vn', '123456', 1, 1),
+('U022', 'Nguyễn Thị V', 'v@fpt.edu.vn', '123456', 1, 1),
+('U023', 'Lê Văn W', 'w@fpt.edu.vn', '123456', 1, 1),
+('U024', 'Phạm Thị X', 'x@fpt.edu.vn', '123456', 1, 1),
+('U025', 'Nguyễn Văn Y', 'y@fpt.edu.vn', '123456', 1, 1),
+('U026', 'Trần Thị Z', 'z@fpt.edu.vn', '123456', 1, 1),
+('U027', 'Bùi Thị A1', 'a1@fpt.edu.vn', '123456', 1, 1),
+('U028', 'Đặng Văn B1', 'b1@fpt.edu.vn', '123456', 1, 1),
+('U029', 'Nguyễn Văn C1', 'c1@fpt.edu.vn', '123456', 1, 1),
+('U030', 'Trần Thị D1', 'd1@fpt.edu.vn', '123456', 1, 1),
 ('U003', 'Ngô Văn C', 'c@fpt.edu.vn', '123456', 2, 1),
 ('U004', 'Lê Văn D', 'd@fpt.edu.vn', '123456', 3, 1);
+
+
 
 CREATE TABLE Roles (
     RoleID INT PRIMARY KEY AUTO_INCREMENT,
@@ -74,6 +86,7 @@ INSERT INTO Roles (RoleID, RoleName, Description) VALUES
 (2, 'Phó chủ nhiệm', 'Hỗ trợ chủ nhiệm quản lý CLB'),
 (3, 'Trưởng ban', 'Quản lý các ban trong câu lạc bộ’'),
 (4, 'Thành viên', 'Thành viên chính thức của CLB');
+
 
 CREATE TABLE Clubs (
     ClubID INT PRIMARY KEY AUTO_INCREMENT,
@@ -98,6 +111,9 @@ INSERT INTO Clubs (ClubImg, IsRecruiting, ClubName, Description, EstablishedDate
 ('/images/clubs/dance.jpg', FALSE, 'Câu Lạc Bộ Nhảy', '...', '2019-08-20', '0967890123', 'dance@club.com', 'https://facebook.com/danceclub', TRUE, 'Phong Trào'),
 ('/images/clubs/debate.jpg', TRUE, 'Câu Lạc Bộ Tranh Biện', '...', '2020-02-25', '0978901234', 'debate@club.com', 'https://facebook.com/debateclub', TRUE, 'Học Thuật');
 
+
+
+
 CREATE TABLE Departments (
     DepartmentID INT PRIMARY KEY AUTO_INCREMENT,
     DepartmentName VARCHAR(50) NOT NULL,
@@ -119,21 +135,27 @@ CREATE TABLE ClubDepartments (
     FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID),
     FOREIGN KEY (DepartmentID) REFERENCES Departments(DepartmentID)
 );
+
 INSERT INTO ClubDepartments (DepartmentID, ClubID) VALUES
-(3, 1), -- Assigning 'Ban Chủ nhiệm' to ClubID 1
-(2, 1), -- Assigning 'Ban Truyền thông' to ClubID 1
-(3, 2), -- Assigning 'Ban Chủ nhiệm' to ClubID 2
-(4, 2), -- Assigning 'Ban Chuyên môn' to ClubID 2
-(5, 1), -- Assigning 'Ban Hậu cần' to ClubID 1
-(6, 2), -- Assigning 'Ban Đối ngoại' to ClubID 2
-(3, 3),
-(3, 4),
-(3, 5),
-(3, 6),
-(3, 7),
-(3, 8),
-(4, 4), 
-(2, 4);
+(3, 1),  -- ClubDepartmentID = 1 → Ban Chủ nhiệm của CLB 1
+(2, 1),  -- ClubDepartmentID = 2 → Ban Truyền thông của CLB 1
+(3, 2),  -- ClubDepartmentID = 3 → Ban Chủ nhiệm của CLB 2
+(4, 2),  -- ClubDepartmentID = 4 → Ban Chuyên môn của CLB 2
+(5, 1),  -- ClubDepartmentID = 5 → Ban Hậu cần của CLB 1
+(6, 2),  -- ClubDepartmentID = 6 → Ban Đối ngoại của CLB 2
+(3, 3),  -- ClubDepartmentID = 7 → Ban Chủ nhiệm của CLB 3
+(3, 4),  -- ClubDepartmentID = 8 → Ban Chủ nhiệm của CLB 4
+(3, 5),  -- ClubDepartmentID = 9 → Ban Chủ nhiệm của CLB 5
+(3, 6),  -- ClubDepartmentID = 10 → Ban Chủ nhiệm của CLB 6
+(3, 7),  -- ClubDepartmentID = 11 → Ban Chủ nhiệm của CLB 7
+(3, 8),  -- ClubDepartmentID = 12 → Ban Chủ nhiệm của CLB 8
+(4, 4),  -- ClubDepartmentID = 13 → Ban Chuyên môn của CLB 4
+(2, 4),  -- ClubDepartmentID = 14 → Ban Truyền thông của CLB 4
+(1, 4),  -- ClubDepartmentID = 15 → Ban Nội dung của CLB 4
+(1, 5),  -- ClubDepartmentID = 16 → Ban Nội dung của CLB 5
+(5, 4),  -- ClubDepartmentID = 17 → Ban Hậu cần của CLB 4
+(6, 4);  -- ClubDepartmentID = 18 → Ban Đối ngoại của CLB 4
+
 
 
 CREATE TABLE UserClubs (
@@ -144,36 +166,51 @@ CREATE TABLE UserClubs (
     RoleID INT NOT NULL,
     JoinDate DATETIME NOT NULL,
     IsActive BOOLEAN DEFAULT 1,
-    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE,
-    FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID) ,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID),
     FOREIGN KEY (ClubDepartmentID) REFERENCES ClubDepartments(ClubDepartmentID),
     FOREIGN KEY (RoleID) REFERENCES Roles(RoleID)
 );
 
 INSERT INTO UserClubs (UserID, ClubID, ClubDepartmentID, RoleID, JoinDate) VALUES
-('U001', 1, 1, 1, '2020-09-01'), -- Chủ nhiệm (Ban Chủ nhiệm, ClubID 1)
-('U002', 1, 5, 3, '2021-01-15'), -- Trưởng ban (Ban Hậu cần, ClubID 1)
-('U002', 2, 3, 2, '2020-10-05'), -- Phó chủ nhiệm (Ban Truyền thông, ClubID 2)
-('U003', 2, 4, 3, '2021-02-20'), -- Trưởng ban (Ban Chuyên môn, ClubID 2)
-('U003', 1, 1, 2, '2020-11-10'), -- Phó chủ nhiệm (Ban Chủ nhiệm, ClubID 1)
-('U004', 1, 2, 3, '2021-03-25'), -- Trưởng ban (Ban Nội dung, ClubID 1)
-('U005', 2, 6, 3, '2021-04-30'), -- Trưởng ban (Ban Đối ngoại, ClubID 2)
-('U006', 2, 3, 1, '2021-07-01'), -- Chủ nhiệm (Ban Truyền thông, ClubID 2)
-('U007', 1, 5, 4, '2021-07-03'), -- Thành viên (Ban Hậu cần, ClubID 1)
-('U008', 2, 6, 4, '2021-07-04'), -- Thành viên (Ban Đối ngoại, ClubID 2)
-('U009', 1, 2, 4, '2021-07-05'), -- Thành viên (Ban Nội dung, ClubID 1)
-('U010', 2, 4, 4, '2021-07-06'), -- Thành viên (Ban Chuyên môn, ClubID 2)
-('U011', 3, 7, 1, '2021-08-01'),
-('U012', 4, 8, 1, '2021-08-02'),
-('U013', 5, 9, 1, '2021-08-03'),
-('U014', 6, 10, 1, '2021-08-04'),
-('U015', 7, 11, 1, '2021-08-05'),
-('U016', 8, 12, 1, '2021-08-06'),
-('U017', 4, 13, 4, '2021-08-10'), 
-('U018', 4, 14, 4, '2021-08-10'), 
-('U019', 4, 13, 4, '2021-08-11'),
-('U020', 4, 14, 4, '2021-08-11'),
-('U021', 4, 13, 4, '2021-08-12');
+('U001', 1, 1, 1, '2020-09-01'), -- Chủ nhiệm CLB 1, Ban Chủ nhiệm
+('U002', 1, 5, 3, '2021-01-15'), -- Trưởng ban Hậu cần CLB 1
+('U002', 2, 3, 2, '2020-10-05'), -- Phó chủ nhiệm CLB 2, Ban Truyền thông
+('U003', 2, 4, 3, '2021-02-20'), -- Trưởng ban Chuyên môn CLB 2
+('U003', 1, 1, 2, '2020-11-10'), -- Phó chủ nhiệm CLB 1, Ban Chủ nhiệm
+('U004', 1, 2, 3, '2021-03-25'), -- Trưởng ban Nội dung CLB 1
+('U005', 2, 6, 3, '2021-04-30'), -- Trưởng ban Đối ngoại CLB 2
+('U006', 2, 3, 1, '2021-07-01'), -- Chủ nhiệm CLB 2, Ban Truyền thông
+('U007', 1, 5, 4, '2021-07-03'), -- Thành viên Ban Hậu cần CLB 1
+('U008', 2, 6, 4, '2021-07-04'), -- Thành viên Ban Đối ngoại CLB 2
+('U009', 1, 2, 4, '2021-07-05'), -- Thành viên Ban Nội dung CLB 1
+('U010', 2, 4, 4, '2021-07-06'), -- Thành viên Ban Chuyên môn CLB 2
+('U011', 3, 7, 1, '2021-08-01'), -- Chủ nhiệm CLB 3, Ban Chủ nhiệm
+('U012', 4, 8, 1, '2021-08-02'), -- Chủ nhiệm CLB 4, Ban Chủ nhiệm
+('U013', 5, 9, 1, '2021-08-03'), -- Chủ nhiệm CLB 5, Ban Chủ nhiệm
+('U014', 6, 10, 1, '2021-08-04'), -- Chủ nhiệm CLB 6, Ban Chủ nhiệm
+('U015', 7, 11, 1, '2021-08-05'), -- Chủ nhiệm CLB 7, Ban Chủ nhiệm
+('U016', 8, 12, 1, '2021-08-06'), -- Chủ nhiệm CLB 8, Ban Chủ nhiệm
+('U017', 4, 13, 4, '2021-08-10'), -- Thành viên Ban Chuyên môn CLB 4
+('U018', 4, 14, 4, '2021-08-10'), -- Thành viên Ban Truyền thông CLB 4
+('U019', 4, 13, 4, '2021-08-11'), -- Thành viên Ban Chuyên môn CLB 4
+('U020', 4, 14, 4, '2021-08-11'), -- Thành viên Ban Truyền thông CLB 4
+('U021', 4, 13, 4, '2021-08-12'), -- Thành viên Ban Chuyên môn CLB 4
+('U022', 4, 15, 3, '2021-09-01'), -- Trưởng ban Nội dung CLB 4
+('U023', 4, 14, 3, '2021-09-01'), -- Trưởng ban Truyền thông CLB 4
+('U024', 4, 13, 3, '2021-09-01'), -- Trưởng ban Chuyên môn CLB 4
+('U022', 4, 8, 4, '2021-09-01'), -- Thành viên Ban Chủ nhiệm CLB 4 (trưởng ban kiêm thành viên Ban Chủ nhiệm)
+('U023', 4, 8, 4, '2021-09-01'), -- Thành viên Ban Chủ nhiệm CLB 4
+('U024', 4, 8, 4, '2021-09-01'), -- Thành viên Ban Chủ nhiệm CLB 4
+('U025', 4, 16, 3, '2021-09-01'), -- Trưởng ban Hậu cần CLB 4
+('U026', 4, 16, 4, '2021-09-01'), -- Thành viên Ban Hậu cần CLB 4
+('U025', 4, 15, 4, '2021-09-01'), -- Thành viên Ban Nội dung CLB 4
+('U012', 4, 8, 1, '2021-09-01'), -- Chủ nhiệm CLB 4, Ban Chủ nhiệm (có thể duplicate kiểm tra)
+('U027', 4, 17, 3, '2021-09-01'), -- Trưởng ban Đối ngoại CLB 4
+('U028', 4, 17, 4, '2021-09-01'), -- Thành viên Ban Đối ngoại CLB 4
+('U029', 4, 18, 3, '2021-09-05'), -- Trưởng ban Ban Đối ngoại CLB 4
+('U030', 4, 18, 4, '2021-09-06'); -- Thành viên Ban Đối ngoại CLB 4
+
 
 
 -- ========================================
