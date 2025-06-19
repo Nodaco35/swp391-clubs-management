@@ -71,10 +71,10 @@ public class FormManagementServlet extends HttpServlet {
             // Kiểm tra quyền truy cập trong club cụ thể (chỉ cho roleId 1-3)
             UserClub userClub = userClubDAO.getUserClubManagementRole(userId, clubId);
             if (userClub == null) {
-                response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền quản lý form trong CLB này.", StandardCharsets.UTF_8.name()));
+                response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền quản lý form.", StandardCharsets.UTF_8.name()));
                 return;
-            }            session.setAttribute("userClub", userClub);
-            
+            }            
+            session.setAttribute("userClub", userClub);
             // Use the templateDAO already initialized
             List<Map<String, Object>> savedForms = templateDAO.getFormsByClubAndStatus(clubId, false);
             List<Map<String, Object>> publishedForms = templateDAO.getFormsByClubAndStatus(clubId, true);
