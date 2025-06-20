@@ -1,0 +1,154 @@
+/* === Layout tổng === */
+.container {
+  max-width: 960px;
+  margin: 40px auto;
+  padding: 0 20px;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* === Phần tiêu đề === */
+h2 {
+  margin-top: 40px;
+  margin-bottom: 20px;
+  color: #222831;
+  font-size: 22px;
+}
+
+/* === Card CLB === */
+.club-card {
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.club-logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #e6f3f7;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  color: #00a6c0;
+  margin-right: 16px;
+}
+
+.club-info {
+  flex: 1;
+}
+
+.club-name {
+  font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 4px;
+  color: #00a6c0;
+}
+
+.club-meta {
+  font-size: 14px;
+  color: #555;
+}
+
+.club-actions {
+  margin-left: auto;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.badge-active {
+  background-color: #e6f7f1;
+  color: #1aaa55;
+}
+
+.badge-inactive {
+  background-color: #fff3f3;
+  color: #d93025;
+}
+
+/* === Bảng sự kiện === */
+.table-events {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.table-events thead {
+  background: #f5f5f5;
+}
+
+.table-events th, .table-events td {
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 14px;
+  border-bottom: 1px solid #eee;
+}
+
+.table-events th {
+  font-weight: 600;
+  color: #333;
+}
+
+.table-events tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+.table-actions button {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.table-actions button:hover {
+  background-color: #f0f0f0;
+}
+
+/* === Badge sự kiện === */
+.badge-registered {
+  background-color: #e8f1fc;
+  color: #1a73e8;
+}
+
+.badge-attended {
+  background-color: #e6f7f1;
+  color: #1aaa55;
+}
+
+.badge-absent {
+  background-color: #fff3f3;
+  color: #d93025;
+}
+
+.badge-completed {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.badge-pending {
+  background-color: #fffde7;
+  color: #f4b400;
+}
+.section-box {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+}

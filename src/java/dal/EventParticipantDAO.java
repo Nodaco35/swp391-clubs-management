@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import models.EventParticipant;
+import models.EventParticipation;
 
 
 public class EventParticipantDAO extends DBContext {
@@ -163,5 +164,42 @@ public class EventParticipantDAO extends DBContext {
             LOGGER.log(Level.SEVERE, "Error counting participants by status", e);
         }
         return 0;
+    }
+    
+    
+    public List<EventParticipation> getEventParticipationByUser(String userID) {
+        List<EventParticipation> list = new ArrayList<>();
+        String sql = """
+            SELECT e.EventID, e.EventName, c.ClubName, e.EventDate, e.Location, 
+                               ep.Status AS ParticipationStatus, e.Status AS EventStatus
+                        FROM EventParticipants ep
+                        JOIN Events e ON ep.EventID = e.EventID
+                        JOIN Clubs c ON e.ClubID = c.ClubID
+                        WHERE ep.UserID = ?
+                        ORDER BY e.EventDate DESC
+        """;
+
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, userID);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                EventParticipation ep = new EventParticipation();
+                ep.setEventID(rs.getString("EventID"));
+                ep.setEventName(rs.getString("EventName"));
+                ep.setClubName(rs.getString("ClubName"));
+                ep.setEventDate(rs.getTimestamp("EventDate"));
+                ep.setLocation(rs.getString("Location"));
+                ep.setParticipationStatus(rs.getString("ParticipationStatus"));
+                ep.setEventStatus(rs.getString("EventStatus"));
+
+                list.add(ep);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
     }
 }
