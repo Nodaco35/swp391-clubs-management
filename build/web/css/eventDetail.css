@@ -451,6 +451,8 @@ body {
 }
 
 .event-description {
+    margin-left: 5%;
+    max-width: 90%;
     line-height: 1.8;
     color: var(--text-light);
     font-size: 1.1rem;

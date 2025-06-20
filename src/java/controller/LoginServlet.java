@@ -124,6 +124,7 @@ public class LoginServlet extends HttpServlet {
             boolean isChairman = ud.isChairman(user_find.getUserID());
             List<Integer> myEventIDs = ud.getEventIDsOfChairman(user_find.getUserID());
             session.setAttribute("myEventIDs", myEventIDs);
+            session.setAttribute("isChairman", isChairman);
             System.out.println("Danh sách sự kiện của chủ nhiệm " + user_find.getUserID() + ": " + myEventIDs);
 
             System.out.println("Đăng nhập: " + user_find.getUserID());

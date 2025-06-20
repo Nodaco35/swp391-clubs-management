@@ -435,6 +435,65 @@ body {
     font-size: 14px;
 }
 
+/* Departments Overview */
+.departments-overview {
+    margin-bottom: 30px;
+}
+
+.departments-overview h2 {
+    color: #2c5aa0;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.departments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.department-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #4fc3f7;
+}
+
+.department-card h3 {
+    color: #2c5aa0;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.department-card p {
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.department-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.member-count {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.department-leader {
+    font-size: 14px;
+    color: #666;
+}
+
+
 /* Events Management */
 .events-management {
     background: white;
@@ -630,4 +689,299 @@ body {
     background-color: #0056b3;
 }
 
+
+/*Add, edit event*/
+/* Dashboard Content */
+.dashboard-content {
+    max-width: 85%;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+
+.tab-content.active {
+    display: block;
+}
+
+/* Page Header */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px 0;
+}
+
+.page-title h1 {
+    color: #2c5aa0;
+    font-size: 28px;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.page-title p {
+    color: #666;
+    font-size: 16px;
+}
+
+.page-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.3s;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+/* Form Styles */
+.form-container {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.event-form {
+    padding: 0;
+}
+
+.form-section {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+}
+
+.form-section h3 {
+    color: #2c5aa0;
+    margin-bottom: 20px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    font-weight: 500;
+    color: #333;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #4fc3f7;
+    box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.2);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Agenda Styles */
+.agenda-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.agenda-item input[type="time"] {
+    width: 120px;
+}
+
+.agenda-item input[type="text"] {
+    flex: 1;
+}
+
+.btn-remove-agenda {
+    background: #f44336;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s;
+}
+
+.btn-remove-agenda:hover {
+    background: #d32f2f;
+}
+
+.btn-add-agenda {
+    background: #4fc3f7;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px;
+    transition: background-color 0.3s;
+}
+
+.btn-add-agenda:hover {
+    background: #29b6f6;
+}
+
+/* Venue Availability */
+.venue-availability {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.venue-availability h4 {
+    color: #2c5aa0;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.venue-status {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.venue-status-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+}
+
+.venue-name {
+    font-weight: 500;
+    color: #333;
+}
+
+.venue-status-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.venue-status-badge.available {
+    background: #d4edda;
+    color: #155724;
+}
+
+.venue-status-badge.occupied {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.venue-conflict-info {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+}
+
+/* Form Actions */
+.form-actions {
+    padding: 20px;
+    background: #f8f9fa;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.btn-cancel {
+    padding: 10px 20px;
+    border: 1px solid #ddd;
+    background: white;
+    color: #333;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.3s;
+}
+
+.btn-cancel:hover {
+    background: #f8f9fa;
+}
+
+.btn-submit {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    background: #28a745;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.3s;
+}
+
+.btn-submit:hover {
+    background: #218838;
+}
+/*Add, edit event*/
 

@@ -1,22 +1,24 @@
-
 package models;
 
 import java.util.Date;
 
 public class Events {
+
     private int eventID;
     private String eventName;
     private String eventImg;
     private String description;
 
     private Date eventDate;
-    private String location;
+
     private int clubID;
     private boolean isPublic;
     private int formTemplateID;
 
     private int capacity;
     private String status;
+
+    private String semesterID;
 
     // Thêm các trường bổ sung cho hiển thị
     private String clubName;
@@ -26,11 +28,12 @@ public class Events {
     private int registered;
     private int spotsLeft;
 
+    private Locations location;
 
     public Events() {
     }
 
-    public Events(int eventID, String eventName, String eventImg, String description, Date eventDate, String location, int clubID, boolean isPublic, int formTemplateID, int capacity, String status, String clubName, String clubImg) {
+    public Events(int eventID, String eventName, String eventImg, String description, Date eventDate, Locations location, int clubID, boolean isPublic, int formTemplateID, int capacity, String status, String semesterID, String clubName, String clubImg, int registered, int spotsLeft) {
         this.eventID = eventID;
         this.eventName = eventName;
         this.eventImg = eventImg;
@@ -42,8 +45,11 @@ public class Events {
         this.formTemplateID = formTemplateID;
         this.capacity = capacity;
         this.status = status;
+        this.semesterID = semesterID;
         this.clubName = clubName;
         this.clubImg = clubImg;
+        this.registered = registered;
+        this.spotsLeft = spotsLeft;
     }
 
     public int getCapacity() {
@@ -94,11 +100,11 @@ public class Events {
         this.eventDate = eventDate;
     }
 
-    public String getLocation() {
+    public Locations getLocation() {
         return location;
     }
 
-    public void setLocation(String location) {
+    public void setLocation(Locations location) {
         this.location = location;
     }
 
@@ -166,4 +172,11 @@ public class Events {
         this.spotsLeft = spotsLeft;
     }
 
+    public String getSemesterID() {
+        return semesterID;
+    }
+
+    public void setSemesterID(String semesterID) {
+        this.semesterID = semesterID;
+    }
 }

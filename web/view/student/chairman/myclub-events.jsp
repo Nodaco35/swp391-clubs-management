@@ -73,7 +73,7 @@
 					<option value="ongoing">Đang diễn ra</option>
 					<option value="completed">Đã kết thúc</option>
 				</select>
-				<a href="chairman-page?action=myclub-events&subaction=add" class="btn-add-event">
+				<a href="chairman-page?action=myclub-events&subaction=add-event" class="btn-add-event">
 					<i class="fas fa-plus"></i> Thêm sự kiện
 				</a>
 			</div>
@@ -98,7 +98,7 @@
 						<td>
 							<fmt:formatDate value="${event.eventDate}" pattern="dd/MM/yyyy HH:mm" />
 						</td>
-						<td>${event.location}</td>
+						<td>${event.location.locationName}</td>
 						<td>${event.registered}/${event.capacity} (Còn ${event.spotsLeft} chỗ trống)</td>
 						<td>
                             <span class="status ${event.status}">
@@ -111,7 +111,7 @@
                             </span>
 						</td>
 						<td>
-							<a href="chairman-page?action=myclub-events&subaction=edit&eventID=${event.eventID}" class="btn-action edit" title="Sửa">
+							<a href="chairman-page?action=myclub-events&subaction=edit-event&eventID=${event.eventID}" class="btn-action edit" title="Sửa">
 								<i class="fas fa-edit"></i>
 							</a>
 							<c:if test="${event.status == 'Pending'}">

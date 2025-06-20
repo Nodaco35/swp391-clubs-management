@@ -2,19 +2,8 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-
         <group>
-            <file>file:/D:/ClubManagementSystem/swp391-clubs-management/src/java/dal/ClubDepartmentDAO.java</file>
-            <file>file:/D:/ClubManagementSystem/swp391-clubs-management/web/view/student/chairman/formBuilder.jsp</file>
-            <file>file:/D:/ClubManagementSystem/swp391-clubs-management/src/java/controller/ApplicationFormServlet.java</file>
-            <file>file:/D:/ClubManagementSystem/swp391-clubs-management/src/java/dal/UserClubDAO.java</file>
-            <file>file:/D:/ClubManagementSystem/swp391-clubs-management/src/java/controller/FormBuilderServlet.java</file>
-            <file>file:/D:/ClubManagementSystem/swp391-clubs-management/web/js/applicationForm.js</file>
-            <file>file:/D:/ClubManagementSystem/swp391-clubs-management/src/java/controller/FormManagementServlet.java</file>
-            <file>file:/D:/ClubManagementSystem/swp391-clubs-management/web/view/student/applicationForm.jsp</file>
-            <file>file:/D:/ClubManagementSystem/swp391-clubs-management/web/js/formBuilder.js</file>
-            <file>file:/D:/ClubManagementSystem/swp391-clubs-management/web/css/formBuilder.css</file>
-            <file>file:/D:/ClubManagementSystem/swp391-clubs-management/web/js/formManagement.js</file>
+            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/17_06/afternoon/swp391-clubs-management/src/java/controller/ChairmanPageServlet.java</file>
         </group>
     </open-files>
 </project-private>

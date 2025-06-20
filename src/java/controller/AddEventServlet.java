@@ -5,21 +5,18 @@
 
 package controller;
 
-import dal.EventsDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.List;
-import models.Events;
 
 /**
  *
  * @author LE VAN THUAN
  */
-public class EventsPageServlet extends HttpServlet {
+public class AddEventServlet extends HttpServlet {
    
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -36,10 +33,10 @@ public class EventsPageServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet EventsPageServlet</title>");  
+            out.println("<title>Servlet AddEventServlet</title>");  
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet EventsPageServlet at " + request.getContextPath () + "</h1>");
+            out.println("<h1>Servlet AddEventServlet at " + request.getContextPath () + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -55,66 +52,9 @@ public class EventsPageServlet extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    throws ServletException, IOException {
 
-        EventsDAO dao = new EventsDAO();
-
-        String keyword = request.getParameter("key");
-        String publicFilter = request.getParameter("publicFilter");
-        String sortByDate = request.getParameter("sortByDate");
-
-        if (publicFilter == null || publicFilter.isEmpty()) {
-            publicFilter = "all";
-        }
-
-        if (sortByDate == null || sortByDate.isEmpty()) {
-            sortByDate = "newest";
-        }
-
-        int page = 1;
-        int pageSize = 8;
-
-        try {
-            String pageParam = request.getParameter("page");
-            if (pageParam != null && !pageParam.isEmpty()) {
-                page = Integer.parseInt(pageParam);
-                if (page < 1) {
-                    page = 1;
-                }
-            }
-        } catch (NumberFormatException e) {
-            page = 1;
-        }
-
-        int offset = (page - 1) * pageSize;
-
-        List<Events> events = dao.searchEvents(keyword, publicFilter, sortByDate, pageSize, offset);
-
-        int totalEvents = dao.countEvents(keyword, publicFilter);
-        int totalPages = (int) Math.ceil((double) totalEvents / pageSize);
-
-        if (page > totalPages && totalPages > 0) {
-            page = totalPages;
-            offset = (page - 1) * pageSize;
-            events = dao.searchEvents(keyword, publicFilter, sortByDate, pageSize, offset);
-        }
-
-        String currentPath = request.getServletPath();
-        request.setAttribute("currentPath", currentPath);
-
-        request.setAttribute("events", events);
-        request.setAttribute("currentPage", page);
-        request.setAttribute("totalPages", totalPages);
-        request.setAttribute("totalEvents", totalEvents);
-        request.setAttribute("pageSize", pageSize);
-
-        request.setAttribute("currentKeyword", keyword != null ? keyword : "");
-        request.setAttribute("currentPublicFilter", publicFilter);
-        request.setAttribute("currentSortByDate", sortByDate);
-        ;
-
-        request.getRequestDispatcher("view/events-page/events-page.jsp").forward(request, response);
-    }
+    } 
 
     /** 
      * Handles the HTTP <code>POST</code> method.

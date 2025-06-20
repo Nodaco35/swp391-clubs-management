@@ -1,4 +1,4 @@
-<%-- 
+<%--
     Document   : event-detail
     Created on : May 30, 2025, 11:26:29 PM
     Author     : LE VAN THUAN
@@ -172,7 +172,7 @@
 							</div>
 							<div class="meta-content">
 								<h4>Địa điểm</h4>
-								<p>${e.location}</p>
+								<p>${e.location.locationName}</p>
 							</div>
 						</div>
 
@@ -216,6 +216,10 @@
 					</div>
 
 
+					<h3 class="section-title">
+						<i class="fas fa-info-circle"></i>
+						Sự kiện liên quan
+					</h3>
 					<!-- Related Events -->
 					<div class="events-grid" id="eventsGrid">
 						<c:forEach var="e" items="${requestScope.relatedEvents}">
@@ -237,7 +241,7 @@
 										</div>
 										<div class="event-detail">
 											<i class="fas fa-map-marker-alt"></i>
-											<span>${e.location}</span>
+											<span>${e.location.locationName}</span>
 										</div>
 										<div class="event-detail">
 											<i class="fas fa-users"></i>

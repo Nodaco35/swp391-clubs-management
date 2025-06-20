@@ -14,11 +14,34 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import models.Locations;
 
 /**
  * @author LE VAN THUAN
  */
 public class EventsDAO {
+    
+    public Locations getLocationByID(int id) {
+    String sql = "SELECT * FROM Locations WHERE LocationID = ?";
+    try {
+        Connection connection = DBContext.getConnection();
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setInt(1, id);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            Locations location = new Locations();
+            location.setLocationID(rs.getInt("LocationID"));
+            location.setLocationName(rs.getString("LocationName"));
+            location.setTypeLocation(rs.getString("TypeLocation"));
+            return location;
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+        throw new RuntimeException("Error retrieving location by ID", e);
+    }
+    return null;
+}
+
 
     public List<Events> getAllEvents() {
         List<Events> events = new ArrayList<Events>();
@@ -34,11 +57,12 @@ public class EventsDAO {
                 event.setEventImg(rs.getString("EventImg"));
                 event.setDescription(rs.getString("Description"));
                 event.setEventDate(rs.getTimestamp("EventDate"));
-                event.setLocation(rs.getString("Location"));
                 event.setClubID(rs.getInt("ClubID"));
                 event.setPublic(rs.getBoolean("IsPublic"));
                 event.setCapacity(rs.getInt("Capacity"));
                 event.setStatus(rs.getString("Status"));
+                Locations l = getLocationByID(rs.getInt("LocationID"));
+                event.setLocation(l);
                 events.add(event);
             }
         } catch (Exception e) {
@@ -62,11 +86,12 @@ public class EventsDAO {
                 event.setEventImg(rs.getString("EventImg"));
                 event.setDescription(rs.getString("Description"));
                 event.setEventDate(rs.getTimestamp("EventDate"));
-                event.setLocation(rs.getString("Location"));
                 event.setClubID(rs.getInt("ClubID"));
                 event.setPublic(rs.getBoolean("IsPublic"));
                 event.setCapacity(rs.getInt("Capacity"));
                 event.setStatus(rs.getString("Status"));
+                Locations l = getLocationByID(rs.getInt("LocationID"));
+                event.setLocation(l);
                 return event;
             }
         } catch (SQLException e) {
@@ -87,7 +112,7 @@ public class EventsDAO {
                         AND (ep.Status = 'REGISTERED' OR ep.Status = 'ATTENDED' OR ep.Status = 'ABSENT')
                     WHERE e.ClubID = ?
                     GROUP BY e.EventID, e.EventName, e.EventImg, e.Description, 
-                             e.EventDate, e.Location, e.ClubID, e.IsPublic, 
+                             e.EventDate, e.LocationID, e.ClubID, e.IsPublic, 
                              e.FormTemplateID, e.Capacity, e.Status
                     ORDER BY e.EventDate DESC
                 """;
@@ -104,7 +129,6 @@ public class EventsDAO {
                 event.setEventImg(rs.getString("EventImg"));
                 event.setDescription(rs.getString("Description"));
                 event.setEventDate(rs.getTimestamp("EventDate"));
-                event.setLocation(rs.getString("Location"));
                 event.setClubID(rs.getInt("ClubID"));
                 event.setPublic(rs.getBoolean("IsPublic"));
                 event.setFormTemplateID(rs.getInt("FormTemplateID"));
@@ -112,6 +136,8 @@ public class EventsDAO {
                 event.setStatus(rs.getString("Status"));
                 event.setRegistered(rs.getInt("RegisteredCount"));
                 event.setSpotsLeft(rs.getInt("SpotsLeft"));
+                Locations l = getLocationByID(rs.getInt("LocationID"));
+                event.setLocation(l);
                 events.add(event);
             }
         } catch (SQLException e) {
@@ -136,11 +162,12 @@ public class EventsDAO {
                 event.setEventImg(rs.getString("EventImg"));
                 event.setDescription(rs.getString("Description"));
                 event.setEventDate(rs.getTimestamp("EventDate"));
-                event.setLocation(rs.getString("Location"));
                 event.setClubID(rs.getInt("ClubID"));
                 event.setPublic(rs.getBoolean("IsPublic"));
                 event.setCapacity(rs.getInt("Capacity"));
                 event.setStatus(rs.getString("Status"));
+                Locations l = getLocationByID(rs.getInt("LocationID"));
+                event.setLocation(l);
                 events.add(event);
             }
         } catch (SQLException e) {
@@ -196,11 +223,12 @@ public class EventsDAO {
                 event.setEventImg(rs.getString("EventImg"));
                 event.setDescription(rs.getString("Description"));
                 event.setEventDate(rs.getTimestamp("EventDate"));
-                event.setLocation(rs.getString("Location"));
                 event.setClubID(rs.getInt("ClubID"));
                 event.setPublic(rs.getBoolean("IsPublic"));
                 event.setCapacity(rs.getInt("Capacity"));
                 event.setStatus(rs.getString("Status"));
+                Locations l = getLocationByID(rs.getInt("LocationID"));
+                event.setLocation(l);
 
                 event.setClubName(rs.getString("ClubName"));
                 events.add(event);
@@ -408,11 +436,12 @@ public class EventsDAO {
                 event.setEventName(rs.getString("EventName"));
                 event.setDescription(rs.getString("Description"));
                 event.setEventDate(rs.getTimestamp("EventDate"));
-                event.setLocation(rs.getString("Location"));
                 event.setClubID(rs.getInt("ClubID"));
                 event.setPublic(rs.getBoolean("IsPublic"));
                 event.setCapacity(rs.getInt("Capacity"));
                 event.setStatus(rs.getString("Status"));
+                Locations l = getLocationByID(rs.getInt("LocationID"));
+                event.setLocation(l);
 
                 // Thêm thông tin câu lạc bộ
                 event.setClubName(rs.getString("ClubName"));

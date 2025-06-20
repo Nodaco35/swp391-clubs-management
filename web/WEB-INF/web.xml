@@ -101,6 +101,10 @@
         <servlet-name>ChairmanPageServlet</servlet-name>
         <servlet-class>controller.ChairmanPageServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>AddEventServlet</servlet-name>
+        <servlet-class>controller.AddEventServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ClubsServlet</servlet-name>
         <url-pattern>/clubs</url-pattern>
@@ -199,6 +203,10 @@
     <servlet-mapping>
         <servlet-name>ChairmanPageServlet</servlet-name>
         <url-pattern>/chairman-page</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AddEventServlet</servlet-name>
+        <url-pattern>/add-event</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

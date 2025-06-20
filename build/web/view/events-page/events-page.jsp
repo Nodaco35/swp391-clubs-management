@@ -74,7 +74,9 @@
                         <form action="logout" method="post">
                             <input class="btn btn-primary" type="submit" value="Logout">
                         </form>
-                        <a href="${pageContext.request.contextPath}/chairman-page" class="btn btn-primary">MyClub</a>
+                        <c:if test="${sessionScope.isChairman == true}">
+                            <a href="${pageContext.request.contextPath}/chairman-page" class="btn btn-primary">MyClub</a>
+                        </c:if>
                     </div>
                 </c:when>
                 <c:otherwise>
@@ -182,7 +184,7 @@
                                 </div>
                                 <div class="event-detail">
                                     <i class="fas fa-map-marker-alt"></i>
-                                    <span>${e.location}</span>
+                                    <span>${e.location.locationName}</span>
                                 </div>
                                 <div class="event-detail">
                                     <i class="fas fa-users"></i>

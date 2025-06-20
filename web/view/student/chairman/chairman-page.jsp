@@ -1,4 +1,4 @@
-<%-- 
+    <%--
     Document   : chairman-page
     Created on : Jun 14, 2025, 8:42:59 PM
     Author     : LE VAN THUAN
@@ -115,8 +115,9 @@
         <nav class="dashboard-nav">
             <ul>
                 <li><a href="chairman-page?action=overview" class="nav-item ${action == 'overview' ? 'active' : ''}"><i class="fas fa-tachometer-alt"></i> Tổng quan</a></li>
-                <li><a href="chairman-page?action=myclub-events" class="nav-item ${action == 'myclub-events' ? 'active' : ''}"><i class="fas fa-calendar-check"></i> Quản lý sự kiện</a></li>
-                <li><a href="chairman-page?action=tasks" class="nav-item ${action == 'tasks' ? 'active' : ''}"><i class="fas fa-tasks"></i> Công việc</a></li>
+                <li><a href="chairman-page?action=myclub-events" class="nav-item ${action == 'myclub-events' ? 'active' : ''}"><i class="fas fa-calendar-alt"></i> Sự kiện</a></li>
+                <li><a href="chairman-page?action=tasks" class="nav-item ${action == 'tasks' ? 'active' : ''}"><i class="fas fa-clock"></i> Timeline & Công
+                    việc</a></li>
             </ul>
         </nav>
 
@@ -129,7 +130,17 @@
             <jsp:include page="overview.jsp" />
         </c:when>
         <c:when test="${action == 'myclub-events'}">
-            <jsp:include page="myclub-events.jsp" />
+            <c:choose>
+                <c:when test="${subaction == 'add-event'}">
+                    <jsp:include page="add-event.jsp" />
+                </c:when>
+                <c:when test="${subaction == 'edit-event'}">
+                    <jsp:include page="edit-event.jsp" />
+                </c:when>
+                <c:otherwise>
+                    <jsp:include page="myclub-events.jsp" />
+                </c:otherwise>
+            </c:choose>
         </c:when>
         <c:when test="${action == 'tasks'}">
             <jsp:include page="tasks.jsp" />

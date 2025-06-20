@@ -87,16 +87,12 @@ public class ChairmanPageServlet extends HttpServlet {
             request.setAttribute("totalDepartments", clubDAO.getTotalDepartments(clubID));
 
             if ("myclub-events".equals(action)) {
-                if ("add".equals(subaction)) {
-                    request.getRequestDispatcher("view/student/chairman/add-event.jsp").forward(request, response);
-                    return;
+                if ("add-event".equals(subaction)) {
 
-                } else if ("edit".equals(subaction)) {
+                } else if ("edit-event".equals(subaction)) {
                     int eventID = Integer.parseInt(request.getParameter("eventID"));
                     Events event = eventDAO.getEventByID(eventID);
                     request.setAttribute("event", event);
-                    request.getRequestDispatcher("view/student/chairman/edit-event.jsp").forward(request, response);
-                    return;
 
 //                } else if ("assign-task".equals(subaction)) {
 //                    int eventID = Integer.parseInt(request.getParameter("eventID"));
@@ -125,6 +121,7 @@ public class ChairmanPageServlet extends HttpServlet {
 
         // Luôn set lại action để JSP biết tab nào được chọn
         request.setAttribute("action", action);
+        request.setAttribute("subaction", subaction);
         request.getRequestDispatcher("view/student/chairman/chairman-page.jsp").forward(request, response);
     }
 
