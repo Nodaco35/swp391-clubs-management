@@ -164,4 +164,23 @@ public class EventParticipantDAO extends DBContext {
         }
         return 0;
     }
+    //Kiểm tra xem người điền form có tham gia sự kiện không
+    public boolean hasUserParticipatedInEvent(String userId, int eventId) {
+        String sql = "SELECT COUNT(*) FROM EventParticipants WHERE EventID = ? AND UserID = ?";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, eventId);
+            ps.setString(2, userId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error checking if user participated in event", e);
+        }
+        return false;
+    }
 }

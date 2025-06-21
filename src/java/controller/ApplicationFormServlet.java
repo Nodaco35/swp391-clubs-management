@@ -18,10 +18,7 @@ import models.ApplicationResponse;
 import models.ClubApplication;
 import models.Users;
 
-/**
- *
- * @author Vinh
- */
+
 public class ApplicationFormServlet extends HttpServlet {
     private ApplicationFormTemplateDAO formDAO;
     private ApplicationResponseDAO responseDAO;
@@ -76,7 +73,6 @@ public class ApplicationFormServlet extends HttpServlet {
 
             // Sắp xếp câu hỏi theo displayOrder trước khi gửi xuống JSP
             questions.sort((q1, q2) -> {
-                // Sắp xếp theo displayOrder trước, nếu bằng nhau thì sắp xếp theo templateId
                 int orderComparison = Integer.compare(q1.getDisplayOrder(), q2.getDisplayOrder());
                 return orderComparison != 0 ? orderComparison : Integer.compare(q1.getTemplateId(), q2.getTemplateId());
             });
@@ -97,13 +93,7 @@ public class ApplicationFormServlet extends HttpServlet {
         }
     }
 
-    /** 
-     * Handles the HTTP <code>POST</code> method.
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
@@ -163,12 +153,7 @@ public class ApplicationFormServlet extends HttpServlet {
                 for (ApplicationFormTemplate question : questions) {
                     String fieldName = "ans_" + question.getTemplateId();
                     String fieldType = question.getFieldType();
-                    
-                    // Log để debug
-                    System.out.println("Debug - Đang xử lý câu hỏi ID " + question.getTemplateId() + 
-                        ", loại: " + fieldType + ", thứ tự hiển thị: " + question.getDisplayOrder());
-                    
-                    // Xử lý các loại trường khác nhau
+
                     if ("Checkbox".equalsIgnoreCase(fieldType)) {
                         // Xử lý checkbox: có thể có nhiều giá trị
                         String[] values = request.getParameterValues(fieldName);
@@ -180,12 +165,9 @@ public class ApplicationFormServlet extends HttpServlet {
                             // Xóa dấu phẩy cuối cùng
                             responsesJson.setLength(responsesJson.length() - 1);
                             responsesJson.append("],");
-                            
-                            // Log để debug
-                            System.out.println("Debug - Checkbox " + fieldName + " có " + values.length + " giá trị được chọn");
+
                         } else {
                             responsesJson.append("\"").append(fieldName).append("\":[],");
-                            System.out.println("Debug - Checkbox " + fieldName + " không có giá trị nào được chọn");
                         }
                     } else if ("Radio".equalsIgnoreCase(fieldType)) {
                         // Xử lý radio và dropdown: một giá trị
@@ -193,14 +175,10 @@ public class ApplicationFormServlet extends HttpServlet {
                         if (value != null && !value.isEmpty()) {
                             responsesJson.append("\"").append(fieldName).append("\":\"")
                                       .append(value.replace("\"", "\\\"")).append("\",");
-                            System.out.println("Debug - " + fieldType + " " + fieldName + " chọn giá trị: " + value);
                         } else {
                             responsesJson.append("\"").append(fieldName).append("\":\"\",");
-                            System.out.println("Debug - " + fieldType + " " + fieldName + " không có giá trị được chọn");
                         }
                     } else if ("Info".equalsIgnoreCase(fieldType)) {
-                        // Không xử lý trường thông tin vì chỉ hiển thị, không cần lưu
-                        System.out.println("Debug - Bỏ qua trường Info " + fieldName);
                         continue; // Chuyển sang câu hỏi tiếp theo
                     } else {
                         // Xử lý các loại trường thông thường khác
@@ -208,11 +186,8 @@ public class ApplicationFormServlet extends HttpServlet {
                         if (value != null) {
                             responsesJson.append("\"").append(fieldName).append("\":\"")
                                       .append(value.replace("\"", "\\\"")).append("\",");
-                            System.out.println("Debug - Trường " + fieldType + " " + fieldName + 
-                                " có giá trị: " + (value.length() > 50 ? value.substring(0, 50) + "..." : value));
                         } else {
                             responsesJson.append("\"").append(fieldName).append("\":\"\",");
-                            System.out.println("Debug - Trường " + fieldType + " " + fieldName + " không có giá trị");
                         }
                     }
                 }
@@ -220,8 +195,6 @@ public class ApplicationFormServlet extends HttpServlet {
                 // Thêm metadata với thời gian chính xác
                 java.util.Calendar cal = java.util.Calendar.getInstance();
                 java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(cal.getTimeInMillis());
-                System.out.println("Debug - Timestamp for metadata: " + currentTimestamp);
-                
                 responsesJson.append("\"_metadata\":{")
                           .append("\"submitTime\":\"").append(currentTimestamp).append("\",")
                           .append("\"formTitle\":\"").append(title.replace("\"", "\\\"")).append("\",")
@@ -265,11 +238,9 @@ public class ApplicationFormServlet extends HttpServlet {
             if (user != null) {
                 // Lấy email từ thông tin người dùng trong cơ sở dữ liệu
                 email = user.getEmail();
-                System.out.println("Debug - Đã lấy email từ cơ sở dữ liệu: " + email);
             } else {
                 // Nếu không tìm thấy người dùng, sử dụng email từ session nếu có
                 email = (String) session.getAttribute("userEmail");
-                System.out.println("Debug - Không tìm thấy user từ DB, sử dụng email từ session: " + email);
             }
             
             // Đặt email, đảm bảo không null
