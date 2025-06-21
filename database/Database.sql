@@ -308,10 +308,10 @@ INSERT INTO Events (EventName, EventImg, Description, EventDate, LocationID, Clu
 
 -- Summer 2025 
 ('FPTU Showcase 2025 Chung Kết', 'images/events/showcase2025.jpg', '...', '2025-06-30 09:00:00', 1, 7, TRUE, 200, 'PENDING', 'SU25'),
-('Thử Thách Lập Trình FPTU 2025', 'images/events/coding2025.jpg', '...', '2025-06-23 08:00:00', 25, 4, TRUE, 50, 'PROCESSING', 'SU25'),
-('Giải Bóng Đá Sinh Viên FPTU 2025', 'images/events/football2025.jpg', '...', '2025-06-05 08:00:00', 5, 1, TRUE, 120, 'COMPLETED', 'SU25'),
+('Thử Thách Lập Trình FPTU 2025', 'images/events/coding2025.jpg', '...', '2025-06-21 08:00:00', 25, 4, TRUE, 50, 'COMPLETED', 'SU25'),
+('Giải Bóng Đá Sinh Viên FPTU 2025', 'images/events/football2025.jpg', '...', '2025-06-05 08:00:00', 5, 1, TRUE, 120, 'PENDING', 'SU25'),
 ('Chiến Dịch Tình Nguyện Xanh 2025', 'images/events/greenfuture2025.jpg', '...', '2025-07-25 07:00:00', 35, 5, TRUE, 40, 'PENDING', 'SU25'),
-('Giải Bóng Rổ 3x3 FPTU', 'images/events/basketball2025.jpg', '...', '2025-07-05 14:00:00', 4, 2, FALSE, 80, 'PENDING', 'SU25'),
+('Giải Bóng Rổ 3x3 FPTU', 'images/events/basketball2025.jpg', '...', '2025-07-05 14:00:00', 4, 2, FALSE, 80, 'COMPLETED', 'SU25'),
 ('Ngày Hội Âm Nhạc FPTU 2025', 'images/events/musicday2025.jpg', '...', '2025-07-10 10:00:00', 1, 6, FALSE, 250, 'PENDING', 'SU25'),
 ('Hackathon Đổi Mới AI', 'images/events/aihackathon2025.jpg', '...', '2025-07-15 08:00:00', 25, 4, TRUE, 45, 'PENDING', 'SU25'),
 ('Cuộc thi Code War: Thử thách thuật toán', '/images/events/codewar.jpg', '...', '2025-07-31 09:00:00', 27, 4, 1, 120, 'PENDING', 'SU25'),
