@@ -249,112 +249,215 @@ CREATE TABLE ApplicationFormTemplates (
 -- ========================================
 -- EVENTS
 -- ========================================
+CREATE TABLE Locations (
+    LocationID INT PRIMARY KEY AUTO_INCREMENT,
+    LocationName VARCHAR(200) NOT NULL,
+    TypeLocation ENUM('OnCampus', 'OffCampus') NOT NULL
+);
+
+INSERT INTO Locations (LocationName, TypeLocation) VALUES
+('Đường 30m, Đại học FPT Hà Nội', 'OnCampus'),
+('Sảnh tòa Delta, Đại học FPT Hà Nội', 'OnCampus'),
+('Hội trường tầng 5 tòa Gamma, Đại học FPT Hà Nội', 'OnCampus'),
+('Sân bóng rổ, Đại học FPT Hà Nội', 'OnCampus'),
+('Sân bóng đá cạnh hồ cá Koi, Đại học FPT Hà Nội', 'OnCampus'),
+('Nhà võ 1, Đại học FPT Hà Nội', 'OnCampus'),
+('Sảnh tòa Alpha, Đại học FPT Hà Nội', 'OnCampus'),
+('Sảnh tòa Epsilon, Đại học FPT Hà Nội', 'OnCampus'),
+('AL-L101', 'OnCampus'), ('AL-L201', 'OnCampus'), ('AL-L301', 'OnCampus'), ('AL-L401', 'OnCampus'),
+('AL-L501', 'OnCampus'), ('AL-L601', 'OnCampus'), ('AL-L701', 'OnCampus'),
+('AL-R101', 'OnCampus'), ('AL-R201', 'OnCampus'), ('AL-R301', 'OnCampus'), ('AL-R401', 'OnCampus'),
+('AL-R501', 'OnCampus'), ('AL-R601', 'OnCampus'), ('AL-R701', 'OnCampus'),
+('BE-101', 'OnCampus'), ('BE-201', 'OnCampus'), ('BE-301', 'OnCampus'), ('BE-401', 'OnCampus'),
+('DE-101', 'OnCampus'), ('DE-201', 'OnCampus'), ('DE-301', 'OnCampus'), ('DE-401', 'OnCampus'),
+('EP-101', 'OnCampus'), ('EP-201', 'OnCampus'), ('EP-301', 'OnCampus'), ('EP-401', 'OnCampus'),
+
+('Khu vực nông thôn Đà Nẵng', 'OffCampus'),
+('Tỉnh Tuyên Quang', 'OffCampus'),
+('Sân vận động Thành phố Hà Nội', 'OffCampus'),
+('Nhà thi đấu Quận Cầu Giấy, Hà Nội', 'OffCampus'),
+('Trung tâm Hội nghị Quốc gia, Hà Nội', 'OffCampus'),
+('Nhà Văn hóa Sinh viên TP.HCM', 'OffCampus'),
+('Sân vận động Mỹ Đình, Hà Nội', 'OffCampus');
+
+
 CREATE TABLE Events (
     EventID INT PRIMARY KEY AUTO_INCREMENT,
     EventName VARCHAR(100) NOT NULL,
-    EventImg VARCHAR(100) ,
+    EventImg VARCHAR(100),
     Description TEXT,
     EventDate DATETIME,
-    Location VARCHAR(200),
+    LocationID INT,
     ClubID INT NOT NULL,
     IsPublic BOOLEAN DEFAULT 0,
     FormTemplateID INT,
     Capacity INT,
-    Status ENUM('Pending','Processing', 'Completed'),
+    Status ENUM('Pending', 'Processing', 'Completed'),
+    SemesterID VARCHAR(10),
     FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID),
-    FOREIGN KEY (FormTemplateID) REFERENCES ApplicationFormTemplates(TemplateID)
+    FOREIGN KEY (FormTemplateID) REFERENCES ApplicationFormTemplates(TemplateID),
+    FOREIGN KEY (SemesterID) REFERENCES Semesters(TermID),
+    FOREIGN KEY (LocationID) REFERENCES Locations(LocationID)
 );
-INSERT INTO Events (EventName, EventImg, Description, EventDate, Location, ClubID, IsPublic, Capacity, Status) VALUES
--- Sự kiện sắp tới (Pending) cho năm 2025
-('FPTU Showcase 2025 Chung Kết', 'images/events/showcase2025.jpg', 'FPTU Showcase 2025 Chung Kết là sự kiện nghệ thuật lớn nhất trong năm, nơi quy tụ những tiết mục đặc sắc từ các vòng thi trước đó trên khắp các cơ sở FPTU toàn quốc. Với chủ đề ''Bùng cháy đam mê, lan tỏa cảm hứng'', chương trình không chỉ là sân chơi thể hiện tài năng mà còn là nơi gắn kết cộng đồng sinh viên thông qua âm nhạc, vũ đạo, sân khấu hóa, và các màn trình diễn đỉnh cao. Khán giả sẽ được mãn nhãn với hệ thống âm thanh ánh sáng hiện đại, tương tác sân khấu chuyên nghiệp và đặc biệt là những khoảnh khắc thăng hoa của tuổi trẻ. Sự kiện dự kiến thu hút hàng trăm sinh viên và khách mời, tạo nên một đêm diễn bùng nổ, đầy cảm xúc.', '2025-04-27 09:00:00', 'Sân khấu chính, Campus Hà Nội', 7, TRUE, 200, 'PENDING'),
-('Lễ Hội Âm Nhạc Tết 2025', 'images/events/tetmusic2025.jpg', 'Lễ Hội Âm Nhạc Tết 2025 mang đến không gian âm nhạc sống động kết hợp tinh hoa truyền thống và xu hướng hiện đại. Người tham dự sẽ được thưởng thức những tiết mục dân gian hòa quyện với âm nhạc điện tử, rap, ballad… từ các câu lạc bộ nghệ thuật sinh viên. Không khí ngày Tết lan tỏa qua các gian hàng trò chơi dân gian, trình diễn áo dài, và các hoạt động giao lưu văn hóa vùng miền. Đây là dịp để sinh viên FPTU cùng nhau đón Tết sớm, lan tỏa niềm vui và gắn kết cộng đồng.', '2025-01-15 19:00:00', 'Campus Quy Nhơn', 6, TRUE, 300, 'PENDING'),
-('Thử Thách Lập Trình FPTU 2025', 'images/events/coding2025.jpg', 'Cuộc thi lập trình giải quyết các vấn đề thực tế.', '2025-03-15 08:00:00', 'Phòng máy tính, Campus TP.HCM', 4, TRUE, 50, 'PENDING'),
-('Chiến Dịch Tình Nguyện Xanh 2025', 'images/events/greenfuture2025.jpg', 'Hoạt động tình nguyện thúc đẩy phát triển bền vững cho cộng đồng địa phương.', '2025-06-10 07:00:00', 'Khu vực nông thôn Đà Nẵng', 5, TRUE, 40, 'PENDING'),
-('Hội Thảo Kỹ Năng Viết Tiếng Anh', 'images/events/englishworkshop2025.jpg', 'Hội thảo nâng cao kỹ năng viết và thuyết trình tiếng Anh học thuật.', '2025-02-20 09:00:00', 'Phòng hội thảo B1, Campus Hà Nội', 3, TRUE, 60, 'PENDING'),
-('Giải Bóng Rổ 3x3 FPTU', 'images/events/basketball2025.jpg', 'Giải đấu bóng rổ 3x3 sôi động dành cho sinh viên FPTU.', '2025-05-10 14:00:00', 'Sân thể thao, Campus TP.HCM', 2, FALSE, 80, 'PENDING'),
-('Cuộc Thi Tranh Biện Xã Hội 2025', 'images/events/debate2025.jpg', 'Cuộc thi tranh biện về các vấn đề xã hội nóng hổi.', '2025-04-15 13:00:00', 'Hội trường lớn, Campus Hà Nội', 8, TRUE, 100, 'PENDING'),
-('Giải Bóng Đá Sinh Viên FPTU 2025', 'images/events/football2025.jpg', 'Giải đấu bóng đá thường niên dành cho sinh viên toàn trường.', '2025-03-25 08:00:00', 'Sân vận động, Campus Hà Nội', 1, TRUE, 120, 'PENDING'),
-('Ngày Hội Âm Nhạc FPTU 2025', 'images/events/musicday2025.jpg', 'Ngày hội với các màn trình diễn âm nhạc và hoạt động tương tác.', '2025-05-20 10:00:00', 'Sân khấu ngoài trời, Campus Cần Thơ', 6, FALSE, 250, 'PENDING'),
-('Hackathon Đổi Mới AI', 'images/events/aihackathon2025.jpg', 'Cuộc thi phát triển các giải pháp trí tuệ nhân tạo sáng tạo.', '2025-06-05 08:00:00', 'Phòng máy tính, Campus Hà Nội', 4, TRUE, 45, 'PENDING'),
-('Workshop: Xây dựng Website với Spring Boot','/images/events/springboot_workshop.jpg',
-  'Buổi workshop chuyên sâu dành cho các thành viên Câu Lạc Bộ Lập Trình nhằm giúp làm quen với cách xây dựng website sử dụng Spring Boot – một framework mạnh mẽ trong Java. 
-  Trong sự kiện này, các bạn sẽ được hướng dẫn từng bước từ cấu hình dự án, kết nối cơ sở dữ liệu, tới việc triển khai các chức năng cơ bản như login, CRUD, API REST. 
-  Ngoài ra, chúng tôi cũng sẽ tổ chức phần Q&A và thực hành trực tiếp trên máy, khuyến khích mọi người mang laptop để tham gia coding ngay tại sự kiện.',
-  '2025-06-20 14:00:00',
-  'Phòng Lab 302, Tòa nhà A, FPTU',
-  4,
-  0,
-  100,
-  'Pending'),
-('Cuộc thi Code War: Thử thách thuật toán',
-  '/images/events/codewar.jpg',
-  'Code War là một cuộc thi lập trình được tổ chức bởi Câu Lạc Bộ Lập Trình nhằm nâng cao khả năng tư duy thuật toán và kỹ năng giải quyết vấn đề của sinh viên. 
-  Cuộc thi gồm nhiều vòng với các mức độ từ cơ bản đến nâng cao, người chơi sẽ thi đấu cá nhân trong khoảng thời gian giới hạn để giải quyết các bài toán lập trình bằng ngôn ngữ tuỳ chọn.
-  Sự kiện cũng là nơi gặp gỡ, học hỏi giữa những bạn trẻ yêu thích công nghệ và có đam mê với lập trình.',
-  '2025-06-25 09:00:00',
-  'Hội trường Innovation Lab, FPTU',
-  4,
-  1,
-  120,
-  'Pending'),
--- Sự kiện đã hoàn thành (Completed) trong năm 2024
-('Lễ Hội Làng Tết 2024', 'images/events/villagefest2024.jpg', 'Sự kiện tái hiện không khí Tết truyền thống với các tiết mục âm nhạc và nhảy.', '2024-01-20 10:00:00', 'Campus Đà Nẵng', 6, TRUE, 500, 'COMPLETED'),
-('Trại Lập Trình FPTU 2024', 'images/events/codingbootcamp2024.jpg', 'Trại huấn luyện chuyên sâu về kỹ thuật lập trình nâng cao.', '2024-11-20 08:00:00', 'Phòng máy tính, Campus TP.HCM', 4, TRUE, 60, 'COMPLETED'),
-('Đêm Nhạc Rock 2024', 'images/events/rocknight2024.jpg', 'Đêm nhạc rock bùng nổ với các ban nhạc sinh viên.', '2024-12-10 19:00:00', 'Sân khấu ngoài trời, Campus Hà Nội', 6, TRUE, 200, 'COMPLETED'),
-('Chiến Dịch Tình Nguyện Hè 2024', 'images/events/summervolunteer2024.jpg', 'Hoạt động tình nguyện hỗ trợ trẻ em vùng sâu vùng xa.', '2024-07-15 07:00:00', 'Tỉnh Tuyên Quang', 5, FALSE, 35, 'COMPLETED'),
-('Cuộc Thi Nói Tiếng Anh 2024', 'images/events/englishcontest2024.jpg', 'Cuộc thi thể hiện kỹ năng giao tiếp tiếng Anh.', '2024-11-25 09:00:00', 'Phòng hội thảo B3, Campus Hà Nội', 3, TRUE, 70, 'COMPLETED'),
-('Giải Bóng Đá 5x5 FPTU 2024', 'images/events/football2024.jpg', 'Giải đấu bóng đá 5x5 hấp dẫn dành cho sinh viên FPTU.', '2024-12-05 14:00:00', 'Sân thể thao, Campus Cần Thơ', 1, FALSE, 100, 'COMPLETED'),
-('Ngày Hội Nhảy FPTU 2024', 'images/events/dancefest2024.jpg', 'Ngày hội nhảy với các màn trình diễn độc đáo từ sinh viên.', '2024-12-15 10:00:00', 'Sân chính, Campus Quy Nhơn', 7, TRUE, 400, 'COMPLETED'),
-('Hội Thảo Phát Triển Web 2024', 'images/events/webdev2024.jpg', 'Hội thảo thực hành về công nghệ phát triển web hiện đại.', '2024-11-15 14:00:00', 'Phòng hội thảo A2, Campus Đà Nẵng', 4, TRUE, 50, 'COMPLETED'),
-('FPTU Dance Battle 2024', 'images/events/dancebattle2024.jpg', 'Cuộc thi nhảy thể hiện tài năng của sinh viên.', '2024-11-30 18:00:00', 'Sân khấu chính, Campus TP.HCM', 7, TRUE, 150, 'COMPLETED'),
-('Cuộc Thi Tranh Biện 2024', 'images/events/debate2024.jpg', 'Cuộc thi tranh biện về các chủ đề học thuật và xã hội.', '2024-12-01 09:00:00', 'Phòng hội thảo C1, Campus Hà Nội', 8, TRUE, 65, 'COMPLETED');
+INSERT INTO Events (EventName, EventImg, Description, EventDate, LocationID, ClubID, IsPublic, Capacity, Status, SemesterID) VALUES
+-- Spring 2025
+('Lễ Hội Âm Nhạc Tết 2025', 'images/events/tetmusic2025.jpg', '...', '2025-02-01 19:00:00', 2, 6, TRUE, 300, 'PENDING', 'SP25'),
+('Hội Thảo Kỹ Năng Viết Tiếng Anh', 'images/events/englishworkshop2025.jpg', '...', '2025-03-05 09:00:00', 9, 3, TRUE, 60, 'COMPLETED', 'SP25'),
+('Cuộc Thi Tranh Biện Xã Hội 2025', 'images/events/debate2025.jpg', '...', '2025-04-10 13:00:00', 3, 8, TRUE, 100, 'COMPLETED', 'SP25'),
+('Workshop: Xây dựng Website với Spring Boot', '/images/events/springboot_workshop.jpg', '...', '2025-04-20 14:00:00', 26, 4, 0, 100, 'PENDING', 'SP25'),
 
--- Sự kiện PENDING (sau ngày hôm nay)
-UPDATE Events SET EventDate = '2025-06-30 09:00:00', Status = 'PENDING' WHERE EventID = 1;
-UPDATE Events SET EventDate = '2025-07-01 19:00:00', Status = 'PENDING' WHERE EventID = 2;
-UPDATE Events SET EventDate = '2025-07-25 08:00:00', Status = 'PENDING' WHERE EventID = 6;
-UPDATE Events SET EventDate = '2025-06-28 13:00:00', Status = 'PENDING' WHERE EventID = 7;
-UPDATE Events SET EventDate = '2025-07-05 08:00:00', Status = 'PENDING' WHERE EventID = 8;
-UPDATE Events SET EventDate = '2025-07-31 10:00:00', Status = 'PENDING' WHERE EventID = 9;
+-- Summer 2025 
+('FPTU Showcase 2025 Chung Kết', 'images/events/showcase2025.jpg', '...', '2025-06-30 09:00:00', 1, 7, TRUE, 200, 'PENDING', 'SU25'),
+('Thử Thách Lập Trình FPTU 2025', 'images/events/coding2025.jpg', '...', '2025-06-23 08:00:00', 25, 4, TRUE, 50, 'PROCESSING', 'SU25'),
+('Giải Bóng Đá Sinh Viên FPTU 2025', 'images/events/football2025.jpg', '...', '2025-06-05 08:00:00', 5, 1, TRUE, 120, 'COMPLETED', 'SU25'),
+('Chiến Dịch Tình Nguyện Xanh 2025', 'images/events/greenfuture2025.jpg', '...', '2025-07-25 07:00:00', 35, 5, TRUE, 40, 'PENDING', 'SU25'),
+('Giải Bóng Rổ 3x3 FPTU', 'images/events/basketball2025.jpg', '...', '2025-07-05 14:00:00', 4, 2, FALSE, 80, 'PENDING', 'SU25'),
+('Ngày Hội Âm Nhạc FPTU 2025', 'images/events/musicday2025.jpg', '...', '2025-07-10 10:00:00', 1, 6, FALSE, 250, 'PENDING', 'SU25'),
+('Hackathon Đổi Mới AI', 'images/events/aihackathon2025.jpg', '...', '2025-07-15 08:00:00', 25, 4, TRUE, 45, 'PENDING', 'SU25'),
+('Cuộc thi Code War: Thử thách thuật toán', '/images/events/codewar.jpg', '...', '2025-07-31 09:00:00', 27, 4, 1, 120, 'PENDING', 'SU25'),
 
--- Sự kiện PROCESSING (hôm nay)
-UPDATE Events SET EventDate = '2025-06-19 08:00:00', Status = 'PROCESSING' WHERE EventID = 3;
+-- Spring 2024
+('Lễ Hội Làng Tết 2024', 'images/events/villagefest2024.jpg', '...', '2024-01-20 10:00:00', 36, 6, TRUE, 500, 'COMPLETED', 'SP24'),
 
--- Sự kiện COMPLETED (trước ngày hôm nay)
-UPDATE Events SET EventDate = '2025-06-10 07:00:00', Status = 'COMPLETED' WHERE EventID = 4;
-UPDATE Events SET EventDate = '2025-06-01 09:00:00', Status = 'COMPLETED' WHERE EventID = 5;
-UPDATE Events SET EventDate = '2025-06-05 10:00:00', Status = 'COMPLETED' WHERE EventID = 10;
-UPDATE Events SET EventDate = '2024-01-20 10:00:00', Status = 'COMPLETED' WHERE EventID = 11;
-UPDATE Events SET EventDate = '2024-11-20 08:00:00', Status = 'COMPLETED' WHERE EventID = 12;
-UPDATE Events SET EventDate = '2024-12-10 19:00:00', Status = 'COMPLETED' WHERE EventID = 13;
-UPDATE Events SET EventDate = '2024-07-15 07:00:00', Status = 'COMPLETED' WHERE EventID = 14;
-UPDATE Events SET EventDate = '2024-11-25 09:00:00', Status = 'COMPLETED' WHERE EventID = 15;
-UPDATE Events SET EventDate = '2024-12-05 14:00:00', Status = 'COMPLETED' WHERE EventID = 16;
-UPDATE Events SET EventDate = '2024-12-15 10:00:00', Status = 'COMPLETED' WHERE EventID = 17;
-UPDATE Events SET EventDate = '2024-11-15 14:00:00', Status = 'COMPLETED' WHERE EventID = 18;
-UPDATE Events SET EventDate = '2024-11-30 18:00:00', Status = 'COMPLETED' WHERE EventID = 19;
-UPDATE Events SET EventDate = '2024-12-01 09:00:00', Status = 'COMPLETED' WHERE EventID = 20;
+-- Summer 2024
+('Chiến Dịch Tình Nguyện Hè 2024', 'images/events/summervolunteer2024.jpg', '...', '2024-07-15 07:00:00', 36, 5, FALSE, 35, 'COMPLETED', 'SU24'),
 
-UPDATE Events SET Description = 'FPTU Showcase 2025 Chung Kết là sự kiện nghệ thuật lớn nhất trong năm, nơi quy tụ những tiết mục đặc sắc từ các vòng thi trước đó trên khắp các cơ sở FPTU toàn quốc. Với chủ đề ''Bùng cháy đam mê, lan tỏa cảm hứng'', chương trình không chỉ là sân chơi thể hiện tài năng mà còn là nơi gắn kết cộng đồng sinh viên thông qua âm nhạc, vũ đạo, sân khấu hóa, và các màn trình diễn đỉnh cao. Khán giả sẽ được mãn nhãn với hệ thống âm thanh ánh sáng hiện đại, tương tác sân khấu chuyên nghiệp và đặc biệt là những khoảnh khắc thăng hoa của tuổi trẻ. Sự kiện dự kiến thu hút hàng trăm sinh viên và khách mời, tạo nên một đêm diễn bùng nổ, đầy cảm xúc.' WHERE EventID = 1;
-UPDATE Events SET Description = 'Lễ Hội Âm Nhạc Tết 2025 mang đến không gian âm nhạc sống động kết hợp tinh hoa truyền thống và xu hướng hiện đại. Người tham dự sẽ được thưởng thức những tiết mục dân gian hòa quyện với âm nhạc điện tử, rap, ballad… từ các câu lạc bộ nghệ thuật sinh viên. Không khí ngày Tết lan tỏa qua các gian hàng trò chơi dân gian, trình diễn áo dài, và các hoạt động giao lưu văn hóa vùng miền. Đây là dịp để sinh viên FPTU cùng nhau đón Tết sớm, lan tỏa niềm vui và gắn kết cộng đồng.' WHERE EventID = 2;
-UPDATE Events SET Description = 'Thử Thách Lập Trình FPTU 2025 là sân chơi trí tuệ quy tụ những bạn trẻ đam mê công nghệ và giải thuật. Các đội thi sẽ đối mặt với các bài toán lập trình thực tiễn liên quan đến xử lý dữ liệu, trí tuệ nhân tạo, và bảo mật. Cuộc thi không chỉ rèn luyện kỹ năng coding mà còn thúc đẩy tư duy phản biện, làm việc nhóm và sáng tạo giải pháp. Bên cạnh đó, chương trình còn có workshop chia sẻ kinh nghiệm từ các chuyên gia, tạo môi trường học hỏi bổ ích.' WHERE EventID = 3;
-UPDATE Events SET Description = 'Chiến Dịch Tình Nguyện Xanh 2025 hướng đến mục tiêu nâng cao nhận thức bảo vệ môi trường và phát triển cộng đồng bền vững. Sinh viên sẽ tham gia các hoạt động trồng cây xanh, tái chế rác thải, làm sạch môi trường tại các vùng nông thôn. Ngoài ra, chiến dịch còn kết hợp tổ chức lớp học kỹ năng sống, tặng quà cho học sinh khó khăn, góp phần lan tỏa tinh thần trách nhiệm xã hội. Đây là dịp để sinh viên thể hiện lòng nhiệt huyết, sẻ chia và cống hiến cho cộng đồng.' WHERE EventID = 4;
-UPDATE Events SET Description = 'Hội Thảo Kỹ Năng Viết Tiếng Anh 2025 giúp sinh viên nâng cao khả năng viết học thuật qua các chủ đề phổ biến trong môi trường học thuật quốc tế. Diễn giả là các giảng viên, cựu sinh viên xuất sắc sẽ chia sẻ phương pháp viết luận logic, cách triển khai ý tưởng, và kỹ năng phản biện trong tiếng Anh. Người tham dự sẽ được thực hành trực tiếp, nhận phản hồi từ chuyên gia và tài liệu học tập chất lượng. Hội thảo phù hợp với sinh viên chuẩn bị cho IELTS, học bổng, hoặc nghiên cứu.' WHERE EventID = 5;
-UPDATE Events SET Description = 'Giải Bóng Rổ 3x3 FPTU là sân chơi thể thao hấp dẫn thu hút những bạn trẻ yêu thích vận động, chiến thuật và tinh thần đồng đội. Với thể thức thi đấu 3x3 hiện đại, trận đấu diễn ra nhanh, căng thẳng và đầy kịch tính. Các đội bóng đến từ nhiều cơ sở FPTU sẽ tranh tài quyết liệt để giành chức vô địch. Bên cạnh đó, sự kiện còn có các hoạt động cổ động, tặng quà cho khán giả và phần biểu diễn sôi động giữa trận đấu, tạo nên bầu không khí sôi nổi và đầy hào hứng.' WHERE EventID = 6;
-UPDATE Events SET Description = 'Cuộc Thi Tranh Biện Xã Hội 2025 mở ra diễn đàn lý tưởng cho những sinh viên yêu thích tranh luận, tư duy phản biện và quan tâm đến các vấn đề xã hội. Với các chủ đề nóng như giáo dục, môi trường, bình đẳng giới, đội thi sẽ đối đầu trực tiếp qua các vòng debate gay cấn. Sự kiện góp phần nâng cao khả năng lập luận, thuyết phục và trình bày logic cho người trẻ. Ban giám khảo là giảng viên và chuyên gia, đảm bảo tính chuyên môn và công tâm.' WHERE EventID = 7;
-UPDATE Events SET Description = 'Giải Bóng Đá Sinh Viên FPTU 2025 quy tụ các đội bóng sinh viên tài năng đến từ các khoa và cơ sở khác nhau. Đây là dịp để sinh viên rèn luyện thể chất, xây dựng tinh thần đồng đội và giao lưu giữa các cộng đồng học tập. Các trận đấu diễn ra hấp dẫn với sự cổ vũ nhiệt tình từ khán giả. Sự kiện hứa hẹn tạo ra không khí thể thao sôi động, kết nối đam mê và lan tỏa năng lượng tích cực trong sinh viên.' WHERE EventID = 8;
-UPDATE Events SET Description = 'Ngày Hội Âm Nhạc FPTU 2025 là lễ hội nghệ thuật mở rộng với sân khấu hoành tráng, hệ thống âm thanh – ánh sáng chuyên nghiệp. Sinh viên sẽ được đắm chìm trong các màn trình diễn nhạc trẻ, acoustic, rap, EDM đến từ các ban nhạc và nghệ sĩ trẻ FPTU. Ngoài ra còn có các khu vui chơi, gian hàng ẩm thực và khu check-in nghệ thuật, tạo nên một không gian văn hóa – giải trí đặc sắc. Đây là dịp để sinh viên thể hiện đam mê và thư giãn sau những giờ học căng thẳng.' WHERE EventID = 9;
-UPDATE Events SET Description = 'Hackathon Đổi Mới AI là sự kiện công nghệ nổi bật dành cho sinh viên yêu thích lập trình và sáng tạo với trí tuệ nhân tạo. Trong vòng 24-48 giờ, các đội sẽ xây dựng sản phẩm AI giải quyết bài toán xã hội như chatbot giáo dục, nhận diện cảm xúc, phân tích dữ liệu. Cuộc thi khuyến khích tư duy đổi mới, kỹ năng teamwork và khả năng hiện thực hóa ý tưởng thành sản phẩm. Các dự án xuất sắc sẽ được mentor hỗ trợ phát triển tiếp và có cơ hội trình bày trước nhà đầu tư.' WHERE EventID = 10;
-UPDATE Events SET Description = 'Ngày Hội Câu Lạc Bộ FPTU 2025 là dịp để hơn 50 CLB học thuật, kỹ năng, thể thao, nghệ thuật… giới thiệu hoạt động đến tân sinh viên. Không gian sự kiện tràn ngập sắc màu với các booth trải nghiệm, mini game, sân khấu biểu diễn và hoạt động giao lưu hấp dẫn. Sinh viên sẽ có cơ hội khám phá đam mê, kết nối bạn bè, và tìm kiếm môi trường phát triển bản thân trong thời gian học tại FPTU.' WHERE EventID = 11;
-UPDATE Events SET Description = 'Cuộc Thi Sáng Tạo Nội Dung Số 2025 khuyến khích sinh viên thể hiện bản lĩnh truyền thông qua các hình thức như video ngắn, infographic, podcast, và mạng xã hội. Với chủ đề về lối sống sinh viên, giáo dục số, sức khỏe tinh thần, người tham gia sẽ thi tài sáng tạo nội dung hấp dẫn, lan tỏa giá trị tích cực. Cuộc thi kết hợp workshop từ chuyên gia truyền thông và giải thưởng giá trị.' WHERE EventID = 12;
-UPDATE Events SET Description = 'Diễn Đàn Sinh Viên FPTU 2025 quy tụ sinh viên xuất sắc cùng lãnh đạo nhà trường để trao đổi thẳng thắn về các vấn đề học tập, đời sống, cơ hội nghề nghiệp. Diễn đàn là cầu nối giúp sinh viên đóng góp ý kiến cải tiến môi trường học đường, đồng thời được định hướng phát triển toàn diện. Đây là hoạt động mang tính chất đối thoại, thể hiện sự dân chủ và cầu thị của FPTU.' WHERE EventID = 13;
-UPDATE Events SET Description = 'Ngày Hội Việc Làm FPTU 2025 kết nối sinh viên với hơn 100 doanh nghiệp trong và ngoài nước thuộc nhiều lĩnh vực như công nghệ, tài chính, marketing, giáo dục… Sinh viên có cơ hội phỏng vấn trực tiếp, cập nhật yêu cầu thị trường, và nhận tư vấn nghề nghiệp từ chuyên gia. Ngoài ra, các hội thảo kỹ năng ứng tuyển và viết CV cũng được tổ chức đồng hành.' WHERE EventID = 14;
-UPDATE Events SET Description = 'Tuần Lễ Quốc Tế FPTU 2025 giới thiệu văn hóa các quốc gia thông qua chuỗi hoạt động giao lưu với sinh viên quốc tế, trình diễn trang phục truyền thống, ẩm thực đa quốc gia, và workshop ngôn ngữ. Sự kiện góp phần xây dựng môi trường quốc tế hóa, tôn vinh sự đa dạng và thúc đẩy hội nhập toàn cầu cho sinh viên FPTU.' WHERE EventID = 15;
-UPDATE Events SET Description = 'Workshop Lập Kế Hoạch Tài Chính Cá Nhân cung cấp kiến thức thiết thực về quản lý chi tiêu, tiết kiệm, đầu tư, và lập kế hoạch tài chính cho sinh viên. Diễn giả là các chuyên gia tài chính, nhà đầu tư trẻ chia sẻ câu chuyện thực tế và kinh nghiệm ứng dụng. Đây là kỹ năng quan trọng giúp sinh viên tự chủ và chuẩn bị tốt cho cuộc sống sau khi ra trường.' WHERE EventID = 16;
-UPDATE Events SET Description = 'Cuộc Thi Nhiếp Ảnh FPTU 2025 tìm kiếm những khoảnh khắc đẹp và ý nghĩa trong đời sống sinh viên qua ống kính sáng tạo. Chủ đề năm nay là "Thanh xuân FPTU", mở ra không gian cảm xúc qua hình ảnh về học tập, tình bạn, hoạt động xã hội. Các tác phẩm xuất sắc sẽ được triển lãm, in sách ảnh và trao giải.' WHERE EventID = 17;
-UPDATE Events SET Description = 'Ngày Hội Đổi Mới Sáng Tạo FPTU là sân chơi kết nối ý tưởng khởi nghiệp, sáng chế công nghệ, cải tiến sản phẩm từ sinh viên toàn trường. Các đội sẽ trình bày dự án trước hội đồng chuyên gia, nhận tư vấn và có cơ hội gọi vốn hoặc tham gia ươm tạo. Sự kiện góp phần thúc đẩy tinh thần đổi mới và xây dựng văn hóa khởi nghiệp tại FPTU.' WHERE EventID = 18;
-UPDATE Events SET Description = 'Chương Trình Tri Ân Ngày Nhà Giáo Việt Nam 20/11 là dịp sinh viên gửi lời cảm ơn đến thầy cô qua các tiết mục văn nghệ, viết thư tay, tặng quà, và các hoạt động gắn kết. Sự kiện mang không khí ấm áp, xúc động, thể hiện tinh thần “tôn sư trọng đạo” và sự trân trọng công lao của người làm giáo dục.' WHERE EventID = 19;
-UPDATE Events SET Description = 'Hành Trình Khám Phá Bản Thân là chuỗi hoạt động trải nghiệm như trekking, dã ngoại, thử thách nhóm giúp sinh viên khám phá giá trị cá nhân, tăng cường kỹ năng mềm và xây dựng tinh thần đồng đội. Các hoạt động được thiết kế kết hợp giữa vui chơi, thử thách và chia sẻ giúp người tham gia hiểu rõ bản thân và định hướng tương lai.' WHERE EventID = 20;
+-- Fall 2024
+('Trại Lập Trình FPTU 2024', 'images/events/codingbootcamp2024.jpg', '...', '2024-11-20 08:00:00', 25, 4, TRUE, 60, 'COMPLETED', 'FA24'),
+('Đêm Nhạc Rock 2024', 'images/events/rocknight2024.jpg', '...', '2024-12-10 19:00:00', 1, 6, TRUE, 200, 'COMPLETED', 'FA24'),
+('Cuộc Thi Nói Tiếng Anh 2024', 'images/events/englishcontest2024.jpg', '...', '2024-11-25 09:00:00', 10, 3, TRUE, 70, 'COMPLETED', 'FA24'),
+('Giải Bóng Đá 5x5 FPTU 2024', 'images/events/football2024.jpg', '...', '2024-12-05 14:00:00', 5, 1, FALSE, 100, 'COMPLETED', 'FA24'),
+('Ngày Hội Nhảy FPTU 2024', 'images/events/dancefest2024.jpg', '...', '2024-12-15 10:00:00', 2, 7, TRUE, 400, 'COMPLETED', 'FA24'),
+('Hội Thảo Phát Triển Web 2024', 'images/events/webdev2024.jpg', '...', '2024-11-15 14:00:00', 11, 4, TRUE, 50, 'COMPLETED', 'FA24'),
+('FPTU Dance Battle 2024', 'images/events/dancebattle2024.jpg', '...', '2024-11-30 18:00:00', 1, 7, TRUE, 150, 'COMPLETED', 'FA24'),
+('Cuộc Thi Tranh Biện 2024', 'images/events/debate2024.jpg', '...', '2024-12-01 09:00:00', 12, 8, TRUE, 65, 'COMPLETED', 'FA24');
+
+UPDATE Events 
+SET Description = 'Lễ Hội Âm Nhạc Tết 2025 mang đến không gian âm nhạc sống động kết hợp tinh hoa truyền thống và xu hướng hiện đại. Người tham dự sẽ được thưởng thức các tiết mục dân gian hòa quyện với âm nhạc điện tử, rap, ballad… từ các câu lạc bộ nghệ thuật sinh viên. Không khí ngày Tết lan tỏa qua các gian hàng trò chơi dân gian, trình diễn áo dài, và các hoạt động giao lưu văn hóa vùng miền. Đây là dịp để sinh viên FPTU cùng nhau đón Tết sớm, lan tỏa niềm vui và gắn kết cộng đồng.' 
+WHERE EventName = 'Lễ Hội Âm Nhạc Tết 2025' AND SemesterID = 'SP25';
+UPDATE Events 
+SET Description = 'Hội Thảo Kỹ Năng Viết Tiếng Anh 2025 giúp sinh viên nâng cao khả năng viết học thuật qua các chủ đề phổ biến trong môi trường học thuật quốc tế. Diễn giả là các giảng viên, cựu sinh viên xuất sắc sẽ chia sẻ phương pháp viết luận logic, cách triển khai ý tưởng, và kỹ năng phản biện trong tiếng Anh. Người tham dự sẽ được thực hành trực tiếp, nhận phản hồi từ chuyên gia và tài liệu học tập chất lượng. Hội thảo phù hợp với sinh viên chuẩn bị cho IELTS, học bổng, hoặc nghiên cứu.' 
+WHERE EventName = 'Hội Thảo Kỹ Năng Viết Tiếng Anh' AND SemesterID = 'SP25';
+UPDATE Events 
+SET Description = 'Cuộc Thi Tranh Biện Xã Hội 2025 mở ra diễn đàn lý tưởng cho những sinh viên yêu thích tranh luận, tư duy phản biện và quan tâm đến các vấn đề xã hội. Với các chủ đề nóng như giáo dục, môi trường, bình đẳng giới, đội thi sẽ đối đầu trực tiếp qua các vòng debate gay cấn. Sự kiện góp phần nâng cao khả năng lập luận, thuyết phục và trình bày logic cho người trẻ. Ban giám khảo là giảng viên và chuyên gia, đảm bảo tính chuyên môn và công tâm.' 
+WHERE EventName = 'Cuộc Thi Tranh Biện Xã Hội 2025' AND SemesterID = 'SP25';
+UPDATE Events 
+SET Description = 'Workshop: Xây dựng Website với Spring Boot là cơ hội để sinh viên khám phá framework Spring Boot trong phát triển ứng dụng web. Diễn giả là các lập trình viên chuyên nghiệp sẽ hướng dẫn cách xây dựng website từ cơ bản đến nâng cao, bao gồm thiết kế API, tích hợp cơ sở dữ liệu, và triển khai ứng dụng. Người tham gia sẽ được thực hành trực tiếp, nhận tài liệu học tập, và thảo luận với các chuyên gia, giúp nắm vững kỹ năng phát triển web hiện đại.' 
+WHERE EventName = 'Workshop: Xây dựng Website với Spring Boot' AND SemesterID = 'SP25';
+UPDATE Events 
+SET Description = 'FPTU Showcase 2025 Chung Kết là sự kiện nghệ thuật lớn nhất trong năm, nơi quy tụ những tiết mục đặc sắc từ các vòng thi trước đó trên khắp các cơ sở FPTU toàn quốc. Với chủ đề ''Bùng cháy đam mê, lan tỏa cảm hứng'', chương trình không chỉ là sân chơi thể hiện tài năng mà còn là nơi gắn kết cộng đồng sinh viên thông qua âm nhạc, vũ đạo, sân khấu hóa, và các màn trình diễn đỉnh cao. Khán giả sẽ được mãn nhãn với hệ thống âm thanh ánh sáng hiện đại, tương tác sân khấu chuyên nghiệp và đặc biệt là những khoảnh khắc thăng hoa của tuổi trẻ. Sự kiện dự kiến thu hút hàng trăm sinh viên và khách mời, tạo nên một đêm diễn bùng nổ, đầy cảm xúc.' 
+WHERE EventName = 'FPTU Showcase 2025 Chung Kết' AND SemesterID = 'SU25';
+UPDATE Events 
+SET Description = 'Thử Thách Lập Trình FPTU 2025 là sân chơi trí tuệ quy tụ những bạn trẻ đam mê công nghệ và giải thuật. Các đội thi sẽ đối mặt với các bài toán lập trình thực tiễn liên quan đến xử lý dữ liệu, trí tuệ nhân tạo, và bảo mật. Cuộc thi không chỉ rèn luyện kỹ năng coding mà còn thúc đẩy tư duy phản biện, làm việc nhóm và sáng tạo giải pháp. Bên cạnh đó, chương trình còn có workshop chia sẻ kinh nghiệm từ các chuyên gia, tạo môi trường học hỏi bổ ích.' 
+WHERE EventName = 'Thử Thách Lập Trình FPTU 2025' AND SemesterID = 'SU25';
+UPDATE Events 
+SET Description = 'Giải Bóng Đá Sinh Viên FPTU 2025 quy tụ các đội bóng sinh viên tài năng đến từ các khoa và cơ sở khác nhau. Đây là dịp để sinh viên rèn luyện thể chất, xây dựng tinh thần đồng đội và giao lưu giữa các cộng đồng học tập. Các trận đấu diễn ra hấp dẫn với sự cổ vũ nhiệt tình từ khán giả. Sự kiện hứa hẹn tạo ra không khí thể thao sôi động, kết nối đam mê và lan tỏa năng lượng tích cực trong sinh viên.' 
+WHERE EventName = 'Giải Bóng Đá Sinh Viên FPTU 2025' AND SemesterID = 'SU25';
+UPDATE Events 
+SET Description = 'Chiến Dịch Tình Nguyện Xanh 2025 hướng đến mục tiêu nâng cao nhận thức bảo vệ môi trường và phát triển cộng đồng bền vững. Sinh viên sẽ tham gia các hoạt động trồng cây xanh, tái chế rác thải, làm sạch môi trường tại các vùng nông thôn. Ngoài ra, chiến dịch còn kết hợp tổ chức lớp học kỹ năng sống, tặng quà cho học sinh khó khăn, góp phần lan tỏa tinh thần trách nhiệm xã hội. Đây là dịp để sinh viên thể hiện lòng nhiệt huyết, sẻ chia và cống hiến cho cộng đồng.' 
+WHERE EventName = 'Chiến Dịch Tình Nguyện Xanh 2025' AND SemesterID = 'SU25';
+UPDATE Events 
+SET Description = 'Giải Bóng Rổ 3x3 FPTU là sân chơi thể thao hấp dẫn thu hút những bạn trẻ yêu thích vận động, chiến thuật và tinh thần đồng đội. Với thể thức thi đấu 3x3 hiện đại, trận đấu diễn ra nhanh, căng thẳng và đầy kịch tính. Các đội bóng đến từ nhiều cơ sở FPTU sẽ tranh tài quyết liệt để giành chức vô địch. Bên cạnh đó, sự kiện còn có các hoạt động cổ động, tặng quà cho khán giả và phần biểu diễn sôi động giữa trận đấu, tạo nên bầu không khí sôi nổi và đầy hào hứng.' 
+WHERE EventName = 'Giải Bóng Rổ 3x3 FPTU' AND SemesterID = 'SU25';
+UPDATE Events 
+SET Description = 'Ngày Hội Âm Nhạc FPTU 2025 là lễ hội nghệ thuật mở rộng với sân khấu hoành tráng, hệ thống âm thanh – ánh sáng chuyên nghiệp. Sinh viên sẽ được đắm chìm trong các màn trình diễn nhạc trẻ, acoustic, rap, EDM đến từ các ban nhạc và nghệ sĩ trẻ FPTU. Ngoài ra còn có các khu vui chơi, gian hàng ẩm thực và khu check-in nghệ thuật, tạo nên một không gian văn hóa – giải trí đặc sắc. Đây là dịp để sinh viên thể hiện đam mê và thư giãn sau những giờ học căng thẳng.' 
+WHERE EventName = 'Ngày Hội Âm Nhạc FPTU 2025' AND SemesterID = 'SU25';
+UPDATE Events 
+SET Description = 'Hackathon Đổi Mới AI là sự kiện công nghệ nổi bật dành cho sinh viên yêu thích lập trình và sáng tạo với trí tuệ nhân tạo. Trong vòng 24-48 giờ, các đội sẽ xây dựng sản phẩm AI giải quyết bài toán xã hội như chatbot giáo dục, nhận diện cảm xúc, phân tích dữ liệu. Cuộc thi khuyến khích tư duy đổi mới, kỹ năng teamwork và khả năng hiện thực hóa ý tưởng thành sản phẩm. Các dự án xuất sắc sẽ được mentor hỗ trợ phát triển tiếp và có cơ hội trình bày trước nhà đầu tư.' 
+WHERE EventName = 'Hackathon Đổi Mới AI' AND SemesterID = 'SU25';
+UPDATE Events 
+SET Description = 'Cuộc thi Code War: Thử thách thuật toán là sân chơi công nghệ dành cho các lập trình viên trẻ đam mê giải thuật và lập trình thi đấu. Các thí sinh sẽ đối mặt với các bài toán phức tạp về cấu trúc dữ liệu, tối ưu hóa thuật toán, và tư duy logic. Cuộc thi không chỉ kiểm tra kỹ năng coding mà còn khuyến khích sự sáng tạo và khả năng làm việc dưới áp lực. Các workshop từ chuyên gia và giải thưởng hấp dẫn sẽ là động lực lớn cho người tham gia.' 
+WHERE EventName = 'Cuộc thi Code War: Thử thách thuật toán' AND SemesterID = 'SU25';
+UPDATE Events 
+SET Description = 'Lễ Hội Làng Tết 2024 tái hiện không gian Tết truyền thống Việt Nam với các gian hàng thủ công, trò chơi dân gian, và trình diễn nghệ thuật đặc sắc như múa lân, hát chèo, và biểu diễn áo dài. Sự kiện mang đến cơ hội trải nghiệm văn hóa vùng miền, thưởng thức ẩm thực Tết như bánh chưng, bánh tét, và giao lưu cùng sinh viên từ các câu lạc bộ văn hóa. Đây là dịp để sinh viên FPTU hòa mình vào không khí Tết cổ truyền, lan tỏa niềm vui và kết nối cộng đồng.' 
+WHERE EventName = 'Lễ Hội Làng Tết 2024' AND SemesterID = 'SP24';
+UPDATE Events 
+SET Description = 'Chiến Dịch Tình Nguyện Hè 2024 là hành trình đầy ý nghĩa đưa sinh viên FPTU đến với các vùng nông thôn, tham gia các hoạt động thiện nguyện như xây nhà tình thương, dạy học cho trẻ em khó khăn, và hỗ trợ cộng đồng địa phương. Chương trình không chỉ lan tỏa tinh thần sẻ chia mà còn giúp sinh viên rèn luyện kỹ năng lãnh đạo, làm việc nhóm, và cảm nhận sâu sắc giá trị của sự cống hiến. Các hoạt động giao lưu văn hóa và khám phá vùng đất mới cũng là điểm nhấn đặc biệt.' 
+WHERE EventName = 'Chiến Dịch Tình Nguyện Hè 2024' AND SemesterID = 'SU24';
+UPDATE Events 
+SET Description = 'Trại Lập Trình FPTU 2024 là sân chơi công nghệ quy tụ các coder trẻ đam mê lập trình và sáng tạo phần mềm. Trong 3 ngày, sinh viên sẽ tham gia các thử thách coding, workshop về công nghệ mới như blockchain, DevOps, và phát triển ứng dụng thực tế. Dưới sự hướng dẫn của các mentor là chuyên gia công nghệ, trại hè mang đến cơ hội học hỏi, kết nối và phát triển kỹ năng lập trình chuyên sâu, đồng thời xây dựng tinh thần đồng đội và sáng tạo.' 
+WHERE EventName = 'Trại Lập Trình FPTU 2024' AND SemesterID = 'FA24';
+UPDATE Events 
+SET Description = 'Đêm Nhạc Rock 2024 là sự kiện âm nhạc bùng nổ với các màn trình diễn đầy năng lượng từ các ban nhạc rock sinh viên FPTU và khách mời nổi tiếng. Không gian sân khấu được đầu tư hoành tráng với hệ thống âm thanh, ánh sáng đỉnh cao, mang đến trải nghiệm cuồng nhiệt cho khán giả. Bên cạnh âm nhạc, sự kiện còn có các khu vực tương tác, check-in nghệ thuật và gian hàng lưu niệm, tạo nên một đêm rock sôi động, đậm chất tuổi trẻ.' 
+WHERE EventName = 'Đêm Nhạc Rock 2024' AND SemesterID = 'FA24';
+UPDATE Events 
+SET Description = 'Cuộc Thi Nói Tiếng Anh 2024 là sân chơi giúp sinh viên FPTU rèn luyện kỹ năng giao tiếp tiếng Anh thông qua các bài thuyết trình, tranh luận, và trả lời tình huống. Với các chủ đề đa dạng từ học thuật, văn hóa đến đời sống, thí sinh sẽ thể hiện khả năng sử dụng ngôn ngữ lưu loát, tự tin và sáng tạo. Sự kiện còn có sự góp mặt của giám khảo là các chuyên gia ngôn ngữ, mang đến phản hồi giá trị và cơ hội học hỏi cho người tham gia.' 
+WHERE EventName = 'Cuộc Thi Nói Tiếng Anh 2024' AND SemesterID = 'FA24';
+UPDATE Events 
+SET Description = 'Giải Bóng Đá 5x5 FPTU 2024 là giải đấu thể thao sôi động quy tụ các đội bóng sinh viên từ các khoa và cơ sở FPTU. Với thể thức 5x5, các trận đấu diễn ra nhanh, kịch tính, đòi hỏi sự phối hợp chiến thuật và kỹ năng cá nhân. Sự kiện không chỉ là nơi tranh tài mà còn là cơ hội giao lưu, xây dựng tinh thần đoàn kết giữa các sinh viên. Không khí sôi nổi với sự cổ vũ nhiệt tình từ khán giả và các hoạt động bên lề sẽ làm nên dấu ấn đặc biệt.' 
+WHERE EventName = 'Giải Bóng Đá 5x5 FPTU 2024' AND SemesterID = 'FA24';
+UPDATE Events 
+SET Description = 'Ngày Hội Nhảy FPTU 2024 là lễ hội vũ đạo hoành tráng, nơi các nhóm nhảy sinh viên thể hiện tài năng qua các thể loại như hip-hop, contemporary, và K-pop. Sân khấu được đầu tư chuyên nghiệp với ánh sáng, âm thanh hiện đại, kết hợp cùng các màn trình diễn mãn nhãn. Sự kiện còn có khu vực giao lưu, workshop dạy nhảy và các trò chơi tương tác, mang đến không gian giải trí sôi động và cơ hội khám phá đam mê cho sinh viên.' 
+WHERE EventName = 'Ngày Hội Nhảy FPTU 2024' AND SemesterID = 'FA24';
+UPDATE Events 
+SET Description = 'Hội Thảo Phát Triển Web 2024 mang đến cơ hội học hỏi về các công nghệ phát triển web tiên tiến như React, Node.js, và thiết kế giao diện người dùng. Diễn giả là các lập trình viên dày dạn kinh nghiệm sẽ chia sẻ kiến thức thực tiễn, từ xây dựng website responsive đến tối ưu hóa hiệu suất. Người tham gia sẽ được thực hành coding trực tiếp, nhận phản hồi từ chuyên gia, và kết nối với cộng đồng yêu công nghệ, giúp định hướng nghề nghiệp trong lĩnh vực phát triển web.' 
+WHERE EventName = 'Hội Thảo Phát Triển Web 2024' AND SemesterID = 'FA24';
+UPDATE Events 
+SET Description = 'FPTU Dance Battle 2024 là cuộc thi vũ đạo đối kháng kịch tính, nơi các nhóm nhảy sinh viên tranh tài qua các vòng loại và chung kết. Với các thể loại đa dạng như street dance, popping, và breakdance, sự kiện mang đến những màn trình diễn bùng nổ và sáng tạo. Khán giả sẽ được hòa mình vào không khí sôi động với âm nhạc, ánh sáng chuyên nghiệp, và các hoạt động bên lề như giao lưu với vũ công, tạo nên một ngày hội vũ đạo đáng nhớ.' 
+WHERE EventName = 'FPTU Dance Battle 2024' AND SemesterID = 'FA24';
+UPDATE Events 
+SET Description = 'Cuộc Thi Tranh Biện 2024 là diễn đàn trí tuệ nơi sinh viên FPTU thể hiện khả năng lập luận, phản biện, và thuyết trình về các vấn đề xã hội, kinh tế, và giáo dục. Với format tranh biện chuyên nghiệp, các đội thi sẽ đối đầu qua các vòng thi căng thẳng, được chấm điểm bởi ban giám khảo là các chuyên gia và giảng viên. Sự kiện không chỉ nâng cao kỹ năng tư duy logic mà còn khuyến khích sinh viên bày tỏ quan điểm và kết nối với cộng đồng.' 
+WHERE EventName = 'Cuộc Thi Tranh Biện 2024' AND SemesterID = 'FA24';
+
+CREATE TABLE Agenda (
+    AgendaID INT PRIMARY KEY AUTO_INCREMENT,
+    EventID INT NOT NULL,
+    Title VARCHAR(100) NOT NULL,
+    Description TEXT,
+    StartTime DATETIME NOT NULL,
+    EndTime DATETIME NOT NULL,
+    FOREIGN KEY (EventID) REFERENCES Events(EventID)
+);
+
+INSERT INTO Agenda (EventID, Title, Description, StartTime, EndTime) VALUES
+-- EventID 3: Thử Thách Lập Trình FPTU 2025
+(3, 'Check-in & Nhận thẻ', 'Người tham dự check-in và nhận thẻ tham dự.', '2025-03-15 07:30:00', '2025-03-15 08:00:00'),
+(3, 'Phát biểu khai mạc', 'Ban tổ chức giới thiệu chương trình và mục tiêu cuộc thi.', '2025-03-15 08:00:00', '2025-03-15 08:15:00'),
+(3, 'Phổ biến thể lệ & luật chơi', 'Giới thiệu thể lệ cuộc thi và các quy tắc đánh giá.', '2025-03-15 08:15:00', '2025-03-15 08:45:00'),
+(3, 'Bắt đầu thi lập trình', 'Các đội/thí sinh bắt đầu làm bài.', '2025-03-15 08:45:00', '2025-03-15 11:30:00'),
+(3, 'Chấm điểm & chờ kết quả', 'Ban giám khảo chấm điểm và tổng hợp kết quả.', '2025-03-15 11:30:00', '2025-03-15 11:50:00'),
+(3, 'Tổng kết & chụp ảnh lưu niệm', 'Trao giải, chụp ảnh, kết thúc chương trình.', '2025-03-15 11:50:00', '2025-03-15 12:30:00'),
+
+-- EventID 10: Hackathon Đổi Mới AI
+(10, 'Check-in & Giới thiệu', 'Người tham gia đến check-in và nhận hướng dẫn.', '2025-06-05 07:30:00', '2025-06-05 08:00:00'),
+(10, 'Phát động & chia đội', 'Ban tổ chức phổ biến đề bài và chia đội.', '2025-06-05 08:00:00', '2025-06-05 08:30:00'),
+(10, 'Coding Marathon', 'Các đội bắt đầu lập trình và triển khai ý tưởng AI.', '2025-06-05 08:30:00', '2025-06-05 17:00:00'),
+(10, 'Trình bày sản phẩm', 'Các đội trình bày giải pháp của mình.', '2025-06-05 17:00:00', '2025-06-05 18:00:00'),
+(10, 'Trao giải & nhận xét', 'Ban giám khảo nhận xét và trao giải cho đội xuất sắc.', '2025-06-05 18:00:00', '2025-06-05 18:30:00'),
+(10, 'Tổng kết & chụp ảnh lưu niệm', 'Tổng kết sự kiện, chụp ảnh, dọn dẹp địa điểm.', '2025-06-05 18:30:00', '2025-06-05 19:30:00'),
+
+-- EventID 11: Workshop Spring Boot
+(11, 'Chuẩn bị đón khách', 'Sắp xếp thiết bị, banner và kiểm tra âm thanh.', '2025-06-20 13:00:00', '2025-06-20 13:45:00'),
+(11, 'Chào mừng và giới thiệu', 'MC giới thiệu sự kiện và diễn giả.', '2025-06-20 13:45:00', '2025-06-20 14:00:00'),
+(11, 'Tổng quan Spring Boot', 'Giới thiệu về Spring Boot và kiến trúc cơ bản.', '2025-06-20 14:00:00', '2025-06-20 14:30:00'),
+(11, 'Cấu hình dự án', 'Hướng dẫn cấu hình Maven và Spring Initializr.', '2025-06-20 14:30:00', '2025-06-20 15:00:00'),
+(11, 'Kết nối Database', 'Tích hợp với MySQL/PostgreSQL sử dụng Spring Data JPA.', '2025-06-20 15:00:00', '2025-06-20 15:30:00'),
+(11, 'Thực hành API CRUD', 'Tạo controller, service, repository cho quản lý người dùng.', '2025-06-20 15:30:00', '2025-06-20 16:15:00'),
+(11, 'Q&A và chia sẻ kinh nghiệm', 'Tham gia hỏi đáp trực tiếp với diễn giả.', '2025-06-20 16:15:00', '2025-06-20 16:30:00'),
+(11, 'Giải lao và networking', 'Tự do giao lưu, trao đổi kết nối.', '2025-06-20 16:30:00', '2025-06-20 17:00:00'),
+(11, 'Dọn dẹp và kết thúc', 'Thu dọn thiết bị, chụp ảnh kỷ niệm và đóng sự kiện.', '2025-06-20 17:00:00', '2025-06-20 17:45:00'),
+
+
+-- EventID 12: Cuộc thi Code War
+(12, 'Check-in & Nhận số báo danh', 'Thí sinh đăng ký tại bàn check-in.', '2025-06-25 08:00:00', '2025-06-25 08:30:00'),
+(12, 'Khai mạc cuộc thi', 'Giới thiệu thể lệ, quy định và cơ cấu giải thưởng.', '2025-06-25 08:30:00', '2025-06-25 08:50:00'),
+(12, 'Làm bài Round 1', 'Giải 3 bài toán cơ bản trong 45 phút.', '2025-06-25 08:50:00', '2025-06-25 09:35:00'),
+(12, 'Giải lao ngắn', 'Nghỉ ngơi, ăn nhẹ.', '2025-06-25 09:35:00', '2025-06-25 09:50:00'),
+(12, 'Làm bài Round 2', 'Giải bài toán khó hơn và có tính ứng dụng.', '2025-06-25 09:50:00', '2025-06-25 10:40:00'),
+(12, 'Chấm điểm và giải lao', 'BTC chấm bài tự động + nghỉ ngơi.', '2025-06-25 10:40:00', '2025-06-25 11:00:00'),
+(12, 'Công bố kết quả', 'Công bố top 5 thí sinh xuất sắc.', '2025-06-25 11:00:00', '2025-06-25 11:15:00'),
+(12, 'Trao thưởng', 'Trao giải nhất, nhì, ba và quà lưu niệm.', '2025-06-25 11:15:00', '2025-06-25 11:30:00'),
+(12, 'Giao lưu & chụp hình', 'Giao lưu các bạn cùng đam mê lập trình.', '2025-06-25 11:30:00', '2025-06-25 12:00:00'),
+(12, 'Thu dọn và kết thúc sự kiện', 'Thu dọn bàn ghế, thiết bị, vệ sinh phòng.', '2025-06-25 12:00:00', '2025-06-25 12:45:00'),
+
+
+-- EventID 8: Giải Bóng Đá Sinh Viên FPTU 2025
+(8, 'Check-in & chia đội', 'Thí sinh đến check-in và nhận áo thi đấu.', '2025-07-05 07:15:00', '2025-07-05 07:45:00'),
+(8, 'Phát biểu khai mạc', 'Ban tổ chức phát biểu và tuyên bố khai mạc.', '2025-07-05 07:45:00', '2025-07-05 08:00:00'),
+(8, 'Trận vòng loại', 'Thi đấu các trận vòng loại.', '2025-07-05 08:00:00', '2025-07-05 11:00:00'),
+(8, 'Nghỉ trưa', 'Nghỉ ăn nhẹ và chuẩn bị vòng tiếp theo.', '2025-07-05 11:00:00', '2025-07-05 12:00:00'),
+(8, 'Bán kết & chung kết', 'Các đội mạnh nhất tranh tài.', '2025-07-05 12:00:00', '2025-07-05 14:00:00'),
+(8, 'Lễ trao giải & bế mạc', 'Trao cúp, chụp ảnh, tổng kết & dọn dẹp.', '2025-07-05 14:00:00', '2025-07-05 15:30:00');
 
 CREATE TABLE EventParticipants (
     EventParticipantID INT PRIMARY KEY AUTO_INCREMENT,
