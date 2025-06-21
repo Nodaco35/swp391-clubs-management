@@ -10,6 +10,7 @@ public class Events {
     private String description;
 
     private Date eventDate;
+    private Date endTime;
 
     private int clubID;
     private boolean isPublic;
@@ -33,23 +34,24 @@ public class Events {
     public Events() {
     }
 
-    public Events(int eventID, String eventName, String eventImg, String description, Date eventDate, Locations location, int clubID, boolean isPublic, int formTemplateID, int capacity, String status, String semesterID, String clubName, String clubImg, int registered, int spotsLeft) {
+    public Events(int eventID, Locations location, int spotsLeft, int registered, String clubImg, String clubName, String semesterID, String status, int capacity, boolean isPublic, int formTemplateID, int clubID, Date endTime, String description, Date eventDate, String eventImg, String eventName) {
         this.eventID = eventID;
-        this.eventName = eventName;
-        this.eventImg = eventImg;
-        this.description = description;
-        this.eventDate = eventDate;
         this.location = location;
-        this.clubID = clubID;
+        this.spotsLeft = spotsLeft;
+        this.registered = registered;
+        this.clubImg = clubImg;
+        this.clubName = clubName;
+        this.semesterID = semesterID;
+        this.status = status;
+        this.capacity = capacity;
         this.isPublic = isPublic;
         this.formTemplateID = formTemplateID;
-        this.capacity = capacity;
-        this.status = status;
-        this.semesterID = semesterID;
-        this.clubName = clubName;
-        this.clubImg = clubImg;
-        this.registered = registered;
-        this.spotsLeft = spotsLeft;
+        this.clubID = clubID;
+        this.endTime = endTime;
+        this.description = description;
+        this.eventDate = eventDate;
+        this.eventImg = eventImg;
+        this.eventName = eventName;
     }
 
     public int getCapacity() {
@@ -98,6 +100,14 @@ public class Events {
 
     public void setEventDate(Date eventDate) {
         this.eventDate = eventDate;
+    }
+
+    public Date getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Date endTime) {
+        this.endTime = endTime;
     }
 
     public Locations getLocation() {

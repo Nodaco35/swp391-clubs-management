@@ -3,7 +3,10 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/17_06/afternoon/swp391-clubs-management/src/java/controller/ChairmanPageServlet.java</file>
+            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/17_06/afternoon/swp391-clubs-management/src/java/models/Events.java</file>
+            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/17_06/afternoon/swp391-clubs-management/src/java/dal/EventsDAO.java</file>
+            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/17_06/afternoon/swp391-clubs-management/src/java/controller/AddEventServlet.java</file>
+            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/17_06/afternoon/swp391-clubs-management/src/java/controller/MyClubServlet.java</file>
         </group>
     </open-files>
 </project-private>

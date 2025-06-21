@@ -75,7 +75,7 @@
                             <input class="btn btn-primary" type="submit" value="Logout">
                         </form>
                         <c:if test="${sessionScope.isChairman == true}">
-                            <a href="${pageContext.request.contextPath}/chairman-page" class="btn btn-primary">MyClub</a>
+                            <a href="${pageContext.request.contextPath}/chairman-page/overview" class="btn btn-primary">MyClub</a>
                         </c:if>
                     </div>
                 </c:when>
@@ -206,7 +206,7 @@
                                 <c:choose>
                                     <c:when test="${isMyEvent}">
                                         <button type="button" class="register-btn">
-                                            <a href="${pageContext.request.contextPath}/chairman-page">MyClub</a>
+                                            <a href="${pageContext.request.contextPath}/chairman-page/overview">MyClub</a>
                                         </button>
                                     </c:when>
                                     <c:otherwise>

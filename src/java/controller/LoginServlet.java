@@ -123,6 +123,8 @@ public class LoginServlet extends HttpServlet {
             session.setMaxInactiveInterval(30 * 60); // 30 phút
             boolean isChairman = ud.isChairman(user_find.getUserID());
             List<Integer> myEventIDs = ud.getEventIDsOfChairman(user_find.getUserID());
+            int myClubID = ud.getClubIdIfChairman(user_find.getUserID());
+            session.setAttribute("myClubID", myClubID);
             session.setAttribute("myEventIDs", myEventIDs);
             session.setAttribute("isChairman", isChairman);
             System.out.println("Danh sách sự kiện của chủ nhiệm " + user_find.getUserID() + ": " + myEventIDs);

@@ -4,43 +4,37 @@
  */
 package dal;
 
-import models.EventOwnerInfo;
-import models.EventStats;
-import models.Events;
+import models.*;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import models.Locations;
 
 /**
  * @author LE VAN THUAN
  */
 public class EventsDAO {
-    
+
     public Locations getLocationByID(int id) {
-    String sql = "SELECT * FROM Locations WHERE LocationID = ?";
-    try {
-        Connection connection = DBContext.getConnection();
-        PreparedStatement ps = connection.prepareStatement(sql);
-        ps.setInt(1, id);
-        ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            Locations location = new Locations();
-            location.setLocationID(rs.getInt("LocationID"));
-            location.setLocationName(rs.getString("LocationName"));
-            location.setTypeLocation(rs.getString("TypeLocation"));
-            return location;
+        String sql = "SELECT * FROM Locations WHERE LocationID = ?";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                Locations location = new Locations();
+                location.setLocationID(rs.getInt("LocationID"));
+                location.setLocationName(rs.getString("LocationName"));
+                location.setTypeLocation(rs.getString("TypeLocation"));
+                return location;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error retrieving location by ID", e);
         }
-    } catch (Exception e) {
-        e.printStackTrace();
-        throw new RuntimeException("Error retrieving location by ID", e);
+        return null;
     }
-    return null;
-}
 
 
     public List<Events> getAllEvents() {
@@ -86,6 +80,7 @@ public class EventsDAO {
                 event.setEventImg(rs.getString("EventImg"));
                 event.setDescription(rs.getString("Description"));
                 event.setEventDate(rs.getTimestamp("EventDate"));
+                event.setEndTime(rs.getTimestamp("EndTime"));
                 event.setClubID(rs.getInt("ClubID"));
                 event.setPublic(rs.getBoolean("IsPublic"));
                 event.setCapacity(rs.getInt("Capacity"));
@@ -129,6 +124,7 @@ public class EventsDAO {
                 event.setEventImg(rs.getString("EventImg"));
                 event.setDescription(rs.getString("Description"));
                 event.setEventDate(rs.getTimestamp("EventDate"));
+                event.setEndTime(rs.getTimestamp("EndTime"));
                 event.setClubID(rs.getInt("ClubID"));
                 event.setPublic(rs.getBoolean("IsPublic"));
                 event.setFormTemplateID(rs.getInt("FormTemplateID"));
@@ -236,7 +232,6 @@ public class EventsDAO {
         } catch (SQLException e) {
             throw new RuntimeException("Error searching events: " + e.getMessage(), e);
         }
-        System.out.println("Generated SQL: " + sql);
         return events;
     }
 
@@ -408,6 +403,163 @@ public class EventsDAO {
         }
         return 0;
     }
+
+    public String checkTimeConflict(int locationId, Timestamp startTime, Timestamp endTime) {
+        String sql = "SELECT EventID, EventName FROM Events WHERE LocationID = ? AND " +
+                "((EventDate < ? AND EndTime > ?) OR " +
+                "(EventDate < ? AND EndTime > ?) OR " +
+                "(EventDate >= ? AND EventDate <= ?))";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, locationId);
+            ps.setTimestamp(2, endTime);
+            ps.setTimestamp(3, startTime);
+            ps.setTimestamp(4, endTime);
+            ps.setTimestamp(5, startTime);
+            ps.setTimestamp(6, startTime);
+            ps.setTimestamp(7, endTime);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return "Địa điểm đã được sử dụng bởi sự kiện '" + rs.getString("EventName") + "' trong khoảng thời gian này.";
+            }
+            return null;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // Thêm sự kiện mới vào bảng Events
+    public boolean addEvent(String eventName, String description, Timestamp eventDate, Timestamp endTime,
+                            int locationId, int clubId, boolean isPublic, int capacity) {
+
+        String sql = "INSERT INTO Events (EventName, Description, EventDate, EndTime, LocationID, ClubID, IsPublic, Capacity, Status, SemesterID) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', 'SU25')";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, eventName);
+            ps.setString(2, description != null && !description.isEmpty() ? description : null);
+            ps.setTimestamp(3, eventDate);
+            ps.setTimestamp(4, endTime);
+            ps.setInt(5, locationId);
+            ps.setInt(6, clubId);
+            ps.setBoolean(7, isPublic);
+            ps.setInt(8, capacity);
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean isLocationConflict(int locationId, Timestamp start, Timestamp end) {
+        String sql = "SELECT COUNT(*) FROM Events " +
+                "WHERE LocationID = ? " +
+                "AND ((? BETWEEN EventDate AND EndTime) OR (? BETWEEN EventDate AND EndTime) OR " +
+                "     (EventDate BETWEEN ? AND ?) OR (EndTime BETWEEN ? AND ?)) ";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, locationId);
+            ps.setTimestamp(2, start);
+            ps.setTimestamp(3, end);
+            ps.setTimestamp(4, start);
+            ps.setTimestamp(5, end);
+            ps.setTimestamp(6, start);
+            ps.setTimestamp(7, end);
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi kiểm tra trùng địa điểm", e);
+        }
+        return false;
+    }
+
+    public void insertEvent(String eventName, String description, Timestamp eventDate, Timestamp endTime,
+                            int locationId, int clubId, boolean isPublic, int capacity) {
+
+        String sql = "INSERT INTO Events (EventName, Description, EventDate, EndTime, LocationID, ClubID, IsPublic, Capacity, Status, SemesterID) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', 'SU25')";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, eventName);
+            ps.setString(2, description != null && !description.isEmpty() ? description : null);
+            ps.setTimestamp(3, eventDate);
+            ps.setTimestamp(4, endTime);
+            ps.setInt(5, locationId);
+            ps.setInt(6, clubId);
+            ps.setBoolean(7, isPublic);
+            ps.setInt(8, capacity);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<Agenda> getAgendasByEventID(int eventID) {
+        List<Agenda> agendas = new ArrayList<>();
+        String sql = "SELECT * FROM Agenda WHERE EventID = ? ORDER BY StartTime ASC";
+
+        try (Connection con = DBContext.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, eventID);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Agenda a = new Agenda();
+                a.setAgendaID(rs.getInt("AgendaID"));
+                a.setEventID(rs.getInt("EventID"));
+                a.setTitle(rs.getString("Title"));
+                a.setDescription(rs.getString("Description"));
+                a.setStartTime(rs.getTimestamp("StartTime"));
+                a.setEndTime(rs.getTimestamp("EndTime"));
+                agendas.add(a);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return agendas;
+    }
+
+    public void insertAgenda(int eventID, String title, String description, Timestamp startTime, Timestamp endTime) {
+        String sql = "INSERT INTO Agenda (EventID, Title, Description, StartTime, EndTime) VALUES (?, ?, ?, ?, ?)";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, eventID);
+            ps.setString(2, title);
+            ps.setString(3, description);
+            ps.setTimestamp(4, startTime);
+            ps.setTimestamp(5, endTime);
+            ps.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteAllByEventID(int eventID) {
+        String sql = "DELETE FROM Agenda WHERE EventID = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, eventID);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+
+
 
 
 
