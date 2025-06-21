@@ -301,11 +301,11 @@ CREATE TABLE Events (
 );
 INSERT INTO Events (EventName, EventImg, Description, EventDate, LocationID, ClubID, IsPublic, Capacity, Status, SemesterID) VALUES
 -- Spring 2025
-('Lễ Hội Âm Nhạc Tết 2025', 'images/events/tetmusic2025.jpg', '...', '2025-02-01 19:00:00', 2, 6, TRUE, 300, 'PENDING', 'SP25'),
+('Lễ Hội Âm Nhạc Tết 2025', 'images/events/tetmusic2025.jpg', '...', '2025-02-01 19:00:00', 2, 6, TRUE, 300, 'COMPLETED', 'SP25'),
 ('Hội Thảo Kỹ Năng Viết Tiếng Anh', 'images/events/englishworkshop2025.jpg', '...', '2025-03-05 09:00:00', 9, 3, TRUE, 60, 'COMPLETED', 'SP25'),
 ('Cuộc Thi Tranh Biện Xã Hội 2025', 'images/events/debate2025.jpg', '...', '2025-04-10 13:00:00', 3, 8, TRUE, 100, 'COMPLETED', 'SP25'),
-('Workshop: Xây dựng Website với Spring Boot', '/images/events/springboot_workshop.jpg', '...', '2025-04-20 14:00:00', 26, 4, 0, 100, 'PENDING', 'SP25'),
-
+('Workshop: Xây dựng Website với Spring Boot', '/images/events/springboot_workshop.jpg', '...', '2025-04-20 14:00:00', 26, 4, 0, 100, 'COMPLETED', 'SP25'),
+	
 -- Summer 2025 
 ('FPTU Showcase 2025 Chung Kết', 'images/events/showcase2025.jpg', '...', '2025-06-30 09:00:00', 1, 7, TRUE, 200, 'PENDING', 'SU25'),
 ('Thử Thách Lập Trình FPTU 2025', 'images/events/coding2025.jpg', '...', '2025-06-21 08:00:00', 25, 4, TRUE, 50, 'COMPLETED', 'SU25'),
