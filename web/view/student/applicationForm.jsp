@@ -240,9 +240,8 @@ System.out.println("ApplicationForm.jsp: Đang hiển thị " + questions.size()
                                         >
                                     </c:when>
                                     
-                                    <%-- Trường chọn nhiều (checkbox) --%>
-                                    <c:when test="${question.getFieldType() eq 'Checkbox'}">
-                                        <div class="checkbox-group" style="display: flex; flex-direction: column; gap: 10px;">
+                                    <%-- Trường chọn nhiều (checkbox) --%>                                    <c:when test="${question.getFieldType() eq 'Checkbox'}">
+                                        <div class="checkbox-group" id="checkbox-group-${question.getTemplateId()}" style="display: flex; flex-direction: column; gap: 10px;">
                                             <%-- Xử lý options với phương thức tập trung --%>
                                             <% 
                                                 ApplicationFormTemplate checkboxQuestion = (ApplicationFormTemplate)pageContext.getAttribute("question");
@@ -258,20 +257,22 @@ System.out.println("ApplicationForm.jsp: Đang hiển thị " + questions.size()
                                                 
                                                 pageContext.setAttribute("checkboxOptionsList", checkboxOptionsList);
                                             %>
-                                            
-                                            <c:forEach var="option" items="${checkboxOptionsList}" varStatus="status">
-                                                <div class="checkbox-option" style="display: flex; align-items: center; margin: 5px 0;">
+                                              <c:forEach var="option" items="${checkboxOptionsList}" varStatus="status">                                                <div class="checkbox-option" style="display: flex; align-items: center; margin: 5px 0;">
                                                     <input 
                                                         type="checkbox" 
                                                         id="ans_${question.getTemplateId()}_${status.index}" 
                                                         name="ans_${question.getTemplateId()}" 
                                                         value="${option}"
-                                                        ${question.isRequired() && status.index == 0 ? 'required' : ''}
+                                                        data-is-required="${question.isRequired()}"
                                                         style="margin-right: 10px;"
                                                     >
                                                     <label for="ans_${question.getTemplateId()}_${status.index}" style="cursor: pointer;">${option}</label>
                                                 </div>
                                             </c:forEach>
+                                            <c:if test="${question.isRequired()}">
+                                                <input type="hidden" id="validator_${question.getTemplateId()}" class="checkbox-validator" name="validator_${question.getTemplateId()}" value="" required>
+                                                <div class="error-message" id="error-msg-${question.getTemplateId()}" style="display: none;">Vui lòng chọn ít nhất một tùy chọn</div>
+                                            </c:if>
                                         </div>
                                     </c:when>
                                     
@@ -285,12 +286,6 @@ System.out.println("ApplicationForm.jsp: Đang hiển thị " + questions.size()
                                                 
                                                 // Sử dụng phương thức tiện ích mới để xử lý tất cả định dạng tùy chọn
                                                 List<String> radioOptionsList = JsonUtils.parseFormBuilderOptions(options);
-                                                
-                                                // Debug log
-                                                System.out.println("Debug - Radio ID " + q.getTemplateId() + 
-                                                    " - Options raw: " + options);
-                                                System.out.println("Debug - Radio options parsed: " + radioOptionsList);
-                                                
                                                 pageContext.setAttribute("radioOptionsList", radioOptionsList);
                                             %>
                                             

@@ -6,25 +6,46 @@ public class UserClub {
     private int userClubID;
     private String userID;
     private int clubID;
-    private int departmentID;
+    private int clubDepartmentID;
     private int roleID;
     private Date joinDate;
     private boolean isActive;
     private String fullName; // Thêm trường fullName
     private String roleName; // Thêm trường roleName
     private String departmentName; // Thêm trường departmentName
+    private String ClubImg;
+    private String ClubName;
+            
     public UserClub() {
     }
 
-    public UserClub(int userClubID, String userID, int clubID, int departmentID, int roleID, Date joinDate, boolean isActive) {
+    public UserClub(int userClubID, String userID, int clubID, int clubDepartmentID, int roleID, Date joinDate, boolean isActive) {
         this.userClubID = userClubID;
         this.userID = userID;
         this.clubID = clubID;
-        this.departmentID = departmentID;
+         this.clubDepartmentID = clubDepartmentID;
         this.roleID = roleID;
         this.joinDate = joinDate;
         this.isActive = isActive;
     }
+
+    public String getClubName() {
+        return ClubName;
+    }
+
+    public void setClubName(String ClubName) {
+        this.ClubName = ClubName;
+    }
+
+    
+    public String getClubImg() {
+        return ClubImg;
+    }
+
+    public void setClubImg(String ClubImg) {
+        this.ClubImg = ClubImg;
+    }
+    
 
     public int getUserClubID() {
         return userClubID;
@@ -50,12 +71,12 @@ public class UserClub {
         this.clubID = clubID;
     }
 
-    public int getDepartmentID() {
-        return departmentID;
+    public int getClubDepartmentID() {
+        return clubDepartmentID;
     }
 
-    public void setDepartmentID(int departmentID) {
-        this.departmentID = departmentID;
+    public void setClubDepartmentID(int clubDepartmentID) {
+        this.clubDepartmentID = clubDepartmentID;
     }
 
     public int getRoleID() {
@@ -105,8 +126,6 @@ public class UserClub {
     public void setDepartmentName(String departmentName) {
         this.departmentName = departmentName;
     }
-    
-    
 
     @Override
     public String toString() {
@@ -114,7 +133,7 @@ public class UserClub {
                 "userClubID=" + userClubID +
                 ", userID='" + userID + '\'' +
                 ", clubID=" + clubID +
-                ", departmentID=" + departmentID +
+                ", clubDepartmentID=" + clubDepartmentID +
                 ", roleID=" + roleID +
                 ", joinDate=" + joinDate +
                 ", isActive=" + isActive +
@@ -123,4 +142,9 @@ public class UserClub {
                 ", departmentName='" + departmentName + '\'' +
                 '}';
     }
+    
+    
+
+   
+    
 }

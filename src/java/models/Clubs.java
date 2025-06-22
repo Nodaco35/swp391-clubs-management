@@ -1,9 +1,6 @@
-
 package models;
 
-
 import java.util.Date;
-
 
 public class Clubs {
     private int clubID;
@@ -16,15 +13,16 @@ public class Clubs {
     private String contactGmail;
     private String contactURL;
     private boolean clubStatus;
-    private String category; // Thêm trường category
-    private int memberCount; // Thêm trường memberCount
-    
+    private String category;
+    private int memberCount;
+    private boolean isFavorite; // Thêm trường isFavorite
+
     public Clubs() {
     }
-    
+
     public Clubs(int clubID, String clubImg, boolean isRecruiting, String clubName, String description,
                  Date establishedDate, String contactPhone, String contactGmail, String contactURL,
-                 boolean clubStatus, String category, int memberCount) {
+                 boolean clubStatus, String category, int memberCount, boolean isFavorite) {
         this.clubID = clubID;
         this.clubImg = clubImg;
         this.isRecruiting = isRecruiting;
@@ -37,6 +35,7 @@ public class Clubs {
         this.clubStatus = clubStatus;
         this.category = category;
         this.memberCount = memberCount;
+        this.isFavorite = isFavorite;
     }
 
     public int getClubID() {
@@ -135,4 +134,11 @@ public class Clubs {
         this.memberCount = memberCount;
     }
 
+    public boolean isFavorite() {
+        return isFavorite;
+    }
+
+    public void setFavorite(boolean isFavorite) {
+        this.isFavorite = isFavorite;
+    }
 }

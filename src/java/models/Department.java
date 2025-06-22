@@ -1,20 +1,19 @@
-
 package models;
 
 public class Department {
     private int departmentID;
     private String departmentName;
+    private boolean departmentStatus;
     private String description;
-    private int clubID;
 
     public Department() {
     }
 
-    public Department(int departmentID, String departmentName, String description, int clubID) {
+    public Department(int departmentID, String departmentName, boolean departmentStatus, String description) {
         this.departmentID = departmentID;
         this.departmentName = departmentName;
+        this.departmentStatus = departmentStatus;
         this.description = description;
-        this.clubID = clubID;
     }
 
     public int getDepartmentID() {
@@ -33,6 +32,14 @@ public class Department {
         this.departmentName = departmentName;
     }
 
+    public boolean isDepartmentStatus() {
+        return departmentStatus;
+    }
+
+    public void setDepartmentStatus(boolean departmentStatus) {
+        this.departmentStatus = departmentStatus;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -41,17 +48,13 @@ public class Department {
         this.description = description;
     }
 
-    public int getClubID() {
-        return clubID;
-    }
-
-    public void setClubID(int clubID) {
-        this.clubID = clubID;
-    }
-
     @Override
     public String toString() {
-        return "Department{" + "departmentID=" + departmentID + ", departmentName=" + departmentName + ", description=" + description + ", clubID=" + clubID + '}';
+        return "Department{" +
+               "departmentID=" + departmentID +
+               ", departmentName='" + departmentName + '\'' +
+               ", departmentStatus=" + departmentStatus +
+               ", description='" + description + '\'' +
+               '}';
     }
-    
 }

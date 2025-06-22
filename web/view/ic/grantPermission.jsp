@@ -1,5 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"%>
-<%@ page pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
@@ -9,15 +8,9 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Phân quyền người dùng - UniClub Admin</title>
-
-        <!-- Google Fonts -->
-        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-
-        <!-- Font Awesome -->
+        <title>Quản lý đơn xin tạo CLB - UniClub Admin</title>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@600&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
-        <!-- CSS -->
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
     </head>
     <body>
@@ -25,196 +18,315 @@
             <jsp:include page="components/ic-sidebar.jsp" />
 
             <main class="main-content">
-                <!-- Header giống Admin Dashboard -->
-                <div class="header">
-                    <h1 class="page-title">Phân quyền người dùng</h1>
+                <div class="page-header">
+                    <h1 class="page-title">Quản lý đơn xin tạo CLB</h1>
                     <div class="user-profile">
-                        <div class="user-avatar">
-                            ${fn:substring(sessionScope.user.fullName, 0, 1)}
-                        </div>
+                        <div class="user-avatar">${fn:substring(sessionScope.user.fullName, 0, 1)}</div>
                         <div class="user-info">
-                            <div class="user-name">${sessionScope.user.fullName}</div>
-                            <div class="user-role">Quản trị viên</div>
+                            <div class="user-name">${fn:escapeXml(sessionScope.user.fullName)}</div>
+                            <div class="user-role">IC Officer</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Card chứa Search + Button + Table -->
                 <div class="card">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                        <h2 class="card-title">Quản lý phân quyền người dùng</h2>
+                    <div class="card-header">
+                        <h2 class="card-title">Danh sách đơn xin tạo CLB</h2>
+                        <div class="card-actions">
 
-                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                            <!-- Form search -->
-                            <form action="ic" method="get" class="search-form" style="display: flex; align-items: center; gap: 10px;">
-                                <input type="hidden" name="action" value="findUserById">
-                                <input type="text" name="userSearchID" value="${requestScope.userSearchID}" class="search-input" placeholder="Nhập ID người dùng...">
-                                <button class="btn btn-primary" type="submit">
-                                    <i class="fas fa-search"></i> Tìm người dùng
-                                </button>
-                            </form>
+                            <div class="filter-group">
+                                <label class="filter-label">Lọc theo trạng thái</label>
+                                <select id="statusFilter" class="filter-select" onchange="filterRequests()">
+                                    <option value="all">Tất cả</option>
+                                    <option value="PENDING">Chờ duyệt</option>
+                                    <option value="APPROVED">Đã duyệt</option>
+                                    <option value="REJECTED">Từ chối</option>
+                                    <option value="USED">Đã dùng</option>
+                                </select>
+                            </div>
 
-
+                            <div class="search-box">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="userIdSearch" class="search-input" placeholder="Nhập ID người dùng..." oninput="filterRequests()">
+                            </div>
                         </div>
                     </div>
 
                     <div class="card-body">
+                        <h4>Có ${numberRequest} đơn đang chờ duyệt</h4>
                         <c:if test="${not empty successMessage}">
-                            <div class="alert alert-success" id="successMessage" style="margin-bottom: 15px;">
+                            <div class="alert alert-success" id="successMessage">
                                 <i class="fas fa-check-circle"></i> ${successMessage}
                             </div>
                             <script>
-                                // Tự ẩn thông báo sau 10s
-                                setTimeout(function () {
-                                    var msg = document.getElementById('successMessage');
-                                    if (msg) {
-                                        msg.style.display = 'none';
-                                    }
-                                }, 10000); // 10 giây = 10000 ms
+                                setTimeout(() => document.getElementById('successMessage')?.style.display = 'none', 10000);
+                            </script>
+                        </c:if>
+                        <c:if test="${not empty errorMessage}">
+                            <div class="alert alert-warning" id="errorMessage">
+                                <i class="fas fa-exclamation-circle"></i> ${errorMessage}
+                            </div>
+                            <script>
+                                setTimeout(() => document.getElementById('errorMessage')?.style.display = 'none', 10000);
                             </script>
                         </c:if>
 
-                        <!-- Nếu không tìm thấy user -->
-                        <c:if test="${userFind == null && not empty userSearchID}">
-                            <div class="alert alert-warning">
-                                Không tìm thấy người dùng với ID "${userSearchID}".
-                            </div>
-                        </c:if>
-
-                        <!-- Nếu tìm thấy user -->
-                        <c:if test="${userFind != null}">
-                            <div class="table-container">
-                                <table id="usersTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Người dùng</th>
-                                            <th>MSSV</th>
-
-                                            <th>Vai trò</th>
-                                            <th>Ngày sinh</th>
-                                                <c:if test="${userFind.permissionID == 1}">
-                                                <th>Số lượng được cấp</th>
-                                                </c:if>
-                                                <c:if test="${userFind.permissionID == 1 && activePermissionCount!=0}">
-                                                <th>Thao tác</th>
-                                                </c:if>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr data-role="${userFind.permissionID == 2 ? 'admin' : (userFind.permissionID == 3 ? 'ic' : 'user')}">
-                                            <td>
-                                                <div class="user-info">
-                                                    <div class="user-avatar">
-                                                        <c:if test="${not empty userFind.avatar}">
-                                                            <img src="${userFind.avatar}" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%;" />
-                                                        </c:if>
-                                                        <c:if test="${empty userFind.avatar}">
-                                                            ${fn:substring(userFind.fullName, 0, 1)}
-                                                        </c:if>
-                                                    </div>
-                                                    <div class="user-details">
-                                                        <div class="user-name">${userFind.fullName}</div>
-                                                        <div class="user-email">${userFind.email}</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>${userFind.userID}</td>
-                                            <td>
-                                                <c:choose>
-                                                    <c:when test="${userFind.permissionID == 2}">
-                                                        <span class="badge badge-admin"><i class="fas fa-user-shield"></i> Admin</span>
-                                                    </c:when>
-                                                    <c:when test="${userFind.permissionID == 3}">
-                                                        <span class="badge badge-ic"><i class="fas fa-user-tie"></i> IC Officer</span>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <span class="badge badge-user"><i class="fas fa-user"></i>Sinh viên</span>
-                                                    </c:otherwise>
-                                                </c:choose>
-                                            </td>
-                                            <td>
-                                                <fmt:formatDate value="${userFind.dateOfBirth}" pattern="dd/MM/yyyy" />
-                                            </td>
-                                            <c:if test="${userFind.permissionID == 1}">
+                        <div class="table-container">
+                            <table id="requestsTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Người dùng</th>
+                                        <th>Tên CLB</th>
+                                        <th>Danh mục</th>
+                                        <th>Ngày gửi</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Đơn chờ duyệt -->
+                                    <c:forEach var="request" items="${requests}" varStatus="loop">
+                                        <c:if test="${request.status == 'PENDING'}">
+                                            <tr request-status="PENDING">
+                                                <td>#${request.id}</td>
                                                 <td>
-
-                                                    <c:choose>
-                                                        <c:when test="${activePermissionCount == 0}">
-                                                            <span class="badge badge-falure">
-                                                                <i class="fas fa-info-circle"></i> Chưa có quyền tạo câu lạc bộ
-                                                            </span>
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <span class="badge badge-success">
-                                                                <i class="fas fa-check-circle"></i> Đã có ${activePermissionCount} quyền tạo câu lạc bộ
-                                                            </span>
-                                                        </c:otherwise>
-                                                    </c:choose>
+                                                    <div class="user-info">
+                                                        <div class="user-avatar">${fn:substring(request.userName, 0, 1)}</div>
+                                                        <div class="user-details">
+                                                            <div class="user-name">${fn:escapeXml(request.userName)}</div>
+                                                            <div class="user-email">${request.userID}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>${fn:escapeXml(request.clubName)}</td>
+                                                <td>${request.category}</td>
+                                                <td><c:out value="${request.requestDate}"></c:out></td>
+                                                    <td><span class="badge badge-pending"><i class="fas fa-clock"></i> Chờ duyệt</span></td>
+                                                    <td class="table-actions">
+                                                        <button class="btn btn-icon btn-success" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=approvePermissionRequest&id=${request.id}'">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                    <button class="btn btn-icon btn-error" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=rejectPermissionRequest&id=${request.id}'">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                    <button class="btn btn-icon btn-error" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=deletePermissionRequest&id=${request.id}'">
+                                                        <i class="fa-solid fa-trash"></i>
+                                                    </button>
 
                                                 </td>
-                                            </c:if>
-                                            <c:if test="${userFind.permissionID == 1 && activePermissionCount!=0}">
-                                                <th>
-                                                    <a href="${pageContext.request.contextPath}/ic?action=DeleteByUserId&id=${userFind.userID}" 
-                                                       class="btn btn-error" 
-                                                       onclick="return confirm('Bạn có chắc chắn muốn huỷ quyền tạo CLB của người dùng này không?');">
-                                                        <i class="fas fa-trash-alt"></i> Huỷ quyền
-                                                    </a>
+                                            </tr>
+                                        </c:if>
+                                    </c:forEach>
 
-                                                </th>
-                                            </c:if>
+                                    <!-- Đơn đã duyệt -->
+                                    <c:forEach var="request" items="${requests}" varStatus="loop">
+                                        <c:if test="${request.status == 'APPROVED'}">
+                                            <tr request-status="APPROVED">
+                                                <td>#${request.id}</td>
+                                                <td>
+                                                    <div class="user-info">
+                                                        <div class="user-avatar">${fn:substring(request.userName, 0, 1)}</div>
+                                                        <div class="user-details">
+                                                            <div class="user-name">${fn:escapeXml(request.userName)}</div>
+                                                            <div class="user-email">${request.userID}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>${fn:escapeXml(request.clubName)}</td>
+                                                <td>${request.category}</td>
+                                                <td><c:out value="${request.requestDate}"></c:out></td>
+                                                    <td><span class="badge badge-approved"><i class="fas fa-check"></i> Đã duyệt</span></td>
+
+                                                    <td class="table-actions">
+                                                        <button class="btn btn-icon btn-error" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=rejectPermissionRequest&id=${request.id}'">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                    <button class="btn btn-icon btn-error" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=deletePermissionRequest&id=${request.id}'">
+                                                        <i class="fa-solid fa-trash"></i>
+                                                    </button>
+
+                                                </td>
+                                            </tr>
+                                        </c:if>
+                                    </c:forEach>
+
+                                    <!-- Đơn bị từ chối -->
+                                    <c:forEach var="request" items="${requests}" varStatus="loop">
+                                        <c:if test="${request.status == 'REJECTED'}">
+                                            <tr request-status="REJECTED">
+                                                <td>#${request.id}</td>
+                                                <td>
+                                                    <div class="user-info">
+                                                        <div class="user-avatar">${fn:substring(request.userName, 0, 1)}</div>
+                                                        <div class="user-details">
+                                                            <div class="user-name">${fn:escapeXml(request.userName)}</div>
+                                                            <div class="user-email">${request.userID}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>${fn:escapeXml(request.clubName)}</td>
+                                                <td>${request.category}</td>
+                                                <td><c:out value="${request.requestDate}"></c:out></td>
+                                                    <td><span class="badge badge-rejected"><i class="fas fa-times"></i> Từ chối</span></td>
+                                                    <td class="table-actions">
+                                                        <button class="btn btn-icon btn-success" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=approvePermissionRequest&id=${request.id}'">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                    <button class="btn btn-icon btn-error" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=deletePermissionRequest&id=${request.id}'">
+                                                        <i class="fa-solid fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </c:if>
+                                    </c:forEach>
+
+                                    <!-- Đơn đã dùng -->
+                                    <c:forEach var="request" items="${requests}" varStatus="loop">
+                                        <c:if test="${request.status == 'USED'}">
+                                            <tr request-status="USED">
+                                                <td>#${request.id}</td>
+                                                <td>
+                                                    <div class="user-info">
+                                                        <div class="user-avatar">${fn:substring(request.userName, 0, 1)}</div>
+                                                        <div class="user-details">
+                                                            <div class="user-name">${fn:escapeXml(request.userName)}</div>
+                                                            <div class="user-email">${request.userID}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>${fn:escapeXml(request.clubName)}</td>
+                                                <td>${request.category}</td>
+                                                <td><c:out value="${request.requestDate}"></c:out></td>
+                                                    <td><span class="badge badge-info"><i class="fas fa-check-circle"></i> Đã dùng</span></td>
+                                                    <td class="table-actions"></td>
+                                                </tr>
+                                        </c:if>
+                                    </c:forEach>
+
+                                    <c:if test="${empty requests}">
+                                        <tr class="original-empty-state">
+                                            <td colspan="7" class="empty-state">
+                                                <i class="fas fa-folder-open empty-icon"></i>
+                                                <div class="empty-title">Không có đơn nào</div>
+                                                <div class="empty-description">Hiện tại không có đơn xin tạo CLB nào.</div>
+                                            </td>
                                         </tr>
-                                    </tbody>
-                                </table>
+                                    </c:if>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Modal xác nhận -->
+                        <div id="confirmModal" class="modal">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h3 class="modal-title">Xác nhận hành động</h3>
+                                    <button class="modal-close" onclick="closeConfirmModal()">×</button>
+                                </div>
+                                <div class="modal-body">
+                                    <p id="modalText"></p>
+                                </div>
+                                <div class="modal-footer">
+                                    <form id="confirmForm" action="${pageContext.request.contextPath}/ic" method="post">
+                                        <input type="hidden" name="action" value="processRequest">
+                                        <input type="hidden" name="requestId" id="requestId">
+                                        <input type="hidden" name="status" id="modalStatus">
+                                        <button type="submit" class="btn btn-primary">Xác nhận</button>
+                                        <button type="button" class="btn btn-outline" onclick="closeConfirmModal()">Hủy</button>
+                                    </form>
+                                </div>
                             </div>
-                        </c:if>
-                    </div>
-                    <!-- Form Thêm quyền (nếu có user hợp lệ) -->
-                    <div style="display: flex; align-items: center; gap: 10px; margin-left: 10px;">
-                        <c:if test="${userFind != null}">
-                            <c:if test="${userFind.permissionID == 1}">
-                                <button class="btn btn-primary" type="button"
-                                        onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=grantPermisstionForUser&id=${userFind.userID}'"
-                                        >
-                                    <i class="fa-solid fa-check"></i> Thêm quyền tạo câu lạc bộ
-                                </button>
-                            </c:if>
-                        </c:if>
+                        </div>
                     </div>
                 </div>
             </main>
         </div>
+
+        <script>
+            function filterRequests() {
+                const status = document.getElementById('statusFilter').value;
+                const userId = document.getElementById('userIdSearch').value.toLowerCase().trim();
+                const rows = document.querySelectorAll('#requestsTable tbody tr[request-status]');
+                const tbody = document.querySelector('#requestsTable tbody');
+
+                let visibleCount = 0;
+
+                rows.forEach(row => {
+                    const rowStatus = row.getAttribute('request-status');
+                    // Lấy userID từ .user-email element
+                    const userEmailElement = row.querySelector('.user-email');
+                    const rowUserId = userEmailElement ? userEmailElement.textContent.toLowerCase().trim() : '';
+
+                    const statusMatch = status === 'all' || rowStatus === status;
+                    const userIdMatch = userId === '' || rowUserId.includes(userId);
+
+                    if (statusMatch && userIdMatch) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                // Xử lý empty state
+                let originalEmptyRow = tbody.querySelector('.original-empty-state');
+                let filterEmptyRow = tbody.querySelector('.filter-empty-state');
+
+                if (visibleCount === 0) {
+                    // Ẩn empty state gốc nếu có
+                    if (originalEmptyRow) {
+                        originalEmptyRow.style.display = 'none';
+                    }
+
+                    // Tạo empty state mới cho filter nếu chưa có
+                    if (!filterEmptyRow) {
+                        filterEmptyRow = document.createElement('tr');
+                        filterEmptyRow.className = 'filter-empty-state';
+                        filterEmptyRow.innerHTML = `
+                            <td colspan="7" class="empty-state">
+                                <i class="fas fa-folder-open empty-icon"></i>
+                                <div class="empty-title">Không có đơn nào</div>
+                                <div class="empty-description">Không tìm thấy đơn phù hợp với bộ lọc.</div>
+                            </td>
+                        `;
+                        tbody.appendChild(filterEmptyRow);
+                    }
+                    filterEmptyRow.style.display = '';
+                } else {
+                    // Hiện empty state gốc nếu có và không có data
+                    if (originalEmptyRow) {
+                        originalEmptyRow.style.display = '';
+                    }
+
+                    // Ẩn empty state của filter
+                    if (filterEmptyRow) {
+                        filterEmptyRow.style.display = 'none';
+                    }
+                }
+            }
+
+
+            // Khởi tạo filter khi trang load
+            document.addEventListener('DOMContentLoaded', function () {
+                filterRequests();
+            });
+
+            // Hàm tự động ẩn thông báo sau một khoảng thời gian (mặc định là 10 giây)
+            function hideNotificationAfterTimeout(elementId, timeout = 10000) {
+                const notification = document.getElementById(elementId);
+                if (notification) {
+                    setTimeout(() => {
+                        notification.style.display = 'none';  // Ẩn thông báo sau 10 giây
+                    }, timeout);
+            }
+            }
+
+            // Khi DOM đã sẵn sàng, kiểm tra và ẩn thông báo success/error
+            window.onload = function () {
+                hideNotificationAfterTimeout('successMessage');  // Ẩn success message sau 10 giây
+                hideNotificationAfterTimeout('errorMessage');    // Ẩn error message sau 10 giây
+            };
+        </script>
     </body>
-
-    <style>
-
-        .search-box {
-            flex: 1;
-            min-width: 300px;
-            position: relative;
-        }
-
-        .search-input {
-            flex: 1;
-            padding: 0.75rem 1rem 0.75rem 2.5rem;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            font-size: 0.875rem;
-            transition: box-shadow 0.2s, border-color 0.2s;
-            min-width: 200px;
-        }
-
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
-        }
-        
-        .card{
-            padding-bottom: 20px;
-            margin-top: 20px;
-        }
-
-    </style>
 </html>

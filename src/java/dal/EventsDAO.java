@@ -15,6 +15,10 @@ import java.util.List;
  */
 public class EventsDAO {
 
+    public EventsDAO() {
+    }
+
+    
     public Locations getLocationByID(int id) {
         String sql = "SELECT * FROM Locations WHERE LocationID = ?";
         try {
@@ -36,6 +40,39 @@ public class EventsDAO {
         return null;
     }
 
+
+    public List<Events> findByUCID(String userID) {
+        List<Events> findByUCID = new ArrayList<>();
+        String sql = """
+                     SELECT DISTINCT e.*
+                     FROM Events e
+                     JOIN UserClubs uc ON e.ClubID = uc.ClubID
+                     WHERE uc.UserID = ? and e.EventDate >= NOW()
+                     ORDER BY e.EventDate ASC;""";
+        try {
+            PreparedStatement ps = DBContext_Duc.getInstance().connection.prepareStatement(sql);
+            ps.setObject(1, userID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Events event = new Events();
+                event.setEventID(rs.getInt("EventID"));
+                event.setEventName(rs.getString("EventName"));
+                event.setEventImg(rs.getString("EventImg"));
+                event.setDescription(rs.getString("Description"));
+                event.setEventDate(rs.getTimestamp("EventDate"));
+                event.setClubID(rs.getInt("ClubID"));
+                event.setPublic(rs.getBoolean("IsPublic"));
+                event.setCapacity(rs.getInt("Capacity"));
+                event.setStatus(rs.getString("Status"));
+                Locations l = getLocationByID(rs.getInt("LocationID"));
+                event.setLocation(l);
+                findByUCID.add(event);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return findByUCID;
+    }
 
     public List<Events> getAllEvents() {
         List<Events> events = new ArrayList<Events>();
@@ -753,4 +790,106 @@ public class EventsDAO {
         return count;
     }
 
+    // Thêm sự kiện vào danh sách yêu thích
+    public boolean addFavoriteEvent(String userID, int eventID) {
+        String query = "INSERT INTO FavoriteEvents (UserID, EventID) VALUES (?, ?)";
+        try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, userID);
+            stmt.setInt(2, eventID);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Error adding favorite event: " + e.getMessage());
+            return false;
+        }
+    }
+
+// Xóa sự kiện khỏi danh sách yêu thích
+    public boolean removeFavoriteEvent(String userID, int eventID) {
+        String query = "DELETE FROM FavoriteEvents WHERE UserID = ? AND EventID = ?";
+        try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, userID);
+            stmt.setInt(2, eventID);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Error removing favorite event: " + e.getMessage());
+            return false;
+        }
+    }
+
+// Kiểm tra xem sự kiện có trong danh sách yêu thích của người dùng không
+    public boolean isFavoriteEvent(String userID, int eventID) {
+        String query = "SELECT COUNT(*) FROM FavoriteEvents WHERE UserID = ? AND EventID = ?";
+        try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, userID);
+            stmt.setInt(2, eventID);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error checking favorite event: " + e.getMessage());
+        }
+        return false;
+    }
+
+// Lấy danh sách sự kiện yêu thích của người dùng
+    public List<Events> getFavoriteEvents(String userID, int page, int pageSize) {
+        List<Events> events = new ArrayList<>();
+        String query = """
+            SELECT e.*, c.ClubName 
+            FROM FavoriteEvents fe
+            JOIN Events e ON fe.EventID = e.EventID
+            JOIN Clubs c ON e.ClubID = c.ClubID
+            WHERE fe.UserID = ? AND e.Status = 'PENDING'
+            ORDER BY fe.AddedDate DESC
+            LIMIT ? OFFSET ?
+        """;
+        try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, userID);
+            stmt.setInt(2, pageSize);
+            stmt.setInt(3, (page - 1) * pageSize);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Events event = new Events();
+                    event.setEventID(rs.getInt("EventID"));
+                event.setEventName(rs.getString("EventName"));
+                event.setEventImg(rs.getString("EventImg"));
+                event.setDescription(rs.getString("Description"));
+                event.setEventDate(rs.getTimestamp("EventDate"));
+                event.setClubID(rs.getInt("ClubID"));
+                event.setPublic(rs.getBoolean("IsPublic"));
+                event.setCapacity(rs.getInt("Capacity"));
+                event.setStatus(rs.getString("Status"));
+                Locations l = getLocationByID(rs.getInt("LocationID"));
+                event.setLocation(l);
+                    events.add(event);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting favorite events: " + e.getMessage());
+        }
+        return events;
+    }
+
+    // Đếm tổng số sự kiện yêu thích
+    public int getTotalFavoriteEvents(String userID) {
+        String query = """
+            SELECT COUNT(*) 
+            FROM FavoriteEvents fe
+            JOIN Events e ON fe.EventID = e.EventID
+            WHERE fe.UserID = ? AND e.Status = 'PENDING'
+        """;
+        try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, userID);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error counting favorite events: " + e.getMessage());
+        }
+        return 0;
+    }
 }

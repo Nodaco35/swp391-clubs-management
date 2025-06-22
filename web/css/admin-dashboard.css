@@ -735,6 +735,7 @@ textarea.form-control {
         grid-template-columns: 1fr;
     }
 }
+
 .badge-admin {
     background-color: rgba(239, 68, 68, 0.1);
     color: var(--destructive);

@@ -1,42 +1,32 @@
 package controller;
 
-import dal.ClubCreationPermissionDAO;
 import dal.ClubDAO;
 import dal.PeriodicReportDAO;
+import dal.ClubCreationPermissionDAO;
+import dal.CreatedClubApplicationsDAO;
+import dal.NotificationDAO;
 import dal.UserDAO;
-
-import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.util.List;
 import models.PeriodicReport;
 import models.Users;
+import java.io.IOException;
+import java.util.List;
+import models.ClubCreationPermissions;
+import models.CreatedClubApplications;
 
-/**
- *
- * @author NC PC
- */
 public class ICServlet extends HttpServlet {
 
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet ICServlet</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet ICServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
+    private NotificationDAO notificationDAO;
+    private ClubCreationPermissionDAO permissionDAO;
+
+    @Override
+    public void init() throws ServletException {
+        notificationDAO = new NotificationDAO();
+        permissionDAO = new ClubCreationPermissionDAO();
     }
 
     @Override
@@ -44,9 +34,14 @@ public class ICServlet extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = request.getSession();
         UserDAO ud = new UserDAO();
+        ClubDAO clubDAO = new ClubDAO();
+        ClubCreationPermissionDAO ccp = new ClubCreationPermissionDAO();
+        CreatedClubApplicationsDAO cca = new CreatedClubApplicationsDAO();
+
+        Users user = (Users) session.getAttribute("user");
         String action = request.getParameter("action");
+
         if (action == null) {
-            ClubDAO clubDAO = new ClubDAO();
             PeriodicReportDAO reportDAO = new PeriodicReportDAO();
 
             // Thống kê
@@ -70,11 +65,17 @@ public class ICServlet extends HttpServlet {
 
             request.getRequestDispatcher("/view/ic/dashboard.jsp").forward(request, response);
         } else if (action.equals("grantPermission")) {
+
+            int numberRequest = cca.countPendingRequests();
+            List<ClubCreationPermissions> requests = ccp.getAllRequests();
+
+            request.setAttribute("requests", requests);
+            request.setAttribute("numberRequest", numberRequest);
+
             request.getRequestDispatcher("view/ic/grantPermission.jsp").forward(request, response);
         } else if (action.equals("grantPermisstionForUser")) {
-            // Xử lý cấp quyền
-            ClubCreationPermissionDAO ccp = new ClubCreationPermissionDAO();
-            String userId = (String) request.getParameter("id"); // hoặc lấy từ param nếu bạn truyền userID
+
+            String userId = (String) request.getParameter("id");
             String adminId = ((Users) session.getAttribute("user")).getUserID();
 
             Users userFind = ud.getUserByID(userId);
@@ -86,57 +87,44 @@ public class ICServlet extends HttpServlet {
             request.setAttribute("userFind", userFind);
             request.setAttribute("userSearchID", userId);
 
-            // Forward về trang grantPermission.jsp (giả sử bạn forward lại)
             request.getRequestDispatcher("view/ic/grantPermission.jsp").forward(request, response);
-        } else if (action.equals("findUserById")) {
+        } else if (action.equals("approvePermissionRequest") || action.equals("rejectPermissionRequest") || action.equals("deletePermissionRequest")) {
+            //Sửa duyệt chỉ cần theo id của request -> phân ra action từ chối và đồng ý
+            int id = Integer.parseInt(request.getParameter("id"));
+            boolean success;
+            String message;
+            if (action.equals("approvePermissionRequest")) {
+                success = ccp.approveRequest(id, user.getUserID());
+                message = success ? "Đã duyệt đơn thành công!" : "Duyệt đơn thất bại. Vui lòng thử lại.";
 
-            String userSearchID = request.getParameter("userSearchID");
-            Users userFind = ud.getUserByID(userSearchID);
-            ClubCreationPermissionDAO ccp = new ClubCreationPermissionDAO();
-            int numberOfPermissions = ccp.countActiveClubPermission(userSearchID);
-            request.setAttribute("activePermissionCount", numberOfPermissions);
-            request.setAttribute("userFind", userFind);
-            request.setAttribute("userSearchID", userSearchID);
+            } else if(action.equals("rejectPermissionRequest")) {
+                success = ccp.rejectRequest(id, user.getUserID());
+                message = success ? "Đã từ chối đơn thành công!" : "Từ chối đơn thất bại. Vui lòng thử lại.";
 
-            request.getRequestDispatcher("view/ic/grantPermission.jsp").forward(request, response);
-        } else if (action.equals("DeleteByUserId")) {
-            ClubCreationPermissionDAO ccp = new ClubCreationPermissionDAO();
-            String userId = (String) request.getParameter("id");
-            ccp.revokeClubPermission(userId);
+            }else{
+                success = ccp.deleteRequest(id);
+                message = success ? "Đã xoá đơn thành công!" : "Xoá đơn thất bại. Vui lòng thử lại.";
+            }
 
-            int numberOfPermissions = ccp.countActiveClubPermission(userId);
+            int numberRequest = cca.countPendingRequests();
+            List<ClubCreationPermissions> requests = ccp.getAllRequests();
 
-            Users userFind = ud.getUserByID(userId);
-            request.setAttribute("activePermissionCount", numberOfPermissions);
-            request.setAttribute("userFind", userFind);
-            request.setAttribute("userSearchID", userId);
-
+            request.setAttribute("requests", requests);
+            request.setAttribute("numberRequest", numberRequest);
+            request.setAttribute(success ? "successMessage" : "errorMessage", message);
+            request.setAttribute("pendingRequests", ccp.getPermissionsByStatus("PENDING"));
             request.getRequestDispatcher("view/ic/grantPermission.jsp").forward(request, response);
         }
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        doGet(request, response);
     }
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
     @Override
     public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
+        return "IC Servlet for managing club permission requests";
+    }
 }
