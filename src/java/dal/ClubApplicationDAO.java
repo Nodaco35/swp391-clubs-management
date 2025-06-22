@@ -10,7 +10,41 @@ import java.util.List;
 import models.ClubApplication;
 
 public class ClubApplicationDAO {
+    //DAO
+    public List<ClubApplication> getClubApplicationsByUser(String userID) {
+        List<ClubApplication> list = new ArrayList<>();
+        String sql = """
+            SELECT ca.ApplicationID, ca.UserID, ca.ClubID, ca.Email, ca.Status, ca.SubmitDate, c.ClubName
+            FROM ClubApplications ca
+            JOIN Clubs c ON ca.ClubID = c.ClubID
+            WHERE ca.UserID = ?
+            ORDER BY ca.SubmitDate DESC
+        """;
 
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, userID);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                ClubApplication ca = new ClubApplication();
+                ca.setApplicationId(rs.getInt("ApplicationID"));
+                ca.setUserId(rs.getString("UserID"));
+                ca.setClubId(rs.getInt("ClubID"));
+                ca.setEmail(rs.getString("Email"));
+                ca.setStatus(rs.getString("Status"));
+                ca.setSubmitDate(rs.getTimestamp("SubmitDate"));
+                ca.setClubName(rs.getString("ClubName"));
+
+                list.add(ca);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+    
     public static List<ClubApplication> pendingApplicationsFindByClub(String userID) {
         String sql = """
                      SELECT ca.*, u.FullName, c.ClubName
