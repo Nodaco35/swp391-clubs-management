@@ -76,7 +76,7 @@ public class CreatedClubApplicationsDAO {
     }
 
     public int countPendingRequests() {
-        String sql = "SELECT COUNT(*) FROM CreatedClubApplications WHERE Status = 'PENDING'";
+        String sql = "SELECT COUNT(*) FROM ClubCreationPermissions WHERE Status = 'PENDING'";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) return rs.getInt(1);

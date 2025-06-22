@@ -13,6 +13,7 @@ public class DBContext {    public static Connection getConnection() {
             String password = "Thuylinh0203";
 
 
+
             return DriverManager.getConnection(url, user, password);
         } catch (Exception e) {
             e.printStackTrace();

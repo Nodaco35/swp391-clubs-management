@@ -1,6 +1,7 @@
 package models;
 
 import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  * Extended model class for ClubApplications that includes additional fields from joins
@@ -28,6 +29,21 @@ public class ClubApplicationExtended extends ClubApplication {
         this.setResponseId(app.getResponseId());
         this.setStatus(app.getStatus());
         this.setSubmitDate((Timestamp) app.getSubmitDate());
+    }
+    
+    // Override phương thức setSubmitDate để hỗ trợ cả Date và Timestamp
+    @Override
+    public void setSubmitDate(Timestamp submitDate) {
+        super.setSubmitDate(submitDate);
+    }
+    
+    // Thêm phương thức mới để chấp nhận tham số kiểu Date
+    public void setSubmitDate(Date submitDate) {
+        if (submitDate != null) {
+            super.setSubmitDate(new Timestamp(submitDate.getTime()));
+        } else {
+            super.setSubmitDate(null);
+        }
     }
     
     // Getters and setters

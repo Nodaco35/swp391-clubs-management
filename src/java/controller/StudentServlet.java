@@ -1,6 +1,8 @@
 package controller;
 
+import dal.ClubApplicationDAO;
 import dal.ClubCreationPermissionDAO;
+import dal.EventParticipantDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,6 +10,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import models.Users;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import models.ClubApplication;
+import models.EventParticipation;
 
 public class StudentServlet extends HttpServlet {
 
@@ -30,6 +36,20 @@ public class StudentServlet extends HttpServlet {
         HttpSession session = request.getSession();
         Users user = (Users) session.getAttribute("user");
         String action = request.getParameter("action");
+
+        //History ( Events and Clubs )
+        if ("history".equals(action) && user != null) {
+            ClubApplicationDAO ca = new ClubApplicationDAO();
+            List<ClubApplication> clubApplications = ca.getClubApplicationsByUser(user.getUserID());
+            request.setAttribute("clubApplications", clubApplications);
+
+            EventParticipantDAO ep = new EventParticipantDAO();
+            List<EventParticipation> eventParticipations = ep.getEventParticipationByUser(user.getUserID());
+            request.setAttribute("events", eventParticipations);
+
+            request.getRequestDispatcher("view/student/activity-history.jsp").forward(request, response);
+            return;
+        }
 
         if (action == null || !action.equals("sendPermissionRequest")) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
@@ -54,8 +74,8 @@ public class StudentServlet extends HttpServlet {
             session.setAttribute("error", "Bạn đã có quyền tạo câu lạc bộ.");
         } else {
             boolean success = permissionDAO.insertRequest(userId);
-            session.setAttribute(success ? "message" : "error", 
-                success ? "Đơn xin quyền tạo câu lạc bộ đã được gửi!" : "Gửi đơn thất bại. Vui lòng thử lại sau.");
+            session.setAttribute(success ? "message" : "error",
+                    success ? "Đơn xin quyền tạo câu lạc bộ đã được gửi!" : "Gửi đơn thất bại. Vui lòng thử lại sau.");
         }
 
         response.sendRedirect(request.getContextPath() + "/clubs");

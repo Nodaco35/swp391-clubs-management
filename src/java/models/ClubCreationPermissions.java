@@ -1,4 +1,3 @@
-
 package models;
 
 import java.time.LocalDateTime;
@@ -6,15 +5,18 @@ import java.time.LocalDateTime;
 public class ClubCreationPermissions {
     private int id;
     private String userID;
-    private String userName; // For display purposes
+    private String userName;
+    private String clubName;
+    private String category;
     private String status;
     private LocalDateTime requestDate;
-    private LocalDateTime processedDate;
     private String processedBy;
     private LocalDateTime grantedDate;
     private LocalDateTime usedDate;
 
-    // Getters and Setters
+    public ClubCreationPermissions() {
+    }
+
     public int getId() {
         return id;
     }
@@ -39,6 +41,23 @@ public class ClubCreationPermissions {
         this.userName = userName;
     }
 
+    public String getClubName() {
+        return clubName;
+    }
+
+    public void setClubName(String clubName) {
+        this.clubName = clubName;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+
     public String getStatus() {
         return status;
     }
@@ -53,14 +72,6 @@ public class ClubCreationPermissions {
 
     public void setRequestDate(LocalDateTime requestDate) {
         this.requestDate = requestDate;
-    }
-
-    public LocalDateTime getProcessedDate() {
-        return processedDate;
-    }
-
-    public void setProcessedDate(LocalDateTime processedDate) {
-        this.processedDate = processedDate;
     }
 
     public String getProcessedBy() {
@@ -85,5 +96,5 @@ public class ClubCreationPermissions {
 
     public void setUsedDate(LocalDateTime usedDate) {
         this.usedDate = usedDate;
-    }
+    } 
 }
