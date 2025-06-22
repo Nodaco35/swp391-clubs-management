@@ -234,8 +234,6 @@ document.addEventListener('DOMContentLoaded', function() {
         'Mức độ tiếp tục': 'Mức độ bạn muốn tiếp tục tham gia các hoạt động của CLB trong tương lai'
     };
     
-    // Ghi log danh sách mô tả tiêu chí để debug
-    logDebug('Danh sách mô tả tiêu chí:', criteriaDescriptions);    // Biến toàn cục để lưu trữ instance của biểu đồ để có thể hủy trước khi render lại
     let ratingDistributionChartInstance = null;
     
     // Biểu đồ 1: Phân phối đánh giá tổng quan
@@ -271,13 +269,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         logDebug('Dữ liệu đánh giá từ các thuộc tính:', {rate5, rate4, rate3, rate2, rate1});
         
-        // In ra console các thuộc tính đầy đủ để kiểm tra
-        console.log("Thuộc tính data-rate5:", ratingDistributionChartEl.getAttribute('data-rate5'));
-        console.log("Thuộc tính data-rate4:", ratingDistributionChartEl.getAttribute('data-rate4'));
-        console.log("Thuộc tính data-rate3:", ratingDistributionChartEl.getAttribute('data-rate3'));
-        console.log("Thuộc tính data-rate2:", ratingDistributionChartEl.getAttribute('data-rate2'));
-        console.log("Thuộc tính data-rate1:", ratingDistributionChartEl.getAttribute('data-rate1'));
-        
         // In ra cả HTML của canvas để kiểm tra
         console.log("Canvas HTML:", ratingDistributionChartEl.outerHTML);
         
@@ -300,19 +291,13 @@ document.addEventListener('DOMContentLoaded', function() {
             '3 sao': ratingDistributionData[2],
             '2 sao': ratingDistributionData[3],
             '1 sao': ratingDistributionData[4]
-        });        // Tạo một bản sao của dữ liệu với thứ tự đúng (5->1 sao)
+        });
         // Thử lấy dữ liệu từ nhiều cách khác nhau
         const attr5 = ratingDistributionChartEl.getAttribute('data-rate5');
         const attr4 = ratingDistributionChartEl.getAttribute('data-rate4');
         const attr3 = ratingDistributionChartEl.getAttribute('data-rate3');
         const attr2 = ratingDistributionChartEl.getAttribute('data-rate2');
         const attr1 = ratingDistributionChartEl.getAttribute('data-rate1');
-        
-        console.log("Giá trị thuộc tính data-rate5 thô:", attr5, "loại:", typeof attr5);
-        console.log("Giá trị thuộc tính data-rate4 thô:", attr4, "loại:", typeof attr4);
-        console.log("Giá trị thuộc tính data-rate3 thô:", attr3, "loại:", typeof attr3);
-        console.log("Giá trị thuộc tính data-rate2 thô:", attr2, "loại:", typeof attr2);
-        console.log("Giá trị thuộc tính data-rate1 thô:", attr1, "loại:", typeof attr1);
         
         // Kiểm tra nếu các thuộc tính chứa số hay không
         const hasNumber5 = !isNaN(parseInt(attr5, 10));
@@ -322,7 +307,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const hasNumber1 = !isNaN(parseInt(attr1, 10));
         
         console.log("Có số trong thuộc tính:", {hasNumber5, hasNumber4, hasNumber3, hasNumber2, hasNumber1});
-          // Tạo mảng hiển thị với dữ liệu thực từ thuộc tính
         // Luôn sử dụng parseInt với fallback 0 để đảm bảo số nguyên hợp lệ
         const displayData = [
             parseInt(attr5 || '0', 10),
@@ -339,11 +323,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Dữ liệu có sẵn để hiển thị?', canDisplayData ? 'Có' : 'Không');
         
         if (!canDisplayData) {
-            console.log('CHÚ Ý: Tất cả các giá trị là 0, vui lòng kiểm tra:');
-            console.log('1. Kiểm tra database: Các feedback có được lưu đúng không?');
-            console.log('2. Kiểm tra Servlet: getFeedbacksByEventID và tính toán phân phối rating');
-            console.log('3. Kiểm tra JSP: Giá trị ${ratingDistribution[x]} có lấy được không?');
-            console.log('4. Kiểm tra JS: Các thuộc tính data-rate* có lấy được giá trị không?');
             
             // Kiểm tra sâu hơn vào database và cách fetch dữ liệu
             const eventIdInput = document.querySelector('input[name="eventId"]');
@@ -354,11 +333,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Tạo biểu đồ với kiểu dáng tương tự mockup
         logDebug('Đang tạo biểu đồ phân phối đánh giá với dữ liệu:', displayData);
           try {
-            // Kiểm tra lần cuối và lấy dữ liệu tốt nhất có thể
             console.log("=== DỮ LIỆU CUỐI CÙNG CHO BIỂU ĐỒ ===");
-            
-            // Nếu tất cả là 0 nhưng có thông tin từ servlet log chỉ ra có dữ liệu
-            const dataFromServletLog = [0, 1, 1, 1, 1]; // Dữ liệu từ servlet log (5★=0, 4★=1, 3★=1, 2★=1, 1★=1)
+            const dataFromServletLog = [0, 1, 1, 1, 1];
             
             // Nếu displayData toàn số 0 nhưng servlet log có dữ liệu thì sử dụng dữ liệu từ servlet log
             let finalChartData = displayData;
@@ -565,12 +541,6 @@ document.addEventListener('DOMContentLoaded', function() {
             'Mức độ tiếp tục'
         ];
         
-        // Ghi log để xác nhận chúng ta có các khóa đúng cho criteriaDescriptions
-        logDebug('Kiểm tra độ phù hợp giữa tiêu chí và mô tả:');
-        criteriaLabels.forEach(label => {
-            const hasDescription = criteriaDescriptions[label] ? true : false;
-            logDebug(`- Tiêu chí '${label}': ${hasDescription ? 'Có mô tả' : 'KHÔNG CÓ MÔ TẢ'}`);
-        });
         
         // Lấy giá trị từ dữ liệu backend
         const criteriaValues = [
