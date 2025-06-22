@@ -23,9 +23,9 @@ public class EventsDAO {
     public static List<Events> findByUCID(String userID) {
         List<Events> findByUCID = new ArrayList<>();
         String sql = """
-                     SELECT e.*
+                     SELECT DISTINCT e.*
                      FROM Events e
-                     JOIN UserClubs uc ON e.ClubID = uc.ClubID                     
+                     JOIN UserClubs uc ON e.ClubID = uc.ClubID
                      WHERE uc.UserID = ? and e.EventDate >= NOW()
                      ORDER BY e.EventDate ASC;""";
         try {
