@@ -1,22 +1,25 @@
-
 package models;
 
 import java.util.Date;
 
 public class Events {
+
     private int eventID;
     private String eventName;
     private String eventImg;
     private String description;
 
     private Date eventDate;
-    private String location;
+    private Date endTime;
+
     private int clubID;
     private boolean isPublic;
     private int formTemplateID;
 
     private int capacity;
     private String status;
+
+    private String semesterID;
 
     // Thêm các trường bổ sung cho hiển thị
     private String clubName;
@@ -26,24 +29,29 @@ public class Events {
     private int registered;
     private int spotsLeft;
 
+    private Locations location;
 
     public Events() {
     }
 
-    public Events(int eventID, String eventName, String eventImg, String description, Date eventDate, String location, int clubID, boolean isPublic, int formTemplateID, int capacity, String status, String clubName, String clubImg) {
+    public Events(int eventID, Locations location, int spotsLeft, int registered, String clubImg, String clubName, String semesterID, String status, int capacity, boolean isPublic, int formTemplateID, int clubID, Date endTime, String description, Date eventDate, String eventImg, String eventName) {
         this.eventID = eventID;
-        this.eventName = eventName;
-        this.eventImg = eventImg;
-        this.description = description;
-        this.eventDate = eventDate;
         this.location = location;
-        this.clubID = clubID;
+        this.spotsLeft = spotsLeft;
+        this.registered = registered;
+        this.clubImg = clubImg;
+        this.clubName = clubName;
+        this.semesterID = semesterID;
+        this.status = status;
+        this.capacity = capacity;
         this.isPublic = isPublic;
         this.formTemplateID = formTemplateID;
-        this.capacity = capacity;
-        this.status = status;
-        this.clubName = clubName;
-        this.clubImg = clubImg;
+        this.clubID = clubID;
+        this.endTime = endTime;
+        this.description = description;
+        this.eventDate = eventDate;
+        this.eventImg = eventImg;
+        this.eventName = eventName;
     }
 
     public int getCapacity() {
@@ -94,11 +102,19 @@ public class Events {
         this.eventDate = eventDate;
     }
 
-    public String getLocation() {
+    public Date getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Date endTime) {
+        this.endTime = endTime;
+    }
+
+    public Locations getLocation() {
         return location;
     }
 
-    public void setLocation(String location) {
+    public void setLocation(Locations location) {
         this.location = location;
     }
 
@@ -166,4 +182,11 @@ public class Events {
         this.spotsLeft = spotsLeft;
     }
 
+    public String getSemesterID() {
+        return semesterID;
+    }
+
+    public void setSemesterID(String semesterID) {
+        this.semesterID = semesterID;
+    }
 }

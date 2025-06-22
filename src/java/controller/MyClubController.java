@@ -54,16 +54,17 @@ public class MyClubController extends HttpServlet {
             
             int countPendingApplication = ClubApplicationDAO.countpendingApplicationsFindByClub(user.getUserID());
             
-            
+            EventsDAO ev = new EventsDAO();
+
             // mới
             int countUpcomingMeeting = ClubMeetingDAO.countByUserID(user.getUserID());
             
             List<Notification> recentNotifications = NotificationDAO.findRecentByUserID(user.getUserID());
 
-            List<Events> upcomingEvents = EventsDAO.findByUCID(user.getUserID());
+            List<Events> upcomingEvents = ev.findByUCID(user.getUserID());
 
             List<ClubApplication> pendingApplications = ClubApplicationDAO.pendingApplicationsFindByClub(user.getUserID());
-            // hoàn thành mới new db
+
             List<TaskAssignment> todoLists = TaskAssignmentDAO.findByUserID(user.getUserID());
             
             

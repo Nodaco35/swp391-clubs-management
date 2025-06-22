@@ -102,8 +102,36 @@
         <servlet-class>controller.ChairmanPageServlet</servlet-class>
     </servlet>
     <servlet>
+        <servlet-name>AddEventServlet</servlet-name>
+        <servlet-class>controller.AddEventServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AddLocationServlet</servlet-name>
+        <servlet-class>controller.AddLocationServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ChairmanOverviewServlet</servlet-name>
+        <servlet-class>controller.ChairmanOverviewServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ChairmanMyClubEventsServlet</servlet-name>
+        <servlet-class>controller.ChairmanMyClubEventsServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ChairmanTasksServlet</servlet-name>
+        <servlet-class>controller.ChairmanTasksServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>EditEventServlet</servlet-name>
+        <servlet-class>controller.EditEventServlet</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>CreateClubServlet</servlet-name>
         <servlet-class>controller.CreateClubServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AgendaServlet</servlet-name>
+        <servlet-class>controller.AgendaServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>FormResponsesServlet</servlet-name>
@@ -167,6 +195,7 @@
         <servlet-name>EventsPageServlet</servlet-name>
         <url-pattern>/events-page</url-pattern>
     </servlet-mapping>
+
     <servlet>
         <servlet-name>StudentServlet</servlet-name>
         <servlet-class>controller.StudentServlet</servlet-class>
@@ -228,6 +257,34 @@
         <url-pattern>/chairman-page</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
+        <servlet-name>AddEventServlet</servlet-name>
+        <url-pattern>/chairman-page/myclub-events/add-event</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AddLocationServlet</servlet-name>
+        <url-pattern>/add-location</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ChairmanOverviewServlet</servlet-name>
+        <url-pattern>/chairman-page/overview</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ChairmanMyClubEventsServlet</servlet-name>
+        <url-pattern>/chairman-page/myclub-events</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ChairmanTasksServlet</servlet-name>
+        <url-pattern>/chairman-page/tasks</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>EditEventServlet</servlet-name>
+        <url-pattern>/chairman-page/myclub-events/edit-event</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AgendaServlet</servlet-name>
+        <url-pattern>/agenda</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
         <servlet-name>FormResponsesServlet</servlet-name>
         <url-pattern>/formResponses</url-pattern>
     </servlet-mapping>
@@ -240,8 +297,6 @@
         <url-pattern>/viewFeedback</url-pattern>
     </servlet-mapping>
     <session-config>
-        <session-timeout>
-            30
-        </session-timeout>
+        <session-timeout>30</session-timeout>
     </session-config>
 </web-app>

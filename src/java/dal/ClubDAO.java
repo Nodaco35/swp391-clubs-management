@@ -89,6 +89,10 @@ public class ClubDAO {
 
 
 
+
+
+
+
     public List<Clubs> getFeaturedClubs(int limit) {
         List<Clubs> clubs = new ArrayList<>();
         Connection conn = null;

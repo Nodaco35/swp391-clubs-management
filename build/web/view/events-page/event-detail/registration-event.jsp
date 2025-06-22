@@ -137,7 +137,7 @@
 								<span><i class="fas fa-clock"></i> <span id="eventTime"><fmt:formatDate
 										value="${e.eventDate}" pattern="HH:mm"/></span></span>
 								<span><i class="fas fa-map-marker-alt"></i> <span
-										id="eventLocation">${e.location}</span></span>
+										id="eventLocation">${e.location.locationName}</span></span>
 							</div>
 						</div>
 					</div>

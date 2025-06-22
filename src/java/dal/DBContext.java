@@ -11,8 +11,6 @@ public class DBContext {    public static Connection getConnection() {
             String url = "jdbc:mysql://localhost:3306/ClubManagementSystem?zeroDateTimeBehavior=CONVERT_TO_NULL";
             String user = "root";
             String password = "Thuylinh0203";
-
-
             return DriverManager.getConnection(url, user, password);
         } catch (Exception e) {
             e.printStackTrace();

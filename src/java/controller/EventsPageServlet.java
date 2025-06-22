@@ -181,15 +181,8 @@ public class EventsPageServlet extends HttpServlet {
         request.setAttribute("currentKeyword", keyword != null ? keyword : "");
         request.setAttribute("currentPublicFilter", publicFilter);
         request.setAttribute("currentSortByDate", sortByDate);
-        request.setAttribute("favoriteEvents", favoriteEvents);
 
-        System.out.println("=== Search Parameters ===");
-        System.out.println("Keyword: " + keyword);
-        System.out.println("Public Filter: " + publicFilter);
-        System.out.println("Sort By: " + sortByDate);
-        System.out.println("Page: " + page + "/" + totalPages);
-        System.out.println("Total Events: " + totalEvents);
-        System.out.println("Events Found: " + events.size());
+        request.setAttribute("favoriteEvents", favoriteEvents);
 
         request.getRequestDispatcher("view/events-page/events-page.jsp").forward(request, response);
     }
