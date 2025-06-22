@@ -74,6 +74,7 @@ public class EventsDAO {
         return findByUCID;
     }
 
+
     public List<Events> getAllEvents() {
         List<Events> events = new ArrayList<Events>();
         String sql = "select * from Events";

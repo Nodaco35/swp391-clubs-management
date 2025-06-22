@@ -1,3 +1,4 @@
+
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
@@ -54,6 +55,7 @@ public class MyClubController extends HttpServlet {
             int countPendingApplication = ClubApplicationDAO.countpendingApplicationsFindByClub(user.getUserID());
             
             EventsDAO ev = new EventsDAO();
+
             // mới
             int countUpcomingMeeting = ClubMeetingDAO.countByUserID(user.getUserID());
             
@@ -62,7 +64,7 @@ public class MyClubController extends HttpServlet {
             List<Events> upcomingEvents = ev.findByUCID(user.getUserID());
 
             List<ClubApplication> pendingApplications = ClubApplicationDAO.pendingApplicationsFindByClub(user.getUserID());
-            //tạm thời đang chờ db 
+
             List<TaskAssignment> todoLists = TaskAssignmentDAO.findByUserID(user.getUserID());
             
             
@@ -77,7 +79,7 @@ public class MyClubController extends HttpServlet {
             //mới
             request.setAttribute("countUpcomingMeeting", countUpcomingMeeting);
             request.setAttribute("pendingApplications", pendingApplications);
-            request.setAttribute("todoList", todoLists);
+            request.setAttribute("departmentTasks", todoLists);
             request.setAttribute("countTodoLists", countTodoLists);
             request.setAttribute("countPendingApplication", countPendingApplication);
             
@@ -87,6 +89,7 @@ public class MyClubController extends HttpServlet {
         }
     }
 
+    
     
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
