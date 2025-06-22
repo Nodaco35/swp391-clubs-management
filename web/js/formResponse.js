@@ -42,14 +42,40 @@ document.addEventListener('DOMContentLoaded', function() {
         showToast('error', 'Lỗi', 'Không tìm thấy thông tin form');
         return;
     }
-    
-
+      // Lấy các phần tử DOM
     const responsesList = document.getElementById('responsesList');
-    const searchInput = document.getElementById('searchInput');
+    const searchInput = document.getElementById('responseSearchInput'); // Updated ID to match the new HTML
     const modal = document.getElementById('responseModal');
     const closeModal = document.querySelector('.close-modal');
     const filterTabs = document.querySelectorAll('.tab-btn');
     
+    // Làm sạch thanh tìm kiếm khi tải trang
+    if (searchInput) {
+        searchInput.value = '';
+        
+        // Thêm nút xóa tìm kiếm vào search-box nếu cần
+        const searchBox = searchInput.closest('.search-box');
+        if (searchBox && !searchBox.querySelector('.search-clear-btn')) {
+            const clearButton = document.createElement('button');
+            clearButton.className = 'search-clear-btn';
+            clearButton.innerHTML = '<i class="fas fa-times"></i>';
+            clearButton.style.display = 'none';
+            clearButton.title = 'Xóa từ khóa tìm kiếm';
+            searchBox.appendChild(clearButton);
+              // Thêm sự kiện cho nút xóa
+            clearButton.addEventListener('click', function() {
+                searchInput.value = '';
+                searchTerm = '';
+                this.style.display = 'none';
+                searchInput.focus();
+                filterAndRenderResponses();
+            });
+                  // Hiển thị/ẩn nút xóa dựa trên nội dung thanh tìm kiếm
+            searchInput.addEventListener('input', function() {
+                clearButton.style.display = this.value ? 'flex' : 'none';
+            });
+        }
+    }
     
     // Kiểm tra xem có dữ liệu từ server không
     let serverData = null;
@@ -125,24 +151,26 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Hiển thị responses ban đầu
     renderResponses(responses);
-    
-    // Xử lý tìm kiếm
     if (!searchInput) {
-        console.error("Không tìm thấy phần tử searchInput. Kiểm tra ID trong HTML.");
+        console.error("[DEBUG SEARCH] Không tìm thấy phần tử searchInput. Kiểm tra ID trong HTML.");
     } else {
-        console.log("Đã tìm thấy phần tử searchInput, đang thiết lập sự kiện.");
-        
-        // Thêm cả hai cách gán sự kiện để đảm bảo hoạt động trên nhiều trình duyệt
-        searchInput.oninput = function() {
-            console.log("Tìm kiếm với từ khóa: " + this.value);
+          // Chỉ sử dụng một cách gán sự kiện để tránh trùng lặp
+        searchInput.addEventListener('input', function(event) {
+
+            console.log("[DEBUG SEARCH] Element ID:", this.id);
+            console.log("[DEBUG SEARCH] Event type:", event.type);
+            
+            const oldSearchTerm = searchTerm;
             searchTerm = this.value.toLowerCase().trim();
-            filterAndRenderResponses();
-        };
-        
-        searchInput.addEventListener('input', function() {
-            searchTerm = this.value.toLowerCase().trim();
-            filterAndRenderResponses();
+            
+            // Sử dụng setTimeout để đảm bảo UI cập nhật sau khi nhập
+            setTimeout(() => {
+                filterAndRenderResponses();
+            }, 10);
         });
+        
+        // Đảm bảo searchTerm được đồng bộ với giá trị ban đầu của input
+        searchTerm = searchInput.value.toLowerCase().trim();
     }
     
     // Xử lý filter tabs
@@ -178,74 +206,113 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'all': return 'Tất cả';
             default: return status;
         }
-    }
-    
-    // Xử lý lọc và render responses
+    }    // Xử lý lọc và render responses - chi tiết hóa log để debug
     function filterAndRenderResponses() {
-        console.log("Bắt đầu lọc dữ liệu. Từ khóa tìm kiếm:", searchTerm);
-        let filteredResponses = responses;
         
-        // Lọc theo tab
+        let filteredResponses = [...responses]; // Tạo bản sao để tránh thay đổi mảng gốc
+        
+        // Lọc theo tab trước
         if (currentFilter !== 'all') {
-            filteredResponses = responses.filter(response => response.status === currentFilter);
-            console.log(`Đã lọc theo tab ${currentFilter}: ${filteredResponses.length} kết quả`);
+            console.log("[DEBUG FILTER] Đang lọc theo tab:", currentFilter);
+            const beforeCount = filteredResponses.length;
+            
+            filteredResponses = filteredResponses.filter(response => response.status === currentFilter);
+            
+            console.log(`[DEBUG FILTER] Đã lọc theo tab ${currentFilter}: ${beforeCount} -> ${filteredResponses.length} kết quả`);
         }
         
         // Lọc theo tìm kiếm
-        if (searchTerm) {
+        if (searchTerm && searchTerm.length > 0) {
             try {
-                filteredResponses = filteredResponses.filter(response => {
-                    const name = (response.name || '').toLowerCase();
-                    const email = (response.email || '').toLowerCase();
-                    const userId = (response.userId || '').toLowerCase();
                 
-                    const nameMatch = name.includes(searchTerm);
-                    const emailMatch = email.includes(searchTerm);
-                    const userIdMatch = userId.includes(searchTerm);
-                    
-                    const isMatch = nameMatch || emailMatch || userIdMatch;
-                    
-                    if (isMatch) {
-                        console.log(`Đã tìm thấy kết quả khớp: ${response.name} (${response.email})`);
-                    }
-                    
-                    return isMatch;
-                });
+                // Chia từ khóa tìm kiếm thành các từ riêng biệt để tìm kiếm linh hoạt hơn
+                const searchWords = searchTerm.split(' ').filter(word => word.length > 0);
                 
-                console.log(`Sau khi tìm kiếm với từ khóa "${searchTerm}": ${filteredResponses.length} kết quả`);
+                if (searchWords.length > 0) {
+                    const beforeCount = filteredResponses.length;
+                    
+                    filteredResponses = filteredResponses.filter(response => {
+                        if (!response) {
+                            return false;
+                        }
+                        
+                        const name = (response.name || '').toLowerCase();
+                        const email = (response.email || '').toLowerCase();
+                        const userId = (response.userId || '').toLowerCase();
+                        
+                        // Kiểm tra xem có ít nhất một từ khóa tìm kiếm khớp với bất kỳ trường nào
+                        const matches = searchWords.some(word => {
+                            const nameMatch = name.includes(word);
+                            const emailMatch = email.includes(word);
+                            const userIdMatch = userId.includes(word);
+                            
+                            return nameMatch || emailMatch || userIdMatch;
+                        });
+                        
+                        if (matches) {
+                            console.log(`[DEBUG FILTER] Tìm thấy kết quả khớp: ${response.name} (${response.email})`);
+                        }
+                        
+                        return matches;
+                    });
+                }
+                
             } catch (error) {
-                console.error("Lỗi khi thực hiện tìm kiếm:", error);
-                filteredResponses = responses;
+                console.error("[DEBUG FILTER] Lỗi khi thực hiện tìm kiếm:", error);
+                // Giữ nguyên kết quả hiện tại nếu có lỗi
             }
         }
         
-        // Render kết quả ra giao diện
         renderResponses(filteredResponses);
-    }
-    
+    }    
     // Render danh sách responses
-    function renderResponses(dataToRender) {
+    function renderResponses(dataToRender) {       
+        // Xóa nội dung hiện tại
+        responsesList.innerHTML = '';
+        
+        // Kiểm tra nếu không có dữ liệu hoặc dữ liệu rỗng
         if (!dataToRender || dataToRender.length === 0) {
+            
             let message = '';
+            let iconClass = 'fa-inbox';
             
             // Nếu đang tìm kiếm, hiển thị thông báo không tìm thấy kết quả tìm kiếm
-            if (searchTerm) {
+            if (searchTerm && searchTerm.length > 0) {
                 message = `Không tìm thấy đơn đăng ký nào phù hợp với từ khóa "${searchTerm}"`;
                 if (currentFilter !== 'all') {
                     message += ` trong danh mục "${getStatusText(currentFilter)}"`;
                 }
+                iconClass = 'fa-search';
             } else {
                 // Nếu không tìm kiếm, hiển thị thông báo không có đơn trong danh mục
                 message = `Không có đơn đăng ký nào ${currentFilter !== 'all' ? 'trong danh mục này' : ''}`;
+                console.log("[DEBUG RENDER] Hiển thị danh mục trống cho tab:", currentFilter);
             }
             
-            responsesList.innerHTML = `
-                <div class="no-responses-message">
-                    <i class="fas fa-inbox"></i>
-                    <p>${message}</p>
-                    ${searchTerm ? '<p style="font-size:0.9em;opacity:0.8;margin-top:10px;">Vui lòng thử từ khóa khác hoặc xóa bộ lọc tìm kiếm</p>' : ''}
-                </div>
+            const emptyStateElement = document.createElement('div');
+            emptyStateElement.className = 'no-responses-message';
+            emptyStateElement.innerHTML = `
+                <i class="fas ${iconClass}"></i>
+                <p>${message}</p>
+                ${searchTerm ? '<p style="font-size:0.9em;opacity:0.8;margin-top:10px;">Vui lòng thử từ khóa khác hoặc xóa bộ lọc tìm kiếm</p>' : ''}
+                ${searchTerm ? '<button id="clearSearchBtn" class="clear-search-btn"><i class="fas fa-times"></i> Xóa tìm kiếm</button>' : ''}
             `;
+            
+            responsesList.appendChild(emptyStateElement);
+            
+            // Thêm sự kiện cho nút xóa tìm kiếm
+            const clearSearchBtn = document.getElementById('clearSearchBtn');
+            if (clearSearchBtn) {
+                clearSearchBtn.addEventListener('click', function() {
+                    console.log("[DEBUG RENDER] Người dùng nhấn nút xóa tìm kiếm");
+                    if (searchInput) {
+                        searchInput.value = '';
+                        searchTerm = '';
+                        filterAndRenderResponses();
+                    }
+                });
+            }
+            
             return;
         }
         
@@ -256,7 +323,6 @@ document.addEventListener('DOMContentLoaded', function() {
             responseItem.className = 'response-item';
             responseItem.dataset.id = response.id;
             
-            // Xác định CSS class cho trạng thái
             let statusClass = '';
             let statusText = '';
             
@@ -525,8 +591,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         console.log("Rendering modal footer. Form type:", formType, "Status:", response.status);
         
-        // Thêm nút từ chối cho tất cả các trạng thái trừ đã từ chối
-        if (response.status !== 'rejected') {
+        // Thêm nút từ chối cho tất cả các trạng thái trừ đã từ chối và đã duyệt
+        if (response.status !== 'rejected' && response.status !== 'approved') {
             modalFooter += `
                 <button class="action-btn btn-reject" id="modalRejectBtn" data-id="${response.id}">
                     <i class="fas fa-times"></i> Từ chối

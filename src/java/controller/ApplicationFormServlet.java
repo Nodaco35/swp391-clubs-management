@@ -50,11 +50,10 @@ public class ApplicationFormServlet extends HttpServlet {
 
         try {
             int repTemplateId = Integer.parseInt(templateIdStr);
-
-            // Lấy template đại diện
-            ApplicationFormTemplate rep = formDAO.getTemplateById(repTemplateId);
-            if (rep == null || !rep.isPublished()) {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Form not found or not published");
+            ApplicationFormTemplate rep = formDAO.getTemplateById(repTemplateId);            if (rep == null || !rep.isPublished()) {
+                // Chuyển hướng về trang chủ với thông báo lỗi
+                response.sendRedirect(request.getContextPath() + "/home?error=form_not_found&message=" + 
+                    URLEncoder.encode("Không tìm thấy biểu mẫu hoặc biểu mẫu chưa được xuất bản", StandardCharsets.UTF_8.name()));
                 return;
             }
 
@@ -64,10 +63,10 @@ public class ApplicationFormServlet extends HttpServlet {
 
             // Lấy danh sách câu hỏi cùng group (cùng title & clubId) và đã publish
             List<ApplicationFormTemplate> questions = formDAO
-                    .getPublishedTemplatesByGroup(formTitle, clubId);
-
-            if (questions.isEmpty()) {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Form has no questions");
+                    .getPublishedTemplatesByGroup(formTitle, clubId);            if (questions.isEmpty()) {
+                // Chuyển hướng về trang chủ với thông báo lỗi
+                response.sendRedirect(request.getContextPath() + "/home?error=form_not_found&message=" + 
+                    URLEncoder.encode("Biểu mẫu không có câu hỏi nào", StandardCharsets.UTF_8.name()));
                 return;
             }
 
@@ -85,9 +84,10 @@ public class ApplicationFormServlet extends HttpServlet {
             request.setAttribute("clubId", clubId);
             request.setAttribute("eventId", rep.getEventId());
             request.getRequestDispatcher("/view/student/applicationForm.jsp")
-                    .forward(request, response);
-        } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid form link: templateId must be a number");
+                    .forward(request, response);        } catch (NumberFormatException e) {
+            // Chuyển hướng về trang chủ với thông báo lỗi
+            response.sendRedirect(request.getContextPath() + "/home?error=form_not_found&message=" + 
+                URLEncoder.encode("ID biểu mẫu không hợp lệ, phải là một số", StandardCharsets.UTF_8.name()));
         } catch (SQLException e) {
             throw new ServletException(e);
         }
@@ -106,17 +106,17 @@ public class ApplicationFormServlet extends HttpServlet {
         }
         
         // Lấy templateId từ form data
-        String templateIdStr = request.getParameter("templateId");
-        if (templateIdStr == null || templateIdStr.isEmpty()) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Mã biểu mẫu không hợp lệ");
+        String templateIdStr = request.getParameter("templateId");        if (templateIdStr == null || templateIdStr.isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/home?error=form_not_found&message=" + 
+                URLEncoder.encode("Mã biểu mẫu không hợp lệ", StandardCharsets.UTF_8.name()));
             return;
         }
         
-        int templateId;
-        try {
+        int templateId;        try {
             templateId = Integer.parseInt(templateIdStr);
         } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Mã biểu mẫu không hợp lệ");
+            response.sendRedirect(request.getContextPath() + "/home?error=form_not_found&message=" + 
+                URLEncoder.encode("Mã biểu mẫu không hợp lệ, phải là một số", StandardCharsets.UTF_8.name()));
             return;
         }
         
