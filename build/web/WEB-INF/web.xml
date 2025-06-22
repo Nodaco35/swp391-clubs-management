@@ -113,6 +113,10 @@
         <servlet-name>TypeFeedbackServlet</servlet-name>
         <servlet-class>controller.TypeFeedbackServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>ViewFeedbackServlet</servlet-name>
+        <servlet-class>controller.ViewFeedbackServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ClubsServlet</servlet-name>
         <url-pattern>/clubs</url-pattern>
@@ -230,6 +234,10 @@
     <servlet-mapping>
         <servlet-name>TypeFeedbackServlet</servlet-name>
         <url-pattern>/typefeedback</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ViewFeedbackServlet</servlet-name>
+        <url-pattern>/viewFeedback</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

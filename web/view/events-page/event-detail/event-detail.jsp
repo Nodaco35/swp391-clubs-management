@@ -11,9 +11,9 @@
 
 <!DOCTYPE html>
 <html>
-<head>	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<link rel="stylesheet" href="${pageContext.request.contextPath}/css/eventDetail.css">
+<head>	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	<link rel="stylesheet" href="${pageContext.request.contextPath}/css/eventDetail.css">
 	<link rel="stylesheet" href="${pageContext.request.contextPath}/css/typeFeedback.css">
+	<link rel="stylesheet" href="${pageContext.request.contextPath}/css/viewFeedback.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 	<title>Event Detail</title>
 </head>
@@ -324,10 +324,35 @@
 											</c:otherwise>
 										</c:choose>
 									</c:when>									<c:otherwise>
-										<div style="display: flex; gap: 10px;">
-											<button type="button" class="register-btn-finish disabled" disabled>
+										<div style="display: flex; gap: 10px;">											<button type="button" class="register-btn-finish disabled" disabled>
 												Đã kết thúc
-											</button>											<c:if test="${sessionScope.user != null}">
+											</button>
+											
+											<%-- Kiểm tra xem người dùng có phải chủ nhiệm/trưởng ban của CLB tổ chức hay không --%>
+											<%@ page import="dal.UserClubDAO" %>
+											<c:if test="${sessionScope.user != null}">
+												<c:set var="clubId" value="${event.clubID}" />
+												<c:set var="userId" value="${sessionScope.user.userID}" />
+												<%
+													String userIdStr = (String)pageContext.getAttribute("userId");
+													Integer clubIdInt = (Integer)pageContext.getAttribute("clubId");
+													Integer eventIdInt = (Integer)pageContext.getAttribute("eventId");
+													
+													UserClubDAO userClubDAO = new UserClubDAO();
+													boolean isClubPresident = userClubDAO.isClubPresident(userIdStr, clubIdInt);
+													
+													pageContext.setAttribute("isClubPresident", isClubPresident);
+												%>
+												
+												<%-- Nút xem feedback cho chủ nhiệm/trưởng ban --%>
+												<c:if test="${isClubPresident}">
+													<a href="${pageContext.request.contextPath}/viewFeedback?eventId=${event.eventID}" class="view-feedback-btn">
+														<i class="fas fa-chart-bar"></i> Xem feedback
+													</a>
+												</c:if>
+											</c:if>
+											
+											<c:if test="${sessionScope.user != null}">
 												<c:set var="eventId" value="${event.eventID}" />
 												<c:set var="userId" value="${sessionScope.user.userID}" />
 												<%-- Kiểm tra xem người dùng đã tham gia sự kiện và đã gửi feedback chưa --%>
