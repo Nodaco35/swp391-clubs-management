@@ -17,6 +17,26 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/viewFeedback.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Thêm event ID làm meta tag để giúp debug JS -->
+    <meta name="eventId" content="${param.eventId}">
+
+    <!-- Script debug cho ratingDistribution -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // In chi tiết về object ratingDistribution
+            const ratingDebug = {
+                isEmpty: "${empty ratingDistribution}",
+                isNull: "${ratingDistribution == null}",
+                size: "${not empty ratingDistribution ? ratingDistribution.size() : 'N/A'}",
+                keys: "${not empty ratingDistribution ? ratingDistribution.keySet() : 'N/A'}",
+                values: "${not empty ratingDistribution ? ratingDistribution.values() : 'N/A'}"
+            };
+            console.log("Chi tiết ratingDistribution:", ratingDebug);
+        });
+    </script>
+
+
 </head>
 <body>
     <jsp:include page="/view/events-page/header.jsp" />
@@ -139,34 +159,62 @@
                             </div>
                         </div>
                         <canvas id="ratingDistributionChart" 
-                            data-rate5="<c:out value="${ratingDistribution[5]}" default="0"/>"
-                            data-rate4="<c:out value="${ratingDistribution[4]}" default="0"/>"
-                            data-rate3="<c:out value="${ratingDistribution[3]}" default="0"/>"
-                            data-rate2="<c:out value="${ratingDistribution[2]}" default="0"/>"
-                            data-rate1="<c:out value="${ratingDistribution[1]}" default="0"/>"
-                            data-debug="5★=${ratingDistribution[5]}, 4★=${ratingDistribution[4]}, 3★=${ratingDistribution[3]}, 2★=${ratingDistribution[2]}, 1★=${ratingDistribution[1]}"></canvas>
-
-                        <!-- Dữ liệu đánh giá trực tiếp từ Java - Sử dụng JSTL -->
+                            data-rate5="${ratingDistribution.get(5)}" 
+                            data-rate4="${ratingDistribution.get(4)}" 
+                            data-rate3="${ratingDistribution.get(3)}" 
+                            data-rate2="${ratingDistribution.get(2)}" 
+                            data-rate1="${ratingDistribution.get(1)}">
+                        </canvas>
+                        
+                        <!-- Truyền dữ liệu qua JavaScript trực tiếp thay vì data-attribute -->
                         <script>
-                            // Dữ liệu đánh giá truyền trực tiếp từ JSP sang JS
-                            window.ratingDistributionDirectData = {
-                                rate5: "${ratingDistribution[5]}",
-                                rate4: "${ratingDistribution[4]}",
-                                rate3: "${ratingDistribution[3]}",
-                                rate2: "${ratingDistribution[2]}",
-                                rate1: "${ratingDistribution[1]}"
+                            // Cách thiết lập dữ liệu thủ công để đảm bảo giá trị chính xác
+                            window.ratingDistributionData = {
+                                rate5: parseInt("${ratingDistribution.get(5)}", 10) || 0,
+                                rate4: parseInt("${ratingDistribution.get(4)}", 10) || 0,
+                                rate3: parseInt("${ratingDistribution.get(3)}", 10) || 0,
+                                rate2: parseInt("${ratingDistribution.get(2)}", 10) || 0,
+                                rate1: parseInt("${ratingDistribution.get(1)}", 10) || 0
                             };
-                            console.log("Dữ liệu trực tiếp từ JSP JSTL:", window.ratingDistributionDirectData);
                             
-                            // Chuyển đổi thành số
-                            window.ratingDistributionDirectDataNumbers = {
-                                rate5: parseInt(window.ratingDistributionDirectData.rate5 || "0", 10),
-                                rate4: parseInt(window.ratingDistributionDirectData.rate4 || "0", 10),
-                                rate3: parseInt(window.ratingDistributionDirectData.rate3 || "0", 10),
-                                rate2: parseInt(window.ratingDistributionDirectData.rate2 || "0", 10),
-                                rate1: parseInt(window.ratingDistributionDirectData.rate1 || "0", 10)
-                            };
-                            console.log("Dữ liệu số từ JSP JSTL:", window.ratingDistributionDirectDataNumbers);
+                            // Log các giá trị để kiểm tra
+                            console.log("Truyền dữ liệu trực tiếp vào JavaScript: ", window.ratingDistributionData);
+                        </script>
+
+                        
+                        <script>
+                            // Mặc định là true, sẽ được cập nhật trong JS dựa trên dữ liệu thực tế
+                            window.shouldDisplayCharts = true;
+                            
+                            console.log("Dữ liệu phân phối đánh giá raw từ backend (get + containsKey):", {
+                                rate5: "${ratingDistribution.containsKey(5) ? ratingDistribution.get(5) : 'Key không tồn tại'}",
+                                rate4: "${ratingDistribution.containsKey(4) ? ratingDistribution.get(4) : 'Key không tồn tại'}",
+                                rate3: "${ratingDistribution.containsKey(3) ? ratingDistribution.get(3) : 'Key không tồn tại'}",
+                                rate2: "${ratingDistribution.containsKey(2) ? ratingDistribution.get(2) : 'Key không tồn tại'}",
+                                rate1: "${ratingDistribution.containsKey(1) ? ratingDistribution.get(1) : 'Key không tồn tại'}"
+                            });
+                            
+                            // Thêm debug type của ratingDistribution
+                            console.log("Kiểu dữ liệu ratingDistribution: ${ratingDistribution.getClass().getName()}");
+                            
+                            // Kiểm tra dữ liệu JSON được tạo
+                            document.addEventListener('DOMContentLoaded', function() {
+                                console.log("JSON data-distribution:", document.getElementById("ratingDistributionChart").getAttribute("data-distribution"));
+                                console.log("Debug attribute:", document.getElementById("ratingDistributionChart").getAttribute("data-debug"));
+                                
+                                // Debug thông tin tổng hợp
+                                console.log("Thông tin tổng hợp:", {
+                                    feedbackCount: "${feedbackCount}",
+                                    hasData: "${feedbackCount > 0}",
+                                    hasRatingDistribution: "${not empty ratingDistribution}",
+                                    statisticsNotNull: "${statistics != null}"
+                                });
+                                    // Debug biến toàn cục mới tạo
+                                    console.log("Dữ liệu từ biến window.ratingDistributionData:", window.ratingDistributionData);
+                                } catch(e) {
+                                    console.error("Lỗi debug thuộc tính:", e);
+                                }
+                            });
                         </script>
                     </div>
                 </div>
