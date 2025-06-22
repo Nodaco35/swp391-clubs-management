@@ -1,7 +1,7 @@
 package controller;
 
-import dal.ClubCreationPermissionDAO;
 import dal.ClubDAO;
+import dal.CreatedClubApplicationsDAO;
 import dal.UserClubDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -18,13 +18,13 @@ public class ClubsServlet extends HttpServlet {
 
     private ClubDAO clubDAO;
     private UserClubDAO userClubDAO;
-    private ClubCreationPermissionDAO permissionDAO;
+    private CreatedClubApplicationsDAO permissionDAO;
 
     @Override
     public void init() throws ServletException {
         clubDAO = new ClubDAO();
         userClubDAO = new UserClubDAO();
-        permissionDAO = new ClubCreationPermissionDAO();
+        permissionDAO = new CreatedClubApplicationsDAO();
     }
 
     @Override
@@ -71,7 +71,6 @@ public class ClubsServlet extends HttpServlet {
         Users user = (Users) session.getAttribute("user");
         String userID = (user != null) ? user.getUserID() : null;
 
-        // Check if user has any clubs and favorite clubs
         boolean hasClubs = false;
         boolean hasFavoriteClubs = false;
         boolean hasPendingRequest = false;
@@ -83,7 +82,6 @@ public class ClubsServlet extends HttpServlet {
             hasPendingRequest = permissionDAO.hasPendingRequest(userID);
         }
 
-        // Handle favoriteClubs category
         if ("favoriteClubs".equalsIgnoreCase(category)) {
             if (user == null || userID == null) {
                 clubs = clubDAO.getClubsByCategory("all", page, pageSize);
@@ -94,7 +92,6 @@ public class ClubsServlet extends HttpServlet {
                 totalClubs = clubDAO.getTotalFavoriteClubs(userID);
             }
         } else {
-            // Handle myClubs and other categories
             if ("myClubs".equalsIgnoreCase(category)) {
                 if (user == null || userID == null) {
                     clubs = clubDAO.getClubsByCategory("all", page, pageSize);
@@ -110,7 +107,6 @@ public class ClubsServlet extends HttpServlet {
             }
         }
 
-        // Set favorite status for each club
         if (userID != null) {
             for (Clubs club : clubs) {
                 boolean isFavorite = clubDAO.isFavoriteClub(userID, club.getClubID());
@@ -120,7 +116,6 @@ public class ClubsServlet extends HttpServlet {
 
         int totalPages = (int) Math.ceil((double) totalClubs / pageSize);
 
-        // Check for club creation permission
         boolean hasPermission = user != null && permissionDAO.hasActiveClubPermission(userID);
 
         request.setAttribute("clubs", clubs);
@@ -159,7 +154,6 @@ public class ClubsServlet extends HttpServlet {
         boolean isFavorite = false;
         UserClub userClub = null;
 
-        // Set favorite status
         if (user != null) {
             String userID = user.getUserID();
             userClub = userClubDAO.getUserClub(userID, clubID);
@@ -173,7 +167,6 @@ public class ClubsServlet extends HttpServlet {
             club.setFavorite(isFavorite);
         }
 
-        // Check for club creation permission
         boolean hasPermission = user != null && permissionDAO.hasActiveClubPermission(user.getUserID());
         request.setAttribute("club", club);
         request.setAttribute("isMember", isMember);

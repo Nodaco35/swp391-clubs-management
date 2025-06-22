@@ -93,13 +93,26 @@ public class ICServlet extends HttpServlet {
             int id = Integer.parseInt(request.getParameter("id"));
             boolean success;
             String message;
+            String userId = request.getParameter("userID");
             if (action.equals("approvePermissionRequest")) {
                 success = ccp.approveRequest(id, user.getUserID());
                 message = success ? "Đã duyệt đơn thành công!" : "Duyệt đơn thất bại. Vui lòng thử lại.";
+                 if (success) {
+                    notificationDAO.sentToPerson1(user.getUserID(), userId, 
+                        "Đơn xin quyền tạo câu lạc bộ được duyệt", 
+                        "Đơn xin quyền tạo câu lạc bộ của bạn đã được duyệt. Bạn có thể tạo câu lạc bộ ngay bây giờ!", 
+                        "HIGH");
+                }
 
             } else if(action.equals("rejectPermissionRequest")) {
                 success = ccp.rejectRequest(id, user.getUserID());
                 message = success ? "Đã từ chối đơn thành công!" : "Từ chối đơn thất bại. Vui lòng thử lại.";
+                 if (success) {
+                    notificationDAO.sentToPerson1(user.getUserID(), userId, 
+                        "Đơn xin quyền tạo câu lạc bộ bị từ chối", 
+                        "Đơn xin quyền tạo câu lạc bộ của bạn đã bị từ chối. Vui lòng liên hệ IC để biết thêm chi tiết.", 
+                        "HIGH");
+                }
 
             }else{
                 success = ccp.deleteRequest(id);
