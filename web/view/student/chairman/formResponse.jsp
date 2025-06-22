@@ -8,10 +8,10 @@
     <title>Form Response - UniClub</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/formResponse.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/formResponseSearch.css">
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     </head>
     <body>
@@ -33,7 +33,7 @@
         </c:if>
         
         <div class="container">
-            <div class="header">
+            <div style="text-align: center; background-color: aliceblue; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
                 <h1>Quản lý đăng ký ${formType eq 'member' ? 'CLB' : 'sự kiện'}</h1>
                 <p>Xem và duyệt các đơn đăng ký tham gia ${formType eq 'member' ? 'câu lạc bộ' : 'sự kiện'}</p>
             </div>
@@ -77,11 +77,11 @@
                     <div class="stat-label">Tổng cộng</div>
                 </div>
             </div>
-            
-            <div class="search-container">
+              <div class="search-container">
                 <div class="search-box">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="searchInput" placeholder="Tìm kiếm theo tên, email hoặc mã người dùng...">
+                    <input type="text" id="responseSearchInput" placeholder="Tìm kiếm theo tên, email hoặc mã người dùng...">
+                    <!-- Clear button sẽ được thêm tự động từ JS -->
                 </div>
             </div>
             

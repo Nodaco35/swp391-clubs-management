@@ -139,6 +139,121 @@ body {
 #searchInput::placeholder {
     color: rgba(255, 255, 255, 0.8);
 }
+.header-container .search-container {
+    display: none !important;
+}
+
+/* Style for the formResponse search container */
+.container .search-container {
+    margin-bottom: 25px;
+    padding: 0 15px;
+}
+
+/* Style for the search box in formResponse */
+.container .search-box {
+    display: flex;
+    align-items: center;
+    background-color: #ffffff;
+    border-radius: 50px;
+    padding: 12px 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e0e0e0;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.container .search-box:hover,
+.container .search-box:focus-within {
+    box-shadow: 0 6px 16px rgba(155, 89, 182, 0.2);
+    border-color: #9b59b6;
+}
+
+.container .search-icon {
+    color: #9b59b6;
+    margin-right: 12px;
+    font-size: 18px;
+}
+
+#responseSearchInput {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    background-color: transparent;
+    color: #444;
+    padding: 8px 0;
+    font-family: 'Roboto', sans-serif;
+}
+
+#responseSearchInput::placeholder {
+    color: #aaa;
+    font-weight: 300;
+}
+
+.search-clear-btn {
+    background: none;
+    border: none;
+    color: #9b59b6;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    transition: all 0.2s;
+}
+
+.search-clear-btn:hover {
+    background-color: rgba(155, 89, 182, 0.1);
+}
+
+/* Improved styling for the no results message */
+.no-responses-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 50px 20px;
+    color: #7f8c8d;
+    text-align: center;
+    min-height: 250px;
+    gap: 10px;
+}
+
+.no-responses-message i {
+    font-size: 3.5rem;
+    margin-bottom: 15px;
+    color: #9b59b6;
+    opacity: 0.6;
+}
+
+.clear-search-btn {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: rgba(155, 89, 182, 0.1);
+    border: none;
+    border-radius: 20px;
+    color: #9b59b6;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.clear-search-btn:hover {
+    background: rgba(155, 89, 182, 0.2);
+}
+
+.clear-search-btn i {
+    font-size: 14px;
+    margin-bottom: 0;
+    opacity: 1;
+}
+
 
 /* Filter Tabs */
 .filter-tabs {

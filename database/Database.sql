@@ -475,7 +475,12 @@ INSERT INTO EventParticipants (EventID, UserID, Status) VALUES
 (3, 'U001', 'REGISTERED'),
 (3, 'U003', 'REGISTERED'),
 (4, 'U002', 'REGISTERED'),
-(4, 'U004', 'REGISTERED');
+(4, 'U004', 'REGISTERED'),
+(13,'U002','REGISTERED'),
+(13,'U005','REGISTERED'),
+(13,'U006','REGISTERED'),
+(13,'U007','REGISTERED'),
+(13,'U008','REGISTERED');
 
 -- ================================================================================
 -- ========================================
@@ -741,3 +746,10 @@ CREATE TABLE Feedbacks (
     FOREIGN KEY (EventID) REFERENCES Events(EventID) ON DELETE CASCADE,
     FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+INSERT INTO `Feedbacks` VALUES 
+(1,13,'U005',0,4,'Sự kiện khá vui và thú vị',5,3,4,5,4,3,5,3,4,'2025-06-20 22:48:28'),
+(2,13,'U006',1,2,'Tôi không thích sự kiện lắm, trải nghiệm của tôi khá tệ',2,1,3,2,1,3,2,4,3,'2025-06-21 00:58:14'),
+(3,13,'U007',0,1,'Sự kiện không vui như tôi nghĩ',2,3,4,3,1,2,3,1,2,'2025-06-21 00:58:54'),
+(4,13,'U008',0,3,'SỰ kiện ok',5,3,4,3,3,4,3,5,3,'2025-06-21 01:00:14');
+
