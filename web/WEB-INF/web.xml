@@ -195,13 +195,10 @@
         <servlet-name>EventsPageServlet</servlet-name>
         <url-pattern>/events-page</url-pattern>
     </servlet-mapping>
-<<<<<<< HEAD
-=======
     <servlet>
         <servlet-name>StudentServlet</servlet-name>
         <servlet-class>controller.StudentServlet</servlet-class>
     </servlet>
->>>>>>> main
     <servlet-mapping>
         <servlet-name>NotificationController</servlet-name>
         <url-pattern>/notification</url-pattern>
@@ -259,7 +256,6 @@
         <url-pattern>/chairman-page</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-<<<<<<< HEAD
         <servlet-name>AddEventServlet</servlet-name>
         <url-pattern>/chairman-page/myclub-events/add-event</url-pattern>
     </servlet-mapping>
@@ -286,7 +282,8 @@
     <servlet-mapping>
         <servlet-name>AgendaServlet</servlet-name>
         <url-pattern>/agenda</url-pattern>
-=======
+    </servlet-mapping>
+    <servlet-mapping>
         <servlet-name>FormResponsesServlet</servlet-name>
         <url-pattern>/formResponses</url-pattern>
     </servlet-mapping>
@@ -297,7 +294,6 @@
     <servlet-mapping>
         <servlet-name>ViewFeedbackServlet</servlet-name>
         <url-pattern>/viewFeedback</url-pattern>
->>>>>>> main
     </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>
