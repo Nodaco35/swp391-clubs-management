@@ -11,7 +11,44 @@ import java.util.List;
 import models.ClubCreationPermissions;
 
 public class ClubCreationPermissionDAO {
-    
+
+    public List<ClubCreationPermissions> getAllRequests() {
+        List<ClubCreationPermissions> permissions = new ArrayList<>();
+        String query = "SELECT p.*, u.FullName FROM ClubCreationPermissions p " +
+                      "LEFT JOIN Users u ON p.UserID = u.UserID " +
+                      "ORDER BY p.RequestDate DESC";
+        try (Connection conn = DBContext.getConnection(); 
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                ClubCreationPermissions permission = new ClubCreationPermissions();
+                permission.setId(rs.getInt("ID"));
+                permission.setUserID(rs.getString("UserID"));
+                permission.setUserName(rs.getString("FullName"));
+                permission.setClubName(rs.getString("ClubName"));
+                permission.setCategory(rs.getString("Category"));
+                permission.setStatus(rs.getString("Status"));
+                Timestamp requestTimestamp = rs.getTimestamp("RequestDate");
+                if (requestTimestamp != null) {
+                    permission.setRequestDate(requestTimestamp.toLocalDateTime());
+                }
+                permission.setProcessedBy(rs.getString("ProcessedBy"));
+                Timestamp grantedTimestamp = rs.getTimestamp("GrantedDate");
+                if (grantedTimestamp != null) {
+                    permission.setGrantedDate(grantedTimestamp.toLocalDateTime());
+                }
+                Timestamp usedTimestamp = rs.getTimestamp("UsedDate");
+                if (usedTimestamp != null) {
+                    permission.setUsedDate(usedTimestamp.toLocalDateTime());
+                }
+                permissions.add(permission);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return permissions;
+    }
+
     // Insert a new permission request
     public boolean insertRequest(String userID) {
         if (userID == null || userID.trim().isEmpty()) {
@@ -29,9 +66,9 @@ public class ClubCreationPermissionDAO {
     // Get permissions by status
     public List<ClubCreationPermissions> getPermissionsByStatus(String status) {
         List<ClubCreationPermissions> permissions = new ArrayList<>();
-        String query = "SELECT p.*, u.FullName FROM ClubCreationPermissions p " +
-                       "JOIN Users u ON p.UserID = u.UserID " +
-                       "WHERE p.Status = ? ORDER BY p.RequestDate DESC";
+        String query = "SELECT p.*, u.FullName FROM ClubCreationPermissions p "
+                + "JOIN Users u ON p.UserID = u.UserID "
+                + "WHERE p.Status = ? ORDER BY p.RequestDate DESC";
         try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, status);
             ResultSet rs = stmt.executeQuery();
@@ -46,9 +83,6 @@ public class ClubCreationPermissionDAO {
                     permission.setRequestDate(requestTimestamp.toLocalDateTime());
                 }
                 Timestamp processedTimestamp = rs.getTimestamp("ProcessedDate");
-                if (processedTimestamp != null) {
-                    permission.setProcessedDate(processedTimestamp.toLocalDateTime());
-                }
                 permission.setProcessedBy(rs.getString("ProcessedBy"));
                 Timestamp grantedTimestamp = rs.getTimestamp("GrantedDate");
                 if (grantedTimestamp != null) {
@@ -66,9 +100,8 @@ public class ClubCreationPermissionDAO {
         return permissions;
     }
 
-    // Approve a request and transition to ACTIVE
     public boolean approveRequest(int id, String processedBy) {
-        String query = "UPDATE ClubCreationPermissions SET Status = 'ACTIVE', ProcessedDate = NOW(), ProcessedBy = ?, GrantedDate = NOW() WHERE ID = ? AND Status = 'PENDING'";
+        String query = "UPDATE ClubCreationPermissions SET Status = 'APPROVED', ProcessedBy = ?, GrantedDate = NOW() WHERE ID = ? ";
         try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, processedBy);
             stmt.setInt(2, id);
@@ -77,13 +110,20 @@ public class ClubCreationPermissionDAO {
             return false;
         }
     }
-
-    // Reject a request
     public boolean rejectRequest(int id, String processedBy) {
-        String query = "UPDATE ClubCreationPermissions SET Status = 'REJECTED', ProcessedDate = NOW(), ProcessedBy = ? WHERE ID = ? AND Status = 'PENDING'";
+        String query = "UPDATE ClubCreationPermissions SET Status = 'REJECTED', ProcessedBy = ? , GrantedDate = NOW() WHERE ID = ? ";
         try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, processedBy);
             stmt.setInt(2, id);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+    public boolean deleteRequest(int id) {
+        String query = "Delete from ClubCreationPermissions WHERE ID = ? ";
+        try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, id);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             return false;
