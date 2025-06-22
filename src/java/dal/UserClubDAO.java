@@ -19,7 +19,7 @@ public class UserClubDAO {
                                         FROM UserClubs uc
                                         JOIN clubs c on uc.ClubID = c.ClubID
                                         JOIN Roles r ON uc.RoleID = r.RoleID
-                                        
+                    
                                         JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
                                         JOIN departments d on cd.DepartmentID = d.DepartmentID
                                         WHERE uc.UserID = ?""";
