@@ -131,8 +131,6 @@ public class AddEventServlet extends HttpServlet {
                 eventTime == null || eventTime.trim().isEmpty() ||
                 eventEndTime == null || eventEndTime.trim().isEmpty()) {
 
-            request.setAttribute("errorMessage", "Vui lòng nhập đầy đủ thông tin bắt buộc.");
-
             String locationType = request.getParameter("locationType");
             LocationDAO locationDAO = new LocationDAO();
             request.setAttribute("locations", locationDAO.getLocationsByType(locationType != null ? locationType : "OnCampus"));
@@ -190,7 +188,6 @@ public class AddEventServlet extends HttpServlet {
             boolean isPublic = "public".equalsIgnoreCase(eventType);
             dao.insertEvent(eventName, eventDescription, startDateTime, endDateTime, locationId, myClubID, isPublic, maxParticipants);
 
-//            request.removeAttribute("errorMessage"); // Xóa errorMessage trước khi redirect
             response.sendRedirect(request.getContextPath() + "/chairman-page/myclub-events");
 
         } catch (NumberFormatException e) {
