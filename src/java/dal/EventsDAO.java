@@ -501,6 +501,28 @@ public class EventsDAO {
         }
     }
 
+    public void updateEvent(int eventID, String name, String description, Timestamp start, Timestamp end,
+                            int locationID, int capacity, boolean isPublic) {
+        String sql = "UPDATE Events SET EventName = ?, Description = ?, EventDate = ?, EndTime = ?, " +
+                "LocationID = ?, Capacity = ?, IsPublic = ? WHERE EventID = ?";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, name);
+            ps.setString(2, description);
+            ps.setTimestamp(3, start);
+            ps.setTimestamp(4, end);
+            ps.setInt(5, locationID);
+            ps.setInt(6, capacity);
+            ps.setBoolean(7, isPublic);
+            ps.setInt(8, eventID);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     public List<Agenda> getAgendasByEventID(int eventID) {
         List<Agenda> agendas = new ArrayList<>();
         String sql = "SELECT * FROM Agenda WHERE EventID = ? ORDER BY StartTime ASC";

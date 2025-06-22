@@ -7,6 +7,10 @@ package controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,9 +86,14 @@ public class EditEventServlet extends HttpServlet {
                     List<Agenda> agendas = eventDAO.getAgendasByEventID(eventID);
 
                     // Lấy loại địa điểm từ event nếu có, mặc định "OnCampus"
-                    String locationType = "OnCampus";
-                    if (event.getLocation() != null && event.getLocation().getTypeLocation() != null) {
-                        locationType = event.getLocation().getTypeLocation();
+                    String locationType = request.getParameter("locationType");
+                    if (locationType == null || locationType.isEmpty()) {
+                        // fallback từ event
+                        if (event.getLocation() != null && event.getLocation().getTypeLocation() != null) {
+                            locationType = event.getLocation().getTypeLocation();
+                        } else {
+                            locationType = "OnCampus";
+                        }
                     }
 
                     // Lấy danh sách địa điểm theo loại đã chọn
@@ -116,9 +125,44 @@ public class EditEventServlet extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-        processRequest(request, response);
+            throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+
+        try {
+            int eventID = Integer.parseInt(request.getParameter("eventID"));
+            String eventName = request.getParameter("eventName");
+            String eventDateStr = request.getParameter("eventDate");
+            String startTimeStr = request.getParameter("eventTime");
+            String endTimeStr = request.getParameter("eventEndTime");
+            int locationID = Integer.parseInt(request.getParameter("eventLocation"));
+            int capacity = Integer.parseInt(request.getParameter("maxParticipants"));
+            String eventType = request.getParameter("eventType");
+            String description = request.getParameter("eventDescription");
+
+            boolean isPublic = "public".equalsIgnoreCase(eventType);
+
+            // Kết hợp ngày + giờ thành Timestamp
+            LocalDate date = LocalDate.parse(eventDateStr);
+            LocalTime startTime = LocalTime.parse(startTimeStr);
+            LocalTime endTime = LocalTime.parse(endTimeStr);
+
+            Timestamp eventStart = Timestamp.valueOf(LocalDateTime.of(date, startTime));
+            Timestamp eventEnd = Timestamp.valueOf(LocalDateTime.of(date, endTime));
+
+            // Cập nhật DB
+            EventsDAO eventDAO = new EventsDAO();
+            eventDAO.updateEvent(eventID, eventName, description, eventStart, eventEnd, locationID, capacity, isPublic);
+
+            // Redirect về lại trang chỉnh sửa
+            response.sendRedirect(request.getContextPath() + "/chairman-page/myclub-events/edit-event?eventID=" + eventID);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("errorMessage", "Lỗi khi cập nhật sự kiện: " + e.getMessage());
+            request.getRequestDispatcher("/view/student/chairman/edit-event.jsp").forward(request, response);
+        }
     }
+
 
     /** 
      * Returns a short description of the servlet.

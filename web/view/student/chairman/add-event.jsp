@@ -207,7 +207,7 @@
 						<input type="time" id="eventEndTime" name="eventEndTime" value="${param.eventEndTime}" required>
 					</div>
 				</div>
-				<div class="form-grid">
+				<div class="form-grid-2">
 					<div class="form-group">
 						<label for="locationType">Loại địa điểm (Trong hay ngoài trường) *</label>
 						<select id="locationType" name="locationType" onchange="this.form.submit()" required>
@@ -219,7 +219,7 @@
 						</select>
 					</div>
 				</div>
-				<div class="form-grid">
+				<div class="form-grid-2">
 					<div class="form-group">
 						<label for="eventLocation">Địa điểm *</label>
 						<select id="eventLocation" name="eventLocation" required>
@@ -245,7 +245,7 @@
 			</div>
 		</form>
 
-		<div class="form-grid">
+		<div class="form-grid-2">
 			<div id="newLocationGroup"
 			     style="display: ${param.locationType == 'OffCampus' ? 'block' : 'none'}; margin-top: 20px;">
 				<form action="${pageContext.request.contextPath}/add-location" method="post">

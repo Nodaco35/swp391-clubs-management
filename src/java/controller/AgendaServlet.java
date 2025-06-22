@@ -11,6 +11,8 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.util.Date;
 
 import dal.EventsDAO;
 import jakarta.servlet.ServletException;
@@ -60,8 +62,9 @@ public class AgendaServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-        processRequest(request, response);
-    } 
+        request.getRequestDispatcher("/view/student/chairman/edit-event.jsp").forward(request, response);
+
+    }
 
     /** 
      * Handles the HTTP <code>POST</code> method.
@@ -70,6 +73,7 @@ public class AgendaServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         int eventID = Integer.parseInt(request.getParameter("eventID"));
@@ -81,8 +85,9 @@ public class AgendaServlet extends HttpServlet {
 
         // Lấy ngày sự kiện
         Events event = eventsDAO.getEventByID(eventID);
-// Lấy ngày sự kiện
-        LocalDate eventDate = event.getEventDate().toLocalDateTime().toLocalDate();
+        Date date = event.getEventDate(); // java.util.Date
+        LocalDate eventDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
         // Xóa toàn bộ agenda cũ theo EventID
         eventsDAO.deleteAllByEventID(eventID);
 
@@ -103,7 +108,7 @@ public class AgendaServlet extends HttpServlet {
             }
         }
 
-        response.sendRedirect("edit-event?eventID=" + eventID); // quay lại trang edit
+        response.sendRedirect(request.getContextPath() + "/chairman-page/myclub-events/edit-event?eventID=" + eventID);
     }
 
     /** 
