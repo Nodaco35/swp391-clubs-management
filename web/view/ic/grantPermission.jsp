@@ -104,13 +104,13 @@
                                                 <td><c:out value="${request.requestDate}"></c:out></td>
                                                     <td><span class="badge badge-pending"><i class="fas fa-clock"></i> Chờ duyệt</span></td>
                                                     <td class="table-actions">
-                                                        <button class="btn btn-icon btn-success" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=approvePermissionRequest&id=${request.id}'">
+                                                        <button class="btn btn-icon btn-success" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=approvePermissionRequest&id=${request.id}&userID=${request.userID}'">
                                                         <i class="fas fa-check"></i>
                                                     </button>
-                                                    <button class="btn btn-icon btn-error" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=rejectPermissionRequest&id=${request.id}'">
+                                                    <button class="btn btn-icon btn-error" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=rejectPermissionRequest&id=${request.id}&userID=${request.userID}'">
                                                         <i class="fas fa-times"></i>
                                                     </button>
-                                                    <button class="btn btn-icon btn-error" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=deletePermissionRequest&id=${request.id}'">
+                                                    <button class="btn btn-icon btn-error" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=deletePermissionRequest&id=${request.id}&userID=${request.userID}'">
                                                         <i class="fa-solid fa-trash"></i>
                                                     </button>
 
@@ -139,10 +139,10 @@
                                                     <td><span class="badge badge-approved"><i class="fas fa-check"></i> Đã duyệt</span></td>
 
                                                     <td class="table-actions">
-                                                        <button class="btn btn-icon btn-error" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=rejectPermissionRequest&id=${request.id}'">
+                                                        <button class="btn btn-icon btn-error" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=rejectPermissionRequest&id=${request.id}&userID=${request.userID}'">
                                                         <i class="fas fa-times"></i>
                                                     </button>
-                                                    <button class="btn btn-icon btn-error" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=deletePermissionRequest&id=${request.id}'">
+                                                    <button class="btn btn-icon btn-error" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=deletePermissionRequest&id=${request.id}&userID=${request.userID}'">
                                                         <i class="fa-solid fa-trash"></i>
                                                     </button>
 
@@ -170,10 +170,10 @@
                                                 <td><c:out value="${request.requestDate}"></c:out></td>
                                                     <td><span class="badge badge-rejected"><i class="fas fa-times"></i> Từ chối</span></td>
                                                     <td class="table-actions">
-                                                        <button class="btn btn-icon btn-success" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=approvePermissionRequest&id=${request.id}'">
+                                                        <button class="btn btn-icon btn-success" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=approvePermissionRequest&id=${request.id}&userID=${request.userID}'">
                                                         <i class="fas fa-check"></i>
                                                     </button>
-                                                    <button class="btn btn-icon btn-error" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=deletePermissionRequest&id=${request.id}'">
+                                                    <button class="btn btn-icon btn-error" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=deletePermissionRequest&id=${request.id}&userID=${request.userID}'">
                                                         <i class="fa-solid fa-trash"></i>
                                                     </button>
                                                 </td>

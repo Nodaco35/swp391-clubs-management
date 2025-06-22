@@ -187,45 +187,6 @@
                         </div>
                     </section>
 
-                    <!-- Mới đức -->
-                    <section id="upcoming-clubmeeting" class="mb-10">
-                        <h2 class="text-3xl font-semibold text-black mb-6">Cuộc họp sắp tới của clb</h2>
-                        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-                            <c:choose>
-                                <c:when test="${empty clubmeetings}">
-                                    <p class="text-gray-600 text-center py-4">Không có cuộc họp nào.</p>
-                                </c:when>
-                                <c:otherwise>
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <c:forEach items="${clubmeetings}" var="cm" varStatus="loop">
-                                            <div class="bg-white rounded-lg shadow-md p-6 border border-gray-150 hover:shadow-lg transition">
-                                                <div class="flex items-center gap-6">
-                                                    <img src="${pageContext.request.contextPath}/${cm.clubImg}" alt="${cm.clubName}" class="w-24 h-24 rounded-lg object-cover border-2 border-blue-100">
-                                                    <div>
-                                                        <h3 class="text-xl font-medium text-gray-800">${cm.clubName}</h3>
-                                                        <p class="text-sm text-gray-600"><i class="fas fa-calendar-alt"></i> ${cm.startedTime}</p>
-                                                        <p class="text-sm text-gray-600">
-                                                            Link: <strong><a href="${cm.URLMeeting}" target="_blank" class="text-blue-600 underline">${cm.URLMeeting}</a></strong>
-                                                        </p>                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <c:if test="${loop.count % 2 == 1 and loop.last}">
-                                                <div></div>
-                                            </c:if>
-
-                                        </c:forEach>
-
-
-                                    </div>
-                                </c:otherwise>
-                            </c:choose>
-                            <c:if test="${isLeader}">
-                                <a href="#" class="mt-5 inline-block text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-full transition" >Tạo cuộc họp mới</a>
-                            </c:if>
-                        </div>
-                    </section>
-
                         <!-- Mới đức -->
                         <section id="upcoming-clubmeeting" class="mb-10">
                             <h2 class="text-3xl font-semibold text-black mb-6">Cuộc họp sắp tới của clb</h2>
@@ -264,8 +225,7 @@
                                 </c:if>
                             </div>
                         </section>
-
-
+                        
                         <!-- Upcoming Events -->
                         <section id="upcoming-events" class="mb-10">
                             <h2 class="text-2xl font-bold text-gray-800 mb-4">Sự Kiện Sắp Tới</h2>

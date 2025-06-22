@@ -195,7 +195,6 @@
         <servlet-name>EventsPageServlet</servlet-name>
         <url-pattern>/events-page</url-pattern>
     </servlet-mapping>
-
     <servlet>
         <servlet-name>StudentServlet</servlet-name>
         <servlet-class>controller.StudentServlet</servlet-class>
