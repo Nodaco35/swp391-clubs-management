@@ -45,7 +45,7 @@ public class ClubApplicationDAO {
         return list;
     }
     
-    public static List<ClubApplication> pendingApplicationsFindByClub(String userID) {
+   public static List<ClubApplication> pendingApplicationsFindByClub(String userID) {
         String sql = """
                      SELECT ca.*, u.FullName, c.ClubName
                      FROM ClubApplications ca

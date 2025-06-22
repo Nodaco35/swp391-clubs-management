@@ -13,13 +13,13 @@ import models.Roles;
 
 public class UserClubDAO {
 
+    // mới
     public static List<UserClub> findByUserID(String userID) {
         String sql = """
                     SELECT uc.*, r.RoleName, d.DepartmentName , c.ClubImg, c.ClubName
                                         FROM UserClubs uc
                                         JOIN clubs c on uc.ClubID = c.ClubID
                                         JOIN Roles r ON uc.RoleID = r.RoleID
-                                        
                                         JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
                                         JOIN departments d on cd.DepartmentID = d.DepartmentID
                                         WHERE uc.UserID = ?""";
@@ -48,6 +48,7 @@ public class UserClubDAO {
         }
         return findByUserID;
     }
+
 
     public boolean isUserMemberOfClub(int clubID, String userID) {
         String sql = "SELECT 1 FROM UserClubs WHERE ClubID = ? AND UserID = ? AND IsActive = 1";

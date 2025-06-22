@@ -71,7 +71,4 @@ public class ClubMeeting {
     public String toString() {
         return "ClubMeeting{" + "clubMeetingID=" + clubMeetingID + ", clubID=" + clubID + ", URLMeeting=" + URLMeeting + ", startedTime=" + startedTime + ", clubName=" + clubName + '}';
     }
-    
-    
-    
 }

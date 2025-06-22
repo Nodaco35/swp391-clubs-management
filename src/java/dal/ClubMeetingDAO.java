@@ -66,6 +66,4 @@ public class ClubMeetingDAO {
         }
         return count;
     }
-    
-    
 }
