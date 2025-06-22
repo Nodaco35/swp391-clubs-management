@@ -29,6 +29,7 @@
                         <li><a href="#calendar" class="text-blue-500 hover:text-blue-700 block py-2 px-4 rounded">Nhiệm vụ của ban</a></li>
                         <li><a href="#upcoming-clubmeeting" class="text-blue-500 hover:text-blue-700 block py-2 px-4 rounded">Cuộc học sắp tới của clb</a></li>
                         <li><a href="#upcoming-events" class="text-blue-500 hover:text-blue-700 block py-2 px-4 rounded">Sự Kiện Sắp Tới</a></li>
+                        <li><a href="#actions" class="text-blue-500 hover:text-blue-700 block py-2 px-4 rounded">Quản Lý Form</a></li>
                             <c:set var="isLeader" value="false" />
                             <c:forEach items="${userclubs}" var="uc">
                                 <c:if test="${not empty uc and uc.roleID == 1}">
@@ -38,9 +39,7 @@
                             <c:if test="${isLeader}">
                             <li><a href="#pending-applications" class="text-blue-500 hover:text-blue-700 block py-2 px-4 rounded">Các Đơn Chờ Duyệt</a></li>
                             <li><a href="#financial-overview" class="text-blue-500 hover:text-blue-700 block py-2 px-4 rounded">Tổng Quan Tài Chính</a></li>
-                            <li><a href="#actions" class="text-blue-500 hover:text-blue-700 block py-2 px-4 rounded">Quản Lý Form</a></li>
                             </c:if>
-
                     </ul>
                 </aside>
             </aside>
@@ -324,7 +323,7 @@
                             </div>
                         </c:if>
 
-                        <c:if test="${isLeader}">
+                        
                             <!-- Existing Actions Section -->
                             <section id="actions" class="mb-10">
                                 <h2 class="text-2xl font-bold text-gray-800 mb-4">Quản Lý Form</h2>
@@ -359,7 +358,6 @@
                                     </p>
                                 </div>
                             </section>
-                        </c:if>
                 </div>
             </main>
 
