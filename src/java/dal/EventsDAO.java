@@ -95,6 +95,43 @@ public class EventsDAO {
         return null;
     }
 
+    public List<Events> getEventsByClubIdForTask(int clubID) {
+        List<Events> events = new ArrayList<>();
+        String sql = """
+                SELECT * FROM Events 
+                WHERE ClubID = ? 
+                ORDER BY EventDate DESC
+            """;
+
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, clubID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Events event = new Events();
+                event.setEventID(rs.getInt("EventID"));
+                event.setEventName(rs.getString("EventName"));
+                event.setEventImg(rs.getString("EventImg"));
+                event.setDescription(rs.getString("Description"));
+                event.setEventDate(rs.getTimestamp("EventDate"));
+                event.setEndTime(rs.getTimestamp("EndTime"));
+                event.setClubID(rs.getInt("ClubID"));
+                event.setPublic(rs.getBoolean("IsPublic"));
+                event.setFormTemplateID(rs.getInt("FormTemplateID"));
+                event.setCapacity(rs.getInt("Capacity"));
+                event.setStatus(rs.getString("Status"));
+                Locations l = getLocationByID(rs.getInt("LocationID"));
+                event.setLocation(l);
+                events.add(event);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return events;
+    }
+
+
     public List<Events> getEventsByClubID(int clubID) {
         List<Events> events = new ArrayList<>();
         String sql = """

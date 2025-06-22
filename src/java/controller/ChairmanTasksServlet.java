@@ -7,14 +7,21 @@ package controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import dal.ClubDAO;
+import dal.EventsDAO;
+import dal.TaskDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import models.ClubInfo;
+import models.Events;
+import models.TaskAssignmentDepartment;
 import models.Users;
 
 /**
@@ -58,23 +65,55 @@ public class ChairmanTasksServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         HttpSession session = request.getSession();
         Users user = (Users) session.getAttribute("user");
-        ClubDAO clubDAO = new ClubDAO();
 
         if (user != null) {
             String userID = user.getUserID();
-            ClubInfo club = clubDAO.getClubChairman(userID);
-            request.setAttribute("club", club);
+            ClubDAO clubDAO = new ClubDAO();
+            EventsDAO eventDAO = new EventsDAO();
+            TaskDAO taskDAO = new TaskDAO();
 
-            String currentPath = request.getServletPath();
-            request.setAttribute("currentPath", currentPath);
+            ClubInfo club = clubDAO.getClubChairman(userID);
+            List<Events> eventList = eventDAO.getEventsByClubID(club.getClubID());
+
+            // Lấy eventID từ query parameter
+            String eventIDParam = request.getParameter("eventID");
+            Map<Events, List<TaskAssignmentDepartment>> timelineMap = new LinkedHashMap<>();
+
+            if (eventIDParam != null && !eventIDParam.isEmpty()) {
+                try {
+                    int eventID = Integer.parseInt(eventIDParam);
+                    Events selectedEvent = eventDAO.getEventByID(eventID);
+                    List<TaskAssignmentDepartment> tasks = taskDAO.getTaskAssignDepartByEventID(eventID);
+                    if (!tasks.isEmpty()) {
+                        timelineMap.put(selectedEvent, tasks);
+                    }
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                for (Events event : eventList) {
+                    List<TaskAssignmentDepartment> taskList = taskDAO.getTaskAssignDepartByEventID(event.getEventID());
+                    if (!taskList.isEmpty()) {
+                        timelineMap.put(event, taskList);
+                    }
+                }
+            }
+
+            request.setAttribute("eventList", eventList);
+            request.setAttribute("timelineMap", timelineMap);
+            request.setAttribute("club", club);
+            request.setAttribute("currentPath", request.getServletPath());
 
             request.getRequestDispatcher("/view/student/chairman/tasks.jsp").forward(request, response);
         } else {
             response.sendRedirect(request.getContextPath() + "/login");
         }
     }
+
+
 
     /** 
      * Handles the HTTP <code>POST</code> method.

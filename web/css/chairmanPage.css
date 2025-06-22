@@ -1137,3 +1137,396 @@ body {
 .btn-submit:hover {
     background: #218838;
 }
+
+/*Timeline event*/
+/* Timeline Management */
+.timeline-management {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.section-title h2 {
+    color: #333;
+    margin: 0;
+    font-size: 24px;
+}
+
+.section-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.filter-select {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.timeline-container {
+    padding: 20px;
+}
+
+.timeline-item {
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.timeline-header {
+    background: #2c5aa0;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.timeline-header h3 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.timeline-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-edit-timeline,
+.btn-delete-timeline {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.3s;
+}
+
+.btn-edit-timeline {
+    background: #28a745;
+    color: white;
+}
+
+.btn-delete-timeline {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-edit-timeline:hover {
+    background: #218838;
+}
+
+.btn-delete-timeline:hover {
+    background: #c82333;
+}
+
+.timeline-phases {
+    padding: 20px;
+}
+
+.phase-item {
+    position: relative;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.phase-item:last-child {
+    margin-bottom: 0;
+}
+
+.phase-connector {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    position: relative;
+    margin-top: 5px;
+    flex-shrink: 0;
+    background: #4caf50;
+}
+
+.phase-connector::after {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 40px;
+    background: #ddd;
+}
+
+
+.phase-content {
+    flex: 1;
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.phase-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.phase-header h4 {
+    color: #2c5aa0;
+    margin: 0;
+}
+
+.phase-status {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.phase-status.completed {
+    background: #d4edda;
+    color: #155724;
+}
+
+.phase-status.ongoing {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.phase-status.upcoming {
+    background: #e2e3e5;
+    color: #6c757d;
+}
+
+.phase-description {
+    color: #666;
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.phase-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.phase-dates,
+.phase-departments {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    color: #666;
+}
+
+.phase-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #4fc3f7;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+}
+
+/* Phase Tasks */
+.phase-tasks {
+    margin-top: 15px;
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+}
+
+.phase-tasks-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.phase-tasks-header h5 {
+    color: #2c5aa0;
+    margin: 0;
+    font-size: 14px;
+}
+
+.btn-add-task-to-phase {
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 12px;
+    /* Adjusted for readability */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-add-task-to-phase:hover {
+    background: #218838;
+}
+
+.phase-task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.phase-task-item {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.phase-task-info {
+    flex: 1;
+}
+
+.phase-task-title {
+    font-weight: bold;
+    color: #333;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.phase-task-meta {
+    display: flex;
+    gap: 15px;
+    font-size: 12px;
+    color: #666;
+}
+
+.phase-task-department {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.phase-task-deadline {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.phase-task-deadline.overdue {
+    color: #dc3545;
+}
+
+.phase-task-deadline.due-soon {
+    color: #fd7e14;
+}
+
+.phase-task-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.btn-task-action-small {
+    background: none;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-size: 12px;
+    cursor: pointer;
+    color: #6c757d;
+    transition: all 0.3s;
+}
+
+.btn-task-action-small:hover {
+    background: #f8f9fa;
+    border-color: #adb5bd;
+}
+
+.btn-task-action-small.remind {
+    color: #fd7e14;
+    border-color: #fd7e14;
+}
+
+.btn-task-action-small.remind:hover {
+    background: #fd7e14;
+    color: white;
+}
+
+.task-priority {
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.task-priority.low {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.task-priority.medium {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.task-priority.high {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.task-priority.urgent {
+    background: #dc3545;
+    color: white;
+    animation: pulse 1.5s infinite;
+}
+
+
+
+/*Timeline event*/
+

@@ -144,8 +144,8 @@
 <main class="dashboard-content">
 	<div class="page-header">
 		<div class="page-title">
-			<h1><i class="fas fa-plus"></i>Xem sự kiện</h1>
-			<p>Xem chi tiết sự kiện và chỉnh sửa</p>
+			<h1><i class="fas fa-edit"></i>Xem sự kiện</h1>
+			<p>Chỉnh sửa và xem chi tiết sự kiện</p>
 		</div>
 		<div class="page-actions">
 			<a href="${pageContext.request.contextPath}/chairman-page/myclub-events" class="btn-secondary">

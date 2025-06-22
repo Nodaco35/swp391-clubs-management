@@ -141,7 +141,124 @@
 
 </header>
 <main class="dashboard-content">
-	<h1>Hello</h1>
+	<section class="timeline-management">
+		<div class="section-header">
+			<div class="section-title">
+				<h2>Timeline quản lý sự kiện</h2>
+			</div>
+			<div class="section-actions">
+				<form method="get" action="${pageContext.request.contextPath}/chairman-page/tasks">
+					<select name="eventID" id="timelineEventFilter" class="filter-select" onchange="this.form.submit()">
+						<option value="">Tất cả sự kiện</option>
+						<c:forEach var="event" items="${eventList}">
+							<option value="${event.eventID}" ${param.eventID == event.eventID ? 'selected' : ''}>
+									${event.eventName}
+							</option>
+						</c:forEach>
+					</select>
+				</form>
+			</div>
+
+		</div>
+
+		<div class="timeline-container" id="timelineContainer">
+			<c:if test="${not empty timelineMap}">
+				<div class="timeline-container" id="timelineContainer">
+					<c:forEach var="entry" items="${timelineMap}">
+						<c:set var="event" value="${entry.key}" />
+						<c:set var="tasks" value="${entry.value}" />
+
+						<div class="timeline-item">
+							<div class="timeline-header">
+								<h3><i class="fas fa-calendar-alt"></i> ${event.eventName}</h3>
+								<div class="timeline-actions">
+									<button class="btn-edit-timeline"><i class="fas fa-edit"></i> Chỉnh sửa</button>
+									<button class="btn-delete-timeline"><i class="fas fa-trash"></i> Xóa</button>
+								</div>
+
+							</div>
+
+							<div class="timeline-phases">
+								<c:forEach var="phase" items="${tasks}">
+									<div class="phase-item ${phase.status == 'Completed' ? 'completed' : 'ongoing'}">
+										<div class="phase-connector"></div>
+										<div class="phase-content">
+											<div class="phase-header">
+												<h4>${phase.term}</h4>
+												<span class="phase-status ${phase.status == 'Completed' ? 'completed' : 'ongoing'}">${phase.status}</span>
+											</div>
+											<p class="phase-description">${phase.description}</p>
+											<div class="phase-info">
+												<div class="phase-dates">
+													<i class="fas fa-calendar"></i>
+													<fmt:formatDate value="${phase.termStart}" pattern="dd/MM/yyyy" /> -
+													<fmt:formatDate value="${phase.termEnd}" pattern="dd/MM/yyyy" />
+												</div>
+												<div class="phase-departments">
+													<i class="fas fa-users"></i>
+													<c:forEach var="d" items="${phase.departments}" varStatus="loop">
+														${d.departmentName}<c:if test="${!loop.last}">, </c:if>
+													</c:forEach>
+												</div>
+
+											</div>
+
+											<!-- Task info -->
+											<div class="phase-tasks">
+												<div class="phase-tasks-header">
+													<h5><i class="fas fa-tasks"></i> Công việc </h5>
+													<button class="btn-add-task-to-phase">
+														<i class="fas fa-plus"></i> Giao công việc
+													</button>
+												</div>
+
+												<div class="phase-task-list">
+													<div class="phase-task-item">
+														<div class="phase-task-info">
+															<div class="phase-task-title">${phase.taskName}</div>
+															<div class="phase-task-meta">
+																<div class="phase-task-department">
+																	<i class="fas fa-user"></i>
+																	<c:forEach var="d" items="${phase.departments}">
+																		${d.departmentName}
+																	</c:forEach>
+																</div>
+																<div class="phase-task-deadline">
+																	<i class="fas fa-calendar-alt"></i>
+																	<fmt:formatDate value="${phase.startedDate}" pattern="dd/MM/yyyy" /> -
+																	<fmt:formatDate value="${phase.dueDate}" pattern="dd/MM/yyyy" />
+																</div>
+															</div>
+														</div>
+														<div class="phase-task-actions">
+															<button class="btn-task-action-small" title="Xem chi tiết">
+																<i class="fas fa-eye"></i>
+															</button>
+															<button class="btn-task-action-small" title="Xóa công việc">
+																<i class="fas fa-trash"></i>
+															</button>
+														</div>
+													</div>
+												</div>
+											</div>
+
+										</div>
+									</div>
+								</c:forEach>
+							</div>
+						</div>
+					</c:forEach>
+				</div>
+			</c:if>
+		</div>
+		<!-- Empty State -->
+		<c:if test="${empty timelineMap}">
+			<div style="text-align: center; padding: 40px; color: #666;">
+				<i class="fas fa-clock" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+				<p>Chưa có timeline nào được tạo.</p>
+			</div>
+		</c:if>
+	</section>
 </main>
 </body>
 </html>
