@@ -57,10 +57,30 @@ public class UserDAO {
         return false;
     }
 
-    
+    public int getClubIdIfChairman(String userID) {
+        String sql = "SELECT ClubID " +
+                "FROM UserClubs " +
+                "WHERE UserID = ? AND RoleID = 1 AND IsActive = 1 " +
+                "LIMIT 1";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, userID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("ClubID");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 
 
-// Lấy danh sách người dùng theo phân trang
+
+
+
+    // Lấy danh sách người dùng theo phân trang
     public static List<Users> findUsersByPage(int offset, int noOfRecords) {
         List<Users> list = new ArrayList<>();
         String sql = """

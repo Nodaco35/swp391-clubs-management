@@ -15,6 +15,15 @@ public class ClubDepartment {
         // Default constructor
     }
 
+    public ClubDepartment(int clubId, String description, boolean departmentStatus, String departmentName, int departmentId, int clubDepartmentId) {
+        this.clubId = clubId;
+        this.description = description;
+        this.departmentStatus = departmentStatus;
+        this.departmentName = departmentName;
+        this.departmentId = departmentId;
+        this.clubDepartmentId = clubDepartmentId;
+    }
+
     public int getClubDepartmentId() {
         return clubDepartmentId;
     }
