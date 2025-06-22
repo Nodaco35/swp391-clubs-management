@@ -46,3 +46,5 @@ Thumbs.db
 .vscode/
 src/java/dal/DBContext.java
 src/java/dal/DBContext.java
+nbproject/private/private.properties
+/nbproject

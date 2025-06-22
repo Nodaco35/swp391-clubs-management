@@ -1,4 +1,3 @@
-
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
@@ -329,13 +328,35 @@
                             <!-- Existing Actions Section -->
                             <section id="actions" class="mb-10">
                                 <h2 class="text-2xl font-bold text-gray-800 mb-4">Quản Lý Form</h2>
-                                <div class="flex gap-4">
-                                    <a href="${pageContext.request.contextPath}/formManagement" class="text-white bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded-full transition flex items-center gap-2">
-                                        <i class="fas fa-list-alt"></i> Quản Lý Các Form
-                                    </a>
-                                    <a href="${pageContext.request.contextPath}/formBuilder" class="text-white bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded-full transition flex items-center gap-2">
-                                        <i class="fas fa-plus"></i> Tạo Form Mới
-                                    </a>
+                                
+                                <!-- Club selection dropdown -->
+                                <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200 mb-4">
+                                    <h3 class="text-lg font-medium text-gray-800 mb-3">Chọn Câu Lạc Bộ</h3>
+                                    <p class="text-sm text-gray-600 mb-4">Vui lòng chọn câu lạc bộ mà bạn muốn quản lý form:</p>
+                                    
+                                    <div class="relative inline-block w-full md:w-64 mb-4">
+                                        <select id="clubSelector" class="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded-lg shadow leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                            <option value="">-- Chọn câu lạc bộ --</option>
+                                            <c:forEach items="${userclubs}" var="club">
+                                                <option value="${club.clubID}">${club.clubName}</option>
+                                            </c:forEach>
+                                        </select>
+                                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                            <i class="fas fa-chevron-down"></i>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="formManagementButtons" style="display: none;" class="flex gap-4">
+                                        <a href="#" id="formManagementLink" class="text-white bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded-full transition flex items-center gap-2">
+                                            <i class="fas fa-list-alt"></i> Quản Lý Các Form
+                                        </a>
+                                        <a href="#" id="formBuilderLink" class="text-white bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded-full transition flex items-center gap-2">
+                                            <i class="fas fa-plus"></i> Tạo Form Mới
+                                        </a>
+                                    </div>
+                                                      <p id="noPermissionMessage" class="hidden text-sm text-red-500 mt-2">
+                                        <i class="fas fa-exclamation-circle mr-1"></i> Bạn không có đủ quyền quản lý form trong câu lạc bộ này. Chỉ thành viên có vai trò quản lý mới có thể truy cập.
+                                    </p>
                                 </div>
                             </section>
                         </c:if>
@@ -347,12 +368,52 @@
 
     </body>
     <script>
-
         document.querySelectorAll('.sidebar a').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
                 document.querySelector(this.getAttribute('href')).scrollIntoView({behavior: 'smooth'});
             });
         });
+        
+        // Club selection for form management
+        const clubSelector = document.getElementById('clubSelector');
+        const formManagementButtons = document.getElementById('formManagementButtons');
+        const formManagementLink = document.getElementById('formManagementLink');
+        const formBuilderLink = document.getElementById('formBuilderLink');
+        const noPermissionMessage = document.getElementById('noPermissionMessage');
+          if (clubSelector) {
+            clubSelector.addEventListener('change', function() {
+                const selectedClubId = this.value;
+                  if (selectedClubId) {
+                    // Create array of clubs where user has permission (roleID 1-3)
+                    const permittedClubIds = [
+                        <c:forEach items="${userclubs}" var="club" varStatus="status">
+                            <c:if test="${club.roleID >= 1 && club.roleID <= 3}">${club.clubID}<c:if test="${!status.last}">,</c:if></c:if>
+                        </c:forEach>
+                    ];
+                    
+                    // Check if user has permission for this club
+                    const hasPermission = permittedClubIds.includes(parseInt(selectedClubId));
+                    
+                    if (hasPermission) {
+                        // Show form management buttons if user has permission
+                        formManagementButtons.style.display = 'flex';
+                        noPermissionMessage.classList.add('hidden');
+                        
+                        // Update links with the selected club ID
+                        formManagementLink.href = '${pageContext.request.contextPath}/formManagement?clubId=' + selectedClubId;
+                        formBuilderLink.href = '${pageContext.request.contextPath}/formBuilder?clubId=' + selectedClubId;
+                    } else {
+                        // Show no permission message
+                        formManagementButtons.style.display = 'none';
+                        noPermissionMessage.classList.remove('hidden');
+                    }
+                } else {
+                    // Hide form management buttons when no club is selected
+                    formManagementButtons.style.display = 'none';
+                    noPermissionMessage.classList.add('hidden');
+                }
+            });
+        }
     </script>
 </html>

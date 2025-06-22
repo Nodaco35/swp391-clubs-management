@@ -56,14 +56,14 @@ public class FormManagementServlet extends HttpServlet {
             try {
                 clubId = Integer.parseInt(clubIdParam);
             } catch (NumberFormatException e) {
-                response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied&message=" + URLEncoder.encode("ID CLB không hợp lệ.", StandardCharsets.UTF_8.name()));
+                response.sendRedirect(request.getContextPath() + "/myclub?error=access_denied&message=" + URLEncoder.encode("ID CLB không hợp lệ.", StandardCharsets.UTF_8.name()));
                 return;
             }
         }
           try {
             // Kiểm tra nếu clubId là null thì redirect về my-club
             if (clubId == null) {
-                response.sendRedirect(request.getContextPath() + "/my-club?error=invalid_club&message=" + 
+                response.sendRedirect(request.getContextPath() + "/myclub?error=invalid_club&message=" + 
                     URLEncoder.encode("Vui lòng chọn câu lạc bộ để quản lý form.", StandardCharsets.UTF_8.name()));
                 return;
             }
@@ -71,7 +71,7 @@ public class FormManagementServlet extends HttpServlet {
             // Kiểm tra quyền truy cập trong club cụ thể (chỉ cho roleId 1-3)
             UserClub userClub = userClubDAO.getUserClubManagementRole(userId, clubId);
             if (userClub == null) {
-                response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền quản lý form.", StandardCharsets.UTF_8.name()));
+                response.sendRedirect(request.getContextPath() + "/myclub?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền quản lý form.", StandardCharsets.UTF_8.name()));
                 return;
             }            
             session.setAttribute("userClub", userClub);
@@ -96,7 +96,7 @@ public class FormManagementServlet extends HttpServlet {
             } catch (UnsupportedEncodingException ex) {
                 errorMessage = "Có lỗi xảy ra khi tải dữ liệu form";
             }
-            response.sendRedirect(request.getContextPath() + "/my-club?error=form_management_error&message=" + errorMessage);
+            response.sendRedirect(request.getContextPath() + "/myclub?error=form_management_error&message=" + errorMessage);
             return;
         }
     } 
@@ -117,7 +117,7 @@ public class FormManagementServlet extends HttpServlet {
         // Kiểm tra quyền truy cập (chỉ cho roleId 1-3)
         UserClub userClub = userClubDAO.getUserClubByUserId(userId);
         if (userClub == null || userClub.getRoleID() < 1 || userClub.getRoleID() > 3) {
-            response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền truy cập chức năng này.", StandardCharsets.UTF_8.name()));
+            response.sendRedirect(request.getContextPath() + "/myclub?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền truy cập chức năng này.", StandardCharsets.UTF_8.name()));
             return;
         }
         String action = request.getParameter("action");
