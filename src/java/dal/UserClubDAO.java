@@ -16,11 +16,13 @@ public class UserClubDAO {
     public static List<UserClub> findByUserID(String userID) {
         String sql = """
                     SELECT uc.*, r.RoleName, d.DepartmentName , c.ClubImg, c.ClubName
-                    FROM UserClubs uc
-                    JOIN clubs c on uc.ClubID = c.ClubID
-                    JOIN Roles r ON uc.RoleID = r.RoleID
-                    JOIN ClubDepartments d ON uc.DepartmentID = d.DepartmentID
-                    WHERE uc.UserID = ?""";
+                                        FROM UserClubs uc
+                                        JOIN clubs c on uc.ClubID = c.ClubID
+                                        JOIN Roles r ON uc.RoleID = r.RoleID
+                                        
+                                        JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
+                                        JOIN departments d on cd.DepartmentID = d.DepartmentID
+                                        WHERE uc.UserID = ?""";
         List<UserClub> findByUserID = new ArrayList<>();
         try {
             PreparedStatement ps = DBContext_Duc.getInstance().connection.prepareStatement(sql);
@@ -31,7 +33,7 @@ public class UserClubDAO {
                 uc.setUserClubID(rs.getInt("UserClubID"));
                 uc.setUserID(rs.getString("UserID"));
                 uc.setClubID(rs.getInt("ClubID"));
-                uc.setClubDepartmentID(rs.getInt("DepartmentID"));
+                uc.setClubDepartmentID(rs.getInt("ClubDepartmentID"));
                 uc.setRoleID(rs.getInt("RoleID"));
                 uc.setJoinDate(rs.getTimestamp("JoinDate"));
                 uc.setIsActive(rs.getBoolean("IsActive"));
@@ -46,6 +48,7 @@ public class UserClubDAO {
         }
         return findByUserID;
     }
+
 
     public boolean isUserMemberOfClub(int clubID, String userID) {
         String sql = "SELECT 1 FROM UserClubs WHERE ClubID = ? AND UserID = ? AND IsActive = 1";

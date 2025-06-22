@@ -27,7 +27,7 @@ public class DBContext_Duc {
     private DBContext_Duc() {
         try {
             String user = "root";
-            String password = "nodaco123";
+            String password = "Thuylinh0203";
 
             String url = "jdbc:mysql://localhost:3306/ClubManagementSystem?zeroDateTimeBehavior=CONVERT_TO_NULL";
 
