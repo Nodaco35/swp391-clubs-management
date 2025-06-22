@@ -487,18 +487,26 @@ INSERT INTO EventParticipants (EventID, UserID, Status) VALUES
 -- TASK ASSIGNMENTS
 -- ========================================
 CREATE TABLE TaskAssignmentDepartment (
-    	TaskAssignmentDepartmentID INT PRIMARY KEY AUTO_INCREMENT,
-    	EventID INT NOT NULL,
+	TaskAssignmentDepartmentID INT PRIMARY KEY AUTO_INCREMENT,
+	EventID INT NOT NULL,
 	Term ENUM('Trước sự kiện', 'Trong sự kiện', 'Sau sự kiện'),
 	TermStart DATE,
 	TermEnd DATE,
    	Description TEXT,
-  	TaskName VARCHAR(100),
 	Status ENUM('ToDo','Processing','Review','Approved'),
+  	TaskName VARCHAR(100),
 	StartedDate DATE, 
 	DueDate DATE,
 	FOREIGN KEY (EventID) REFERENCES Events(EventID)
 );
+INSERT INTO TaskAssignmentDepartment (EventID, Term, TermStart, TermEnd, Description, Status, TaskName, StartedDate, DueDate) VALUES
+(11, 'Trước sự kiện', '2025-07-10', '2025-07-13', 'Thiết kế poster, đăng bài truyền thông trước sự kiện', 'ToDo', 'Chuẩn bị truyền thông', '2025-07-10', '2025-07-13'),
+(11, 'Trước sự kiện', '2025-07-11', '2025-07-14', 'Chuẩn bị nội dung sự kiện', 'ToDo', 'Chuẩn bị slide', '2025-07-11', '2025-07-14'),
+(11, 'Trong sự kiện', '2025-07-15', '2025-07-15', 'Chuẩn bị hậu cần tại địa điểm tổ chức', 'ToDo', 'Bố trí thiết bị, bàn ghế', '2025-07-15', '2025-07-15'),
+(11, 'Sau sự kiện', '2025-07-16', '2025-07-18', 'Đăng bài viết recap sự kiện lên mạng xã hội', 'ToDo', 'Recap truyền thông', '2025-07-16', '2025-07-18'),
+(12, 'Trước sự kiện', '2025-07-27', '2025-07-30', 'Thiết kế standee, backdrop cho sự kiện', 'ToDo', 'Thiết kế standee', '2025-07-27', '2025-07-30'),
+(12, 'Trong sự kiện', '2025-07-31', '2025-07-31', 'Tiếp đón và check-in người tham dự tại sảnh', 'ToDo', 'Check-in sự kiện', '2025-07-31', '2025-07-31');
+
 
 CREATE TABLE TaskAssignmentDepartmentResponser (
 	TaskAssignmentDepartmentResponserID INT PRIMARY KEY AUTO_INCREMENT,
@@ -506,8 +514,14 @@ CREATE TABLE TaskAssignmentDepartmentResponser (
 	TaskAssignmentDepartmentID INT NOT NULL,
 	FOREIGN KEY (TaskAssignmentDepartmentID) REFERENCES TaskAssignmentDepartment(TaskAssignmentDepartmentID),
 	FOREIGN KEY (ClubDepartmentID) REFERENCES ClubDepartments(ClubDepartmentID)
-
 );
+INSERT INTO TaskAssignmentDepartmentResponser (ClubDepartmentID, TaskAssignmentDepartmentID) VALUES
+(15, 1), -- Nội dung 15, Hậu cần 17, Truyền thông 2 của ClubID = 4 CLB Lập Trình
+(17, 2), -- Thu dọn hậu cần
+(2, 3),
+(2, 4),
+(15, 5),
+(17, 6);
 
 CREATE TABLE TaskAssignmentMember (
 	TaskAssignmentDepartmentID INT PRIMARY KEY AUTO_INCREMENT,
