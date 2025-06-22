@@ -148,6 +148,8 @@
 
                     <!-- Nhiệm vụ của người dùng -->
                     <section id="calendar" class="mb-10">
+
+
                         <!--                        
                                                 mới-->
                         <section class="mb-10">
@@ -166,7 +168,8 @@
                                                     <p class="text-sm text-gray-600">Trạng thái: ${task.status}</p>
                                                     <p class="text-sm text-gray-600">Ban: ${task.departmentName}</p>
                                                     <p class="text-sm text-gray-600">CLB: ${task.clubName}</p>
-                                                    <p class="text-sm text-gray-600">Sự kiện: ${task.eventName}</p>                                                
+                                                    <p class="text-sm text-gray-600">Sự kiện: ${task.eventName}</p>
+
                                             </div>
 
                                             <c:if test="${loop.count % 2 == 1 and loop.last}">
@@ -223,42 +226,6 @@
                         </div>
                     </section>
 
-
-                    <!-- Upcoming Events -->
-                    <section id="upcoming-events" class="mb-10">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-4">Sự Kiện Sắp Tới</h2>
-                        <c:choose>
-                            <c:when test="${empty userclubs and empty upcomingEvents}">
-                                <p class="text-gray-600 text-center py-8">Bạn chưa tham gia câu lạc bộ nào, do đó không có sự kiện sắp tới.</p>
-                            </c:when>
-                            <c:when test="${not empty userclubs and empty upcomingEvents}">
-                                <p class="text-gray-600 text-center py-8">Không có sự kiện sắp tới cho các câu lạc bộ bạn đã tham gia.</p>
-                            </c:when>
-                            <c:otherwise>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <c:forEach items="${upcomingEvents}" var="event">
-                                        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition">
-                                            <div class="flex items-center gap-6">
-                                                <img src="${pageContext.request.contextPath}/${event.eventImg}" alt="${event.eventName}" class="w-24 h-24 rounded-lg object-cover border-2 border-blue-100">
-                                                <div>
-                                                    <h3 class="text-xl font-medium text-gray-800">${event.eventName}</h3>
-                                                    <p class="text-sm text-gray-600"><i class="fas fa-calendar-alt"></i> ${event.eventDate}</p>
-                                                    <p class="text-sm text-gray-600"><i class="fas fa-map-marker-alt"></i> ${event.location.locationName}</p>
-
-                                                </div>
-
-                                            </c:forEach>
-                                        </div>
-
-                                    </c:otherwise>
-                                </c:choose>
-
-                                <c:if test="${isLeader}">
-                                    <a href="#" class="mt-5 inline-block text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-full transition" >Tạo cuộc họp mới</a>
-                                </c:if>
-                            </div>
-                        </section>
-
                         <!-- Mới đức -->
                         <section id="upcoming-clubmeeting" class="mb-10">
                             <h2 class="text-3xl font-semibold text-black mb-6">Cuộc họp sắp tới của clb</h2>
@@ -299,6 +266,35 @@
                         </section>
 
 
+                        <!-- Upcoming Events -->
+                        <section id="upcoming-events" class="mb-10">
+                            <h2 class="text-2xl font-bold text-gray-800 mb-4">Sự Kiện Sắp Tới</h2>
+                            <c:choose>
+                                <c:when test="${empty userclubs and empty upcomingEvents}">
+                                    <p class="text-gray-600 text-center py-8">Bạn chưa tham gia câu lạc bộ nào, do đó không có sự kiện sắp tới.</p>
+                                </c:when>
+                                <c:when test="${not empty userclubs and empty upcomingEvents}">
+                                    <p class="text-gray-600 text-center py-8">Không có sự kiện sắp tới cho các câu lạc bộ bạn đã tham gia.</p>
+                                </c:when>
+                                <c:otherwise>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <c:forEach items="${upcomingEvents}" var="event">
+                                            <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition">
+                                                <div class="flex items-center gap-6">
+                                                    <img src="${pageContext.request.contextPath}/${event.eventImg}" alt="${event.eventName}" class="w-24 h-24 rounded-lg object-cover border-2 border-blue-100">
+                                                    <div>
+                                                        <h3 class="text-xl font-medium text-gray-800">${event.eventName}</h3>
+                                                        <p class="text-sm text-gray-600"><i class="fas fa-calendar-alt"></i> ${event.eventDate}</p>
+                                                        <p class="text-sm text-gray-600"><i class="fas fa-map-marker-alt"></i> ${event.location.locationName}</p>
+                                                    </div>
+                                                </div>
+                                                <a href="${pageContext.request.contextPath}/event-detail?id=${event.eventID}" class="mt-4 inline-block text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-full transition">Đăng kí ngay</a>
+                                            </div>
+                                        </c:forEach>
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
+                        </section>
 
                         <!-- Pending Member Applications -->
                         <c:set var="isLeader" value="false" />
