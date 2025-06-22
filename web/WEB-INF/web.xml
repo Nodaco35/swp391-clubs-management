@@ -100,13 +100,18 @@
     <servlet>
         <servlet-name>ChairmanPageServlet</servlet-name>
         <servlet-class>controller.ChairmanPageServlet</servlet-class>
-    </servlet>    <servlet>
+    </servlet>
+    <servlet>
         <servlet-name>CreateClubServlet</servlet-name>
         <servlet-class>controller.CreateClubServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>FormResponsesServlet</servlet-name>
         <servlet-class>controller.FormResponsesServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>TypeFeedbackServlet</servlet-name>
+        <servlet-class>controller.TypeFeedbackServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>ClubsServlet</servlet-name>
@@ -201,7 +206,8 @@
     <servlet-mapping>
         <servlet-name>MyClubController</servlet-name>
         <url-pattern>/myclub</url-pattern>
-    </servlet-mapping>    <servlet-mapping>
+    </servlet-mapping>
+    <servlet-mapping>
         <servlet-name>ApplicationFormServlet</servlet-name>
         <url-pattern>/applicationForm</url-pattern>
     </servlet-mapping>
@@ -220,6 +226,10 @@
     <servlet-mapping>
         <servlet-name>FormResponsesServlet</servlet-name>
         <url-pattern>/formResponses</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>TypeFeedbackServlet</servlet-name>
+        <url-pattern>/typefeedback</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
