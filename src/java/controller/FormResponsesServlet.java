@@ -52,14 +52,14 @@ public class FormResponsesServlet extends HttpServlet {
             try {
                 templateId = Integer.parseInt(templateIdParam);
             } catch (NumberFormatException e) {
-                response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied&message=" + URLEncoder.encode("ID Form không hợp lệ.", StandardCharsets.UTF_8.name()));
+                response.sendRedirect(request.getContextPath() + "/myclub?error=access_denied&message=" + URLEncoder.encode("ID Form không hợp lệ.", StandardCharsets.UTF_8.name()));
                 return;
             }
         }
 
         // Kiểm tra nếu templateId là null
         if (templateId == null) {
-            response.sendRedirect(request.getContextPath() + "/my-club?error=invalid_form&message=" +
+            response.sendRedirect(request.getContextPath() + "/myclub?error=invalid_form&message=" +
                     URLEncoder.encode("Vui lòng chọn form để xem phản hồi.", StandardCharsets.UTF_8.name()));
             return;
         }
@@ -72,14 +72,14 @@ public class FormResponsesServlet extends HttpServlet {
             try {
                 clubId = Integer.parseInt(clubIdParam);
             } catch (NumberFormatException e) {
-                response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied&message=" + URLEncoder.encode("ID CLB không hợp lệ.", StandardCharsets.UTF_8.name()));
+                response.sendRedirect(request.getContextPath() + "/myclub?error=access_denied&message=" + URLEncoder.encode("ID CLB không hợp lệ.", StandardCharsets.UTF_8.name()));
                 return;
             }
         }
 
         // Kiểm tra nếu clubId là null thì redirect về my-club
         if (clubId == null) {
-            response.sendRedirect(request.getContextPath() + "/my-club?error=invalid_club&message=" +
+            response.sendRedirect(request.getContextPath() + "/myclub?error=invalid_club&message=" +
                     URLEncoder.encode("Vui lòng chọn câu lạc bộ để quản lý form.", StandardCharsets.UTF_8.name()));
             return;
         }
@@ -87,7 +87,7 @@ public class FormResponsesServlet extends HttpServlet {
         // Kiểm tra quyền truy cập trong club cụ thể (chỉ cho roleId 1-3)
         UserClub userClub = userClubDAO.getUserClubManagementRole(userId, clubId);
         if (userClub == null) {
-            response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền quản lý form trong CLB này.", StandardCharsets.UTF_8.name()));
+            response.sendRedirect(request.getContextPath() + "/myclub?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền quản lý form trong CLB này.", StandardCharsets.UTF_8.name()));
             return;
         }
 
