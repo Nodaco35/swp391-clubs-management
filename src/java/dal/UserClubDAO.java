@@ -13,6 +13,7 @@ import models.Roles;
 
 public class UserClubDAO {
 
+    // mới
     public static List<UserClub> findByUserID(String userID) {
         String sql = """
                     SELECT uc.*, r.RoleName, d.DepartmentName , c.ClubImg, c.ClubName
