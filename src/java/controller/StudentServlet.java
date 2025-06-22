@@ -39,17 +39,14 @@ public class StudentServlet extends HttpServlet {
 
         //History ( Events and Clubs )
         if ("history".equals(action) && user != null) {
-            // Lấy danh sách đơn xin tham gia CLB
             ClubApplicationDAO ca = new ClubApplicationDAO();
             List<ClubApplication> clubApplications = ca.getClubApplicationsByUser(user.getUserID());
             request.setAttribute("clubApplications", clubApplications);
 
-            // Lấy danh sách sự kiện đã tham gia
             EventParticipantDAO ep = new EventParticipantDAO();
             List<EventParticipation> eventParticipations = ep.getEventParticipationByUser(user.getUserID());
             request.setAttribute("events", eventParticipations);
 
-            // Forward sang JSP
             request.getRequestDispatcher("view/student/activity-history.jsp").forward(request, response);
             return;
         }
