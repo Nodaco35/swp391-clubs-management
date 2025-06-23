@@ -31,12 +31,19 @@ public class FormResponseDAO extends DBContext {
                      JOIN ApplicationFormTemplates aft ON ar.TemplateID = aft.TemplateID
                      JOIN Users u ON ca.UserId = u.UserID
                      WHERE ar.TemplateID = ?
+                     AND ar.ResponseID IN (
+                        SELECT MAX(ar2.ResponseID) 
+                        FROM ApplicationResponses ar2 
+                        WHERE ar2.TemplateID = ? 
+                        GROUP BY ar2.UserID
+                     )
                      ORDER BY ar.SubmitDate DESC
                      """;
 
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, templateId);
+            ps.setInt(2, templateId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     ClubApplicationExtended application = new ClubApplicationExtended();
@@ -72,12 +79,20 @@ public class FormResponseDAO extends DBContext {
                      JOIN ApplicationFormTemplates aft ON ar.TemplateID = aft.TemplateID
                      JOIN Users u ON ca.UserId = u.UserID
                      WHERE ca.ClubId = ?
+                     AND ar.ResponseID IN (
+                        SELECT MAX(ar2.ResponseID) 
+                        FROM ApplicationResponses ar2 
+                        JOIN ClubApplications ca2 ON ar2.ResponseID = ca2.ResponseId 
+                        WHERE ca2.ClubId = ? 
+                        GROUP BY ar2.UserID
+                     )
                      ORDER BY ar.SubmitDate DESC
                      """;
 
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, clubId);
+            ps.setInt(2, clubId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     ClubApplicationExtended application = new ClubApplicationExtended();
@@ -112,7 +127,14 @@ public class FormResponseDAO extends DBContext {
                      JOIN ApplicationResponses ar ON ca.ResponseId = ar.ResponseID
                      JOIN ApplicationFormTemplates aft ON ar.TemplateID = aft.TemplateID
                      JOIN Users u ON ca.UserId = u.UserID
-                     WHERE ar.TemplateID = ? AND ca.ClubId = ?
+                     WHERE ar.TemplateID = ? AND ca.ClubId = ? 
+                     AND ar.ResponseID IN (
+                        SELECT MAX(ar2.ResponseID) 
+                        FROM ApplicationResponses ar2 
+                        JOIN ClubApplications ca2 ON ar2.ResponseID = ca2.ResponseId 
+                        WHERE ar2.TemplateID = ? AND ca2.ClubId = ? 
+                        GROUP BY ar2.UserID
+                     )
                      ORDER BY ar.SubmitDate DESC
                      """;
 
@@ -120,6 +142,8 @@ public class FormResponseDAO extends DBContext {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, templateId);
             ps.setInt(2, clubId);
+            ps.setInt(3, templateId);
+            ps.setInt(4, clubId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     ClubApplicationExtended application = new ClubApplicationExtended();
@@ -489,5 +513,45 @@ public class FormResponseDAO extends DBContext {
 
     public boolean rejectApplication(int responseId) {
         return updateApplicationResponseStatus(responseId, "Rejected");
+    }
+
+    // Phương thức để kiểm tra xem một form có bất kỳ phản hồi nào hay không
+    public boolean hasResponses(int templateId) {
+        String sql = "SELECT COUNT(*) FROM ApplicationResponses WHERE TemplateID = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, templateId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int count = rs.getInt(1);
+                    return count > 0;
+                }
+            }
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Error checking if template has responses", ex);
+        }
+        return false;
+    }
+    
+    // Phương thức lấy danh sách templateId có phản hồi
+    public List<Integer> getTemplateIdsWithResponses(int clubId) {
+        List<Integer> templateIdsWithResponses = new ArrayList<>();
+        String sql = "SELECT DISTINCT ar.TemplateID " +
+                     "FROM ApplicationResponses ar " +
+                     "JOIN ApplicationFormTemplates aft ON ar.TemplateID = aft.TemplateID " +
+                     "WHERE aft.ClubID = ?";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, clubId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    templateIdsWithResponses.add(rs.getInt("TemplateID"));
+                }
+            }
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Error getting template IDs with responses", ex);
+        }
+        return templateIdsWithResponses;
     }
 }

@@ -52,12 +52,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Làm sạch thanh tìm kiếm khi tải trang
     if (searchInput) {
         searchInput.value = '';
-        
-        // Thêm nút xóa tìm kiếm vào search-box nếu cần
-        const searchBox = searchInput.closest('.search-box');
-        if (searchBox && !searchBox.querySelector('.search-clear-btn')) {
+          // Thêm nút xóa tìm kiếm vào form-response-search-box
+        const searchBox = searchInput.closest('.form-response-search-box');
+        if (searchBox && !searchBox.querySelector('.form-response-search-clear-btn')) {
             const clearButton = document.createElement('button');
-            clearButton.className = 'search-clear-btn';
+            clearButton.className = 'form-response-search-clear-btn';
             clearButton.innerHTML = '<i class="fas fa-times"></i>';
             clearButton.style.display = 'none';
             clearButton.title = 'Xóa từ khóa tìm kiếm';
@@ -295,7 +294,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <i class="fas ${iconClass}"></i>
                 <p>${message}</p>
                 ${searchTerm ? '<p style="font-size:0.9em;opacity:0.8;margin-top:10px;">Vui lòng thử từ khóa khác hoặc xóa bộ lọc tìm kiếm</p>' : ''}
-                ${searchTerm ? '<button id="clearSearchBtn" class="clear-search-btn"><i class="fas fa-times"></i> Xóa tìm kiếm</button>' : ''}
+                ${searchTerm ? '<button id="clearSearchBtn" class="form-response-clear-search-btn"><i class="fas fa-times"></i> Xóa tìm kiếm</button>' : ''}
             `;
             
             responsesList.appendChild(emptyStateElement);

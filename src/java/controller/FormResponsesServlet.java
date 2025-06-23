@@ -148,9 +148,52 @@ public class FormResponsesServlet extends HttpServlet {
                 out.print(gson.toJson(new ApiResponse(false, "Bạn cần đăng nhập để thực hiện thao tác này.")));
                 return;
             }
-
-            // Lấy thông tin từ request
+              // Xác định hành động từ request parameter
             String action = request.getParameter("action");
+            
+            // Nếu action là checkResponses, xử lý việc kiểm tra phản hồi
+            if ("checkResponses".equals(action)) {
+                // Lấy clubId từ request parameter
+                String clubIdParam = request.getParameter("clubId");
+                Integer clubId = null;
+                
+                if (clubIdParam != null && !clubIdParam.isEmpty()) {
+                    try {
+                        clubId = Integer.parseInt(clubIdParam);
+                    } catch (NumberFormatException e) {
+                        out.print(gson.toJson(new ApiResponse(false, "ID CLB không hợp lệ.")));
+                        return;
+                    }
+                }
+                
+                // Kiểm tra nếu clubId là null
+                if (clubId == null) {
+                    out.print(gson.toJson(new ApiResponse(false, "Vui lòng chọn câu lạc bộ.")));
+                    return;
+                }
+                
+                // Kiểm tra quyền truy cập trong club cụ thể
+                UserClub userClub = userClubDAO.getUserClubManagementRole(userId, clubId);
+                if (userClub == null) {
+                    out.print(gson.toJson(new ApiResponse(false, "Bạn không có quyền quản lý form trong CLB này.")));
+                    return;
+                }
+                
+                try {
+                    // Lấy danh sách templateId có phản hồi
+                    List<Integer> templateIdsWithResponses = formResponseDAO.getTemplateIdsWithResponses(clubId);
+                    
+                    // Gửi kết quả về client
+                    out.print(gson.toJson(templateIdsWithResponses));
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Lỗi khi kiểm tra phản hồi form", e);
+                    out.print(gson.toJson(new ApiResponse(false, "Đã xảy ra lỗi khi kiểm tra phản hồi form: " + e.getMessage())));
+                }
+                
+                return;
+            }
+            
+            // Lấy thông tin từ request
             String responseIdStr = request.getParameter("responseId");
             String clubIdStr = request.getParameter("clubId");
 
@@ -246,17 +289,22 @@ public class FormResponsesServlet extends HttpServlet {
             response.setStatus(200); // Use 200 instead of 500 to ensure the response is processed by fetch
             out.print(gson.toJson(new ApiResponse(false, "Đã xảy ra lỗi: " + e.getMessage())));
         }
-    }
-
-    // Lớp hỗ trợ để trả về API response dạng JSON
+    }    // Lớp hỗ trợ để trả về API response dạng JSON
     private static class ApiResponse {
         private boolean success;
         private String message;
         private String status;
+        private Object data;
 
         public ApiResponse(boolean success, String message) {
             this.success = success;
             this.message = message;
+        }
+        
+        public ApiResponse(boolean success, String message, Object data) {
+            this.success = success;
+            this.message = message;
+            this.data = data;
         }
 
         public boolean isSuccess() {
@@ -281,6 +329,14 @@ public class FormResponsesServlet extends HttpServlet {
 
         public void setStatus(String status) {
             this.status = status;
+        }
+        
+        public Object getData() {
+            return data;
+        }
+
+        public void setData(Object data) {
+            this.data = data;
         }
     }
 
