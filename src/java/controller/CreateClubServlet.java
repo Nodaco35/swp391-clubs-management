@@ -100,7 +100,6 @@ public class CreateClubServlet extends HttpServlet {
         request.setAttribute("approvedCategory", approvedCategory);
         request.setAttribute("departments", departments);
         request.setAttribute("isEdit", false);
-        System.out.println("handleCreateClubForm: departments=" + departments + ", approvedClubName=" + approvedClubName + ", approvedCategory=" + approvedCategory);
         request.getRequestDispatcher("/view/clubs-page/create-club.jsp").forward(request, response);
     }
 
@@ -140,7 +139,6 @@ public class CreateClubServlet extends HttpServlet {
         request.setAttribute("clubDepartmentIDs", clubDepartmentIDs);
         request.setAttribute("isEdit", true);
         request.setAttribute("isPresident", true);
-        System.out.println("handleEditClub: clubID=" + clubID + ", departments=" + departments + ", clubDepartmentIDs=" + clubDepartmentIDs);
         request.getRequestDispatcher("/view/clubs-page/create-club.jsp").forward(request, response);
     }
 
@@ -174,16 +172,6 @@ public class CreateClubServlet extends HttpServlet {
         Part filePart = request.getPart("clubImg");
         String[] departmentIDs = request.getParameterValues("departmentIDs");
 
-        System.out.println("Received create form data:");
-        System.out.println("clubName: " + clubName);
-        System.out.println("category: " + category);
-        System.out.println("contactGmail: " + contactGmail);
-        System.out.println("description: " + description);
-        System.out.println("contactPhone: " + contactPhone);
-        System.out.println("contactURL: " + contactURL);
-        System.out.println("establishedDate: " + establishedDateStr);
-        System.out.println("filePart: " + (filePart != null ? filePart.getName() + ", size: " + filePart.getSize() + ", type: " + filePart.getContentType() : "null"));
-        System.out.println("departmentIDs: " + (departmentIDs != null ? Arrays.toString(departmentIDs) : "null"));
 
         List<String> errors = new ArrayList<>();
         if (clubName == null || clubName.trim().isEmpty()) {
@@ -240,7 +228,6 @@ public class CreateClubServlet extends HttpServlet {
                     String buildUploadPath = buildImgPath + File.separator + newFileName;
                     Files.copy(new File(webUploadPath).toPath(), new File(buildUploadPath).toPath(), StandardCopyOption.REPLACE_EXISTING);
                     relativePath = folder + "/" + newFileName;
-                    System.out.println("Image saved successfully: " + relativePath);
                 } catch (IOException e) {
                     errors.add("Lỗi khi upload ảnh: " + e.getMessage());
                 }
@@ -295,7 +282,6 @@ public class CreateClubServlet extends HttpServlet {
                 userClubDAO.addUserClub(newUserClub);
                 Clubs createdClub = clubDAO.getClubById(newClubID);
                 session.setAttribute("currentClub_" + newClubID, createdClub);
-                System.out.println("Created club saved to session with ID: " + newClubID + ", ClubImg: " + createdClub.getClubImg());
                 response.sendRedirect(request.getContextPath() + "/clubs");
                 return;
             } else {
@@ -358,17 +344,7 @@ public class CreateClubServlet extends HttpServlet {
         Part filePart = request.getPart("clubImg");
         String[] departmentIDs = request.getParameterValues("departmentIDs");
 
-        System.out.println("Received update form data:");
-        System.out.println("clubID: " + clubID);
-        System.out.println("clubName: " + clubName);
-        System.out.println("category: " + category);
-        System.out.println("contactGmail: " + contactGmail);
-        System.out.println("description: " + description);
-        System.out.println("contactPhone: " + contactPhone);
-        System.out.println("contactURL: " + contactURL);
-        System.out.println("establishedDate: " + establishedDateStr);
-        System.out.println("filePart: " + (filePart != null ? filePart.getName() + ", size: " + filePart.getSize() + ", type: " + filePart.getContentType() : "null"));
-        System.out.println("departmentIDs: " + (departmentIDs != null ? Arrays.toString(departmentIDs) : "null"));
+        
 
         List<String> errors = new ArrayList<>();
         if (clubName == null || clubName.trim().isEmpty()) {
@@ -428,7 +404,6 @@ public class CreateClubServlet extends HttpServlet {
                     String buildUploadPath = buildImgPath + File.separator + newFileName;
                     Files.copy(new File(webUploadPath).toPath(), new File(buildUploadPath).toPath(), StandardCopyOption.REPLACE_EXISTING);
                     relativePath = folder + "/" + newFileName;
-                    System.out.println("Image saved successfully: " + relativePath);
                 } catch (IOException e) {
                     errors.add("Lỗi khi upload ảnh: " + e.getMessage());
                 }
@@ -464,14 +439,12 @@ public class CreateClubServlet extends HttpServlet {
         if (!newDepartmentIDList.contains(3)) {
             newDepartmentIDList.add(3);
         }
-        System.out.println("Processed newDepartmentIDList: " + newDepartmentIDList);
 
         try {
             boolean updated = clubDAO.updateClub(club, newDepartmentIDList);
             if (updated) {
                 Clubs updatedClub = clubDAO.getClubById(clubID);
                 session.setAttribute("currentClub_" + clubID, updatedClub);
-                System.out.println("Updated club saved to session with ID: " + clubID + ", ClubImg: " + updatedClub.getClubImg());
                 request.setAttribute("club", updatedClub);
                 request.setAttribute("message", "Cập nhật câu lạc bộ thành công.");
                 response.sendRedirect(request.getContextPath() + "/club-detail?id=" + clubID + "&t=" + System.currentTimeMillis());

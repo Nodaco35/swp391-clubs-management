@@ -54,7 +54,7 @@
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="${pageContext.request.contextPath}/homepage" class="menu-link">
+                    <a href="${pageContext.request.contextPath}/" class="menu-link">
                         <i class="fas fa-home"></i>
                         <span>Về trang chủ</span>
                     </a>
