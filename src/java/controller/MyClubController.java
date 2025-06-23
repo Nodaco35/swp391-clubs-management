@@ -66,36 +66,18 @@ public class MyClubController extends HttpServlet {
             List<ClubApplication> pendingApplications = ClubApplicationDAO.pendingApplicationsFindByClub(user.getUserID());
 
             List<TaskAssignment> todoLists = TaskAssignmentDAO.findByUserID(user.getUserID());
-<<<<<<< HEAD
-            
-            
-            //mới
-=======
 
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
             List<ClubMeeting> clubmeetings = ClubMeetingDAO.findByUserID(user.getUserID());
             
 
             request.setAttribute("userclubs", userclubs);
             request.setAttribute("recentNotifications", recentNotifications);
             request.setAttribute("upcomingEvents", upcomingEvents);
-<<<<<<< HEAD
-            
-            //mới
-=======
-
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
             request.setAttribute("countUpcomingMeeting", countUpcomingMeeting);
             request.setAttribute("pendingApplications", pendingApplications);
             request.setAttribute("departmentTasks", todoLists);
             request.setAttribute("countTodoLists", countTodoLists);
             request.setAttribute("countPendingApplication", countPendingApplication);
-<<<<<<< HEAD
-            
-           //mới
-=======
-
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
             request.setAttribute("clubmeetings", clubmeetings);
             request.getRequestDispatcher("view/student/myClub.jsp").forward(request, response);
         }

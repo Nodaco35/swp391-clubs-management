@@ -22,7 +22,7 @@
                 <div class="club-detail">
                     <!-- Thông tin câu lạc bộ -->
                     <div class="club-header">
-                        <% 
+                        <%
                             // Lấy clubID từ request
                             String clubID = request.getParameter("id");
                             // Lấy câu lạc bộ từ session nếu có
@@ -32,7 +32,7 @@
                             // Đặt displayClub vào request để sử dụng trong JSP
                             request.setAttribute("displayClub", displayClub);
                         %>
-                        <img src="${pageContext.request.contextPath}/${displayClub.clubImg != null && not empty displayClub.clubImg ? displayClub.clubImg : 'images/default-club.jpg'}?t=<%= System.currentTimeMillis() %>" 
+                        <img src="${pageContext.request.contextPath}/${displayClub.clubImg != null && not empty displayClub.clubImg ? displayClub.clubImg : 'images/default-club.jpg'}?t=<%= System.currentTimeMillis()%>" 
                              alt="${displayClub.clubName}" class="club-image">
 
                         <div class="club-info">
@@ -80,16 +80,13 @@
                                         <i class="fas fa-users"></i> Quản lý thành viên
                                     </a>
                                 </c:if>
-<<<<<<< HEAD
-                                
+
                                 <c:if test="${isDepartmentLeader}">
                                     <a href="${pageContext.request.contextPath}/department-dashboard" 
                                        class="btn btn-success left-btn">
                                         <i class="fas fa-users-gear"></i> Quản lý Ban
                                     </a>
                                 </c:if>
-=======
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
 
                                 <c:if test="${!isMember && displayClub.isRecruiting && sessionScope.user != null}">
                                     <a href="${pageContext.request.contextPath}/club-apply?clubID=${displayClub.clubID}" 

@@ -62,15 +62,6 @@ public class AdminServlet extends HttpServlet {
 
             int upcomingEventsCount = eventDAO.countUpcomingEvents();
 
-<<<<<<< HEAD
-            List<CreatedClubApplications> pendingClubRequests = ccaDAO.getPendingRequests(10);
-            List<CreatedClubApplications> approvedClubRequests = ccaDAO.getRequestsByStatus("APPROVED");
-            List<CreatedClubApplications> rejectedClubRequests = ccaDAO.getRequestsByStatus("REJECTED");
-=======
-//            List<CreatedClubApplications> pendingClubRequests = ccaDAO.getPendingRequests(10);
-//            List<CreatedClubApplications> approvedClubRequests = ccaDAO.getRequestsByStatus("APPROVED");
-//            List<CreatedClubApplications> rejectedClubRequests = ccaDAO.getRequestsByStatus("REJECTED");
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
             List<Clubs> activeClubs = clubDAO.getActiveClubs();
             List<Clubs> inactiveClubs = clubDAO.getInactiveClubs();
 
@@ -82,15 +73,6 @@ public class AdminServlet extends HttpServlet {
             request.setAttribute("totalMembers", totalMembers);
             request.setAttribute("pendingRequests", pendingRequests);
             request.setAttribute("upcomingEventsCount", upcomingEventsCount);
-<<<<<<< HEAD
-            request.setAttribute("pendingClubRequests", pendingClubRequests);
-            request.setAttribute("approvedClubRequests", approvedClubRequests);
-            request.setAttribute("rejectedClubRequests", rejectedClubRequests);
-=======
-//            request.setAttribute("pendingClubRequests", pendingClubRequests);
-//            request.setAttribute("approvedClubRequests", approvedClubRequests);
-//            request.setAttribute("rejectedClubRequests", rejectedClubRequests);
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
             request.setAttribute("activeClubs", activeClubs);
             request.setAttribute("inactiveClubs", inactiveClubs);
 

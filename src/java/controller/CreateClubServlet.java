@@ -2,6 +2,7 @@ package controller;
 
 import dal.ClubDAO;
 import dal.UserClubDAO;
+import dal.PermissionDAO;
 import dal.ClubCreationPermissionDAO;
 import dal.CreatedClubApplicationsDAO;
 import jakarta.servlet.ServletException;
@@ -49,7 +50,6 @@ public class CreateClubServlet extends HttpServlet {
     public void init() throws ServletException {
         clubDAO = new ClubDAO();
         userClubDAO = new UserClubDAO();
-        permissionDAO = new ClubCreationPermissionDAO();
         applicationDAO = new CreatedClubApplicationsDAO();
     }
 

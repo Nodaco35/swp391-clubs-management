@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Làm hàm có sẵn toàn cục để Chart.js có thể sử dụng
-    window.showUsersWithRating = showUsersWithRating;
+     window.showUsersWithRating = showUsersWithRating;
     
     // Các tiêu chí đánh giá và mô tả của chúng
     const criteriaDescriptions = {
@@ -234,11 +234,6 @@ document.addEventListener('DOMContentLoaded', function() {
         'Mức độ tiếp tục': 'Mức độ bạn muốn tiếp tục tham gia các hoạt động của CLB trong tương lai'
     };
     
-<<<<<<< HEAD
-    // Ghi log danh sách mô tả tiêu chí để debug
-    logDebug('Danh sách mô tả tiêu chí:', criteriaDescriptions);    // Biến toàn cục để lưu trữ instance của biểu đồ để có thể hủy trước khi render lại
-=======
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
     let ratingDistributionChartInstance = null;
     
     // Biểu đồ 1: Phân phối đánh giá tổng quan
@@ -273,17 +268,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const rate1 = parseInt(ratingDistributionChartEl.getAttribute('data-rate1') || '0', 10);
         
         logDebug('Dữ liệu đánh giá từ các thuộc tính:', {rate5, rate4, rate3, rate2, rate1});
-        
-<<<<<<< HEAD
-        // In ra console các thuộc tính đầy đủ để kiểm tra
-        console.log("Thuộc tính data-rate5:", ratingDistributionChartEl.getAttribute('data-rate5'));
-        console.log("Thuộc tính data-rate4:", ratingDistributionChartEl.getAttribute('data-rate4'));
-        console.log("Thuộc tính data-rate3:", ratingDistributionChartEl.getAttribute('data-rate3'));
-        console.log("Thuộc tính data-rate2:", ratingDistributionChartEl.getAttribute('data-rate2'));
-        console.log("Thuộc tính data-rate1:", ratingDistributionChartEl.getAttribute('data-rate1'));
-        
-=======
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
         // In ra cả HTML của canvas để kiểm tra
         console.log("Canvas HTML:", ratingDistributionChartEl.outerHTML);
         
@@ -306,10 +290,7 @@ document.addEventListener('DOMContentLoaded', function() {
             '3 sao': ratingDistributionData[2],
             '2 sao': ratingDistributionData[3],
             '1 sao': ratingDistributionData[4]
-<<<<<<< HEAD
-        });        // Tạo một bản sao của dữ liệu với thứ tự đúng (5->1 sao)
-=======
-        });
+
 >>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
         // Thử lấy dữ liệu từ nhiều cách khác nhau
         const attr5 = ratingDistributionChartEl.getAttribute('data-rate5');
@@ -317,16 +298,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const attr3 = ratingDistributionChartEl.getAttribute('data-rate3');
         const attr2 = ratingDistributionChartEl.getAttribute('data-rate2');
         const attr1 = ratingDistributionChartEl.getAttribute('data-rate1');
-        
-<<<<<<< HEAD
-        console.log("Giá trị thuộc tính data-rate5 thô:", attr5, "loại:", typeof attr5);
-        console.log("Giá trị thuộc tính data-rate4 thô:", attr4, "loại:", typeof attr4);
-        console.log("Giá trị thuộc tính data-rate3 thô:", attr3, "loại:", typeof attr3);
-        console.log("Giá trị thuộc tính data-rate2 thô:", attr2, "loại:", typeof attr2);
-        console.log("Giá trị thuộc tính data-rate1 thô:", attr1, "loại:", typeof attr1);
-        
-=======
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
+       
         // Kiểm tra nếu các thuộc tính chứa số hay không
         const hasNumber5 = !isNaN(parseInt(attr5, 10));
         const hasNumber4 = !isNaN(parseInt(attr4, 10));
@@ -335,10 +307,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const hasNumber1 = !isNaN(parseInt(attr1, 10));
         
         console.log("Có số trong thuộc tính:", {hasNumber5, hasNumber4, hasNumber3, hasNumber2, hasNumber1});
-<<<<<<< HEAD
-          // Tạo mảng hiển thị với dữ liệu thực từ thuộc tính
-=======
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
+
         // Luôn sử dụng parseInt với fallback 0 để đảm bảo số nguyên hợp lệ
         const displayData = [
             parseInt(attr5 || '0', 10),

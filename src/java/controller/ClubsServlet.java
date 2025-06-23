@@ -121,7 +121,7 @@ public class ClubsServlet extends HttpServlet {
         int totalPages = (int) Math.ceil((double) totalClubs / pageSize);
 
         // Check for club creation permission
-        boolean hasPermission = user != null && permissionDAO.hasActiveClubPermission(userID);
+        boolean hasPermission = user != null && permissionDAO.hasActivePermission(userID);
 
         request.setAttribute("clubs", clubs);
         request.setAttribute("selectedCategory", category);
@@ -178,7 +178,7 @@ public class ClubsServlet extends HttpServlet {
         }
 
         // Check for club creation permission
-        boolean hasPermission = user != null && permissionDAO.hasActiveClubPermission(user.getUserID());
+        boolean hasPermission = user != null && permissionDAO.hasActivePermission(user.getUserID());
         request.setAttribute("club", club);
         request.setAttribute("isMember", isMember);
         request.setAttribute("isPresident", isPresident);
