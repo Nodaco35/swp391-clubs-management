@@ -76,11 +76,10 @@
                     <div class="stat-number" id="totalCount">0</div>
                     <div class="stat-label">Tổng cộng</div>
                 </div>
-            </div>
-              <div class="search-container">
-                <div class="search-box">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="responseSearchInput" placeholder="Tìm kiếm theo tên, email hoặc mã người dùng...">
+            </div>              <div class="form-response-search-container">
+                <div class="form-response-search-box">
+                    <i class="fas fa-search form-response-search-icon"></i>
+                    <input type="text" id="responseSearchInput" class="form-response-search-input" placeholder="Tìm kiếm theo tên, email hoặc mã người dùng...">
                     <!-- Clear button sẽ được thêm tự động từ JS -->
                 </div>
             </div>
