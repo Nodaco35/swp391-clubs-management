@@ -17,6 +17,15 @@ CREATE TABLE Semesters (
     Status ENUM('ACTIVE', 'INACTIVE') DEFAULT 'ACTIVE'
 );
 
+INSERT INTO Semesters (TermID, TermName, StartDate, EndDate, Status)
+VALUES 
+('SP24', 'Spring 2024', '2024-01-01', '2024-04-30', 'INACTIVE'),
+('SU24', 'Summer 2024', '2024-05-01', '2024-08-31', 'INACTIVE'),
+('FA24', 'Fall 2024', '2024-09-01', '2024-12-31', 'INACTIVE'),
+('SP25', 'Spring 2025', '2025-01-01', '2025-04-30', 'INACTIVE'),
+('SU25', 'Summer 2025', '2025-05-01', '2025-08-31', 'ACTIVE'),
+('FA25', 'Fall 2025', '2025-09-01', '2025-12-31', 'INACTIVE');
+
 
 -- ========================================
 -- USERS, CLUBS, AND ROLES
