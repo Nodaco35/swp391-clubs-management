@@ -32,7 +32,7 @@
     background: var(--form-bg);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
-    overflow: hidden;
+    overflow: visible;
 }
 
 /* Header của form */

@@ -1,6 +1,10 @@
 
 -- ========================================
+<<<<<<< HEAD
 -- CREATE DATABASE - MYSQL
+=======
+-- CREATE DATABASE (MySQL style)
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
 -- ========================================
 DROP DATABASE IF EXISTS ClubManagementSystem;
 CREATE DATABASE ClubManagementSystem CHARACTER SET utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -27,7 +31,10 @@ VALUES
 ('FA25', 'Fall 2025', '2025-09-01', '2025-12-31', 'INACTIVE');
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
 -- ========================================
 -- USERS, CLUBS, AND ROLES
 -- ========================================
@@ -38,6 +45,10 @@ CREATE TABLE Permissions (
 );
 INSERT INTO Permissions (PermissionName) VALUES ('Student'), ('Admin'), ('IC_Officer');
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
 CREATE TABLE Users (
     UserID VARCHAR(10) PRIMARY KEY,
     FullName VARCHAR(100) NOT NULL,
@@ -101,7 +112,11 @@ CREATE TABLE Clubs (
     ClubID INT PRIMARY KEY AUTO_INCREMENT,
     ClubImg VARCHAR(255),
     IsRecruiting BOOLEAN DEFAULT 1,
+<<<<<<< HEAD
     ClubName VARCHAR(100) NOT NULL UNIQUE,
+=======
+    ClubName VARCHAR(100) NOT NULL,
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
     Description TEXT,
     Category ENUM('Thể Thao', 'Học Thuật', 'Phong Trào') DEFAULT 'Học Thuật',
     EstablishedDate DATE,
@@ -181,6 +196,7 @@ CREATE TABLE UserClubs (
     FOREIGN KEY (RoleID) REFERENCES Roles(RoleID)
 );
 
+<<<<<<< HEAD
 -- sửa ok rồi đừng sửa nữa nhé
 INSERT INTO UserClubs (UserID, ClubID, ClubDepartmentID, RoleID, JoinDate, IsActive) VALUES
 ('U001', 1, 1, 1, '2020-09-01', 1),
@@ -217,6 +233,58 @@ INSERT INTO UserClubs (UserID, ClubID, ClubDepartmentID, RoleID, JoinDate, IsAct
 
 
 
+=======
+
+INSERT INTO UserClubs (UserID, ClubID, ClubDepartmentID, RoleID, JoinDate, IsActive) VALUES
+('U001', 1, 1, 1, '2020-09-01', 1), -- Chủ nhiệm CLB 1, Ban Chủ nhiệm
+('U001', 1, 1, 3, '2020-09-01', 1), -- Chủ nhiệm kiêm Trưởng ban Chủ nhiệm CLB 1
+('U002', 1, 5, 3, '2021-01-15', 1), -- Trưởng ban Hậu cần CLB 1
+('U002', 1, 1, 4, '2021-01-15', 1), -- Trưởng ban Hậu cần là thành viên Ban Chủ nhiệm CLB 1
+('U002', 2, 3, 2, '2020-10-05', 1), -- Phó chủ nhiệm CLB 2, Ban Chủ nhiệm
+('U003', 2, 4, 3, '2021-02-20', 1), -- Trưởng ban Chuyên môn CLB 2
+('U003', 2, 3, 4, '2021-02-20', 1), -- Trưởng ban Chuyên môn là thành viên Ban Chủ nhiệm CLB 2
+('U003', 1, 1, 2, '2020-11-10', 1), -- Phó chủ nhiệm CLB 1, Ban Chủ nhiệm
+('U004', 1, 2, 3, '2021-03-25', 1), -- Trưởng ban Truyền thông CLB 1
+('U004', 1, 1, 4, '2021-03-25', 1), -- Trưởng ban Truyền thông là thành viên Ban Chủ nhiệm CLB 1
+('U005', 2, 6, 3, '2021-04-30', 1), -- Trưởng ban Đối ngoại CLB 2
+('U005', 2, 3, 4, '2021-04-30', 1), -- Trưởng ban Đối ngoại là thành viên Ban Chủ nhiệm CLB 2
+('U006', 2, 3, 1, '2021-07-01', 1), -- Chủ nhiệm CLB 2, Ban Chủ nhiệm
+('U006', 2, 3, 3, '2021-07-01', 1), -- Chủ nhiệm kiêm Trưởng ban Chủ nhiệm CLB 2
+('U007', 1, 5, 4, '2021-07-03', 1), -- Thành viên Ban Hậu cần CLB 1
+('U008', 2, 6, 4, '2021-07-04', 1), -- Thành viên Ban Đối ngoại CLB 2
+('U009', 1, 2, 4, '2021-07-05', 1), -- Thành viên Ban Truyền thông CLB 1
+('U010', 2, 4, 4, '2021-07-06', 1), -- Thành viên Ban Chuyên môn CLB 2
+('U011', 3, 7, 1, '2021-08-01', 1), -- Chủ nhiệm CLB 3, Ban Chủ nhiệm
+('U011', 3, 7, 3, '2021-08-01', 1), -- Chủ nhiệm kiêm Trưởng ban Chủ nhiệm CLB 3
+('U012', 4, 8, 1, '2021-08-02', 1), -- Chủ nhiệm CLB 4, Ban Chủ nhiệm
+('U012', 4, 8, 3, '2021-08-02', 1), -- Chủ nhiệm kiêm Trưởng ban Chủ nhiệm CLB 4
+('U013', 5, 9, 1, '2021-08-03', 1), -- Chủ nhiệm CLB 5, Ban Chủ nhiệm
+('U013', 5, 9, 3, '2021-08-03', 1), -- Chủ nhiệm kiêm Trưởng ban Chủ nhiệm CLB 5
+('U014', 6, 10, 1, '2021-08-04', 1), -- Chủ nhiệm CLB 6, Ban Chủ nhiệm
+('U014', 6, 10, 3, '2021-08-04', 1), -- Chủ nhiệm kiêm Trưởng ban Chủ nhiệm CLB 6
+('U015', 7, 11, 1, '2021-08-05', 1), -- Chủ nhiệm CLB 7, Ban Chủ nhiệm
+('U015', 7, 11, 3, '2021-08-05', 1), -- Chủ nhiệm kiêm Trưởng ban Chủ nhiệm CLB 7
+('U016', 8, 12, 1, '2021-08-06', 1), -- Chủ nhiệm CLB 8, Ban Chủ nhiệm
+('U016', 8, 12, 3, '2021-08-06', 1), -- Chủ nhiệm kiêm Trưởng ban Chủ nhiệm CLB 8
+('U017', 4, 13, 4, '2021-08-10', 1), -- Thành viên Ban Chuyên môn CLB 4
+('U018', 4, 14, 4, '2021-08-10', 1), -- Thành viên Ban Truyền thông CLB 4
+('U019', 4, 13, 4, '2021-08-11', 1), -- Thành viên Ban Chuyên môn CLB 4
+('U020', 4, 14, 4, '2021-08-11', 1), -- Thành viên Ban Truyền thông CLB 4
+('U021', 4, 13, 4, '2021-08-12', 1), -- Thành viên Ban Chuyên môn CLB 4
+('U022', 4, 15, 3, '2021-09-01', 1), -- Trưởng ban Nội dung CLB 4
+('U022', 4, 8, 4, '2021-09-01', 1), -- Trưởng ban Nội dung là thành viên Ban Chủ nhiệm CLB 4
+('U023', 4, 14, 3, '2021-05-01', 1), -- Trưởng ban Truyền thông CLB 4 (adjusted JoinDate to keep earliest)
+('U023', 4, 8, 4, '2021-05-01', 1), -- Trưởng ban Truyền thông là thành viên Ban Chủ nhiệm CLB 4
+('U024', 4, 13, 3, '2021-05-01', 1), -- Trưởng ban Chuyên môn CLB 4 (kept U015, removed U017 as duplicate)
+('U024', 4, 8, 4, '2021-05-01', 1), -- Trưởng ban Chuyên môn là thành viên Ban Chủ nhiệm CLB 4
+('U025', 4, 17, 3, '2021-05-01', 1), -- Trưởng ban Hậu cần CLB 4 (kept U015, removed U027 as duplicate)
+('U025', 4, 8, 4, '2021-05-01', 1), -- Trưởng ban Hậu cần là thành viên Ban Chủ nhiệm CLB 4
+('U026', 4, 17, 4, '2021-09-01', 1), -- Thành viên Ban Hậu cần CLB 4
+('U027', 4, 18, 3, '2021-09-01', 1), -- Trưởng ban Đối ngoại CLB 4 (kept U027, removed U029)
+('U027', 4, 8, 4, '2021-09-01', 1), -- Trưởng ban Đối ngoại là thành viên Ban Chủ nhiệm CLB 4
+('U028', 4, 18, 4, '2021-09-01', 1), -- Thành viên Ban Đối ngoại CLB 4
+('U030', 4, 15, 4, '2021-05-06', 1); -- Thành viên Ban Nội dung CLB 4 (corrected ClubDepartmentID from 18 to 15)
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
 
 
 
@@ -244,7 +312,10 @@ CREATE TABLE ApplicationFormTemplates (
 -- ========================================
 -- EVENTS
 -- ========================================
+<<<<<<< HEAD
 
+=======
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
 CREATE TABLE Locations (
     LocationID INT PRIMARY KEY AUTO_INCREMENT,
     LocationName VARCHAR(200) NOT NULL,
@@ -276,13 +347,20 @@ INSERT INTO Locations (LocationName, TypeLocation) VALUES
 ('Nhà Văn hóa Sinh viên TP.HCM', 'OffCampus'),
 ('Sân vận động Mỹ Đình, Hà Nội', 'OffCampus');
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
 CREATE TABLE Events (
     EventID INT PRIMARY KEY AUTO_INCREMENT,
     EventName VARCHAR(100) NOT NULL,
     EventImg VARCHAR(100),
     Description TEXT,
     EventDate DATETIME,
+<<<<<<< HEAD
     EndTime DATETIME,
+=======
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
     LocationID INT,
     ClubID INT NOT NULL,
     IsPublic BOOLEAN DEFAULT 0,
@@ -295,6 +373,7 @@ CREATE TABLE Events (
     FOREIGN KEY (SemesterID) REFERENCES Semesters(TermID),
     FOREIGN KEY (LocationID) REFERENCES Locations(LocationID)
 );
+<<<<<<< HEAD
 
 
 INSERT INTO Events (EventName, EventImg, Description, EventDate, EndTime, LocationID, ClubID, IsPublic, Capacity, Status, SemesterID) VALUES
@@ -331,6 +410,40 @@ INSERT INTO Events (EventName, EventImg, Description, EventDate, EndTime, Locati
 ('Cuộc Thi Tranh Biện 2024', 'images/events/debate2024.jpg', '...', '2024-12-01 09:00:00', '2024-12-01 11:00:00', 12, 8, TRUE, 65, 'COMPLETED', 'FA24');
 
 
+=======
+INSERT INTO Events (EventName, EventImg, Description, EventDate, LocationID, ClubID, IsPublic, Capacity, Status, SemesterID) VALUES
+-- Spring 2025
+('Lễ Hội Âm Nhạc Tết 2025', 'images/events/tetmusic2025.jpg', '...', '2025-02-01 19:00:00', 2, 6, TRUE, 300, 'COMPLETED', 'SP25'),
+('Hội Thảo Kỹ Năng Viết Tiếng Anh', 'images/events/englishworkshop2025.jpg', '...', '2025-03-05 09:00:00', 9, 3, TRUE, 60, 'COMPLETED', 'SP25'),
+('Cuộc Thi Tranh Biện Xã Hội 2025', 'images/events/debate2025.jpg', '...', '2025-04-10 13:00:00', 3, 8, TRUE, 100, 'COMPLETED', 'SP25'),
+('Workshop: Xây dựng Website với Spring Boot', '/images/events/springboot_workshop.jpg', '...', '2025-04-20 14:00:00', 26, 4, 0, 100, 'COMPLETED', 'SP25'),
+	
+-- Summer 2025 
+('FPTU Showcase 2025 Chung Kết', 'images/events/showcase2025.jpg', '...', '2025-06-30 09:00:00', 1, 7, TRUE, 200, 'PENDING', 'SU25'),
+('Thử Thách Lập Trình FPTU 2025', 'images/events/coding2025.jpg', '...', '2025-06-21 08:00:00', 25, 4, TRUE, 50, 'COMPLETED', 'SU25'),
+('Giải Bóng Đá Sinh Viên FPTU 2025', 'images/events/football2025.jpg', '...', '2025-06-05 08:00:00', 5, 1, TRUE, 120, 'PENDING', 'SU25'),
+('Chiến Dịch Tình Nguyện Xanh 2025', 'images/events/greenfuture2025.jpg', '...', '2025-07-25 07:00:00', 35, 5, TRUE, 40, 'PENDING', 'SU25'),
+('Giải Bóng Rổ 3x3 FPTU', 'images/events/basketball2025.jpg', '...', '2025-07-05 14:00:00', 4, 2, FALSE, 80, 'COMPLETED', 'SU25'),
+('Ngày Hội Âm Nhạc FPTU 2025', 'images/events/musicday2025.jpg', '...', '2025-07-10 10:00:00', 1, 6, FALSE, 250, 'PENDING', 'SU25'),
+('Hackathon Đổi Mới AI', 'images/events/aihackathon2025.jpg', '...', '2025-07-15 08:00:00', 25, 4, TRUE, 45, 'PENDING', 'SU25'),
+('Cuộc thi Code War: Thử thách thuật toán', '/images/events/codewar.jpg', '...', '2025-07-31 09:00:00', 27, 4, 1, 120, 'PENDING', 'SU25'),
+
+-- Spring 2024
+('Lễ Hội Làng Tết 2024', 'images/events/villagefest2024.jpg', '...', '2024-01-20 10:00:00', 36, 6, TRUE, 500, 'COMPLETED', 'SP24'),
+
+-- Summer 2024
+('Chiến Dịch Tình Nguyện Hè 2024', 'images/events/summervolunteer2024.jpg', '...', '2024-07-15 07:00:00', 36, 5, FALSE, 35, 'COMPLETED', 'SU24'),
+
+-- Fall 2024
+('Trại Lập Trình FPTU 2024', 'images/events/codingbootcamp2024.jpg', '...', '2024-11-20 08:00:00', 25, 4, TRUE, 60, 'COMPLETED', 'FA24'),
+('Đêm Nhạc Rock 2024', 'images/events/rocknight2024.jpg', '...', '2024-12-10 19:00:00', 1, 6, TRUE, 200, 'COMPLETED', 'FA24'),
+('Cuộc Thi Nói Tiếng Anh 2024', 'images/events/englishcontest2024.jpg', '...', '2024-11-25 09:00:00', 10, 3, TRUE, 70, 'COMPLETED', 'FA24'),
+('Giải Bóng Đá 5x5 FPTU 2024', 'images/events/football2024.jpg', '...', '2024-12-05 14:00:00', 5, 1, FALSE, 100, 'COMPLETED', 'FA24'),
+('Ngày Hội Nhảy FPTU 2024', 'images/events/dancefest2024.jpg', '...', '2024-12-15 10:00:00', 2, 7, TRUE, 400, 'COMPLETED', 'FA24'),
+('Hội Thảo Phát Triển Web 2024', 'images/events/webdev2024.jpg', '...', '2024-11-15 14:00:00', 11, 4, TRUE, 50, 'COMPLETED', 'FA24'),
+('FPTU Dance Battle 2024', 'images/events/dancebattle2024.jpg', '...', '2024-11-30 18:00:00', 1, 7, TRUE, 150, 'COMPLETED', 'FA24'),
+('Cuộc Thi Tranh Biện 2024', 'images/events/debate2024.jpg', '...', '2024-12-01 09:00:00', 12, 8, TRUE, 65, 'COMPLETED', 'FA24');
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
 
 UPDATE Events 
 SET Description = 'Lễ Hội Âm Nhạc Tết 2025 mang đến không gian âm nhạc sống động kết hợp tinh hoa truyền thống và xu hướng hiện đại. Người tham dự sẽ được thưởng thức các tiết mục dân gian hòa quyện với âm nhạc điện tử, rap, ballad… từ các câu lạc bộ nghệ thuật sinh viên. Không khí ngày Tết lan tỏa qua các gian hàng trò chơi dân gian, trình diễn áo dài, và các hoạt động giao lưu văn hóa vùng miền. Đây là dịp để sinh viên FPTU cùng nhau đón Tết sớm, lan tỏa niềm vui và gắn kết cộng đồng.' 
@@ -399,9 +512,12 @@ UPDATE Events
 SET Description = 'Cuộc Thi Tranh Biện 2024 là diễn đàn trí tuệ nơi sinh viên FPTU thể hiện khả năng lập luận, phản biện, và thuyết trình về các vấn đề xã hội, kinh tế, và giáo dục. Với format tranh biện chuyên nghiệp, các đội thi sẽ đối đầu qua các vòng thi căng thẳng, được chấm điểm bởi ban giám khảo là các chuyên gia và giảng viên. Sự kiện không chỉ nâng cao kỹ năng tư duy logic mà còn khuyến khích sinh viên bày tỏ quan điểm và kết nối với cộng đồng.' 
 WHERE EventName = 'Cuộc Thi Tranh Biện 2024' AND SemesterID = 'FA24';
 
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
 CREATE TABLE Agenda (
     AgendaID INT PRIMARY KEY AUTO_INCREMENT,
     EventID INT NOT NULL,
@@ -411,6 +527,7 @@ CREATE TABLE Agenda (
     EndTime DATETIME NOT NULL,
     FOREIGN KEY (EventID) REFERENCES Events(EventID)
 );
+<<<<<<< HEAD
 -- Thử Thách Lập Trình FPTU 2025
 INSERT INTO Agenda (EventID, Title, Description, StartTime, EndTime) VALUES
 ((SELECT EventID FROM Events WHERE EventName = 'Thử Thách Lập Trình FPTU 2025'), 'Check-in & Nhận thẻ', 'Người tham dự check-in và nhận thẻ tham dự.', '2025-03-15 07:30:00', '2025-03-15 08:00:00'),
@@ -463,6 +580,58 @@ INSERT INTO Agenda (EventID, Title, Description, StartTime, EndTime) VALUES
 
 
 
+=======
+
+INSERT INTO Agenda (EventID, Title, Description, StartTime, EndTime) VALUES
+-- EventID 3: Thử Thách Lập Trình FPTU 2025
+(3, 'Check-in & Nhận thẻ', 'Người tham dự check-in và nhận thẻ tham dự.', '2025-03-15 07:30:00', '2025-03-15 08:00:00'),
+(3, 'Phát biểu khai mạc', 'Ban tổ chức giới thiệu chương trình và mục tiêu cuộc thi.', '2025-03-15 08:00:00', '2025-03-15 08:15:00'),
+(3, 'Phổ biến thể lệ & luật chơi', 'Giới thiệu thể lệ cuộc thi và các quy tắc đánh giá.', '2025-03-15 08:15:00', '2025-03-15 08:45:00'),
+(3, 'Bắt đầu thi lập trình', 'Các đội/thí sinh bắt đầu làm bài.', '2025-03-15 08:45:00', '2025-03-15 11:30:00'),
+(3, 'Chấm điểm & chờ kết quả', 'Ban giám khảo chấm điểm và tổng hợp kết quả.', '2025-03-15 11:30:00', '2025-03-15 11:50:00'),
+(3, 'Tổng kết & chụp ảnh lưu niệm', 'Trao giải, chụp ảnh, kết thúc chương trình.', '2025-03-15 11:50:00', '2025-03-15 12:30:00'),
+
+-- EventID 10: Hackathon Đổi Mới AI
+(10, 'Check-in & Giới thiệu', 'Người tham gia đến check-in và nhận hướng dẫn.', '2025-06-05 07:30:00', '2025-06-05 08:00:00'),
+(10, 'Phát động & chia đội', 'Ban tổ chức phổ biến đề bài và chia đội.', '2025-06-05 08:00:00', '2025-06-05 08:30:00'),
+(10, 'Coding Marathon', 'Các đội bắt đầu lập trình và triển khai ý tưởng AI.', '2025-06-05 08:30:00', '2025-06-05 17:00:00'),
+(10, 'Trình bày sản phẩm', 'Các đội trình bày giải pháp của mình.', '2025-06-05 17:00:00', '2025-06-05 18:00:00'),
+(10, 'Trao giải & nhận xét', 'Ban giám khảo nhận xét và trao giải cho đội xuất sắc.', '2025-06-05 18:00:00', '2025-06-05 18:30:00'),
+(10, 'Tổng kết & chụp ảnh lưu niệm', 'Tổng kết sự kiện, chụp ảnh, dọn dẹp địa điểm.', '2025-06-05 18:30:00', '2025-06-05 19:30:00'),
+
+-- EventID 11: Workshop Spring Boot
+(11, 'Chuẩn bị đón khách', 'Sắp xếp thiết bị, banner và kiểm tra âm thanh.', '2025-06-20 13:00:00', '2025-06-20 13:45:00'),
+(11, 'Chào mừng và giới thiệu', 'MC giới thiệu sự kiện và diễn giả.', '2025-06-20 13:45:00', '2025-06-20 14:00:00'),
+(11, 'Tổng quan Spring Boot', 'Giới thiệu về Spring Boot và kiến trúc cơ bản.', '2025-06-20 14:00:00', '2025-06-20 14:30:00'),
+(11, 'Cấu hình dự án', 'Hướng dẫn cấu hình Maven và Spring Initializr.', '2025-06-20 14:30:00', '2025-06-20 15:00:00'),
+(11, 'Kết nối Database', 'Tích hợp với MySQL/PostgreSQL sử dụng Spring Data JPA.', '2025-06-20 15:00:00', '2025-06-20 15:30:00'),
+(11, 'Thực hành API CRUD', 'Tạo controller, service, repository cho quản lý người dùng.', '2025-06-20 15:30:00', '2025-06-20 16:15:00'),
+(11, 'Q&A và chia sẻ kinh nghiệm', 'Tham gia hỏi đáp trực tiếp với diễn giả.', '2025-06-20 16:15:00', '2025-06-20 16:30:00'),
+(11, 'Giải lao và networking', 'Tự do giao lưu, trao đổi kết nối.', '2025-06-20 16:30:00', '2025-06-20 17:00:00'),
+(11, 'Dọn dẹp và kết thúc', 'Thu dọn thiết bị, chụp ảnh kỷ niệm và đóng sự kiện.', '2025-06-20 17:00:00', '2025-06-20 17:45:00'),
+
+
+-- EventID 12: Cuộc thi Code War
+(12, 'Check-in & Nhận số báo danh', 'Thí sinh đăng ký tại bàn check-in.', '2025-06-25 08:00:00', '2025-06-25 08:30:00'),
+(12, 'Khai mạc cuộc thi', 'Giới thiệu thể lệ, quy định và cơ cấu giải thưởng.', '2025-06-25 08:30:00', '2025-06-25 08:50:00'),
+(12, 'Làm bài Round 1', 'Giải 3 bài toán cơ bản trong 45 phút.', '2025-06-25 08:50:00', '2025-06-25 09:35:00'),
+(12, 'Giải lao ngắn', 'Nghỉ ngơi, ăn nhẹ.', '2025-06-25 09:35:00', '2025-06-25 09:50:00'),
+(12, 'Làm bài Round 2', 'Giải bài toán khó hơn và có tính ứng dụng.', '2025-06-25 09:50:00', '2025-06-25 10:40:00'),
+(12, 'Chấm điểm và giải lao', 'BTC chấm bài tự động + nghỉ ngơi.', '2025-06-25 10:40:00', '2025-06-25 11:00:00'),
+(12, 'Công bố kết quả', 'Công bố top 5 thí sinh xuất sắc.', '2025-06-25 11:00:00', '2025-06-25 11:15:00'),
+(12, 'Trao thưởng', 'Trao giải nhất, nhì, ba và quà lưu niệm.', '2025-06-25 11:15:00', '2025-06-25 11:30:00'),
+(12, 'Giao lưu & chụp hình', 'Giao lưu các bạn cùng đam mê lập trình.', '2025-06-25 11:30:00', '2025-06-25 12:00:00'),
+(12, 'Thu dọn và kết thúc sự kiện', 'Thu dọn bàn ghế, thiết bị, vệ sinh phòng.', '2025-06-25 12:00:00', '2025-06-25 12:45:00'),
+
+
+-- EventID 8: Giải Bóng Đá Sinh Viên FPTU 2025
+(8, 'Check-in & chia đội', 'Thí sinh đến check-in và nhận áo thi đấu.', '2025-07-05 07:15:00', '2025-07-05 07:45:00'),
+(8, 'Phát biểu khai mạc', 'Ban tổ chức phát biểu và tuyên bố khai mạc.', '2025-07-05 07:45:00', '2025-07-05 08:00:00'),
+(8, 'Trận vòng loại', 'Thi đấu các trận vòng loại.', '2025-07-05 08:00:00', '2025-07-05 11:00:00'),
+(8, 'Nghỉ trưa', 'Nghỉ ăn nhẹ và chuẩn bị vòng tiếp theo.', '2025-07-05 11:00:00', '2025-07-05 12:00:00'),
+(8, 'Bán kết & chung kết', 'Các đội mạnh nhất tranh tài.', '2025-07-05 12:00:00', '2025-07-05 14:00:00'),
+(8, 'Lễ trao giải & bế mạc', 'Trao cúp, chụp ảnh, tổng kết & dọn dẹp.', '2025-07-05 14:00:00', '2025-07-05 15:30:00');
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
 
 CREATE TABLE EventParticipants (
     EventParticipantID INT PRIMARY KEY AUTO_INCREMENT,
@@ -491,6 +660,7 @@ INSERT INTO EventParticipants (EventID, UserID, Status) VALUES
 -- ========================================
 -- TASK ASSIGNMENTS
 -- ========================================
+<<<<<<< HEAD
 CREATE TABLE Tasks (
     TaskID INT PRIMARY KEY AUTO_INCREMENT,
     ParentTaskID INT, -- NULL nếu là nhiệm vụ cấp cao
@@ -552,6 +722,62 @@ CREATE TABLE TaskFeedbacks (
 
     FOREIGN KEY (TaskID) REFERENCES Tasks(TaskID),
     FOREIGN KEY (ReviewerID) REFERENCES Users(UserID)
+=======
+CREATE TABLE TaskAssignmentDepartment (
+	TaskAssignmentDepartmentID INT PRIMARY KEY AUTO_INCREMENT,
+	EventID INT NOT NULL,
+	Term ENUM('Trước sự kiện', 'Trong sự kiện', 'Sau sự kiện'),
+	TermStart DATE,
+	TermEnd DATE,
+   	Description TEXT,
+	Status ENUM('ToDo','Processing','Review','Approved'),
+  	TaskName VARCHAR(100),
+	StartedDate DATE, 
+	DueDate DATE,
+	FOREIGN KEY (EventID) REFERENCES Events(EventID)
+);
+INSERT INTO TaskAssignmentDepartment (EventID, Term, TermStart, TermEnd, Description, Status, TaskName, StartedDate, DueDate) VALUES
+(11, 'Trước sự kiện', '2025-07-10', '2025-07-13', 'Thiết kế poster, đăng bài truyền thông trước sự kiện', 'ToDo', 'Chuẩn bị truyền thông', '2025-07-10', '2025-07-13'),
+(11, 'Trước sự kiện', '2025-07-11', '2025-07-14', 'Chuẩn bị nội dung sự kiện', 'ToDo', 'Chuẩn bị slide', '2025-07-11', '2025-07-14'),
+(11, 'Trong sự kiện', '2025-07-15', '2025-07-15', 'Chuẩn bị hậu cần tại địa điểm tổ chức', 'ToDo', 'Bố trí thiết bị, bàn ghế', '2025-07-15', '2025-07-15'),
+(11, 'Sau sự kiện', '2025-07-16', '2025-07-18', 'Đăng bài viết recap sự kiện lên mạng xã hội', 'ToDo', 'Recap truyền thông', '2025-07-16', '2025-07-18'),
+(12, 'Trước sự kiện', '2025-07-27', '2025-07-30', 'Thiết kế standee, backdrop cho sự kiện', 'ToDo', 'Thiết kế standee', '2025-07-27', '2025-07-30'),
+(12, 'Trong sự kiện', '2025-07-31', '2025-07-31', 'Tiếp đón và check-in người tham dự tại sảnh', 'ToDo', 'Check-in sự kiện', '2025-07-31', '2025-07-31');
+
+
+CREATE TABLE TaskAssignmentDepartmentResponser (
+	TaskAssignmentDepartmentResponserID INT PRIMARY KEY AUTO_INCREMENT,
+	ClubDepartmentID INT NOT NULL,
+	TaskAssignmentDepartmentID INT NOT NULL,
+	FOREIGN KEY (TaskAssignmentDepartmentID) REFERENCES TaskAssignmentDepartment(TaskAssignmentDepartmentID),
+	FOREIGN KEY (ClubDepartmentID) REFERENCES ClubDepartments(ClubDepartmentID)
+);
+INSERT INTO TaskAssignmentDepartmentResponser (ClubDepartmentID, TaskAssignmentDepartmentID) VALUES
+(15, 1), -- Nội dung 15, Hậu cần 17, Truyền thông 2 của ClubID = 4 CLB Lập Trình
+(17, 2), -- Thu dọn hậu cần
+(2, 3),
+(2, 4),
+(15, 5),
+(17, 6);
+
+CREATE TABLE TaskAssignmentMember (
+	TaskAssignmentDepartmentID INT PRIMARY KEY AUTO_INCREMENT,
+	TaskAssignmentDepartmentResponserID INT NOT NULL,
+	Description TEXT,
+	TaskName VARCHAR(100),
+   	Status ENUM('ToDo','Processing','Review','Approved'),
+	StartedDate DATE, 
+   	DueDate DATETIME,
+	FOREIGN KEY (TaskAssignmentDepartmentResponserID) REFERENCES TaskAssignmentDepartmentResponser(TaskAssignmentDepartmentResponserID)
+);
+
+CREATE TABLE TaskAssignmentMemberResponser (
+    TaskAssignmentMemberResponserID INT PRIMARY KEY AUTO_INCREMENT,
+    TaskAssignmentMember INT NOT NULL,
+    MemberID VARCHAR(10) NOT NULL,
+    FOREIGN KEY (TaskAssignmentMember) REFERENCES TaskAssignmentMember(TaskAssignmentDepartmentID),
+    FOREIGN KEY (MemberID) REFERENCES Users(UserID)
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
 );
 
 -- ================================================================================
@@ -562,8 +788,12 @@ CREATE TABLE ClubMeeting (
 	ClubMeetingID INT PRIMARY KEY AUTO_INCREMENT,
 	ClubID INT NOT NULL,
 	URLMeeting varchar(50),
+<<<<<<< HEAD
 	StartedTime DATETIME, 
 FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID)
+=======
+	StartedTime DATETIME 
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
 );
 
 CREATE TABLE DepartmentMeeting (
@@ -598,6 +828,25 @@ INSERT INTO Notifications (Title, Content, CreatedDate, ReceiverID, Priority, St
 ('Nhắc nhở sự kiện', 'Sự kiện Giải Bóng Đá Sinh Viên 2023 sẽ diễn ra trong 2 ngày nữa', '2023-12-13 08:00:00', 'U001', 'HIGH', 'UNREAD'),
 ('Nhắc nhở sự kiện', 'Sự kiện Workshop Lập Trình Web sẽ diễn ra trong 2 ngày nữa', '2023-11-18 08:00:00', 'U003', 'HIGH', 'UNREAD');
 
+<<<<<<< HEAD
+=======
+CREATE TABLE CreatedClubApplications (
+    ApplicationID INT PRIMARY KEY AUTO_INCREMENT,
+    UserID VARCHAR(10),
+    ClubID INT,
+    Email VARCHAR(100) NOT NULL,			
+    Status ENUM('PENDING', 'APPROVED', 'REJECTED'),
+    SubmitDate DATETIME,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID)
+);
+INSERT INTO CreatedClubApplications (UserID, ClubID, Email, Status, SubmitDate) VALUES
+('U001', 4, 'a@gmail.com', 'PENDING', '2023-11-01 10:00:00'),
+('U002', 6, 'b@gmail.com', 'PENDING', '2023-11-02 11:00:00'),
+('U003', 8, 'c@gmail.com', 'PENDING', '2023-11-03 09:00:00'),
+('U004', 7, 'd@gmail.com', 'PENDING', '2023-11-04 14:00:00');
+
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
 CREATE TABLE ApplicationResponses (
     ResponseID INT PRIMARY KEY AUTO_INCREMENT,
     TemplateID INT NOT NULL,
@@ -671,6 +920,7 @@ CREATE TABLE PeriodicReportEvents (
     FOREIGN KEY (ReportID) REFERENCES PeriodicClubReport(ReportID)
 );
 
+<<<<<<< HEAD
 CREATE TABLE ClubCreationPermissions  (
     ID INT AUTO_INCREMENT PRIMARY KEY,
     UserID VARCHAR(10) NOT NULL,
@@ -698,6 +948,18 @@ VALUES
   ('U005', 'CLB Lập Trình', 'Học Thuật', 'PENDING', '2025-06-21 10:00:00', NULL, NULL),
   ('U001', 'CLB Nhiếp Ảnh', 'Phong Trào', 'APPROVED', '2025-06-15 10:00:00', 'U004', '2025-06-16 10:00:00'),
   ('U002', 'CLB Môi Trường', 'Phong Trào', 'REJECTED', '2025-06-10 10:00:00', 'U004', '2025-06-11 10:00:00');
+=======
+CREATE TABLE ClubCreationPermissions (
+    PermissionID INT PRIMARY KEY AUTO_INCREMENT,
+    UserID VARCHAR(10) NOT NULL,
+    Status ENUM('ACTIVE', 'USED', 'INACTIVE') DEFAULT 'ACTIVE',
+    GrantedBy VARCHAR(10),
+    GrantedDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UsedDate DATETIME NULL,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    FOREIGN KEY (GrantedBy) REFERENCES Users(UserID)
+);
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
 
 
 CREATE TABLE ActivedMemberClubs (
@@ -707,10 +969,18 @@ CREATE TABLE ActivedMemberClubs (
     ActiveDate DATE NOT NULL,
     LeaveDate DATE DEFAULT NULL, -- NULL nếu vẫn còn hoạt động
     IsActive BOOLEAN DEFAULT TRUE,
+<<<<<<< HEAD
     ProgressPoint INT DEFAULT NULL, -- Điểm rèn luyện, cho phép NULL
    FOREIGN KEY (UserID) REFERENCES Users(UserID),
     FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID)
 );
+=======
+
+    FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID)
+);
+
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
 -- ================================================================================
 -- ========================================
 -- FAVORITES
@@ -780,6 +1050,7 @@ INSERT INTO `Feedbacks` VALUES
 (3,13,'U007',0,1,'Sự kiện không vui như tôi nghĩ',2,3,4,3,1,2,3,1,2,'2025-06-21 00:58:54'),
 (4,13,'U008',0,3,'SỰ kiện ok',5,3,4,3,3,4,3,5,3,'2025-06-21 01:00:14');
 
+<<<<<<< HEAD
 INSERT INTO ClubMeeting (ClubID, URLMeeting, StartedTime)
 VALUES (1, 'https://meet.example.com/club1', '2025-12-12 23:00:00');
 
@@ -798,3 +1069,5 @@ INSERT INTO Notifications (Title, Content, CreatedDate, ReceiverID, Priority, St
 
 
 
+=======
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265

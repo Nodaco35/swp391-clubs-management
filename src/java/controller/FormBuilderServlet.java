@@ -40,7 +40,11 @@ public class FormBuilderServlet extends HttpServlet {    private ApplicationForm
         userClubDAO = new UserClubDAO();
         departmentDAO = new ClubDepartmentDAO(); // Khởi tạo DAO cho ClubDepartments
         responseDAO = new ApplicationResponseDAO(); // Khởi tạo Response DAO
+<<<<<<< HEAD
     }@Override
+=======
+    }    @Override
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
         String userId = (String) session.getAttribute("userID");
@@ -57,6 +61,7 @@ public class FormBuilderServlet extends HttpServlet {    private ApplicationForm
             try {
                 clubId = Integer.parseInt(clubIdParam);
             } catch (NumberFormatException e) {
+<<<<<<< HEAD
                 response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied&message=" + URLEncoder.encode("ID CLB không hợp lệ.", StandardCharsets.UTF_8.name()));
                 return;
             }
@@ -66,6 +71,20 @@ public class FormBuilderServlet extends HttpServlet {    private ApplicationForm
         UserClub userClub = userClubDAO.getUserClubManagementRole(userId, clubId);
         if (userClub == null) {
             response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền quản lý form.", StandardCharsets.UTF_8.name()));
+=======
+                response.sendRedirect(request.getContextPath() + "/myclub?error=access_denied&message=" + URLEncoder.encode("ID CLB không hợp lệ.", StandardCharsets.UTF_8.name()));
+                return;
+            }
+        } else {
+            // Nếu không có clubId, chuyển hướng về trang myClub để chọn CLB
+            response.sendRedirect(request.getContextPath() + "/myclub?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền truy cập chức năng này.", StandardCharsets.UTF_8.name()));
+            return;
+        }
+          // Kiểm tra quyền truy cập (chỉ cho roleId 1-3) trong CLB cụ thể
+        UserClub userClub = userClubDAO.getUserClubManagementRole(userId, clubId);
+        if (userClub == null || userClub.getRoleID() < 1 || userClub.getRoleID() > 3) {
+            response.sendRedirect(request.getContextPath() + "/myclub?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền quản lý form.", StandardCharsets.UTF_8.name()));
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
             return;
         }
         session.setAttribute("userClub", userClub);
@@ -87,7 +106,11 @@ public class FormBuilderServlet extends HttpServlet {    private ApplicationForm
 
                     // Chỉ cho phép chỉnh sửa form của club hiện tại
                     if (clubIdForForm != userClub.getClubID()) {
+<<<<<<< HEAD
                         response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền chỉnh sửa form này.", StandardCharsets.UTF_8.name()));
+=======
+                        response.sendRedirect(request.getContextPath() + "/myclub?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền chỉnh sửa form này.", StandardCharsets.UTF_8.name()));
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
                         return;
                     }                    // Kiểm tra xem form đã có phản hồi nào chưa
                     boolean formHasResponses = false;
@@ -148,7 +171,11 @@ public class FormBuilderServlet extends HttpServlet {    private ApplicationForm
         }
 
         if (userClub == null || userClub.getRoleID() < 1 || userClub.getRoleID() > 3) {
+<<<<<<< HEAD
             response.sendRedirect(request.getContextPath() + "/my-club?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền truy cập chức năng này.", StandardCharsets.UTF_8.name()));
+=======
+            response.sendRedirect(request.getContextPath() + "/myclub?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền truy cập chức năng này.", StandardCharsets.UTF_8.name()));
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
             return;
         }
 

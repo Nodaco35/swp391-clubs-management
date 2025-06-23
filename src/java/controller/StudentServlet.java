@@ -1,7 +1,7 @@
 package controller;
 
 import dal.ClubApplicationDAO;
-import dal.ClubCreationPermissionDAO;
+import dal.CreatedClubApplicationsDAO;
 import dal.EventParticipantDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -10,18 +10,21 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import models.Users;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import models.ClubApplication;
 import models.EventParticipation;
 
 public class StudentServlet extends HttpServlet {
 
-    private ClubCreationPermissionDAO permissionDAO;
+    private CreatedClubApplicationsDAO applicationDAO;
+    private ClubApplicationDAO clubApplicationDAO;
+    private EventParticipantDAO eventParticipantDAO;
 
     @Override
     public void init() throws ServletException {
-        permissionDAO = new ClubCreationPermissionDAO();
+        applicationDAO = new CreatedClubApplicationsDAO();
+        clubApplicationDAO = new ClubApplicationDAO();
+        eventParticipantDAO = new EventParticipantDAO();
     }
 
     @Override
@@ -37,14 +40,11 @@ public class StudentServlet extends HttpServlet {
         Users user = (Users) session.getAttribute("user");
         String action = request.getParameter("action");
 
-        //History ( Events and Clubs )
         if ("history".equals(action) && user != null) {
-            ClubApplicationDAO ca = new ClubApplicationDAO();
-            List<ClubApplication> clubApplications = ca.getClubApplicationsByUser(user.getUserID());
+            List<ClubApplication> clubApplications = clubApplicationDAO.getClubApplicationsByUser(user.getUserID());
             request.setAttribute("clubApplications", clubApplications);
 
-            EventParticipantDAO ep = new EventParticipantDAO();
-            List<EventParticipation> eventParticipations = ep.getEventParticipationByUser(user.getUserID());
+            List<EventParticipation> eventParticipations = eventParticipantDAO.getEventParticipationByUser(user.getUserID());
             request.setAttribute("events", eventParticipations);
 
             request.getRequestDispatcher("view/student/activity-history.jsp").forward(request, response);
@@ -62,20 +62,25 @@ public class StudentServlet extends HttpServlet {
         }
 
         String userId = user.getUserID();
-        if (userId == null || userId.trim().isEmpty()) {
-            session.setAttribute("error", "Thông tin người dùng không hợp lệ.");
+        String clubName = request.getParameter("clubName");
+        String category = request.getParameter("category");
+
+        if (userId == null || userId.trim().isEmpty() || clubName == null || clubName.trim().isEmpty() || 
+            category == null || !List.of("Thể Thao", "Học Thuật", "Phong Trào").contains(category)) {
+            session.setAttribute("error", "Thông tin không hợp lệ. Vui lòng nhập đầy đủ và đúng định dạng.");
             response.sendRedirect(request.getContextPath() + "/clubs");
             return;
         }
 
-        if (permissionDAO.hasPendingRequest(userId)) {
-            session.setAttribute("error", "Bạn đã có đơn đang chờ xử lý. Vui lòng đợi xử lý trước khi gửi đơn mới.");
-        } else if (permissionDAO.hasActivePermission(userId)) {
-            session.setAttribute("error", "Bạn đã có quyền tạo câu lạc bộ.");
+        if (applicationDAO.hasActiveApplication(userId)) {
+            session.setAttribute("error", "Bạn đã có quyền tạo câu lạc bộ với trạng thái APPROVED. Vui lòng sử dụng quyền hiện tại trước khi gửi đơn mới.");
+        } else if (applicationDAO.isClubNameTaken(clubName)) {
+            session.setAttribute("error", "Tên câu lạc bộ '" + clubName + "' đã được sử dụng. Vui lòng chọn tên khác.");
         } else {
-            boolean success = permissionDAO.insertRequest(userId);
+            boolean success = applicationDAO.insertRequest(userId, clubName, category);
             session.setAttribute(success ? "message" : "error",
-                    success ? "Đơn xin quyền tạo câu lạc bộ đã được gửi!" : "Gửi đơn thất bại. Vui lòng thử lại sau.");
+                    success ? "Đơn xin quyền tạo câu lạc bộ '" + clubName + "' (" + category + ") đã được gửi!" 
+                            : "Gửi đơn thất bại. Vui lòng thử lại sau.");
         }
 
         response.sendRedirect(request.getContextPath() + "/clubs");
@@ -83,6 +88,6 @@ public class StudentServlet extends HttpServlet {
 
     @Override
     public String getServletInfo() {
-        return "Student Servlet for handling student permission requests";
+        return "Student Servlet for handling student club creation application requests";
     }
 }

@@ -27,7 +27,11 @@ public class DBContext_Duc {
     private DBContext_Duc() {
         try {
             String user = "root";
+<<<<<<< HEAD
             String password = "Ahy180104";
+=======
+            String password = "nodaco123";
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
             String url = "jdbc:mysql://localhost:3306/ClubManagementSystem?zeroDateTimeBehavior=CONVERT_TO_NULL";
 
             Class.forName("com.mysql.cj.jdbc.Driver"); // chú ý driver mới của MySQL

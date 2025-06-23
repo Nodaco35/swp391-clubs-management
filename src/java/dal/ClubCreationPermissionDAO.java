@@ -147,7 +147,7 @@ public class ClubCreationPermissionDAO {
 
     // Check for active permissions
     public boolean hasActivePermission(String userID) {
-        String query = "SELECT COUNT(*) FROM ClubCreationPermissions WHERE UserID = ? AND Status = 'ACTIVE'";
+        String query = "SELECT COUNT(*) FROM ClubCreationPermissions WHERE UserID = ? AND Status = 'APPROVED'";
         try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, userID);
             ResultSet rs = stmt.executeQuery();
@@ -162,7 +162,7 @@ public class ClubCreationPermissionDAO {
 
     // Mark permission as used
     public boolean markPermissionAsUsed(String userID) {
-        String query = "UPDATE ClubCreationPermissions SET Status = 'USED', UsedDate = NOW() WHERE UserID = ? AND Status = 'ACTIVE'";
+        String query = "UPDATE ClubCreationPermissions SET Status = 'USED', UsedDate = NOW() WHERE UserID = ? AND Status = 'APPROVED'";
         try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, userID);
             return stmt.executeUpdate() > 0;
@@ -173,7 +173,7 @@ public class ClubCreationPermissionDAO {
 
     // Revoke permission
     public boolean revokePermission(String userID) {
-        String query = "UPDATE ClubCreationPermissions SET Status = 'INACTIVE' WHERE UserID = ? AND Status = 'ACTIVE'";
+        String query = "UPDATE ClubCreationPermissions SET Status = 'INACTIVE' WHERE UserID = ? AND Status = 'APPROVED'";
         try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, userID);
             return stmt.executeUpdate() > 0;
@@ -187,7 +187,7 @@ public class ClubCreationPermissionDAO {
         try {
             Connection conn = DBContext.getConnection();
             PreparedStatement ps = conn.prepareStatement(
-                    "SELECT COUNT(*) FROM ClubCreationPermissions WHERE UserID = ? AND Status = 'ACTIVE'"
+                    "SELECT COUNT(*) FROM ClubCreationPermissions WHERE UserID = ? AND Status = 'APPROVED'"
             );
             ps.setString(1, userId);
             ResultSet rs = ps.executeQuery();
@@ -204,7 +204,7 @@ public class ClubCreationPermissionDAO {
         try {
             Connection conn = DBContext.getConnection();
             PreparedStatement ps = conn.prepareStatement(
-                    "INSERT INTO ClubCreationPermissions (UserID, Status, GrantedBy, GrantedDate) VALUES (?, 'ACTIVE', ?, NOW())");
+                    "INSERT INTO ClubCreationPermissions (UserID, Status, GrantedBy, GrantedDate) VALUES (?, 'APPROVED', ?, NOW())");
             ps.setString(1, userId);
             ps.setString(2, grantedBy);
             ps.executeUpdate();
@@ -217,30 +217,12 @@ public class ClubCreationPermissionDAO {
         try {
             Connection conn = DBContext.getConnection();
             PreparedStatement ps = conn.prepareStatement(
-                    "UPDATE ClubCreationPermissions SET Status = 'INACTIVE' WHERE UserID = ? AND Status = 'ACTIVE'"
+                    "UPDATE ClubCreationPermissions SET Status = 'INACTIVE' WHERE UserID = ? AND Status = 'APPROVED'"
             );
             ps.setString(1, userId);
             ps.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public boolean hasActiveClubPermission(String userId) {
-        boolean hasActive = false;
-        try {
-            Connection conn = DBContext.getConnection();
-            PreparedStatement ps = conn.prepareStatement(
-                    "SELECT 1 FROM ClubCreationPermissions WHERE UserID = ? AND Status = 'ACTIVE' LIMIT 1"
-            );
-            ps.setString(1, userId);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                hasActive = true;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return hasActive;
     }
 }

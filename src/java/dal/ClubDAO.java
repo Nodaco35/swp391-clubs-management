@@ -12,7 +12,22 @@ import models.Clubs;
 import models.Department;
 
 public class ClubDAO {
-
+    
+    public boolean isClubNameTaken(String clubName, int excludeClubID) {
+        String query = "SELECT COUNT(*) FROM Clubs WHERE ClubName = ? AND ClubID != ?";
+        try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, clubName.trim());
+            stmt.setInt(2, excludeClubID);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
     public ClubInfo getClubChairman(String userID) {
         String sql = "SELECT c.ClubID, c.ClubName, c.ClubImg, u.FullName AS ClubChairmanName " +
                 "FROM UserClubs uc " +
@@ -87,12 +102,6 @@ public class ClubDAO {
         return 0;
     }
 
-
-
-
-
-
-
     public List<Clubs> getFeaturedClubs(int limit) {
         List<Clubs> clubs = new ArrayList<>();
         Connection conn = null;
@@ -124,33 +133,22 @@ public class ClubDAO {
                 club.setContactGmail(rs.getString("ContactGmail"));
                 club.setContactURL(rs.getString("ContactURL"));
                 club.setClubStatus(rs.getBoolean("ClubStatus"));
-
-                // Giả định có trường Category trong bảng Clubs
-                // Nếu không có, bạn có thể gán giá trị mặc định hoặc tạo logic phân loại
-                club.setCategory(getCategoryForClub(rs.getInt("ClubID")));
-
+                String category = rs.getString("Category");
+                club.setCategory(category != null ? category : getCategoryForClub(rs.getInt("ClubID")));
                 club.setMemberCount(rs.getInt("MemberCount"));
-
                 clubs.add(club);
             }
         } catch (SQLException e) {
             System.out.println("Error getting featured clubs: " + e.getMessage());
         } finally {
             try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (conn != null) {
-                    DBContext.closeConnection(conn);
-                }
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (conn != null) DBContext.closeConnection(conn);
             } catch (SQLException e) {
                 System.out.println("Error closing resources: " + e.getMessage());
             }
         }
-
         return clubs;
     }
 
@@ -202,7 +200,8 @@ public class ClubDAO {
                 club.setContactGmail(rs.getString("ContactGmail"));
                 club.setContactURL(rs.getString("ContactURL"));
                 club.setClubStatus(rs.getBoolean("ClubStatus"));
-                club.setCategory(rs.getString("Category"));
+                String dbCategory = rs.getString("Category");
+                club.setCategory(dbCategory != null ? dbCategory : getCategoryForClub(rs.getInt("ClubID")));
                 club.setMemberCount(rs.getInt("MemberCount"));
                 clubs.add(club);
             }
@@ -210,15 +209,9 @@ public class ClubDAO {
             System.out.println("Error getting clubs by category: " + e.getMessage());
         } finally {
             try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (conn != null) {
-                    DBContext.closeConnection(conn);
-                }
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (conn != null) DBContext.closeConnection(conn);
             } catch (SQLException e) {
                 System.out.println("Error closing resources: " + e.getMessage());
             }
@@ -233,7 +226,7 @@ public class ClubDAO {
         ResultSet rs = null;
 
         if (userID == null || userID.isEmpty()) {
-            return clubs; // Return empty list if userID is invalid
+            return clubs;
         }
 
         try {
@@ -263,7 +256,8 @@ public class ClubDAO {
                 club.setContactGmail(rs.getString("ContactGmail"));
                 club.setContactURL(rs.getString("ContactURL"));
                 club.setClubStatus(rs.getBoolean("ClubStatus"));
-                club.setCategory(rs.getString("Category"));
+                String dbCategory = rs.getString("Category");
+                club.setCategory(dbCategory != null ? dbCategory : getCategoryForClub(rs.getInt("ClubID")));
                 club.setMemberCount(rs.getInt("MemberCount"));
                 clubs.add(club);
             }
@@ -271,15 +265,9 @@ public class ClubDAO {
             System.out.println("Error getting user clubs: " + e.getMessage());
         } finally {
             try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (conn != null) {
-                    DBContext.closeConnection(conn);
-                }
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (conn != null) DBContext.closeConnection(conn);
             } catch (SQLException e) {
                 System.out.println("Error closing resources: " + e.getMessage());
             }
@@ -301,7 +289,7 @@ public class ClubDAO {
                 stmt = conn.prepareStatement(query);
             } else if ("myClubs".equalsIgnoreCase(category)) {
                 if (userID == null || userID.isEmpty()) {
-                    return 0; // No clubs if userID is invalid
+                    return 0;
                 }
                 query = "SELECT COUNT(*) FROM Clubs c "
                         + "JOIN UserClubs uc ON c.ClubID = uc.ClubID "
@@ -322,15 +310,9 @@ public class ClubDAO {
             System.out.println("Error getting total clubs by category: " + e.getMessage());
         } finally {
             try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (conn != null) {
-                    DBContext.closeConnection(conn);
-                }
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (conn != null) DBContext.closeConnection(conn);
             } catch (SQLException e) {
                 System.out.println("Error closing resources: " + e.getMessage());
             }
@@ -357,20 +339,13 @@ public class ClubDAO {
             System.out.println("Error getting total active clubs: " + e.getMessage());
         } finally {
             try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (conn != null) {
-                    DBContext.closeConnection(conn);
-                }
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (conn != null) DBContext.closeConnection(conn);
             } catch (SQLException e) {
                 System.out.println("Error closing resources: " + e.getMessage());
             }
         }
-
         return count;
     }
 
@@ -393,15 +368,9 @@ public class ClubDAO {
             System.out.println("Error getting total club members: " + e.getMessage());
         } finally {
             try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (conn != null) {
-                    DBContext.closeConnection(conn);
-                }
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (conn != null) DBContext.closeConnection(conn);
             } catch (SQLException e) {
                 System.out.println("Error closing resources: " + e.getMessage());
             }
@@ -428,15 +397,9 @@ public class ClubDAO {
             System.out.println("Error getting total departments: " + e.getMessage());
         } finally {
             try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (conn != null) {
-                    DBContext.closeConnection(conn);
-                }
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (conn != null) DBContext.closeConnection(conn);
             } catch (SQLException e) {
                 System.out.println("Error closing resources: " + e.getMessage());
             }
@@ -473,15 +436,9 @@ public class ClubDAO {
             System.out.println("Error getting category for club: " + e.getMessage());
         } finally {
             try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (conn != null) {
-                    DBContext.closeConnection(conn);
-                }
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (conn != null) DBContext.closeConnection(conn);
             } catch (SQLException e) {
                 System.out.println("Error closing resources: " + e.getMessage());
             }
@@ -502,7 +459,6 @@ public class ClubDAO {
         String sql = "SELECT * FROM Clubs WHERE ClubStatus = ? ORDER BY EstablishedDate DESC";
 
         try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-
             stmt.setBoolean(1, isActive);
             ResultSet rs = stmt.executeQuery();
 
@@ -518,14 +474,13 @@ public class ClubDAO {
                 club.setContactGmail(rs.getString("ContactGmail"));
                 club.setContactURL(rs.getString("ContactURL"));
                 club.setClubStatus(rs.getBoolean("ClubStatus"));
-                club.setCategory(rs.getString("Category"));
+                String dbCategory = rs.getString("Category");
+                club.setCategory(dbCategory != null ? dbCategory : getCategoryForClub(rs.getInt("ClubID")));
                 clubs.add(club);
             }
-
         } catch (SQLException e) {
             System.out.println("Error getting clubs: " + e.getMessage());
         }
-
         return clubs;
     }
 
@@ -556,22 +511,17 @@ public class ClubDAO {
                 club.setContactGmail(rs.getString("ContactGmail"));
                 club.setContactURL(rs.getString("ContactURL"));
                 club.setClubStatus(rs.getBoolean("ClubStatus"));
-                club.setCategory(getCategoryForClub(clubID));
+                String dbCategory = rs.getString("Category");
+                club.setCategory(dbCategory != null ? dbCategory : getCategoryForClub(clubID));
                 club.setMemberCount(rs.getInt("MemberCount"));
             }
         } catch (SQLException e) {
             System.out.println("Error getting club by ID: " + e.getMessage());
         } finally {
             try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (conn != null) {
-                    DBContext.closeConnection(conn);
-                }
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (conn != null) DBContext.closeConnection(conn);
             } catch (SQLException e) {
                 System.out.println("Error closing resources: " + e.getMessage());
             }
@@ -579,7 +529,6 @@ public class ClubDAO {
         return club;
     }
 
-    // Thêm phương thức getMemberCount (mới)
     public int getMemberCount(int clubID) {
         String query = "SELECT COUNT(*) FROM UserClubs WHERE ClubID = ? AND IsActive = 1";
         try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -595,7 +544,6 @@ public class ClubDAO {
         return 0;
     }
 
-    // Thêm phương thức addFavoriteClub (mới)
     public boolean addFavoriteClub(String userID, int clubID) {
         String query = "INSERT INTO FavoriteClubs (UserID, ClubID) VALUES (?, ?)";
         try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -608,7 +556,6 @@ public class ClubDAO {
         }
     }
 
-    // Thêm phương thức removeFavoriteClub (mới)
     public boolean removeFavoriteClub(String userID, int clubID) {
         String query = "DELETE FROM FavoriteClubs WHERE UserID = ? AND ClubID = ?";
         try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -621,7 +568,6 @@ public class ClubDAO {
         }
     }
 
-    // Thêm phương thức isFavoriteClub (mới)
     public boolean isFavoriteClub(String userID, int clubID) {
         String query = "SELECT COUNT(*) FROM FavoriteClubs WHERE UserID = ? AND ClubID = ?";
         try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -638,7 +584,6 @@ public class ClubDAO {
         return false;
     }
 
-    // Thêm phương thức getFavoriteClubs (mới, sửa lỗi clubID)
     public List<Clubs> getFavoriteClubs(String userID, int page, int pageSize) {
         List<Clubs> clubs = new ArrayList<>();
         String query = """
@@ -660,14 +605,15 @@ public class ClubDAO {
                     club.setIsRecruiting(rs.getBoolean("IsRecruiting"));
                     club.setClubName(rs.getString("ClubName"));
                     club.setDescription(rs.getString("Description"));
-                    club.setCategory(rs.getString("Category"));
+                    String dbCategory = rs.getString("Category");
+                    club.setCategory(dbCategory != null ? dbCategory : getCategoryForClub(rs.getInt("ClubID")));
                     club.setEstablishedDate(rs.getDate("EstablishedDate"));
                     club.setContactPhone(rs.getString("ContactPhone"));
                     club.setContactGmail(rs.getString("ContactGmail"));
                     club.setContactURL(rs.getString("ContactURL"));
                     club.setClubStatus(rs.getBoolean("ClubStatus"));
-                    club.setMemberCount(getMemberCount(club.getClubID())); // Sửa: dùng club.getClubID()
-                    club.setFavorite(true); // Đặt là yêu thích vì đây là danh sách yêu thích
+                    club.setMemberCount(getMemberCount(club.getClubID()));
+                    club.setFavorite(true);
                     clubs.add(club);
                 }
             }
@@ -677,7 +623,6 @@ public class ClubDAO {
         return clubs;
     }
 
-    // Thêm phương thức getTotalFavoriteClubs (mới)
     public int getTotalFavoriteClubs(String userID) {
         String query = "SELECT COUNT(*) FROM FavoriteClubs WHERE UserID = ?";
         try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -692,9 +637,6 @@ public class ClubDAO {
         }
         return 0;
     }
-    
-    //create club 
-    
     public List<Department> getAllDepartments() {
         List<Department> departments = new ArrayList<>();
         Connection conn = null;
@@ -717,15 +659,9 @@ public class ClubDAO {
             System.out.println("Error getting departments: " + e.getMessage());
         } finally {
             try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (conn != null) {
-                    DBContext.closeConnection(conn);
-                }
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (conn != null) DBContext.closeConnection(conn);
             } catch (SQLException e) {
                 System.out.println("Error closing resources: " + e.getMessage());
             }
@@ -754,7 +690,11 @@ public class ClubDAO {
             clubStmt.setString(5, club.getContactPhone());
             clubStmt.setString(6, club.getContactGmail());
             clubStmt.setString(7, club.getContactURL());
-            clubStmt.setDate(8, new java.sql.Date(club.getEstablishedDate().getTime()));
+            if (club.getEstablishedDate() != null) {
+                clubStmt.setDate(8, new java.sql.Date(club.getEstablishedDate().getTime()));
+            } else {
+                clubStmt.setNull(8, java.sql.Types.DATE);
+            }
             clubStmt.setBoolean(9, club.isClubStatus());
             clubStmt.setBoolean(10, club.isIsRecruiting());
 
@@ -783,24 +723,16 @@ public class ClubDAO {
             conn.commit();
         } catch (SQLException e) {
             try {
-                if (conn != null) {
-                    conn.rollback();
-                }
+                if (conn != null) conn.rollback();
             } catch (SQLException rollbackEx) {
                 System.out.println("Error rolling back transaction: " + rollbackEx.getMessage());
             }
-            throw e; // Re-throw to handle in caller
+            throw e;
         } finally {
             try {
-                if (generatedKeys != null) {
-                    generatedKeys.close();
-                }
-                if (clubStmt != null) {
-                    clubStmt.close();
-                }
-                if (deptStmt != null) {
-                    deptStmt.close();
-                }
+                if (generatedKeys != null) generatedKeys.close();
+                if (clubStmt != null) clubStmt.close();
+                if (deptStmt != null) deptStmt.close();
                 if (conn != null) {
                     conn.setAutoCommit(true);
                     DBContext.closeConnection(conn);
@@ -811,7 +743,6 @@ public class ClubDAO {
         }
         return newClubID;
     }
-    
     public boolean updateClub(Clubs club, List<Integer> newDepartmentIDs) throws SQLException {
         Connection conn = null;
         PreparedStatement clubStmt = null;
@@ -822,12 +753,12 @@ public class ClubDAO {
             conn = DBContext.getConnection();
             conn.setAutoCommit(false);
 
-            // Cập nhật thông tin CLB
             String clubQuery = "UPDATE Clubs SET ClubName = ?, Description = ?, Category = ?, ClubImg = ?, ContactPhone = ?, ContactGmail = ?, ContactURL = ?, EstablishedDate = ? WHERE ClubID = ?";
             clubStmt = conn.prepareStatement(clubQuery);
             clubStmt.setString(1, club.getClubName());
             clubStmt.setString(2, club.getDescription());
             clubStmt.setString(3, club.getCategory());
+            System.out.println("Updating club ID " + club.getClubID() + " with category: " + club.getCategory());
             clubStmt.setString(4, club.getClubImg());
             clubStmt.setString(5, club.getContactPhone());
             clubStmt.setString(6, club.getContactGmail());
@@ -840,15 +771,14 @@ public class ClubDAO {
             clubStmt.setInt(9, club.getClubID());
 
             int rows = clubStmt.executeUpdate();
+            System.out.println("Updated " + rows + " rows in Clubs table for club ID " + club.getClubID());
             if (rows == 0) {
                 conn.rollback();
                 return false;
             }
 
-            // Lấy danh sách DepartmentID hiện có
             List<Integer> existingDepartmentIDs = getClubDepartmentIDs(club.getClubID());
 
-            // Chỉ thêm các DepartmentID mới (chưa tồn tại)
             String checkDeptQuery = "SELECT COUNT(*) FROM ClubDepartments WHERE ClubID = ? AND DepartmentID = ?";
             String insertDeptQuery = "INSERT INTO ClubDepartments (DepartmentID, ClubID) VALUES (?, ?)";
             checkDeptStmt = conn.prepareStatement(checkDeptQuery);
@@ -856,12 +786,10 @@ public class ClubDAO {
 
             for (Integer deptID : newDepartmentIDs) {
                 if (deptID != null && !existingDepartmentIDs.contains(deptID)) {
-                    // Kiểm tra DepartmentID có tồn tại trong ClubDepartments
                     checkDeptStmt.setInt(1, club.getClubID());
                     checkDeptStmt.setInt(2, deptID);
                     ResultSet rs = checkDeptStmt.executeQuery();
                     if (rs.next() && rs.getInt(1) == 0) {
-                        // Thêm DepartmentID mới
                         insertDeptStmt.setInt(1, deptID);
                         insertDeptStmt.setInt(2, club.getClubID());
                         insertDeptStmt.addBatch();
@@ -875,6 +803,7 @@ public class ClubDAO {
             conn.commit();
             return true;
         } catch (SQLException e) {
+            System.out.println("SQLException during club update: " + e.getMessage());
             try {
                 if (conn != null) conn.rollback();
             } catch (SQLException rollbackEx) {

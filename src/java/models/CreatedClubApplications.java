@@ -1,25 +1,27 @@
-
 package models;
 
-import java.sql.Timestamp;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public class CreatedClubApplications {
-    private int applicationID;
+    private int id;
     private String userID;
-    private int clubID;
-    private String email;
+    private String userName; // For display purposes
+    private String clubName;
+    private String category; // New field for category
     private String status;
-    private Date submitDate;
-    private String clubName; // JOIN từ bảng Clubs
+    private LocalDateTime requestDate;
+    private LocalDateTime processedDate;
+    private String processedBy;
+    private LocalDateTime grantedDate;
+    private LocalDateTime usedDate;
 
-    
-    public int getApplicationID() {
-        return applicationID;
+    // Getters and Setters
+    public int getId() {
+        return id;
     }
 
-    public void setApplicationID(int applicationID) {
-        this.applicationID = applicationID;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getUserID() {
@@ -30,20 +32,28 @@ public class CreatedClubApplications {
         this.userID = userID;
     }
 
-    public int getClubID() {
-        return clubID;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setClubID(int clubID) {
-        this.clubID = clubID;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
-    public String getEmail() {
-        return email;
+    public String getClubName() {
+        return clubName;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setClubName(String clubName) {
+        this.clubName = clubName;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public String getStatus() {
@@ -54,21 +64,43 @@ public class CreatedClubApplications {
         this.status = status;
     }
 
-    public Date getSubmitDate() {
-        return submitDate;
+    public LocalDateTime getRequestDate() {
+        return requestDate;
     }
 
-    public void setSubmitDate(Date submitDate) {
-        this.submitDate = submitDate;
+    public void setRequestDate(LocalDateTime requestDate) {
+        this.requestDate = requestDate;
     }
 
-    public String getClubName() {
-        return clubName;
+    public LocalDateTime getProcessedDate() {
+        return processedDate;
     }
 
-    public void setClubName(String clubName) {
-        this.clubName = clubName;
+    public void setProcessedDate(LocalDateTime processedDate) {
+        this.processedDate = processedDate;
     }
-    
-    
+
+    public String getProcessedBy() {
+        return processedBy;
+    }
+
+    public void setProcessedBy(String processedBy) {
+        this.processedBy = processedBy;
+    }
+
+    public LocalDateTime getGrantedDate() {
+        return grantedDate;
+    }
+
+    public void setGrantedDate(LocalDateTime grantedDate) {
+        this.grantedDate = grantedDate;
+    }
+
+    public LocalDateTime getUsedDate() {
+        return usedDate;
+    }
+
+    public void setUsedDate(LocalDateTime usedDate) {
+        this.usedDate = usedDate;
+    }
 }

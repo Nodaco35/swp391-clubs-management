@@ -40,7 +40,11 @@
                     <label for="clubName" class="block text-sm font-medium text-gray-700">Tên Câu Lạc Bộ: <span class="text-red-500">*</span></label>
                     <input type="text" name="clubName" id="clubName" required
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                           value="${isEdit ? club.clubName : param.clubName}">
+                           value="${isEdit ? club.clubName : approvedClubName}"
+                           ${isEdit ? '' : 'readonly'}>
+                    <c:if test="${!isEdit}">
+                        <p class="text-sm text-gray-500 mt-1">Tên câu lạc bộ được lấy từ đơn xin quyền và không thể chỉnh sửa.</p>
+                    </c:if>
                 </div>
 
                 <div>
@@ -50,14 +54,17 @@
                 </div>
 
                 <div>
-                    <label for="category" class="block text-sm font-medium text-gray-700">Danh Mục:</label>
-                    <select name="category" id="category"
+                    <label for="category" class="block text-sm font-medium text-gray-700">Danh Mục: <span class="text-red-500">*</span></label>
+                    <select name="category" id="category" ${isEdit ? '' : 'disabled'} required
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="" disabled ${isEdit && club.category == null ? 'selected' : ''}>Chọn danh mục</option>
-                        <option value="Học Thuật" ${isEdit && club.category == 'Học Thuật' || param.category == 'Học Thuật' ? 'selected' : ''}>Học Thuật</option>
-                        <option value="Thể Thao" ${isEdit && club.category == 'Thể Thao' || param.category == 'Thể Thao' ? 'selected' : ''}>Thể Thao</option>
-                        <option value="Phong Trào" ${isEdit && club.category == 'Phong Trào' || param.category == 'Phong Trào' ? 'selected' : ''}>Phong Trào</option>
+                        <option value="Học Thuật" ${isEdit && club.category == 'Học Thuật' || (!isEdit && approvedCategory == 'Học Thuật') ? 'selected' : ''}>Học Thuật</option>
+                        <option value="Thể Thao" ${isEdit && club.category == 'Thể Thao' || (!isEdit && approvedCategory == 'Thể Thao') ? 'selected' : ''}>Thể Thao</option>
+                        <option value="Phong Trào" ${isEdit && club.category == 'Phong Trào' || (!isEdit && approvedCategory == 'Phong Trào') ? 'selected' : ''}>Phong Trào</option>
                     </select>
+                    <c:if test="${!isEdit}">
+                        <p class="text-sm text-gray-500 mt-1">Danh mục được lấy từ đơn xin quyền và không thể chỉnh sửa.</p>
+                    </c:if>
                 </div>
 
                 <div>
@@ -72,10 +79,18 @@
                     <div class="grid grid-cols-1 gap-2 mt-2">
                         <c:forEach var="dept" items="${departments}">
                             <label class="flex items-center">
+                                <c:set var="isChecked" value="false"/>
+                                <c:if test="${!isEdit && paramValues.departmentIDs != null}">
+                                    <c:forEach var="paramDeptID" items="${paramValues.departmentIDs}">
+                                        <c:if test="${paramDeptID == dept.departmentID.toString()}">
+                                            <c:set var="isChecked" value="true"/>
+                                        </c:if>
+                                    </c:forEach>
+                                </c:if>
                                 <input type="checkbox" name="departmentIDs" value="${dept.departmentID}"
                                        <c:choose>
                                            <c:when test="${isEdit && clubDepartmentIDs != null && clubDepartmentIDs.contains(dept.departmentID)}">checked disabled</c:when>
-                                           <c:when test="${!isEdit && paramValues.departmentIDs != null && paramValues.departmentIDs.contains(dept.departmentID.toString())}">checked</c:when>
+                                           <c:when test="${isChecked}">checked</c:when>
                                        </c:choose>
                                        class="h-4 w-4 text-blue-500 focus:ring-blue-500 border-gray-300 rounded">
                                 <span class="ml-2 text-sm text-gray-700">${dept.departmentName}</span>
