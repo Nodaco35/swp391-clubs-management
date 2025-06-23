@@ -16,6 +16,10 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     </head>
     <body>
+<<<<<<< HEAD
+
+=======
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
         <header class="header">
             <div class="container header-container">
                 <div class="logo">
@@ -127,6 +131,95 @@
                     <h2>Sự Kiện Sắp Tới</h2>
                     <p>Khám phá các sự kiện thú vị và bổ ích đang chờ đón bạn</p>
                 </div>
+<<<<<<< HEAD
+<<<<<<< HEAD
+                <div class="event-sort">
+                    <select id="sortSelect" class="sort-select" onchange="changeSort(this.value)">
+                        <option value="newest" ${currentSortByDate == 'newest' ? 'selected' : ''}>Mới Nhất</option>
+                        <option value="oldest" ${currentSortByDate == 'oldest' ? 'selected' : ''}>Cũ Nhất</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Events Info -->
+            <div class="events-info">
+                <p>Hiển thị ${fn:length(events)} trên tổng ${requestScope.totalEvents} sự kiện
+                    <c:if test="${currentPage > 0 && totalPages > 0}">
+                        - Trang ${currentPage}/${totalPages}
+                    </c:if>
+                </p>
+            </div>
+
+            <!-- Events Grid -->
+            <div class="events-grid" id="eventsGrid">
+                <c:forEach var="e" items="${requestScope.events}">
+                    <div class="event-card" onclick="redirectToDetail('${e.eventID}')">
+                        <div class="event-image">
+                            <i class="fas fa-calendar-day"></i>
+                            <span class="event-badge ${e.isPublic() ? 'badge-public' : 'badge-private'}">
+                                    ${e.isPublic() ? 'Công khai' : 'Riêng tư'}
+                            </span>
+                        </div>
+                        <div class="event-content">
+                            <h3 class="event-title">${e.eventName}</h3>
+                                <%--                                    <p class="event-description">${e.description}</p>--%>
+                            <div class="event-details">
+                                <div class="event-detail">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span><fmt:formatDate value="${e.eventDate}" pattern="dd/MM/yyyy HH:mm"/></span>
+                                </div>
+                                <div class="event-detail">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>${e.location.locationName}</span>
+                                </div>
+                                <div class="event-detail">
+                                    <i class="fas fa-users"></i>
+                                    <span>Sức chứa: ${e.capacity}</span>
+                                </div>
+                            </div>
+                            <div class="event-club">
+                                <strong>Club Name:</strong> ${e.clubName}
+                            </div>
+                            <div class="event-footer">
+                                <span class="attendees status-${fn:toLowerCase(e.status)}">${e.status}</span>
+                                <c:set var="isMyEvent" value="false" />
+                                <c:forEach var="id" items="${sessionScope.myEventIDs}">
+                                    <c:if test="${id == e.eventID}">
+                                        <c:set var="isMyEvent" value="true" />
+                                    </c:if>
+                                </c:forEach>
+
+                                <c:choose>
+                                    <c:when test="${isMyEvent}">
+                                        <button type="button" class="register-btn">
+                                            <a href="${pageContext.request.contextPath}/chairman-page/overview">MyClub</a>
+                                        </button>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <c:choose>
+                                            <c:when test="${e.status == 'PENDING' || e.status == 'Pending'}">
+                                                <button type="button" class="register-btn">
+                                                    Đăng ký
+                                                </button>
+                                            </c:when>
+                                            <c:when test="${e.status == 'Processing' || e.status == 'PROCESSING'}">
+                                                <button type="button" class="register-btn" disabled>
+                                                    Đang diễn ra
+                                                </button>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <button type="button" class="register-btn disabled" disabled>
+                                                    Đã kết thúc
+                                                </button>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
+                        </div>
+=======
+=======
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
                 <div class="event-filters-wrapper">
                     <!-- Event Filter Buttons -->
                     <div class="event-filters">
@@ -154,6 +247,10 @@
                                 Sự Kiện Yêu Thích
                             </a>
                         </c:if>
+<<<<<<< HEAD
+>>>>>>> main
+=======
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
                     </div>
                     <div class="event-sort">
                         <select id="sortSelect" class="sort-select" onchange="changeSort(this.value)">
@@ -193,7 +290,11 @@
 
                                     <div class="event-detail">
                                         <i class="fas fa-map-marker-alt"></i>
+<<<<<<< HEAD
+                                        <span>${e.location}</span>
+=======
                                         <span>${e.location.locationName}</span>
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
                                     </div>
                                     <div class="event-detail">
                                         <i class="fas fa-users"></i>
@@ -231,7 +332,11 @@
                                     <c:choose>
                                         <c:when test="${isMyEvent}">
                                             <button type="button" class="register-btn">
+<<<<<<< HEAD
+                                                <a href="${pageContext.request.contextPath}/chairman-page">MyClub</a>
+=======
                                                 <a href="${pageContext.request.contextPath}/chairman-page/overview">MyClub</a>
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
                                             </button>
                                         </c:when>
 
@@ -278,6 +383,10 @@
                            href="events-page?key=${currentKeyword}&publicFilter=${currentPublicFilter}&sortByDate=${currentSortByDate}&page=${currentPage + 1}">Next</a>
                     </c:if>
                 </div>
+<<<<<<< HEAD
+
+=======
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
             </div>
         </section>
     </main>

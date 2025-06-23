@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Làm hàm có sẵn toàn cục để Chart.js có thể sử dụng
-    window.showUsersWithRating = showUsersWithRating;
+     window.showUsersWithRating = showUsersWithRating;
     
     // Các tiêu chí đánh giá và mô tả của chúng
     const criteriaDescriptions = {
@@ -268,7 +268,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const rate1 = parseInt(ratingDistributionChartEl.getAttribute('data-rate1') || '0', 10);
         
         logDebug('Dữ liệu đánh giá từ các thuộc tính:', {rate5, rate4, rate3, rate2, rate1});
-        
         // In ra cả HTML của canvas để kiểm tra
         console.log("Canvas HTML:", ratingDistributionChartEl.outerHTML);
         
@@ -291,14 +290,15 @@ document.addEventListener('DOMContentLoaded', function() {
             '3 sao': ratingDistributionData[2],
             '2 sao': ratingDistributionData[3],
             '1 sao': ratingDistributionData[4]
-        });
+
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
         // Thử lấy dữ liệu từ nhiều cách khác nhau
         const attr5 = ratingDistributionChartEl.getAttribute('data-rate5');
         const attr4 = ratingDistributionChartEl.getAttribute('data-rate4');
         const attr3 = ratingDistributionChartEl.getAttribute('data-rate3');
         const attr2 = ratingDistributionChartEl.getAttribute('data-rate2');
         const attr1 = ratingDistributionChartEl.getAttribute('data-rate1');
-        
+       
         // Kiểm tra nếu các thuộc tính chứa số hay không
         const hasNumber5 = !isNaN(parseInt(attr5, 10));
         const hasNumber4 = !isNaN(parseInt(attr4, 10));
@@ -307,6 +307,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const hasNumber1 = !isNaN(parseInt(attr1, 10));
         
         console.log("Có số trong thuộc tính:", {hasNumber5, hasNumber4, hasNumber3, hasNumber2, hasNumber1});
+
         // Luôn sử dụng parseInt với fallback 0 để đảm bảo số nguyên hợp lệ
         const displayData = [
             parseInt(attr5 || '0', 10),
@@ -323,6 +324,14 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Dữ liệu có sẵn để hiển thị?', canDisplayData ? 'Có' : 'Không');
         
         if (!canDisplayData) {
+<<<<<<< HEAD
+            console.log('CHÚ Ý: Tất cả các giá trị là 0, vui lòng kiểm tra:');
+            console.log('1. Kiểm tra database: Các feedback có được lưu đúng không?');
+            console.log('2. Kiểm tra Servlet: getFeedbacksByEventID và tính toán phân phối rating');
+            console.log('3. Kiểm tra JSP: Giá trị ${ratingDistribution[x]} có lấy được không?');
+            console.log('4. Kiểm tra JS: Các thuộc tính data-rate* có lấy được giá trị không?');
+=======
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
             
             // Kiểm tra sâu hơn vào database và cách fetch dữ liệu
             const eventIdInput = document.querySelector('input[name="eventId"]');
@@ -333,8 +342,16 @@ document.addEventListener('DOMContentLoaded', function() {
         // Tạo biểu đồ với kiểu dáng tương tự mockup
         logDebug('Đang tạo biểu đồ phân phối đánh giá với dữ liệu:', displayData);
           try {
+<<<<<<< HEAD
+            // Kiểm tra lần cuối và lấy dữ liệu tốt nhất có thể
+            console.log("=== DỮ LIỆU CUỐI CÙNG CHO BIỂU ĐỒ ===");
+            
+            // Nếu tất cả là 0 nhưng có thông tin từ servlet log chỉ ra có dữ liệu
+            const dataFromServletLog = [0, 1, 1, 1, 1]; // Dữ liệu từ servlet log (5★=0, 4★=1, 3★=1, 2★=1, 1★=1)
+=======
             console.log("=== DỮ LIỆU CUỐI CÙNG CHO BIỂU ĐỒ ===");
             const dataFromServletLog = [0, 1, 1, 1, 1];
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
             
             // Nếu displayData toàn số 0 nhưng servlet log có dữ liệu thì sử dụng dữ liệu từ servlet log
             let finalChartData = displayData;
@@ -541,6 +558,15 @@ document.addEventListener('DOMContentLoaded', function() {
             'Mức độ tiếp tục'
         ];
         
+<<<<<<< HEAD
+        // Ghi log để xác nhận chúng ta có các khóa đúng cho criteriaDescriptions
+        logDebug('Kiểm tra độ phù hợp giữa tiêu chí và mô tả:');
+        criteriaLabels.forEach(label => {
+            const hasDescription = criteriaDescriptions[label] ? true : false;
+            logDebug(`- Tiêu chí '${label}': ${hasDescription ? 'Có mô tả' : 'KHÔNG CÓ MÔ TẢ'}`);
+        });
+=======
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
         
         // Lấy giá trị từ dữ liệu backend
         const criteriaValues = [

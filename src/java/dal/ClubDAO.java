@@ -637,7 +637,6 @@ public class ClubDAO {
         }
         return 0;
     }
-
     public List<Department> getAllDepartments() {
         List<Department> departments = new ArrayList<>();
         Connection conn = null;
@@ -744,7 +743,6 @@ public class ClubDAO {
         }
         return newClubID;
     }
-
     public boolean updateClub(Clubs club, List<Integer> newDepartmentIDs) throws SQLException {
         Connection conn = null;
         PreparedStatement clubStmt = null;

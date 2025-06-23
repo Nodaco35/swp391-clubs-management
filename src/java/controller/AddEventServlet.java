@@ -131,6 +131,7 @@ public class AddEventServlet extends HttpServlet {
                 eventTime == null || eventTime.trim().isEmpty() ||
                 eventEndTime == null || eventEndTime.trim().isEmpty()) {
 
+
             String locationType = request.getParameter("locationType");
             LocationDAO locationDAO = new LocationDAO();
             request.setAttribute("locations", locationDAO.getLocationsByType(locationType != null ? locationType : "OnCampus"));

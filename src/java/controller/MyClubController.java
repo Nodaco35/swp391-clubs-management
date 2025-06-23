@@ -73,13 +73,11 @@ public class MyClubController extends HttpServlet {
             request.setAttribute("userclubs", userclubs);
             request.setAttribute("recentNotifications", recentNotifications);
             request.setAttribute("upcomingEvents", upcomingEvents);
-
             request.setAttribute("countUpcomingMeeting", countUpcomingMeeting);
             request.setAttribute("pendingApplications", pendingApplications);
             request.setAttribute("departmentTasks", todoLists);
             request.setAttribute("countTodoLists", countTodoLists);
             request.setAttribute("countPendingApplication", countPendingApplication);
-
             request.setAttribute("clubmeetings", clubmeetings);
             request.getRequestDispatcher("view/student/myClub.jsp").forward(request, response);
         }

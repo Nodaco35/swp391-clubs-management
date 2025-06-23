@@ -17,6 +17,8 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/viewFeedback.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<<<<<<< HEAD
+=======
 
     <!-- Thêm event ID làm meta tag để giúp debug JS -->
     <meta name="eventId" content="${param.eventId}">
@@ -37,6 +39,7 @@
     </script>
 
 
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
 </head>
 <body>
     <jsp:include page="/view/events-page/header.jsp" />
@@ -159,6 +162,36 @@
                             </div>
                         </div>
                         <canvas id="ratingDistributionChart" 
+<<<<<<< HEAD
+                            data-rate5="<c:out value="${ratingDistribution[5]}" default="0"/>"
+                            data-rate4="<c:out value="${ratingDistribution[4]}" default="0"/>"
+                            data-rate3="<c:out value="${ratingDistribution[3]}" default="0"/>"
+                            data-rate2="<c:out value="${ratingDistribution[2]}" default="0"/>"
+                            data-rate1="<c:out value="${ratingDistribution[1]}" default="0"/>"
+                            data-debug="5★=${ratingDistribution[5]}, 4★=${ratingDistribution[4]}, 3★=${ratingDistribution[3]}, 2★=${ratingDistribution[2]}, 1★=${ratingDistribution[1]}"></canvas>
+
+                        <!-- Dữ liệu đánh giá trực tiếp từ Java - Sử dụng JSTL -->
+                        <script>
+                            // Dữ liệu đánh giá truyền trực tiếp từ JSP sang JS
+                            window.ratingDistributionDirectData = {
+                                rate5: "${ratingDistribution[5]}",
+                                rate4: "${ratingDistribution[4]}",
+                                rate3: "${ratingDistribution[3]}",
+                                rate2: "${ratingDistribution[2]}",
+                                rate1: "${ratingDistribution[1]}"
+                            };
+                            console.log("Dữ liệu trực tiếp từ JSP JSTL:", window.ratingDistributionDirectData);
+                            
+                            // Chuyển đổi thành số
+                            window.ratingDistributionDirectDataNumbers = {
+                                rate5: parseInt(window.ratingDistributionDirectData.rate5 || "0", 10),
+                                rate4: parseInt(window.ratingDistributionDirectData.rate4 || "0", 10),
+                                rate3: parseInt(window.ratingDistributionDirectData.rate3 || "0", 10),
+                                rate2: parseInt(window.ratingDistributionDirectData.rate2 || "0", 10),
+                                rate1: parseInt(window.ratingDistributionDirectData.rate1 || "0", 10)
+                            };
+                            console.log("Dữ liệu số từ JSP JSTL:", window.ratingDistributionDirectDataNumbers);
+=======
                             data-rate5="${ratingDistribution.get(5)}" 
                             data-rate4="${ratingDistribution.get(4)}" 
                             data-rate3="${ratingDistribution.get(3)}" 
@@ -215,6 +248,7 @@
                                     console.error("Lỗi debug thuộc tính:", e);
                                 }
                             });
+>>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
                         </script>
                     </div>
                 </div>

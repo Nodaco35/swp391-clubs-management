@@ -145,6 +145,14 @@
         <servlet-name>ViewFeedbackServlet</servlet-name>
         <servlet-class>controller.ViewFeedbackServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>DepartmentDashboardServlet</servlet-name>
+        <servlet-class>controller.DepartmentDashboardServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>DepartmentMemberServlet</servlet-name>
+        <servlet-class>controller.DepartmentMemberServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ClubsServlet</servlet-name>
         <url-pattern>/clubs</url-pattern>
@@ -294,6 +302,14 @@
     <servlet-mapping>
         <servlet-name>ViewFeedbackServlet</servlet-name>
         <url-pattern>/viewFeedback</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DepartmentDashboardServlet</servlet-name>
+        <url-pattern>/department-dashboard</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DepartmentMemberServlet</servlet-name>
+        <url-pattern>/department-members</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>

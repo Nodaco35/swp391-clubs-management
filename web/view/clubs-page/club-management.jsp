@@ -23,6 +23,7 @@
                 <!-- Display Messages -->
                 <c:if test="${not empty sessionScope.message}">
                     <div class="message success">${sessionScope.message}</div>
+                    <c:remove var="message" scope="session"/> <%-- [THÊM] Remove after display --%>
                     <c:remove var="message" scope="session"/>
                     <script>
                         setTimeout(() => {
@@ -32,6 +33,7 @@
                 </c:if>
                 <c:if test="${not empty sessionScope.error}">
                     <div class="message error">${sessionScope.error}</div>
+                    <c:remove var="error" scope="session"/> <%-- [THÊM] Remove after display --%>
                     <c:remove var="error" scope="session"/>
                     <script>
                         setTimeout(() => {
