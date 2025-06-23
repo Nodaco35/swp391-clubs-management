@@ -291,7 +291,6 @@ document.addEventListener('DOMContentLoaded', function() {
             '2 sao': ratingDistributionData[3],
             '1 sao': ratingDistributionData[4]
 
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
         // Thử lấy dữ liệu từ nhiều cách khác nhau
         const attr5 = ratingDistributionChartEl.getAttribute('data-rate5');
         const attr4 = ratingDistributionChartEl.getAttribute('data-rate4');
@@ -324,14 +323,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Dữ liệu có sẵn để hiển thị?', canDisplayData ? 'Có' : 'Không');
         
         if (!canDisplayData) {
-<<<<<<< HEAD
-            console.log('CHÚ Ý: Tất cả các giá trị là 0, vui lòng kiểm tra:');
-            console.log('1. Kiểm tra database: Các feedback có được lưu đúng không?');
-            console.log('2. Kiểm tra Servlet: getFeedbacksByEventID và tính toán phân phối rating');
-            console.log('3. Kiểm tra JSP: Giá trị ${ratingDistribution[x]} có lấy được không?');
-            console.log('4. Kiểm tra JS: Các thuộc tính data-rate* có lấy được giá trị không?');
-=======
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
+
             
             // Kiểm tra sâu hơn vào database và cách fetch dữ liệu
             const eventIdInput = document.querySelector('input[name="eventId"]');
@@ -342,16 +334,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Tạo biểu đồ với kiểu dáng tương tự mockup
         logDebug('Đang tạo biểu đồ phân phối đánh giá với dữ liệu:', displayData);
           try {
-<<<<<<< HEAD
-            // Kiểm tra lần cuối và lấy dữ liệu tốt nhất có thể
-            console.log("=== DỮ LIỆU CUỐI CÙNG CHO BIỂU ĐỒ ===");
-            
-            // Nếu tất cả là 0 nhưng có thông tin từ servlet log chỉ ra có dữ liệu
-            const dataFromServletLog = [0, 1, 1, 1, 1]; // Dữ liệu từ servlet log (5★=0, 4★=1, 3★=1, 2★=1, 1★=1)
-=======
-            console.log("=== DỮ LIỆU CUỐI CÙNG CHO BIỂU ĐỒ ===");
-            const dataFromServletLog = [0, 1, 1, 1, 1];
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
             
             // Nếu displayData toàn số 0 nhưng servlet log có dữ liệu thì sử dụng dữ liệu từ servlet log
             let finalChartData = displayData;
