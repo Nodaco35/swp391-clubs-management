@@ -168,13 +168,20 @@ public class EventParticipantDAO extends DBContext {
     public List<EventParticipation> getEventParticipationByUser(String userID) {
         List<EventParticipation> list = new ArrayList<>();
         String sql = """
-            SELECT e.EventID, e.EventName, c.ClubName, e.EventDate, e.Location, 
-                               ep.Status AS ParticipationStatus, e.Status AS EventStatus
-                        FROM EventParticipants ep
-                        JOIN Events e ON ep.EventID = e.EventID
-                        JOIN Clubs c ON e.ClubID = c.ClubID
-                        WHERE ep.UserID = ?
-                        ORDER BY e.EventDate DESC
+            SELECT 
+                e.EventID, 
+                e.EventName, 
+                c.ClubName, 
+                e.EventDate, 
+                l.LocationName AS Location, 
+                ep.Status AS ParticipationStatus, 
+                e.Status AS EventStatus
+            FROM EventParticipants ep
+            JOIN Events e ON ep.EventID = e.EventID
+            JOIN Clubs c ON e.ClubID = c.ClubID
+            JOIN Locations l ON e.LocationID = l.LocationID
+            WHERE ep.UserID = ?
+            ORDER BY e.EventDate DESC
         """;
 
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
