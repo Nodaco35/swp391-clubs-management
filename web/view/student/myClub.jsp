@@ -28,6 +28,7 @@
                         <li><a href="#notifications" class="text-blue-500 hover:text-blue-700 block py-2 px-4 rounded">Thông Báo Gần Đây</a></li>
                         <li><a href="#calendar" class="text-blue-500 hover:text-blue-700 block py-2 px-4 rounded">Nhiệm vụ của ban</a></li>
                         <li><a href="#upcoming-clubmeeting" class="text-blue-500 hover:text-blue-700 block py-2 px-4 rounded">Cuộc học sắp tới của clb</a></li>
+                        <li><a href="#upcoming-departmentmeeting" class="text-blue-500 hover:text-blue-700 block py-2 px-4 rounded">Cuộc học sắp tới của ban</a></li>
                         <li><a href="#upcoming-events" class="text-blue-500 hover:text-blue-700 block py-2 px-4 rounded">Sự Kiện Sắp Tới</a></li>
                             <c:set var="isLeader" value="false" />
                             <c:forEach items="${userclubs}" var="uc">
@@ -38,9 +39,9 @@
                             <c:if test="${isLeader}">
                             <li><a href="#pending-applications" class="text-blue-500 hover:text-blue-700 block py-2 px-4 rounded">Các Đơn Chờ Duyệt</a></li>
                             <li><a href="#financial-overview" class="text-blue-500 hover:text-blue-700 block py-2 px-4 rounded">Tổng Quan Tài Chính</a></li>
-                            <li><a href="#actions" class="text-blue-500 hover:text-blue-700 block py-2 px-4 rounded">Quản Lý Form</a></li>
-                            </c:if>
 
+                        </c:if>
+                        <li><a href="#actions" class="text-blue-500 hover:text-blue-700 block py-2 px-4 rounded">Quản Lý Form</a></li>
                     </ul>
                 </aside>
             </aside>
@@ -59,12 +60,20 @@
                                 </div>
                             </div>
 
-                            <!-- moiws -->
+
                             <div class="p-4 bg-white rounded-lg shadow-md border border-gray-200 flex items-center">
                                 <i class="fas fa-users text-blue-500 mr-2"></i>
                                 <div>
                                     <p class="text-sm text-gray-600">Số cuộc họp của clb</p>
                                     <p class="text-lg font-semibold text-gray-800">${countUpcomingMeeting} <a href="#upcoming-clubmeeting" ><i class="fa-solid fa-eye"></i></a></p>
+                                </div>
+                            </div>
+
+                            <div class="p-4 bg-white rounded-lg shadow-md border border-gray-200 flex items-center">
+                                <i class="fas fa-users text-blue-500 mr-2"></i>
+                                <div>
+                                    <p class="text-sm text-gray-600">Số cuộc họp trong ban</p>
+                                    <p class="text-lg font-semibold text-gray-800">${countUpcomingDepartmentMeeting} <a href="#upcoming-departmentmeeting" ><i class="fa-solid fa-eye"></i></a></p>
                                 </div>
                             </div>
 
@@ -149,8 +158,7 @@
                     <section id="calendar" class="mb-10">
 
 
-                        <!--                        
-                                                mới-->
+
                         <section class="mb-10">
                             <h2 class="text-3xl font-semibold text-black mb-6">Nhiệm Vụ Của Ban</h2>
                             <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
@@ -169,24 +177,24 @@
                                                     <p class="text-sm text-gray-600">CLB: ${task.clubName}</p>
                                                     <p class="text-sm text-gray-600">Sự kiện: ${task.eventName}</p>
 
-                                            </div>
+                                                </div>
 
-                                            <c:if test="${loop.count % 2 == 1 and loop.last}">
-                                                <div></div>
-                                            </c:if>
-                                        </c:forEach>
+                                                <c:if test="${loop.count % 2 == 1 and loop.last}">
+                                                    <div></div>
+                                                </c:if>
+                                            </c:forEach>
 
 
-                                    </div>
-                                </c:otherwise>
-                            </c:choose>
-                            <c:if test="${isLeader}">
-                                <a href="#" class="mt-5 inline-block text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-full transition" >Tạo nhiệm vụ</a>
-                            </c:if>
-                        </div>
-                    </section>
+                                        </div>
+                                    </c:otherwise>
+                                </c:choose>
+                                <c:if test="${isLeader}">
+                                    <a href="#" class="mt-5 inline-block text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-full transition" >Tạo nhiệm vụ</a>
+                                </c:if>
+                            </div>
+                        </section>
 
-                        <!-- Mới đức -->
+
                         <section id="upcoming-clubmeeting" class="mb-10">
                             <h2 class="text-3xl font-semibold text-black mb-6">Cuộc họp sắp tới của clb</h2>
                             <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
@@ -224,7 +232,55 @@
                                 </c:if>
                             </div>
                         </section>
-                        
+
+
+                        <!-- Mới đức -->
+                        <section id="upcoming-departmentmeeting" class="mb-10">
+                            <h2 class="text-3xl font-semibold text-black mb-6">Cuộc họp sắp tới của ban</h2>
+                            <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+                                <c:choose>
+                                    <c:when test="${empty departmentmeetings}">
+                                        <p class="text-gray-600 text-center py-4">Không có cuộc họp nào.</p>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <c:forEach items="${departmentmeetings}" var="cm" varStatus="loop">
+                                                <div class="bg-white rounded-lg shadow-md p-6 border border-gray-150 hover:shadow-lg transition">
+                                                    <div class="flex items-center gap-6">
+                                                        <img src="${pageContext.request.contextPath}/${cm.clubImg}" alt="${cm.clubName}" class="w-24 h-24 rounded-lg object-cover border-2 border-blue-100">
+                                                        <div>
+                                                            <h3 class="text-xl font-medium text-gray-800">${cm.clubName}</h3>
+                                                            <h2 class="text-xl font-medium text-gray-800"><i class="fas fa-users"></i> ${cm.departmentName}</h2>
+                                                            <p class="text-sm text-gray-600"><i class="fas fa-calendar-alt"></i> ${cm.startedTime}</p>
+
+                                                            <p class="text-sm text-gray-600">
+                                                                Link: <strong><a href="${cm.URLMeeting}" target="_blank" class="text-blue-600 underline">${cm.URLMeeting}</a></strong>
+                                                            </p>                                                    </div>
+                                                    </div>
+                                                </div>
+
+                                                <c:if test="${loop.count % 2 == 1 and loop.last}">
+                                                    <div></div>
+                                                </c:if>
+
+                                            </c:forEach>
+
+
+                                        </div>
+                                    </c:otherwise>
+                                </c:choose>
+                                <c:forEach items="${userclubs}" var="uc">
+                                    <c:if test="${not empty uc and (uc.roleID == 1 || uc.roleID == 3)}">
+                                        <c:set var="isLeaderOrDepartmentLeader" value="true" />
+                                    </c:if>
+
+                                </c:forEach>
+                                <c:if test="${isLeaderOrDepartmentLeader}">
+                                    <a href="#" class="mt-5 inline-block text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-full transition" >Tạo cuộc họp mới</a>
+                                </c:if>
+                            </div>
+                        </section>
+
                         <!-- Upcoming Events -->
                         <section id="upcoming-events" class="mb-10">
                             <h2 class="text-2xl font-bold text-gray-800 mb-4">Sự Kiện Sắp Tới</h2>
@@ -324,42 +380,42 @@
                             </div>
                         </c:if>
 
-                        <c:if test="${isLeader}">
-                            <!-- Existing Actions Section -->
-                            <section id="actions" class="mb-10">
-                                <h2 class="text-2xl font-bold text-gray-800 mb-4">Quản Lý Form</h2>
-                                
-                                <!-- Club selection dropdown -->
-                                <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200 mb-4">
-                                    <h3 class="text-lg font-medium text-gray-800 mb-3">Chọn Câu Lạc Bộ</h3>
-                                    <p class="text-sm text-gray-600 mb-4">Vui lòng chọn câu lạc bộ mà bạn muốn quản lý form:</p>
-                                    
-                                    <div class="relative inline-block w-full md:w-64 mb-4">
-                                        <select id="clubSelector" class="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded-lg shadow leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                            <option value="">-- Chọn câu lạc bộ --</option>
-                                            <c:forEach items="${userclubs}" var="club">
-                                                <option value="${club.clubID}">${club.clubName}</option>
-                                            </c:forEach>
-                                        </select>
-                                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                                            <i class="fas fa-chevron-down"></i>
-                                        </div>
+
+                        <!-- Existing Actions Section -->
+                        <section id="actions" class="mb-10">
+                            <h2 class="text-2xl font-bold text-gray-800 mb-4">Quản Lý Form</h2>
+
+                            <!-- Club selection dropdown -->
+                            <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200 mb-4">
+                                <h3 class="text-lg font-medium text-gray-800 mb-3">Chọn Câu Lạc Bộ</h3>
+                                <p class="text-sm text-gray-600 mb-4">Vui lòng chọn câu lạc bộ mà bạn muốn quản lý form:</p>
+
+                                <div class="relative inline-block w-full md:w-64 mb-4">
+                                    <select id="clubSelector" class="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded-lg shadow leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="">-- Chọn câu lạc bộ --</option>
+                                        <c:forEach items="${userclubs}" var="club">
+                                            <option value="${club.clubID}">${club.clubName}</option>
+                                        </c:forEach>
+                                    </select>
+                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                        <i class="fas fa-chevron-down"></i>
                                     </div>
-                                    
-                                    <div id="formManagementButtons" style="display: none;" class="flex gap-4">
-                                        <a href="#" id="formManagementLink" class="text-white bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded-full transition flex items-center gap-2">
-                                            <i class="fas fa-list-alt"></i> Quản Lý Các Form
-                                        </a>
-                                        <a href="#" id="formBuilderLink" class="text-white bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded-full transition flex items-center gap-2">
-                                            <i class="fas fa-plus"></i> Tạo Form Mới
-                                        </a>
-                                    </div>
-                                                      <p id="noPermissionMessage" class="hidden text-sm text-red-500 mt-2">
-                                        <i class="fas fa-exclamation-circle mr-1"></i> Bạn không có đủ quyền quản lý form trong câu lạc bộ này. Chỉ thành viên có vai trò quản lý mới có thể truy cập.
-                                    </p>
                                 </div>
-                            </section>
-                        </c:if>
+
+                                <div id="formManagementButtons" style="display: none;" class="flex gap-4">
+                                    <a href="#" id="formManagementLink" class="text-white bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded-full transition flex items-center gap-2">
+                                        <i class="fas fa-list-alt"></i> Quản Lý Các Form
+                                    </a>
+                                    <a href="#" id="formBuilderLink" class="text-white bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded-full transition flex items-center gap-2">
+                                        <i class="fas fa-plus"></i> Tạo Form Mới
+                                    </a>
+                                </div>
+                                <p id="noPermissionMessage" class="hidden text-sm text-red-500 mt-2">
+                                    <i class="fas fa-exclamation-circle mr-1"></i> Bạn không có đủ quyền quản lý form trong câu lạc bộ này. Chỉ thành viên có vai trò quản lý mới có thể truy cập.
+                                </p>
+                            </div>
+                        </section>
+
                 </div>
             </main>
 
@@ -369,51 +425,47 @@
     </body>
     <script>
         document.querySelectorAll('.sidebar a').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({behavior: 'smooth'});
-            });
+        anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({behavior: 'smooth'});
         });
-        
+        });
         // Club selection for form management
         const clubSelector = document.getElementById('clubSelector');
         const formManagementButtons = document.getElementById('formManagementButtons');
         const formManagementLink = document.getElementById('formManagementLink');
         const formBuilderLink = document.getElementById('formBuilderLink');
         const noPermissionMessage = document.getElementById('noPermissionMessage');
-          if (clubSelector) {
-            clubSelector.addEventListener('change', function() {
-                const selectedClubId = this.value;
-                  if (selectedClubId) {
-                    // Create array of clubs where user has permission (roleID 1-3)
-                    const permittedClubIds = [
-                        <c:forEach items="${userclubs}" var="club" varStatus="status">
-                            <c:if test="${club.roleID >= 1 && club.roleID <= 3}">${club.clubID}<c:if test="${!status.last}">,</c:if></c:if>
-                        </c:forEach>
-                    ];
-                    
-                    // Check if user has permission for this club
-                    const hasPermission = permittedClubIds.includes(parseInt(selectedClubId));
-                    
-                    if (hasPermission) {
-                        // Show form management buttons if user has permission
-                        formManagementButtons.style.display = 'flex';
-                        noPermissionMessage.classList.add('hidden');
-                        
-                        // Update links with the selected club ID
-                        formManagementLink.href = '${pageContext.request.contextPath}/formManagement?clubId=' + selectedClubId;
-                        formBuilderLink.href = '${pageContext.request.contextPath}/formBuilder?clubId=' + selectedClubId;
-                    } else {
-                        // Show no permission message
-                        formManagementButtons.style.display = 'none';
-                        noPermissionMessage.classList.remove('hidden');
-                    }
-                } else {
-                    // Hide form management buttons when no club is selected
-                    formManagementButtons.style.display = 'none';
-                    noPermissionMessage.classList.add('hidden');
-                }
-            });
+        if (clubSelector) {
+        clubSelector.addEventListener('change', function() {
+        const selectedClubId = this.value;
+        if (selectedClubId) {
+        // Create array of clubs where user has permission (roleID 1-3)
+        const permittedClubIds = [
+        <c:forEach items="${userclubs}" var="club" varStatus="status">
+            <c:if test="${club.roleID >= 1 && club.roleID <= 3}">${club.clubID}<c:if test="${!status.last}">,</c:if></c:if>
+        </c:forEach>
+        ];
+        // Check if user has permission for this club
+        const hasPermission = permittedClubIds.includes(parseInt(selectedClubId));
+        if (hasPermission) {
+        // Show form management buttons if user has permission
+        formManagementButtons.style.display = 'flex';
+        noPermissionMessage.classList.add('hidden');
+        // Update links with the selected club ID
+        formManagementLink.href = '${pageContext.request.contextPath}/formManagement?clubId=' + selectedClubId;
+        formBuilderLink.href = '${pageContext.request.contextPath}/formBuilder?clubId=' + selectedClubId;
+        } else {
+        // Show no permission message
+        formManagementButtons.style.display = 'none';
+        noPermissionMessage.classList.remove('hidden');
+        }
+        } else {
+        // Hide form management buttons when no club is selected
+        formManagementButtons.style.display = 'none';
+        noPermissionMessage.classList.add('hidden');
+        }
+        });
         }
     </script>
 </html>

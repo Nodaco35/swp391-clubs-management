@@ -7,6 +7,7 @@ package controller;
 
 import dal.ClubApplicationDAO;
 import dal.ClubMeetingDAO;
+import dal.DepartmentMeetingDAO;
 import dal.EventsDAO;
 import dal.NotificationDAO;
 import dal.TaskAssignmentDAO;
@@ -23,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import models.ClubApplication;
 import models.ClubMeeting;
+import models.DepartmentMeeting;
 import models.Events;
 import models.Notification;
 import models.TaskAssignment;
@@ -56,7 +58,7 @@ public class MyClubController extends HttpServlet {
             
             EventsDAO ev = new EventsDAO();
 
-            // mới
+            
             int countUpcomingMeeting = ClubMeetingDAO.countByUserID(user.getUserID());
             
             List<Notification> recentNotifications = NotificationDAO.findRecentByUserID(user.getUserID());
@@ -69,7 +71,13 @@ public class MyClubController extends HttpServlet {
 
             List<ClubMeeting> clubmeetings = ClubMeetingDAO.findByUserID(user.getUserID());
             
-
+            //mới
+            int countUpcomingDepartmentMeeting = DepartmentMeetingDAO.countByUID(user.getUserID());
+            List<DepartmentMeeting> departmentmeetings = DepartmentMeetingDAO.findByUserID(user.getUserID());
+            request.setAttribute("countUpcomingDepartmentMeeting", countUpcomingDepartmentMeeting);
+            request.setAttribute("departmentmeetings", departmentmeetings);
+            //
+            
             request.setAttribute("userclubs", userclubs);
             request.setAttribute("recentNotifications", recentNotifications);
             request.setAttribute("upcomingEvents", upcomingEvents);
