@@ -21,8 +21,7 @@
         <!-- Page Header -->
         <div class="page-header">
             <h1><i class="fas fa-clipboard-list"></i>Quản lý Form</h1>
-            <div class="header-actions">
-                <a href="${pageContext.request.contextPath}/formBuilder" class="btn btn-primary">
+            <div class="header-actions">            <a href="${pageContext.request.contextPath}/formBuilder?clubId=${param.clubId}" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Tạo Form Mới
                 </a>
             </div>
@@ -60,8 +59,7 @@
                         <div class="empty-state">
                             <i class="fas fa-inbox"></i>
                             <h3>Chưa có form nào được lưu</h3>
-                            <p>Tạo form mới để bắt đầu thu thập đăng ký từ thành viên.</p>
-                            <a href="${pageContext.request.contextPath}/formBuilder" class="btn btn-primary">
+                            <p>Tạo form mới để bắt đầu thu thập đăng ký từ thành viên.</p>                            <a href="${pageContext.request.contextPath}/formBuilder?clubId=${param.clubId}" class="btn btn-primary">
                                 <i class="fas fa-plus"></i> Tạo Form Đầu Tiên
                             </a>
                         </div>

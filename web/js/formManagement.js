@@ -89,13 +89,15 @@ document.addEventListener("DOMContentLoaded", () => {
   // Get context path for proper URL construction
   const contextPath = window.location.pathname.substring(0, window.location.pathname.indexOf("/", 2)) || ""
   console.log("Context path:", contextPath)
-
   // Edit form
   const editButtons = document.querySelectorAll(".edit-form")
   editButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const templateId = button.getAttribute("data-template-id")
-      window.location.href = `${contextPath}/formBuilder?templateId=${templateId}`
+      // Get clubId from URL parameters
+      const urlParams = new URLSearchParams(window.location.search)
+      const clubId = urlParams.get('clubId')
+      window.location.href = `${contextPath}/formBuilder?templateId=${templateId}&clubId=${clubId}`
     })
   })
   // Publish form
