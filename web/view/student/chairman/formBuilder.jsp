@@ -455,6 +455,7 @@
     <input type="hidden" id="formTitleHidden" name="formTitle">
     <input type="hidden" id="formTypeHidden" name="formType">
     <input type="hidden" id="questionsHidden" name="questions">
+    <input type="hidden" id="clubIdHidden" name="clubId" value="${param.clubId}" />
     <c:if test="${not empty param.templateId}">
         <input type="hidden" name="editingTemplateId" value="${param.templateId}" />
     </c:if>
