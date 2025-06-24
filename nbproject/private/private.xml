@@ -2,28 +2,6 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/controller/AddEventServlet.java</file>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/controller/AdminServlet.java</file>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/controller/ClubsServlet.java</file>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/controller/CreateClubServlet.java</file>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/controller/FormBuilderServlet.java</file>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/controller/FormManagementServlet.java</file>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/controller/MyClubController.java</file>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/web/js/viewFeedback.js</file>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/models/TaskAssignment.java</file>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/dal/ClubCreationPermissionDAO.java</file>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/dal/DBContext.java</file>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/web/view/student/myClub.jsp</file>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/web/view/clubs-page/club-detail.jsp</file>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/filters/AuthFilter.java</file>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/controller/FormResponsesServlet.java</file>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/controller/ChairmanTasksServlet.java</file>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/dal/FormResponseDAO.java</file>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/dal/TaskDAO.java</file>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/nbproject/build-impl.xml</file>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/dal/UserDAO.java</file>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/dal/UserClubDAO.java</file>
-        </group>
+        <group/>
     </open-files>
 </project-private>
