@@ -153,6 +153,10 @@
         <servlet-name>DepartmentMemberServlet</servlet-name>
         <servlet-class>controller.DepartmentMemberServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>DepartmentMeetingServlet</servlet-name>
+        <servlet-class>controller.DepartmentMeetingServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ClubsServlet</servlet-name>
         <url-pattern>/clubs</url-pattern>
@@ -310,6 +314,10 @@
     <servlet-mapping>
         <servlet-name>DepartmentMemberServlet</servlet-name>
         <url-pattern>/department-members</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DepartmentMeetingServlet</servlet-name>
+        <url-pattern>/department-meeting</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>

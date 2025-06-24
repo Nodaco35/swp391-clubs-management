@@ -915,4 +915,28 @@ public class UserClubDAO {
         }
         return userClub;
     }
+    
+    public static List<UserClub> findByCDID(int clubDepartmentID) {
+        List<UserClub> findByCDID = new ArrayList<>();
+        String sql = """
+                     select * from userclubs uc
+                     JOIN clubdepartments cd on uc.ClubDepartmentID = cd.ClubDepartmentID
+                     Join departments d on cd.DepartmentID = d.DepartmentID
+                     where uc.ClubDepartmentID = ?""";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setObject(1, clubDepartmentID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                UserClub uc = new UserClub();
+
+                uc.setUserID(rs.getString("UserID"));
+                uc.setDepartmentName(rs.getString("DepartmentName"));
+                findByCDID.add(uc);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return findByCDID;
+    }
 }
