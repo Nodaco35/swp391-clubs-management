@@ -290,7 +290,7 @@
                                     Xem sự kiện khác
                                 </a>
                                 <c:choose>
-                                    <c:when test="${sessionScope.isChairman == true}">
+                                    <c:when test="${sessionScope.isChairman == true && event.clubID == sessionScope.myClubID}}">
                                         <a href="${pageContext.request.contextPath}/chairman-page/overview" class="btn btn-primary">
                                             <i class="fas fa-crown"></i> MyClub
                                         </a>
