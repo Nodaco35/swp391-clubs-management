@@ -47,12 +47,6 @@
     overflow: hidden;
 }
 
-.event-image {
-    width: 250px;
-    height: 150px;
-    object-fit: cover;
-}
-
 .event-details {
     padding: 15px;
     flex-grow: 1;
