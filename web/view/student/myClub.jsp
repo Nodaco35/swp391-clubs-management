@@ -213,30 +213,45 @@
                                                             <p class="text-sm text-gray-600"><i class="fas fa-calendar-alt"></i> <strong>${cm.startedTime}</strong></p>
                                                             <p class="text-sm text-gray-600">
                                                                 Link: <strong><a href="${cm.URLMeeting}" target="_blank" class="text-blue-600 underline">${cm.URLMeeting}</a></strong>
-                                                            </p>                                                    </div>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mt-4 flex flex-row gap-2">
+                                                        <button
+                                                            class="edit-meeting-btn btn-outline text-gray-700 border border-gray-200 px-2 py-1 rounded hover:bg-gray-100"
+                                                            data-id="${cm.clubMeetingID}"
+                                                            data-clubid="${cm.clubID}"
+                                                            data-url="${cm.URLMeeting}"
+                                                            data-time="${cm.startedTime}">
+                                                            <i class="fas fa-edit"></i> Chỉnh sửa
+                                                        </button>
+                                                        <form action="${pageContext.request.contextPath}/myclub?action=deleteClubMeeting" method="post" style="display:inline;">
+                                                            <input type="hidden" name="clubMeetingId" value="${cm.clubMeetingID}">
+                                                            <button type="submit" class="btn-outline text-gray-700 border border-gray-200 px-2 py-1 rounded hover:bg-gray-100" onclick="return confirm('Bạn có chắc muốn xóa cuộc họp này?')">
+                                                                <i class="fas fa-trash"></i> Xóa
+                                                            </button>
+                                                        </form>
                                                     </div>
                                                 </div>
-
                                                 <c:if test="${loop.count % 2 == 1 and loop.last}">
                                                     <div></div>
                                                 </c:if>
-
                                             </c:forEach>
-
-
                                         </div>
                                     </c:otherwise>
                                 </c:choose>
                                 <c:if test="${isLeader}">
-                                    <a href="myclub?action=createClubMeeting" class="mt-5 inline-block text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-full transition" >Tạo cuộc họp mới</a>
+                                    <a href="myclub?action=createClubMeeting" class="mt-5 inline-block text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-full transition">Tạo cuộc họp mới</a>
                                 </c:if>
                             </div>
                         </section>
 
                         <!-- Form tạo cuộc họp mới - ẩn ban đầu -->
                         <div id="createMeetingForm" class="mt-6 bg-gray-50 p-6 rounded-lg border border-gray-300 hidden">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Tạo Cuộc Họp Mới</h3>
+
                             <form action="${pageContext.request.contextPath}/myclub?action=submitCreateMeeting" method="POST">
+                                <h3 id="formTitle" class="text-lg font-semibold text-gray-800 mb-4">Tạo Cuộc Họp Mới</h3>
+                                <input type="hidden" id="meetingIdInput" name="clubMeetingId" />
                                 <div class="mb-4">
                                     <label for="clubId" class="block text-sm font-medium text-gray-700">Chọn Câu Lạc Bộ</label>
                                     <select id="clubId" name="clubId" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
@@ -258,7 +273,6 @@
                                 <button type="button" id="cancelMeetingForm" class="ml-2 bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Hủy</button>
                             </form>
                         </div>
-
 
                         <!-- Mới đức -->
                         <section id="upcoming-departmentmeeting" class="mb-10">
@@ -295,15 +309,7 @@
                                         </div>
                                     </c:otherwise>
                                 </c:choose>
-                                <c:forEach items="${userclubs}" var="uc">
-                                    <c:if test="${not empty uc and (uc.roleID == 1 || uc.roleID == 3)}">
-                                        <c:set var="isLeaderOrDepartmentLeader" value="true" />
-                                    </c:if>
-
-                                </c:forEach>
-                                <c:if test="${isLeaderOrDepartmentLeader}">
-                                    <a href="#" class="mt-5 inline-block text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-full transition" >Tạo cuộc họp mới</a>
-                                </c:if>
+                                
                             </div>
                         </section>
 
@@ -385,7 +391,7 @@
 
 
 
-                       
+
 
 
                         <!-- Existing Actions Section -->
@@ -480,18 +486,56 @@
         const createBtn = document.querySelector('a[href="myclub?action=createClubMeeting"]');
         const createForm = document.getElementById('createMeetingForm');
         const cancelBtn = document.getElementById('cancelMeetingForm');
+        const formTitle = document.getElementById('formTitle');
+        const meetingIdInput = document.getElementById('meetingIdInput');
+        const clubSelect = document.getElementById('clubId');
+        const meetingTimeInput = document.getElementById('meetingTime');
+        const meetingLinkInput = document.getElementById('meetingLink');
+        const formElement = createForm.querySelector('form');
+        // Tạo mới
         if (createBtn && createForm) {
         createBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        createForm.classList.toggle('hidden');
+        // Reset trạng thái về "Tạo"
+        formTitle.textContent = 'Tạo Cuộc Họp Mới';
+        formElement.action = '${pageContext.request.contextPath}/myclub?action=submitCreateMeeting';
+        meetingIdInput.value = '';
+        meetingTimeInput.value = '';
+        meetingLinkInput.value = '';
+        clubSelect.selectedIndex = 0;
+        createForm.classList.remove('hidden');
+        createForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
         }
 
-        if (cancelBtn) {
+        // Hủy
+        if (cancelBtn && createForm) {
         cancelBtn.addEventListener('click', () => {
         createForm.classList.add('hidden');
         });
         }
+
+        // Chỉnh sửa
+        document.querySelectorAll('.edit-meeting-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const meetingId = btn.getAttribute('data-id');
+        const clubId = btn.getAttribute('data-clubid');
+        const startedTime = btn.getAttribute('data-time');
+        const meetingURL = btn.getAttribute('data-url');
+        formTitle.textContent = 'Chỉnh sửa Cuộc Họp';
+        meetingIdInput.value = meetingId;
+        meetingTimeInput.value = startedTime;
+        meetingLinkInput.value = meetingURL;
+       
+        [...clubSelect.options].forEach(option => {
+        option.selected = option.value === clubId;
+        });
+        formElement.action = '${pageContext.request.contextPath}/myclub?action=submitUpdateMeeting';
+        createForm.classList.remove('hidden');
+        createForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        });
         });
 
 

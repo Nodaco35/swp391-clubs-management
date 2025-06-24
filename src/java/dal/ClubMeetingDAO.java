@@ -83,6 +83,42 @@ public class ClubMeetingDAO {
         }
        
     }
+    
+     public static void update(int clubID, String startedTime, String URLMeeting, int clubMeetingID) {
+        String sql = """
+                     UPDATE `clubmanagementsystem`.`clubmeeting`
+                     SET
+                     
+                     `ClubID` = ?,
+                     `URLMeeting` = ?,
+                     `StartedTime` = ?
+                     WHERE `ClubMeetingID` = ?;""";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setObject(1, clubID);
+            ps.setObject(3, startedTime);
+            ps.setObject(2, URLMeeting);
+            ps.setObject(4, clubMeetingID);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+    }
+
+    public static void delete(int clubMeetingID) {
+        String sql = """
+                     DELETE FROM `clubmanagementsystem`.`clubmeeting`
+                     WHERE ClubMeetingID = ?;""";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setObject(1, clubMeetingID);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+    }
 }
 
 

@@ -19,35 +19,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import com.google.gson.Gson;
 
 /**
  *
  * @author Vinh
  */
 public class ViewFeedbackServlet extends HttpServlet {
-   
-    private static final Logger LOGGER = Logger.getLogger(ViewFeedbackServlet.class.getName());
-    // Lưu trữ thời điểm cập nhật cuối cùng cho mỗi event
-    private static final Map<Integer, Long> lastUpdateTimeMap = new HashMap<>();
-    // Lưu trữ số lượng phản hồi cuối cùng cho mỗi sự kiện
-    private static final Map<Integer, Integer> lastFeedbackCountMap = new HashMap<>();
-      @Override
+     private static final Logger LOGGER = Logger.getLogger(ViewFeedbackServlet.class.getName());@Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
+        // Đảm bảo mã hóa UTF-8 cho cả request và response
+        request.setCharacterEncoding("UTF-8");
         response.setContentType("text/html;charset=UTF-8");
+        response.setCharacterEncoding("UTF-8");
         
         // Thêm headers để ngăn trình duyệt cache
         response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         response.setHeader("Pragma", "no-cache");
         response.setDateHeader("Expires", 0);
         
+        
         try {
-            // Khởi tạo DAO objects
             FeedbackDAO feedbackDAO = new FeedbackDAO();
             
-            // Kiểm tra đăng nhập
             HttpSession session = request.getSession();
             Users user = (Users) session.getAttribute("user");
             
@@ -63,13 +58,6 @@ public class ViewFeedbackServlet extends HttpServlet {
                 return;
             }
             
-            // Xử lý yêu cầu kiểm tra cập nhật mới qua AJAX
-            String checkUpdates = request.getParameter("checkUpdates");
-            if ("true".equals(checkUpdates)) {
-                handleCheckUpdates(request, response, eventIdStr);
-                return;
-            }
-            
             try {
                 int eventId = Integer.parseInt(eventIdStr);
                 
@@ -78,7 +66,7 @@ public class ViewFeedbackServlet extends HttpServlet {
                 Events event = eventDAO.getEventByID(eventId);
                 
                 if (event == null) {
-                    LOGGER.log(Level.SEVERE, "Không tìm thấy sự kiện có ID: {0}. Không thể tiếp tục mà không có dữ liệu sự kiện.", eventId);
+                    LOGGER.log(Level.SEVERE, "Cannot find event with ID: {0}. Cannot continue", eventId);
                     response.sendRedirect(request.getContextPath() + "/events-page?error=event_not_found");
                     return;
                 }
@@ -95,35 +83,29 @@ public class ViewFeedbackServlet extends HttpServlet {
                 }
                 
                 // Lấy danh sách feedback của sự kiện
-                List<Feedback> feedbacks = new ArrayList<>();
+                List<Feedback> feedbacks = new ArrayList<>();                
                 try {
-                    LOGGER.log(Level.INFO, "Đang lấy phản hồi cho sự kiện có ID: {0}", eventId);
                     feedbacks = feedbackDAO.getFeedbacksByEventID(eventId);
                     if (feedbacks == null) {
-                        LOGGER.log(Level.WARNING, "getFeedbacksByEventID trả về null, sử dụng danh sách trống thay thế");
+                        LOGGER.log(Level.WARNING, "getFeedbacksByEventID return null");
                         feedbacks = new ArrayList<>();
                     } else {
-                        LOGGER.log(Level.INFO, "Got {0} feedback items for event ID: {1}", 
+                        LOGGER.log(Level.INFO, "Lấy được {0} phản hồi cho sự kiện ID: {1}", 
                             new Object[]{feedbacks.size(), eventId});
-                        
-                        // Lưu số lượng feedback vào map
-                        lastFeedbackCountMap.put(eventId, feedbacks.size());
                     }
                 } catch (Exception e) {
                     LOGGER.log(Level.SEVERE, "Error getting feedbacks for event: " + eventId, e);
                     feedbacks = new ArrayList<>();
                 }
-                
-                // Tính toán thống kê
-                Feedback statistics = null;
+                  // Tính toán thống kê
+                Feedback statistics = null;                
                 try {
-                    LOGGER.log(Level.INFO, "Calculating statistics for event ID: {0}", eventId);
                     statistics = feedbackDAO.getEventFeedbackStatistics(eventId);
                     if (statistics == null) {
                         LOGGER.log(Level.WARNING, "getEventFeedbackStatistics returned null for event ID: {0}", eventId);
-                        request.setAttribute("debugError", "Statistics calculation returned null");
+                        request.setAttribute("debugError", "Tính toán thống kê trả về null");
                     } else {
-                        LOGGER.log(Level.INFO, "Statistics for event ID {0}: Rating={1}, Q1={2}, Q2={3}, Q3={4}, Q4={5}, Q5={6}", 
+                        LOGGER.log(Level.INFO, "Statistic for event ID {0}: Rating={1}, Q1={2}, Q2={3}, Q3={4}, Q4={5}, Q5={6}", 
                             new Object[]{
                                 eventId, 
                                 statistics.getRating(), 
@@ -135,9 +117,9 @@ public class ViewFeedbackServlet extends HttpServlet {
                             });
                     }
                 } catch (Exception e) {
-                    LOGGER.log(Level.SEVERE, "Error getting statistics for event: {0}", new Object[]{eventId});
-                    LOGGER.log(Level.SEVERE, "Exception details", e);
-                    request.setAttribute("debugError", "Error getting statistics: " + e.getMessage());
+                    LOGGER.log(Level.SEVERE, "Error getting statistics for event {0}", new Object[]{eventId});
+                    LOGGER.log(Level.SEVERE, "Chi tiết lỗi", e);
+                    request.setAttribute("debugError", "Lỗi khi lấy thống kê: " + e.getMessage());
                 }
                 
                 // Tính phân phối đánh giá
@@ -156,22 +138,18 @@ public class ViewFeedbackServlet extends HttpServlet {
                                 // Lấy giá trị hiện tại và cộng thêm 1
                                 Integer currentCount = ratingDistribution.get(rating);
                                 if (currentCount == null) {
-                                    currentCount = 0; // Đảm bảo không có null
+                                    currentCount = 0;
                                 }
                                 ratingDistribution.put(rating, currentCount + 1);
                             } else {
                                 LOGGER.log(Level.WARNING, "Invalid rating value found: {0} for feedback ID: {1}", 
                                     new Object[]{rating, feedback.getFeedbackID()});
-                            }
-                        } catch (Exception e) {
-                            // Bỏ qua các feedback không hợp lệ
+                            }                        } catch (Exception e) {
                             LOGGER.log(Level.WARNING, "Error processing feedback rating: {0}", e.getMessage());
-                            request.setAttribute("ratingError", "Error processing ratings: " + e.getMessage());
                         }
                     }
                 }
                 
-                // Kiểm tra và log phân phối đánh giá (đảm bảo không có null)
                 for (int i = 1; i <= 5; i++) {
                     if (ratingDistribution.get(i) == null) {
                         ratingDistribution.put(i, 0);
@@ -187,17 +165,12 @@ public class ViewFeedbackServlet extends HttpServlet {
                                 new Object[]{i, value});
                             ratingDistribution.put(i, 0);
                         }
-                        
-                        // Log kiểu dữ liệu thực tế
-                        LOGGER.log(Level.INFO, "Rating {0} stars: Value={1}, Type={2}", 
-                            new Object[]{i, ratingDistribution.get(i), ratingDistribution.get(i).getClass().getName()});
-                    } catch (Exception e) {
+                                      } catch (Exception e) {
                         LOGGER.log(Level.SEVERE, "Error validating rating value for {0} stars", i);
                         ratingDistribution.put(i, 0); // Đảm bảo có giá trị mặc định
                     }
                 }
-                
-                // Log phân phối đánh giá để debug
+                  // Log tổng quan phân phối đánh giá
                 LOGGER.log(Level.INFO, "Rating distribution: 5★={0}, 4★={1}, 3★={2}, 2★={3}, 1★={4}", 
                     new Object[]{
                         ratingDistribution.get(5),
@@ -207,25 +180,30 @@ public class ViewFeedbackServlet extends HttpServlet {
                         ratingDistribution.get(1)
                     });
                 
-                // Đặt attribute debug để hiển thị trên trang
+                // Thêm attribute debug để hiển thị trên trang
                 request.setAttribute("ratingDebug", String.format("5★=%d, 4★=%d, 3★=%d, 2★=%d, 1★=%d",
                     ratingDistribution.get(5),
                     ratingDistribution.get(4),
                     ratingDistribution.get(3),
                     ratingDistribution.get(2),
                     ratingDistribution.get(1)));
+                  // Kiểm tra nếu client yêu cầu dữ liệu JSON
+                String format = request.getParameter("format");
+                if ("json".equalsIgnoreCase(format)) {
+                    // Xử lý request dạng JSON API
+                    handleJsonRequest(request, response, ratingDistribution, statistics, feedbacks.size());
+                    return; // Không tiếp tục forward sang JSP
+                }
                 
+
                 // Đặt dữ liệu vào request
                 request.setAttribute("event", event);
                 request.setAttribute("feedbacks", feedbacks);
                 request.setAttribute("statistics", statistics);
                 request.setAttribute("ratingDistribution", ratingDistribution);
                 request.setAttribute("feedbackCount", feedbacks.size());
+                  // Đã xóa đoạn lưu thời gian cập nhật
                 
-                // Lưu trữ thời gian cập nhật cho event này
-                lastUpdateTimeMap.put(eventId, System.currentTimeMillis());
-                
-                // Forward đến trang JSP để hiển thị
                 request.getRequestDispatcher("/view/student/chairman/viewFeedback.jsp").forward(request, response);
                 
             } catch (NumberFormatException e) {
@@ -233,7 +211,6 @@ public class ViewFeedbackServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/events-page");
             }
         } catch (Exception e) {
-            // Xử lý tất cả các ngoại lệ khác
             LOGGER.log(Level.SEVERE, "Unexpected error in ViewFeedbackServlet", e);
         }
     } 
@@ -246,104 +223,63 @@ public class ViewFeedbackServlet extends HttpServlet {
     throws ServletException, IOException {
         doGet(request, response);
     }
-
-    /**
-     * Xử lý yêu cầu kiểm tra cập nhật mới từ AJAX
-     */
-    private void handleCheckUpdates(HttpServletRequest request, HttpServletResponse response, String eventIdStr) 
-    throws ServletException, IOException {
-        LOGGER.log(Level.INFO, "Đang xử lý yêu cầu kiểm tra cập nhật cho event ID: {0}", eventIdStr);
-        
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        
-        PrintWriter out = response.getWriter();
-        
-        try {
-            int eventId = Integer.parseInt(eventIdStr);
-            FeedbackDAO feedbackDAO = new FeedbackDAO();
-            
-            // Lấy số lượng feedback hiện tại
-            List<Feedback> currentFeedbacks = feedbackDAO.getFeedbacksByEventID(eventId);
-            int currentCount = (currentFeedbacks != null) ? currentFeedbacks.size() : 0;
-            
-            // Lấy số lượng feedback lần cuối đã biết
-            Integer lastKnownCount = lastFeedbackCountMap.get(eventId);
-            if (lastKnownCount == null) {
-                lastKnownCount = 0;
-            }
-            
-            // Kiểm tra xem có cập nhật mới không
-            boolean hasNewFeedback = currentCount > lastKnownCount;
-            LOGGER.log(Level.INFO, "Check Updates: EventID={0}, Current Count={1}, Last Known Count={2}, Has New={3}",
-                new Object[]{eventId, currentCount, lastKnownCount, hasNewFeedback});
-            
-            // Cập nhật số lượng feedback mới nhất
-            lastFeedbackCountMap.put(eventId, currentCount);
-            
-            // Tạo response JSON (sử dụng chuỗi thay vì thư viện JSON)
-            StringBuilder jsonBuilder = new StringBuilder();
-            jsonBuilder.append("{");
-            jsonBuilder.append("\"hasUpdates\":").append(hasNewFeedback).append(",");
-            jsonBuilder.append("\"currentFeedbackCount\":").append(currentCount).append(",");
-            jsonBuilder.append("\"previousFeedbackCount\":").append(lastKnownCount).append(",");
-            jsonBuilder.append("\"timestamp\":").append(System.currentTimeMillis());
-            
-            if (hasNewFeedback) {
-                // Nếu có cập nhật mới, tính toán lại phân phối đánh giá và thêm vào response
-                Map<Integer, Integer> newRatingDistribution = new HashMap<>();
-                
-                // Khởi tạo tất cả các giá trị là 0
-                for (int i = 1; i <= 5; i++) {
-                    newRatingDistribution.put(i, 0);
-                }
-                
-                // Tính toán phân phối đánh giá mới
-                if (currentFeedbacks != null && !currentFeedbacks.isEmpty()) {
-                    for (Feedback feedback : currentFeedbacks) {
-                        int rating = feedback.getRating();
-                        if (rating >= 1 && rating <= 5) {
-                            Integer currentValue = newRatingDistribution.get(rating);
-                            newRatingDistribution.put(rating, currentValue + 1);
-                        }
-                    }
-                }
-                
-                // Thêm phân phối đánh giá mới vào response
-                jsonBuilder.append(",\"ratingDistribution\":{");
-                for (int i = 1; i <= 5; i++) {
-                    jsonBuilder.append("\"").append(i).append("\":").append(newRatingDistribution.get(i));
-                    if (i < 5) {
-                        jsonBuilder.append(",");
-                    }
-                }
-                jsonBuilder.append("}");
-                
-                // Thêm thông tin thống kê tổng quan nếu có
-                Feedback statistics = feedbackDAO.getEventFeedbackStatistics(eventId);
-                if (statistics != null) {
-                    jsonBuilder.append(",\"statistics\":{");
-                    jsonBuilder.append("\"averageRating\":").append(statistics.getRating());
-                    jsonBuilder.append("}");
-                }
-            }
-            
-            jsonBuilder.append("}");
-            out.print(jsonBuilder.toString());
-            
-        } catch (NumberFormatException e) {
-            LOGGER.log(Level.WARNING, "Invalid eventId for checkUpdates: " + eventIdStr, e);
-            out.print("{\"error\":\"Invalid event ID\"}");
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error checking for updates", e);
-            out.print("{\"error\":\"Internal server error\"}");
-        }
-        
-        out.flush();
-    }
+    
+    // Đã xóa phương thức handleCheckUpdates không cần thiết
 
     @Override
     public String getServletInfo() {
         return "ViewFeedbackServlet - Hiển thị các feedback của một sự kiện";
+    }
+
+    /**
+     * API endpoint để trả về dữ liệu phân phối đánh giá dưới dạng JSON
+     * URI: /view-feedback?eventId=X&format=json
+     */
+    private void handleJsonRequest(HttpServletRequest request, HttpServletResponse response, 
+            Map<Integer, Integer> ratingDistribution, Feedback statistics, int feedbackCount) 
+            throws IOException {
+        // Thiết lập response type là JSON
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        
+        // Tạo đối tượng chứa dữ liệu trả về
+        Map<String, Object> jsonData = new HashMap<>();
+        
+        Map<String, Integer> ratingData = new HashMap<>();
+        ratingData.put("rate5", ratingDistribution.get(5));
+        ratingData.put("rate4", ratingDistribution.get(4));
+        ratingData.put("rate3", ratingDistribution.get(3));
+        ratingData.put("rate2", ratingDistribution.get(2));
+        ratingData.put("rate1", ratingDistribution.get(1));
+        
+        // Thêm vào đối tượng JSON chính
+        jsonData.put("ratingDistribution", ratingData);
+        jsonData.put("feedbackCount", feedbackCount);
+        
+        // Thêm thông tin thống kê nếu có
+        if (statistics != null) {
+            Map<String, Object> statsData = new HashMap<>();
+            statsData.put("averageRating", statistics.getRating());
+            statsData.put("q1Organization", statistics.getQ1Organization());
+            statsData.put("q2Communication", statistics.getQ2Communication());
+            statsData.put("q3Support", statistics.getQ3Support());
+            statsData.put("q4Relevance", statistics.getQ4Relevance());
+            statsData.put("q5Welcoming", statistics.getQ5Welcoming());
+            statsData.put("q6Value", statistics.getQ6Value());
+            statsData.put("q7Timing", statistics.getQ7Timing());
+            statsData.put("q8Participation", statistics.getQ8Participation());
+            statsData.put("q9WillingnessToReturn", statistics.getQ9WillingnessToReturn());
+            
+            jsonData.put("statistics", statsData);
+        }
+        
+        // Chuyển đối tượng thành chuỗi JSON và gửi về client
+        Gson gson = new Gson();
+        String jsonResponse = gson.toJson(jsonData);
+        
+        // Ghi response
+        PrintWriter out = response.getWriter();
+        out.print(jsonResponse);
+        out.flush();
     }
 }

@@ -280,6 +280,54 @@ body {
     padding: 1.5rem;
 }
 
+/* Search and Filter Section Enhanced */
+.form-select {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
+}
+
+.form-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-select:hover {
+    border-color: #3b82f6;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+.form-select option {
+    padding: 0.5rem;
+}
+
+/* Filter and Sort Controls */
+.filter-controls {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 120px;
+}
+
+.filter-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
 /* Info Card */
 .info-item {
     display: flex;
@@ -503,6 +551,65 @@ body {
     background: #f9fafb;
 }
 
+/* Sort Animation */
+.table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.sorting {
+    opacity: 1;
+    transform: none;
+}
+
+/* Status Badge Styles */
+.badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+}
+
+.badge.bg-success {
+    background-color: rgba(45, 193, 85, 0.9) !important;
+}
+
+.badge.bg-secondary {
+    background-color: rgba(108, 117, 125, 0.9) !important;
+}
+
+/* Sortable Column Styles */
+.sortable {
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    position: relative;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.sortable:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.sortable i.fa-sort {
+    opacity: 0.3;
+    font-size: 0.8em;
+    vertical-align: middle;
+}
+
+.sortable i.fa-sort-up,
+.sortable i.fa-sort-down {
+    opacity: 0.8;
+    font-size: 0.8em;
+    vertical-align: middle;
+}
+
+.sort-active {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
     .dashboard-cards {
@@ -713,4 +820,98 @@ body {
 .notification.info {
     background: linear-gradient(135deg, #3b82f6, #1d4ed8);
     color: white;
+}
+
+/* Member Detail Styles */
+.member-info {
+    color: #333;
+}
+
+#memberDetailModal .badge {
+    font-size: 0.85rem;
+    padding: 0.5em 0.85em;
+}
+
+#memberDetailModal .avatar-container {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 15px;
+}
+
+#memberDetailModal .avatar-container img {
+    border: 4px solid #fff;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+#memberDetailModal .avatar-container img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+#memberDetailModal .table th {
+    font-weight: 500;
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+/* Task list styles */
+#memberDetailTasksBody tr td:first-child {
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Role and status badges */
+#memberDetailModal .role-badge {
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+/* Progress bar styling */
+#memberDetailModal .progress {
+    height: 8px;
+    background-color: rgba(0, 0, 0, 0.05);
+    margin-top: 5px;
+}
+
+/* Task statistics styling */
+#memberDetailModal .task-stats {
+    transition: all 0.2s ease;
+    border-radius: 10px;
+}
+
+#memberDetailModal .task-stats:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* Additional styling for empty task state */
+#memberDetailEmptyTasks {
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+#memberDetailEmptyTasks:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* User info styling */
+#memberDetailModal .member-info i {
+    width: 18px;
+    text-align: center;
+}
+
+/* Last activity styling */
+#memberDetailLastActivity {
+    background-color: rgba(0, 0, 0, 0.02);
+    padding: 8px 12px;
+    border-radius: 6px;
+    display: inline-block;
+    margin-top: 5px;
+    transition: all 0.2s ease;
+}
+
+#memberDetailLastActivity:hover {
+    background-color: rgba(0, 0, 0, 0.04);
 }

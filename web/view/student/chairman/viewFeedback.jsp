@@ -17,13 +17,10 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/viewFeedback.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<<<<<<< HEAD
-=======
-
     <!-- Thêm event ID làm meta tag để giúp debug JS -->
     <meta name="eventId" content="${param.eventId}">
 
-    <!-- Script debug cho ratingDistribution -->
+    <!--debug cho ratingDistribution -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // In chi tiết về object ratingDistribution
@@ -39,7 +36,6 @@
     </script>
 
 
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
 </head>
 <body>
     <jsp:include page="/view/events-page/header.jsp" />
@@ -160,95 +156,64 @@
                                 <span class="legend-color" style="background-color: #2e7d32;"></span>
                                 <span class="legend-text">5 sao - Rất hài lòng</span>
                             </div>
+                        </div>                          <!-- Hiển thị trạng thái loading -->
+                        <div id="chartLoadingState" class="chart-loading-state">
+                            <div class="loading-spinner">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                            <div class="loading-text">Đang tải dữ liệu biểu đồ...</div>
                         </div>
-                        <canvas id="ratingDistributionChart" 
-<<<<<<< HEAD
-                            data-rate5="<c:out value="${ratingDistribution[5]}" default="0"/>"
-                            data-rate4="<c:out value="${ratingDistribution[4]}" default="0"/>"
-                            data-rate3="<c:out value="${ratingDistribution[3]}" default="0"/>"
-                            data-rate2="<c:out value="${ratingDistribution[2]}" default="0"/>"
-                            data-rate1="<c:out value="${ratingDistribution[1]}" default="0"/>"
-                            data-debug="5★=${ratingDistribution[5]}, 4★=${ratingDistribution[4]}, 3★=${ratingDistribution[3]}, 2★=${ratingDistribution[2]}, 1★=${ratingDistribution[1]}"></canvas>
-
-                        <!-- Dữ liệu đánh giá trực tiếp từ Java - Sử dụng JSTL -->
-                        <script>
-                            // Dữ liệu đánh giá truyền trực tiếp từ JSP sang JS
-                            window.ratingDistributionDirectData = {
-                                rate5: "${ratingDistribution[5]}",
-                                rate4: "${ratingDistribution[4]}",
-                                rate3: "${ratingDistribution[3]}",
-                                rate2: "${ratingDistribution[2]}",
-                                rate1: "${ratingDistribution[1]}"
-                            };
-                            console.log("Dữ liệu trực tiếp từ JSP JSTL:", window.ratingDistributionDirectData);
-                            
-                            // Chuyển đổi thành số
-                            window.ratingDistributionDirectDataNumbers = {
-                                rate5: parseInt(window.ratingDistributionDirectData.rate5 || "0", 10),
-                                rate4: parseInt(window.ratingDistributionDirectData.rate4 || "0", 10),
-                                rate3: parseInt(window.ratingDistributionDirectData.rate3 || "0", 10),
-                                rate2: parseInt(window.ratingDistributionDirectData.rate2 || "0", 10),
-                                rate1: parseInt(window.ratingDistributionDirectData.rate1 || "0", 10)
-                            };
-                            console.log("Dữ liệu số từ JSP JSTL:", window.ratingDistributionDirectDataNumbers);
-=======
-                            data-rate5="${ratingDistribution.get(5)}" 
-                            data-rate4="${ratingDistribution.get(4)}" 
-                            data-rate3="${ratingDistribution.get(3)}" 
-                            data-rate2="${ratingDistribution.get(2)}" 
-                            data-rate1="${ratingDistribution.get(1)}">
-                        </canvas>
                         
-                        <!-- Truyền dữ liệu qua JavaScript trực tiếp thay vì data-attribute -->
-                        <script>
-                            // Cách thiết lập dữ liệu thủ công để đảm bảo giá trị chính xác
-                            window.ratingDistributionData = {
-                                rate5: parseInt("${ratingDistribution.get(5)}", 10) || 0,
-                                rate4: parseInt("${ratingDistribution.get(4)}", 10) || 0,
-                                rate3: parseInt("${ratingDistribution.get(3)}", 10) || 0,
-                                rate2: parseInt("${ratingDistribution.get(2)}", 10) || 0,
-                                rate1: parseInt("${ratingDistribution.get(1)}", 10) || 0
-                            };
-                            
-                            // Log các giá trị để kiểm tra
-                            console.log("Truyền dữ liệu trực tiếp vào JavaScript: ", window.ratingDistributionData);
-                        </script>
+                        <!-- Hiển thị trạng thái lỗi -->
+                        <div id="chartErrorState" class="chart-error-state" style="display: none;">
+                            <div class="error-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="error-message">Không thể tải dữ liệu biểu đồ</div>
+                            <button class="retry-button" onclick="retryLoadData()">Thử lại</button>
+                        </div>
+
+                        <!-- Container cho biểu đồ -->
+                        <div id="chartContainer" style="display: none;">
+                            <canvas id="ratingDistributionChart"></canvas>
+                        </div>
+                        
+                        <!-- Debug Panel -->
+                        <div class="debug-panel" style="margin-top: 10px; display: none;">
+                            <details>
+                                <summary style="cursor: pointer;">Debug Info</summary>
+                                <div id="debugOutput" class="debug-output" style="background: #f5f5f5; padding: 10px; border: 1px solid #ddd; margin-top: 5px; font-family: monospace; white-space: pre-wrap;"></div>
+                            </details>
+                        </div>
 
                         
                         <script>
-                            // Mặc định là true, sẽ được cập nhật trong JS dựa trên dữ liệu thực tế
+                              // Mặc định là true, sẽ được cập nhật trong JS dựa trên dữ liệu thực tế
                             window.shouldDisplayCharts = true;
-                            
-                            console.log("Dữ liệu phân phối đánh giá raw từ backend (get + containsKey):", {
-                                rate5: "${ratingDistribution.containsKey(5) ? ratingDistribution.get(5) : 'Key không tồn tại'}",
-                                rate4: "${ratingDistribution.containsKey(4) ? ratingDistribution.get(4) : 'Key không tồn tại'}",
-                                rate3: "${ratingDistribution.containsKey(3) ? ratingDistribution.get(3) : 'Key không tồn tại'}",
-                                rate2: "${ratingDistribution.containsKey(2) ? ratingDistribution.get(2) : 'Key không tồn tại'}",
-                                rate1: "${ratingDistribution.containsKey(1) ? ratingDistribution.get(1) : 'Key không tồn tại'}"
-                            });
                             
                             // Thêm debug type của ratingDistribution
                             console.log("Kiểu dữ liệu ratingDistribution: ${ratingDistribution.getClass().getName()}");
                             
-                            // Kiểm tra dữ liệu JSON được tạo
+                            // Debug thông tin tổng hợp
+                            console.log("Thông tin tổng hợp:", {
+                                feedbackCount: "${feedbackCount}",
+                                hasData: "${feedbackCount > 0}",
+                                hasRatingDistribution: "${not empty ratingDistribution}",
+                                statisticsNotNull: "${statistics != null}"
+                            });
+                            
+                            // Debug biến toàn cục
                             document.addEventListener('DOMContentLoaded', function() {
-                                console.log("JSON data-distribution:", document.getElementById("ratingDistributionChart").getAttribute("data-distribution"));
-                                console.log("Debug attribute:", document.getElementById("ratingDistributionChart").getAttribute("data-debug"));
+                                console.log("Dữ liệu từ biến window.ratingDistributionData (DOMContentLoaded):", window.ratingDistributionData);
                                 
-                                // Debug thông tin tổng hợp
-                                console.log("Thông tin tổng hợp:", {
-                                    feedbackCount: "${feedbackCount}",
-                                    hasData: "${feedbackCount > 0}",
-                                    hasRatingDistribution: "${not empty ratingDistribution}",
-                                    statisticsNotNull: "${statistics != null}"
-                                });
-                                    // Debug biến toàn cục mới tạo
-                                    console.log("Dữ liệu từ biến window.ratingDistributionData:", window.ratingDistributionData);
-                                } catch(e) {
-                                    console.error("Lỗi debug thuộc tính:", e);
+                                // Kiểm tra xem JSON có đúng định dạng không
+                                const jsonElement = document.getElementById('ratingDataJson');
+                                if (jsonElement) {
+                                    console.log("Nội dung JSON script raw:", jsonElement.textContent.trim());
+                                } else {
+                                    console.error("Không tìm thấy phần tử JSON script");
                                 }
                             });
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
                         </script>
                     </div>
                 </div>
@@ -278,20 +243,34 @@
                                 <span class="legend-color" style="background-color: #2e7d32;"></span>
                                 <span class="legend-text">Rất hài lòng</span>
                             </div>
-                        </div>
-                        <canvas id="detailedRatingChart" 
-                            data-criteria='{
-                                "q1Organization": ${statistics.q1Organization != null ? statistics.q1Organization : 0},
-                                "q2Communication": ${statistics.q2Communication != null ? statistics.q2Communication : 0},
-                                "q3Support": ${statistics.q3Support != null ? statistics.q3Support : 0},
-                                "q4Relevance": ${statistics.q4Relevance != null ? statistics.q4Relevance : 0},
-                                "q5Welcoming": ${statistics.q5Welcoming != null ? statistics.q5Welcoming : 0},
-                                "q6Value": ${statistics.q6Value != null ? statistics.q6Value : 0},
-                                "q7Timing": ${statistics.q7Timing != null ? statistics.q7Timing : 0},
-                                "q8Participation": ${statistics.q8Participation != null ? statistics.q8Participation : 0},
-                                "q9WillingnessToReturn": ${statistics.q9WillingnessToReturn != null ? statistics.q9WillingnessToReturn : 0}
-                            }'>
-                        </canvas>
+                        </div>                        <!-- Sử dụng script type="application/json" cho dữ liệu chi tiết -->
+                        <script type="application/json" id="detailedRatingData">
+                        {
+                            "q1Organization": ${statistics.q1Organization != null ? statistics.q1Organization : 0},
+                            "q2Communication": ${statistics.q2Communication != null ? statistics.q2Communication : 0},
+                            "q3Support": ${statistics.q3Support != null ? statistics.q3Support : 0},
+                            "q4Relevance": ${statistics.q4Relevance != null ? statistics.q4Relevance : 0},
+                            "q5Welcoming": ${statistics.q5Welcoming != null ? statistics.q5Welcoming : 0},
+                            "q6Value": ${statistics.q6Value != null ? statistics.q6Value : 0},
+                            "q7Timing": ${statistics.q7Timing != null ? statistics.q7Timing : 0},
+                            "q8Participation": ${statistics.q8Participation != null ? statistics.q8Participation : 0},
+                            "q9WillingnessToReturn": ${statistics.q9WillingnessToReturn != null ? statistics.q9WillingnessToReturn : 0}
+                        }
+                        </script>
+                        
+                        <canvas id="detailedRatingChart"></canvas>
+                        
+                        <!-- Script để đọc dữ liệu chi tiết -->
+                        <script>
+                            try {
+                                const detailedJsonData = document.getElementById('detailedRatingData').textContent.trim();
+                                window.detailedRatingData = JSON.parse(detailedJsonData);
+                                console.log("Dữ liệu chi tiết từ JSON script:", window.detailedRatingData);
+                            } catch (error) {
+                                console.error("Lỗi khi đọc dữ liệu chi tiết từ script JSON:", error);
+                                window.detailedRatingData = {}; // Fallback to empty object
+                            }
+                        </script>
                     </div>
                 </div>
                 </c:when>
@@ -451,10 +430,105 @@
             </div>
         </div>
     </div>
-    
-    <!-- Footer -->
+      <!-- Footer -->
     <jsp:include page="/view/events-page/footer.jsp" />
 
+    <!-- Biểu đồ vẫn sử dụng JS cũ cho các tính năng khác -->
     <script src="${pageContext.request.contextPath}/js/viewFeedback.js?v=<%= System.currentTimeMillis() %>"></script>
+    
+    <!-- API JSON mới cho biểu đồ đánh giá -->
+    <script src="${pageContext.request.contextPath}/js/feedbackChartAPI.js?v=<%= System.currentTimeMillis() %>"></script>
+
+    <!-- CSS cho loading state và error state -->
+    <style>
+        .chart-loading-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .loading-spinner {
+            font-size: 32px;
+            color: #4caf50;
+            margin-bottom: 10px;
+        }
+        
+        .loading-text {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .chart-error-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            background-color: #fff8f8;
+            border-radius: 8px;
+            border: 1px solid #ffebee;
+        }
+        
+        .error-icon {
+            font-size: 32px;
+            color: #f44336;
+            margin-bottom: 10px;
+        }
+        
+        .error-message {
+            font-size: 14px;
+            color: #d32f2f;
+            margin-bottom: 15px;
+        }
+        
+        .retry-button {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        .retry-button:hover {
+            background-color: #d32f2f;
+        }
+        
+        #chartContainer {
+            height: 300px;
+            width: 100%;
+            position: relative;
+        }
+        
+        .no-data-message {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            opacity: 0.7;
+        }
+    </style>
+
+    <!-- Khởi tạo phương pháp JSON API theo tham số URL -->
+    <script>
+        // Nếu URL có tham số useJsonApi=true, kích hoạt phương pháp mới
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('useJsonApi')) {
+            const useJsonApi = urlParams.get('useJsonApi') === 'true';
+            localStorage.setItem('useJsonApi', useJsonApi ? 'true' : 'false');
+        }
+        
+        // Nếu chưa có trạng thái lưu trữ, mặc định sử dụng JSON API
+        if (localStorage.getItem('useJsonApi') === null) {
+            localStorage.setItem('useJsonApi', 'true');
+        }
+    </script>
 </body>
 </html>

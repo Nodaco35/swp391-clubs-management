@@ -9,12 +9,8 @@
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Font Awesome -->
+      <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/department-leader.css">
@@ -24,8 +20,8 @@
     <button class="mobile-menu-toggle d-md-none" onclick="toggleSidebar()">
         <i class="fas fa-bars"></i>
     </button>
-
-    <div class="department-leader-container">        <!-- Sidebar -->
+    <!-- Sidebar -->
+    <div class="department-leader-container">        
         <nav class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
@@ -65,12 +61,10 @@
                         <span>Về trang chủ</span>
                     </a>
                 </li>
-            </ul>
-            
-            <div class="sidebar-footer">
+            </ul>            <div class="sidebar-footer">
                 <div class="user-info">
                     <div class="user-avatar">
-                        <img src="${pageContext.request.contextPath}/img/${currentUser.avatar != null ? currentUser.avatar : 'Hinh-anh-dai-dien-mac-dinh-Facebook.jpg'}" alt="Avatar">
+                        <img src="${pageContext.request.contextPath}/img/${not empty currentUser.avatar ? currentUser.avatar : 'Hinh-anh-dai-dien-mac-dinh-Facebook.jpg'}" alt="Avatar">
                     </div>
                     <div class="user-details">
                         <div class="user-name">${currentUser.fullName}</div>
@@ -293,125 +287,26 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </main>    </div>
-
+            </div>        </main>
+    </div>
+    
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Scripts -->
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Dashboard data for JavaScript -->
     <script>
-        // Current time display
-        function updateTime() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('vi-VN', { 
-                hour: '2-digit', 
-                minute: '2-digit',
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
-            document.getElementById('currentTime').textContent = timeString;
-            document.getElementById('lastUpdate').textContent = now.toLocaleTimeString('vi-VN');
-        }
-        
-        // Update time every second
-        setInterval(updateTime, 1000);
-        updateTime();
-
-        // Task Progress Chart
-        const taskCtx = document.getElementById('taskProgressChart').getContext('2d');
-        const taskProgressChart = new Chart(taskCtx, {
-            type: 'doughnut',            data: {
-                labels: ['Hoàn thành', 'Đang thực hiện', 'To Do'],
-                datasets: [{
-                    data: [
-                        ${dashboard.doneTasks},
-                        ${dashboard.inProgressTasks},
-                        ${dashboard.todoTasks}
-                    ],
-                    backgroundColor: [
-                        '#10b981', // Green for completed
-                        '#3b82f6', // Blue for in progress  
-                        '#ef4444'  // Red for todo
-                    ],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                cutout: '70%'
-            }
-        });
-
-        // Member Activity Chart
-        const memberCtx = document.getElementById('memberActivityChart').getContext('2d');
-        const memberActivityChart = new Chart(memberCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Hoạt động', 'Không hoạt động'],
-                datasets: [{
-                    data: [
-                        ${dashboard.activeMembers},
-                        ${dashboard.totalMembers - dashboard.activeMembers}
-                    ],
-                    backgroundColor: [
-                        '#10b981', // Green for active
-                        '#f59e0b'  // Orange for inactive
-                    ],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                cutout: '70%'
-            }
-        });        // Menu active state
-        document.querySelectorAll('.menu-link').forEach(link => {
-            link.addEventListener('click', function(e) {
-                document.querySelectorAll('.menu-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                this.parentElement.classList.add('active');
-            });
-        });
-
-        // Mobile sidebar toggle
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('active');
-        }
-
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(e) {
-            const sidebar = document.getElementById('sidebar');
-            const toggle = document.querySelector('.mobile-menu-toggle');
-            
-            if (window.innerWidth <= 768 && 
-                !sidebar.contains(e.target) && 
-                !toggle.contains(e.target) && 
-                sidebar.classList.contains('active')) {
-                sidebar.classList.remove('active');
-            }
-        });
-
-        // Responsive chart resize
-        window.addEventListener('resize', function() {
-            if (taskProgressChart) taskProgressChart.resize();
-            if (memberActivityChart) memberActivityChart.resize();
-        });
-    </script>
+        // Pass dashboard data to JavaScript
+        window.dashboardData = {
+            doneTasks: ${dashboard.doneTasks},
+            inProgressTasks: ${dashboard.inProgressTasks},
+            todoTasks: ${dashboard.todoTasks},
+            activeMembers: ${dashboard.activeMembers},
+            totalMembers: ${dashboard.totalMembers}
+        };
+    </script>    <!-- Custom Dashboard JS -->
+    <script src="${pageContext.request.contextPath}/js/department-dashboard.js"></script>
 </body>
 </html>

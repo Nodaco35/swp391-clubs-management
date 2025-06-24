@@ -148,12 +148,19 @@ public class UserClubServlet extends HttpServlet {
                 request.setAttribute("error", "Câu lạc bộ đã có chủ nhiệm!");
             }
             else if (roleID == 3 && userClubDAO.hasDepartmentHead(clubID, departmentID)) {
-                request.setAttribute("error", "Ban này đã có trưởng ban!");
-            } else {
+                request.setAttribute("error", "Ban này đã có trưởng ban!");            } else {
+                // Get the correct clubDepartmentID based on clubID and departmentID
+                int clubDepartmentID = userClubDAO.getClubDepartmentIdByClubAndDepartment(clubID, departmentID);
+                if (clubDepartmentID == -1) {
+                    request.setAttribute("error", "Không tìm thấy ban trong câu lạc bộ này!");
+                    doGet(request, response);
+                    return;
+                }
+                
                 UserClub uc = new UserClub();
                 uc.setUserID(userID);
                 uc.setClubID(clubID);
-                uc.setClubDepartmentID(departmentID);
+                uc.setClubDepartmentID(clubDepartmentID);
                 uc.setRoleID(roleID);
                 uc.setIsActive(request.getParameter("isActive") != null);
                 try {
@@ -196,11 +203,18 @@ public class UserClubServlet extends HttpServlet {
             }
             else if (roleID == 3 && departmentID != 0 && userClubDAO.hasDepartmentHead(clubID, departmentID) &&
                      currentUc.getRoleID() != 3) {
-                request.setAttribute("error", "Ban này đã có trưởng ban!");
-            } else {
+                request.setAttribute("error", "Ban này đã có trưởng ban!");            } else {
+                // Get the correct clubDepartmentID based on clubID and departmentID
+                int clubDepartmentID = userClubDAO.getClubDepartmentIdByClubAndDepartment(clubID, departmentID);
+                if (clubDepartmentID == -1) {
+                    request.setAttribute("error", "Không tìm thấy ban trong câu lạc bộ này!");
+                    doGet(request, response);
+                    return;
+                }
+                
                 UserClub uc = new UserClub();
                 uc.setUserClubID(userClubID);
-                uc.setClubDepartmentID(departmentID);
+                uc.setClubDepartmentID(clubDepartmentID);
                 uc.setRoleID(roleID);
                 uc.setIsActive(request.getParameter("isActive") != null);
                 try {
