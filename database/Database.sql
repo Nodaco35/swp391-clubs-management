@@ -29,10 +29,6 @@ VALUES
 ('FA25', 'Fall 2025', '2025-09-01', '2025-12-31', 'INACTIVE');
 
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
 -- ========================================
 -- USERS, CLUBS, AND ROLES
 -- ========================================
@@ -43,10 +39,6 @@ CREATE TABLE Permissions (
 );
 INSERT INTO Permissions (PermissionName) VALUES ('Student'), ('Admin'), ('IC_Officer');
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
 CREATE TABLE Users (
     UserID VARCHAR(10) PRIMARY KEY,
     FullName VARCHAR(100) NOT NULL,
@@ -110,11 +102,9 @@ CREATE TABLE Clubs (
     ClubID INT PRIMARY KEY AUTO_INCREMENT,
     ClubImg VARCHAR(255),
     IsRecruiting BOOLEAN DEFAULT 1,
-<<<<<<< HEAD
-    ClubName VARCHAR(100) NOT NULL UNIQUE,
-=======
+
     ClubName VARCHAR(100) NOT NULL,
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
+
     Description TEXT,
     Category ENUM('Thể Thao', 'Học Thuật', 'Phong Trào') DEFAULT 'Học Thuật',
     EstablishedDate DATE,
@@ -194,7 +184,7 @@ CREATE TABLE UserClubs (
     FOREIGN KEY (RoleID) REFERENCES Roles(RoleID)
 );
 
-<<<<<<< HEAD
+
 -- sửa ok rồi đừng sửa nữa nhé
 INSERT INTO UserClubs (UserID, ClubID, ClubDepartmentID, RoleID, JoinDate, IsActive) VALUES
 ('U001', 1, 1, 1, '2020-09-01', 1),
@@ -231,7 +221,7 @@ INSERT INTO UserClubs (UserID, ClubID, ClubDepartmentID, RoleID, JoinDate, IsAct
 
 
 
-=======
+
 
 INSERT INTO UserClubs (UserID, ClubID, ClubDepartmentID, RoleID, JoinDate, IsActive) VALUES
 ('U001', 1, 1, 1, '2020-09-01', 1), -- Chủ nhiệm CLB 1, Ban Chủ nhiệm
@@ -282,7 +272,7 @@ INSERT INTO UserClubs (UserID, ClubID, ClubDepartmentID, RoleID, JoinDate, IsAct
 ('U027', 4, 8, 4, '2021-09-01', 1), -- Trưởng ban Đối ngoại là thành viên Ban Chủ nhiệm CLB 4
 ('U028', 4, 18, 4, '2021-09-01', 1), -- Thành viên Ban Đối ngoại CLB 4
 ('U030', 4, 15, 4, '2021-05-06', 1); -- Thành viên Ban Nội dung CLB 4 (corrected ClubDepartmentID from 18 to 15)
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
+
 
 
 
@@ -396,40 +386,6 @@ INSERT INTO Events (EventName, EventImg, Description, EventDate, EndTime, Locati
 ('FPTU Dance Battle 2024', 'images/events/dancebattle2024.jpg', '...', '2024-11-30 18:00:00', '2024-11-30 21:00:00', 1, 7, TRUE, 150, 'COMPLETED', 'FA24'),
 ('Cuộc Thi Tranh Biện 2024', 'images/events/debate2024.jpg', '...', '2024-12-01 09:00:00', '2024-12-01 11:00:00', 12, 8, TRUE, 65, 'COMPLETED', 'FA24');
 
-
-=======
-INSERT INTO Events (EventName, EventImg, Description, EventDate, LocationID, ClubID, IsPublic, Capacity, Status, SemesterID) VALUES
--- Spring 2025
-('Lễ Hội Âm Nhạc Tết 2025', 'images/events/tetmusic2025.jpg', '...', '2025-02-01 19:00:00', 2, 6, TRUE, 300, 'COMPLETED', 'SP25'),
-('Hội Thảo Kỹ Năng Viết Tiếng Anh', 'images/events/englishworkshop2025.jpg', '...', '2025-03-05 09:00:00', 9, 3, TRUE, 60, 'COMPLETED', 'SP25'),
-('Cuộc Thi Tranh Biện Xã Hội 2025', 'images/events/debate2025.jpg', '...', '2025-04-10 13:00:00', 3, 8, TRUE, 100, 'COMPLETED', 'SP25'),
-('Workshop: Xây dựng Website với Spring Boot', '/images/events/springboot_workshop.jpg', '...', '2025-04-20 14:00:00', 26, 4, 0, 100, 'COMPLETED', 'SP25'),
-	
--- Summer 2025 
-('FPTU Showcase 2025 Chung Kết', 'images/events/showcase2025.jpg', '...', '2025-06-30 09:00:00', 1, 7, TRUE, 200, 'PENDING', 'SU25'),
-('Thử Thách Lập Trình FPTU 2025', 'images/events/coding2025.jpg', '...', '2025-06-21 08:00:00', 25, 4, TRUE, 50, 'COMPLETED', 'SU25'),
-('Giải Bóng Đá Sinh Viên FPTU 2025', 'images/events/football2025.jpg', '...', '2025-06-05 08:00:00', 5, 1, TRUE, 120, 'PENDING', 'SU25'),
-('Chiến Dịch Tình Nguyện Xanh 2025', 'images/events/greenfuture2025.jpg', '...', '2025-07-25 07:00:00', 35, 5, TRUE, 40, 'PENDING', 'SU25'),
-('Giải Bóng Rổ 3x3 FPTU', 'images/events/basketball2025.jpg', '...', '2025-07-05 14:00:00', 4, 2, FALSE, 80, 'COMPLETED', 'SU25'),
-('Ngày Hội Âm Nhạc FPTU 2025', 'images/events/musicday2025.jpg', '...', '2025-07-10 10:00:00', 1, 6, FALSE, 250, 'PENDING', 'SU25'),
-('Hackathon Đổi Mới AI', 'images/events/aihackathon2025.jpg', '...', '2025-07-15 08:00:00', 25, 4, TRUE, 45, 'PENDING', 'SU25'),
-('Cuộc thi Code War: Thử thách thuật toán', '/images/events/codewar.jpg', '...', '2025-07-31 09:00:00', 27, 4, 1, 120, 'PENDING', 'SU25'),
-
--- Spring 2024
-('Lễ Hội Làng Tết 2024', 'images/events/villagefest2024.jpg', '...', '2024-01-20 10:00:00', 36, 6, TRUE, 500, 'COMPLETED', 'SP24'),
-
--- Summer 2024
-('Chiến Dịch Tình Nguyện Hè 2024', 'images/events/summervolunteer2024.jpg', '...', '2024-07-15 07:00:00', 36, 5, FALSE, 35, 'COMPLETED', 'SU24'),
-
--- Fall 2024
-('Trại Lập Trình FPTU 2024', 'images/events/codingbootcamp2024.jpg', '...', '2024-11-20 08:00:00', 25, 4, TRUE, 60, 'COMPLETED', 'FA24'),
-('Đêm Nhạc Rock 2024', 'images/events/rocknight2024.jpg', '...', '2024-12-10 19:00:00', 1, 6, TRUE, 200, 'COMPLETED', 'FA24'),
-('Cuộc Thi Nói Tiếng Anh 2024', 'images/events/englishcontest2024.jpg', '...', '2024-11-25 09:00:00', 10, 3, TRUE, 70, 'COMPLETED', 'FA24'),
-('Giải Bóng Đá 5x5 FPTU 2024', 'images/events/football2024.jpg', '...', '2024-12-05 14:00:00', 5, 1, FALSE, 100, 'COMPLETED', 'FA24'),
-('Ngày Hội Nhảy FPTU 2024', 'images/events/dancefest2024.jpg', '...', '2024-12-15 10:00:00', 2, 7, TRUE, 400, 'COMPLETED', 'FA24'),
-('Hội Thảo Phát Triển Web 2024', 'images/events/webdev2024.jpg', '...', '2024-11-15 14:00:00', 11, 4, TRUE, 50, 'COMPLETED', 'FA24'),
-('FPTU Dance Battle 2024', 'images/events/dancebattle2024.jpg', '...', '2024-11-30 18:00:00', 1, 7, TRUE, 150, 'COMPLETED', 'FA24'),
-('Cuộc Thi Tranh Biện 2024', 'images/events/debate2024.jpg', '...', '2024-12-01 09:00:00', 12, 8, TRUE, 65, 'COMPLETED', 'FA24');
 
 UPDATE Events 
 SET Description = 'Lễ Hội Âm Nhạc Tết 2025 mang đến không gian âm nhạc sống động kết hợp tinh hoa truyền thống và xu hướng hiện đại. Người tham dự sẽ được thưởng thức các tiết mục dân gian hòa quyện với âm nhạc điện tử, rap, ballad… từ các câu lạc bộ nghệ thuật sinh viên. Không khí ngày Tết lan tỏa qua các gian hàng trò chơi dân gian, trình diễn áo dài, và các hoạt động giao lưu văn hóa vùng miền. Đây là dịp để sinh viên FPTU cùng nhau đón Tết sớm, lan tỏa niềm vui và gắn kết cộng đồng.' 
