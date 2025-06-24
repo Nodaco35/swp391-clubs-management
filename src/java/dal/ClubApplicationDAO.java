@@ -56,7 +56,7 @@ public class ClubApplicationDAO {
                      ORDER BY ca.SubmitDate DESC;""";
         List<ClubApplication> list = new ArrayList<>();
         try {
-            PreparedStatement ps = DBContext_Duc.getInstance().connection.prepareStatement(sql);
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, userID);
             ResultSet rs = ps.executeQuery();
             while(rs.next()){
@@ -86,7 +86,7 @@ public class ClubApplicationDAO {
                     WHERE uc.UserID = ? AND uc.RoleID = 1 AND ca.Status = 'PENDING';""";
         try {
             
-            PreparedStatement ps = DBContext_Duc.getInstance().connection.prepareStatement(sql);
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setString(1, userID);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {

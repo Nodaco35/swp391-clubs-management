@@ -4,7 +4,7 @@
  */
 package dal;
 
-import dal.DBContext_Duc;
+
 import java.util.ArrayList;
 import java.util.List;
 import models.Notification;
@@ -18,14 +18,14 @@ public class NotificationDAO {
 
     public static List<Notification> findByUserId(String userID) {
         List<Notification> findByUserId = new ArrayList<>();
-        DBContext_Duc db = DBContext_Duc.getInstance();
+        
         String sql = """
                      SELECT * FROM clubmanagementsystem.notifications
                      where ReceiverID = ?
                      order by CreatedDate desc;
                      ;""";
         try {
-            PreparedStatement ps = db.connection.prepareStatement(sql);
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, userID);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -48,12 +48,12 @@ public class NotificationDAO {
     }
 
     public static void delete(int id) {
-        DBContext_Duc db = DBContext_Duc.getInstance();
+        
         String sql = """
                      DELETE FROM `clubmanagementsystem`.`notifications`
                      WHERE NotificationID = ?;""";
         try {
-            PreparedStatement ps = db.connection.prepareStatement(sql);
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -62,7 +62,7 @@ public class NotificationDAO {
     }
 
     public static void markAsRead(Integer id) {
-        DBContext_Duc db = DBContext_Duc.getInstance();
+        
         String sql = """
                      UPDATE `clubmanagementsystem`.`notifications`
                      SET
@@ -71,7 +71,7 @@ public class NotificationDAO {
                      
                      WHERE `NotificationID` = ?;""";
         try {
-            PreparedStatement ps = db.connection.prepareStatement(sql);
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, "READ");
             ps.setObject(2, id);
             ps.executeUpdate();
@@ -81,7 +81,7 @@ public class NotificationDAO {
     }
 
     public static Notification findByNotificationID(Integer id) {
-        DBContext_Duc db = DBContext_Duc.getInstance();
+        
         String sql = """
                      SELECT `notifications`.`NotificationID`,
                          `notifications`.`Title`,
@@ -94,7 +94,7 @@ public class NotificationDAO {
                      FROM `clubmanagementsystem`.`notifications`
                      where `notifications`.`NotificationID` = ?;""";
         try {
-            PreparedStatement ps = db.connection.prepareStatement(sql);
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, id);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -118,7 +118,7 @@ public class NotificationDAO {
     public static List<Notification> findByUserIdAndStatus(String userID, String status) {
         List<Notification> findByUserId = new ArrayList<>();
 
-        DBContext_Duc db = DBContext_Duc.getInstance();
+        
         String sql = """
                      SELECT * FROM clubmanagementsystem.notifications
                      where ReceiverID = ? and status = ?
@@ -126,7 +126,7 @@ public class NotificationDAO {
                      order by CreatedDate desc;
                      ;""";
         try {
-            PreparedStatement ps = db.connection.prepareStatement(sql);
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, userID);
             ps.setObject(2, status);
             ResultSet rs = ps.executeQuery();
@@ -149,7 +149,7 @@ public class NotificationDAO {
     }
 
     public static void sentToPerson(String senderID, String receiverID, String title, String content) {
-        DBContext_Duc db = DBContext_Duc.getInstance();
+        
         String sql = """
                      INSERT INTO `clubmanagementsystem`.`notifications`
                      (
@@ -164,7 +164,7 @@ public class NotificationDAO {
                      ?,
                      ?);""";
         try {
-            PreparedStatement ps = db.connection.prepareStatement(sql);
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, title);
             ps.setObject(2, content);
             ps.setObject(3, receiverID);
@@ -194,7 +194,7 @@ public class NotificationDAO {
     public static List<Notification> findByUserIdAndImpotant(String userID, String prioity) {
         List<Notification> findByUserId = new ArrayList<>();
 
-        DBContext_Duc db = DBContext_Duc.getInstance();
+        
         String sql = """
                      SELECT * FROM clubmanagementsystem.notifications
                      where ReceiverID = ? and Priority = ?
@@ -202,7 +202,7 @@ public class NotificationDAO {
                      order by CreatedDate desc;
                      ;""";
         try {
-            PreparedStatement ps = db.connection.prepareStatement(sql);
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, userID);
             ps.setObject(2, prioity);
             ResultSet rs = ps.executeQuery();
@@ -227,7 +227,7 @@ public class NotificationDAO {
     public static List<Notification> findByUserSenderID(String userID) {
         List<Notification> findByUserId = new ArrayList<>();
 
-        DBContext_Duc db = DBContext_Duc.getInstance();
+       
         String sql = """
                      SELECT * FROM clubmanagementsystem.notifications
                      where SenderID = ?
@@ -236,7 +236,7 @@ public class NotificationDAO {
                       
                      ;""";
         try {
-            PreparedStatement ps = db.connection.prepareStatement(sql);
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, userID);
 
             ResultSet rs = ps.executeQuery();
@@ -276,9 +276,9 @@ public class NotificationDAO {
                             `Content` LIKE CONCAT('%', ?, '%')
                        )
                      ORDER BY `CreatedDate` DESC""";
-        DBContext_Duc db = DBContext_Duc.getInstance();
+        
         try {
-            PreparedStatement ps = db.connection.prepareStatement(sql);
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, userID);
             ps.setObject(2, keywords);
             ps.setObject(3, keywords);
@@ -308,7 +308,7 @@ public class NotificationDAO {
                      FROM Notifications WHERE CreatedDate >= DATE_SUB(NOW(), INTERVAL 7 DAY) AND ReceiverID = ?
                      ORDER BY CreatedDate DESC""";
         try {
-            PreparedStatement ps = DBContext_Duc.getInstance().connection.prepareStatement(sql);
+           PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, userID);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {

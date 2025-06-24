@@ -12,7 +12,29 @@ import models.Clubs;
 import models.Department;
 
 public class ClubDAO {
-    
+    public static List<Clubs> findByUserIDAndChairman(String userID) {
+        List<Clubs> findByUserIDAndChairman = new ArrayList<>();
+        String sql = "Select *\n"
+                + "from clubs c \n"
+                + "join userclubs uc on c.ClubID = uc.ClubID\n"
+                + "where uc.UserID = ? and RoleID = 1";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setObject(1, userID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {                
+                Clubs c = new Clubs();
+                c.setClubID(rs.getInt("ClubID"));
+                c.setClubName(rs.getString("ClubName"));
+                findByUserIDAndChairman.add(c);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return findByUserIDAndChairman;
+        
+    }
+
     public boolean isClubNameTaken(String clubName, int excludeClubID) {
         String query = "SELECT COUNT(*) FROM Clubs WHERE ClubName = ? AND ClubID != ?";
         try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {

@@ -95,7 +95,7 @@ public class UserDAO {
         LIMIT ? OFFSET ?
     """;
 
-        try (PreparedStatement ps = DBContext_Duc.getInstance().connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = DBContext.getConnection().prepareStatement(sql)) {
             ps.setInt(1, noOfRecords);
             ps.setInt(2, offset);
             ResultSet rs = ps.executeQuery();
@@ -123,7 +123,7 @@ public class UserDAO {
 // Đếm tổng số người dùng
     public static int countAllUsers() {
         String sql = "SELECT COUNT(*) FROM Users";
-        try (PreparedStatement ps = DBContext_Duc.getInstance().connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);) {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 return rs.getInt(1);
@@ -135,8 +135,7 @@ public class UserDAO {
     }
 
     public static void insertByAdmin(String fullName, String email, String password, String dateOfBirth, int permissionID, String status) {
-        DBContext_Duc db = DBContext_Duc.getInstance();
-
+        
         String sql = """
                      INSERT INTO `clubmanagementsystem`.`users`
                      (`UserID`,
@@ -167,7 +166,7 @@ public class UserDAO {
             } else {
                 status_raw = 0;
             }
-            PreparedStatement ps = db.connection.prepareStatement(sql);
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             String userID = generateNextUserId();
             ps.setObject(1, userID);
             ps.setObject(2, fullName);
@@ -198,9 +197,9 @@ public class UserDAO {
                      `Status` = ?   
                      
                      WHERE `UserID` = ?;""";
-        DBContext_Duc db = DBContext_Duc.getInstance();
+        
         try {
-            PreparedStatement ps = db.connection.prepareStatement(sql);
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, new_name);
             ps.setObject(2, new_email);
             ps.setObject(3, new_password);
@@ -224,9 +223,9 @@ public class UserDAO {
                      `Status` = 0
                      
                      WHERE `UserID` = ?;""";
-        DBContext_Duc db = DBContext_Duc.getInstance();
+        
         try {
-            PreparedStatement ps = db.connection.prepareStatement(sql);
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, userID);
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -245,7 +244,7 @@ public class UserDAO {
         LIMIT ? OFFSET ?
     """;
 
-        try (PreparedStatement ps = DBContext_Duc.getInstance().connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = DBContext.getConnection().prepareStatement(sql)) {
             ps.setInt(1, perID);
             ps.setInt(2, noOfRecords);
             ps.setInt(3, offset);
@@ -273,7 +272,7 @@ public class UserDAO {
 
     public static int countUsersByPermissionID(int permissionID) {
         String sql = "SELECT COUNT(*) FROM Users WHERE PermissionID = ?";
-        try (PreparedStatement ps = DBContext_Duc.getInstance().connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = DBContext.getConnection().prepareStatement(sql)) {
             ps.setInt(1, permissionID);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -297,7 +296,7 @@ public class UserDAO {
         LIMIT ? OFFSET ?
     """;
 
-        try (PreparedStatement ps = DBContext_Duc.getInstance().connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = DBContext.getConnection().prepareStatement(sql)) {
             String searchPattern = "%" + query + "%";
             ps.setString(1, searchPattern);
             ps.setString(2, searchPattern);
@@ -333,7 +332,7 @@ public class UserDAO {
         FROM Users
         WHERE FullName LIKE ? OR Email LIKE ? OR UserID LIKE ?
     """;
-        try (PreparedStatement ps = DBContext_Duc.getInstance().connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = DBContext.getConnection().prepareStatement(sql)) {
             String searchPattern = "%" + query + "%";
             ps.setString(1, searchPattern);
             ps.setString(2, searchPattern);
@@ -429,10 +428,10 @@ public class UserDAO {
                 + "  `FullName` = ?,\n"
                 + "  `AvatarSrc` = ? , `DateOfBirth` = ?\n"
                 + "WHERE `UserID` = ?;";
-        DBContext_Duc db = DBContext_Duc.getInstance();
+        
 
         try {
-            PreparedStatement ps = db.connection.prepareStatement(sql);
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, newName);
             ps.setObject(2, avatarPath);
             ps.setObject(3, dob);
@@ -449,11 +448,11 @@ public class UserDAO {
 
         // Thử kết nối với DBContext_Duc
         try {
-            DBContext_Duc db = DBContext_Duc.getInstance();
+            
 
             // Kiểm tra kết nối không null
-            if (db.connection != null) {
-                try (PreparedStatement ps = db.connection.prepareStatement(sql)) {
+            if (DBContext.getConnection() != null) {
+                try (PreparedStatement ps = DBContext.getConnection().prepareStatement(sql)) {
                     ps.setString(1, id);
                     try (ResultSet rs = ps.executeQuery()) {
                         if (rs.next()) {
@@ -513,11 +512,11 @@ public class UserDAO {
                          `Email` = ?
                          
                          WHERE `UserID` = ?;""";
-        DBContext_Duc db = DBContext_Duc.getInstance();
+        
 
         try {
 
-            PreparedStatement ps = db.connection.prepareStatement(sql);
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, otpEmail);
             ps.setObject(2, id);
             ps.executeUpdate();
@@ -887,10 +886,10 @@ public class UserDAO {
         String sql = "UPDATE users SET Password = ? WHERE UserID = ?";
 
         // Thử với DBContext_Duc
-        DBContext_Duc db = DBContext_Duc.getInstance();
-        if (db.connection != null) {
+        
+        if (DBContext.getConnection()!=null) {
             try {
-                PreparedStatement ps = db.connection.prepareStatement(sql);
+                PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
                 ps.setString(1, newPassword);
                 ps.setString(2, userID);
                 int rowsAffected = ps.executeUpdate();

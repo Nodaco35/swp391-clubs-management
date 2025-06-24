@@ -17,8 +17,7 @@ public class PermissionDAO {
         
         String sql = "SELECT * FROM clubmanagementsystem.permissions;";
         try {
-            DBContext_Duc db = DBContext_Duc.getInstance();
-            PreparedStatement ps = db.connection.prepareStatement(sql);
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {                
                 Permission per = new Permission();
@@ -39,9 +38,9 @@ public class PermissionDAO {
                          `permissions`.`PermissionName`,
                          `permissions`.`Description`
                      FROM `clubmanagementsystem`.`permissions`;""";
-        DBContext_Duc db = DBContext_Duc.getInstance();
+        
         try {
-            PreparedStatement ps = db.connection.prepareStatement(sql);
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
             while(rs.next()){
                 Permission per = new Permission();

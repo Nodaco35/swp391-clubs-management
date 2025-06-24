@@ -50,7 +50,7 @@ public class EventsDAO {
                      WHERE uc.UserID = ? and e.EventDate >= NOW()
                      ORDER BY e.EventDate ASC;""";
         try {
-            PreparedStatement ps = DBContext_Duc.getInstance().connection.prepareStatement(sql);
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, userID);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {

@@ -3,8 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/24_06/swp391-clubs-management/web/view/student/chairman/tasks.jsp</file>
-            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/24_06/swp391-clubs-management/src/java/controller/ChairmanTasksServlet.java</file>
+            <file>file:/D:/FULearning/SU25/SWP/main/swp391-clubs-management/web/view/student/myClub.jsp</file>
+            <file>file:/D:/FULearning/SU25/SWP/main/swp391-clubs-management/src/java/dal/DepartmentMeetingDAO.java</file>
+            <file>file:/D:/FULearning/SU25/SWP/main/swp391-clubs-management/web/view/admin/users.jsp</file>
         </group>
     </open-files>
 </project-private>

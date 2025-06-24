@@ -25,7 +25,7 @@ public class ClubMeetingDAO {
                        AND cm.StartedTime >= NOW() - INTERVAL 1 HOUR;""";
         List<ClubMeeting> findByUserID = new ArrayList<>();
         try {
-            PreparedStatement ps = DBContext_Duc.getInstance().connection.prepareStatement(sql);
+           PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, userID);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -54,7 +54,7 @@ public class ClubMeetingDAO {
                                           WHERE uc.UserID = ?
                                           AND cm.StartedTime > CURRENT_TIMESTAMP""";int count = 0;
         try {
-            PreparedStatement ps = DBContext_Duc.getInstance().connection.prepareStatement(sql);
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, userID);
             ResultSet rs = ps.executeQuery();
             
@@ -66,4 +66,23 @@ public class ClubMeetingDAO {
         }
         return count;
     }
+
+    public static void insert(int clubID, String startedTime, String URLMeeting) {
+        String sql = """
+                     INSERT INTO ClubMeeting (ClubID, URLMeeting, StartedTime)
+                     VALUES (?, ?, ?);""";
+        
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setObject(1, clubID);
+            ps.setObject(2, URLMeeting);
+            ps.setObject(3, startedTime);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+       
+    }
 }
+
+

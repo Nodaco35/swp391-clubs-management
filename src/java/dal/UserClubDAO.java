@@ -25,7 +25,7 @@ public class UserClubDAO {
                                         WHERE uc.UserID = ?""";
         List<UserClub> findByUserID = new ArrayList<>();
         try {
-            PreparedStatement ps = DBContext_Duc.getInstance().connection.prepareStatement(sql);
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, userID);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -48,7 +48,28 @@ public class UserClubDAO {
         }
         return findByUserID;
     }
-
+    
+    public static List<UserClub> findByClubID(int clubID) {
+        List<UserClub> findByClubID = new ArrayList<>();
+        String sql = """
+                     Select *
+                     from userclubs uc
+                     join clubs c on uc.ClubID = c.ClubID
+                     where c.ClubID = ?""";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setObject(1, clubID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                UserClub uc = new UserClub();
+                uc.setUserID(rs.getString("UserID"));
+                findByClubID.add(uc);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return findByClubID;
+    }
 
     public boolean isUserMemberOfClub(int clubID, String userID) {
         String sql = "SELECT 1 FROM UserClubs WHERE ClubID = ? AND UserID = ? AND IsActive = 1";
