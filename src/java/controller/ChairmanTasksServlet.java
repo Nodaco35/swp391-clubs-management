@@ -99,7 +99,7 @@ public class ChairmanTasksServlet extends HttpServlet {
                     Map<String, List<Tasks>> groupedByTerm = new LinkedHashMap<>();
 
                     for (Tasks task : allTasks) {
-                        String term = task.getTerm();
+                        String term = task.getTerm().getTermName();
 
                         if (groupedByTerm.containsKey(term)) {
                             groupedByTerm.get(term).add(task);
@@ -136,7 +136,7 @@ public class ChairmanTasksServlet extends HttpServlet {
                     Map<String, List<Tasks>> groupedByTerm = new LinkedHashMap<>();
 
                     for (Tasks task : allTasks) {
-                        String term = task.getTerm();
+                        String term = task.getTerm().getTermName();
 
                         if (groupedByTerm.containsKey(term)) {
                             groupedByTerm.get(term).add(task);
@@ -164,6 +164,7 @@ public class ChairmanTasksServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login");
         }
     }
+
 
 
     /** 

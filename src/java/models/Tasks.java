@@ -5,10 +5,8 @@ import java.util.List;
 
 public class Tasks {
     private int taskID;
-    private int parentTask; // nếu NULL là nhiệm vụ giao cho ban
-    private String term; // 'Trước sự kiện', 'Trong sự kiện', 'Sau sự kiện'
-    private Date termStart;
-    private Date termEnd;
+    private int parentTaskID; // nếu NULL là nhiệm vụ giao cho ban
+    private EventTerms term; // 'Trước sự kiện', 'Trong sự kiện', 'Sau sự kiện'
     private Events event; // foreign key -> Events
     private Clubs club;   // foreign key -> Clubs
     private String title;
@@ -23,34 +21,34 @@ public class Tasks {
 
     private List<Department> departments;
 
-    public List<Department> getDepartments() {
-        return departments;
-    }
-    public void setDepartments(List<Department> departments) {
-        this.departments = departments;
-    }
+
 
 
     public Tasks() {
     }
 
-    public Tasks(int taskID, Date createdAt, Users createdBy, Date endDate, Date startDate, int progressPercent, String priority, String status, String description, String title, Clubs club, Events event, Date termStart, Date termEnd, String term, int parentTask) {
+    public Tasks(int parentTaskID, int taskID, EventTerms term, Events event, Clubs club, String title, String status, String description, String priority, int progressPercent, Date startDate, Date endDate, Users createdBy, Date createdAt) {
+        this.parentTaskID = parentTaskID;
         this.taskID = taskID;
-        this.createdAt = createdAt;
-        this.createdBy = createdBy;
-        this.endDate = endDate;
-        this.startDate = startDate;
-        this.progressPercent = progressPercent;
-        this.priority = priority;
+        this.term = term;
+        this.event = event;
+        this.club = club;
+        this.title = title;
         this.status = status;
         this.description = description;
-        this.title = title;
-        this.club = club;
-        this.event = event;
-        this.termStart = termStart;
-        this.termEnd = termEnd;
-        this.term = term;
-        this.parentTask = parentTask;
+        this.priority = priority;
+        this.progressPercent = progressPercent;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.createdBy = createdBy;
+        this.createdAt = createdAt;
+    }
+
+    public List<Department> getDepartments() {
+        return departments;
+    }
+    public void setDepartments(List<Department> departments) {
+        this.departments = departments;
     }
 
     public int getTaskID() {
@@ -101,28 +99,12 @@ public class Tasks {
         this.progressPercent = progressPercent;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
     public String getPriority() {
         return priority;
     }
 
     public void setPriority(String priority) {
         this.priority = priority;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public String getTitle() {
@@ -133,20 +115,36 @@ public class Tasks {
         this.title = title;
     }
 
-    public Clubs getClub() {
-        return club;
+    public String getDescription() {
+        return description;
     }
 
-    public void setClub(Clubs club) {
-        this.club = club;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public Date getTermEnd() {
-        return termEnd;
+    public String getStatus() {
+        return status;
     }
 
-    public void setTermEnd(Date termEnd) {
-        this.termEnd = termEnd;
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public int getParentTaskID() {
+        return parentTaskID;
+    }
+
+    public void setParentTaskID(int parentTaskID) {
+        this.parentTaskID = parentTaskID;
+    }
+
+    public EventTerms getTerm() {
+        return term;
+    }
+
+    public void setTerm(EventTerms term) {
+        this.term = term;
     }
 
     public Events getEvent() {
@@ -157,28 +155,11 @@ public class Tasks {
         this.event = event;
     }
 
-    public Date getTermStart() {
-        return termStart;
+    public Clubs getClub() {
+        return club;
     }
 
-    public void setTermStart(Date termStart) {
-        this.termStart = termStart;
-    }
-
-    public String getTerm() {
-        return term;
-    }
-
-    public void setTerm(String term) {
-        this.term = term;
-    }
-
-    public int getParentTask() {
-        return parentTask;
-    }
-
-    public void setParentTask(int parentTask) {
-        this.parentTask = parentTask;
+    public void setClub(Clubs club) {
+        this.club = club;
     }
 }
-
