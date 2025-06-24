@@ -10,12 +10,16 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import dal.ClubDAO;
 import dal.EventsDAO;
 import dal.LocationDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import models.ClubInfo;
+import models.Users;
 
 /**
  *
@@ -57,9 +61,21 @@ public class AddLocationServlet extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-        request.getRequestDispatcher("/view/student/chairman/add-event.jsp").forward(request, response);
-    } 
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Users user = (Users) session.getAttribute("user");
+        ClubDAO clubDAO = new ClubDAO();
+        EventsDAO eventDAO = new EventsDAO();
+        if (user != null) {
+            String userID = user.getUserID();
+            ClubInfo club = clubDAO.getClubChairman(userID);
+            request.setAttribute("club", club);
+
+            request.getRequestDispatcher("/view/student/chairman/add-event.jsp").forward(request, response);
+        } else {
+            response.sendRedirect(request.getContextPath() + "/login");
+        }
+    }
 
     /** 
      * Handles the HTTP <code>POST</code> method.
