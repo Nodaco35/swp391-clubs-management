@@ -44,10 +44,10 @@ public class DepartmentDashboardServlet extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy thông tin ban");
                 return;
             }
-            
-            // Đưa dữ liệu vào request
+              // Đưa dữ liệu vào request
             request.setAttribute("dashboard", dashboard);
             request.setAttribute("currentUser", currentUser);
+            request.setAttribute("departmentName", dashboard.getDepartmentName());
             // Forward đến JSP
             request.getRequestDispatcher("view/student/department-leader/dashboard.jsp").forward(request, response);
             

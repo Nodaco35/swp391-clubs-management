@@ -2,6 +2,7 @@ package controller;
 
 import dal.ClubCreationPermissionDAO;
 import dal.ClubDAO;
+import dal.DepartmentMemberDAO;
 import dal.UserClubDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -163,16 +164,25 @@ public class ClubsServlet extends HttpServlet {
         // Set favorite status
         if (user != null) {
             String userID = user.getUserID();
-            userClub = userClubDAO.getUserClub(userID, clubID);
-            if (userClub != null && userClub.isIsActive()) {
+            userClub = userClubDAO.getUserClub(userID, clubID);            if (userClub != null && userClub.isIsActive()) {
                 isMember = true;
                 if (userClub.getRoleID() == 1 || userClub.getRoleID() == 2) {
                     isPresident = true;
                 }
+                // Check if user is department leader
+                // Could be role 3 (Trưởng ban) or other department leadership roles
                 if (userClub.getRoleID() == 3) {
                     isDepartmentLeader = true;
                     int departmentID = userClub.getClubDepartmentID();
                     request.setAttribute("departmentID", departmentID);
+                } else {
+                    // Additional check using DAO to verify department leadership
+                    DepartmentMemberDAO deptDAO = new DepartmentMemberDAO();
+                    if (deptDAO.isDepartmentLeader(userID, userClub.getClubDepartmentID())) {
+                        isDepartmentLeader = true;
+                        int departmentID = userClub.getClubDepartmentID();
+                        request.setAttribute("departmentID", departmentID);
+                    }
                 }
             }
             isFavorite = clubDAO.isFavoriteClub(userID, clubID);

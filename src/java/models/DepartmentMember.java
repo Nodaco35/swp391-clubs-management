@@ -12,9 +12,9 @@ public class DepartmentMember {
     private Timestamp joinedDate;
     private boolean isActive;
     private String status;
-    
-    // Department info
-    private int departmentID;
+      // Department info
+    private int clubDepartmentID;  // Khóa chính - ID của ban trong CLB cụ thể
+    private int departmentID;      // Reference - ID loại ban (để hiển thị)
     private String departmentName;
     private int clubID;
     private String clubName;
@@ -108,6 +108,14 @@ public class DepartmentMember {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public int getClubDepartmentID() {
+        return clubDepartmentID;
+    }
+
+    public void setClubDepartmentID(int clubDepartmentID) {
+        this.clubDepartmentID = clubDepartmentID;
     }
 
     public int getDepartmentID() {

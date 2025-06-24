@@ -67,24 +67,28 @@
                                         </c:otherwise>
                                     </c:choose>
                                 </div>
-                            </div>
-
+                            </div>                            
                             <div class="club-buttons-row">
-                                <c:if test="${isPresident}">
-                                    <a href="${pageContext.request.contextPath}/create-club?action=editClub&id=${displayClub.clubID}"
-                                       class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">Chỉnh sửa</a>
-                                </c:if>
-                                <c:if test="${isPresident}">
-                                    <a href="${pageContext.request.contextPath}/club-members?clubID=${displayClub.clubID}" 
-                                       class="btn btn-primary left-btn">
-                                        <i class="fas fa-users"></i> Quản lý thành viên
-                                    </a>
-                                </c:if>                <c:if test="${isDepartmentLeader}">
-                                    <a href="${pageContext.request.contextPath}/department-dashboard" 
-                                       class="btn btn-success left-btn">
-                                        <i class="fas fa-users-gear"></i> Quản lý Ban
-                                    </a>
-                                </c:if>
+                                <div class="left-buttons">
+                                    <c:if test="${isPresident}">
+                                        <a href="${pageContext.request.contextPath}/create-club?action=editClub&id=${displayClub.clubID}"
+                                           class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition btn-edit">
+                                            <i class="fas fa-edit me-2"></i>Chỉnh sửa
+                                        </a>
+                                    </c:if>
+                                    <c:if test="${isPresident}">
+                                        <a href="${pageContext.request.contextPath}/club-members?clubID=${displayClub.clubID}" 
+                                           class="btn btn-primary">
+                                            <i class="fas fa-users"></i> Quản lý thành viên
+                                        </a>
+                                    </c:if>
+                                    <c:if test="${isDepartmentLeader}">
+                                        <a href="${pageContext.request.contextPath}/department-dashboard" 
+                                           class="btn btn-primary">
+                                            <i class="fas fa-users-gear"></i> Quản lý Ban
+                                        </a>
+                                    </c:if>
+                                </div>
 
                                 <c:if test="${!isMember && displayClub.isRecruiting && sessionScope.user != null}">
                                     <a href="${pageContext.request.contextPath}/club-apply?clubID=${displayClub.clubID}" 
