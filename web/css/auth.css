@@ -169,13 +169,14 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
 }
 
-.banner-text {
-    font-size: 6rem;
-    font-weight: 900;
-    color: var(--light-cream);
-    letter-spacing: 0.1em;
+.banner-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 /* Form Section */
@@ -339,6 +340,15 @@ body {
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
+}
+
+@keyframes fpShake {
+    0% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+    100% { transform: translateX(0); }
 }
 
 /* Form Styles */
@@ -620,6 +630,92 @@ body {
     }
 }
 
+/* Forgot/Reset Password Modern Form Styles */
+.fp-container {
+    max-width: 420px;
+    margin: 60px auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+    padding: 48px 36px 40px 36px;
+    animation: fpFadeIn 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+    transition: box-shadow 0.3s, transform 0.3s;
+}
+.fp-container:hover {
+    box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+    transform: translateY(-2px) scale(1.01);
+}
+.fp-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #222;
+    letter-spacing: 1px;
+    animation: fpSlideDown 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.fp-sub {
+    color: #555;
+    font-size: 1rem;
+    margin-bottom: 28px;
+}
+.fp-sub a { color: #222; text-decoration: underline; }
+.fp-label {
+    font-weight: 500;
+    margin-bottom: 8px;
+    display: block;
+    color: #222;
+}
+.fp-input {
+    width: 100%;
+    padding: 13px 12px;
+    border: 1px solid #ddd;
+    border-radius: 7px;
+    font-size: 1rem;
+    margin-bottom: 24px;
+    background: #f5f5f5;
+}
+.fp-btn {
+    width: 100%;
+    background: #222;
+    color: #fff;
+    font-weight: 600;
+    padding: 13px 0;
+    border: none;
+    border-radius: 7px;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+.fp-btn:active {
+    transform: scale(0.97);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+.fp-input:focus {
+    border-color: var(--accent-turquoise);
+    box-shadow: 0 0 0 2px var(--accent-turquoise, #00a6c0);
+    background: #e6f7ff;
+    transition: box-shadow 0.2s, background 0.2s;
+}
+.fp-message, .fp-error {
+    margin-bottom: 10px;
+    font-size: 0.98rem;
+    text-align: center;
+    animation: fpFadeIn 0.5s;
+}
+.fp-message { color: #388e3c; }
+.fp-error { color: #d32f2f; }
+.fp-link { display: block; text-align: center; margin-top: 18px; color: #222; text-decoration: underline; }
+
+@media (max-width: 600px) {
+    .fp-container {
+        padding: 24px 8px 24px 8px;
+        margin: 24px auto;
+    }
+    .fp-title { font-size: 1.3rem; }
+}
+
 @media (max-width: 768px) {
     .nav-menu {
         display: none;
@@ -677,4 +773,14 @@ body {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+@keyframes fpFadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes fpSlideDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: none; }
 }

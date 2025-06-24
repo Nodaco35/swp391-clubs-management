@@ -190,3 +190,63 @@ document.querySelectorAll(".form-input").forEach((input) => {
 if (window.history.replaceState) {
     window.history.replaceState(null, null, window.location.href)
 }
+
+// Password show/hide toggle for reset/forgot password forms
+function addPasswordToggle() {
+    const pwFields = document.querySelectorAll('.fp-input[type="password"]');
+    pwFields.forEach(function(input) {
+        // Only add if not already present
+        if (!input.parentElement.querySelector('.fp-toggle')) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'fp-toggle';
+            btn.innerHTML = '<i class="fas fa-eye"></i>';
+            btn.style.position = 'absolute';
+            btn.style.right = '12px';
+            btn.style.top = '50%';
+            btn.style.transform = 'translateY(-50%)';
+            btn.style.background = 'none';
+            btn.style.border = 'none';
+            btn.style.cursor = 'pointer';
+            btn.style.padding = '0 8px';
+            btn.style.color = '#888';
+            btn.onclick = function(e) {
+                e.preventDefault();
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    btn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                } else {
+                    input.type = 'password';
+                    btn.innerHTML = '<i class="fas fa-eye"></i>';
+                }
+            };
+            input.parentElement.style.position = 'relative';
+            input.parentElement.appendChild(btn);
+        }
+    });
+}
+
+// Hiệu ứng rung khi nhập sai hoặc có lỗi
+function shakeOnError() {
+    var err = document.querySelector('.fp-error');
+    if (err) {
+        var container = document.querySelector('.fp-container');
+        if (container) {
+            container.style.animation = 'fpShake 0.3s';
+            container.addEventListener('animationend', function handler() {
+                container.style.animation = '';
+                container.removeEventListener('animationend', handler);
+            });
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    addPasswordToggle();
+    // Smooth scroll to error/message if present
+    var err = document.querySelector('.fp-error, .fp-message');
+    if (err) {
+        err.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        shakeOnError();
+    }
+});

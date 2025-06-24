@@ -60,7 +60,7 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("view/login.jsp").forward(request, response);
+        request.getRequestDispatcher("view/auth/login.jsp").forward(request, response);
     }
 
     /**
@@ -81,7 +81,7 @@ public class LoginServlet extends HttpServlet {
         if (email == null || password == null || email.trim().isEmpty() || password.trim().isEmpty()) {
             request.setAttribute("error", "Vui lòng nhập đầy đủ email và mật khẩu!");
             request.setAttribute("email", email);
-            request.getRequestDispatcher("view/login.jsp").forward(request, response);
+            request.getRequestDispatcher("view/auth/login.jsp").forward(request, response);
             return;
         }
 
@@ -89,7 +89,7 @@ public class LoginServlet extends HttpServlet {
         if (!pattern.matcher(email).matches()) {
             request.setAttribute("error", "Email không hợp lệ (phải dùng @fpt.edu.vn)!");
             request.setAttribute("email", email);
-            request.getRequestDispatcher("view/login.jsp").forward(request, response);
+            request.getRequestDispatcher("view/auth/login.jsp").forward(request, response);
             return;
         }
 
@@ -99,7 +99,7 @@ public class LoginServlet extends HttpServlet {
         if (user_find == null) {
             request.setAttribute("error", "Sai tài khoản hoặc mật khẩu");
             request.setAttribute("email", email);
-            request.getRequestDispatcher("view/login.jsp").forward(request, response);
+            request.getRequestDispatcher("view/auth/login.jsp").forward(request, response);
         } else if (!user_find.isStatus()) {
             // Kiểm tra nếu tài khoản chưa xác minh
             request.setAttribute("error", "Tài khoản chưa được xác minh. Vui lòng kiểm tra email để xác minh tài khoản.");
@@ -111,7 +111,7 @@ public class LoginServlet extends HttpServlet {
                     "/resend-verification?email=" + email + "'>Gửi lại email xác minh</a></p></div>";
             request.setAttribute("resendVerification", resendButton);
 
-            request.getRequestDispatcher("view/login.jsp").forward(request, response);
+            request.getRequestDispatcher("view/auth/login.jsp").forward(request, response);
         } else {
             // Tạo session
             HttpSession session = request.getSession();

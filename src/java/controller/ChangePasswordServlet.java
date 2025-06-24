@@ -40,7 +40,7 @@ public class ChangePasswordServlet extends HttpServlet {
         }
         
         // Hiển thị trang đổi mật khẩu
-        request.getRequestDispatcher("view/change-password.jsp").forward(request, response);
+        request.getRequestDispatcher("view/auth/change-password.jsp").forward(request, response);
     }
 
     /**
@@ -70,7 +70,7 @@ public class ChangePasswordServlet extends HttpServlet {
         if (!newPassword.equals(confirmPassword)) {
             request.setAttribute("msg", "Xác nhận mật khẩu không đúng");
             request.setAttribute("msgType", "error");
-            request.getRequestDispatcher("view/change-password.jsp").forward(request, response);
+            request.getRequestDispatcher("view/auth/change-password.jsp").forward(request, response);
             return;
         }
         
@@ -78,7 +78,7 @@ public class ChangePasswordServlet extends HttpServlet {
         if (!UserDAO.checkPassword(userID, currentPassword)) {
             request.setAttribute("msg", "Mật khẩu hiện tại không đúng");
             request.setAttribute("msgType", "error");
-            request.getRequestDispatcher("view/change-password.jsp").forward(request, response);
+            request.getRequestDispatcher("view/auth/change-password.jsp").forward(request, response);
             return;
         }        // Cập nhật mật khẩu mới
         boolean success = UserDAO.changePassword(userID, newPassword);
@@ -86,7 +86,7 @@ public class ChangePasswordServlet extends HttpServlet {
         if (!success) {
             request.setAttribute("msg", "Có lỗi xảy ra khi đổi mật khẩu");
             request.setAttribute("msgType", "error");
-            request.getRequestDispatcher("view/change-password.jsp").forward(request, response);
+            request.getRequestDispatcher("view/auth/change-password.jsp").forward(request, response);
             return;
         }
 
