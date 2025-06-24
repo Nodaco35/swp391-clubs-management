@@ -19,8 +19,8 @@ public class EmailService {
     // Các thông tin cấu hình
     private static String smtpHost = "smtp.gmail.com";
     private static String smtpPort = "587";
-    private static String fromEmail = "fptcms@gmail.com";
-    private static String password = "qthj sgph dnkf swvz";  // Sẽ được cập nhật từ file cấu hình hoặc biến môi trường
+    private static String fromEmail = "funiclubs@gmail.com";
+    private static String password = "pxdq kibm yyub xnvp";  // Sẽ được cập nhật từ file cấu hình hoặc biến môi trường
     private static String baseUrl = "http://localhost:8080";
     
     static {
@@ -143,6 +143,71 @@ public class EmailService {
             
         } catch (MessagingException e) {
             LOGGER.log(Level.SEVERE, "Lỗi khi gửi email đến {0}: {1}", new Object[]{toEmail, e.getMessage()});
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
+     * Gửi email đặt lại mật khẩu với token reset
+     * @param toEmail Email người nhận
+     * @param fullName Họ tên người nhận
+     * @param resetToken Token đặt lại mật khẩu
+     * @param contextPath ContextPath của ứng dụng web
+     * @return true nếu gửi thành công, false nếu thất bại
+     */
+    public static boolean sendResetPasswordEmail(String toEmail, String fullName, String resetToken, String contextPath) {
+        try {
+            LOGGER.log(Level.INFO, "Chuẩn bị gửi email đặt lại mật khẩu đến: {0}", toEmail);
+
+            Properties props = new Properties();
+            props.put("mail.smtp.auth", "true");
+            props.put("mail.smtp.starttls.enable", "true");
+            props.put("mail.smtp.host", smtpHost);
+            props.put("mail.smtp.port", smtpPort);
+
+            Session session = Session.getInstance(props, new Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(fromEmail, password);
+                }
+            });
+
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(fromEmail));
+            message.setRecipients(
+                    Message.RecipientType.TO,
+                    InternetAddress.parse(toEmail)
+            );
+            message.setSubject("Password Reset – FPT Club Management System");
+
+            // Tạo URL đặt lại mật khẩu
+            String resetUrl = baseUrl + contextPath + "/reset-password?token=" + resetToken;
+            LOGGER.log(Level.INFO, "URL đặt lại mật khẩu: {0}", resetUrl);
+
+            String htmlContent = ""
+                    + "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;'>"
+                    + "<h2 style='color: #4285f4;'>Yêu cầu đặt lại mật khẩu</h2>"
+                    + "<p>Xin chào <strong>" + fullName + "</strong>,</p>"
+                    + "<p>Bạn (hoặc ai đó) đã yêu cầu đặt lại mật khẩu cho tài khoản trên hệ thống Quản lý Câu lạc bộ FPT.</p>"
+                    + "<p>Nếu đây là bạn, vui lòng nhấp vào nút bên dưới để đặt lại mật khẩu:</p>"
+                    + "<div style='text-align: center; margin: 30px 0;'>"
+                    + "<a href='" + resetUrl + "' style='background-color: #4285f4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;'>Đặt lại mật khẩu</a>"
+                    + "</div>"
+                    + "<p>Hoặc bạn có thể sao chép và dán đường dẫn sau vào trình duyệt:</p>"
+                    + "<p style='background-color: #f5f5f5; padding: 10px; border-radius: 4px;'>" + resetUrl + "</p>"
+                    + "<p>Lưu ý: Liên kết này sẽ hết hạn sau 24 giờ.</p>"
+                    + "<p>Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email.</p>"
+                    + "<p>Thân mến,<br>Ban quản trị CMS</p>"
+                    + "</div>";
+
+            message.setContent(htmlContent, "text/html; charset=UTF-8");
+            Transport.send(message);
+            LOGGER.log(Level.INFO, "Đã gửi email đặt lại mật khẩu đến: {0}", toEmail);
+            return true;
+
+        } catch (MessagingException e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi gửi email đặt lại mật khẩu đến {0}: {1}", new Object[]{toEmail, e.getMessage()});
             e.printStackTrace();
             return false;
         }

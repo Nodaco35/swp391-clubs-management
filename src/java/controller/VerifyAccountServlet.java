@@ -21,7 +21,7 @@ public class VerifyAccountServlet extends HttpServlet {
         
         if (token == null || token.trim().isEmpty()) {
             request.setAttribute("error", "Token xác minh không hợp lệ!");
-            request.getRequestDispatcher("/view/verifyResult.jsp").forward(request, response);
+            request.getRequestDispatcher("/view/auth/verifyResult.jsp").forward(request, response);
             return;
         }
         
@@ -30,7 +30,7 @@ public class VerifyAccountServlet extends HttpServlet {
         
         if (user == null) {
             request.setAttribute("error", "Token xác minh không tồn tại hoặc đã hết hạn!");
-            request.getRequestDispatcher("/view/verifyResult.jsp").forward(request, response);
+            request.getRequestDispatcher("/view/auth/verifyResult.jsp").forward(request, response);
             return;
         }
         
@@ -38,13 +38,13 @@ public class VerifyAccountServlet extends HttpServlet {
         if (user.getTokenExpiry() == null || new java.util.Date().after(user.getTokenExpiry())) {
             request.setAttribute("error", "Token xác minh đã hết hạn! Vui lòng yêu cầu gửi lại email xác minh.");
             request.setAttribute("email", user.getEmail());
-            request.getRequestDispatcher("/view/verifyResult.jsp").forward(request, response);
+            request.getRequestDispatcher("/view/auth/verifyResult.jsp").forward(request, response);
             return;
         }
           // Kiểm tra xem tài khoản đã được xác minh chưa
         if (user.isStatus()) {
             request.setAttribute("success", "Tài khoản của bạn đã được xác minh trước đó! Bạn có thể đăng nhập ngay bây giờ.");
-            request.getRequestDispatcher("/view/verifyResult.jsp").forward(request, response);
+            request.getRequestDispatcher("/view/auth/verifyResult.jsp").forward(request, response);
             return;
         }
 
@@ -60,6 +60,6 @@ public class VerifyAccountServlet extends HttpServlet {
             request.setAttribute("email", user.getEmail());
         }
         
-        request.getRequestDispatcher("/view/verifyResult.jsp").forward(request, response);
+        request.getRequestDispatcher("/view/auth/verifyResult.jsp").forward(request, response);
     }
 }

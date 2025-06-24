@@ -22,7 +22,7 @@ public class RegisterServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("/view/register.jsp").forward(request, response);
+        request.getRequestDispatcher("/view/auth/register.jsp").forward(request, response);
     }    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -38,7 +38,7 @@ public class RegisterServlet extends HttpServlet {
             request.setAttribute("fullName", fullName);
             request.setAttribute("email", email);
             request.setAttribute("dateOfBirth", dateOfBirthStr);
-            request.getRequestDispatcher("/view/register.jsp").forward(request, response);
+            request.getRequestDispatcher("/view/auth/register.jsp").forward(request, response);
             return;
         }
         UserDAO ud = new UserDAO();
@@ -47,7 +47,7 @@ public class RegisterServlet extends HttpServlet {
             request.setAttribute("fullName", fullName);
             request.setAttribute("email", email);
             request.setAttribute("dateOfBirth", dateOfBirthStr);
-            request.getRequestDispatcher("/view/register.jsp").forward(request, response);
+            request.getRequestDispatcher("/view/auth/register.jsp").forward(request, response);
             return;
         }
 
@@ -66,7 +66,7 @@ public class RegisterServlet extends HttpServlet {
             request.setAttribute("fullName", fullName);
             request.setAttribute("email", email);
             request.setAttribute("dateOfBirth", dateOfBirthStr);
-            request.getRequestDispatcher("/view/register.jsp").forward(request, response);
+            request.getRequestDispatcher("/view/auth/register.jsp").forward(request, response);
             return;
         }        newUser.setPermissionID(1); // Default: Student
         newUser.setStatus(false);   // Inactive until email verification
@@ -100,14 +100,14 @@ public class RegisterServlet extends HttpServlet {
                 request.setAttribute("warning", "Đăng ký thành công nhưng không thể tạo token xác minh. Vui lòng liên hệ quản trị viên.");
             }
                   // Chuyển đến trang đăng nhập thay vì tự động đăng nhập
-            request.getRequestDispatcher("/view/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/view/auth/login.jsp").forward(request, response);
         } else {
             LOGGER.log(Level.SEVERE, "Đăng ký thất bại cho email: {0}", email);
             request.setAttribute("error", "Đăng ký thất bại! Vui lòng thử lại.");
             request.setAttribute("fullName", fullName);
             request.setAttribute("email", email);
             request.setAttribute("dateOfBirth", dateOfBirthStr);
-            request.getRequestDispatcher("/view/register.jsp").forward(request, response);
+            request.getRequestDispatcher("/view/auth/register.jsp").forward(request, response);
         }
     }    private String validateInput(String fullName, String email, String password, String confirmPassword, String dateOfBirth) {
         if (fullName == null || fullName.trim().length() < 2 || fullName.trim().length() > 100) {
