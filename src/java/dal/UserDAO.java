@@ -43,19 +43,23 @@ public class UserDAO {
         return eventIDs;
     }
 
-    public boolean isChairman(String userID) {
-        String sql = "SELECT 1 FROM UserClubs WHERE UserID = ? AND RoleID = 1 AND IsActive = 1 LIMIT 1";
-        try {
-            Connection connection = DBContext.getConnection();
-            PreparedStatement ps = connection.prepareStatement(sql);
+    public boolean isChairman(String userID, int clubID) {
+        String sql = "SELECT 1 FROM UserClubs WHERE UserID = ? AND ClubID = ? AND RoleID = 1 AND IsActive = 1 LIMIT 1";
+        try (Connection connection = DBContext.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+
             ps.setString(1, userID);
+            ps.setInt(2, clubID);
+
             ResultSet rs = ps.executeQuery();
-            return rs.next(); // có ít nhất 1 dòng là true
+            return rs.next();
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return false;
     }
+
 
     public int getClubIdIfChairman(String userID) {
         String sql = "SELECT ClubID " +

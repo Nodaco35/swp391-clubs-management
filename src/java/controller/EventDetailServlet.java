@@ -88,9 +88,7 @@ public class EventDetailServlet extends HttpServlet {
                 request.setAttribute("registeredCount", stats.getRegisteredCount());
                 request.setAttribute("spotsLeft", stats.getSpotsLeft());
                 request.setAttribute("isMember", isMember);
-                System.out.println("Event: " + e.getEventName());
-                System.out.println("Is Member: " + isMember);
-                System.out.println("Spots left: " + stats.getSpotsLeft());
+
 
                 request.getRequestDispatcher("view/events-page/event-detail/event-detail.jsp").forward(request, response);
             } else {
