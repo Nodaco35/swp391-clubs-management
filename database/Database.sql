@@ -1,10 +1,8 @@
 
 -- ========================================
-<<<<<<< HEAD
--- CREATE DATABASE - MYSQL
-=======
+
 -- CREATE DATABASE (MySQL style)
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
+
 -- ========================================
 DROP DATABASE IF EXISTS ClubManagementSystem;
 CREATE DATABASE ClubManagementSystem CHARACTER SET utf8mb4 COLLATE=utf8mb4_unicode_ci;
