@@ -7,9 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DepartmentMemberDAO {    /**
-     * Lấy danh sách thành viên trong ban theo phân trang
+     * Lấy danh sách thành viên trong ban theo phân trang (sử dụng ClubDepartmentID)
      */
-    public List<DepartmentMember> getDepartmentMembers(int departmentID, int page, int pageSize) {
+    public List<DepartmentMember> getDepartmentMembers(int clubDepartmentID, int page, int pageSize) {
         List<DepartmentMember> members = new ArrayList<>();
         String sql = """
             SELECT u.UserID, u.FullName, u.Email, u.AvatarSrc,
@@ -21,14 +21,14 @@ public class DepartmentMemberDAO {    /**
             INNER JOIN Departments d ON cd.DepartmentID = d.DepartmentID
             INNER JOIN Clubs c ON cd.ClubID = c.ClubID
             LEFT JOIN Roles r ON uc.RoleID = r.RoleID
-            WHERE cd.DepartmentID = ?
+            WHERE cd.ClubDepartmentID = ?
             ORDER BY uc.JoinDate DESC
             LIMIT ? OFFSET ?
             """;
         
         try (Connection conn = DBContext.getConnection()) {
             PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, departmentID);
+            ps.setInt(1, clubDepartmentID);
             ps.setInt(2, pageSize);
             ps.setInt(3, (page - 1) * pageSize);
             
@@ -58,19 +58,19 @@ public class DepartmentMemberDAO {    /**
         }
         return members;
     }    /**
-     * Đếm tổng số thành viên trong ban
+     * Đếm tổng số thành viên trong ban (sử dụng ClubDepartmentID)
      */
-    public int getTotalMembersCount(int departmentID) {
+    public int getTotalMembersCount(int clubDepartmentID) {
         String sql = """
             SELECT COUNT(*) as total
             FROM UserClubs uc
             INNER JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
-            WHERE cd.DepartmentID = ?
+            WHERE cd.ClubDepartmentID = ?
             """;
         
         try (Connection conn = DBContext.getConnection()) {
             PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, departmentID);
+            ps.setInt(1, clubDepartmentID);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 return rs.getInt("total");
@@ -80,9 +80,9 @@ public class DepartmentMemberDAO {    /**
         }
         return 0;
     }    /**
-     * Tìm kiếm thành viên theo tên hoặc email
+     * Tìm kiếm thành viên theo tên hoặc email (sử dụng ClubDepartmentID)
      */
-    public List<DepartmentMember> searchMembers(int departmentID, String keyword, int page, int pageSize) {
+    public List<DepartmentMember> searchMembers(int clubDepartmentID, String keyword, int page, int pageSize) {
         List<DepartmentMember> members = new ArrayList<>();
         String sql = """
             SELECT u.UserID, u.FullName, u.Email, u.AvatarSrc,
@@ -94,7 +94,7 @@ public class DepartmentMemberDAO {    /**
             INNER JOIN Departments d ON cd.DepartmentID = d.DepartmentID
             INNER JOIN Clubs c ON cd.ClubID = c.ClubID
             LEFT JOIN Roles r ON uc.RoleID = r.RoleID
-            WHERE cd.DepartmentID = ? 
+            WHERE cd.ClubDepartmentID = ? 
             AND (u.FullName LIKE ? OR u.Email LIKE ?)
             ORDER BY uc.JoinDate DESC
             LIMIT ? OFFSET ?
@@ -103,11 +103,11 @@ public class DepartmentMemberDAO {    /**
         try (Connection conn = DBContext.getConnection()) {
             PreparedStatement ps = conn.prepareStatement(sql);
             String searchPattern = "%" + keyword + "%";
-            ps.setInt(1, departmentID);
+            ps.setInt(1, clubDepartmentID);
             ps.setString(2, searchPattern);
             ps.setString(3, searchPattern);
             ps.setInt(4, pageSize);
-            ps.setInt(5, (page - 1) * pageSize);              ResultSet rs = ps.executeQuery();
+            ps.setInt(5, (page - 1) * pageSize);ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 DepartmentMember member = new DepartmentMember();
                 member.setUserID(rs.getString("UserID"));
@@ -258,6 +258,47 @@ public class DepartmentMemberDAO {    /**
         }
         return students;
     }    /**
+     * Tìm kiếm sinh viên chưa tham gia ban cụ thể (sử dụng ClubDepartmentID)
+     */
+    public List<Users> searchStudentsNotInClubDepartment(int clubDepartmentID, String keyword, int limit) {
+        List<Users> students = new ArrayList<>();
+        String sql = """
+            SELECT DISTINCT u.UserID, u.FullName, u.Email, u.AvatarSrc
+            FROM Users u
+            WHERE u.PermissionID = 1 
+            AND u.Status = 1
+            AND (u.FullName LIKE ? OR u.Email LIKE ?)
+            AND u.UserID NOT IN (
+                SELECT uc.UserID 
+                FROM UserClubs uc 
+                WHERE uc.ClubDepartmentID = ?
+            )
+            ORDER BY u.FullName
+            LIMIT ?
+            """;
+        
+        try (Connection conn = DBContext.getConnection()) {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            String searchPattern = "%" + keyword + "%";
+            ps.setString(1, searchPattern);
+            ps.setString(2, searchPattern);
+            ps.setInt(3, clubDepartmentID);
+            ps.setInt(4, limit);
+            
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Users student = new Users();
+                student.setUserID(rs.getString("UserID"));
+                student.setFullName(rs.getString("FullName"));
+                student.setEmail(rs.getString("Email"));
+                student.setAvatar(rs.getString("AvatarSrc"));
+                students.add(student);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return students;
+    }    /**
      * Thêm thành viên vào ban
      */
     public boolean addMemberToDepartment(String userID, int clubID, int departmentID, int roleID) {
@@ -297,18 +338,21 @@ public class DepartmentMemberDAO {    /**
         }
         return false;
     }    /**
-     * Kiểm tra quyền trưởng ban
+     * Kiểm tra quyền trưởng ban cho ban cụ thể
+     * @param userID ID của user
+     * @param clubDepartmentID ID của ban cụ thể
      */
-    public boolean isDepartmentLeader(String userID) {
+    public boolean isDepartmentLeader(String userID, int clubDepartmentID) {
         String sql = """
             SELECT COUNT(*) as count
             FROM UserClubs uc
-            WHERE uc.UserID = ? AND uc.RoleID = 3
+            WHERE uc.UserID = ? AND uc.ClubDepartmentID = ? AND uc.RoleID = 3 AND uc.IsActive = 1
             """;
         
         try (Connection conn = DBContext.getConnection()) {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, userID);
+            ps.setInt(2, clubDepartmentID);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 return rs.getInt("count") > 0;
@@ -317,7 +361,30 @@ public class DepartmentMemberDAO {    /**
             e.printStackTrace();
         }
         return false;
-    }    /**
+    }/**
+     * Lấy ClubDepartment ID của trưởng ban
+     */
+    public int getClubDepartmentIdByLeader(String userID) {
+        String sql = """
+            SELECT uc.ClubDepartmentID
+            FROM UserClubs uc
+            WHERE uc.UserID = ? AND uc.RoleID = 3 AND uc.IsActive = 1
+            """;
+        
+        try (Connection conn = DBContext.getConnection()) {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, userID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("ClubDepartmentID");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    /**
      * Lấy Department ID của trưởng ban
      */
     public int getDepartmentIdByLeader(String userID) {
@@ -336,8 +403,47 @@ public class DepartmentMemberDAO {    /**
                 return rs.getInt("DepartmentID");
             }
         } catch (SQLException e) {
+            e.printStackTrace();        }
+        return 0;
+    }
+    
+    /**
+     * Thêm thành viên vào ban (sử dụng ClubDepartmentID trực tiếp)
+     */
+    public boolean addMemberToClubDepartment(String userID, int clubDepartmentID, int roleID) {
+        // Get clubID from clubDepartmentID
+        String getClubIdSql = """
+            SELECT ClubID 
+            FROM ClubDepartments 
+            WHERE ClubDepartmentID = ?
+            """;
+        
+        String insertSql = """
+            INSERT INTO UserClubs (UserID, ClubID, ClubDepartmentID, RoleID, JoinDate, IsActive)
+            VALUES (?, ?, ?, ?, NOW(), 1)
+            """;
+        
+        try (Connection conn = DBContext.getConnection()) {
+            // Get ClubID
+            PreparedStatement getPs = conn.prepareStatement(getClubIdSql);
+            getPs.setInt(1, clubDepartmentID);
+            ResultSet rs = getPs.executeQuery();
+            
+            if (rs.next()) {
+                int clubID = rs.getInt("ClubID");
+                
+                // Insert new member
+                PreparedStatement insertPs = conn.prepareStatement(insertSql);
+                insertPs.setString(1, userID);
+                insertPs.setInt(2, clubID);
+                insertPs.setInt(3, clubDepartmentID);
+                insertPs.setInt(4, roleID);
+                
+                return insertPs.executeUpdate() > 0;
+            }
+        } catch (SQLException e) {
             e.printStackTrace();
         }
-        return 0;
+        return false;
     }
 }

@@ -621,7 +621,7 @@ public class UserClubDAO {
         try {
             conn = DBContext.getConnection();
             String query = """
-                SELECT uc.*, u.FullName, r.RoleName, d.DepartmentName 
+                SELECT uc.*, u.FullName, r.RoleName, d.DepartmentName , d.DepartmentID
                 FROM UserClubs uc
                 JOIN Users u ON uc.UserID = u.UserID
                 JOIN Roles r ON uc.RoleID = r.RoleID
@@ -646,6 +646,8 @@ public class UserClubDAO {
                 userClub.setFullName(rs.getString("FullName"));
                 userClub.setRoleName(rs.getString("RoleName"));
                 userClub.setDepartmentName(rs.getString("DepartmentName"));
+                userClub.setClubDepartmentID(rs.getInt("DepartmentID"));
+
             }
         } catch (SQLException e) {
             System.out.println("Error getting user club: " + e.getMessage());

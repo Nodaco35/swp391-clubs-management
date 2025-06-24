@@ -40,8 +40,7 @@ public class DepartmentDashboardServlet extends HttpServlet {
             
             // Lấy dữ liệu dashboard
             DepartmentDashboard dashboard = dashboardDAO.getCompleteDashboard(currentUser.getUserID());
-            
-            if (dashboard == null) {
+              if (dashboard == null) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy thông tin ban");
                 return;
             }
@@ -49,7 +48,6 @@ public class DepartmentDashboardServlet extends HttpServlet {
             // Đưa dữ liệu vào request
             request.setAttribute("dashboard", dashboard);
             request.setAttribute("currentUser", currentUser);
-            
             // Forward đến JSP
             request.getRequestDispatcher("view/student/department-leader/dashboard.jsp").forward(request, response);
             

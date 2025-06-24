@@ -30,30 +30,21 @@ public class DepartmentMemberServlet extends HttpServlet {
         
         HttpSession session = request.getSession();
         Users currentUser = (Users) session.getAttribute("user");
-          // Kiểm tra đăng nhập
+        
+        // Kiểm tra đăng nhập
         if (currentUser == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-          try {
-            // Debug logging
+          try {            // Debug logging
             System.out.println("DepartmentMemberServlet: User ID = " + currentUser.getUserID());
             
-            // Kiểm tra quyền trưởng ban
-            boolean isLeader = memberDAO.isDepartmentLeader(currentUser.getUserID());
-            System.out.println("DepartmentMemberServlet: Is department leader = " + isLeader);
+            // Lấy club department ID của user (user chỉ có thể là trưởng ban 1 ban trong 1 CLB)
+            int clubDepartmentID = memberDAO.getClubDepartmentIdByLeader(currentUser.getUserID());
+            System.out.println("DepartmentMemberServlet: ClubDepartment ID = " + clubDepartmentID);
             
-            if (!isLeader) {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập trang này");
-                return;
-            }
-            
-            // Lấy department ID
-            int departmentID = memberDAO.getDepartmentIdByLeader(currentUser.getUserID());
-            System.out.println("DepartmentMemberServlet: Department ID = " + departmentID);
-            
-            if (departmentID == 0) {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy thông tin ban");
+            if (clubDepartmentID == 0) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập trang này hoặc không phải là trưởng ban");
                 return;
             }
             
@@ -64,16 +55,16 @@ public class DepartmentMemberServlet extends HttpServlet {
             
             switch (action) {
                 case "list":
-                    handleListMembers(request, response, departmentID);
+                    handleListMembers(request, response, clubDepartmentID);
                     break;
                 case "search":
-                    handleSearchMembers(request, response, departmentID);
+                    handleSearchMembers(request, response, clubDepartmentID);
                     break;
                 case "searchStudents":
-                    handleSearchStudents(request, response, departmentID);
+                    handleSearchStudents(request, response, clubDepartmentID);
                     break;
                 default:
-                    handleListMembers(request, response, departmentID);
+                    handleListMembers(request, response, clubDepartmentID);
                     break;
             }
             
@@ -93,17 +84,12 @@ public class DepartmentMemberServlet extends HttpServlet {
         if (currentUser == null) {
             response.sendRedirect("auth");
             return;
-        }
-        
-        try {
-            if (!memberDAO.isDepartmentLeader(currentUser.getUserID())) {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập trang này");
-                return;
-            }
+        }          try {            // Lấy club department ID của user (user chỉ có thể là trưởng ban 1 ban trong 1 CLB)
+            int clubDepartmentID = memberDAO.getClubDepartmentIdByLeader(currentUser.getUserID());
+            System.out.println("DepartmentMemberServlet POST: ClubDepartment ID = " + clubDepartmentID);
             
-            int departmentID = memberDAO.getDepartmentIdByLeader(currentUser.getUserID());
-            if (departmentID == 0) {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy thông tin ban");
+            if (clubDepartmentID == 0) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập trang này hoặc không phải là trưởng ban");
                 return;
             }
             
@@ -111,13 +97,13 @@ public class DepartmentMemberServlet extends HttpServlet {
             
             switch (action) {
                 case "updateStatus":
-                    handleUpdateStatus(request, response, departmentID);
+                    handleUpdateStatus(request, response, clubDepartmentID);
                     break;
                 case "removeMember":
-                    handleRemoveMember(request, response, departmentID);
+                    handleRemoveMember(request, response, clubDepartmentID);
                     break;
                 case "addMember":
-                    handleAddMember(request, response, departmentID);
+                    handleAddMember(request, response, clubDepartmentID);
                     break;
                 default:
                     response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Hành động không hợp lệ");
@@ -129,8 +115,7 @@ public class DepartmentMemberServlet extends HttpServlet {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Có lỗi xảy ra: " + e.getMessage());
         }
     }
-    
-    private void handleListMembers(HttpServletRequest request, HttpServletResponse response, int departmentID)
+      private void handleListMembers(HttpServletRequest request, HttpServletResponse response, int clubDepartmentID)
             throws ServletException, IOException {
         
         // Lấy tham số phân trang
@@ -157,10 +142,9 @@ public class DepartmentMemberServlet extends HttpServlet {
                 pageSize = 10;
             }
         }
-        
-        // Lấy danh sách thành viên
-        List<DepartmentMember> members = memberDAO.getDepartmentMembers(departmentID, page, pageSize);
-        int totalMembers = memberDAO.getTotalMembersCount(departmentID);
+          // Lấy danh sách thành viên
+        List<DepartmentMember> members = memberDAO.getDepartmentMembers(clubDepartmentID, page, pageSize);
+        int totalMembers = memberDAO.getTotalMembersCount(clubDepartmentID);
         int totalPages = (int) Math.ceil((double) totalMembers / pageSize);
         
         // Lấy thông tin department để hiển thị
@@ -172,13 +156,12 @@ public class DepartmentMemberServlet extends HttpServlet {
         request.setAttribute("pageSize", pageSize);
         request.setAttribute("totalMembers", totalMembers);
         request.setAttribute("totalPages", totalPages);
-        request.setAttribute("departmentID", departmentID);
+        request.setAttribute("clubDepartmentID", clubDepartmentID);
         
         // Forward đến JSP
         request.getRequestDispatcher("view/student/department-leader/members.jsp").forward(request, response);
     }
-    
-    private void handleSearchMembers(HttpServletRequest request, HttpServletResponse response, int departmentID)
+      private void handleSearchMembers(HttpServletRequest request, HttpServletResponse response, int clubDepartmentID)
             throws ServletException, IOException {
         
         String keyword = request.getParameter("keyword");
@@ -196,16 +179,15 @@ public class DepartmentMemberServlet extends HttpServlet {
                 page = 1;
             }
         }
-        
-        // Tìm kiếm thành viên
+          // Tìm kiếm thành viên
         List<DepartmentMember> members;
         if (keyword.trim().isEmpty()) {
-            members = memberDAO.getDepartmentMembers(departmentID, page, pageSize);
+            members = memberDAO.getDepartmentMembers(clubDepartmentID, page, pageSize);
         } else {
-            members = memberDAO.searchMembers(departmentID, keyword.trim(), page, pageSize);
+            members = memberDAO.searchMembers(clubDepartmentID, keyword.trim(), page, pageSize);
         }
         
-        int totalMembers = memberDAO.getTotalMembersCount(departmentID);
+        int totalMembers = memberDAO.getTotalMembersCount(clubDepartmentID);
         int totalPages = (int) Math.ceil((double) totalMembers / pageSize);
         
         request.setAttribute("members", members);
@@ -213,19 +195,18 @@ public class DepartmentMemberServlet extends HttpServlet {
         request.setAttribute("pageSize", pageSize);
         request.setAttribute("totalMembers", totalMembers);
         request.setAttribute("totalPages", totalPages);
-        request.setAttribute("departmentID", departmentID);
+        request.setAttribute("clubDepartmentID", clubDepartmentID);
         request.setAttribute("keyword", keyword);
         
         request.getRequestDispatcher("view/student/department-leader/members.jsp").forward(request, response);
     }
-    
-    private void handleSearchStudents(HttpServletRequest request, HttpServletResponse response, int departmentID)
+      private void handleSearchStudents(HttpServletRequest request, HttpServletResponse response, int clubDepartmentID)
             throws IOException {
         
         String keyword = request.getParameter("keyword");
         if (keyword == null) keyword = "";
         
-        List<Users> students = memberDAO.searchStudentsNotInDepartment(departmentID, keyword.trim(), 10);
+        List<Users> students = memberDAO.searchStudentsNotInClubDepartment(clubDepartmentID, keyword.trim(), 10);
         
         // Trả về JSON
         response.setContentType("application/json");
@@ -234,8 +215,7 @@ public class DepartmentMemberServlet extends HttpServlet {
         Gson gson = new Gson();
         String json = gson.toJson(students);
         response.getWriter().write(json);
-    }
-      private void handleUpdateStatus(HttpServletRequest request, HttpServletResponse response, int departmentID)
+    }      private void handleUpdateStatus(HttpServletRequest request, HttpServletResponse response, int clubDepartmentID)
             throws IOException {
         
         String userID = request.getParameter("userID");
@@ -249,7 +229,7 @@ public class DepartmentMemberServlet extends HttpServlet {
         
         try {
             boolean isActive = Boolean.parseBoolean(isActiveParam);
-              boolean success = memberDAO.updateMemberStatus(userID, departmentID, isActive, status);
+              boolean success = memberDAO.updateMemberStatus(userID, clubDepartmentID, isActive, status);
             
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
@@ -260,8 +240,7 @@ public class DepartmentMemberServlet extends HttpServlet {
         } catch (Exception e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Có lỗi xảy ra");
         }
-    }
-      private void handleRemoveMember(HttpServletRequest request, HttpServletResponse response, int departmentID)
+    }      private void handleRemoveMember(HttpServletRequest request, HttpServletResponse response, int clubDepartmentID)
             throws IOException {
         
         String userID = request.getParameter("userID");
@@ -270,7 +249,7 @@ public class DepartmentMemberServlet extends HttpServlet {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Thiếu ID người dùng");
             return;
         }
-          boolean success = memberDAO.removeMemberFromDepartment(userID, departmentID);
+          boolean success = memberDAO.removeMemberFromDepartment(userID, clubDepartmentID);
         
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
@@ -279,23 +258,20 @@ public class DepartmentMemberServlet extends HttpServlet {
         response.getWriter().write(json);
     }
     
-    private void handleAddMember(HttpServletRequest request, HttpServletResponse response, int departmentID)
+    private void handleAddMember(HttpServletRequest request, HttpServletResponse response, int clubDepartmentID)
             throws IOException {
-        
-        String userID = request.getParameter("userID");
-        String clubIDParam = request.getParameter("clubID");
+          String userID = request.getParameter("userID");
         String roleIDParam = request.getParameter("roleID");
         
-        if (userID == null || clubIDParam == null || roleIDParam == null) {
+        if (userID == null || roleIDParam == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Thiếu thông tin cần thiết");
             return;
         }
         
         try {
-            int clubID = Integer.parseInt(clubIDParam);
             int roleID = Integer.parseInt(roleIDParam);
             
-            boolean success = memberDAO.addMemberToDepartment(userID, clubID, departmentID, roleID);
+            boolean success = memberDAO.addMemberToClubDepartment(userID, clubDepartmentID, roleID);
             
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");

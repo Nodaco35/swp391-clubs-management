@@ -171,6 +171,8 @@ public class ClubsServlet extends HttpServlet {
                 }
                 if (userClub.getRoleID() == 3) {
                     isDepartmentLeader = true;
+                    int departmentID = userClub.getClubDepartmentID();
+                    request.setAttribute("departmentID", departmentID);
                 }
             }
             isFavorite = clubDAO.isFavoriteClub(userID, clubID);

@@ -79,9 +79,7 @@
                                        class="btn btn-primary left-btn">
                                         <i class="fas fa-users"></i> Quản lý thành viên
                                     </a>
-                                </c:if>
-
-                                <c:if test="${isDepartmentLeader}">
+                                </c:if>                <c:if test="${isDepartmentLeader}">
                                     <a href="${pageContext.request.contextPath}/department-dashboard" 
                                        class="btn btn-success left-btn">
                                         <i class="fas fa-users-gear"></i> Quản lý Ban
