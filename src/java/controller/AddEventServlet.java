@@ -115,8 +115,6 @@ public class AddEventServlet extends HttpServlet {
             return;
         }
 
-
-
         String eventName = request.getParameter("eventName");
         String eventLocationIDStr = request.getParameter("eventLocation");
         String maxParticipantsStr = request.getParameter("maxParticipants");
@@ -142,7 +140,6 @@ public class AddEventServlet extends HttpServlet {
         }
 
 
-        // Xử lý thêm sự kiện
         String eventType = request.getParameter("eventType");
         String eventDescription = request.getParameter("eventDescription");
 
