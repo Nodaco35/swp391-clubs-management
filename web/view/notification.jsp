@@ -70,7 +70,7 @@
                     </c:when>
                     <c:otherwise>
                         <c:forEach var="noti" items="${notifications}">
-                            <div class="notification ${noti.status == 'UNREAD' ? 'unread' : 'read'}" id="noti-${noti.notificationID}" onclick="showDetail('${noti.notificationID}', '${noti.title}', '${type == 'send' ? noti.receiverName : noti.senderName}', '${noti.createdDate}', '${noti.content.replace('\'', '\\\'')}')">
+                            <div class="notification ${noti.status == 'UNREAD' ? 'unread' : 'read'}" id="noti-${noti.notificationID}">
                                 <div class="notification-left">
                                     <!-- Hiển thị avatar dựa trên type -->
                                     <img src="${type == 'send' ? noti.receiverAvatar : noti.senderAvatar}" alt="Avatar" />

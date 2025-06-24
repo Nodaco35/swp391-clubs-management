@@ -103,6 +103,12 @@ public class MyClubController extends HttpServlet {
         if (action.equals("submitCreateMeeting")) {
             createClubMeeting(request, response);
         }
+        if (action.equals("submitUpdateMeeting")) {
+            submitUpdateMeeting(request, response);
+        }
+        if (action.equals("deleteClubMeeting")) {
+            deleteClubMeeting(request, response);
+        }
     }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -143,6 +149,38 @@ public class MyClubController extends HttpServlet {
         for (UserClub userClub : userInClub) {
             NotificationDAO.sentToPerson(user.getUserID(), userClub.getUserID(), "Cuộc họp mới", "Link tham gia: " + URLMeeting);
         }
+        doGet(request, response);
+    }
+    private void submitUpdateMeeting(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        Users user = (Users) request.getSession().getAttribute("user");
+        if (user == null) {
+            request.getRequestDispatcher("index.jsp").forward(request, response);
+            return;
+        }
+        int clubID = Integer.parseInt(request.getParameter("clubId"));
+        String startedTime = request.getParameter("startedTime");
+        String URLMeeting = request.getParameter("URLMeeting");
+        int clubMeetingID = Integer.parseInt(request.getParameter("clubMeetingId"));
+        ClubMeetingDAO.update(clubID, startedTime, URLMeeting, clubMeetingID);
+        String formattedTime = startedTime.replace("T", " ").substring(0, 16);
+        String content = "Link tham gia: <a href=\"" + URLMeeting + "\">" + URLMeeting + "</a><br/>Thời gian bắt đầu: <strong>" + formattedTime + "</strong>";
+        List<UserClub> userInClub = UserClubDAO.findByClubID(clubID);
+        for (UserClub userClub : userInClub) {
+            NotificationDAO.sentToPerson(user.getUserID(), userClub.getUserID(), "Thay đổi cuộc họp", content);
+        }
+        doGet(request, response);
+    }
+
+    private void deleteClubMeeting(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        Users user = (Users) request.getSession().getAttribute("user");
+        if (user == null) {
+            request.getRequestDispatcher("index.jsp").forward(request, response);
+            return;
+        }
+
+        int clubMeetingID = Integer.parseInt(request.getParameter("clubMeetingId"));
+        ClubMeetingDAO.delete(clubMeetingID);
+
         doGet(request, response);
     }
 
