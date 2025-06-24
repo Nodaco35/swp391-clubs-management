@@ -228,10 +228,36 @@
                                     </c:otherwise>
                                 </c:choose>
                                 <c:if test="${isLeader}">
-                                    <a href="#" class="mt-5 inline-block text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-full transition" >Tạo cuộc họp mới</a>
+                                    <a href="myclub?action=createClubMeeting" class="mt-5 inline-block text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-full transition" >Tạo cuộc họp mới</a>
                                 </c:if>
                             </div>
                         </section>
+
+                        <!-- Form tạo cuộc họp mới - ẩn ban đầu -->
+                        <div id="createMeetingForm" class="mt-6 bg-gray-50 p-6 rounded-lg border border-gray-300 hidden">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Tạo Cuộc Họp Mới</h3>
+                            <form action="${pageContext.request.contextPath}/myclub?action=submitCreateMeeting" method="POST">
+                                <div class="mb-4">
+                                    <label for="clubId" class="block text-sm font-medium text-gray-700">Chọn Câu Lạc Bộ</label>
+                                    <select id="clubId" name="clubId" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                                        <option value="">-- Chọn câu lạc bộ --</option>
+                                        <c:forEach items="${listClubAsChairman}" var="club">
+                                            <option value="${club.clubID}">${club.clubName}</option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="meetingTime" class="block text-sm font-medium text-gray-700">Thời gian bắt đầu</label>
+                                    <input type="datetime-local" id="meetingTime" name="startedTime" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="URLMeeting" class="block text-sm font-medium text-gray-700">Link họp</label>
+                                    <input type="url" id="meetingLink" name="URLMeeting" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                                </div>
+                                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Tạo</button>
+                                <button type="button" id="cancelMeetingForm" class="ml-2 bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Hủy</button>
+                            </form>
+                        </div>
 
 
                         <!-- Mới đức -->
@@ -467,5 +493,26 @@
         }
         });
         }
+
+        // mới
+        document.addEventListener('DOMContentLoaded', () => {
+        const createBtn = document.querySelector('a[href="myclub?action=createClubMeeting"]');
+        const createForm = document.getElementById('createMeetingForm');
+        const cancelBtn = document.getElementById('cancelMeetingForm');
+        if (createBtn && createForm) {
+        createBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        createForm.classList.toggle('hidden');
+        });
+        }
+
+        if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+        createForm.classList.add('hidden');
+        });
+        }
+        });
+
+
     </script>
 </html>

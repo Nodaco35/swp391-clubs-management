@@ -66,4 +66,21 @@ public class ClubMeetingDAO {
         }
         return count;
     }
+
+    public static void insert(int clubID, String startedTime, String URLMeeting) {
+        String sql = """
+                     INSERT INTO ClubMeeting (ClubID, URLMeeting, StartedTime)
+                     VALUES (?, ?, ?);""";
+        
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setObject(1, clubID);
+            ps.setObject(2, URLMeeting);
+            ps.setObject(3, startedTime);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+       
+    }
 }

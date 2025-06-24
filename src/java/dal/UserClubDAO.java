@@ -49,6 +49,27 @@ public class UserClubDAO {
         return findByUserID;
     }
 
+    public static List<UserClub> findByClubID(int clubID) {
+        List<UserClub> findByClubID = new ArrayList<>();
+        String sql = """
+                     Select *
+                     from userclubs uc
+                     join clubs c on uc.ClubID = c.ClubID
+                     where c.ClubID = ?""";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setObject(1, clubID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                UserClub uc = new UserClub();
+                uc.setUserID(rs.getString("UserID"));
+                findByClubID.add(uc);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return findByClubID;
+    }
 
     public boolean isUserMemberOfClub(int clubID, String userID) {
         String sql = "SELECT 1 FROM UserClubs WHERE ClubID = ? AND UserID = ? AND IsActive = 1";
@@ -536,14 +557,13 @@ public class UserClubDAO {
 
         try {
             conn = DBContext.getConnection();
-            String query =
-                    """
+            String query
+                    = """
                     SELECT cd.DepartmentID, d.DepartmentName 
                     FROM ClubDepartments cd
                     JOIN Departments d ON cd.DepartmentID = d.DepartmentID
                     WHERE cd.ClubID = ? AND d.DepartmentStatus = 1
-                    """
-                    ;
+                    """;
             stmt = conn.prepareStatement(query);
             stmt.setInt(1, clubID);
             rs = stmt.executeQuery();
@@ -815,12 +835,16 @@ public class UserClubDAO {
         }
         return false;
     }
+
     /**
-     * Check if a user has a management role in a specific club (roleID between 1-3)
-     * If clubId is null, get the first club where user has a management role
+     * Check if a user has a management role in a specific club (roleID between
+     * 1-3) If clubId is null, get the first club where user has a management
+     * role
+     *
      * @param userID The user ID to check
      * @param clubId The club ID to check, can be null
-     * @return UserClub object with user's role in the specified club, or null if user has no management role
+     * @return UserClub object with user's role in the specified club, or null
+     * if user has no management role
      */
     public UserClub getUserClubManagementRole(String userID, Integer clubId) {
         UserClub userClub = null;
@@ -831,7 +855,7 @@ public class UserClubDAO {
         try {
             conn = DBContext.getConnection();
             String query;
-            
+
             if (clubId != null) {
                 // If clubId is provided, check for that specific club
                 query = """
@@ -885,9 +909,15 @@ public class UserClubDAO {
             System.out.println("Error checking management role in club: " + e.getMessage());
         } finally {
             try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-                if (conn != null) DBContext.closeConnection(conn);
+                if (rs != null) {
+                    rs.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    DBContext.closeConnection(conn);
+                }
             } catch (SQLException e) {
                 System.out.println("Error closing resources: " + e.getMessage());
             }
