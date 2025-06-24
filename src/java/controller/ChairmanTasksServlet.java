@@ -77,16 +77,15 @@ public class ChairmanTasksServlet extends HttpServlet {
             List<Events> eventList = eventDAO.getEventsByClubID(club.getClubID());
 
             String eventIDParam = request.getParameter("eventID");
-            Map<Events, List<Tasks>> timelineMap = new LinkedHashMap<>();
+            Map<Events, Map<String, List<Tasks>>> timelineMap = new LinkedHashMap<>();
 
             if (eventIDParam != null && !eventIDParam.isEmpty()) {
                 try {
                     int eventID = Integer.parseInt(eventIDParam);
                     Events selectedEvent = eventDAO.getEventByID(eventID);
-                    List<Tasks> tasks = taskDAO.getTasksByEventID(eventID);
+                    List<Tasks> allTasks = taskDAO.getTasksByEventID(eventID);
 
-                    // Gán departments cho từng task
-                    for (Tasks task : tasks) {
+                    for (Tasks task : allTasks) {
                         List<TaskAssignees> assignees = taskDAO.getAssigneesByTaskID(task.getTaskID());
                         List<Department> departments = new ArrayList<>();
                         for (TaskAssignees ta : assignees) {
@@ -97,17 +96,33 @@ public class ChairmanTasksServlet extends HttpServlet {
                         task.setDepartments(departments);
                     }
 
-                    if (!tasks.isEmpty()) {
-                        timelineMap.put(selectedEvent, tasks);
+                    Map<String, List<Tasks>> groupedByTerm = new LinkedHashMap<>();
+
+                    for (Tasks task : allTasks) {
+                        String term = task.getTerm();
+
+                        if (groupedByTerm.containsKey(term)) {
+                            groupedByTerm.get(term).add(task);
+                        } else {
+                            List<Tasks> newList = new ArrayList<>();
+                            newList.add(task);
+                            groupedByTerm.put(term, newList);
+                        }
                     }
+
+
+                    if (!groupedByTerm.isEmpty()) {
+                        timelineMap.put(selectedEvent, groupedByTerm);
+                    }
+
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                 }
             } else {
                 for (Events event : eventList) {
-                    List<Tasks> tasks = taskDAO.getTasksByEventID(event.getEventID());
+                    List<Tasks> allTasks = taskDAO.getTasksByEventID(event.getEventID());
 
-                    for (Tasks task : tasks) {
+                    for (Tasks task : allTasks) {
                         List<TaskAssignees> assignees = taskDAO.getAssigneesByTaskID(task.getTaskID());
                         List<Department> departments = new ArrayList<>();
                         for (TaskAssignees ta : assignees) {
@@ -118,8 +133,23 @@ public class ChairmanTasksServlet extends HttpServlet {
                         task.setDepartments(departments);
                     }
 
-                    if (!tasks.isEmpty()) {
-                        timelineMap.put(event, tasks);
+                    Map<String, List<Tasks>> groupedByTerm = new LinkedHashMap<>();
+
+                    for (Tasks task : allTasks) {
+                        String term = task.getTerm();
+
+                        if (groupedByTerm.containsKey(term)) {
+                            groupedByTerm.get(term).add(task);
+                        } else {
+                            List<Tasks> newList = new ArrayList<>();
+                            newList.add(task);
+                            groupedByTerm.put(term, newList);
+                        }
+                    }
+
+
+                    if (!groupedByTerm.isEmpty()) {
+                        timelineMap.put(event, groupedByTerm);
                     }
                 }
             }
@@ -134,7 +164,6 @@ public class ChairmanTasksServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login");
         }
     }
-
 
 
     /** 
