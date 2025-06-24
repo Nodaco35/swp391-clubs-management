@@ -637,25 +637,21 @@ public class UserClubDAO {
         UserClub userClub = null;
         Connection conn = null;
         PreparedStatement stmt = null;
-        ResultSet rs = null;
-
-        try {
+        ResultSet rs = null;        try {
             conn = DBContext.getConnection();
             String query = """
-                SELECT uc.*, u.FullName, r.RoleName, d.DepartmentName 
+                SELECT uc.*, u.FullName, r.RoleName, d.DepartmentName , d.DepartmentID
                 FROM UserClubs uc
                 JOIN Users u ON uc.UserID = u.UserID
                 JOIN Roles r ON uc.RoleID = r.RoleID
                 JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
                 JOIN Departments d ON cd.DepartmentID = d.DepartmentID
                 WHERE uc.UserID = ? AND uc.ClubID = ? AND uc.IsActive = 1
-            """;
-            stmt = conn.prepareStatement(query);
+                ORDER BY uc.RoleID ASC
+            """;            stmt = conn.prepareStatement(query);
             stmt.setString(1, userID);
             stmt.setInt(2, clubID);
-            rs = stmt.executeQuery();
-
-            if (rs.next()) {
+            rs = stmt.executeQuery();if (rs.next()) {
                 userClub = new UserClub();
                 userClub.setUserClubID(rs.getInt("UserClubID"));
                 userClub.setUserID(rs.getString("UserID"));
@@ -663,10 +659,12 @@ public class UserClubDAO {
                 userClub.setClubDepartmentID(rs.getInt("ClubDepartmentID"));
                 userClub.setRoleID(rs.getInt("RoleID"));
                 userClub.setJoinDate(rs.getTimestamp("JoinDate"));
-                userClub.setIsActive(rs.getBoolean("IsActive"));
-                userClub.setFullName(rs.getString("FullName"));
+                userClub.setIsActive(rs.getBoolean("IsActive"));                userClub.setFullName(rs.getString("FullName"));
                 userClub.setRoleName(rs.getString("RoleName"));
                 userClub.setDepartmentName(rs.getString("DepartmentName"));
+                
+                // ClubDepartmentID đã được set ở trên, không cần set lại
+
             }
         } catch (SQLException e) {
             System.out.println("Error getting user club: " + e.getMessage());
@@ -914,6 +912,41 @@ public class UserClubDAO {
             }
         }
         return userClub;
+    }
+
+    /**
+     * Get clubDepartmentID by clubID and departmentID
+     */
+    public int getClubDepartmentIdByClubAndDepartment(int clubID, int departmentID) {
+        String sql = "SELECT ClubDepartmentID FROM ClubDepartments WHERE ClubID = ? AND DepartmentID = ?";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        int clubDepartmentID = -1;
+        
+        try {
+            conn = DBContext.getConnection();
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, clubID);
+            stmt.setInt(2, departmentID);
+            rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                clubDepartmentID = rs.getInt("ClubDepartmentID");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting clubDepartmentID: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (conn != null) DBContext.closeConnection(conn);
+            } catch (SQLException e) {
+                System.out.println("Error closing resources: " + e.getMessage());
+            }
+        }
+        
+        return clubDepartmentID;
     }
     
     public static List<UserClub> findByCDID(int clubDepartmentID) {
