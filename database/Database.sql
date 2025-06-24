@@ -312,10 +312,6 @@ CREATE TABLE ApplicationFormTemplates (
 -- ========================================
 -- EVENTS
 -- ========================================
-<<<<<<< HEAD
-
-=======
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
 CREATE TABLE Locations (
     LocationID INT PRIMARY KEY AUTO_INCREMENT,
     LocationName VARCHAR(200) NOT NULL,
@@ -347,20 +343,13 @@ INSERT INTO Locations (LocationName, TypeLocation) VALUES
 ('Nhà Văn hóa Sinh viên TP.HCM', 'OffCampus'),
 ('Sân vận động Mỹ Đình, Hà Nội', 'OffCampus');
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
 CREATE TABLE Events (
     EventID INT PRIMARY KEY AUTO_INCREMENT,
     EventName VARCHAR(100) NOT NULL,
     EventImg VARCHAR(100),
     Description TEXT,
     EventDate DATETIME,
-<<<<<<< HEAD
     EndTime DATETIME,
-=======
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
     LocationID INT,
     ClubID INT NOT NULL,
     IsPublic BOOLEAN DEFAULT 0,
@@ -373,7 +362,7 @@ CREATE TABLE Events (
     FOREIGN KEY (SemesterID) REFERENCES Semesters(TermID),
     FOREIGN KEY (LocationID) REFERENCES Locations(LocationID)
 );
-<<<<<<< HEAD
+
 
 
 INSERT INTO Events (EventName, EventImg, Description, EventDate, EndTime, LocationID, ClubID, IsPublic, Capacity, Status, SemesterID) VALUES
@@ -443,7 +432,6 @@ INSERT INTO Events (EventName, EventImg, Description, EventDate, LocationID, Clu
 ('Hội Thảo Phát Triển Web 2024', 'images/events/webdev2024.jpg', '...', '2024-11-15 14:00:00', 11, 4, TRUE, 50, 'COMPLETED', 'FA24'),
 ('FPTU Dance Battle 2024', 'images/events/dancebattle2024.jpg', '...', '2024-11-30 18:00:00', 1, 7, TRUE, 150, 'COMPLETED', 'FA24'),
 ('Cuộc Thi Tranh Biện 2024', 'images/events/debate2024.jpg', '...', '2024-12-01 09:00:00', 12, 8, TRUE, 65, 'COMPLETED', 'FA24');
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
 
 UPDATE Events 
 SET Description = 'Lễ Hội Âm Nhạc Tết 2025 mang đến không gian âm nhạc sống động kết hợp tinh hoa truyền thống và xu hướng hiện đại. Người tham dự sẽ được thưởng thức các tiết mục dân gian hòa quyện với âm nhạc điện tử, rap, ballad… từ các câu lạc bộ nghệ thuật sinh viên. Không khí ngày Tết lan tỏa qua các gian hàng trò chơi dân gian, trình diễn áo dài, và các hoạt động giao lưu văn hóa vùng miền. Đây là dịp để sinh viên FPTU cùng nhau đón Tết sớm, lan tỏa niềm vui và gắn kết cộng đồng.' 
@@ -512,12 +500,6 @@ UPDATE Events
 SET Description = 'Cuộc Thi Tranh Biện 2024 là diễn đàn trí tuệ nơi sinh viên FPTU thể hiện khả năng lập luận, phản biện, và thuyết trình về các vấn đề xã hội, kinh tế, và giáo dục. Với format tranh biện chuyên nghiệp, các đội thi sẽ đối đầu qua các vòng thi căng thẳng, được chấm điểm bởi ban giám khảo là các chuyên gia và giảng viên. Sự kiện không chỉ nâng cao kỹ năng tư duy logic mà còn khuyến khích sinh viên bày tỏ quan điểm và kết nối với cộng đồng.' 
 WHERE EventName = 'Cuộc Thi Tranh Biện 2024' AND SemesterID = 'FA24';
 
-<<<<<<< HEAD
-
-
-
-=======
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
 CREATE TABLE Agenda (
     AgendaID INT PRIMARY KEY AUTO_INCREMENT,
     EventID INT NOT NULL,
@@ -527,7 +509,7 @@ CREATE TABLE Agenda (
     EndTime DATETIME NOT NULL,
     FOREIGN KEY (EventID) REFERENCES Events(EventID)
 );
-<<<<<<< HEAD
+
 -- Thử Thách Lập Trình FPTU 2025
 INSERT INTO Agenda (EventID, Title, Description, StartTime, EndTime) VALUES
 ((SELECT EventID FROM Events WHERE EventName = 'Thử Thách Lập Trình FPTU 2025'), 'Check-in & Nhận thẻ', 'Người tham dự check-in và nhận thẻ tham dự.', '2025-03-15 07:30:00', '2025-03-15 08:00:00'),
@@ -577,62 +559,6 @@ INSERT INTO Agenda (EventID, Title, Description, StartTime, EndTime) VALUES
 ((SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên FPTU 2025'), 'Lễ trao giải & bế mạc', 'Trao cúp, chụp ảnh, tổng kết & dọn dẹp.', '2025-07-05 14:00:00', '2025-07-05 15:30:00');
 
 
-
-
-
-=======
-
-INSERT INTO Agenda (EventID, Title, Description, StartTime, EndTime) VALUES
--- EventID 3: Thử Thách Lập Trình FPTU 2025
-(3, 'Check-in & Nhận thẻ', 'Người tham dự check-in và nhận thẻ tham dự.', '2025-03-15 07:30:00', '2025-03-15 08:00:00'),
-(3, 'Phát biểu khai mạc', 'Ban tổ chức giới thiệu chương trình và mục tiêu cuộc thi.', '2025-03-15 08:00:00', '2025-03-15 08:15:00'),
-(3, 'Phổ biến thể lệ & luật chơi', 'Giới thiệu thể lệ cuộc thi và các quy tắc đánh giá.', '2025-03-15 08:15:00', '2025-03-15 08:45:00'),
-(3, 'Bắt đầu thi lập trình', 'Các đội/thí sinh bắt đầu làm bài.', '2025-03-15 08:45:00', '2025-03-15 11:30:00'),
-(3, 'Chấm điểm & chờ kết quả', 'Ban giám khảo chấm điểm và tổng hợp kết quả.', '2025-03-15 11:30:00', '2025-03-15 11:50:00'),
-(3, 'Tổng kết & chụp ảnh lưu niệm', 'Trao giải, chụp ảnh, kết thúc chương trình.', '2025-03-15 11:50:00', '2025-03-15 12:30:00'),
-
--- EventID 10: Hackathon Đổi Mới AI
-(10, 'Check-in & Giới thiệu', 'Người tham gia đến check-in và nhận hướng dẫn.', '2025-06-05 07:30:00', '2025-06-05 08:00:00'),
-(10, 'Phát động & chia đội', 'Ban tổ chức phổ biến đề bài và chia đội.', '2025-06-05 08:00:00', '2025-06-05 08:30:00'),
-(10, 'Coding Marathon', 'Các đội bắt đầu lập trình và triển khai ý tưởng AI.', '2025-06-05 08:30:00', '2025-06-05 17:00:00'),
-(10, 'Trình bày sản phẩm', 'Các đội trình bày giải pháp của mình.', '2025-06-05 17:00:00', '2025-06-05 18:00:00'),
-(10, 'Trao giải & nhận xét', 'Ban giám khảo nhận xét và trao giải cho đội xuất sắc.', '2025-06-05 18:00:00', '2025-06-05 18:30:00'),
-(10, 'Tổng kết & chụp ảnh lưu niệm', 'Tổng kết sự kiện, chụp ảnh, dọn dẹp địa điểm.', '2025-06-05 18:30:00', '2025-06-05 19:30:00'),
-
--- EventID 11: Workshop Spring Boot
-(11, 'Chuẩn bị đón khách', 'Sắp xếp thiết bị, banner và kiểm tra âm thanh.', '2025-06-20 13:00:00', '2025-06-20 13:45:00'),
-(11, 'Chào mừng và giới thiệu', 'MC giới thiệu sự kiện và diễn giả.', '2025-06-20 13:45:00', '2025-06-20 14:00:00'),
-(11, 'Tổng quan Spring Boot', 'Giới thiệu về Spring Boot và kiến trúc cơ bản.', '2025-06-20 14:00:00', '2025-06-20 14:30:00'),
-(11, 'Cấu hình dự án', 'Hướng dẫn cấu hình Maven và Spring Initializr.', '2025-06-20 14:30:00', '2025-06-20 15:00:00'),
-(11, 'Kết nối Database', 'Tích hợp với MySQL/PostgreSQL sử dụng Spring Data JPA.', '2025-06-20 15:00:00', '2025-06-20 15:30:00'),
-(11, 'Thực hành API CRUD', 'Tạo controller, service, repository cho quản lý người dùng.', '2025-06-20 15:30:00', '2025-06-20 16:15:00'),
-(11, 'Q&A và chia sẻ kinh nghiệm', 'Tham gia hỏi đáp trực tiếp với diễn giả.', '2025-06-20 16:15:00', '2025-06-20 16:30:00'),
-(11, 'Giải lao và networking', 'Tự do giao lưu, trao đổi kết nối.', '2025-06-20 16:30:00', '2025-06-20 17:00:00'),
-(11, 'Dọn dẹp và kết thúc', 'Thu dọn thiết bị, chụp ảnh kỷ niệm và đóng sự kiện.', '2025-06-20 17:00:00', '2025-06-20 17:45:00'),
-
-
--- EventID 12: Cuộc thi Code War
-(12, 'Check-in & Nhận số báo danh', 'Thí sinh đăng ký tại bàn check-in.', '2025-06-25 08:00:00', '2025-06-25 08:30:00'),
-(12, 'Khai mạc cuộc thi', 'Giới thiệu thể lệ, quy định và cơ cấu giải thưởng.', '2025-06-25 08:30:00', '2025-06-25 08:50:00'),
-(12, 'Làm bài Round 1', 'Giải 3 bài toán cơ bản trong 45 phút.', '2025-06-25 08:50:00', '2025-06-25 09:35:00'),
-(12, 'Giải lao ngắn', 'Nghỉ ngơi, ăn nhẹ.', '2025-06-25 09:35:00', '2025-06-25 09:50:00'),
-(12, 'Làm bài Round 2', 'Giải bài toán khó hơn và có tính ứng dụng.', '2025-06-25 09:50:00', '2025-06-25 10:40:00'),
-(12, 'Chấm điểm và giải lao', 'BTC chấm bài tự động + nghỉ ngơi.', '2025-06-25 10:40:00', '2025-06-25 11:00:00'),
-(12, 'Công bố kết quả', 'Công bố top 5 thí sinh xuất sắc.', '2025-06-25 11:00:00', '2025-06-25 11:15:00'),
-(12, 'Trao thưởng', 'Trao giải nhất, nhì, ba và quà lưu niệm.', '2025-06-25 11:15:00', '2025-06-25 11:30:00'),
-(12, 'Giao lưu & chụp hình', 'Giao lưu các bạn cùng đam mê lập trình.', '2025-06-25 11:30:00', '2025-06-25 12:00:00'),
-(12, 'Thu dọn và kết thúc sự kiện', 'Thu dọn bàn ghế, thiết bị, vệ sinh phòng.', '2025-06-25 12:00:00', '2025-06-25 12:45:00'),
-
-
--- EventID 8: Giải Bóng Đá Sinh Viên FPTU 2025
-(8, 'Check-in & chia đội', 'Thí sinh đến check-in và nhận áo thi đấu.', '2025-07-05 07:15:00', '2025-07-05 07:45:00'),
-(8, 'Phát biểu khai mạc', 'Ban tổ chức phát biểu và tuyên bố khai mạc.', '2025-07-05 07:45:00', '2025-07-05 08:00:00'),
-(8, 'Trận vòng loại', 'Thi đấu các trận vòng loại.', '2025-07-05 08:00:00', '2025-07-05 11:00:00'),
-(8, 'Nghỉ trưa', 'Nghỉ ăn nhẹ và chuẩn bị vòng tiếp theo.', '2025-07-05 11:00:00', '2025-07-05 12:00:00'),
-(8, 'Bán kết & chung kết', 'Các đội mạnh nhất tranh tài.', '2025-07-05 12:00:00', '2025-07-05 14:00:00'),
-(8, 'Lễ trao giải & bế mạc', 'Trao cúp, chụp ảnh, tổng kết & dọn dẹp.', '2025-07-05 14:00:00', '2025-07-05 15:30:00');
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
-
 CREATE TABLE EventParticipants (
     EventParticipantID INT PRIMARY KEY AUTO_INCREMENT,
     EventID INT,
@@ -660,10 +586,13 @@ INSERT INTO EventParticipants (EventID, UserID, Status) VALUES
 -- ========================================
 -- TASK ASSIGNMENTS
 -- ========================================
-<<<<<<< HEAD
+
 CREATE TABLE Tasks (
     TaskID INT PRIMARY KEY AUTO_INCREMENT,
-    ParentTaskID INT, -- NULL nếu là nhiệm vụ cấp cao
+    ParentTaskID INT, -- NULL nếu là nhiệm vụ giao cho ban
+	Term ENUM('Trước sự kiện', 'Trong sự kiện', 'Sau sự kiện'),
+    TermStart DATE,
+    TermEnd DATE,
     EventID INT,
     ClubID INT,
     Title VARCHAR(100) NOT NULL,
@@ -676,11 +605,18 @@ CREATE TABLE Tasks (
     CreatedBy VARCHAR(10), -- Ai tạo task (Chủ nhiệm/Trưởng ban)
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (ParentTaskID) REFERENCES Tasks(TaskID),
     FOREIGN KEY (EventID) REFERENCES Events(EventID),
     FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID),
     FOREIGN KEY (CreatedBy) REFERENCES Users(UserID)
 );
+-- Chủ nhiệm CLB Lập Trình là U012
+INSERT INTO Tasks (ParentTaskID, Term, TermStart, TermEnd, EventID, ClubID, Title, Description, Status, Priority, ProgressPercent, StartDate, EndDate, CreatedBy) VALUES
+(NULL, 'Trước sự kiện', '2025-07-05', '2025-07-10', 11, 4, 'Thiết kế poster sự kiện', 'Thiết kế và duyệt poster truyền thông cho sự kiện Hackathon AI.', 'ToDo', 'MEDIUM', 0, '2025-07-05 08:00:00', '2025-07-10 17:00:00', 'U012'),
+(NULL, 'Trước sự kiện', '2025-07-01', '2025-07-14', 11, 4, 'Chuẩn bị đề bài Hackathon', 'Xây dựng bộ đề thi cho Hackathon AI', 'ToDo', 'HIGH', 0, '2025-07-01 09:00:00', '2025-07-14 17:00:00', 'U012'),
+(NULL, 'Trong sự kiện', '2025-07-15', '2025-07-15', 11, 4, 'Hỗ trợ kỹ thuật tại sự kiện', 'Giải quyết các sự cố kỹ thuật trong suốt sự kiện', 'ToDo', 'MEDIUM', 0, '2025-07-15 07:30:00', '2025-07-15 14:00:00', 'U012'),
+(NULL, 'Trong sự kiện', '2025-07-15', '2025-07-15', 11, 4, 'Ghi hình & Livestream sự kiện', 'Phụ trách quay video và livestream trên fanpage CLB.', 'ToDo', 'HIGH', 0, '2025-07-15 07:45:00', '2025-07-15 14:00:00', 'U012'),
+(NULL, 'Sau sự kiện', '2025-07-16', '2025-07-17', 11, 4, 'Tổng kết kết quả và gửi email cảm ơn', 'Tổng hợp kết quả thi, gửi thư cảm ơn đến người tham gia', 'ToDo', 'LOW', 0, '2025-07-16 09:00:00', '2025-07-17 17:00:00', 'U012');
+ 
 
 CREATE TABLE TaskAssignees (
     TaskAssigneeID INT PRIMARY KEY AUTO_INCREMENT,
@@ -698,6 +634,15 @@ CREATE TABLE TaskAssignees (
         (AssigneeType = 'Department' AND DepartmentID IS NOT NULL AND UserID IS NULL)
     )
 );
+INSERT INTO TaskAssignees (TaskID, AssigneeType, DepartmentID) VALUES 
+(1, 'Department', 2),   -- Task 1: Thiết kế poster → Ban Truyền thông
+(2, 'Department', 1),   -- Task 2: Chuẩn bị đề thi → Ban Nội dung
+(3, 'Department', 5),   -- Task 3: Hỗ trợ kỹ thuật → Ban Hậu cần
+(3, 'Department', 2),   -- Task 3: Hỗ trợ kỹ thuật → Ban Truyền thông
+(4, 'Department', 2),   -- Task 4: Livestream → Ban Truyền thông
+(5, 'Department', 1);   -- Task 5: Tổng kết → Ban Nội dung 
+
+
 
 CREATE TABLE TaskProgressLogs (
     LogID INT PRIMARY KEY AUTO_INCREMENT,
