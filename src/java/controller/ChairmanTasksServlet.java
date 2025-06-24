@@ -7,6 +7,7 @@ package controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,10 +20,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import models.ClubInfo;
-import models.Events;
-import models.TaskAssignmentDepartment;
-import models.Users;
+import models.*;
 
 /**
  *
@@ -78,15 +76,27 @@ public class ChairmanTasksServlet extends HttpServlet {
             ClubInfo club = clubDAO.getClubChairman(userID);
             List<Events> eventList = eventDAO.getEventsByClubID(club.getClubID());
 
-            // Lấy eventID từ query parameter
             String eventIDParam = request.getParameter("eventID");
-            Map<Events, List<TaskAssignmentDepartment>> timelineMap = new LinkedHashMap<>();
+            Map<Events, List<Tasks>> timelineMap = new LinkedHashMap<>();
 
             if (eventIDParam != null && !eventIDParam.isEmpty()) {
                 try {
                     int eventID = Integer.parseInt(eventIDParam);
                     Events selectedEvent = eventDAO.getEventByID(eventID);
-                    List<TaskAssignmentDepartment> tasks = taskDAO.getTaskAssignDepartByEventID(eventID);
+                    List<Tasks> tasks = taskDAO.getTasksByEventID(eventID);
+
+                    // Gán departments cho từng task
+                    for (Tasks task : tasks) {
+                        List<TaskAssignees> assignees = taskDAO.getAssigneesByTaskID(task.getTaskID());
+                        List<Department> departments = new ArrayList<>();
+                        for (TaskAssignees ta : assignees) {
+                            if (ta.getDepartment() != null) {
+                                departments.add(ta.getDepartment());
+                            }
+                        }
+                        task.setDepartments(departments);
+                    }
+
                     if (!tasks.isEmpty()) {
                         timelineMap.put(selectedEvent, tasks);
                     }
@@ -95,15 +105,27 @@ public class ChairmanTasksServlet extends HttpServlet {
                 }
             } else {
                 for (Events event : eventList) {
-                    List<TaskAssignmentDepartment> taskList = taskDAO.getTaskAssignDepartByEventID(event.getEventID());
-                    if (!taskList.isEmpty()) {
-                        timelineMap.put(event, taskList);
+                    List<Tasks> tasks = taskDAO.getTasksByEventID(event.getEventID());
+
+                    for (Tasks task : tasks) {
+                        List<TaskAssignees> assignees = taskDAO.getAssigneesByTaskID(task.getTaskID());
+                        List<Department> departments = new ArrayList<>();
+                        for (TaskAssignees ta : assignees) {
+                            if (ta.getDepartment() != null) {
+                                departments.add(ta.getDepartment());
+                            }
+                        }
+                        task.setDepartments(departments);
+                    }
+
+                    if (!tasks.isEmpty()) {
+                        timelineMap.put(event, tasks);
                     }
                 }
             }
 
-            request.setAttribute("eventList", eventList);
             request.setAttribute("timelineMap", timelineMap);
+            request.setAttribute("eventList", eventList);
             request.setAttribute("club", club);
             request.setAttribute("currentPath", request.getServletPath());
 

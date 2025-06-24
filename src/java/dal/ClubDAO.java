@@ -54,6 +54,35 @@ public class ClubDAO {
         return null;
     }
 
+    public Clubs getCLubByID(int clubID) {
+        String sql = "select * from Clubs where ClubID = ?";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, clubID);
+            ResultSet rs = ps.executeQuery();
+            if(rs.next()) {
+                Clubs club = new Clubs();
+                club.setClubID(rs.getInt("ClubID"));
+                club.setClubImg(rs.getString("ClubImg"));
+                club.setIsRecruiting(rs.getBoolean("IsRecruiting"));
+                club.setClubName(rs.getString("ClubName"));
+                club.setDescription(rs.getString("Description"));
+                club.setEstablishedDate(rs.getDate("EstablishedDate"));
+                club.setContactPhone(rs.getString("ContactPhone"));
+                club.setContactGmail(rs.getString("ContactGmail"));
+                club.setContactURL(rs.getString("ContactURL"));
+                club.setClubStatus(rs.getBoolean("ClubStatus"));
+                String category = rs.getString("Category");
+                club.setCategory(category != null ? category : getCategoryForClub(rs.getInt("ClubID")));
+                return club;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
     public int getClubIDByUserID(String userID) {
         String sql = "SELECT ClubID FROM UserClubs WHERE UserID = ? AND RoleID = 1 AND IsActive = 1";
         try {

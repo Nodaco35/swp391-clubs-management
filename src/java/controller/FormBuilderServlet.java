@@ -135,28 +135,53 @@ public class FormBuilderServlet extends HttpServlet {    private ApplicationForm
             LOGGER.info("Creating a new form.");
         }
         request.getRequestDispatcher("/view/student/chairman/formBuilder.jsp").forward(request, response);
-    }
-
-    @Override
+    }    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
         String userId = (String) session.getAttribute("userID");
-
-        UserClub userClub = (UserClub) session.getAttribute("userClub");
-        if (userClub == null) {
-            userClub = userClubDAO.getUserClubByUserId(userId);
-            if (userClub != null) {
-                session.setAttribute("userClub", userClub);
+        
+        // Lấy clubId từ request parameter
+        String clubIdParam = request.getParameter("clubId");
+        Integer clubId = null;
+        
+        if (clubIdParam != null && !clubIdParam.isEmpty()) {
+            try {
+                clubId = Integer.parseInt(clubIdParam);
+            } catch (NumberFormatException e) {
+                response.sendRedirect(request.getContextPath() + "/myclub?error=access_denied&message=" + 
+                    URLEncoder.encode("ID CLB không hợp lệ.", StandardCharsets.UTF_8.name()));
+                return;
+            }
+        } else {
+            // Thử lấy từ session nếu không có trong request
+            UserClub sessionClub = (UserClub) session.getAttribute("userClub");
+            if (sessionClub != null) {
+                clubId = sessionClub.getClubID();
             }
         }
-
-        if (userClub == null || userClub.getRoleID() < 1 || userClub.getRoleID() > 3) {
-            response.sendRedirect(request.getContextPath() + "/myclub?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền truy cập chức năng này.", StandardCharsets.UTF_8.name()));
+        
+        // Nếu không có clubId, không thể tiếp tục
+        if (clubId == null) {
+            response.sendRedirect(request.getContextPath() + "/myclub?error=invalid_club&message=" + 
+                URLEncoder.encode("Vui lòng chọn câu lạc bộ để quản lý form.", StandardCharsets.UTF_8.name()));
             return;
         }
 
+        // Kiểm tra quyền truy cập trong club cụ thể (chỉ cho roleId 1-3)
+        UserClub userClub = userClubDAO.getUserClubManagementRole(userId, clubId);
+        if (userClub == null || userClub.getRoleID() < 1 || userClub.getRoleID() > 3) {
+            response.sendRedirect(request.getContextPath() + "/myclub?error=access_denied&message=" + 
+                URLEncoder.encode("Bạn không có quyền quản lý form trong câu lạc bộ này.", StandardCharsets.UTF_8.name()));
+            return;
+        }
+        
+        // Lưu userClub vào session để sử dụng sau này
+        session.setAttribute("userClub", userClub);
+        
         String action = request.getParameter("action");
-        int clubId = userClub.getClubID();        if ("save".equals(action) || "publish".equals(action)) {
+        
+        // clubId đã được lấy và xác thực ở trên
+        if ("save".equals(action) || "publish".equals(action)) {
             try {
                 // Kiểm tra formTitle trước
                 String formTitle = request.getParameter("formTitle");
@@ -181,13 +206,12 @@ public class FormBuilderServlet extends HttpServlet {    private ApplicationForm
                         LOGGER.log(Level.SEVERE, "Error checking form responses: " + e.getMessage(), e);
                     }
                 }
-                
-                saveForm(request, clubId, "publish".equals(action));
-                String redirectPath = request.getContextPath() + "/formBuilder?success=true";
+                  saveForm(request, clubId, "publish".equals(action));
+                String redirectPath = request.getContextPath() + "/formBuilder?success=true&clubId=" + clubId;
                 if ("publish".equals(action)) {
                     redirectPath += "&action=publish";
                 }
-                response.sendRedirect(redirectPath);            } catch (Exception ex) {
+                response.sendRedirect(redirectPath);} catch (Exception ex) {
                 LOGGER.log(Level.SEVERE, "Error in form builder (doPost): " + ex.getMessage(), ex);
                 response.sendRedirect(request.getContextPath() + "/formBuilder?error=true&message=" + 
                     URLEncoder.encode("Đã xảy ra lỗi không mong muốn: " + ex.getMessage(), StandardCharsets.UTF_8.name()));
