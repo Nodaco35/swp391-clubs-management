@@ -621,64 +621,7 @@ CREATE TABLE TaskFeedbacks (
 
     FOREIGN KEY (TaskID) REFERENCES Tasks(TaskID),
     FOREIGN KEY (ReviewerID) REFERENCES Users(UserID)
-=======
-CREATE TABLE TaskAssignmentDepartment (
-	TaskAssignmentDepartmentID INT PRIMARY KEY AUTO_INCREMENT,
-	EventID INT NOT NULL,
-	Term ENUM('Trước sự kiện', 'Trong sự kiện', 'Sau sự kiện'),
-	TermStart DATE,
-	TermEnd DATE,
-   	Description TEXT,
-	Status ENUM('ToDo','Processing','Review','Approved'),
-  	TaskName VARCHAR(100),
-	StartedDate DATE, 
-	DueDate DATE,
-	FOREIGN KEY (EventID) REFERENCES Events(EventID)
 );
-INSERT INTO TaskAssignmentDepartment (EventID, Term, TermStart, TermEnd, Description, Status, TaskName, StartedDate, DueDate) VALUES
-(11, 'Trước sự kiện', '2025-07-10', '2025-07-13', 'Thiết kế poster, đăng bài truyền thông trước sự kiện', 'ToDo', 'Chuẩn bị truyền thông', '2025-07-10', '2025-07-13'),
-(11, 'Trước sự kiện', '2025-07-11', '2025-07-14', 'Chuẩn bị nội dung sự kiện', 'ToDo', 'Chuẩn bị slide', '2025-07-11', '2025-07-14'),
-(11, 'Trong sự kiện', '2025-07-15', '2025-07-15', 'Chuẩn bị hậu cần tại địa điểm tổ chức', 'ToDo', 'Bố trí thiết bị, bàn ghế', '2025-07-15', '2025-07-15'),
-(11, 'Sau sự kiện', '2025-07-16', '2025-07-18', 'Đăng bài viết recap sự kiện lên mạng xã hội', 'ToDo', 'Recap truyền thông', '2025-07-16', '2025-07-18'),
-(12, 'Trước sự kiện', '2025-07-27', '2025-07-30', 'Thiết kế standee, backdrop cho sự kiện', 'ToDo', 'Thiết kế standee', '2025-07-27', '2025-07-30'),
-(12, 'Trong sự kiện', '2025-07-31', '2025-07-31', 'Tiếp đón và check-in người tham dự tại sảnh', 'ToDo', 'Check-in sự kiện', '2025-07-31', '2025-07-31');
-
-
-CREATE TABLE TaskAssignmentDepartmentResponser (
-	TaskAssignmentDepartmentResponserID INT PRIMARY KEY AUTO_INCREMENT,
-	ClubDepartmentID INT NOT NULL,
-	TaskAssignmentDepartmentID INT NOT NULL,
-	FOREIGN KEY (TaskAssignmentDepartmentID) REFERENCES TaskAssignmentDepartment(TaskAssignmentDepartmentID),
-	FOREIGN KEY (ClubDepartmentID) REFERENCES ClubDepartments(ClubDepartmentID)
-);
-INSERT INTO TaskAssignmentDepartmentResponser (ClubDepartmentID, TaskAssignmentDepartmentID) VALUES
-(15, 1), -- Nội dung 15, Hậu cần 17, Truyền thông 2 của ClubID = 4 CLB Lập Trình
-(17, 2), -- Thu dọn hậu cần
-(2, 3),
-(2, 4),
-(15, 5),
-(17, 6);
-
-CREATE TABLE TaskAssignmentMember (
-	TaskAssignmentDepartmentID INT PRIMARY KEY AUTO_INCREMENT,
-	TaskAssignmentDepartmentResponserID INT NOT NULL,
-	Description TEXT,
-	TaskName VARCHAR(100),
-   	Status ENUM('ToDo','Processing','Review','Approved'),
-	StartedDate DATE, 
-   	DueDate DATETIME,
-	FOREIGN KEY (TaskAssignmentDepartmentResponserID) REFERENCES TaskAssignmentDepartmentResponser(TaskAssignmentDepartmentResponserID)
-);
-
-CREATE TABLE TaskAssignmentMemberResponser (
-    TaskAssignmentMemberResponserID INT PRIMARY KEY AUTO_INCREMENT,
-    TaskAssignmentMember INT NOT NULL,
-    MemberID VARCHAR(10) NOT NULL,
-    FOREIGN KEY (TaskAssignmentMember) REFERENCES TaskAssignmentMember(TaskAssignmentDepartmentID),
-    FOREIGN KEY (MemberID) REFERENCES Users(UserID)
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
-);
-
 -- ================================================================================
 -- ========================================
 -- MEETINGS
@@ -687,12 +630,9 @@ CREATE TABLE ClubMeeting (
 	ClubMeetingID INT PRIMARY KEY AUTO_INCREMENT,
 	ClubID INT NOT NULL,
 	URLMeeting varchar(50),
-<<<<<<< HEAD
 	StartedTime DATETIME, 
 FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID)
-=======
-	StartedTime DATETIME 
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
+
 );
 
 CREATE TABLE DepartmentMeeting (
@@ -727,25 +667,8 @@ INSERT INTO Notifications (Title, Content, CreatedDate, ReceiverID, Priority, St
 ('Nhắc nhở sự kiện', 'Sự kiện Giải Bóng Đá Sinh Viên 2023 sẽ diễn ra trong 2 ngày nữa', '2023-12-13 08:00:00', 'U001', 'HIGH', 'UNREAD'),
 ('Nhắc nhở sự kiện', 'Sự kiện Workshop Lập Trình Web sẽ diễn ra trong 2 ngày nữa', '2023-11-18 08:00:00', 'U003', 'HIGH', 'UNREAD');
 
-<<<<<<< HEAD
-=======
-CREATE TABLE CreatedClubApplications (
-    ApplicationID INT PRIMARY KEY AUTO_INCREMENT,
-    UserID VARCHAR(10),
-    ClubID INT,
-    Email VARCHAR(100) NOT NULL,			
-    Status ENUM('PENDING', 'APPROVED', 'REJECTED'),
-    SubmitDate DATETIME,
-    FOREIGN KEY (UserID) REFERENCES Users(UserID),
-    FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID)
-);
-INSERT INTO CreatedClubApplications (UserID, ClubID, Email, Status, SubmitDate) VALUES
-('U001', 4, 'a@gmail.com', 'PENDING', '2023-11-01 10:00:00'),
-('U002', 6, 'b@gmail.com', 'PENDING', '2023-11-02 11:00:00'),
-('U003', 8, 'c@gmail.com', 'PENDING', '2023-11-03 09:00:00'),
-('U004', 7, 'd@gmail.com', 'PENDING', '2023-11-04 14:00:00');
 
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
+
 CREATE TABLE ApplicationResponses (
     ResponseID INT PRIMARY KEY AUTO_INCREMENT,
     TemplateID INT NOT NULL,
@@ -819,7 +742,7 @@ CREATE TABLE PeriodicReportEvents (
     FOREIGN KEY (ReportID) REFERENCES PeriodicClubReport(ReportID)
 );
 
-<<<<<<< HEAD
+
 CREATE TABLE ClubCreationPermissions  (
     ID INT AUTO_INCREMENT PRIMARY KEY,
     UserID VARCHAR(10) NOT NULL,
@@ -847,18 +770,7 @@ VALUES
   ('U005', 'CLB Lập Trình', 'Học Thuật', 'PENDING', '2025-06-21 10:00:00', NULL, NULL),
   ('U001', 'CLB Nhiếp Ảnh', 'Phong Trào', 'APPROVED', '2025-06-15 10:00:00', 'U004', '2025-06-16 10:00:00'),
   ('U002', 'CLB Môi Trường', 'Phong Trào', 'REJECTED', '2025-06-10 10:00:00', 'U004', '2025-06-11 10:00:00');
-=======
-CREATE TABLE ClubCreationPermissions (
-    PermissionID INT PRIMARY KEY AUTO_INCREMENT,
-    UserID VARCHAR(10) NOT NULL,
-    Status ENUM('ACTIVE', 'USED', 'INACTIVE') DEFAULT 'ACTIVE',
-    GrantedBy VARCHAR(10),
-    GrantedDate DATETIME DEFAULT CURRENT_TIMESTAMP,
-    UsedDate DATETIME NULL,
-    FOREIGN KEY (UserID) REFERENCES Users(UserID),
-    FOREIGN KEY (GrantedBy) REFERENCES Users(UserID)
-);
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
+
 
 
 CREATE TABLE ActivedMemberClubs (
@@ -868,18 +780,11 @@ CREATE TABLE ActivedMemberClubs (
     ActiveDate DATE NOT NULL,
     LeaveDate DATE DEFAULT NULL, -- NULL nếu vẫn còn hoạt động
     IsActive BOOLEAN DEFAULT TRUE,
-<<<<<<< HEAD
     ProgressPoint INT DEFAULT NULL, -- Điểm rèn luyện, cho phép NULL
    FOREIGN KEY (UserID) REFERENCES Users(UserID),
     FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID)
 );
-=======
 
-    FOREIGN KEY (UserID) REFERENCES Users(UserID),
-    FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID)
-);
-
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
 -- ================================================================================
 -- ========================================
 -- FAVORITES
@@ -899,20 +804,7 @@ INSERT INTO FavoriteClubs (UserID, ClubID, AddedDate) VALUES
 ('U002', 2, '2025-06-08 16:10:00'),
 ('U002', 5, '2025-06-08 16:15:00');
 
-CREATE TABLE FavoriteEvents (
-    FavoriteEventID INT PRIMARY KEY AUTO_INCREMENT,
-    UserID VARCHAR(10) NOT NULL,
-    EventID INT NOT NULL,
-    AddedDate DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE,
-    FOREIGN KEY (EventID) REFERENCES Events(EventID) ON DELETE CASCADE,
-    UNIQUE (UserID, EventID) -- Đảm bảo mỗi người dùng chỉ thêm một sự kiện yêu thích một lần
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-INSERT INTO FavoriteEvents (UserID, EventID, AddedDate) VALUES
-('U001', 1, '2025-06-15 10:00:00'),
-('U001', 3, '2025-06-15 10:05:00'),
-('U002', 2, '2025-06-15 10:10:00'),
-('U002', 5, '2025-06-15 10:15:00');
+
 
 -- ================================================================================
 -- ========================================
@@ -949,7 +841,6 @@ INSERT INTO `Feedbacks` VALUES
 (3,13,'U007',0,1,'Sự kiện không vui như tôi nghĩ',2,3,4,3,1,2,3,1,2,'2025-06-21 00:58:54'),
 (4,13,'U008',0,3,'SỰ kiện ok',5,3,4,3,3,4,3,5,3,'2025-06-21 01:00:14');
 
-<<<<<<< HEAD
 INSERT INTO ClubMeeting (ClubID, URLMeeting, StartedTime)
 VALUES (1, 'https://meet.example.com/club1', '2025-12-12 23:00:00');
 
@@ -965,8 +856,3 @@ INSERT INTO Notifications (Title, Content, CreatedDate, ReceiverID, Priority, St
 ('Thông báo sự kiện mới', 'Câu lạc bộ Âm Nhạc vừa tạo sự kiện mới: Đêm Nhạc Acoustic', '2025-06-26 09:00:00', 'U002', 'LOW', 'UNREAD');
 
 
-
-
-
-=======
->>>>>>> 80d5538cff8a23b3f10d295a4cb3eec2de29f265
