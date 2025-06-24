@@ -9,13 +9,11 @@
             <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/controller/CreateClubServlet.java</file>
             <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/controller/FormBuilderServlet.java</file>
             <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/controller/FormManagementServlet.java</file>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/dal/DBContext_Duc.java</file>
             <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/controller/MyClubController.java</file>
             <file>file:/D:/tmp/V1/swp391-clubs-management/web/js/viewFeedback.js</file>
             <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/models/TaskAssignment.java</file>
             <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/dal/ClubCreationPermissionDAO.java</file>
             <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/dal/DBContext.java</file>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/web/view/student/department-leader/dashboard.jsp</file>
             <file>file:/D:/tmp/V1/swp391-clubs-management/web/view/student/myClub.jsp</file>
             <file>file:/D:/tmp/V1/swp391-clubs-management/web/view/clubs-page/club-detail.jsp</file>
             <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/filters/AuthFilter.java</file>
@@ -25,10 +23,6 @@
             <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/dal/TaskDAO.java</file>
             <file>file:/D:/tmp/V1/swp391-clubs-management/nbproject/build-impl.xml</file>
             <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/dal/UserDAO.java</file>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/controller/DepartmentMemberServlet.java</file>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/dal/DepartmentMemberDAO.java</file>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/controller/DepartmentDashboardServlet.java</file>
-            <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/dal/DepartmentDashboardDAO.java</file>
             <file>file:/D:/tmp/V1/swp391-clubs-management/src/java/dal/UserClubDAO.java</file>
         </group>
     </open-files>

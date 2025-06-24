@@ -121,16 +121,14 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("permissionID", user_find.getPermissionID());
             session.setAttribute("userID", user_find.getUserID());
             session.setMaxInactiveInterval(30 * 60); // 30 phút
-            boolean isChairman = ud.isChairman(user_find.getUserID());
+
             List<Integer> myEventIDs = ud.getEventIDsOfChairman(user_find.getUserID());
             int myClubID = ud.getClubIdIfChairman(user_find.getUserID());
+            boolean isChairman = ud.isChairman(user_find.getUserID(), myClubID);
             session.setAttribute("myClubID", myClubID);
             session.setAttribute("myEventIDs", myEventIDs);
             session.setAttribute("isChairman", isChairman);
-            System.out.println("Danh sách sự kiện của chủ nhiệm " + user_find.getUserID() + ": " + myEventIDs);
 
-            System.out.println("Đăng nhập: " + user_find.getUserID());
-            System.out.println("Is chairman? " + isChairman);
 
             session.setAttribute("isChairman", isChairman);
             // Điều hướng theo quyền

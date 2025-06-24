@@ -35,7 +35,7 @@ public class TaskAssignmentDAO {
                      ORDER BY tm.DueDate ASC
                      ;""";
         try {
-            PreparedStatement ps = DBContext_Duc.getInstance().connection.prepareStatement(sql);
+           PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, userID);
             
             ResultSet rs = ps.executeQuery();
@@ -73,7 +73,7 @@ public class TaskAssignmentDAO {
                                                                                     where uc.UserID = ?
                                                                                     AND tm.DueDate > now();""";
         try {
-            PreparedStatement ps = DBContext_Duc.getInstance().connection.prepareStatement(sql);
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, userID);
            
             ResultSet rs = ps.executeQuery();

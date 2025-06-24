@@ -20,8 +20,8 @@
     <button class="mobile-menu-toggle d-md-none" onclick="toggleSidebar()">
         <i class="fas fa-bars"></i>
     </button>
-
-    <div class="department-leader-container">        <!-- Sidebar -->
+    <!-- Sidebar -->
+    <div class="department-leader-container">        
         <nav class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
@@ -48,8 +48,15 @@
                         <i class="fas fa-tasks"></i>
                         <span>Quản lý công việc</span>
                     </a>
-                </li>                <li class="menu-item">
-                    <a href="${pageContext.request.contextPath}/home" class="menu-link">
+                </li>
+                <li class="menu-item">
+                    <a href="${pageContext.request.contextPath}/department-meeting" class="menu-link">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Quản lý cuộc họp</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="${pageContext.request.contextPath}/" class="menu-link">
                         <i class="fas fa-home"></i>
                         <span>Về trang chủ</span>
                     </a>

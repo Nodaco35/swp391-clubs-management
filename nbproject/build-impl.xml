@@ -980,32 +980,36 @@ exists or setup the property manually. For example like this:
             <fileset dir="${build.web.dir}" excludes="WEB-INF/classes/.netbeans_*,${dist.archive.excludes}"/>
         </jar>
     </target>
-    <target depends="init,compile,compile-jsps,-pre-dist,-do-dist-with-manifest,-do-dist-without-manifest" name="do-dist"/>    <target depends="init" if="dist.ear.dir" name="library-inclusion-in-manifest">
-        <copy file="${file.reference.mysql-connector-j-9.3.0.jar}" todir="${dist.ear.dir}/lib" failonerror="false"/>
-        <copy file="${file.reference.jaxb-api-2.1.jar-1}" todir="${dist.ear.dir}/lib" failonerror="false"/>
-        <copy file="${file.reference.jakarta.servlet.jsp.jstl-2.0.0.jar-1}" todir="${dist.ear.dir}/lib" failonerror="false"/>
-        <copy file="${file.reference.jakarta.servlet.jsp.jstl-api-2.0.0.jar-1}" todir="${dist.ear.dir}/lib" failonerror="false"/>
-        <copy file="${file.reference.sqljdbc42.jar-1}" todir="${dist.ear.dir}/lib" failonerror="false"/>
-        <copy file="${file.reference.jakarta.activation-2.0.1.jar}" todir="${dist.ear.dir}/lib" failonerror="false"/>
-        <copy file="${file.reference.jakarta.mail-2.0.1.jar}" todir="${dist.ear.dir}/lib" failonerror="false"/>
-        <copy file="${file.reference.json-20230227.jar}" todir="${dist.ear.dir}/lib" failonerror="false"/>
-        <copy file="${libs.CopyLibs.classpath}" todir="${dist.ear.dir}/lib" failonerror="false"/>
-        <copy file="${file.reference.gson-2.10.1.jar}" todir="${dist.ear.dir}/lib" failonerror="false"/>        <copy file="${file.reference.javax.activation-api-1.2.0.jar}" todir="${dist.ear.dir}/lib" failonerror="false"/>
+    <target depends="init,compile,compile-jsps,-pre-dist,-do-dist-with-manifest,-do-dist-without-manifest" name="do-dist"/>
+    <target depends="init" if="dist.ear.dir" name="library-inclusion-in-manifest">
+        <copyfiles files="${file.reference.mysql-connector-j-9.3.0.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${file.reference.jaxb-api-2.1.jar-1}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${file.reference.jakarta.servlet.jsp.jstl-2.0.0.jar-1}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${file.reference.jakarta.servlet.jsp.jstl-api-2.0.0.jar-1}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${file.reference.sqljdbc42.jar-1}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${file.reference.jakarta.activation-2.0.1.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${file.reference.jakarta.mail-2.0.1.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${file.reference.json-20230227.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${libs.CopyLibs.classpath}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${file.reference.gson-2.10.1.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${file.reference.javax.activation-api-1.2.0.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${file.reference.jakarta.servlet-api-6.1.0.jar}" iftldtodir="${build.web.dir}/WEB-INF" todir="${dist.ear.dir}/lib"/>
         <mkdir dir="${build.web.dir}/META-INF"/>
         <manifest file="${build.web.dir}/META-INF/MANIFEST.MF" mode="update"/>
     </target>
     <target depends="init" name="library-inclusion-in-archive" unless="dist.ear.dir">
-        <copy file="${file.reference.mysql-connector-j-9.3.0.jar}" todir="${build.web.dir}/WEB-INF/lib" failonerror="false"/>
-        <copy file="${file.reference.jaxb-api-2.1.jar-1}" todir="${build.web.dir}/WEB-INF/lib" failonerror="false"/>
-        <copy file="${file.reference.jakarta.servlet.jsp.jstl-2.0.0.jar-1}" todir="${build.web.dir}/WEB-INF/lib" failonerror="false"/>
-        <copy file="${file.reference.jakarta.servlet.jsp.jstl-api-2.0.0.jar-1}" todir="${build.web.dir}/WEB-INF/lib" failonerror="false"/>
-        <copy file="${file.reference.sqljdbc42.jar-1}" todir="${build.web.dir}/WEB-INF/lib" failonerror="false"/>
-        <copy file="${file.reference.jakarta.activation-2.0.1.jar}" todir="${build.web.dir}/WEB-INF/lib" failonerror="false"/>
-        <copy file="${file.reference.jakarta.mail-2.0.1.jar}" todir="${build.web.dir}/WEB-INF/lib" failonerror="false"/>
-        <copy file="${file.reference.json-20230227.jar}" todir="${build.web.dir}/WEB-INF/lib" failonerror="false"/>
-        <copy file="${libs.CopyLibs.classpath}" todir="${build.web.dir}/WEB-INF/lib" failonerror="false"/>
-        <copy file="${file.reference.gson-2.10.1.jar}" todir="${build.web.dir}/WEB-INF/lib" failonerror="false"/>
-        <copy file="${file.reference.javax.activation-api-1.2.0.jar}" todir="${build.web.dir}/WEB-INF/lib" failonerror="false"/>
+        <copyfiles files="${file.reference.mysql-connector-j-9.3.0.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
+        <copyfiles files="${file.reference.jaxb-api-2.1.jar-1}" todir="${build.web.dir}/WEB-INF/lib"/>
+        <copyfiles files="${file.reference.jakarta.servlet.jsp.jstl-2.0.0.jar-1}" todir="${build.web.dir}/WEB-INF/lib"/>
+        <copyfiles files="${file.reference.jakarta.servlet.jsp.jstl-api-2.0.0.jar-1}" todir="${build.web.dir}/WEB-INF/lib"/>
+        <copyfiles files="${file.reference.sqljdbc42.jar-1}" todir="${build.web.dir}/WEB-INF/lib"/>
+        <copyfiles files="${file.reference.jakarta.activation-2.0.1.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
+        <copyfiles files="${file.reference.jakarta.mail-2.0.1.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
+        <copyfiles files="${file.reference.json-20230227.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
+        <copyfiles files="${libs.CopyLibs.classpath}" todir="${build.web.dir}/WEB-INF/lib"/>
+        <copyfiles files="${file.reference.gson-2.10.1.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
+        <copyfiles files="${file.reference.javax.activation-api-1.2.0.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
+        <copyfiles files="${file.reference.jakarta.servlet-api-6.1.0.jar}" todir="${build.web.dir}/WEB-INF/lib"/>
     </target>
     <target depends="init" if="dist.ear.dir" name="-clean-webinf-lib">
         <delete dir="${build.web.dir}/WEB-INF/lib"/>
