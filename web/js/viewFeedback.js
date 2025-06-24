@@ -46,24 +46,9 @@ window.addEventListener('error', function (event) {
         if (document.body.contains(errorDiv)) {
             errorDiv.remove();
         }
-    }, 10000);
-
-    // Nếu lỗi liên quan đến Chart.js, thử destroy các instance chart nếu tồn tại
+    }, 10000);    // Nếu lỗi liên quan đến Chart.js
     if (event.error && event.error.message && event.error.message.includes('Chart')) {
         console.log('Phát hiện lỗi liên quan đến Chart.js, thực hiện dọn dẹp...');
-
-        // Thử destroy biểu đồ phân phối đánh giá nếu tồn tại
-        try {
-            if (window.ratingDistributionChartInstance) {
-                window.ratingDistributionChartInstance.destroy();
-                window.ratingDistributionChartInstance = null;
-                console.log('Đã xóa instance biểu đồ phân phối đánh giá');
-            }
-        } catch (e) {
-            console.error('Không thể xóa biểu đồ phân phối đánh giá:', e);
-        }
-
-        // Thử destroy biểu đồ chi tiết nếu tồn tại
         try {
             if (window.detailedRatingChartInstance) {
                 window.detailedRatingChartInstance.destroy();
@@ -242,254 +227,12 @@ document.addEventListener('DOMContentLoaded', function () {
         'Giá trị hoạt động': 'Giá trị hoặc kiến thức bạn nhận được từ hoạt động',
         'Sự hợp lý': 'Sự hợp lý về thời gian, thời lượng, lịch trình',
         'Cơ hội tham gia': 'Cơ hội để bạn tham gia, đóng góp, thể hiện',
-        'Mức độ tiếp tục': 'Mức độ bạn muốn tiếp tục tham gia các hoạt động của CLB trong tương lai'
-    };
-
-    let ratingDistributionChartInstance = null;
-
-    // Biểu đồ 1: Phân phối đánh giá tổng quan
-    const renderRatingDistributionChart = () => {
-        const ratingDistributionChartEl = document.getElementById('ratingDistributionChart');
-        if (!ratingDistributionChartEl) {
-            logDebug('Không tìm thấy phần tử canvas cho biểu đồ phân phối đánh giá');
-            return;
-        }
-
-        logDebug('Found rating distribution chart element');
-
-        // Kiểm tra và hủy biểu đồ cũ nếu tồn tại để tránh lỗi "Canvas is already in use"
-        if (ratingDistributionChartInstance) {
-            logDebug('Hủy biểu đồ phân phối đánh giá cũ');
-            ratingDistributionChartInstance.destroy();
-            ratingDistributionChartInstance = null;
-        }
-
-        // In ra toàn bộ HTML của canvas để kiểm tra
-        console.log("Canvas HTML đầy đủ:", ratingDistributionChartEl.outerHTML);
-
-        // Kiểm tra debugInfo để hiểu rõ hơn về dữ liệu từ backend
-        const debugInfo = ratingDistributionChartEl.getAttribute('data-debug') || '';
-        console.log("Debug info từ JSP:", debugInfo);
-
-        // Lấy dữ liệu đánh giá từ các thuộc tính data-rate riêng lẻ và rõ ràng
-        const rate5 = parseInt(ratingDistributionChartEl.getAttribute('data-rate5') || '0', 10);
-        const rate4 = parseInt(ratingDistributionChartEl.getAttribute('data-rate4') || '0', 10);
-        const rate3 = parseInt(ratingDistributionChartEl.getAttribute('data-rate3') || '0', 10);
-        const rate2 = parseInt(ratingDistributionChartEl.getAttribute('data-rate2') || '0', 10);
-        const rate1 = parseInt(ratingDistributionChartEl.getAttribute('data-rate1') || '0', 10);
-
-        logDebug('Dữ liệu đánh giá từ các thuộc tính:', {rate5, rate4, rate3, rate2, rate1});
-        // In ra cả HTML của canvas để kiểm tra
-        console.log("Canvas HTML:", ratingDistributionChartEl.outerHTML);
-
-        // Tạo mảng dữ liệu từ các giá trị đơn lẻ
-        let ratingDistributionData = [rate5, rate4, rate3, rate2, rate1];
-
-        // Đảm bảo tất cả các giá trị là số hợp lệ
-        ratingDistributionData = ratingDistributionData.map(val =>
-            (val === null || val === undefined || isNaN(val)) ? 0 : Number(val)
-        );
-        // Ghi log dữ liệu cuối cùng sau khi làm sạch
-        logDebug('Dữ liệu cuối cùng sau khi làm sạch:', ratingDistributionData);
-
-        // Kiểm tra xem tất cả các giá trị có là 0 không
-        const allZeros = ratingDistributionData.every(val => val === 0);
-        logDebug('Tất cả giá trị đều là 0?', allZeros);        // Hiển thị thông tin chi tiết về dữ liệu
-        logDebug('Chi tiết dữ liệu biểu đồ:', {
-            '5 sao': ratingDistributionData[0],
-            '4 sao': ratingDistributionData[1],
-            '3 sao': ratingDistributionData[2],
-            '2 sao': ratingDistributionData[3],
-            '1 sao': ratingDistributionData[4]
-        });
-
-
-        // Thử lấy dữ liệu từ nhiều cách khác nhau
-        const attr5 = ratingDistributionChartEl.getAttribute('data-rate5');
-        const attr4 = ratingDistributionChartEl.getAttribute('data-rate4');
-        const attr3 = ratingDistributionChartEl.getAttribute('data-rate3');
-        const attr2 = ratingDistributionChartEl.getAttribute('data-rate2');
-        const attr1 = ratingDistributionChartEl.getAttribute('data-rate1');
-
-        // Kiểm tra nếu các thuộc tính chứa số hay không
-        const hasNumber5 = !isNaN(parseInt(attr5, 10));
-        const hasNumber4 = !isNaN(parseInt(attr4, 10));
-        const hasNumber3 = !isNaN(parseInt(attr3, 10));
-        const hasNumber2 = !isNaN(parseInt(attr2, 10));
-        const hasNumber1 = !isNaN(parseInt(attr1, 10));
-
-        console.log("Có số trong thuộc tính:", {hasNumber5, hasNumber4, hasNumber3, hasNumber2, hasNumber1});
-
-        // Luôn sử dụng parseInt với fallback 0 để đảm bảo số nguyên hợp lệ
-        const displayData = [
-            parseInt(attr5 || '0', 10),
-            parseInt(attr4 || '0', 10),
-            parseInt(attr3 || '0', 10),
-            parseInt(attr2 || '0', 10),
-            parseInt(attr1 || '0', 10)
-        ];
-
-        // Ghi log dữ liệu hiển thị cuối cùng
-        console.log("Dữ liệu hiển thị cuối cùng:", displayData);
-        // Kiểm tra xem dữ liệu có thể hiển thị được không
-        const canDisplayData = displayData.some(val => val > 0);
-        console.log('Dữ liệu có sẵn để hiển thị?', canDisplayData ? 'Có' : 'Không');
-
-        if (!canDisplayData) {
-
-
-            // Kiểm tra sâu hơn vào database và cách fetch dữ liệu
-            const eventIdInput = document.querySelector('input[name="eventId"]');
-            const eventId = eventIdInput ? eventIdInput.value : 'unknown';
-            console.log(`Event ID đang xem: ${eventId}`);
-        }
-
-        // Tạo biểu đồ với kiểu dáng tương tự mockup
-        logDebug('Đang tạo biểu đồ phân phối đánh giá với dữ liệu:', displayData);
-        try {
-
-            // Nếu displayData toàn số 0 nhưng servlet log có dữ liệu thì sử dụng dữ liệu từ servlet log
-            let finalChartData = displayData;
-            if (displayData.every(val => val === 0) && dataFromServletLog.some(val => val > 0)) {
-                console.log("CẢNH BÁO: Tất cả giá trị là 0, sử dụng dữ liệu đã biết từ servlet log:", dataFromServletLog);
-                finalChartData = dataFromServletLog;
-            }
-
-            console.log("Dữ liệu cuối cùng sẽ sử dụng cho biểu đồ:", finalChartData);
-
-            // Tạo biểu đồ và lưu reference vào biến toàn cục
-            ratingDistributionChartInstance = new Chart(
-                    ratingDistributionChartEl,
-                    {
-                        type: 'bar',
-                        data: {
-                            labels: ['5 sao', '4 sao', '3 sao', '2 sao', '1 sao'],
-                            datasets: [{
-                                    // Sử dụng dữ liệu đã xác minh tốt nhất
-                                    data: finalChartData,
-                                    backgroundColor: [
-                                        chartColors.ratingVeryGood, // 5 sao - Xanh lá đậm - Rất hài lòng
-                                        chartColors.ratingGood, // 4 sao - Xanh lá nhạt - Hài lòng
-                                        chartColors.ratingNeutral, // 3 sao - Vàng - Bình thường
-                                        chartColors.ratingBad, // 2 sao - Đỏ nhạt - Không hài lòng
-                                        chartColors.ratingVeryBad    // 1 sao - Đỏ đậm - Rất không hài lòng
-                                    ],
-                                    borderWidth: 0,
-                                    borderRadius: 2,
-                                    barPercentage: 0.8,
-                                    categoryPercentage: 0.7,
-                                    maxBarThickness: 40
-                                }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            layout: {
-                                padding: 10
-                            },
-                            plugins: {
-                                legend: {
-                                    display: false
-                                },
-                                tooltip: {
-                                    enabled: true,
-                                    backgroundColor: 'white',
-                                    titleColor: '#333',
-                                    bodyColor: '#333',
-                                    borderColor: '#ddd',
-                                    borderWidth: 1,
-                                    padding: 12,
-                                    usePointStyle: true,
-                                    cornerRadius: 8,
-                                    displayColors: false,
-                                    titleFont: {
-                                        size: 14,
-                                        weight: 'bold'
-                                    },
-                                    callbacks: {
-                                        title: function (tooltipItems) {
-                                            const index = tooltipItems[0].dataIndex;
-                                            const stars = 5 - index; // Chuyển từ index (0-4) sang số sao (5-1)
-                                            return `${stars} sao - ${ratingLabels[stars]}`;
-                                        },
-                                        label: function (context) {
-                                            const value = context.raw;
-                                            return `Số lượng: ${value} đánh giá`;
-                                        }
-                                    }
-                                }
-                            },
-                            onClick: function (event, elements) {
-                                if (elements && elements.length > 0) {
-                                    const index = elements[0].index;
-                                    // Chúng ta hiện sắp xếp theo thứ tự 5->1 sao
-                                    const stars = 5 - index; // Chuyển từ index (0-4) sang số sao (5-1)
-                                    window.showUsersWithRating(stars);
-                                }
-                            },
-                            scales: {
-                                x: {
-                                    grid: {
-                                        display: false,
-                                        drawBorder: true,
-                                        drawOnChartArea: false,
-                                        drawTicks: true,
-                                        color: chartColors.gridColor,
-                                        tickColor: chartColors.gridColor
-                                    },
-                                    ticks: {
-                                        color: '#666',
-                                        font: {
-                                            size: 12
-                                        }
-                                    }
-                                },
-                                y: {
-                                    beginAtZero: true,
-                                    min: 0,
-                                    // Hiển thị thang đo thích hợp ngay cả khi không có dữ liệu
-                                    max: allZeros ? 3 : undefined, // Nếu không có dữ liệu, hiển thị đến 3
-                                    grace: '10%', // Thêm không gian trên cùng
-                                    border: {
-                                        display: false
-                                    },
-                                    grid: {
-                                        color: chartColors.gridColor,
-                                        tickBorderDash: [2, 2],
-                                        drawTicks: false
-                                    },
-                                    ticks: {
-                                        color: '#888',
-                                        font: {
-                                            size: 12
-                                        },
-                                        // Hiển thị thích hợp dù có dữ liệu hay không
-                                        callback: function (value) {
-                                            if (allZeros) {
-                                                // Khi không có dữ liệu, hiển thị các mốc 0, 1, 2, 3
-                                                return (value === 0 || value === 1 || value === 2 || value === 3) ? value : null;
-                                            }
-                                            // Khi có dữ liệu, hiển thị tất cả các giá trị
-                                            return value;
-                                        },
-                                        stepSize: 1,
-                                        precision: 0
-                                    }
-                                }
-                            }
-                        }
-                    });
-            logDebug('Biểu đồ phân phối đánh giá được tạo thành công với dữ liệu thực tế:', displayData);
-        } catch (error) {
-            // Xử lý lỗi khi tạo biểu đồ
-            logError('Lỗi khi tạo biểu đồ phân phối đánh giá:', error);
-            console.error('Lỗi Chart.js:', error);
-        }
-    };
+        'Mức độ tiếp tục': 'Mức độ bạn muốn tiếp tục tham gia các hoạt động của CLB trong tương lai'    };
+    
     // Biến toàn cục để lưu trữ instance của biểu đồ chi tiết
     let detailedRatingChartInstance = null;
-
-    // Biểu đồ 2: Đánh giá chi tiết theo tiêu chí
+    
+    // Biểu đồ đánh giá chi tiết theo tiêu chí
     const renderDetailedRatingChart = () => {
         const detailedRatingChartEl = document.getElementById('detailedRatingChart');
         if (!detailedRatingChartEl)
@@ -504,18 +247,18 @@ document.addEventListener('DOMContentLoaded', function () {
             detailedRatingChartInstance = null;
         }
 
-        // Phân tích dữ liệu tiêu chí từ thuộc tính HTML
+        // Lấy dữ liệu từ script type="application/json"
         let criteriaData = {};
         try {
-            const dataAttr = detailedRatingChartEl.getAttribute('data-criteria');
-
-            if (!dataAttr) {
-                logDebug('Thuộc tính data-criteria không tồn tại hoặc rỗng');
-                throw new Error('Không có dữ liệu tiêu chí cho biểu đồ');
+            // Lấy dữ liệu từ script JSON 
+            const jsonScriptElement = document.getElementById('detailedRatingData');
+            if (!jsonScriptElement) {
+                logDebug('Không tìm thấy phần tử script#detailedRatingData');
+                throw new Error('Không có script JSON chứa dữ liệu tiêu chí');
             }
-
-            criteriaData = JSON.parse(dataAttr);
-            logDebug('Đã phân tích dữ liệu tiêu chí:', criteriaData);
+            
+            criteriaData = JSON.parse(jsonScriptElement.textContent.trim());
+            logDebug('Đã phân tích dữ liệu tiêu chí từ JSON script:', criteriaData);
         } catch (error) {
             logError('Lỗi phân tích dữ liệu tiêu chí:', error);
 
@@ -527,7 +270,7 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>`;
             detailedRatingChartEl.parentNode.appendChild(errorDiv);
 
-            // Tạo một đối tượng dữ liệu trống thay vì sử dụng dữ liệu mẫu
+            // Tạo một đối tượng dữ liệu trống
             criteriaData = {
                 q1Organization: 0,
                 q2Communication: 0,
@@ -552,16 +295,9 @@ document.addEventListener('DOMContentLoaded', function () {
             'Sự hợp lý',
             'Cơ hội tham gia',
             'Mức độ tiếp tục'
-        ];
+        ];        // Đảm bảo mỗi tiêu chí có mô tả tương ứng
 
-        // Ghi log để xác nhận chúng ta có các khóa đúng cho criteriaDescriptions
-        logDebug('Kiểm tra độ phù hợp giữa tiêu chí và mô tả:');
-        criteriaLabels.forEach(label => {
-            const hasDescription = criteriaDescriptions[label] ? true : false;
-            logDebug(`- Tiêu chí '${label}': ${hasDescription ? 'Có mô tả' : 'KHÔNG CÓ MÔ TẢ'}`);
-        });
-
-        // Lấy giá trị từ dữ liệu backend
+        
         const criteriaValues = [
             criteriaData.q1Organization || 0,
             criteriaData.q2Communication || 0,
@@ -572,18 +308,15 @@ document.addEventListener('DOMContentLoaded', function () {
             criteriaData.q7Timing || 0,
             criteriaData.q8Participation || 0,
             criteriaData.q9WillingnessToReturn || 0
-        ];
-
-        // Ghi log dữ liệu từ backend để debug
+        ];        // Chuẩn bị dữ liệu đánh giá chi tiết
         const detailedData = criteriaLabels.map((label, index) => {
             return {
                 name: label,
                 avgRating: criteriaValues[index]
             };
         });
-        logDebug('Dữ liệu đánh giá chi tiết từ backend:', detailedData);
 
-        // Tạo dữ liệu biểu đồ sử dụng dữ liệu thực từ backend
+        
         const detailedChartData = {
             labels: criteriaLabels,
             datasets: [{
@@ -700,13 +433,8 @@ document.addEventListener('DOMContentLoaded', function () {
                                         else if (value >= 1.5)
                                             ratingText = "Không hài lòng";
                                         else
-                                            ratingText = "Rất không hài lòng";
-
-                                        // Lấy mô tả chi tiết từ đối tượng criteriaDescriptions
+                                            ratingText = "Rất không hài lòng";                                        // Lấy mô tả chi tiết từ đối tượng criteriaDescriptions
                                         const description = criteriaDescriptions[criteriaName];
-
-                                        // Log chi tiết về tooltip để debug
-                                        logDebug(`Tooltip cho tiêu chí '${criteriaName}': ${description ? description : 'Không tìm thấy mô tả'}`);
 
                                         // Trả về mảng các dòng để hiển thị trong tooltip
                                         return [
@@ -725,32 +453,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
         );
     };
-
-    // Cleanup function for chart instances
+    // Gọi hàm để render biểu đồ chi tiết
     function cleanupCharts() {
         logDebug('Chart cleanup called');
 
-        // Destroy rating distribution chart instance if it exists
-        if (ratingDistributionChartInstance) {
-            logDebug('Destroying rating distribution chart instance');
-            ratingDistributionChartInstance.destroy();
-            ratingDistributionChartInstance = null;
-        }
-
-        // Destroy detailed rating chart instance if it exists
         if (detailedRatingChartInstance) {
             logDebug('Destroying detailed rating chart instance');
             detailedRatingChartInstance.destroy();
             detailedRatingChartInstance = null;
         }
     }
-
-    // Clean up charts when page is unloaded or before navigation
+    
+    // Thêm sự kiện để dọn dẹp biểu đồ khi đóng tab hoặc tải lại trang
     window.addEventListener('beforeunload', cleanupCharts);
 
-    // Ensure we render the charts after a short delay to make sure DOM is fully ready
     setTimeout(function () {
-        renderRatingDistributionChart();
+        // Biểu đồ chi tiết vẫn được render từ file này
+        console.log('Rendering detailed chart using viewFeedback.js');
         renderDetailedRatingChart();
     }, 300);
 
@@ -828,7 +547,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         noMatchingFilters.style.display = 'none';
                     }
                 }
-            });
-        });
+            });        });
     }
+    
 });
