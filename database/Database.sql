@@ -541,12 +541,27 @@ INSERT INTO EventParticipants (EventID, UserID, Status) VALUES
 -- TASK ASSIGNMENTS
 -- ========================================
 
-CREATE TABLE Tasks (
-    TaskID INT PRIMARY KEY AUTO_INCREMENT,
-    ParentTaskID INT, -- NULL nếu là nhiệm vụ giao cho ban
-	Term ENUM('Trước sự kiện', 'Trong sự kiện', 'Sau sự kiện'),
+CREATE TABLE EventTerms (
+    TermID INT PRIMARY KEY AUTO_INCREMENT,
+    EventID INT NOT NULL,
+    TermName ENUM('Trước sự kiện', 'Trong sự kiện', 'Sau sự kiện'),
     TermStart DATE,
     TermEnd DATE,
+    FOREIGN KEY (EventID) REFERENCES Events(EventID)
+);
+-- Giai đoạn cho Hackathon AI
+INSERT INTO EventTerms (EventID, TermName, TermStart, TermEnd) VALUES
+(11, 'Trước sự kiện', '2025-07-01', '2025-07-14'),
+(11, 'Trong sự kiện', '2025-07-15', '2025-07-15'),
+(11, 'Sau sự kiện', '2025-07-16', '2025-07-17'),
+-- Giai đoạn cho Code War
+(12, 'Trước sự kiện', '2025-07-20', '2025-07-30'),
+(12, 'Trong sự kiện', '2025-07-31', '2025-07-31');
+
+CREATE TABLE Tasks (
+    TaskID INT PRIMARY KEY AUTO_INCREMENT,
+    ParentTaskID INT, -- NULL nếu là nhiệm vụ cấp cao nhất (dành cho ban)
+    TermID INT,
     EventID INT,
     ClubID INT,
     Title VARCHAR(100) NOT NULL,
@@ -556,21 +571,24 @@ CREATE TABLE Tasks (
     ProgressPercent INT DEFAULT 0,
     StartDate DATETIME,
     EndDate DATETIME,
-    CreatedBy VARCHAR(10), -- Ai tạo task (Chủ nhiệm/Trưởng ban)
+    CreatedBy VARCHAR(10),
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-
     FOREIGN KEY (EventID) REFERENCES Events(EventID),
     FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID),
-    FOREIGN KEY (CreatedBy) REFERENCES Users(UserID)
+    FOREIGN KEY (CreatedBy) REFERENCES Users(UserID),
+    FOREIGN KEY (TermID) REFERENCES EventTerms(TermID)
 );
--- Chủ nhiệm CLB Lập Trình là U012
-INSERT INTO Tasks (ParentTaskID, Term, TermStart, TermEnd, EventID, ClubID, Title, Description, Status, Priority, ProgressPercent, StartDate, EndDate, CreatedBy) VALUES
-(NULL, 'Trước sự kiện', '2025-07-05', '2025-07-10', 11, 4, 'Thiết kế poster sự kiện', 'Thiết kế và duyệt poster truyền thông cho sự kiện Hackathon AI.', 'ToDo', 'MEDIUM', 0, '2025-07-05 08:00:00', '2025-07-10 17:00:00', 'U012'),
-(NULL, 'Trước sự kiện', '2025-07-01', '2025-07-14', 11, 4, 'Chuẩn bị đề bài Hackathon', 'Xây dựng bộ đề thi cho Hackathon AI', 'ToDo', 'HIGH', 0, '2025-07-01 09:00:00', '2025-07-14 17:00:00', 'U012'),
-(NULL, 'Trong sự kiện', '2025-07-15', '2025-07-15', 11, 4, 'Hỗ trợ kỹ thuật tại sự kiện', 'Giải quyết các sự cố kỹ thuật trong suốt sự kiện', 'ToDo', 'MEDIUM', 0, '2025-07-15 07:30:00', '2025-07-15 14:00:00', 'U012'),
-(NULL, 'Trong sự kiện', '2025-07-15', '2025-07-15', 11, 4, 'Ghi hình & Livestream sự kiện', 'Phụ trách quay video và livestream trên fanpage CLB.', 'ToDo', 'HIGH', 0, '2025-07-15 07:45:00', '2025-07-15 14:00:00', 'U012'),
-(NULL, 'Sau sự kiện', '2025-07-16', '2025-07-17', 11, 4, 'Tổng kết kết quả và gửi email cảm ơn', 'Tổng hợp kết quả thi, gửi thư cảm ơn đến người tham gia', 'ToDo', 'LOW', 0, '2025-07-16 09:00:00', '2025-07-17 17:00:00', 'U012');
- 
+-- Hackathon AI
+INSERT INTO Tasks (ParentTaskID, TermID, EventID, ClubID, Title, Description, Status, Priority, ProgressPercent, StartDate, EndDate, CreatedBy) VALUES
+(NULL, 1, 11, 4, 'Thiết kế poster sự kiện', 'Thiết kế và duyệt poster truyền thông cho sự kiện Hackathon AI.', 'ToDo', 'MEDIUM', 0, '2025-07-05 08:00:00', '2025-07-10 17:00:00', 'U012'),
+(NULL, 1, 11, 4, 'Chuẩn bị đề bài Hackathon', 'Xây dựng bộ đề thi cho Hackathon AI', 'ToDo', 'HIGH', 0, '2025-07-01 09:00:00', '2025-07-14 17:00:00', 'U012'),
+(NULL, 2, 11, 4, 'Hỗ trợ kỹ thuật tại sự kiện', 'Giải quyết các sự cố kỹ thuật trong suốt sự kiện', 'ToDo', 'MEDIUM', 0, '2025-07-15 07:30:00', '2025-07-15 14:00:00', 'U012'),
+(NULL, 2, 11, 4, 'Ghi hình & Livestream sự kiện', 'Phụ trách quay video và livestream trên fanpage CLB.', 'ToDo', 'HIGH', 0, '2025-07-15 07:45:00', '2025-07-15 14:00:00', 'U012'),
+(NULL, 3, 11, 4, 'Tổng kết kết quả và gửi email cảm ơn', 'Tổng hợp kết quả thi, gửi thư cảm ơn đến người tham gia', 'ToDo', 'LOW', 0, '2025-07-16 09:00:00', '2025-07-17 17:00:00', 'U012'),
+-- Code War
+(NULL, 4, 12, 4, 'Ra đề và chuẩn bị test case', 'Xây dựng đề thi và bộ test case cho cuộc thi Code War.', 'ToDo', 'HIGH', 0, '2025-07-20 08:00:00', '2025-07-30 17:00:00', 'U012'),
+(NULL, 5, 12, 4, 'Quản lý hệ thống thi và hỗ trợ thí sinh', 'Theo dõi hệ thống thi, xử lý lỗi kỹ thuật và hỗ trợ thí sinh khi cần.', 'ToDo', 'MEDIUM', 0, '2025-07-31 08:00:00', '2025-07-31 13:00:00', 'U012');
+
 
 CREATE TABLE TaskAssignees (
     TaskAssigneeID INT PRIMARY KEY AUTO_INCREMENT,
@@ -589,15 +607,14 @@ CREATE TABLE TaskAssignees (
     )
 );
 INSERT INTO TaskAssignees (TaskID, AssigneeType, DepartmentID) VALUES 
-(1, 'Department', 2),   -- Task 1: Thiết kế poster → Ban Truyền thông
-(2, 'Department', 1),   -- Task 2: Chuẩn bị đề thi → Ban Nội dung
-(3, 'Department', 5),   -- Task 3: Hỗ trợ kỹ thuật → Ban Hậu cần
-(3, 'Department', 2),   -- Task 3: Hỗ trợ kỹ thuật → Ban Truyền thông
-(4, 'Department', 2),   -- Task 4: Livestream → Ban Truyền thông
-(5, 'Department', 1);   -- Task 5: Tổng kết → Ban Nội dung 
-
-
-
+(1, 'Department', 2),   -- Ban Truyền thông
+(2, 'Department', 1),   -- Ban Nội dung
+(3, 'Department', 5),   -- Ban Hậu cần
+(3, 'Department', 2),   -- Ban Truyền thông
+(4, 'Department', 2),   -- Ban Truyền thông
+(5, 'Department', 1),   -- Ban Nội dung
+(6, 'Department', 1),   -- Ban Nội dung
+(7, 'Department', 5);   -- Ban Hậu cần
 CREATE TABLE TaskProgressLogs (
     LogID INT PRIMARY KEY AUTO_INCREMENT,
     TaskID INT NOT NULL,
