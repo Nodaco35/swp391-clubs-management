@@ -144,10 +144,11 @@ public class MyClubController extends HttpServlet {
         String URLMeeting = request.getParameter("URLMeeting");
 
         ClubMeetingDAO.insert(clubID, startedTime, URLMeeting);
-
+        String formattedTime = startedTime.replace("T", " ").substring(0, 16);
+        String content = "Link tham gia: <a href=\"" + URLMeeting + "\">" + URLMeeting + "</a><br/>Thời gian bắt đầu: <strong>" + formattedTime + "</strong>";
         List<UserClub> userInClub = UserClubDAO.findByClubID(clubID);
         for (UserClub userClub : userInClub) {
-            NotificationDAO.sentToPerson(user.getUserID(), userClub.getUserID(), "Cuộc họp mới", "Link tham gia: " + URLMeeting);
+            NotificationDAO.sentToPerson(user.getUserID(), userClub.getUserID(), "Cuộc họp mới", content);
         }
         doGet(request, response);
     }
