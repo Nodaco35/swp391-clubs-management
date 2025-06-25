@@ -10,6 +10,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Quản lý đơn xin tạo CLB - UniClub Admin</title>
         <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@600&display=swap" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
     </head>
@@ -59,15 +60,54 @@
                                 <i class="fas fa-check-circle"></i> ${successMessage}
                             </div>
                             <script>
-                                setTimeout(() => document.getElementById('successMessage')?.style.display = 'none', 10000);
+                                setTimeout(() => {
+                                    const message = document.getElementById('successMessage');
+                                    if (message) {
+                                        message.style.display = 'none';
+                                    }
+                                }, 4000);
                             </script>
                         </c:if>
+
+                        <c:if test="${not empty rejectedMessage}">
+                            <div class="alert alert-warning" id="rejectedMessage">
+                                <i class="fas fa-check-circle"></i> ${rejectedMessage}
+                            </div>
+                            <script>
+                                setTimeout(() => {
+                                    const message = document.getElementById('rejectedMessage');
+                                    if (message) {
+                                        message.style.display = 'none';
+                                    }
+                                }, 4000);
+                            </script>
+                        </c:if>
+
+                        <c:if test="${not empty deletedMessage}">
+                            <div class="alert alert-danger" id="deletedMessage">
+                                <i class="fas fa-check-circle"></i> ${deletedMessage}
+                            </div>
+                            <script>
+                                setTimeout(() => {
+                                    const message = document.getElementById('deletedMessage');
+                                    if (message) {
+                                        message.style.display = 'none';
+                                    }
+                                }, 4000);
+                            </script>
+                        </c:if>
+
                         <c:if test="${not empty errorMessage}">
                             <div class="alert alert-warning" id="errorMessage">
                                 <i class="fas fa-exclamation-circle"></i> ${errorMessage}
                             </div>
                             <script>
-                                setTimeout(() => document.getElementById('errorMessage')?.style.display = 'none', 10000);
+                                setTimeout(() => {
+                                    const message = document.getElementById('errorMessage');
+                                    if (message) {
+                                        message.style.display = 'none';
+                                    }
+                                }, 4000);
                             </script>
                         </c:if>
 

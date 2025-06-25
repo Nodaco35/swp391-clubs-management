@@ -86,38 +86,51 @@
                             </nav>
                         </div>
                     </div>
-                                            
+
                     <c:if test="${not empty mes}">
                         <div id="successMessage" class="alert alert-success">
                             <i class="fas fa-check-circle"></i> ${mes}
                         </div>
+                        <script>
+                            setTimeout(() => {
+                                const message = document.getElementById('successMessage');
+                                if (message) {
+                                    message.style.display = 'none';
+                                }
+                            }, 4000);
+                        </script>
                     </c:if>
 
                     <c:if test="${not empty mesDelete}">
-                        <div id="successMessage" class="alert alert-danger">
+                        <div id="mesDelete" class="alert alert-danger">
                             <i class="fa fa-trash" aria-hidden="true"></i> ${mesDelete}
                         </div>
+                        <script>
+                            setTimeout(() => {
+                                const message = document.getElementById('mesDelete');
+                                if (message) {
+                                    message.style.display = 'none';
+                                }
+                            }, 4000);
+                        </script>
                     </c:if>
-                                            
+
                     <c:if test="${not empty err}">
                         <div id="errorMessage" class="alert alert-danger">
                             <i class="fas fa-exclamation-circle"></i> ${err}
                         </div>
+                        <script>
+                            setTimeout(() => {
+                                const message = document.getElementById('errorMessage');
+                                if (message) {
+                                    message.style.display = 'none';
+                                }
+                            }, 4000);
+                        </script>
                     </c:if>
 
-                    <script>
-                        // Tự động ẩn thông báo sau 5 giây
-                        window.addEventListener('DOMContentLoaded', function () {
-                            setTimeout(function () {
-                                const success = document.getElementById('successMessage');
-                                const error = document.getElementById('errorMessage');
-                                if (success)
-                                    success.style.display = 'none';
-                                if (error)
-                                    error.style.display = 'none';
-                            }, 5000); // 5 giây
-                        });
-                    </script>
+
+
 
                 </header>
 

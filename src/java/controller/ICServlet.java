@@ -92,7 +92,7 @@ public class ICServlet extends HttpServlet {
             //Sửa duyệt chỉ cần theo id của request -> phân ra action từ chối và đồng ý
             int id = Integer.parseInt(request.getParameter("id"));
             boolean success;
-            String message;
+            String message = null, rejectedMessage = null, deletedMessage = null;
             String userId = request.getParameter("userID");
             if (action.equals("approvePermissionRequest")) {
                 success = ccp.approveRequest(id, user.getUserID());
@@ -106,7 +106,7 @@ public class ICServlet extends HttpServlet {
 
             } else if(action.equals("rejectPermissionRequest")) {
                 success = ccp.rejectRequest(id, user.getUserID());
-                message = success ? "Đã từ chối đơn thành công!" : "Từ chối đơn thất bại. Vui lòng thử lại.";
+                rejectedMessage = success ? "Đã từ chối đơn thành công!" : "Từ chối đơn thất bại. Vui lòng thử lại.";
                  if (success) {
                     notificationDAO.sentToPerson1(user.getUserID(), userId, 
                         "Đơn xin quyền tạo câu lạc bộ bị từ chối", 
@@ -116,7 +116,7 @@ public class ICServlet extends HttpServlet {
 
             }else{
                 success = ccp.deleteRequest(id);
-                message = success ? "Đã xoá đơn thành công!" : "Xoá đơn thất bại. Vui lòng thử lại.";
+                deletedMessage = success ? "Đã xoá đơn thành công!" : "Xoá đơn thất bại. Vui lòng thử lại.";
             }
 
             int numberRequest = cca.countPendingRequests();
@@ -125,6 +125,8 @@ public class ICServlet extends HttpServlet {
             request.setAttribute("requests", requests);
             request.setAttribute("numberRequest", numberRequest);
             request.setAttribute(success ? "successMessage" : "errorMessage", message);
+            request.setAttribute(success ? "rejectedMessage" : "errorMessage", rejectedMessage);
+            request.setAttribute(success ? "deletedMessage" : "errorMessage", deletedMessage);
             request.setAttribute("pendingRequests", ccp.getPermissionsByStatus("PENDING"));
             request.getRequestDispatcher("view/ic/grantPermission.jsp").forward(request, response);
         }
