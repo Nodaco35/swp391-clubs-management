@@ -2,8 +2,6 @@ package controller;
 
 import dal.ClubDAO;
 import dal.UserClubDAO;
-import dal.PermissionDAO;
-import dal.ClubCreationPermissionDAO;
 import dal.CreatedClubApplicationsDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -185,6 +183,9 @@ public class CreateClubServlet extends HttpServlet {
         if (contactGmail == null || contactGmail.trim().isEmpty()) {
             errors.add("Email liên hệ không được để trống.");
         }
+         if (contactPhone != null && !contactPhone.trim().isEmpty() && !contactPhone.matches("\\d{10}")) {
+            errors.add("Số điện thoại phải là 10 chữ số và không chứa chữ cái hoặc ký tự đặc biệt.");
+        }
         Date establishedDate = null;
         if (establishedDateStr != null && !establishedDateStr.trim().isEmpty()) {
             try {
@@ -359,6 +360,9 @@ public class CreateClubServlet extends HttpServlet {
             errors.add("Vui lòng chọn danh mục câu lạc bộ.");
         } else if (!VALID_CATEGORIES.contains(category)) {
             errors.add("Danh mục không hợp lệ. Vui lòng chọn Thể Thao, Học Thuật hoặc Phong Trào.");
+        }
+         if (contactPhone != null && !contactPhone.trim().isEmpty() && !contactPhone.matches("\\d{10}")) {
+            errors.add("Số điện thoại phải là 10 chữ số và không chứa chữ cái hoặc ký tự đặc biệt.");
         }
         Date establishedDate = null;
         if (establishedDateStr != null && !establishedDateStr.trim().isEmpty()) {

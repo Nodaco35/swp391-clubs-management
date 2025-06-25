@@ -103,7 +103,7 @@
                 <div>
                     <label for="clubImg" class="block text-sm font-medium text-gray-700">Hình Ảnh Câu Lạc Bộ: ${isEdit ? '' : '<span class="text-red-500">*</span>'}</label>
                     <div class="avatar-box mb-4">
-                        <img id="clubImgPreview" src="${isEdit && club.clubImg != null ? pageContext.request.contextPath.concat('/').concat(club.clubImg).concat('?t=').concat(System.currentTimeMillis()) : pageContext.request.contextPath.concat('../img/default-club-img.png')}" 
+                        <img id="clubImgPreview" src="${isEdit && club.clubImg != null && !club.clubImg.isEmpty() ? pageContext.request.contextPath.concat('/').concat(club.clubImg) : pageContext.request.contextPath.concat('/img/default-club-img.png')}" 
                              alt="Club Image" class="avatar-img w-32 h-32 object-cover rounded-lg">
                     </div>
                     <input type="file" name="clubImg" id="clubImg" accept="image/jpeg,image/png,image/gif,image/webp" ${isEdit ? '' : 'required'}
@@ -172,6 +172,7 @@
         document.getElementById('createClubForm').addEventListener('submit', function(e) {
             const clubName = document.getElementById('clubName').value.trim();
             const contactGmail = document.getElementById('contactGmail').value.trim();
+            const contactPhone = document.getElementById('contactPhone').value.trim();
             const clubImg = document.getElementById('clubImg').files[0];
             const establishedDate = document.getElementById('establishedDate').value;
             const isEdit = ${isEdit};
@@ -180,6 +181,9 @@
 
             if (!clubName) errors.push('Tên câu lạc bộ không được để trống.');
             if (!contactGmail) errors.push('Email liên hệ không được để trống.');
+            if (contactPhone && !/^\d{10}$/.test(contactPhone)) {
+                errors.push('Số điện thoại phải là 10 chữ số và không chứa chữ cái hoặc ký tự đặc biệt.');
+            }
             if (!isEdit && !clubImg) errors.push('Vui lòng chọn một hình ảnh.');
             if (clubImg) {
                 if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(clubImg.type)) {
@@ -195,17 +199,6 @@
             if (errors.length > 0) {
                 e.preventDefault();
                 alert('Vui lòng khắc phục các lỗi sau:\n' + errors.join('\n'));
-            } else {
-                console.log('Form data:');
-                console.log('clubName:', clubName);
-                console.log('contactGmail:', contactGmail);
-                console.log('clubImg:', clubImg ? `${clubImg.name} (${clubImg.size} bytes, ${clubImg.type})` : 'null');
-                console.log('category:', document.getElementById('category').value);
-                console.log('description:', document.getElementById('description').value.trim());
-                console.log('contactPhone:', document.getElementById('contactPhone').value.trim());
-                console.log('contactURL:', document.getElementById('contactURL').value.trim());
-                console.log('establishedDate:', establishedDate);
-                console.log('departmentIDs:', Array.from(document.getElementsByName('departmentIDs')).filter(cb => cb.checked).map(cb => cb.value));
             }
         });
     </script>
