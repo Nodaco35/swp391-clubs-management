@@ -7,6 +7,7 @@ import models.Users;
 import models.Tasks;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import dal.ClubDepartmentDAO;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,6 +18,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.io.PrintWriter;
+import models.ActivedMembers;
 
 public class DepartmentMemberServlet extends HttpServlet {
 
@@ -60,7 +63,11 @@ public class DepartmentMemberServlet extends HttpServlet {
 
             switch (action) {
                 case "list":
-                    handleListMembers(request, response, clubDepartmentID);
+                    int clubID = Integer.parseInt(request.getParameter("clubID"));
+                    ClubDepartmentDAO cp = new ClubDepartmentDAO();
+                    int departmentID = cp.getClubDepartmentID(currentUser.getUserID(), clubID);
+
+                    handleListMembers(request, response, departmentID);
                     break;
                 case "search":
                     handleSearchMembers(request, response, clubDepartmentID);
@@ -71,9 +78,22 @@ public class DepartmentMemberServlet extends HttpServlet {
                 case "getMemberDetail":
                     handleMemberDetail(request, response, clubDepartmentID);
                     break;
-                default:
-                    handleListMembers(request, response, clubDepartmentID);
-                    break;
+            }
+
+            //Evualute Point ( Chấm điểm thành viên )
+            if ("evaluatePoint".equals(action)) {
+                ClubDepartmentDAO cd = new ClubDepartmentDAO();
+                PrintWriter out = response.getWriter();
+
+                int clubDepartmentID_ = Integer.parseInt(request.getParameter("clubDepartmentID"));
+
+                List<ActivedMembers> members = cd.getActiveMembersByClubAndDepartment(clubDepartmentID_);
+
+                request.setAttribute("members", members);
+                request.setAttribute("clubDepartmentID", clubDepartmentID_);
+
+                request.getRequestDispatcher("view/student/department-leader/evaluate-point.jsp").forward(request, response);
+                return;
             }
 
         } catch (Exception e) {
@@ -114,9 +134,46 @@ public class DepartmentMemberServlet extends HttpServlet {
                 case "addMember":
                     handleAddMember(request, response, clubDepartmentID);
                     break;
-                default:
-                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Hành động không hợp lệ");
-                    break;
+            }
+
+            if ("submitRating".equals(action)) {
+                String member = request.getParameter("userID");
+                int points = Integer.parseInt(request.getParameter("points"));
+                ClubDepartmentDAO cd = new ClubDepartmentDAO();
+                int clubDepartmentID_ = Integer.parseInt(request.getParameter("clubDepartmentID"));
+
+                boolean success = cd.updateProgressPoint(member, points);
+                
+                if (success) {
+                    request.setAttribute("mes", "Update successfully");
+                } else {
+                    request.setAttribute("err", "Update failure");
+                }
+
+                List<ActivedMembers> members = cd.getActiveMembersByClubAndDepartment(clubDepartmentID_);
+                request.setAttribute("members", members);
+                request.setAttribute("clubDepartmentID", clubDepartmentID_);
+                request.getRequestDispatcher("view/student/department-leader/evaluate-point.jsp").forward(request, response);
+                return;
+            } else if ("deleteRating".equals(action)) {
+                String member = request.getParameter("userID");
+
+                ClubDepartmentDAO cd = new ClubDepartmentDAO();
+
+                int clubDepartmentID_ = Integer.parseInt(request.getParameter("clubDepartmentID"));
+
+                boolean success = cd.clearProgressPoint(member);
+                if (success) {
+                    request.setAttribute("mesDelete", "Delete successfully");
+                } else {
+                    request.setAttribute("err", "Delete failure");
+                }
+
+                List<ActivedMembers> members = cd.getActiveMembersByClubAndDepartment(clubDepartmentID_);
+                request.setAttribute("members", members);
+                request.setAttribute("clubDepartmentID", clubDepartmentID_);
+                request.getRequestDispatcher("view/student/department-leader/evaluate-point.jsp").forward(request, response);
+                return;
             }
 
         } catch (Exception e) {
@@ -411,7 +468,7 @@ public class DepartmentMemberServlet extends HttpServlet {
             } catch (Exception e) {
                 System.err.println("Error serializing to JSON: " + e.getMessage());
                 e.printStackTrace();
-                
+
                 // Nếu lỗi khi serialize, trả về thông báo lỗi dạng JSON
                 response.getWriter().write("{\"error\":true,\"message\":\"Lỗi khi xử lý dữ liệu thành viên: " + e.getMessage() + "\"}");
             }
