@@ -111,6 +111,9 @@ public class AddLocationServlet extends HttpServlet {
 
             // Thêm địa điểm mới
             locationDAO.addOffCampusLocation(newLocationName.trim());
+            HttpSession session = request.getSession();
+
+            session.setAttribute("successMsg", "Thêm địa điểm thành công!");
             response.sendRedirect(request.getContextPath() + "/chairman-page/myclub-events/add-event");
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", "Không thể thêm địa điểm: " + e.getMessage());

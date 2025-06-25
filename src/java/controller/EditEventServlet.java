@@ -85,10 +85,8 @@ public class EditEventServlet extends HttpServlet {
 
                     List<Agenda> agendas = eventDAO.getAgendasByEventID(eventID);
 
-                    // Lấy loại địa điểm từ event nếu có, mặc định "OnCampus"
                     String locationType = request.getParameter("locationType");
                     if (locationType == null || locationType.isEmpty()) {
-                        // fallback từ event
                         if (event.getLocation() != null && event.getLocation().getTypeLocation() != null) {
                             locationType = event.getLocation().getTypeLocation();
                         } else {
@@ -96,10 +94,8 @@ public class EditEventServlet extends HttpServlet {
                         }
                     }
 
-                    // Lấy danh sách địa điểm theo loại đã chọn
                     List<Locations> locations = locationDAO.getLocationsByType(locationType);
 
-                    // Đưa vào request attribute
                     request.setAttribute("event", event);
                     request.setAttribute("agendas", agendas);
                     request.setAttribute("locations", locations);
@@ -141,7 +137,6 @@ public class EditEventServlet extends HttpServlet {
 
             boolean isPublic = "public".equalsIgnoreCase(eventType);
 
-            // Kết hợp ngày + giờ thành Timestamp
             LocalDate date = LocalDate.parse(eventDateStr);
             LocalTime startTime = LocalTime.parse(startTimeStr);
             LocalTime endTime = LocalTime.parse(endTimeStr);
@@ -149,11 +144,12 @@ public class EditEventServlet extends HttpServlet {
             Timestamp eventStart = Timestamp.valueOf(LocalDateTime.of(date, startTime));
             Timestamp eventEnd = Timestamp.valueOf(LocalDateTime.of(date, endTime));
 
-            // Cập nhật DB
+
             EventsDAO eventDAO = new EventsDAO();
             eventDAO.updateEvent(eventID, eventName, description, eventStart, eventEnd, locationID, capacity, isPublic);
 
-            // Redirect về lại trang chỉnh sửa
+            HttpSession session = request.getSession();
+            session.setAttribute("successMsg", "Chỉnh sửa sự kiện thành công!");
             response.sendRedirect(request.getContextPath() + "/chairman-page/myclub-events/edit-event?eventID=" + eventID);
 
         } catch (Exception e) {

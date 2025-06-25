@@ -158,11 +158,57 @@
 		<c:if test="${not empty errorMessage}">
 		<div class="error-message" style="color: red">${errorMessage}</div>
 		</c:if>
+			<c:if test="${not empty sessionScope.successMsg}">
+			<div class="error-message" style="color: green">${sessionScope.successMsg}</div>
+				<c:remove var="successMsg" scope="session" />
+			</c:if>
 
+			<div class="form-grid-2">
+			<div id="newLocationGroup"
+			     style="display: ${param.locationType == 'OffCampus' ? 'block' : 'none'}; margin-top: 20px;">
+				<form action="${pageContext.request.contextPath}/add-location" method="post">
+					<div class="form-group">
+						<label for="newLocationName">Địa điểm mới</label>
+						<input type="text" id="newLocationName" name="newLocationName"
+						       placeholder="Nhập địa điểm ngoài trường..." value="${param.newLocationName}">
+					</div>
+					<div class="form-actions">
+						<button type="submit" class="btn-submit">
+							<i class="fas fa-plus"></i> Thêm địa điểm
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
 		<form id="eventForm" action="${pageContext.request.contextPath}/chairman-page/myclub-events/add-event"
 		      method="post">
 			<div class="form-section">
 				<h3>Thông tin cơ bản</h3>
+				<div class="form-grid-2">
+					<div class="form-group">
+						<label for="locationType">Loại địa điểm (Trong hay ngoài trường) *</label>
+						<select id="locationType" name="locationType" onchange="this.form.submit()" required>
+							<option value="OnCampus" ${param.locationType == 'OnCampus' ? 'selected' : ''}>Trong trường
+							</option>
+							<option value="OffCampus" ${param.locationType == 'OffCampus' ? 'selected' : ''}>Ngoài
+								trường
+							</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-grid-2">
+					<div class="form-group">
+						<label for="eventLocation">Địa điểm *</label>
+						<select id="eventLocation" name="eventLocation" required>
+							<option value="">Chọn địa điểm...</option>
+							<c:forEach var="location" items="${locations}">
+								<option value="${location.locationID}" ${param.eventLocation == location.locationID ? 'selected' : ''}>
+										${location.locationName}
+								</option>
+							</c:forEach>
+						</select>
+					</div>
+				</div>
 				<div class="form-grid">
 					<div class="form-group">
 						<label for="eventName">Tên sự kiện *</label>
@@ -207,31 +253,7 @@
 						<input type="time" id="eventEndTime" name="eventEndTime" value="${param.eventEndTime}" required>
 					</div>
 				</div>
-				<div class="form-grid-2">
-					<div class="form-group">
-						<label for="locationType">Loại địa điểm (Trong hay ngoài trường) *</label>
-						<select id="locationType" name="locationType" onchange="this.form.submit()" required>
-							<option value="OnCampus" ${param.locationType == 'OnCampus' ? 'selected' : ''}>Trong trường
-							</option>
-							<option value="OffCampus" ${param.locationType == 'OffCampus' ? 'selected' : ''}>Ngoài
-								trường
-							</option>
-						</select>
-					</div>
-				</div>
-				<div class="form-grid-2">
-					<div class="form-group">
-						<label for="eventLocation">Địa điểm *</label>
-						<select id="eventLocation" name="eventLocation" required>
-							<option value="">Chọn địa điểm...</option>
-							<c:forEach var="location" items="${locations}">
-								<option value="${location.locationID}" ${param.eventLocation == location.locationID ? 'selected' : ''}>
-										${location.locationName}
-								</option>
-							</c:forEach>
-						</select>
-					</div>
-				</div>
+
 			</div>
 
 			<div class="form-actions">
@@ -245,23 +267,7 @@
 			</div>
 		</form>
 
-		<div class="form-grid-2">
-			<div id="newLocationGroup"
-			     style="display: ${param.locationType == 'OffCampus' ? 'block' : 'none'}; margin-top: 20px;">
-				<form action="${pageContext.request.contextPath}/add-location" method="post">
-					<div class="form-group">
-						<label for="newLocationName">Địa điểm mới</label>
-						<input type="text" id="newLocationName" name="newLocationName"
-						       placeholder="Nhập địa điểm ngoài trường..." value="${param.newLocationName}">
-					</div>
-					<div class="form-actions">
-						<button type="submit" class="btn-submit">
-							<i class="fas fa-plus"></i> Thêm địa điểm
-						</button>
-					</div>
-				</form>
-			</div>
-		</div>
+
 </main>
 <script>
     function toggleNewLocation() {
@@ -274,34 +280,6 @@
         toggleNewLocation();
     }
 
-    // // Gửi form eventForm khi locationType thay đổi
-    // function submitLocationType() {
-    //     var form = document.getElementById('eventForm');
-    //     // Tạm thời bỏ required để gửi locationType
-    //     form.querySelectorAll('input[required], select[required]').forEach(function (element) {
-    //         if (element.id !== 'locationType') {
-    //             element.removeAttribute('required');
-    //         }
-    //     });
-    //     form.submit();
-    //     // Khôi phục required
-    //     setTimeout(function () {
-    //         form.querySelectorAll('input:not([id="locationType"]), select:not([id="locationType"])').forEach(function (element) {
-    //             if (element.dataset.required === 'true') {
-    //                 element.setAttribute('required', '');
-    //             }
-    //         });
-    //     }, 0);
-    // }
-    //
-    // // Khởi tạo trạng thái khi tải trang
-    // window.onload = function () {
-    //     toggleNewLocation();
-    //     // Lưu trạng thái required ban đầu
-    //     document.querySelectorAll('input[required], select[required]').forEach(function (element) {
-    //         element.dataset.required = 'true';
-    //     });
-    // };
 </script>
 </body>
 </html>

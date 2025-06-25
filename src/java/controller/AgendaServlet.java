@@ -19,6 +19,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import models.Events;
 
 /**
@@ -83,12 +84,10 @@ public class AgendaServlet extends HttpServlet {
 
         EventsDAO eventsDAO = new EventsDAO();
 
-        // Lấy ngày sự kiện
         Events event = eventsDAO.getEventByID(eventID);
-        Date date = event.getEventDate(); // java.util.Date
+        Date date = event.getEventDate();
         LocalDate eventDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
-        // Xóa toàn bộ agenda cũ theo EventID
         eventsDAO.deleteAllByEventID(eventID);
 
         if (startTimes != null && endTimes != null && activities != null) {
@@ -107,6 +106,8 @@ public class AgendaServlet extends HttpServlet {
                 }
             }
         }
+        HttpSession session = request.getSession();
+        session.setAttribute("successMsg", "Thêm chương trình sự kiện thành công!");
 
         response.sendRedirect(request.getContextPath() + "/chairman-page/myclub-events/edit-event?eventID=" + eventID);
     }
