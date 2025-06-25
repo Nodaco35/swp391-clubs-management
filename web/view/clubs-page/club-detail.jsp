@@ -83,7 +83,7 @@
                                         </a>
                                     </c:if>
                                     <c:if test="${isDepartmentLeader}">
-                                        <a href="${pageContext.request.contextPath}/department-dashboard" 
+                                        <a href="${pageContext.request.contextPath}/department-dashboard?clubID=${displayClub.clubID}" 
                                            class="btn btn-primary">
                                             <i class="fas fa-users-gear"></i> Quản lý Ban
                                         </a>

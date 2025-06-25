@@ -38,6 +38,9 @@ public class DepartmentDashboardServlet extends HttpServlet {
                 return;
             }
             
+            int clubID = Integer.parseInt(request.getParameter("clubID"));
+            request.setAttribute("clubID",clubID);
+            
             // Lấy dữ liệu dashboard
             DepartmentDashboard dashboard = dashboardDAO.getCompleteDashboard(currentUser.getUserID());
               if (dashboard == null) {

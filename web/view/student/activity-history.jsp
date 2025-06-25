@@ -77,8 +77,8 @@
                                     </td>
 
                                     <td>
-                                        <span class="badge ${event.eventStatus == 'COMPLETED' ? 'badge-completed' : 'badge-pending'}">
-                                            ${event.eventStatus == 'COMPLETED' ? 'Đã hoàn thành' : 'Sắp diễn ra'}
+                                        <span class="badge ${event.eventStatus == 'Completed' ? 'badge-completed' : 'badge-pending'}">
+                                            ${event.eventStatus == 'Completed' ? 'Đã hoàn thành' : 'Sắp diễn ra'}
                                         </span>
                                     </td>
 
