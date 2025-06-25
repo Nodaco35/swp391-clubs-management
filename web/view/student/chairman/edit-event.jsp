@@ -157,6 +157,10 @@
 		<c:if test="${not empty errorMessage}">
 			<div class="error-message" style="color: red">${errorMessage}</div>
 		</c:if>
+		<c:if test="${not empty sessionScope.successMsg}">
+			<div class="error-message" style="color: green">${sessionScope.successMsg}</div>
+			<c:remove var="successMsg" scope="session" />
+		</c:if>
 		<div class="modal-header">
 			<h3 id="modalTitle">Chi tiết sự kiện</h3>
 		</div>

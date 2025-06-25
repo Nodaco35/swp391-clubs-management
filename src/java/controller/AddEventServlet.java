@@ -185,7 +185,6 @@ public class AddEventServlet extends HttpServlet {
 
             boolean isPublic = "public".equalsIgnoreCase(eventType);
             dao.insertEvent(eventName, eventDescription, startDateTime, endDateTime, locationId, myClubID, isPublic, maxParticipants);
-
             response.sendRedirect(request.getContextPath() + "/chairman-page/myclub-events");
 
         } catch (NumberFormatException e) {
