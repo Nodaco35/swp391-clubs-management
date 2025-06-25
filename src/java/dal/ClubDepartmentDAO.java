@@ -192,34 +192,34 @@ public class ClubDepartmentDAO {
         return -1; // Trả về -1 nếu không tìm thấy hoặc lỗi
     }
 
-    public List<ActivedMembers> getActiveMembersByClubAndDepartment(int departmentID) {
+    public List<ActivedMembers> getActiveMembersByClubAndDepartment(int departmentID, String departmentLeaderID) {
         List<ActivedMembers> members = new ArrayList<>();
         String sql = """
                        SELECT 
-                         amc.UserID,
-                         u.FullName,
-                         u.Email,
-                         amc.ClubID,
-                         amc.ActiveDate,
-                         amc.LeaveDate,
-                         amc.ProgressPoint
-                     FROM ActivedMemberClubs AS amc
-                     JOIN Users AS u
-                       ON amc.UserID = u.UserID
-                     JOIN UserClubs AS uc
-                       ON amc.UserID = uc.UserID
-                      AND amc.ClubID = uc.ClubID
-                      AND amc.UserID = uc.UserID
-                     JOIN ClubDepartments AS cd
-                       ON uc.ClubDepartmentID = cd.ClubDepartmentID
-                     WHERE uc.ClubDepartmentID = ?
-                       AND amc.IsActive = TRUE;
+                           amc.UserID,
+                           u.FullName,
+                           u.Email,
+                           amc.ClubID,
+                           amc.ActiveDate,
+                           amc.LeaveDate,
+                           amc.ProgressPoint
+                       FROM ActivedMemberClubs AS amc
+                       JOIN Users AS u
+                         ON amc.UserID = u.UserID
+                       JOIN UserClubs AS uc
+                         ON amc.UserID = uc.UserID
+                        AND amc.ClubID = uc.ClubID
+                       JOIN ClubDepartments AS cd
+                         ON uc.ClubDepartmentID = cd.ClubDepartmentID
+                       WHERE uc.ClubDepartmentID = ?
+                         AND amc.IsActive = TRUE
+                         AND amc.UserID != ? ;
                      """;
 
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, departmentID);
-
+            ps.setString(2, departmentLeaderID);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     ActivedMembers member = new ActivedMembers();

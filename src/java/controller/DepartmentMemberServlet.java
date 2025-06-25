@@ -87,7 +87,7 @@ public class DepartmentMemberServlet extends HttpServlet {
 
                 int clubDepartmentID_ = Integer.parseInt(request.getParameter("clubDepartmentID"));
 
-                List<ActivedMembers> members = cd.getActiveMembersByClubAndDepartment(clubDepartmentID_);
+                List<ActivedMembers> members = cd.getActiveMembersByClubAndDepartment(clubDepartmentID_,currentUser.getUserID());
 
                 request.setAttribute("members", members);
                 request.setAttribute("clubDepartmentID", clubDepartmentID_);
@@ -150,7 +150,7 @@ public class DepartmentMemberServlet extends HttpServlet {
                     request.setAttribute("err", "Update failure");
                 }
 
-                List<ActivedMembers> members = cd.getActiveMembersByClubAndDepartment(clubDepartmentID_);
+                List<ActivedMembers> members = cd.getActiveMembersByClubAndDepartment(clubDepartmentID_,currentUser.getUserID());
                 request.setAttribute("members", members);
                 request.setAttribute("clubDepartmentID", clubDepartmentID_);
                 request.getRequestDispatcher("view/student/department-leader/evaluate-point.jsp").forward(request, response);
@@ -169,7 +169,7 @@ public class DepartmentMemberServlet extends HttpServlet {
                     request.setAttribute("err", "Delete failure");
                 }
 
-                List<ActivedMembers> members = cd.getActiveMembersByClubAndDepartment(clubDepartmentID_);
+                List<ActivedMembers> members = cd.getActiveMembersByClubAndDepartment(clubDepartmentID_,currentUser.getUserID());
                 request.setAttribute("members", members);
                 request.setAttribute("clubDepartmentID", clubDepartmentID_);
                 request.getRequestDispatcher("view/student/department-leader/evaluate-point.jsp").forward(request, response);
