@@ -124,20 +124,19 @@
                     <div class="event-detail-container">
                         <c:set var="e" value="${requestScope.event}"/>
                         <!-- Event Header -->
-                        <div class="event-detail-header">
+                        <div class="event-detail-header" style="background-image: url('${pageContext.request.contextPath}/${e.eventImg}');">
                             <div class="event-status-badges">
-                                <div class="event-badge badge-public">
-                                    <span class="event-badge ${e.isPublic() ? 'badge-public' : 'badge-private'}">
-                                        ${e.isPublic() ? 'Công khai' : 'Riêng tư'}
-                                    </span>
+                                <div class="event-badge ${e.isPublic() ? 'badge-public' : 'badge-private'}">
+                                    ${e.isPublic() ? 'Công khai' : 'Riêng tư'}
                                 </div>
                             </div>
-                            <div class="event-header-content">
-                                <div class="event-header-icon">
-                                    <i class="fas fa-code"></i>
-                                </div>
-                            </div>
+<%--                            <div class="event-header-content">--%>
+<%--                                <h1 class="event-title">${e.eventName}</h1>--%>
+<%--                            </div>--%>
                         </div>
+
+
+
 
                         <!-- Event Content -->
                         <div class="event-detail-content">
@@ -224,9 +223,9 @@
                                 <c:forEach var="e" items="${requestScope.relatedEvents}">
                                     <div class="event-card" onclick="redirectToDetail('${e.eventID}')">
                                         <div class="event-image">
-                                            <i class="fas fa-calendar-day"></i>
+                                            <img src="${pageContext.request.contextPath}/${e.eventImg}" alt="${e.eventName}" />
                                             <span class="event-badge ${e.isPublic() ? 'badge-public' : 'badge-private'}">
-                                                ${e.isPublic() ? 'Công khai' : 'Riêng tư'}
+                                                    ${e.isPublic() ? 'Công khai' : 'Riêng tư'}
                                             </span>
                                         </div>
                                         <div class="event-content">

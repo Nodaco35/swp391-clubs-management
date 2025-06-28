@@ -15,7 +15,7 @@ import java.util.List;
 public class PermissionDAO {
     public static Permission findByPerId(int perId){
         
-        String sql = "SELECT * FROM clubmanagementsystem.permissions;";
+        String sql = "SELECT * FROM Permissions;";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
@@ -34,10 +34,10 @@ public class PermissionDAO {
     public static List<Permission> findAll(){
         List<Permission> findAll = new ArrayList<>();
         String sql = """
-                     SELECT `permissions`.`PermissionID`,
-                         `permissions`.`PermissionName`,
-                         `permissions`.`Description`
-                     FROM `clubmanagementsystem`.`permissions`;""";
+                     SELECT PermissionID,
+                         PermissionName,
+                         escription
+                     FROM Permissions;""";
         
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);

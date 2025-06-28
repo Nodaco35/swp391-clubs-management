@@ -181,7 +181,7 @@
                     <c:forEach var="e" items="${requestScope.events}">
                         <div class="event-card" onclick="redirectToDetail('${e.eventID}')">
                             <div class="event-image">
-                                <i class="fas fa-calendar-day"></i>
+                                <img src="${pageContext.request.contextPath}/${e.eventImg}" alt="${e.eventName}" />
                                 <span class="event-badge ${e.isPublic() ? 'badge-public' : 'badge-private'}">
                                     ${e.isPublic() ? 'Công khai' : 'Riêng tư'}
                                 </span>

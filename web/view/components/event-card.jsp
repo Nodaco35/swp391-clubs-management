@@ -19,7 +19,7 @@
             </div>
             <div class="event-location">
                 <i class="fas fa-map-marker-alt"></i>
-                ${event.location}
+                ${event.location.locationName}
             </div>
         </div>
 <%--        <p class="event-description">${event.description}</p>--%>

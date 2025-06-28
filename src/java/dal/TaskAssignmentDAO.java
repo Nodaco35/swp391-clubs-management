@@ -24,12 +24,12 @@ public class TaskAssignmentDAO {
                      SELECT distinct(uc.UserID),
                       tm.*, 
                            d.DepartmentName, c.ClubName, c.ClubID, e.EventName, cd.DepartmentID
-                     FROM taskassignmentdepartment tm
+                     FROM TaskAssignmentDepartment tm
                      JOIN Events e ON tm.EventID = e.EventID
                      JOIN ClubDepartments cd ON e.ClubID = cd.ClubID
-                     Join clubs c on cd.clubID = c.ClubID
-                     JOIN departments d on d.DepartmentID = cd.DepartmentID
-                     JOIN userclubs uc on uc.ClubDepartmentID = cd.ClubDepartmentID
+                     Join Clubs c on cd.clubID = c.ClubID
+                     JOIN Departments d on d.DepartmentID = cd.DepartmentID
+                     JOIN Userclubs uc on uc.ClubDepartmentID = cd.ClubDepartmentID
                      where uc.UserID = ?
                      AND tm.DueDate > now()
                      ORDER BY tm.DueDate ASC
@@ -64,12 +64,12 @@ public class TaskAssignmentDAO {
         int count = 0;
         String sql = """
                       SELECT COUNT(distinct tm.TaskAssignmentDepartmentID) as total 
-                                                               FROM taskassignmentdepartment tm
+                                                               FROM TaskAssignmentDepartment tm
                                                                                     JOIN Events e ON tm.EventID = e.EventID
                                                                                     JOIN ClubDepartments cd ON e.ClubID = cd.ClubID
-                                                                                    Join clubs c on cd.clubID = c.ClubID
-                                                                                    JOIN departments d on d.DepartmentID = cd.DepartmentID
-                                                                                    JOIN userclubs uc on uc.ClubDepartmentID = cd.ClubDepartmentID
+                                                                                    Join Clubs c on cd.clubID = c.ClubID
+                                                                                    JOIN Departments d on d.DepartmentID = cd.DepartmentID
+                                                                                    JOIN Userclubs uc on uc.ClubDepartmentID = cd.ClubDepartmentID
                                                                                     where uc.UserID = ?
                                                                                     AND tm.DueDate > now();""";
         try {

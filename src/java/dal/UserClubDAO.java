@@ -18,10 +18,10 @@ public class UserClubDAO {
         String sql = """
                     SELECT uc.*, r.RoleName, d.DepartmentName , c.ClubImg, c.ClubName
                                         FROM UserClubs uc
-                                        JOIN clubs c on uc.ClubID = c.ClubID
+                                        JOIN Clubs c on uc.ClubID = c.ClubID
                                         JOIN Roles r ON uc.RoleID = r.RoleID
                                         JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
-                                        JOIN departments d on cd.DepartmentID = d.DepartmentID
+                                        JOIN Departments d on cd.DepartmentID = d.DepartmentID
                                         WHERE uc.UserID = ?""";
         List<UserClub> findByUserID = new ArrayList<>();
         try {
@@ -53,8 +53,8 @@ public class UserClubDAO {
         List<UserClub> findByClubID = new ArrayList<>();
         String sql = """
                      Select *
-                     from userclubs uc
-                     join clubs c on uc.ClubID = c.ClubID
+                     from Userclubs uc
+                     join Clubs c on uc.ClubID = c.ClubID
                      where c.ClubID = ?""";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
