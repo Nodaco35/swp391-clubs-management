@@ -15,8 +15,8 @@ public class ClubDAO {
     public static List<Clubs> findByUserIDAndChairman(String userID) {
         List<Clubs> findByUserIDAndChairman = new ArrayList<>();
         String sql = "Select *\n"
-                + "from clubs c \n"
-                + "join userclubs uc on c.ClubID = uc.ClubID\n"
+                + "from Clubs c \n"
+                + "join UserClubs uc on c.ClubID = uc.ClubID\n"
                 + "where uc.UserID = ? and RoleID = 1";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);

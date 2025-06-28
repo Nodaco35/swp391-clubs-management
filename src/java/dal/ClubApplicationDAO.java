@@ -51,7 +51,7 @@ public class ClubApplicationDAO {
                      FROM ClubApplications ca
                      JOIN Users u ON ca.UserID = u.UserID
                      JOIN UserClubs uc ON ca.ClubID = uc.ClubID
-                     JOIN clubs c on ca.ClubID = c.ClubID
+                     JOIN Clubs c on ca.ClubID = c.ClubID
                      WHERE uc.UserID = ? AND uc.RoleID = 1 AND ca.Status = 'PENDING'
                      ORDER BY ca.SubmitDate DESC;""";
         List<ClubApplication> list = new ArrayList<>();

@@ -320,14 +320,19 @@ body {
 /* Event Header */
 .event-detail-header {
     position: relative;
-    height: 350px;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    height: 500px; /* tăng chiều cao */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--primary-foreground);
     overflow: hidden;
 }
+
+
+
 
 .event-detail-header::before {
     content: '';
@@ -361,6 +366,21 @@ body {
     margin-bottom: 1rem;
     opacity: 0.9;
 }
+
+.event-header-icon img {
+    max-width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+.event-header-icon img {
+    transition: transform 0.3s ease;
+}
+.event-header-icon img:hover {
+    transform: scale(1.02);
+}
+
 
 .event-status-badges {
     position: absolute;
@@ -637,16 +657,17 @@ body {
 
 .event-image {
     position: relative;
-    width: 100%;
     height: 200px;
-    background: linear-gradient(45deg, var(--primary), var(--secondary));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--primary-foreground);
-    font-size: 3rem;
+    overflow: hidden;
+    border-radius: 10px;
 }
 
+.event-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
 .event-badge {
     position: absolute;
     top: 1rem;

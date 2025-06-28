@@ -126,8 +126,8 @@
 				<div class="event-summary">
 					<div class="event-summary-header">
 						<c:set var="e" value="${requestScope.event}"/>
-						<div class="event-icon" id="eventIcon">
-							<i class="fas fa-calendar-alt"></i>
+						<div class="event-image">
+							<img src="${pageContext.request.contextPath}/${e.eventImg}" alt="${e.eventName}" />
 						</div>
 						<div class="event-info">
 							<h2 id="eventTitle">${e.eventName}</h2>

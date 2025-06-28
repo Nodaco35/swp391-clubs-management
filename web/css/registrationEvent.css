@@ -328,7 +328,7 @@ body {
 .event-summary {
     background: var(--card-bg);
     border-radius: 12px;
-    padding: 2rem;
+    padding: 1.2rem;
     box-shadow: 0 4px 6px rgba(34, 40, 49, 0.1);
     border: 1px solid var(--border);
     height: fit-content;
@@ -337,19 +337,23 @@ body {
 }
 
 /* Event Icon - Positioned above event title */
-.event-icon {
-    width: 100%;
-    height: 60px;
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    color: var(--primary-foreground);
+.event-image {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
     border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
     margin-bottom: 1rem;
+    width: 100%;
 }
 
+.event-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 12px;
+
+}
 /* Adjust the event summary header to use column layout */
 .event-summary-header {
     display: flex;
