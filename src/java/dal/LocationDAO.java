@@ -1,10 +1,9 @@
 package dal;
 
-import models.Locations;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import models.Locations;
 
 public class LocationDAO {
 
@@ -72,6 +71,27 @@ public class LocationDAO {
             throw new RuntimeException(e);
         }
         return 0;
+    }
+
+    // Lấy tất cả các địa điểm
+    public List<Locations> getAllLocations() {
+        List<Locations> locations = new ArrayList<>();
+        String sql = "SELECT LocationID, LocationName, TypeLocation FROM Locations ORDER BY LocationName";
+        try (Connection connection = DBContext.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            
+            while (rs.next()) {
+                Locations location = new Locations();
+                location.setLocationID(rs.getInt("LocationID"));
+                location.setLocationName(rs.getString("LocationName"));
+                location.setTypeLocation(rs.getString("TypeLocation"));
+                locations.add(location);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi khi lấy danh sách địa điểm", e);
+        }
+        return locations;
     }
 
     // Thêm địa điểm mới (OffCampus)

@@ -1,0 +1,132 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Tuyển Quân - UniClub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/recruitmentActivitiesManagement.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+</head>
+<body class="bg-gray-50">
+    <jsp:include page="/view/events-page/header.jsp" />
+    
+    <div class="container mx-auto px-4 py-8">
+        <a href="${pageContext.request.contextPath}/myclub" class="inline-flex items-center text-blue-500 hover:text-blue-700 mb-6">
+            <i class="fas fa-arrow-left mr-2"></i> Quay lại Câu Lạc Bộ Của Tôi
+        </a>
+        
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">Quản Lý Chiến Dịch Tuyển Quân</h1>
+            <a href="${pageContext.request.contextPath}/recruitment/create?clubId=${param.clubId}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+                <i class="fas fa-plus mr-2"></i> Tạo Chiến Dịch Mới
+            </a>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <!-- Tabs -->
+            <div class="flex border-b">
+                <button class="tab-button active px-6 py-3 text-blue-600 border-b-2 border-blue-600 font-medium" data-tab="all">Tất Cả</button>
+                <button class="tab-button px-6 py-3 text-gray-600 font-medium" data-tab="ongoing">Đang Diễn Ra</button>
+                <button class="tab-button px-6 py-3 text-gray-600 font-medium" data-tab="upcoming">Sắp Tới</button>
+                <button class="tab-button px-6 py-3 text-gray-600 font-medium" data-tab="completed">Đã Hoàn Thành</button>
+            </div>
+            
+            <!-- Danh sách chiến dịch -->
+            <div class="p-6">
+                <div class="mb-4">
+                    <input type="text" id="searchCampaign" placeholder="Tìm kiếm chiến dịch..." class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <c:choose>
+                    <c:when test="${empty campaigns}">
+                        <div class="text-center py-8">
+                            <div class="text-gray-400 text-5xl mb-4"><i class="fas fa-clipboard-list"></i></div>
+                            <h3 class="text-xl font-medium text-gray-700 mb-2">Chưa có chiến dịch nào</h3>
+                            <p class="text-gray-500">Bắt đầu bằng cách tạo một chiến dịch tuyển quân mới.</p>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead>
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tiêu Đề</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gen</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thời Gian</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng Thái</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành Động</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200" id="campaignTable">
+                                    <c:forEach items="${campaigns}" var="campaign">
+                                        <tr class="campaign-item" data-status="${campaign.status.toLowerCase()}">
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="font-medium text-gray-900">${campaign.title}</div>
+                                                <div class="text-sm text-gray-500">${campaign.description}</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900">Gen ${campaign.gen}</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900"><fmt:formatDate value="${campaign.startDate}" pattern="dd/MM/yyyy" /> - <fmt:formatDate value="${campaign.endDate}" pattern="dd/MM/yyyy" /></div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <c:choose>
+                                                    <c:when test="${campaign.status eq 'ONGOING'}">
+                                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Đang diễn ra</span>
+                                                    </c:when>
+                                                    <c:when test="${campaign.status eq 'UPCOMING'}">
+                                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Sắp tới</span>
+                                                    </c:when>
+                                                    <c:when test="${campaign.status eq 'COMPLETED'}">
+                                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Đã hoàn thành</span>
+                                                    </c:when>
+                                                </c:choose>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <a href="${pageContext.request.contextPath}/recruitment/edit?id=${campaign.recruitmentID}" class="text-blue-600 hover:text-blue-900 mr-3">
+                                                    <i class="fas fa-edit"></i> Sửa
+                                                </a>
+                                                <button class="text-red-600 hover:text-red-900 delete-campaign" data-id="${campaign.recruitmentID}">
+                                                    <i class="fas fa-trash-alt"></i> Xóa
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                </tbody>
+                            </table>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal xác nhận xóa -->
+    <div id="deleteModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md mx-auto">
+            <h3 class="text-xl font-bold mb-4">Xác nhận xóa</h3>
+            <p class="text-gray-600 mb-6">Bạn có chắc chắn muốn xóa chiến dịch tuyển quân này? Hành động này không thể hoàn tác.</p>
+            <div class="flex justify-end">
+                <button id="cancelDelete" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2">
+                    Hủy
+                </button>
+                <button id="confirmDelete" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                    Xóa
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="${pageContext.request.contextPath}/js/recruitmentActivitiesManagement.js?v=<%= System.currentTimeMillis() %>"></script>
+</body>
+</html>

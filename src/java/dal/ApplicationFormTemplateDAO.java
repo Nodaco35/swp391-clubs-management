@@ -329,7 +329,7 @@ public class ApplicationFormTemplateDAO {
         }
         return -1;
     }    // Lấy tất cả câu hỏi đã publish theo (title, clubId)
-    public List<ApplicationFormTemplate> getPublishedTemplatesByGroup(String title, int clubId) throws SQLException {
+    public List<ApplicationFormTemplate> getPublishedTemplatesByGroup(String title, int clubId){
         List<ApplicationFormTemplate> templates = new ArrayList<>();
         // Mở kết nối mới
         connection = DBContext.getConnection();
@@ -346,6 +346,39 @@ public class ApplicationFormTemplateDAO {
                 }
             }
         }
+        catch(SQLException e) {
+            e.printStackTrace();
+        }
         return templates;
+    }
+
+    // Lấy tất cả các form member (Club) đã xuất bản
+    public List<Map<String, Object>> getPublishedMemberForms(){
+        connection = DBContext.getConnection();
+        List<Map<String, Object>> forms = new ArrayList<>();
+        String sql = "SELECT DISTINCT Title, FormType, ClubID, EventID, Published, MAX(TemplateID) as TemplateID " +
+                "FROM ApplicationFormTemplates " +
+                "WHERE Published = TRUE AND FormType = 'Club' " +
+                "GROUP BY Title, FormType, ClubID, EventID, Published " +
+                "ORDER BY MAX(TemplateID) DESC";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> form = new HashMap<>();
+                    form.put("templateId", rs.getInt("TemplateID"));
+                    form.put("title", rs.getString("Title"));
+                    form.put("formType", rs.getString("FormType"));
+                    form.put("clubId", rs.getInt("ClubID"));
+                    form.put("eventId", rs.getObject("EventID"));
+                    form.put("published", rs.getBoolean("Published"));
+                    forms.add(form);
+                }
+            }
+        }
+        catch(SQLException e) {
+            e.printStackTrace();
+        }
+        return forms;
     }
 }

@@ -1,0 +1,70 @@
+/* Main Styles for Recruitment Activities Management */
+
+/* Tab styling */
+.tab-button {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.tab-button.active {
+    font-weight: 600;
+}
+
+.tab-button:not(.active):hover {
+    color: #3b82f6;
+    background-color: #f3f4f6;
+}
+
+/* Table styling */
+.table-hover tr:hover {
+    background-color: #f9fafb;
+}
+
+/* Status badges */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+    border-radius: 9999px;
+}
+
+.badge-green {
+    background-color: #d1fae5;
+    color: #047857;
+}
+
+.badge-yellow {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.badge-gray {
+    background-color: #f3f4f6;
+    color: #4b5563;
+}
+
+/* Search input styling */
+input[type="text"]:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    border-color: #3b82f6;
+}
+
+/* Modal animation */
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#deleteModal .bg-white {
+    animation: modalFadeIn 0.3s ease-out;
+}
