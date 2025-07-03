@@ -39,9 +39,8 @@
                             <c:if test="${isLeader}">
                             <li><a href="#pending-applications" class="text-blue-500 hover:text-blue-700 block py-2 px-4 rounded">Các Đơn Chờ Duyệt</a></li>
                             <li><a href="#financial-overview" class="text-blue-500 hover:text-blue-700 block py-2 px-4 rounded">Tổng Quan Tài Chính</a></li>
-
                         </c:if>
-                        <li><a href="#actions" class="text-blue-500 hover:text-blue-700 block py-2 px-4 rounded">Quản Lý Form</a></li>
+                        <li><a href="#actions" class="text-blue-500 hover:text-blue-700 block py-2 px-4 rounded">Quản Lý Form Và Hoạt Động Tuyển Quân</a></li>
                     </ul>
                 </aside>
             </aside>
@@ -396,12 +395,12 @@
 
                         <!-- Existing Actions Section -->
                         <section id="actions" class="mb-10">
-                            <h2 class="text-2xl font-bold text-gray-800 mb-4">Quản Lý Form</h2>
+                            <h2 class="text-2xl font-bold text-gray-800 mb-4">Quản Lý Form và hoạt động Tuyển quân</h2>
 
                             <!-- Club selection dropdown -->
                             <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200 mb-4">
                                 <h3 class="text-lg font-medium text-gray-800 mb-3">Chọn Câu Lạc Bộ</h3>
-                                <p class="text-sm text-gray-600 mb-4">Vui lòng chọn câu lạc bộ mà bạn muốn quản lý form:</p>
+                                <p class="text-sm text-gray-600 mb-4">Vui lòng chọn câu lạc bộ mà bạn muốn quản lý form hoặc hoạt động tuyển quân:</p>
 
                                 <div class="relative inline-block w-full md:w-64 mb-4">
                                     <select id="clubSelector" class="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded-lg shadow leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
@@ -414,6 +413,14 @@
                                         <i class="fas fa-chevron-down"></i>
                                     </div>
                                 </div>
+                                
+                                <!-- Nút truy cập tuyển quân chỉ dành cho chủ nhiệm -->
+                                <div id="recruitmentManagementSection" class="mb-4 mt-2" style="display: none;">
+                                    <h3 class="text-lg font-medium text-gray-800 mb-2">Quản Lý Tuyển Quân</h3>
+                                    <a href="#" id="recruitmentLink" class="text-white bg-green-600 hover:bg-green-700 px-6 py-3 rounded-full transition flex items-center gap-2 w-fit">
+                                        <i class="fas fa-users"></i> Quản Lý Hoạt Động Tuyển Quân
+                                    </a>
+                                </div>
 
                                 <div id="formManagementButtons" style="display: none;" class="flex gap-4">
                                     <a href="#" id="formManagementLink" class="text-white bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded-full transition flex items-center gap-2">
@@ -424,7 +431,7 @@
                                     </a>
                                 </div>
                                 <p id="noPermissionMessage" class="hidden text-sm text-red-500 mt-2">
-                                    <i class="fas fa-exclamation-circle mr-1"></i> Bạn không có đủ quyền quản lý form trong câu lạc bộ này. Chỉ thành viên có vai trò quản lý mới có thể truy cập.
+                                    <i class="fas fa-exclamation-circle mr-1"></i> Bạn không có đủ quyền quản lý trong câu lạc bộ này. Chỉ thành viên có vai trò quản lý mới có thể truy cập.
                                 </p>
                             </div>
                         </section>
@@ -449,34 +456,70 @@
         const formManagementLink = document.getElementById('formManagementLink');
         const formBuilderLink = document.getElementById('formBuilderLink');
         const noPermissionMessage = document.getElementById('noPermissionMessage');
-        if (clubSelector) {
-        clubSelector.addEventListener('change', function() {
-        const selectedClubId = this.value;
-        if (selectedClubId) {
-        // Create array of clubs where user has permission (roleID 1-3)
+        const recruitmentLink = document.getElementById('recruitmentLink');
+        const recruitmentManagementSection = document.getElementById('recruitmentManagementSection');
+        
+        // Mảng câu lạc bộ mà người dùng là chủ nhiệm (roleID = 1)
+        const chairmanClubIds = [
+        <c:forEach items="${userclubs}" var="club" varStatus="status">
+            <c:if test="${club.roleID == 1}">${club.clubID}<c:if test="${!status.last}">,</c:if></c:if>
+        </c:forEach>
+        ];
+        
+        // Mảng câu lạc bộ mà người dùng có quyền quản lý form (roleID 1-3)
         const permittedClubIds = [
         <c:forEach items="${userclubs}" var="club" varStatus="status">
             <c:if test="${club.roleID >= 1 && club.roleID <= 3}">${club.clubID}<c:if test="${!status.last}">,</c:if></c:if>
         </c:forEach>
         ];
-        // Check if user has permission for this club
-        const hasPermission = permittedClubIds.includes(parseInt(selectedClubId));
-        if (hasPermission) {
-        // Show form management buttons if user has permission
-        formManagementButtons.style.display = 'flex';
-        noPermissionMessage.classList.add('hidden');
-        // Update links with the selected club ID
-        formManagementLink.href = '${pageContext.request.contextPath}/formManagement?clubId=' + selectedClubId;
-        formBuilderLink.href = '${pageContext.request.contextPath}/formBuilder?clubId=' + selectedClubId;
-        } else {
-        // Show no permission message
-        formManagementButtons.style.display = 'none';
-        noPermissionMessage.classList.remove('hidden');
+        
+        if (recruitmentLink) {
+            recruitmentLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                const selectedClubId = clubSelector.value;
+                if (selectedClubId) {
+                    // Chuyển hướng đến trang quản lý tuyển quân với clubId đã chọn
+                    window.location.href = '${pageContext.request.contextPath}/recruitment?clubId=' + selectedClubId;
+                } else {
+                    // Hiển thị thông báo nếu chưa chọn câu lạc bộ
+                    alert('Vui lòng chọn câu lạc bộ trước khi truy cập trang quản lý tuyển quân.');
+                }
+            });
         }
+        
+        if (clubSelector) {
+        clubSelector.addEventListener('change', function() {
+        const selectedClubId = this.value;
+        if (selectedClubId) {
+            // Kiểm tra quyền quản lý form
+            const hasFormPermission = permittedClubIds.includes(parseInt(selectedClubId));
+            
+            // Kiểm tra quyền chủ nhiệm (chỉ chủ nhiệm mới được quản lý tuyển quân)
+            const hasRecruitmentPermission = chairmanClubIds.includes(parseInt(selectedClubId));
+            
+            // Hiển thị/ẩn các nút quản lý form
+            if (hasFormPermission) {
+                formManagementButtons.style.display = 'flex';
+                noPermissionMessage.classList.add('hidden');
+                // Cập nhật link với clubId đã chọn
+                formManagementLink.href = '${pageContext.request.contextPath}/formManagement?clubId=' + selectedClubId;
+                formBuilderLink.href = '${pageContext.request.contextPath}/formBuilder?clubId=' + selectedClubId;
+            } else {
+                formManagementButtons.style.display = 'none';
+                noPermissionMessage.classList.remove('hidden');
+            }
+            
+            // Hiển thị/ẩn phần quản lý tuyển quân
+            if (hasRecruitmentPermission) {
+                recruitmentManagementSection.style.display = 'block';
+            } else {
+                recruitmentManagementSection.style.display = 'none';
+            }
         } else {
-        // Hide form management buttons when no club is selected
-        formManagementButtons.style.display = 'none';
-        noPermissionMessage.classList.add('hidden');
+            // Ẩn tất cả khi không chọn câu lạc bộ nào
+            formManagementButtons.style.display = 'none';
+            noPermissionMessage.classList.add('hidden');
+            recruitmentManagementSection.style.display = 'none';
         }
         });
         }
@@ -492,6 +535,12 @@
         const meetingTimeInput = document.getElementById('meetingTime');
         const meetingLinkInput = document.getElementById('meetingLink');
         const formElement = createForm.querySelector('form');
+        
+        // Ẩn phần quản lý tuyển quân khi mới tải trang, chưa chọn câu lạc bộ
+        const recruitmentManagementSection = document.getElementById('recruitmentManagementSection');
+        if (recruitmentManagementSection) {
+            recruitmentManagementSection.style.display = 'none';
+        }
         // Tạo mới
         if (createBtn && createForm) {
         createBtn.addEventListener('click', (e) => {
