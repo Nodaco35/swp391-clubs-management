@@ -11,7 +11,7 @@ public class RecruitmentCampaign {
     private String description;
     private Date startDate;
     private Date endDate;
-    private String status; // ONGOING, CLOSED
+    private String status; // UPCOMING, ONGOING, CLOSED
     private String createdBy;
     private Date createdAt;
     

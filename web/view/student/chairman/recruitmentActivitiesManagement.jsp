@@ -16,8 +16,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 </head>
-<body class="bg-gray-50">
+<body style="background-color: #d8d7ce;">
     <jsp:include page="/view/events-page/header.jsp" />
+    
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
     
     <div class="container mx-auto px-4 py-8">
         <a href="${pageContext.request.contextPath}/myclub" class="inline-flex items-center text-blue-500 hover:text-blue-700 mb-6">
@@ -25,33 +28,33 @@
         </a>
         
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-gray-800">Quản Lý Chiến Dịch Tuyển Quân</h1>
-            <a href="${pageContext.request.contextPath}/recruitment/create?clubId=${param.clubId}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
-                <i class="fas fa-plus mr-2"></i> Tạo Chiến Dịch Mới
+            <h1 class="text-3xl font-bold text-gray-800">Quản Lý Hoạt Động Tuyển Quân</h1>
+            <a href="${pageContext.request.contextPath}/recruitment/form?clubId=${param.clubId}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+                <i class="fas fa-plus mr-2"></i> Tạo Hoạt Động Mới
             </a>
         </div>
         
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
             <!-- Tabs -->
             <div class="flex border-b">
                 <button class="tab-button active px-6 py-3 text-blue-600 border-b-2 border-blue-600 font-medium" data-tab="all">Tất Cả</button>
                 <button class="tab-button px-6 py-3 text-gray-600 font-medium" data-tab="ongoing">Đang Diễn Ra</button>
                 <button class="tab-button px-6 py-3 text-gray-600 font-medium" data-tab="upcoming">Sắp Tới</button>
-                <button class="tab-button px-6 py-3 text-gray-600 font-medium" data-tab="completed">Đã Hoàn Thành</button>
+                <button class="tab-button px-6 py-3 text-gray-600 font-medium" data-tab="closed">Đã Hoàn Thành</button>
             </div>
             
-            <!-- Danh sách chiến dịch -->
+            <!-- Danh sách hoạt động -->
             <div class="p-6">
                 <div class="mb-4">
-                    <input type="text" id="searchCampaign" placeholder="Tìm kiếm chiến dịch..." class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="searchCampaign" placeholder="Tìm kiếm hoạt động..." class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 
                 <c:choose>
                     <c:when test="${empty campaigns}">
                         <div class="text-center py-8">
                             <div class="text-gray-400 text-5xl mb-4"><i class="fas fa-clipboard-list"></i></div>
-                            <h3 class="text-xl font-medium text-gray-700 mb-2">Chưa có chiến dịch nào</h3>
-                            <p class="text-gray-500">Bắt đầu bằng cách tạo một chiến dịch tuyển quân mới.</p>
+                            <h3 class="text-xl font-medium text-gray-700 mb-2">Chưa có hoạt động nào</h3>
+                            <p class="text-gray-500">Bắt đầu bằng cách tạo một hoạt động tuyển quân mới.</p>
                         </div>
                     </c:when>
                     <c:otherwise>
@@ -87,18 +90,34 @@
                                                     <c:when test="${campaign.status eq 'UPCOMING'}">
                                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Sắp tới</span>
                                                     </c:when>
-                                                    <c:when test="${campaign.status eq 'COMPLETED'}">
+                                                    <c:when test="${campaign.status eq 'CLOSED'}">
                                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Đã hoàn thành</span>
                                                     </c:when>
                                                 </c:choose>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                <a href="${pageContext.request.contextPath}/recruitment/edit?id=${campaign.recruitmentID}" class="text-blue-600 hover:text-blue-900 mr-3">
-                                                    <i class="fas fa-edit"></i> Sửa
-                                                </a>
-                                                <button class="text-red-600 hover:text-red-900 delete-campaign" data-id="${campaign.recruitmentID}">
-                                                    <i class="fas fa-trash-alt"></i> Xóa
-                                                </button>
+                                                <div class="relative inline-block text-left dropdown">
+                                                    <button class="inline-flex justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                        Thao tác
+                                                        <i class="fas fa-chevron-down ml-2 mt-1"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu hidden origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 py-1 z-10">
+                                                        <a href="${pageContext.request.contextPath}/recruitment/view?id=${campaign.recruitmentID}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                            <i class="fas fa-eye text-blue-500 mr-2"></i> Xem chi tiết
+                                                        </a>
+                                                        <a href="${pageContext.request.contextPath}/recruitment/form?id=${campaign.recruitmentID}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                            <i class="fas fa-edit text-blue-500 mr-2"></i> Sửa
+                                                        </a>
+                                                        <c:if test="${campaign.status eq 'ONGOING' || campaign.status eq 'UPCOMING'}">
+                                                            <button class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 close-campaign" data-id="${campaign.recruitmentID}">
+                                                                <i class="fas fa-check-circle text-yellow-500 mr-2"></i> Kết thúc
+                                                            </button>
+                                                        </c:if>
+                                                        <button class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 delete-campaign" data-id="${campaign.recruitmentID}">
+                                                            <i class="fas fa-trash-alt text-red-500 mr-2"></i> Xóa
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </td>
                                         </tr>
                                     </c:forEach>
@@ -113,9 +132,9 @@
     
     <!-- Modal xác nhận xóa -->
     <div id="deleteModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-8 max-w-md mx-auto">
+        <div class="bg-white rounded-lg p-8 max-w-md mx-auto border border-gray-200">
             <h3 class="text-xl font-bold mb-4">Xác nhận xóa</h3>
-            <p class="text-gray-600 mb-6">Bạn có chắc chắn muốn xóa chiến dịch tuyển quân này? Hành động này không thể hoàn tác.</p>
+            <p class="text-gray-600 mb-6">Bạn có chắc chắn muốn xóa hoạt động tuyển quân này? Hành động này không thể hoàn tác.</p>
             <div class="flex justify-end">
                 <button id="cancelDelete" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2">
                     Hủy
@@ -127,6 +146,23 @@
         </div>
     </div>
     
+    <!-- Modal xác nhận kết thúc hoạt động -->
+    <div id="closeModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md mx-auto border border-gray-200">
+            <h3 class="text-xl font-bold mb-4">Xác nhận kết thúc hoạt động</h3>
+            <p class="text-gray-600 mb-6">Bạn có chắc chắn muốn kết thúc hoạt động tuyển quân này? Trạng thái sẽ chuyển thành "Đã hoàn thành".</p>
+            <div class="flex justify-end">
+                <button id="cancelClose" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2">
+                    Hủy
+                </button>
+                <button id="confirmClose" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+                    Kết thúc
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="${pageContext.request.contextPath}/js/recruitmentCommon.js?v=<%= System.currentTimeMillis() %>"></script>
     <script src="${pageContext.request.contextPath}/js/recruitmentActivitiesManagement.js?v=<%= System.currentTimeMillis() %>"></script>
 </body>
 </html>

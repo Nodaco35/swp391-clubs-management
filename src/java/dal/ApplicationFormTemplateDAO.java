@@ -352,33 +352,92 @@ public class ApplicationFormTemplateDAO {
         return templates;
     }
 
-    // Lấy tất cả các form member (Club) đã xuất bản
-    public List<Map<String, Object>> getPublishedMemberForms(){
+    /**
+     * Lấy tất cả các form member (Club) đã xuất bản
+     * 
+     * @param specificClubId Nếu muốn lọc theo clubId cụ thể, truyền vào giá trị khác null
+     * @return Danh sách các form đã xuất bản dạng Map với các thông tin cần thiết
+     */
+    public List<Map<String, Object>> getPublishedMemberForms(Integer specificClubId){
         connection = DBContext.getConnection();
         List<Map<String, Object>> forms = new ArrayList<>();
+        
+        // Ưu tiên 1: Tìm form cho club hiện tại
         String sql = "SELECT DISTINCT Title, FormType, ClubID, EventID, Published, MAX(TemplateID) as TemplateID " +
                 "FROM ApplicationFormTemplates " +
-                "WHERE Published = TRUE AND FormType = 'Club' " +
-                "GROUP BY Title, FormType, ClubID, EventID, Published " +
-                "ORDER BY MAX(TemplateID) DESC";
+                "WHERE Published = TRUE AND FormType = 'Club' ";
+                
+        if (specificClubId != null) {
+            sql += "AND ClubID = ? ";
+        }
+        
+        sql += "GROUP BY Title, FormType, ClubID, EventID, Published " +
+               "ORDER BY MAX(TemplateID) DESC";
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            // Nếu có clubId cụ thể thì thêm vào điều kiện query
+            if (specificClubId != null) {
+                stmt.setInt(1, specificClubId);
+                System.out.println("DEBUG: Tìm form cho ClubID cụ thể: " + specificClubId);
+            }
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Map<String, Object> form = new HashMap<>();
-                    form.put("templateId", rs.getInt("TemplateID"));
-                    form.put("title", rs.getString("Title"));
+                    int templateId = rs.getInt("TemplateID");
+                    String title = rs.getString("Title");
+                    int clubId = rs.getInt("ClubID");
+                    
+                    form.put("templateId", templateId);
+                    form.put("title", title);
                     form.put("formType", rs.getString("FormType"));
-                    form.put("clubId", rs.getInt("ClubID"));
+                    form.put("clubId", clubId);
                     form.put("eventId", rs.getObject("EventID"));
                     form.put("published", rs.getBoolean("Published"));
                     forms.add(form);
+                    
                 }
             }
         }
         catch(SQLException e) {
-            e.printStackTrace();
+            System.err.println("Lỗi khi lấy danh sách form đã xuất bản: " + e.getMessage());
+            e.printStackTrace(); // In stack trace để debug trong quá trình phát triển
         }
         return forms;
+    }
+    
+    /**
+     * Phương thức gốc để tương thích ngược với code hiện tại
+     * Lấy tất cả các form member (Club) đã xuất bản không lọc theo clubId
+     */
+    public List<Map<String, Object>> getPublishedMemberForms() {
+        return getPublishedMemberForms(null);
+    }
+
+    /**
+     * Lấy danh sách tất cả các form thành viên đã xuất bản theo clubId cụ thể
+     * Phương thức này lấy tất cả các form mà không thực hiện GROUP BY để xem đầy đủ chi tiết
+     * 
+     * @param clubId ID của club cần lọc
+     * @return Danh sách các form thành viên đã xuất bản của club
+     */
+    public List<ApplicationFormTemplate> getAllMemberFormsByClubId(int clubId) {
+        List<ApplicationFormTemplate> templates = new ArrayList<>();
+        String sql = "SELECT * FROM ApplicationFormTemplates WHERE Published = TRUE AND FormType = 'Club' AND ClubID = ? ORDER BY Title, DisplayOrder";
+        
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, clubId);
+            try (ResultSet rs = ps.executeQuery()) {
+                int count = 0;
+                while (rs.next()) {
+                    templates.add(mapRowToTemplate(rs));
+                    count++;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return templates;
     }
 }

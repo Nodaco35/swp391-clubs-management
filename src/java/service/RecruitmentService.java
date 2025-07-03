@@ -35,7 +35,9 @@ public class RecruitmentService {
             return -1; // Indicates time overlap error
         }
         
-        return campaignDAO.createRecruitmentCampaign(campaign);
+        int result = campaignDAO.createRecruitmentCampaign(campaign);
+        // result = -2 indicates that start date is in the past
+        return result;
     }
     
     public boolean updateCampaign(RecruitmentCampaign campaign) {
@@ -62,6 +64,10 @@ public class RecruitmentService {
     
     public boolean deleteCampaign(int recruitmentID) {
         return campaignDAO.deleteRecruitmentCampaign(recruitmentID);
+    }
+    
+    public List<RecruitmentCampaign> getAllCampaigns() {
+        return campaignDAO.getAllRecruitmentCampaigns();
     }
     
     // Stage management methods

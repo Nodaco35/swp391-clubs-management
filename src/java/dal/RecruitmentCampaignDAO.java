@@ -17,14 +17,38 @@ public class RecruitmentCampaignDAO {
     private PreparedStatement ps;
     private ResultSet rs;
     
-    // Create new recruitment campaign
+    /**
+     * Create new recruitment campaign
+     * @param campaign The campaign to create
+     * @return The ID of the created campaign if successful, 
+     *        -1 if time overlap (handled by service layer),
+     *        -2 if start date is in the past
+     */
     public int createRecruitmentCampaign(RecruitmentCampaign campaign) {
         int newRecruitmentId = 0;
         try {
             conn = DBContext.getConnection();
+            
+            // First check if start date is in the past
+            String checkDateSql = "SELECT CASE WHEN ? < CURRENT_DATE THEN 1 ELSE 0 END AS is_past_date";
+            ps = conn.prepareStatement(checkDateSql);
+            ps.setTimestamp(1, campaign.getStartDate() != null ? new Timestamp(campaign.getStartDate().getTime()) : null);
+            rs = ps.executeQuery();
+            
+            if (rs.next() && rs.getInt("is_past_date") == 1) {
+                // Start date is in the past, return -2 to indicate this error
+                return -2;
+            }
+            
+            // Use CASE statement in SQL to determine status based on start date
             String sql = "INSERT INTO RecruitmentCampaigns "
                     + "(ClubID, Gen, TemplateID, Title, Description, StartDate, EndDate, Status, CreatedBy, CreatedAt) "
-                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, "
+                    + "CASE "
+                    + "  WHEN ? = CURRENT_DATE THEN 'ONGOING' "
+                    + "  WHEN ? > CURRENT_DATE THEN 'UPCOMING' "
+                    + "END, "
+                    + "?, ?)";
             ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setInt(1, campaign.getClubID());
             ps.setInt(2, campaign.getGen());
@@ -33,9 +57,11 @@ public class RecruitmentCampaignDAO {
             ps.setString(5, campaign.getDescription());
             ps.setTimestamp(6, campaign.getStartDate() != null ? new Timestamp(campaign.getStartDate().getTime()) : null);
             ps.setTimestamp(7, campaign.getEndDate() != null ? new Timestamp(campaign.getEndDate().getTime()) : null);
-            ps.setString(8, campaign.getStatus());
-            ps.setString(9, campaign.getCreatedBy());
-            ps.setTimestamp(10, new Timestamp(new Date().getTime())); // Current timestamp
+            // For the CASE condition, we need the date part only
+            ps.setTimestamp(8, campaign.getStartDate() != null ? new Timestamp(campaign.getStartDate().getTime()) : null);
+            ps.setTimestamp(9, campaign.getStartDate() != null ? new Timestamp(campaign.getStartDate().getTime()) : null);
+            ps.setString(10, campaign.getCreatedBy());
+            ps.setTimestamp(11, new Timestamp(new Date().getTime())); // Current timestamp
             
             int affectedRows = ps.executeUpdate();
             if (affectedRows > 0) {
@@ -56,10 +82,51 @@ public class RecruitmentCampaignDAO {
     public boolean updateRecruitmentCampaign(RecruitmentCampaign campaign) {
         try {
             conn = DBContext.getConnection();
-            String sql = "UPDATE RecruitmentCampaigns SET "
-                    + "Gen = ?, TemplateID = ?, Title = ?, Description = ?, "
-                    + "StartDate = ?, EndDate = ?, Status = ? "
-                    + "WHERE RecruitmentID = ? AND ClubID = ?";
+            
+            // First check if start date is in the past (for new campaigns only)
+            String checkSql = "SELECT Status FROM RecruitmentCampaigns WHERE RecruitmentID = ?";
+            ps = conn.prepareStatement(checkSql);
+            ps.setInt(1, campaign.getRecruitmentID());
+            rs = ps.executeQuery();
+            
+            boolean isNewCampaign = false;
+            if (rs.next()) {
+                String currentStatus = rs.getString("Status");
+                isNewCampaign = "UPCOMING".equals(currentStatus);
+                
+                // If it's a new campaign and the start date is in the past, don't allow the update
+                if (isNewCampaign) {
+                    String checkDateSql = "SELECT CASE WHEN ? < CURRENT_DATE THEN 1 ELSE 0 END AS is_past_date";
+                    ps = conn.prepareStatement(checkDateSql);
+                    ps.setTimestamp(1, campaign.getStartDate() != null ? new Timestamp(campaign.getStartDate().getTime()) : null);
+                    rs = ps.executeQuery();
+                    
+                    if (rs.next() && rs.getInt("is_past_date") == 1) {
+                        // Start date is in the past for a new campaign
+                        return false;
+                    }
+                }
+            }
+            
+            // Use CASE statement to update Status based on the start date for UPCOMING campaigns
+            String sql;
+            if (isNewCampaign) {
+                sql = "UPDATE RecruitmentCampaigns SET "
+                      + "Gen = ?, TemplateID = ?, Title = ?, Description = ?, "
+                      + "StartDate = ?, EndDate = ?, "
+                      + "Status = CASE "
+                      + "  WHEN ? = CURRENT_DATE THEN 'ONGOING' "
+                      + "  WHEN ? > CURRENT_DATE THEN 'UPCOMING' "
+                      + "  ELSE Status "  // Keep existing status for other cases
+                      + "END "
+                      + "WHERE RecruitmentID = ? AND ClubID = ?";
+            } else {
+                sql = "UPDATE RecruitmentCampaigns SET "
+                      + "Gen = ?, TemplateID = ?, Title = ?, Description = ?, "
+                      + "StartDate = ?, EndDate = ?, Status = ? "
+                      + "WHERE RecruitmentID = ? AND ClubID = ?";
+            }
+            
             ps = conn.prepareStatement(sql);
             ps.setInt(1, campaign.getGen());
             ps.setInt(2, campaign.getTemplateID());
@@ -67,9 +134,18 @@ public class RecruitmentCampaignDAO {
             ps.setString(4, campaign.getDescription());
             ps.setTimestamp(5, campaign.getStartDate() != null ? new Timestamp(campaign.getStartDate().getTime()) : null);
             ps.setTimestamp(6, campaign.getEndDate() != null ? new Timestamp(campaign.getEndDate().getTime()) : null);
-            ps.setString(7, campaign.getStatus());
-            ps.setInt(8, campaign.getRecruitmentID());
-            ps.setInt(9, campaign.getClubID());
+            
+            if (isNewCampaign) {
+                // For the CASE condition, we need the date part for comparison
+                ps.setTimestamp(7, campaign.getStartDate() != null ? new Timestamp(campaign.getStartDate().getTime()) : null);
+                ps.setTimestamp(8, campaign.getStartDate() != null ? new Timestamp(campaign.getStartDate().getTime()) : null);
+                ps.setInt(9, campaign.getRecruitmentID());
+                ps.setInt(10, campaign.getClubID());
+            } else {
+                ps.setString(7, campaign.getStatus());
+                ps.setInt(8, campaign.getRecruitmentID());
+                ps.setInt(9, campaign.getClubID());
+            }
             
             int affectedRows = ps.executeUpdate();
             return affectedRows > 0;
@@ -331,6 +407,42 @@ public class RecruitmentCampaignDAO {
             }
             closeResources();
         }
+    }
+    
+    // Get all recruitment campaigns
+    public List<RecruitmentCampaign> getAllRecruitmentCampaigns() {
+        List<RecruitmentCampaign> campaignList = new ArrayList<>();
+        try {
+            conn = DBContext.getConnection();
+            String sql = "SELECT rc.*, u.FullName AS CreatorName "
+                    + "FROM RecruitmentCampaigns rc "
+                    + "LEFT JOIN Users u ON rc.CreatedBy = u.UserID "
+                    + "ORDER BY rc.CreatedAt DESC";
+            ps = conn.prepareStatement(sql);
+            rs = ps.executeQuery();
+            
+            while (rs.next()) {
+                RecruitmentCampaign campaign = new RecruitmentCampaign();
+                campaign.setRecruitmentID(rs.getInt("RecruitmentID"));
+                campaign.setClubID(rs.getInt("ClubID"));
+                campaign.setGen(rs.getInt("Gen"));
+                campaign.setTemplateID(rs.getInt("TemplateID"));
+                campaign.setTitle(rs.getString("Title"));
+                campaign.setDescription(rs.getString("Description"));
+                campaign.setStartDate(rs.getTimestamp("StartDate"));
+                campaign.setEndDate(rs.getTimestamp("EndDate"));
+                campaign.setStatus(rs.getString("Status"));
+                campaign.setCreatedBy(rs.getString("CreatedBy"));
+                campaign.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                
+                campaignList.add(campaign);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+        return campaignList;
     }
     
     // Helper method to close database resources
