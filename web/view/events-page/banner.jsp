@@ -14,20 +14,16 @@
 <section class="hero" id="heroSection">
 	<div class="container">
 		<div class="hero-content">
-			<h1 class="hero-title">Khám Phá Events</h1>
+			<h1 class="hero-title">Khám Phá Sự Kiện</h1>
 			<p class="hero-description">
-				Tham gia các events để phát triển kỹ năng và tạo nên những kỷ niệm đáng nhớ trong thời sinh
+				Tham gia các sự kiện để phát triển kỹ năng và tạo nên những kỷ niệm đáng nhớ trong thời sinh
 				viên.
 			</p>
 			<div class="hero-buttons">
 				<a href="${pageContext.request.contextPath}/login" class="btn btn-primary btn-lg">
 					<i class="fas fa-calendar-alt"></i>
-					Khám Phá Events Ngay
+					Khám Phá Các Sự Kiện Ngay
 				</a>
-				<%--                        <a href="/register" class="btn btn-outline btn-lg">--%>
-				<%--                            <i class="fas fa-users"></i>--%>
-				<%--                            Đăng Ký Events Ngay--%>
-				<%--                        </a>--%>
 			</div>
 
 			<!-- Feature highlights -->
