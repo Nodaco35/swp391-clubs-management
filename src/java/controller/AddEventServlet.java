@@ -157,8 +157,8 @@ public class AddEventServlet extends HttpServlet {
             int maxParticipants = Integer.parseInt(maxParticipantsStr);
             int locationId = Integer.parseInt(eventLocationIDStr);
 
-            if (maxParticipants <= 0) {
-                request.setAttribute("errorMessage", "Số lượng tối đa phải lớn hơn 0.");
+            if (maxParticipants <= 0 || maxParticipants > 10000) {
+                request.setAttribute("errorMessage", "Số lượng tối đa phải lớn hơn 0 hoặc nhỏ hơn 10000 người");
                 request.setAttribute("locations", locationDAO.getLocationsByType(locationType != null ? locationType : "OnCampus"));
                 request.getRequestDispatcher("/view/student/chairman/add-event.jsp").forward(request, response);
                 return;

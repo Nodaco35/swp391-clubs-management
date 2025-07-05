@@ -327,7 +327,7 @@
                                         <c:forEach items="${upcomingEvents}" var="event">
                                             <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition">
                                                 <div class="flex items-center gap-6">
-                                                    <img src="${pageContext.request.contextPath}/${event.eventImg}" alt="${event.eventName}" class="w-24 h-24 rounded-lg object-cover border-2 border-blue-100">
+                                                    <img src="${pageContext.request.contextPath}/${event.eventImg}" alt="${event.eventName}" class="w-36 h-24 rounded-lg object-cover border-2 border-blue-100">
                                                     <div>
                                                         <h3 class="text-xl font-medium text-gray-800">${event.eventName}</h3>
                                                         <p class="text-sm text-gray-600"><i class="fas fa-calendar-alt"></i> ${event.eventDate}</p>
