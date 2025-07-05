@@ -308,7 +308,7 @@ body {
 }
 
 .event-detail-container {
-    max-width: 85%;
+    max-width: 100%;
     margin: 0 auto;
     background: var(--card-bg);
     border-radius: 12px;
