@@ -215,7 +215,7 @@
 						<input type="text" id="eventName" name="eventName" value="${param.eventName}" required>
 					</div>
 					<div class="form-group">
-						<label for="eventType">Loại sự kiện</label>
+						<label for="eventType">Loại sự kiện *</label>
 						<select id="eventType" name="eventType">
 							<option value="public" ${param.eventType == 'public' ? 'selected' : ''}>Công khai</option>
 							<option value="private" ${param.eventType == 'private' ? 'selected' : ''}>Riêng tư</option>

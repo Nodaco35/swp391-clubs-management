@@ -170,7 +170,6 @@
 							        <h3><i class="fas fa-calendar-alt"></i> ${event.eventName}</h3>
 							        <div class="timeline-actions">
 								        <button class="btn-edit-timeline"><i class="fas fa-edit"></i> Chỉnh sửa</button>
-								        <button class="btn-delete-timeline"><i class="fas fa-trash"></i> Xóa</button>
 							        </div>
 						        </div>
 
