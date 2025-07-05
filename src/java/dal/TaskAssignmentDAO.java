@@ -29,7 +29,7 @@ public class TaskAssignmentDAO {
                      JOIN ClubDepartments cd ON e.ClubID = cd.ClubID
                      Join Clubs c on cd.clubID = c.ClubID
                      JOIN Departments d on d.DepartmentID = cd.DepartmentID
-                     JOIN Userclubs uc on uc.ClubDepartmentID = cd.ClubDepartmentID
+                     JOIN UserClubs uc on uc.ClubDepartmentID = cd.ClubDepartmentID
                      where uc.UserID = ?
                      AND tm.DueDate > now()
                      ORDER BY tm.DueDate ASC

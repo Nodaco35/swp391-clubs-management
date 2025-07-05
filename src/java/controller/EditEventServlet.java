@@ -123,7 +123,14 @@ public class EditEventServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
+        HttpSession session = request.getSession();
+        Integer myClubID = (Integer) session.getAttribute("myClubID");
 
+        if (myClubID == null || myClubID <= 0) {
+            request.setAttribute("errorMessage", "Vui lòng đăng nhập với tư cách chủ nhiệm câu lạc bộ.");
+            request.getRequestDispatcher("/view/student/chairman/add-event.jsp").forward(request, response);
+            return;
+        }
         try {
             int eventID = Integer.parseInt(request.getParameter("eventID"));
             String eventName = request.getParameter("eventName");
@@ -132,6 +139,11 @@ public class EditEventServlet extends HttpServlet {
             String endTimeStr = request.getParameter("eventEndTime");
             int locationID = Integer.parseInt(request.getParameter("eventLocation"));
             int capacity = Integer.parseInt(request.getParameter("maxParticipants"));
+            if (capacity <= 0 || capacity > 10000) {
+                session.setAttribute("errorMessage", "Số lượng tối đa phải lớn hơn 0 hoặc nhỏ hơn 10000 người");
+                response.sendRedirect(request.getContextPath() + "/chairman-page/myclub-events/edit-event?eventID=" + eventID);
+                return;
+            }
             String eventType = request.getParameter("eventType");
             String description = request.getParameter("eventDescription");
 
@@ -148,7 +160,6 @@ public class EditEventServlet extends HttpServlet {
             EventsDAO eventDAO = new EventsDAO();
             eventDAO.updateEvent(eventID, eventName, description, eventStart, eventEnd, locationID, capacity, isPublic);
 
-            HttpSession session = request.getSession();
             session.setAttribute("successMsg", "Chỉnh sửa sự kiện thành công!");
             response.sendRedirect(request.getContextPath() + "/chairman-page/myclub-events/edit-event?eventID=" + eventID);
 

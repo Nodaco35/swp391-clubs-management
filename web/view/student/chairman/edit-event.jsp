@@ -154,8 +154,14 @@
 		</div>
 	</div>
 	<div class="modal-content">
-		<c:if test="${not empty errorMessage}">
-			<div class="error-message" style="color: red">${errorMessage}</div>
+		<c:if test="${not empty sessionScope.errorMessage}">
+			<div class="error-message" style="color: red">${sessionScope.errorMessage}</div>
+			<c:remove var="successMsg" scope="session" />
+
+		</c:if>
+		<c:if test="${not empty requestScope.errorMessage}">
+			<div class="error-message" style="color: red">${requestScope.errorMessage}</div>
+
 		</c:if>
 		<c:if test="${not empty sessionScope.successMsg}">
 			<div class="error-message" style="color: green">${sessionScope.successMsg}</div>

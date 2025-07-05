@@ -20,7 +20,7 @@ public class NotificationDAO {
         List<Notification> findByUserId = new ArrayList<>();
         
         String sql = """
-                     SELECT * FROM clubmanagementsystem.notifications
+                     SELECT * FROM Notifications
                      where ReceiverID = ?
                      order by CreatedDate desc;
                      ;""";

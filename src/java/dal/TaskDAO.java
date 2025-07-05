@@ -5,6 +5,7 @@ import models.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 public class TaskDAO {
@@ -32,6 +33,35 @@ public class TaskDAO {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public List<EventTerms> getTermsByEventID(int eventID) {
+        List<EventTerms> terms = new ArrayList<>();
+        String sql = "SELECT * FROM EventTerms WHERE EventID = ? ORDER BY TermStart ASC";
+        EventsDAO ed = new EventsDAO();
+
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, eventID);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                EventTerms et = new EventTerms();
+                et.setTermID(rs.getInt("TermID"));
+                Events e = ed.getEventByID(rs.getInt("EventID"));
+                et.setEvent(e);
+                et.setTermName(rs.getString("termName"));
+                et.setTermStart(rs.getDate("termStart"));
+                et.setTermEnd(rs.getDate("termEnd"));
+                terms.add(et);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return terms;
     }
 
     public Tasks getTasksByID(int taskID) {
