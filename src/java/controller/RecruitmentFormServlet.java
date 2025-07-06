@@ -7,6 +7,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -263,6 +265,30 @@ public class RecruitmentFormServlet extends HttpServlet {
         // Lấy danh sách giai đoạn
         List<RecruitmentStage> stages = recruitmentService.getStagesByCampaign(recruitmentId);
         
+        // DEBUG: Log thông tin chi tiết về các vòng tuyển
+        logger.log(Level.INFO, "RecruitmentFormServlet - Tìm thấy {0} vòng tuyển cho chiến dịch ID {1}", 
+                  new Object[]{stages.size(), recruitmentId});
+        for (RecruitmentStage stage : stages) {
+            logger.log(Level.INFO, "RecruitmentFormServlet - Vòng tuyển #{0}: {1}, Thời gian: {2} -> {3}, Vị trí: {4}, Mô tả: {5}, Trạng thái: {6}", 
+                      new Object[]{
+                          stage.getStageID(), 
+                          stage.getStageName(), 
+                          stage.getStartDate(), 
+                          stage.getEndDate(), 
+                          stage.getLocationID() > 0 ? "ID: " + stage.getLocationID() : "Không có",
+                          stage.getDescription() != null && !stage.getDescription().isEmpty() ? "Có" : "Không",
+                          stage.getStatus()
+                      });
+        }
+        
+        // Log JSON để debug truyền dữ liệu sang frontend
+        try {
+            logger.log(Level.INFO, "RecruitmentFormServlet - JSON vòng tuyển: {0}", 
+                     new Gson().toJson(stages));
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Không thể chuyển đổi stages sang JSON: {0}", e.getMessage());
+        }
+        
         // Lấy danh sách form đăng ký đã publish của CLB
         List<Map<String, Object>> publishedTemplates = formTemplateDAO.getPublishedMemberForms(clubId);
         
@@ -347,6 +373,26 @@ public class RecruitmentFormServlet extends HttpServlet {
     private void handleCreateCampaign(HttpServletRequest request, HttpServletResponse response, 
                                      Users currentUser, JsonObject jsonResponse) throws Exception {
         
+        // Log toàn bộ parameters nhận được để debug
+        logger.log(Level.INFO, "DEBUG - handleCreateCampaign: Tất cả parameters từ request:");
+        java.util.Enumeration<String> paramNames = request.getParameterNames();
+        while (paramNames.hasMoreElements()) {
+            String paramName = paramNames.nextElement();
+            String paramValue = request.getParameter(paramName);
+            logger.log(Level.INFO, "DEBUG - Parameter: {0} = {1}", new Object[]{paramName, paramValue});
+        }
+        
+        // Kiểm tra và log các parameter cho các vòng tuyển
+        logger.log(Level.INFO, "DEBUG - Kiểm tra thông tin các vòng tuyển từ request:");
+        logger.log(Level.INFO, "Vòng nộp đơn: {0} -> {1}", 
+                  new Object[]{request.getParameter("applicationStageStart"), request.getParameter("applicationStageEnd")});
+        logger.log(Level.INFO, "Vòng phỏng vấn: {0} -> {1}, địa điểm: {2}", 
+                  new Object[]{request.getParameter("interviewStageStart"), request.getParameter("interviewStageEnd"), 
+                              request.getParameter("interviewLocationId")});
+        logger.log(Level.INFO, "Vòng thử thách: {0} -> {1}, mô tả: {2}", 
+                  new Object[]{request.getParameter("challengeStageStart"), request.getParameter("challengeStageEnd"), 
+                              request.getParameter("challengeDescription")});
+        
         // Lấy thông tin clubId từ request
         String clubIdParam = request.getParameter("clubId");
         logger.log(Level.FINE, "clubIdParam từ request.getParameter: {0}", clubIdParam);
@@ -384,12 +430,83 @@ public class RecruitmentFormServlet extends HttpServlet {
         logger.log(Level.INFO, "Tạo chiến dịch mới - ClubID: {0}, Tiêu đề: {1}", new Object[]{campaign.getClubID(), campaign.getTitle()});
         
         // Gọi service để tạo chiến dịch
+        logger.log(Level.INFO, "DEBUG - Gọi recruitmentService.createCampaign với thông tin: ClubID={0}, Gen={1}, Title={2}, StartDate={3}, EndDate={4}", 
+                  new Object[]{
+                      campaign.getClubID(), 
+                      campaign.getGen(), 
+                      campaign.getTitle(),
+                      dateFormat.format(campaign.getStartDate()),
+                      dateFormat.format(campaign.getEndDate())
+                  });
+                  
         int result = recruitmentService.createCampaign(campaign);
+        logger.log(Level.INFO, "DEBUG - Kết quả tạo chiến dịch: {0}", result);
         
         if (result > 0) {
-            jsonResponse.addProperty("success", true);
-            jsonResponse.addProperty("recruitmentId", result);
-            jsonResponse.addProperty("message", "Đã tạo hoạt động tuyển quân thành công");
+            // Lấy ID của chiến dịch vừa tạo
+            int recruitmentId = result;
+            logger.log(Level.INFO, "DEBUG - Chiến dịch đã được tạo với ID={0}, tiếp tục tạo các vòng tuyển", recruitmentId);
+            
+            // DEBUG: Kiểm tra lại một lần nữa các thông tin vòng tuyển
+            logger.log(Level.INFO, "DEBUG - Kiểm tra lại thông tin vòng tuyển từ request trước khi tạo:");
+            logger.log(Level.INFO, "DEBUG - Vòng nộp đơn: {0} -> {1}", 
+                     new Object[]{request.getParameter("applicationStageStart"), request.getParameter("applicationStageEnd")});
+            logger.log(Level.INFO, "DEBUG - Vòng phỏng vấn: {0} -> {1}, Địa điểm: {2}", 
+                     new Object[]{request.getParameter("interviewStageStart"), 
+                                 request.getParameter("interviewStageEnd"),
+                                 request.getParameter("interviewLocationId")});
+            logger.log(Level.INFO, "DEBUG - Vòng thử thách: {0} -> {1}, Mô tả: {2}", 
+                     new Object[]{request.getParameter("challengeStageStart"), 
+                                 request.getParameter("challengeStageEnd"),
+                                 request.getParameter("challengeDescription")});
+            
+            // Tạo các vòng tuyển cho chiến dịch
+            logger.log(Level.INFO, "DEBUG - Bắt đầu gọi createRecruitmentStages()");
+            boolean stagesCreated = createRecruitmentStages(request, recruitmentId);
+            
+            if (stagesCreated) {
+                logger.log(Level.INFO, "DEBUG - Đã tạo thành công các vòng tuyển cho chiến dịch ID {0}", recruitmentId);
+                jsonResponse.addProperty("success", true);
+                jsonResponse.addProperty("recruitmentId", recruitmentId);
+                jsonResponse.addProperty("stagesCreated", true);
+                jsonResponse.addProperty("message", "Đã tạo hoạt động tuyển quân và các vòng tuyển thành công");
+                
+                // Kiểm tra và hiển thị các vòng tuyển đã tạo
+                try {
+                    List<RecruitmentStage> createdStages = new dal.RecruitmentStageDAO().getStagesByRecruitmentId(recruitmentId);
+                    logger.log(Level.INFO, "DEBUG - Đã tạo {0} vòng tuyển trong database", createdStages.size());
+                    for (RecruitmentStage stage : createdStages) {
+                        logger.log(Level.INFO, "DEBUG - Vòng tuyển đã tạo: ID={0}, Tên={1}, Thời gian={2}->{3}", 
+                                  new Object[]{stage.getStageID(), stage.getStageName(), 
+                                              dateFormat.format(stage.getStartDate()),
+                                              dateFormat.format(stage.getEndDate())});
+                    }
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, "DEBUG - Không thể lấy danh sách vòng tuyển đã tạo: {0}", e.getMessage());
+                }
+            } else {
+                logger.log(Level.WARNING, "DEBUG - Chiến dịch ID {0} được tạo nhưng các vòng tuyển thất bại", recruitmentId);
+                jsonResponse.addProperty("success", true);
+                jsonResponse.addProperty("recruitmentId", recruitmentId);
+                jsonResponse.addProperty("stagesCreated", false);
+                jsonResponse.addProperty("message", "Đã tạo hoạt động tuyển quân thành công, nhưng có lỗi khi tạo các vòng tuyển");
+                
+                // Kiểm tra xem đã tạo được vòng tuyển nào không
+                try {
+                    List<RecruitmentStage> partialStages = new dal.RecruitmentStageDAO().getStagesByRecruitmentId(recruitmentId);
+                    if (!partialStages.isEmpty()) {
+                        logger.log(Level.INFO, "DEBUG - Đã tạo được {0} vòng tuyển dù báo lỗi", partialStages.size());
+                        for (RecruitmentStage stage : partialStages) {
+                            logger.log(Level.INFO, "DEBUG - Vòng đã tạo: {0} (ID: {1})", 
+                                      new Object[]{stage.getStageName(), stage.getStageID()});
+                        }
+                    } else {
+                        logger.log(Level.SEVERE, "DEBUG - Không tạo được vòng tuyển nào trong database");
+                    }
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "DEBUG - Lỗi kiểm tra vòng tuyển đã tạo: {0}", e.getMessage());
+                }
+            }
         } else if (result == -1) {
             jsonResponse.addProperty("success", false);
             jsonResponse.addProperty("message", "Thời gian bị trùng với hoạt động khác");
@@ -435,11 +552,515 @@ public class RecruitmentFormServlet extends HttpServlet {
         boolean result = recruitmentService.updateCampaign(updatedCampaign);
         
         if (result) {
-            jsonResponse.addProperty("success", true);
-            jsonResponse.addProperty("message", "Đã cập nhật hoạt động tuyển quân thành công");
+            // Cập nhật các vòng tuyển
+            boolean stagesUpdated = updateRecruitmentStages(request, recruitmentId);
+            
+            if (stagesUpdated) {
+                logger.log(Level.INFO, "Đã cập nhật thành công các vòng tuyển cho chiến dịch ID {0}", recruitmentId);
+                jsonResponse.addProperty("success", true);
+                jsonResponse.addProperty("message", "Đã cập nhật hoạt động tuyển quân và các vòng tuyển thành công");
+            } else {
+                logger.log(Level.WARNING, "Chiến dịch ID {0} được cập nhật nhưng các vòng tuyển thất bại", recruitmentId);
+                jsonResponse.addProperty("success", true);
+                jsonResponse.addProperty("message", "Đã cập nhật hoạt động tuyển quân thành công, nhưng có lỗi khi cập nhật các vòng tuyển");
+            }
         } else {
             jsonResponse.addProperty("success", false);
             jsonResponse.addProperty("message", "Không thể cập nhật hoạt động tuyển quân. Vui lòng kiểm tra trùng lịch hoặc hoạt động đang diễn ra.");
+        }
+    }
+    
+    /**
+     * Tạo các vòng tuyển cho một hoạt động tuyển quân mới
+     * @param request HttpServletRequest chứa dữ liệu form
+     * @param recruitmentId ID của chiến dịch tuyển quân vừa được tạo
+     * @return true nếu tạo thành công tất cả các vòng tuyển, false nếu có lỗi
+     */
+    private boolean createRecruitmentStages(HttpServletRequest request, int recruitmentId) {
+        logger.log(Level.INFO, "DEBUG - Bắt đầu tạo các vòng tuyển cho chiến dịch ID {0}", recruitmentId);
+        
+        try {
+            // Tạo các đối tượng để lưu trữ dữ liệu của các vòng tuyển
+            List<RecruitmentStage> stages = new ArrayList<>();
+            
+            // DEBUG: Kiểm tra một lần nữa các giá trị từ request
+            logger.log(Level.INFO, "DEBUG - createRecruitmentStages: Kiểm tra các parameters vòng tuyển:");
+            logger.log(Level.INFO, "applicationStageStart = {0}", request.getParameter("applicationStageStart"));
+            logger.log(Level.INFO, "applicationStageEnd = {0}", request.getParameter("applicationStageEnd"));
+            logger.log(Level.INFO, "interviewStageStart = {0}", request.getParameter("interviewStageStart"));
+            logger.log(Level.INFO, "interviewStageEnd = {0}", request.getParameter("interviewStageEnd"));
+            logger.log(Level.INFO, "interviewLocationId = {0}", request.getParameter("interviewLocationId"));
+            logger.log(Level.INFO, "challengeStageStart = {0}", request.getParameter("challengeStageStart"));
+            logger.log(Level.INFO, "challengeStageEnd = {0}", request.getParameter("challengeStageEnd"));
+            logger.log(Level.INFO, "challengeDescription = {0}", request.getParameter("challengeDescription"));
+            
+            // 1. Vòng Nộp đơn (Application)
+            String appStartStr = request.getParameter("applicationStageStart");
+            String appEndStr = request.getParameter("applicationStageEnd");
+            
+            if (appStartStr != null && !appStartStr.isEmpty() && appEndStr != null && !appEndStr.isEmpty()) {
+                logger.log(Level.INFO, "DEBUG - Xử lý vòng Nộp đơn: {0} - {1}", new Object[]{appStartStr, appEndStr});
+                
+                try {
+                    Date appStartDate = dateFormat.parse(appStartStr);
+                    Date appEndDate = dateFormat.parse(appEndStr);
+                    
+                    // Get a valid location ID from the database
+                    LocationDAO locationDAO = new LocationDAO();
+                    List<Locations> locations = locationDAO.getAllLocations();
+                    int defaultLocationId = locations.isEmpty() ? 1 : locations.get(0).getLocationID();
+                    
+                    logger.log(Level.INFO, "DEBUG - Using location ID {0} for APPLICATION stage", defaultLocationId);
+                    
+                    RecruitmentStage appStage = new RecruitmentStage();
+                    appStage.setRecruitmentID(recruitmentId);
+                    appStage.setStageName("APPLICATION"); // Sử dụng ENUM value thay vì tên tiếng Việt
+                    appStage.setStartDate(appStartDate);
+                    appStage.setEndDate(appEndDate);
+                    appStage.setStatus("UPCOMING"); // Mặc định là sắp diễn ra
+                    appStage.setLocationID(defaultLocationId); // Sử dụng ID hợp lệ từ bảng Locations
+                    appStage.setDescription("Vòng nộp đơn đăng ký");
+                    stages.add(appStage);
+                    
+                    // Debug log
+                    logger.log(Level.INFO, "DEBUG - Đã tạo vòng APPLICATION với StageName đúng ENUM value");
+                    
+                    logger.log(Level.INFO, "DEBUG - Đã tạo object Vòng Nộp đơn: {0} -> {1}", 
+                              new Object[]{dateFormat.format(appStartDate), dateFormat.format(appEndDate)});
+                } catch (ParseException e) {
+                    logger.log(Level.SEVERE, "DEBUG - Lỗi parse date cho vòng Nộp đơn: {0}", e.getMessage());
+                }
+            } else {
+                logger.log(Level.WARNING, "DEBUG - Thiếu thông tin vòng Nộp đơn cho chiến dịch ID {0}", recruitmentId);
+            }
+            
+            // 2. Vòng Phỏng vấn (Interview)
+            String interviewStartStr = request.getParameter("interviewStageStart");
+            String interviewEndStr = request.getParameter("interviewStageEnd");
+            String interviewLocationIdStr = request.getParameter("interviewLocationId");
+            
+            if (interviewStartStr != null && !interviewStartStr.isEmpty() && 
+                interviewEndStr != null && !interviewEndStr.isEmpty()) {
+                
+                logger.log(Level.INFO, "Xử lý vòng Phỏng vấn: {0} - {1}, địa điểm: {2}", 
+                          new Object[]{interviewStartStr, interviewEndStr, interviewLocationIdStr});
+                
+                Date interviewStartDate = dateFormat.parse(interviewStartStr);
+                Date interviewEndDate = dateFormat.parse(interviewEndStr);
+                
+                RecruitmentStage interviewStage = new RecruitmentStage();
+                interviewStage.setRecruitmentID(recruitmentId);
+                interviewStage.setStageName("INTERVIEW"); // Sử dụng ENUM value thay vì tên tiếng Việt
+                interviewStage.setStartDate(interviewStartDate);
+                interviewStage.setEndDate(interviewEndDate);
+                interviewStage.setStatus("UPCOMING");
+                
+                // Xử lý locationId nếu có
+                if (interviewLocationIdStr != null && !interviewLocationIdStr.isEmpty()) {
+                    try {
+                        int locationId = Integer.parseInt(interviewLocationIdStr);
+                        
+                        // Kiểm tra xem locationId có tồn tại trong database không
+                        LocationDAO locationDAOInterview = new LocationDAO();
+                        List<Locations> locList = locationDAOInterview.getAllLocations();
+                        boolean isValid = false;
+                        
+                        // Verify the location ID exists
+                        for (Locations loc : locList) {
+                            if (loc.getLocationID() == locationId) {
+                                isValid = true;
+                                break;
+                            }
+                        }
+                        
+                        if (isValid) {
+                            logger.log(Level.INFO, "DEBUG - Sử dụng locationId hợp lệ: {0} cho vòng Phỏng vấn", locationId);
+                            interviewStage.setLocationID(locationId);
+                        } else {
+                            // Nếu không hợp lệ, sử dụng ID mặc định
+                            int defaultId = locList.isEmpty() ? 1 : locList.get(0).getLocationID();
+                            logger.log(Level.WARNING, "DEBUG - LocationId {0} không hợp lệ, sử dụng ID mặc định: {1}", 
+                                     new Object[]{locationId, defaultId});
+                            interviewStage.setLocationID(defaultId);
+                        }
+                    } catch (NumberFormatException e) {
+                        logger.log(Level.WARNING, "Lỗi chuyển đổi locationId cho vòng Phỏng vấn: {0}", e.getMessage());
+                        // Sử dụng location mặc định
+                        LocationDAO locationDAODefault = new LocationDAO();
+                        List<Locations> locList = locationDAODefault.getAllLocations();
+                        int defaultId = locList.isEmpty() ? 1 : locList.get(0).getLocationID();
+                        interviewStage.setLocationID(defaultId);
+                        logger.log(Level.INFO, "DEBUG - Sử dụng locationId mặc định: {0} cho vòng Phỏng vấn", defaultId);
+                    }
+                } else {
+                    // Nếu không có location được chọn, sử dụng location mặc định
+                    LocationDAO locationDAODefault = new LocationDAO();
+                    List<Locations> locList = locationDAODefault.getAllLocations();
+                    int defaultId = locList.isEmpty() ? 1 : locList.get(0).getLocationID();
+                    interviewStage.setLocationID(defaultId);
+                    logger.log(Level.INFO, "DEBUG - Không có locationId được chọn, sử dụng mặc định: {0}", defaultId);
+                }
+                
+                interviewStage.setDescription("Vòng phỏng vấn ứng viên");
+                stages.add(interviewStage);
+                
+                // Debug log
+                logger.log(Level.INFO, "DEBUG - Đã tạo vòng INTERVIEW với StageName đúng ENUM value");
+            } else {
+                logger.log(Level.WARNING, "Thiếu thông tin vòng Phỏng vấn cho chiến dịch ID {0}", recruitmentId);
+            }
+            
+            // 3. Vòng Thử thách (Challenge) - không bắt buộc
+            String challengeStartStr = request.getParameter("challengeStageStart");
+            String challengeEndStr = request.getParameter("challengeStageEnd");
+            String challengeDesc = request.getParameter("challengeDescription");
+            
+            logger.log(Level.INFO, "DEBUG - Kiểm tra dữ liệu vòng Thử thách: Start={0}, End={1}, Description={2}", 
+                      new Object[]{challengeStartStr, challengeEndStr, challengeDesc});
+            
+            if (challengeStartStr != null && !challengeStartStr.isEmpty() && 
+                challengeEndStr != null && !challengeEndStr.isEmpty()) {
+                
+                try {
+                    logger.log(Level.INFO, "DEBUG - Xử lý vòng Thử thách: {0} - {1}", 
+                             new Object[]{challengeStartStr, challengeEndStr});
+                    
+                    Date challengeStartDate = dateFormat.parse(challengeStartStr);
+                    Date challengeEndDate = dateFormat.parse(challengeEndStr);
+                    
+                    // Kiểm tra ngày tháng hợp lệ
+                    if (challengeStartDate == null || challengeEndDate == null ||
+                        challengeStartDate.after(challengeEndDate)) {
+                        logger.log(Level.WARNING, "DEBUG - Ngày tháng vòng Thử thách không hợp lệ: {0} -> {1}", 
+                                 new Object[]{challengeStartStr, challengeEndStr});
+                    } else {
+                        // Get a valid location ID from the database for CHALLENGE stage
+                        LocationDAO locationDAOChallenge = new LocationDAO();
+                        List<Locations> locationsChallenge = locationDAOChallenge.getAllLocations();
+                        int defaultLocationIdChallenge = locationsChallenge.isEmpty() ? 1 : locationsChallenge.get(0).getLocationID();
+                        
+                        logger.log(Level.INFO, "DEBUG - Using location ID {0} for CHALLENGE stage", defaultLocationIdChallenge);
+                        
+                        RecruitmentStage challengeStage = new RecruitmentStage();
+                        challengeStage.setRecruitmentID(recruitmentId);
+                        challengeStage.setStageName("CHALLENGE"); // Sử dụng ENUM value thay vì tên tiếng Việt
+                        challengeStage.setStartDate(challengeStartDate);
+                        challengeStage.setEndDate(challengeEndDate);
+                        challengeStage.setStatus("UPCOMING");
+                        challengeStage.setLocationID(defaultLocationIdChallenge); // Sử dụng ID hợp lệ từ bảng Locations
+                        
+                        // Thêm mô tả thử thách nếu có
+                        if (challengeDesc != null && !challengeDesc.isEmpty()) {
+                            logger.log(Level.INFO, "DEBUG - Sử dụng mô tả thử thách từ form: {0}", 
+                                     new Object[]{challengeDesc});
+                            challengeStage.setDescription(challengeDesc);
+                        } else {
+                            logger.log(Level.INFO, "DEBUG - Sử dụng mô tả thử thách mặc định");
+                            challengeStage.setDescription("Vòng thử thách đánh giá năng lực");
+                        }
+                        
+                        logger.log(Level.INFO, "DEBUG - Đã khởi tạo đối tượng vòng Thử thách: {0} -> {1}, Mô tả: {2}", 
+                                 new Object[]{dateFormat.format(challengeStartDate), dateFormat.format(challengeEndDate), 
+                                             challengeStage.getDescription()});
+                        
+                        stages.add(challengeStage);
+                        
+                        // Debug log
+                        logger.log(Level.INFO, "DEBUG - Đã tạo vòng CHALLENGE với StageName đúng ENUM value");
+                    }
+                } catch (ParseException e) {
+                    logger.log(Level.SEVERE, "DEBUG - Lỗi parse date cho vòng Thử thách: {0}", e.getMessage());
+                }
+            } else {
+                logger.log(Level.INFO, "DEBUG - Không đủ thông tin để tạo vòng Thử thách");
+            }
+            
+            // Log thông tin các vòng tuyển trước khi lưu
+            logger.log(Level.INFO, "DEBUG - Chuẩn bị lưu {0} vòng tuyển cho chiến dịch ID {1}", 
+                      new Object[]{stages.size(), recruitmentId});
+            
+            // Debug: hiển thị chi tiết từng vòng tuyển sẽ lưu
+            for (int i = 0; i < stages.size(); i++) {
+                RecruitmentStage stage = stages.get(i);
+                logger.log(Level.INFO, "DEBUG - Vòng tuyển #{0}: {1}, {2} -> {3}, Location: {4}, Description: {5}", 
+                          new Object[]{
+                              i+1, 
+                              stage.getStageName(), 
+                              dateFormat.format(stage.getStartDate()), 
+                              dateFormat.format(stage.getEndDate()),
+                              stage.getLocationID(),
+                              stage.getDescription()
+                          });
+            }
+            
+            // Sử dụng RecruitmentStageDAO để lưu các vòng tuyển vào database
+            dal.RecruitmentStageDAO stageDAO = new dal.RecruitmentStageDAO();
+            boolean allSuccess = true;
+            int successCount = 0;
+            
+            logger.log(Level.INFO, "DEBUG - Bắt đầu lưu {0} vòng tuyển vào database", stages.size());
+            
+            for (RecruitmentStage stage : stages) {
+                try {
+                    // Kiểm tra dữ liệu một lần nữa trước khi lưu
+                    if (stage.getRecruitmentID() <= 0) {
+                        logger.log(Level.SEVERE, "DEBUG - RecruitmentID không hợp lệ: {0}", stage.getRecruitmentID());
+                        allSuccess = false;
+                        continue;
+                    }
+                    
+                    if (stage.getStageName() == null || stage.getStageName().isEmpty()) {
+                        logger.log(Level.SEVERE, "DEBUG - StageName không hợp lệ (null hoặc empty)");
+                        allSuccess = false;
+                        continue;
+                    }
+                    
+                    if (stage.getStartDate() == null || stage.getEndDate() == null) {
+                        logger.log(Level.SEVERE, "DEBUG - Ngày bắt đầu hoặc kết thúc không được để trống");
+                        allSuccess = false;
+                        continue;
+                    }
+                    
+                    // Đảm bảo mô tả không null
+                    if (stage.getDescription() == null) {
+                        stage.setDescription("");
+                    }
+                    
+                    // Đảm bảo status không null
+                    if (stage.getStatus() == null) {
+                        stage.setStatus("UPCOMING");
+                    }
+                    
+                    logger.log(Level.INFO, "DEBUG - Đang lưu vòng {0}: {1} -> {2}", 
+                              new Object[]{stage.getStageName(), 
+                                          dateFormat.format(stage.getStartDate()), 
+                                          dateFormat.format(stage.getEndDate())});
+                    
+                    int stageId = stageDAO.createRecruitmentStage(stage);
+                    
+                    if (stageId <= 0) {
+                        logger.log(Level.SEVERE, "DEBUG - Lỗi khi tạo vòng {0} cho chiến dịch ID {1}, trả về ID: {2}", 
+                                  new Object[]{stage.getStageName(), recruitmentId, stageId});
+                        allSuccess = false;
+                    } else {
+                        successCount++;
+                        logger.log(Level.INFO, "DEBUG - Đã tạo vòng {0} (ID: {1}) thành công cho chiến dịch ID {2}", 
+                                  new Object[]{stage.getStageName(), stageId, recruitmentId});
+                    }
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "DEBUG - Exception khi lưu vòng {0}: {1}", 
+                              new Object[]{stage.getStageName(), e.getMessage()});
+                    for (StackTraceElement ste : e.getStackTrace()) {
+                        logger.log(Level.SEVERE, "DEBUG - Stack trace: {0}", ste.toString());
+                    }
+                    allSuccess = false;
+                }
+            }
+            
+            logger.log(Level.INFO, "DEBUG - Kết quả lưu vòng tuyển: {0}/{1} vòng thành công", 
+                      new Object[]{successCount, stages.size()});
+            
+            return allSuccess;
+            
+        } catch (ParseException e) {
+            logger.log(Level.SEVERE, "Lỗi khi chuyển đổi ngày tháng: {0}", e.getMessage());
+            return false;
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Lỗi không xác định khi tạo các vòng tuyển: {0}", e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
+     * Cập nhật các vòng tuyển cho một hoạt động tuyển quân đã tồn tại
+     * @param request HttpServletRequest chứa dữ liệu form
+     * @param recruitmentId ID của chiến dịch tuyển quân cần cập nhật
+     * @return true nếu cập nhật thành công tất cả các vòng tuyển, false nếu có lỗi
+     */
+    private boolean updateRecruitmentStages(HttpServletRequest request, int recruitmentId) {
+        logger.log(Level.INFO, "Bắt đầu cập nhật các vòng tuyển cho chiến dịch ID {0}", recruitmentId);
+        
+        try {
+            // Lấy danh sách các vòng tuyển hiện tại
+            dal.RecruitmentStageDAO stageDAO = new dal.RecruitmentStageDAO();
+            List<RecruitmentStage> existingStages = stageDAO.getStagesByRecruitmentId(recruitmentId);
+            
+            logger.log(Level.INFO, "Tìm thấy {0} vòng tuyển hiện tại cho chiến dịch ID {1}", 
+                      new Object[]{existingStages.size(), recruitmentId});
+            
+            // Map để lưu trữ các vòng tuyển hiện tại theo tên vòng
+            Map<String, RecruitmentStage> stageMap = new java.util.HashMap<>();
+            for (RecruitmentStage stage : existingStages) {
+                stageMap.put(stage.getStageName(), stage);
+            }
+            
+            // 1. Vòng Nộp đơn (Application)
+            String appStartStr = request.getParameter("applicationStageStart");
+            String appEndStr = request.getParameter("applicationStageEnd");
+            
+            if (appStartStr != null && !appStartStr.isEmpty() && appEndStr != null && !appEndStr.isEmpty()) {
+                logger.log(Level.INFO, "Xử lý vòng Nộp đơn: {0} - {1}", new Object[]{appStartStr, appEndStr});
+                
+                Date appStartDate = dateFormat.parse(appStartStr);
+                Date appEndDate = dateFormat.parse(appEndStr);
+                
+                // Tìm kiếm vòng nộp đơn theo tên tiếng Việt hoặc ENUM
+                RecruitmentStage appStage = stageMap.get("APPLICATION");
+                if (appStage == null) {
+                    appStage = stageMap.get("Vòng Nộp đơn"); // Tương thích với dữ liệu cũ
+                }
+                
+                if (appStage != null) {
+                    // Cập nhật vòng hiện có
+                    appStage.setStartDate(appStartDate);
+                    appStage.setEndDate(appEndDate);
+                    appStage.setStageName("APPLICATION"); // Đảm bảo dùng ENUM value
+                    stageDAO.updateRecruitmentStage(appStage);
+                    logger.log(Level.INFO, "Đã cập nhật vòng APPLICATION ID {0}", appStage.getStageID());
+                } else {
+                    // Tạo mới nếu không tồn tại
+                    appStage = new RecruitmentStage();
+                    appStage.setRecruitmentID(recruitmentId);
+                    appStage.setStageName("APPLICATION"); // Dùng ENUM value
+                    appStage.setStartDate(appStartDate);
+                    appStage.setEndDate(appEndDate);
+                    appStage.setStatus("UPCOMING");
+                    appStage.setLocationID(0);
+                    appStage.setDescription("Vòng nộp đơn đăng ký");
+                    int stageId = stageDAO.createRecruitmentStage(appStage);
+                    logger.log(Level.INFO, "Đã tạo mới vòng APPLICATION ID {0}", stageId);
+                }
+            }
+            
+            // 2. Vòng Phỏng vấn (Interview)
+            String interviewStartStr = request.getParameter("interviewStageStart");
+            String interviewEndStr = request.getParameter("interviewStageEnd");
+            String interviewLocationIdStr = request.getParameter("interviewLocationId");
+            
+            if (interviewStartStr != null && !interviewStartStr.isEmpty() && 
+                interviewEndStr != null && !interviewEndStr.isEmpty()) {
+                
+                logger.log(Level.INFO, "Xử lý vòng Phỏng vấn: {0} - {1}, địa điểm: {2}", 
+                          new Object[]{interviewStartStr, interviewEndStr, interviewLocationIdStr});
+                
+                Date interviewStartDate = dateFormat.parse(interviewStartStr);
+                Date interviewEndDate = dateFormat.parse(interviewEndStr);
+                
+                // Tìm kiếm vòng phỏng vấn theo tên tiếng Việt hoặc ENUM
+                RecruitmentStage interviewStage = stageMap.get("INTERVIEW");
+                if (interviewStage == null) {
+                    interviewStage = stageMap.get("Vòng Phỏng vấn"); // Tương thích với dữ liệu cũ
+                }
+                
+                if (interviewStage != null) {
+                    // Cập nhật vòng hiện có
+                    interviewStage.setStartDate(interviewStartDate);
+                    interviewStage.setEndDate(interviewEndDate);
+                    interviewStage.setStageName("INTERVIEW"); // Đảm bảo dùng ENUM value
+                    
+                    // Xử lý locationId nếu có
+                    if (interviewLocationIdStr != null && !interviewLocationIdStr.isEmpty()) {
+                        try {
+                            int locationId = Integer.parseInt(interviewLocationIdStr);
+                            interviewStage.setLocationID(locationId);
+                        } catch (NumberFormatException e) {
+                            logger.log(Level.WARNING, "Lỗi chuyển đổi locationId: {0}", e.getMessage());
+                        }
+                    }
+                    
+                    stageDAO.updateRecruitmentStage(interviewStage);
+                    logger.log(Level.INFO, "Đã cập nhật vòng INTERVIEW ID {0}", interviewStage.getStageID());
+                } else {
+                    // Tạo mới nếu không tồn tại
+                    interviewStage = new RecruitmentStage();
+                    interviewStage.setRecruitmentID(recruitmentId);
+                    interviewStage.setStageName("INTERVIEW"); // Dùng ENUM value
+                    interviewStage.setStartDate(interviewStartDate);
+                    interviewStage.setEndDate(interviewEndDate);
+                    interviewStage.setStatus("UPCOMING");
+                    
+                    // Xử lý locationId nếu có
+                    if (interviewLocationIdStr != null && !interviewLocationIdStr.isEmpty()) {
+                        try {
+                            int locationId = Integer.parseInt(interviewLocationIdStr);
+                            interviewStage.setLocationID(locationId);
+                        } catch (NumberFormatException e) {
+                            logger.log(Level.WARNING, "Lỗi chuyển đổi locationId: {0}", e.getMessage());
+                            interviewStage.setLocationID(0);
+                        }
+                    } else {
+                        interviewStage.setLocationID(0);
+                    }
+                    
+                    interviewStage.setDescription("Vòng phỏng vấn ứng viên");
+                    int stageId = stageDAO.createRecruitmentStage(interviewStage);
+                    logger.log(Level.INFO, "Đã tạo mới vòng Phỏng vấn ID {0}", stageId);
+                }
+            }
+            
+            // 3. Vòng Thử thách (Challenge) - không bắt buộc
+            String challengeStartStr = request.getParameter("challengeStageStart");
+            String challengeEndStr = request.getParameter("challengeStageEnd");
+            String challengeDesc = request.getParameter("challengeDescription");
+            
+            if (challengeStartStr != null && !challengeStartStr.isEmpty() && 
+                challengeEndStr != null && !challengeEndStr.isEmpty()) {
+                
+                logger.log(Level.INFO, "Xử lý vòng Thử thách: {0} - {1}", new Object[]{challengeStartStr, challengeEndStr});
+                
+                Date challengeStartDate = dateFormat.parse(challengeStartStr);
+                Date challengeEndDate = dateFormat.parse(challengeEndStr);
+                
+                // Tìm kiếm vòng thử thách theo tên tiếng Việt hoặc ENUM
+                RecruitmentStage challengeStage = stageMap.get("CHALLENGE");
+                if (challengeStage == null) {
+                    challengeStage = stageMap.get("Vòng Thử thách"); // Tương thích với dữ liệu cũ
+                }
+                
+                if (challengeStage != null) {
+                    // Cập nhật vòng hiện có
+                    challengeStage.setStartDate(challengeStartDate);
+                    challengeStage.setEndDate(challengeEndDate);
+                    challengeStage.setStageName("CHALLENGE"); // Đảm bảo dùng ENUM value
+                    
+                    // Cập nhật mô tả nếu có
+                    if (challengeDesc != null && !challengeDesc.isEmpty()) {
+                        challengeStage.setDescription(challengeDesc);
+                    }
+                    
+                    stageDAO.updateRecruitmentStage(challengeStage);
+                    logger.log(Level.INFO, "Đã cập nhật vòng CHALLENGE ID {0}", challengeStage.getStageID());
+                } else {
+                    // Tạo mới nếu không tồn tại và có dữ liệu
+                    RecruitmentStage newChallengeStage = new RecruitmentStage();
+                    newChallengeStage.setRecruitmentID(recruitmentId);
+                    newChallengeStage.setStageName("CHALLENGE"); // Dùng ENUM value
+                    newChallengeStage.setStartDate(challengeStartDate);
+                    newChallengeStage.setEndDate(challengeEndDate);
+                    newChallengeStage.setStatus("UPCOMING");
+                    newChallengeStage.setLocationID(0);
+                    
+                    // Thêm mô tả thử thách nếu có
+                    if (challengeDesc != null && !challengeDesc.isEmpty()) {
+                        newChallengeStage.setDescription(challengeDesc);
+                    } else {
+                        newChallengeStage.setDescription("Vòng thử thách đánh giá năng lực");
+                    }
+                    
+                    int stageId = stageDAO.createRecruitmentStage(newChallengeStage);
+                    logger.log(Level.INFO, "Đã tạo mới vòng Thử thách ID {0}", stageId);
+                }
+            }
+            
+            return true;
+        } catch (ParseException e) {
+            logger.log(Level.SEVERE, "Lỗi khi chuyển đổi ngày tháng: {0}", e.getMessage());
+            return false;
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Lỗi không xác định khi cập nhật các vòng tuyển: {0}", e.getMessage());
+            logger.log(Level.SEVERE, "Chi tiết lỗi:", e);
+            return false;
         }
     }
     
@@ -565,5 +1186,60 @@ public class RecruitmentFormServlet extends HttpServlet {
         }
         
         return campaign;
+    }
+    
+    /**
+     * Check if a locationId exists in the database
+     * @param locationId The location ID to check
+     * @return true if the location exists, false otherwise
+     */
+    private boolean isValidLocationId(int locationId) {
+        try {
+            if (locationId <= 0) {
+                logger.log(Level.WARNING, "DEBUG - LocationId {0} is not valid (must be > 0)", locationId);
+                return false;
+            }
+            
+            LocationDAO dao = new LocationDAO();
+            List<Locations> locations = dao.getAllLocations();
+            
+            // Log all available locations for debugging
+            logger.log(Level.INFO, "DEBUG - Available locations in database:");
+            for (Locations loc : locations) {
+                logger.log(Level.INFO, "DEBUG - ID: {0}, Name: {1}, Type: {2}", 
+                         new Object[]{loc.getLocationID(), loc.getLocationName(), loc.getTypeLocation()});
+            }
+            
+            boolean found = locations.stream().anyMatch(loc -> loc.getLocationID() == locationId);
+            logger.log(Level.INFO, "DEBUG - LocationId {0} is {1}valid", 
+                     new Object[]{locationId, found ? "" : "not "});
+            return found;
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "DEBUG - Error checking location ID: {0}", e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get a default valid location ID from the database
+     * @return A valid location ID or 1 if none found
+     */
+    private int getDefaultLocationId() {
+        try {
+            LocationDAO dao = new LocationDAO();
+            List<Locations> locations = dao.getAllLocations();
+            
+            if (!locations.isEmpty()) {
+                int locationId = locations.get(0).getLocationID();
+                logger.log(Level.INFO, "DEBUG - Using default location ID: {0}", locationId);
+                return locationId;
+            } else {
+                logger.log(Level.WARNING, "DEBUG - No locations found in database, using 1 as default");
+                return 1;
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "DEBUG - Error getting default location ID: {0}", e.getMessage());
+            return 1;
+        }
     }
 }

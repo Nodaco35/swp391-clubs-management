@@ -21,6 +21,17 @@ public class RecruitmentStageDAO {
     public int createRecruitmentStage(RecruitmentStage stage) {
         int newStageId = 0;
         try {
+            // Kiểm tra tính hợp lệ của dữ liệu trước khi thêm vào DB
+            if (stage.getRecruitmentID() <= 0) {
+                System.out.println("DEBUG - RecruitmentStageDAO: RecruitmentID không hợp lệ: " + stage.getRecruitmentID());
+                return 0;
+            }
+            
+            if (stage.getStageName() == null || stage.getStageName().isEmpty()) {
+                System.out.println("DEBUG - RecruitmentStageDAO: StageName không hợp lệ (null hoặc empty)");
+                return 0;
+            }
+            
             conn = DBContext.getConnection();
             String sql = "INSERT INTO RecruitmentStages "
                     + "(RecruitmentID, StageName, Status, StartDate, EndDate, LocationID, Description, CreatedAt) "
@@ -28,21 +39,35 @@ public class RecruitmentStageDAO {
             ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setInt(1, stage.getRecruitmentID());
             ps.setString(2, stage.getStageName());
-            ps.setString(3, stage.getStatus());
+            ps.setString(3, stage.getStatus() != null ? stage.getStatus() : "UPCOMING");
             ps.setTimestamp(4, stage.getStartDate() != null ? new Timestamp(stage.getStartDate().getTime()) : null);
             ps.setTimestamp(5, stage.getEndDate() != null ? new Timestamp(stage.getEndDate().getTime()) : null);
             ps.setInt(6, stage.getLocationID());
-            ps.setString(7, stage.getDescription());
+            ps.setString(7, stage.getDescription() != null ? stage.getDescription() : "");
             ps.setTimestamp(8, new Timestamp(new Date().getTime())); // Current timestamp
+            
+            System.out.println("DEBUG - RecruitmentStageDAO: Thực thi SQL insert stage: " + 
+                               "RecruitmentID=" + stage.getRecruitmentID() + 
+                               ", StageName=" + stage.getStageName() + 
+                               ", StartDate=" + (stage.getStartDate() != null ? stage.getStartDate() : "null") + 
+                               ", EndDate=" + (stage.getEndDate() != null ? stage.getEndDate() : "null"));
             
             int affectedRows = ps.executeUpdate();
             if (affectedRows > 0) {
                 rs = ps.getGeneratedKeys();
                 if (rs.next()) {
                     newStageId = rs.getInt(1);
+                    System.out.println("DEBUG - RecruitmentStageDAO: Tạo vòng thành công, ID=" + newStageId);
                 }
+            } else {
+                System.out.println("DEBUG - RecruitmentStageDAO: Không có dòng nào được thêm vào DB");
             }
         } catch (SQLException e) {
+            System.out.println("DEBUG - RecruitmentStageDAO: Lỗi SQL Exception: " + e.getMessage());
+            System.out.println("DEBUG - SQL State: " + e.getSQLState() + ", Error Code: " + e.getErrorCode());
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.out.println("DEBUG - RecruitmentStageDAO: Lỗi Exception khác: " + e.getMessage());
             e.printStackTrace();
         } finally {
             closeResources();

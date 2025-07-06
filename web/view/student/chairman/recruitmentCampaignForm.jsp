@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>t=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
@@ -26,6 +26,52 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/recruitmentForm.css">
 </head>
+
+<!-- Debug Panel for stages -->
+<div id="debugPanel" style="display: none; margin-bottom: 15px; padding: 10px; border: 1px solid #f5c6cb; background-color: #f8d7da; color: #721c24; border-radius: 5px;">
+    <div id="debugContent"></div>
+</div>
+
+<!-- Truyền dữ liệu stages từ server sang JavaScript -->
+<script>
+    // Biến global để lưu trữ dữ liệu các vòng tuyển từ server
+    var serverStageData = false;
+    var stagesFromServer = [];
+    
+    <c:if test="${not empty stages}">
+        serverStageData = true;
+        // Chuyển đổi dữ liệu từ Java List sang JavaScript Array
+        <c:forEach items="${stages}" var="stage">
+            stagesFromServer.push({
+                stageId: ${stage.stageID},
+                recruitmentId: ${stage.recruitmentID},
+                stageName: "${stage.stageName}",
+                description: "${not empty stage.description ? stage.description : ''}",
+                startDate: "${stage.startDate}",
+                endDate: "${stage.endDate}",
+                status: "${stage.status}",
+                locationId: ${stage.locationID > 0 ? stage.locationID : 'null'}
+            });
+            console.log("Đã nhận vòng từ server: ${stage.stageName}, ID: ${stage.stageID}, Thời gian: ${stage.startDate} - ${stage.endDate}");
+        </c:forEach>
+        
+        // Log thông tin stages để debug
+        console.log("Đã nhận được " + stagesFromServer.length + " vòng tuyển từ server");
+        console.log("Chi tiết tất cả các vòng tuyển:", stagesFromServer);
+        
+        // Log chi tiết từng vòng một để debug dễ dàng hơn
+        stagesFromServer.forEach((stage, index) => {
+            console.log(`Chi tiết vòng tuyển #${index+1}:`, {
+                stageName: stage.stageName,
+                stageId: stage.stageId,
+                startDate: stage.startDate,
+                endDate: stage.endDate,
+                locationId: stage.locationId,
+                description: stage.description
+            });
+        });
+    </c:if>
+</script>
 <body style="background-color: #d8d7ce;">
     <jsp:include page="/view/events-page/header.jsp" />
     
@@ -349,9 +395,12 @@
         </form>
     </div>
     
-    <script src="${pageContext.request.contextPath}/js/recruitmentCommon.js?v=<%= System.currentTimeMillis() %>"></script>
-    <script src="${pageContext.request.contextPath}/js/recruitmentFormSaver.js?v=<%= System.currentTimeMillis() %>"></script>
-    <script src="${pageContext.request.contextPath}/js/createEditRecruitmentCampaign.js?v=<%= System.currentTimeMillis() %>"></script>
+    <!-- Script cho form và wizard -->
+    <script src="${pageContext.request.contextPath}/js/formSaver.js"></script>
+    <script src="${pageContext.request.contextPath}/js/recruitmentCommon.js"></script>
+    <script src="${pageContext.request.contextPath}/js/createEditRecruitmentCampaign.js"></script>
+    <!-- Debug script -->
+    <script src="${pageContext.request.contextPath}/js/recruitmentDebug.js"></script>
     
     <!-- Back to top button -->
     <div class="back-to-top" id="backToTop">
