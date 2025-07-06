@@ -144,8 +144,6 @@ public class AddEventServlet extends HttpServlet {
         String eventDescription = request.getParameter("eventDescription");
         String locationType = request.getParameter("locationType");
 
-        // Xử lý upload ảnh
-        // Xử lý upload ảnh
         String eventImgPath = null;
         Part imagePart = request.getPart("eventImg");
 
@@ -217,7 +215,6 @@ public class AddEventServlet extends HttpServlet {
             }
         }
 
-        // Validation
         if (eventName == null || eventName.trim().isEmpty() ||
                 eventLocationIDStr == null || eventLocationIDStr.trim().isEmpty() ||
                 maxParticipantsStr == null || maxParticipantsStr.trim().isEmpty() ||
@@ -230,7 +227,6 @@ public class AddEventServlet extends HttpServlet {
             request.setAttribute("locationType", locationType);
             request.setAttribute("errorMessage", "Vui lòng điền đầy đủ thông tin bắt buộc.");
 
-            // Add club attribute
             if (user != null) {
                 String userID = user.getUserID();
                 ClubInfo club = clubDAO.getClubChairman(userID);
@@ -281,7 +277,6 @@ public class AddEventServlet extends HttpServlet {
 
             boolean isPublic = "public".equalsIgnoreCase(eventType);
 
-            // Gọi method với eventImg parameter
             dao.insertEvent(eventName, eventDescription, startDateTime, endDateTime, locationId, myClubID, isPublic, maxParticipants, eventImgPath);
 
             session.setAttribute("successMsg", "Thêm sự kiện thành công!");

@@ -182,11 +182,6 @@
 			<div class="section-header">
 				<div class="section-title">
 					<h2>Quản lý sự kiện</h2>
-					<div class="search-container">
-						<input type="text" id="eventSearchInput" placeholder="Tìm kiếm sự kiện..."
-						       class="search-input">
-						<i class="fas fa-search search-icon"></i>
-					</div>
 				</div>
 				<div class="section-actions">
 					<select id="eventStatusFilter" class="filter-select">
