@@ -74,7 +74,7 @@ public class ChairmanTasksServlet extends HttpServlet {
             TaskDAO taskDAO = new TaskDAO();
 
             ClubInfo club = clubDAO.getClubChairman(userID);
-            List<Events> eventList = eventDAO.getEventsByClubID(club.getClubID());
+            List<Events> eventList = eventDAO.getEventsByClubIdForTask(club.getClubID());
 
             String eventIDParam = request.getParameter("eventID");
             Map<Events, Map<String, List<Tasks>>> timelineMap = new LinkedHashMap<>();

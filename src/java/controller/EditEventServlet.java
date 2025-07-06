@@ -5,8 +5,13 @@
 
 package controller;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,16 +23,19 @@ import dal.ClubDAO;
 import dal.EventsDAO;
 import dal.LocationDAO;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.annotation.MultipartConfig;
+import jakarta.servlet.http.*;
 import models.*;
 
 /**
  *
  * @author LE VAN THUAN
  */
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024 * 2, // 2MB
+        maxFileSize = 1024 * 1024 * 10,      // 10MB
+        maxRequestSize = 1024 * 1024 * 50    // 50MB
+)
 public class EditEventServlet extends HttpServlet {
    
     /** 
@@ -119,6 +127,8 @@ public class EditEventServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
+    private static final String UPLOAD_DIR = "images/events";
+    private static final String[] ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif"};
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -131,6 +141,7 @@ public class EditEventServlet extends HttpServlet {
             request.getRequestDispatcher("/view/student/chairman/add-event.jsp").forward(request, response);
             return;
         }
+
         try {
             int eventID = Integer.parseInt(request.getParameter("eventID"));
             String eventName = request.getParameter("eventName");
@@ -139,14 +150,15 @@ public class EditEventServlet extends HttpServlet {
             String endTimeStr = request.getParameter("eventEndTime");
             int locationID = Integer.parseInt(request.getParameter("eventLocation"));
             int capacity = Integer.parseInt(request.getParameter("maxParticipants"));
+
             if (capacity <= 0 || capacity > 10000) {
                 session.setAttribute("errorMessage", "Số lượng tối đa phải lớn hơn 0 hoặc nhỏ hơn 10000 người");
                 response.sendRedirect(request.getContextPath() + "/chairman-page/myclub-events/edit-event?eventID=" + eventID);
                 return;
             }
+
             String eventType = request.getParameter("eventType");
             String description = request.getParameter("eventDescription");
-
             boolean isPublic = "public".equalsIgnoreCase(eventType);
 
             LocalDate date = LocalDate.parse(eventDateStr);
@@ -156,9 +168,91 @@ public class EditEventServlet extends HttpServlet {
             Timestamp eventStart = Timestamp.valueOf(LocalDateTime.of(date, startTime));
             Timestamp eventEnd = Timestamp.valueOf(LocalDateTime.of(date, endTime));
 
+            // Xử lý upload ảnh
+            String imageName = null;
+            Part imagePart = request.getPart("eventImage");
 
+            if (imagePart != null && imagePart.getSize() > 0) {
+                // Có ảnh mới được upload
+                String originalFileName = imagePart.getSubmittedFileName();
+                String fileExtension = originalFileName.substring(originalFileName.lastIndexOf(".")).toLowerCase();
+
+                // Kiểm tra định dạng file
+                boolean isValidExtension = false;
+                for (String ext : ALLOWED_EXTENSIONS) {
+                    if (ext.equals(fileExtension)) {
+                        isValidExtension = true;
+                        break;
+                    }
+                }
+
+                if (!isValidExtension) {
+                    session.setAttribute("errorMessage", "Chỉ chấp nhận file ảnh có định dạng: jpg, jpeg, png, gif");
+                    response.sendRedirect(request.getContextPath() + "/chairman-page/myclub-events/edit-event?eventID=" + eventID);
+                    return;
+                }
+
+                // Tạo tên file unique
+                String fileName = "event_" + eventID + "_" + System.currentTimeMillis() + fileExtension;
+                imageName = UPLOAD_DIR + "/" + fileName; // Lưu đường dẫn đầy đủ vào DB
+
+                // 1. Đường dẫn thư mục build (để hiển thị ngay lập tức)
+                String buildUploadPath = getServletContext().getRealPath("/") + UPLOAD_DIR;
+                System.err.println("Build Upload Path: " + buildUploadPath);
+                Path buildUploadDir = Paths.get(buildUploadPath);
+                if (!Files.exists(buildUploadDir)) {
+                    Files.createDirectories(buildUploadDir);
+                }
+                Path buildFilePath = buildUploadDir.resolve(fileName);
+
+                // Lưu file vào build
+                Files.copy(imagePart.getInputStream(), buildFilePath, StandardCopyOption.REPLACE_EXISTING);
+
+                // 2. Đường dẫn thư mục source (để không bị mất khi redeploy)
+                String contextPath = getServletContext().getRealPath("/");
+                String projectRoot = Paths.get(contextPath).getParent().getParent().toString();
+                String sourceUploadPath = Paths.get(projectRoot, "web", UPLOAD_DIR).toString();
+                System.err.println("Source Upload Path: " + sourceUploadPath);
+
+                Path sourceUploadDir = Paths.get(sourceUploadPath);
+                if (!Files.exists(sourceUploadDir)) {
+                    System.err.println("Thư mục source không tồn tại, đang tạo: " + sourceUploadDir);
+                    Files.createDirectories(sourceUploadDir);
+                }
+                Path sourceFilePath = sourceUploadDir.resolve(fileName);
+
+                // Sao chép file sang source
+                Files.copy(buildFilePath, sourceFilePath, StandardCopyOption.REPLACE_EXISTING);
+                System.err.println("File copied to: " + sourceFilePath);
+
+                // Xóa ảnh cũ nếu có
+                EventsDAO eventDAO = new EventsDAO();
+                Events currentEvent = eventDAO.getEventByID(eventID);
+                if (currentEvent != null && currentEvent.getEventImg() != null && !currentEvent.getEventImg().isEmpty()) {
+                    // Xóa ảnh cũ trong build
+                    Path oldBuildImagePath = Paths.get(buildUploadPath, Paths.get(currentEvent.getEventImg()).getFileName().toString());
+                    if (Files.exists(oldBuildImagePath)) {
+                        Files.delete(oldBuildImagePath);
+                        System.err.println("Deleted old image in build: " + oldBuildImagePath);
+                    }
+                    // Xóa ảnh cũ trong source
+                    Path oldSourceImagePath = Paths.get(sourceUploadPath, Paths.get(currentEvent.getEventImg()).getFileName().toString());
+                    if (Files.exists(oldSourceImagePath)) {
+                        Files.delete(oldSourceImagePath);
+                        System.err.println("Deleted old image in source: " + oldSourceImagePath);
+                    }
+                }
+            }
+
+            // Cập nhật event
             EventsDAO eventDAO = new EventsDAO();
-            eventDAO.updateEvent(eventID, eventName, description, eventStart, eventEnd, locationID, capacity, isPublic);
+            if (imageName != null) {
+                // Cập nhật với ảnh mới
+                eventDAO.updateEventWithImage(eventID, eventName, description, eventStart, eventEnd, locationID, capacity, isPublic, imageName);
+            } else {
+                // Cập nhật không thay đổi ảnh
+                eventDAO.updateEvent(eventID, eventName, description, eventStart, eventEnd, locationID, capacity, isPublic);
+            }
 
             session.setAttribute("successMsg", "Chỉnh sửa sự kiện thành công!");
             response.sendRedirect(request.getContextPath() + "/chairman-page/myclub-events/edit-event?eventID=" + eventID);

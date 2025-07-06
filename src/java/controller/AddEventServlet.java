@@ -7,19 +7,22 @@ package controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import dal.ClubDAO;
 import dal.EventsDAO;
 import dal.LocationDAO;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.annotation.MultipartConfig;
+import jakarta.servlet.http.*;
 import models.ClubInfo;
 import models.Locations;
 import models.Users;
@@ -27,6 +30,11 @@ import models.Users;
 /**
  * @author LE VAN THUAN
  */
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024 * 2, // 2MB
+        maxFileSize = 1024 * 1024 * 10,      // 10MB
+        maxRequestSize = 1024 * 1024 * 50    // 50MB
+)
 public class AddEventServlet extends HttpServlet {
 
     /**
@@ -64,6 +72,10 @@ public class AddEventServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException      if an I/O error occurs
      */
+
+    private static final String UPLOAD_DIR = "images/events";
+    private static final String[] ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif"};
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -128,7 +140,84 @@ public class AddEventServlet extends HttpServlet {
         String eventDate = request.getParameter("eventDate");
         String eventTime = request.getParameter("eventTime");
         String eventEndTime = request.getParameter("eventEndTime");
+        String eventType = request.getParameter("eventType");
+        String eventDescription = request.getParameter("eventDescription");
+        String locationType = request.getParameter("locationType");
 
+        // Xử lý upload ảnh
+        // Xử lý upload ảnh
+        String eventImgPath = null;
+        Part imagePart = request.getPart("eventImg");
+
+        if (imagePart != null && imagePart.getSize() > 0) {
+            String fileName = imagePart.getSubmittedFileName();
+            if (fileName != null && !fileName.isEmpty()) {
+                // Kiểm tra định dạng file
+                String fileExtension = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
+                boolean isValidExtension = false;
+                for (String ext : ALLOWED_EXTENSIONS) {
+                    if (ext.equals(fileExtension)) {
+                        isValidExtension = true;
+                        break;
+                    }
+                }
+
+                if (!isValidExtension) {
+                    request.setAttribute("errorMessage", "Chỉ chấp nhận file ảnh có định dạng: jpg, jpeg, png, gif");
+                    LocationDAO locationDAO = new LocationDAO();
+                    request.setAttribute("locations", locationDAO.getLocationsByType(locationType != null ? locationType : "OnCampus"));
+                    request.getRequestDispatcher("/view/student/chairman/add-event.jsp").forward(request, response);
+                    return;
+                }
+
+                try {
+                    // Tạo tên file unique
+                    String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
+                    eventImgPath = UPLOAD_DIR + "/" + uniqueFileName;
+
+                    // 1. Lưu vào thư mục build (để hiển thị ngay lập tức)
+                    String buildUploadPath = getServletContext().getRealPath("/") + UPLOAD_DIR;
+                    System.err.println("Build Upload Path: " + buildUploadPath);
+                    Path buildUploadDir = Paths.get(buildUploadPath);
+                    if (!Files.exists(buildUploadDir)) {
+                        Files.createDirectories(buildUploadDir);
+                    }
+                    Path buildFilePath = buildUploadDir.resolve(uniqueFileName);
+                    Files.copy(imagePart.getInputStream(), buildFilePath, StandardCopyOption.REPLACE_EXISTING);
+
+                    // 2. Lưu vào thư mục source (để không bị mất khi redeploy)
+                    // Lấy đường dẫn gốc của ứng dụng và đi ngược lên hai cấp để đến project root
+                    String contextPath = getServletContext().getRealPath("/");
+                    String projectRoot = Paths.get(contextPath).getParent().getParent().toString();
+                    String sourceUploadPath = Paths.get(projectRoot, "web", UPLOAD_DIR).toString();
+                    System.err.println("Source Upload Path: " + sourceUploadPath);
+
+                    // Tạo thư mục source nếu chưa tồn tại
+                    Path sourceUploadDir = Paths.get(sourceUploadPath);
+                    if (!Files.exists(sourceUploadDir)) {
+                        System.err.println("Thư mục source không tồn tại, đang tạo: " + sourceUploadDir);
+                        Files.createDirectories(sourceUploadDir);
+                    }
+
+                    // Tạo đường dẫn file trong thư mục source
+                    Path sourceFilePath = sourceUploadDir.resolve(uniqueFileName);
+                    System.err.println("Source File Path: " + sourceFilePath);
+
+                    // Copy file từ build sang source
+                    Files.copy(buildFilePath, sourceFilePath, StandardCopyOption.REPLACE_EXISTING);
+                    System.err.println("File copied to: " + sourceFilePath);
+
+                } catch (IOException e) {
+                    request.setAttribute("errorMessage", "Lỗi khi upload ảnh: " + e.getMessage());
+                    LocationDAO locationDAO = new LocationDAO();
+                    request.setAttribute("locations", locationDAO.getLocationsByType(locationType != null ? locationType : "OnCampus"));
+                    request.getRequestDispatcher("/view/student/chairman/add-event.jsp").forward(request, response);
+                    return;
+                }
+            }
+        }
+
+        // Validation
         if (eventName == null || eventName.trim().isEmpty() ||
                 eventLocationIDStr == null || eventLocationIDStr.trim().isEmpty() ||
                 maxParticipantsStr == null || maxParticipantsStr.trim().isEmpty() ||
@@ -136,10 +225,10 @@ public class AddEventServlet extends HttpServlet {
                 eventTime == null || eventTime.trim().isEmpty() ||
                 eventEndTime == null || eventEndTime.trim().isEmpty()) {
 
-            String locationType = request.getParameter("locationType");
             LocationDAO locationDAO = new LocationDAO();
             request.setAttribute("locations", locationDAO.getLocationsByType(locationType != null ? locationType : "OnCampus"));
             request.setAttribute("locationType", locationType);
+            request.setAttribute("errorMessage", "Vui lòng điền đầy đủ thông tin bắt buộc.");
 
             // Add club attribute
             if (user != null) {
@@ -152,13 +241,7 @@ public class AddEventServlet extends HttpServlet {
             return;
         }
 
-
-        String eventType = request.getParameter("eventType");
-        String eventDescription = request.getParameter("eventDescription");
-
-        String locationType = request.getParameter("locationType");
         LocationDAO locationDAO = new LocationDAO();
-
         if (locationType != null && !locationType.isEmpty()) {
             request.setAttribute("locations", locationDAO.getLocationsByType(locationType));
             request.setAttribute("locationType", locationType);
@@ -197,7 +280,11 @@ public class AddEventServlet extends HttpServlet {
             }
 
             boolean isPublic = "public".equalsIgnoreCase(eventType);
-            dao.insertEvent(eventName, eventDescription, startDateTime, endDateTime, locationId, myClubID, isPublic, maxParticipants);
+
+            // Gọi method với eventImg parameter
+            dao.insertEvent(eventName, eventDescription, startDateTime, endDateTime, locationId, myClubID, isPublic, maxParticipants, eventImgPath);
+
+            session.setAttribute("successMsg", "Thêm sự kiện thành công!");
             response.sendRedirect(request.getContextPath() + "/chairman-page/myclub-events");
 
         } catch (NumberFormatException e) {

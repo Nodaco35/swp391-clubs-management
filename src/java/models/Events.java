@@ -19,6 +19,9 @@ public class Events {
     private int capacity;
     private String status;
 
+    private String approvalStatus;
+    private String rejectionReason;
+
     private String semesterID;
 
     // Thêm các trường bổ sung cho hiển thị
@@ -52,6 +55,44 @@ public class Events {
         this.eventDate = eventDate;
         this.eventImg = eventImg;
         this.eventName = eventName;
+    }
+
+    public Events(int eventID, Locations location, int spotsLeft, int registered, String clubImg, String clubName, String semesterID, String rejectionReason, String approvalStatus, String status, int capacity, int formTemplateID, boolean isPublic, int clubID, Date endTime, Date eventDate, String eventImg, String description, String eventName) {
+        this.eventID = eventID;
+        this.location = location;
+        this.spotsLeft = spotsLeft;
+        this.registered = registered;
+        this.clubImg = clubImg;
+        this.clubName = clubName;
+        this.semesterID = semesterID;
+        this.rejectionReason = rejectionReason;
+        this.approvalStatus = approvalStatus;
+        this.status = status;
+        this.capacity = capacity;
+        this.formTemplateID = formTemplateID;
+        this.isPublic = isPublic;
+        this.clubID = clubID;
+        this.endTime = endTime;
+        this.eventDate = eventDate;
+        this.eventImg = eventImg;
+        this.description = description;
+        this.eventName = eventName;
+    }
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
+    }
+
+    public String getApprovalStatus() {
+        return approvalStatus;
+    }
+
+    public void setApprovalStatus(String approvalStatus) {
+        this.approvalStatus = approvalStatus;
     }
 
     public int getCapacity() {

@@ -205,11 +205,13 @@
 				<table class="events-table">
 					<thead>
 					<tr>
+						<th>Loại sự kiện</th>
 						<th>Tên sự kiện</th>
 						<th>Ngày tổ chức</th>
 						<th>Địa điểm</th>
 						<th>Số người tham gia</th>
 						<th>Trạng thái</th>
+						<th>Duyệt</th>
 						<th>Thao tác</th>
 					</tr>
 					</thead>
@@ -231,6 +233,7 @@
 						</c:choose>
 
 						<tr data-status="${statusKey}">
+							<td>${event.isPublic() ? 'Công khai' : 'Riêng tư'}</td>
 							<td>${event.eventName}</td>
 							<td>
 								<fmt:formatDate value="${event.eventDate}" pattern="dd/MM/yyyy HH:mm" />
@@ -248,6 +251,19 @@
                             </span>
 							</td>
 							<td>
+								<span class="status ${event.approvalStatus}">
+                                <c:if test="${event.isPublic() == true}">
+	                                <c:choose>
+		                                <c:when test="${event.approvalStatus == 'PENDING'}">Chờ duyệt</c:when>
+		                                <c:when test="${event.approvalStatus == 'APPROVED'}">Đã duyệt</c:when>
+		                                <c:when test="${event.approvalStatus == 'REJECTED'}">Từ chối</c:when>
+		                                <c:otherwise>Không xác định</c:otherwise>
+	                                </c:choose>
+                                </c:if>
+                            </span>
+							</td>
+							<td>
+								<a href="#" class="btn-action form"><i class="fa-regular fa-rectangle-list"></i></a>
 								<a href="${pageContext.request.contextPath}/chairman-page/myclub-events/edit-event?eventID=${event.eventID}" class="btn-action edit" title="Sửa">
 									<i class="fas fa-edit"></i>
 								</a>

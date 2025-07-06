@@ -123,6 +123,8 @@ public class EventsDAO {
                 event.setPublic(rs.getBoolean("IsPublic"));
                 event.setCapacity(rs.getInt("Capacity"));
                 event.setStatus(rs.getString("Status"));
+                event.setApprovalStatus(rs.getString("ApprovalStatus"));
+                event.setRejectionReason(rs.getString("RejectionReason"));
                 Locations l = getLocationByID(rs.getInt("LocationID"));
                 event.setLocation(l);
                 return event;
@@ -183,7 +185,7 @@ public class EventsDAO {
                     WHERE e.ClubID = ?
                     GROUP BY e.EventID, e.EventName, e.EventImg, e.Description, 
                              e.EventDate, e.LocationID, e.ClubID, e.IsPublic, 
-                             e.FormTemplateID, e.Capacity, e.Status
+                             e.FormTemplateID, e.Capacity, e.Status, e.ApprovalStatus, e.RejectionReason
                     ORDER BY e.EventDate DESC
                 """;
 
@@ -205,6 +207,8 @@ public class EventsDAO {
                 event.setFormTemplateID(rs.getInt("FormTemplateID"));
                 event.setCapacity(rs.getInt("Capacity"));
                 event.setStatus(rs.getString("Status"));
+                event.setApprovalStatus(rs.getString("ApprovalStatus"));
+                event.setRejectionReason(rs.getString("RejectionReason"));
                 event.setRegistered(rs.getInt("RegisteredCount"));
                 event.setSpotsLeft(rs.getInt("SpotsLeft"));
                 Locations l = getLocationByID(rs.getInt("LocationID"));
@@ -555,26 +559,32 @@ public class EventsDAO {
     }
 
     public void insertEvent(String eventName, String description, Timestamp eventDate, Timestamp endTime,
-                            int locationId, int clubId, boolean isPublic, int capacity) {
+                            int locationId, int clubId, boolean isPublic, int capacity, String eventImgPath) {
 
-        String sql = "INSERT INTO Events (EventName, Description, EventDate, EndTime, LocationID, ClubID, IsPublic, Capacity, Status, SemesterID) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', 'SU25')";
-        try {
-            Connection connection = DBContext.getConnection();
-            PreparedStatement ps = connection.prepareStatement(sql);
+        String sql = "INSERT INTO Events (EventName, Description, EventDate, EndTime, LocationID, ClubID, " +
+                "IsPublic, Capacity, Status, SemesterID, EventImg) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Pending', 'SU25', ?)";
+
+        try (Connection connection = DBContext.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+
             ps.setString(1, eventName);
-            ps.setString(2, description != null && !description.isEmpty() ? description : null);
+            ps.setString(2, (description != null && !description.isEmpty()) ? description : null);
             ps.setTimestamp(3, eventDate);
             ps.setTimestamp(4, endTime);
             ps.setInt(5, locationId);
             ps.setInt(6, clubId);
             ps.setBoolean(7, isPublic);
             ps.setInt(8, capacity);
+            ps.setString(9, eventImgPath);
+
             ps.executeUpdate();
+
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Lỗi khi thêm sự kiện: " + e.getMessage(), e);
         }
     }
+
 
     public void updateEvent(int eventID, String name, String description, Timestamp start, Timestamp end,
                             int locationID, int capacity, boolean isPublic) {
@@ -597,6 +607,27 @@ public class EventsDAO {
         }
     }
 
+    public void updateEventWithImage(int eventID, String name, String description, Timestamp start, Timestamp end,
+                                     int locationID, int capacity, boolean isPublic, String imageName) {
+        String sql = "UPDATE Events SET EventName = ?, Description = ?, EventDate = ?, EndTime = ?, " +
+                "LocationID = ?, Capacity = ?, IsPublic = ?, EventImg = ? WHERE EventID = ?";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, name);
+            ps.setString(2, description);
+            ps.setTimestamp(3, start);
+            ps.setTimestamp(4, end);
+            ps.setInt(5, locationID);
+            ps.setInt(6, capacity);
+            ps.setBoolean(7, isPublic);
+            ps.setString(8, imageName);
+            ps.setInt(9, eventID);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     public List<Agenda> getAgendasByEventID(int eventID) {
         List<Agenda> agendas = new ArrayList<>();

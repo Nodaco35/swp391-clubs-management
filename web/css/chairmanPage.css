@@ -639,6 +639,21 @@ body {
     color: #721c24;
 }
 
+.status.PENDING {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status.APPROVED {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status.REJECTED {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
 .btn-action {
     display: inline-flex;
     align-items: center;
@@ -655,6 +670,11 @@ body {
 
 .btn-action i {
     margin-right: 4px;
+}
+
+.btn-action.form {
+    background-color: #860bdc;
+    color: white;
 }
 
 .btn-action.edit {
@@ -748,6 +768,70 @@ body {
 }
 
 /* Form Styles */
+/* Thêm vào file chairmanPage.css */
+
+.image-preview {
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    background-color: #f9f9f9;
+}
+
+.image-preview img {
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.form-group input[type="file"] {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    background-color: #fff;
+    width: 100%;
+    font-size: 14px;
+}
+
+.form-group input[type="file"]:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+.current-image-container {
+    margin-bottom: 15px;
+}
+
+.current-image-container p {
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+}
+
+.current-image-container img {
+    max-width: 200px;
+    max-height: 200px;
+    object-fit: cover;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.form-group input[type="file"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+.form-text {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+    display: block;
+}
+
 .form-container {
     background: white;
     border-radius: 8px;
