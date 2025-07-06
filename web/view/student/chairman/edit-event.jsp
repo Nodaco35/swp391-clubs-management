@@ -185,7 +185,8 @@
 		</form>
 
 		<!-- Form chính dùng để cập nhật thông tin sự kiện -->
-		<form action="edit-event" method="post">
+		<!-- Thêm enctype="multipart/form-data" vào form chính -->
+		<form action="edit-event" method="post" enctype="multipart/form-data">
 			<input type="hidden" id="eventID" name="eventID" value="${event.eventID}"/>
 
 			<div class="form-grid">
@@ -237,6 +238,27 @@
 							</option>
 						</c:forEach>
 					</select>
+				</div>
+
+				<!-- Thêm phần upload ảnh -->
+				<div class="form-group full-width">
+					<label for="eventImage"><i class="fas fa-image"></i> Ảnh sự kiện</label>
+
+					<!-- Hiển thị ảnh hiện tại nếu có -->
+					<c:if test="${not empty event.eventImg}">
+						<div class="current-image-container" style="margin-bottom: 10px;">
+							<p>Ảnh hiện tại:</p>
+							<img src="${pageContext.request.contextPath}/${event.eventImg}"
+							     alt="Current event image"
+							     style="max-width: 200px; max-height: 200px; object-fit: cover; border: 1px solid #ddd; border-radius: 4px;">
+						</div>
+					</c:if>
+
+					<!-- Input để chọn ảnh mới -->
+					<input type="file" id="eventImage" name="eventImage" accept="image/*">
+					<small class="form-text text-muted">
+						Chọn ảnh mới nếu muốn thay đổi. Để trống nếu giữ nguyên ảnh hiện tại.
+					</small>
 				</div>
 
 				<div class="form-group full-width">

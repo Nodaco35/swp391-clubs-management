@@ -158,12 +158,12 @@
 		<c:if test="${not empty errorMessage}">
 		<div class="error-message" style="color: red">${errorMessage}</div>
 		</c:if>
-			<c:if test="${not empty sessionScope.successMsg}">
-			<div class="error-message" style="color: green">${sessionScope.successMsg}</div>
-				<c:remove var="successMsg" scope="session" />
-			</c:if>
+		<c:if test="${not empty sessionScope.successMsg}">
+		<div class="error-message" style="color: green">${sessionScope.successMsg}</div>
+			<c:remove var="successMsg" scope="session"/>
+		</c:if>
 
-			<div class="form-grid-2">
+		<div class="form-grid-2">
 			<div id="newLocationGroup"
 			     style="display: ${param.locationType == 'OffCampus' ? 'block' : 'none'}; margin-top: 20px;">
 				<form action="${pageContext.request.contextPath}/add-location" method="post">
@@ -181,14 +181,15 @@
 			</div>
 		</div>
 		<form id="eventForm" action="${pageContext.request.contextPath}/chairman-page/myclub-events/add-event"
-		      method="post">
+		      method="post" enctype="multipart/form-data">
 			<div class="form-section">
 				<h3>Thông tin cơ bản</h3>
 				<div class="form-grid-2">
 					<div class="form-group">
 						<label for="locationType">Loại địa điểm (Trong hay ngoài trường) *</label>
 						<select id="locationType" name="locationType" onchange="this.form.submit()" required>
-							<option value="OnCampus" ${param.locationType == 'OnCampus' ? 'selected' : ''}>Trong trường
+							<option value="OnCampus" ${param.locationType == 'OnCampus' ? 'selected' : ''}>Trong
+								trường
 							</option>
 							<option value="OffCampus" ${param.locationType == 'OffCampus' ? 'selected' : ''}>Ngoài
 								trường
@@ -220,6 +221,16 @@
 							<option value="public" ${param.eventType == 'public' ? 'selected' : ''}>Công khai</option>
 							<option value="private" ${param.eventType == 'private' ? 'selected' : ''}>Riêng tư</option>
 						</select>
+					</div>
+
+					<!-- THÊM PHẦN UPLOAD ẢNH -->
+					<div class="form-group">
+						<label for="eventImg">Ảnh sự kiện</label>
+						<input type="file" id="eventImg" name="eventImg" accept="image/*" onchange="previewImage(this)">
+						<div id="imagePreview" class="image-preview" style="display: none; margin-top: 10px;">
+							<img id="previewImg" src="" alt="Preview"
+							     style="max-width: 200px; max-height: 200px; border-radius: 8px;">
+						</div>
 					</div>
 
 					<div class="form-group full-width">
@@ -270,6 +281,24 @@
 
 </main>
 <script>
+    function previewImage(input) {
+        const preview = document.getElementById('imagePreview');
+        const previewImg = document.getElementById('previewImg');
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                preview.style.display = 'block';
+            }
+
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.style.display = 'none';
+        }
+    }
+
     function toggleNewLocation() {
         var locationType = document.getElementById('locationType').value;
         var newLocationGroup = document.getElementById('newLocationGroup');
