@@ -198,12 +198,7 @@
 
 	<!-- Modal -->
 	<div id="detailsModal" class="modal">
-		<c:if test="${not empty message}">
-			<div class="message">${message}</div>
-		</c:if>
-		<c:if test="${not empty errorMessage}">
-			<div class="error-message">${errorMessage}</div>
-		</c:if>
+
 		<div class="modal-content">
 			<a href="${pageContext.request.contextPath}/ic/approval-events" class="close">×</a>
 			<div class="modal-header">
@@ -213,6 +208,12 @@
 				</div>
 			</div>
 			<div class="modal-body">
+				<c:if test="${not empty message}">
+					<div class="message">${message}</div>
+				</c:if>
+				<c:if test="${not empty errorMessage}">
+					<div class="error-message">${errorMessage}</div>
+				</c:if>
 				<div class="detail-card">
 					<h4><i class="fas fa-info-circle"></i> Thông tin cơ bản</h4>
 					<div class="detail-item">

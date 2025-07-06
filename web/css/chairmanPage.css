@@ -613,6 +613,26 @@ body {
 .events-table tr:hover {
     background-color: #f8f9fa;
 }
+.events-table td.location-cell {
+    max-width: 176px;  /* hoặc giá trị bạn thấy hợp lý */
+    word-wrap: break-word;
+    white-space: normal;
+}
+
+
+.event-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.event-info strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+.event-info small {
+    color: #666;
+    font-size: 0.8em;
+}
 
 .status {
     display: inline-block;

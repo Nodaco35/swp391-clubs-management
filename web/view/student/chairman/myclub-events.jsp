@@ -200,7 +200,6 @@
 				<table class="events-table">
 					<thead>
 					<tr>
-						<th>Loại sự kiện</th>
 						<th>Tên sự kiện</th>
 						<th>Ngày tổ chức</th>
 						<th>Địa điểm</th>
@@ -228,13 +227,26 @@
 						</c:choose>
 
 						<tr data-status="${statusKey}">
-							<td>${event.isPublic() ? 'Công khai' : 'Riêng tư'}</td>
-							<td>${event.eventName}</td>
+							<td>
+								<div class="event-info">
+									<strong>${event.eventName}</strong>
+									<small>
+											${event.isPublic() ? 'Công khai' : 'Riêng tư'}
+									</small>
+								</div>
+							</td>
 							<td>
 								<fmt:formatDate value="${event.eventDate}" pattern="dd/MM/yyyy HH:mm" />
 							</td>
-							<td>${event.location.locationName}</td>
-							<td>${event.registered}/${event.capacity} (Còn ${event.spotsLeft} chỗ trống)</td>
+							<td class="location-cell">${event.location.locationName}</td>
+							<td>
+								<div class="event-info">
+									<strong>${event.registered}/${event.capacity}</strong>
+									<small>
+										(Còn ${event.spotsLeft} chỗ trống)
+									</small>
+								</div>
+							</td>
 							<td>
                             <span class="status ${event.status}">
                                 <c:choose>
