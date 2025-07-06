@@ -156,6 +156,10 @@ public class RecruitmentCampaignServlet extends HttpServlet {
                     redirectUrl += "?clubId=" + clubIdParam;
                 }
                 
+                // Log để debug
+                logger.log(Level.INFO, "Chuyển hướng tạo mới từ /recruitment/create sang {0} với clubId={1}", 
+                          new Object[]{redirectUrl, clubIdParam});
+                
                 response.sendRedirect(redirectUrl);
                 return;
             } else if ("/view".equals(pathInfo)) {
@@ -217,12 +221,20 @@ public class RecruitmentCampaignServlet extends HttpServlet {
                 if (idParam != null && !idParam.isEmpty()) {
                     // Chế độ chỉnh sửa
                     redirectUrl += "/edit?id=" + idParam;
+                    
+                    // Log để debug luồng chuyển hướng
+                    logger.log(Level.INFO, "[DEBUG] LUỒNG CHUYỂN HƯỚNG: /recruitment/form?id={0} -> {1} (RecruitmentFormServlet)", 
+                              new Object[]{idParam, redirectUrl});
                 } else {
                     // Chế độ tạo mới
                     redirectUrl += "/new";
                     if (clubIdParam != null && !clubIdParam.isEmpty()) {
                         redirectUrl += "?clubId=" + clubIdParam;
                     }
+                    
+                    // Log để debug luồng chuyển hướng
+                    logger.log(Level.INFO, "[DEBUG] LUỒNG CHUYỂN HƯỚNG: /recruitment/form{0} -> {1} (RecruitmentFormServlet)", 
+                              new Object[]{clubIdParam != null ? "?clubId=" + clubIdParam : "", redirectUrl});
                 }
                 
                 response.sendRedirect(redirectUrl);
@@ -231,8 +243,15 @@ public class RecruitmentCampaignServlet extends HttpServlet {
                 // Chuyển hướng sang endpoint form với id
                 String id = request.getParameter("id");
                 if (id != null && !id.isEmpty()) {
-                    response.sendRedirect(request.getContextPath() + "/recruitment/form?id=" + id);
+                    String redirectUrl = request.getContextPath() + "/recruitment/form?id=" + id;
+                    
+                    // Log để debug luồng chuyển hướng
+                    logger.log(Level.INFO, "[DEBUG] LUỒNG CHUYỂN HƯỚNG: /recruitment/edit?id={0} -> {1} -> /recruitmentForm/edit?id={0}", 
+                              new Object[]{id, redirectUrl});
+                    
+                    response.sendRedirect(redirectUrl);
                 } else {
+                    logger.log(Level.WARNING, "[DEBUG] LUỒNG CHUYỂN HƯỚNG: /recruitment/edit -> /recruitment (thiếu ID)");
                     response.sendRedirect(request.getContextPath() + "/recruitment");
                 }
                 return;
@@ -339,6 +358,80 @@ public class RecruitmentCampaignServlet extends HttpServlet {
                         URLEncoder.encode("Lỗi hệ thống: " + e.getMessage(), StandardCharsets.UTF_8.name()));
                     return;
                 }
+            } else if ("/stages".equals(pathInfo)) {
+                // API endpoint để lấy danh sách các vòng tuyển theo recruitmentId
+                String recruitmentIdParam = request.getParameter("recruitmentId");
+                if (recruitmentIdParam == null || recruitmentIdParam.trim().isEmpty()) {
+                    response.setContentType("application/json");
+                    response.setCharacterEncoding("UTF-8");
+                    response.getWriter().write("{\"success\":false,\"message\":\"Thiếu recruitmentId\"}");
+                    return;
+                }
+                
+                try {
+                    int recruitmentId = Integer.parseInt(recruitmentIdParam);
+                    RecruitmentCampaign campaign = recruitmentService.getCampaignById(recruitmentId);
+                    
+                    if (campaign == null) {
+                        response.setContentType("application/json");
+                        response.setCharacterEncoding("UTF-8");
+                        response.getWriter().write("{\"success\":false,\"message\":\"Không tìm thấy chiến dịch\"}");
+                        return;
+                    }
+                    
+                    // Kiểm tra quyền truy cập
+                    UserClub userClub = userClubDAO.getUserClubManagementRole(currentUser.getUserID(), campaign.getClubID());
+                    if (userClub == null || userClub.getRoleID() != 1) {
+                        response.setContentType("application/json");
+                        response.setCharacterEncoding("UTF-8");
+                        response.getWriter().write("{\"success\":false,\"message\":\"Bạn không có quyền truy cập dữ liệu này\"}");
+                        return;
+                    }
+                    
+                    // Lấy danh sách các vòng tuyển
+                    List<RecruitmentStage> stages = recruitmentService.getStagesByCampaign(recruitmentId);
+                    
+                    // DEBUG: Log chi tiết về từng vòng tuyển
+                    logger.log(Level.INFO, "API /stages - Đã tìm thấy {0} vòng tuyển cho chiến dịch ID {1}", 
+                              new Object[]{stages.size(), recruitmentId});
+                    
+                    for (RecruitmentStage stage : stages) {
+                        logger.log(Level.INFO, "API /stages - Vòng tuyển #{0}: {1}, Thời gian: {2} -> {3}, Vị trí: {4}, Mô tả: {5}, Trạng thái: {6}", 
+                                  new Object[]{
+                                      stage.getStageID(), 
+                                      stage.getStageName(), 
+                                      stage.getStartDate(), 
+                                      stage.getEndDate(), 
+                                      stage.getLocationID() > 0 ? "ID: " + stage.getLocationID() : "Không có",
+                                      stage.getDescription() != null && !stage.getDescription().isEmpty() ? "Có" : "Không",
+                                      stage.getStatus()
+                                  });
+                    }
+                    
+                    // Chuyển đổi danh sách thành JSON và trả về
+                    String stagesJson = gson.toJson(stages);
+                    response.setContentType("application/json");
+                    response.setCharacterEncoding("UTF-8");
+                    response.getWriter().write("{\"success\":true,\"stages\":" + stagesJson + "}");
+                    
+                    // Log JSON trả về để debug
+                    logger.log(Level.INFO, "API /stages - JSON trả về: {0}", stagesJson.substring(0, Math.min(stagesJson.length(), 300)) + 
+                              (stagesJson.length() > 300 ? "... (còn nữa)" : ""));
+                    
+                    // Log full JSON để debug chi tiết (có thể bật/tắt khi cần)
+                    logger.log(Level.FINE, "API /stages - Full JSON: {0}", stagesJson);
+                    
+                } catch (NumberFormatException e) {
+                    response.setContentType("application/json");
+                    response.setCharacterEncoding("UTF-8");
+                    response.getWriter().write("{\"success\":false,\"message\":\"ID chiến dịch không hợp lệ\"}");
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "Lỗi khi lấy danh sách vòng tuyển: ", e);
+                    response.setContentType("application/json");
+                    response.setCharacterEncoding("UTF-8");
+                    response.getWriter().write("{\"success\":false,\"message\":\"Lỗi hệ thống: " + e.getMessage() + "\"}");
+                }
+                return;
             } else { // Endpoint "/form" đã được xử lý ở trên
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
@@ -468,19 +561,27 @@ public class RecruitmentCampaignServlet extends HttpServlet {
             if ("/create".equals(pathInfo)) {
                 // Chuyển hướng POST request cho việc tạo hoạt động tuyển quân sang servlet mới
                 String redirectUrl = request.getContextPath() + "/recruitmentForm/create";
+                
+                // Log để debug
+                logger.log(Level.INFO, "Chuyển hướng request tạo mới từ /recruitment/create sang {0}", redirectUrl);
+                
                 response.setContentType("application/json");
                 jsonResponse.addProperty("success", false);
                 jsonResponse.addProperty("redirect", redirectUrl);
-                jsonResponse.addProperty("message", "Endpoint này đã được chuyển đến " + redirectUrl);
+                jsonResponse.addProperty("message", "API đã chuyển sang đường dẫn mới. Vui lòng sử dụng " + redirectUrl);
                 out.print(jsonResponse.toString());
                 return;
             } else if ("/update".equals(pathInfo)) {
                 // Chuyển hướng POST request cho việc cập nhật hoạt động tuyển quân sang servlet mới
                 String redirectUrl = request.getContextPath() + "/recruitmentForm/update";
+                
+                // Log để debug
+                logger.log(Level.INFO, "Chuyển hướng request cập nhật từ /recruitment/update sang {0}", redirectUrl);
+                
                 response.setContentType("application/json");
                 jsonResponse.addProperty("success", false);
                 jsonResponse.addProperty("redirect", redirectUrl);
-                jsonResponse.addProperty("message", "Endpoint này đã được chuyển đến " + redirectUrl);
+                jsonResponse.addProperty("message", "API đã chuyển sang đường dẫn mới. Vui lòng sử dụng " + redirectUrl);
                 out.print(jsonResponse.toString());
                 return;
             } else if ("/stage/create".equals(pathInfo)) {

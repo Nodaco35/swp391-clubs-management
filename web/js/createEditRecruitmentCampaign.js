@@ -476,14 +476,88 @@ function updateStagesDateConstraints() {
  * Điền sẵn dữ liệu giai đoạn nếu ở chế độ chỉnh sửa
  */
 function prefillStageData() {
-    const recruitmentId = document.querySelector('input[name="recruitmentId"]')?.value;
-    
-    if (!recruitmentId) {
-        console.error('Không tìm thấy ID hoạt động tuyển quân để lấy dữ liệu giai đoạn');
+    // Hiển thị debug về mode hiện tại
+    showDebugInfo('Đang kiểm tra dữ liệu vòng tuyển', {
+        isEdit: isEdit,
+        mode: isEdit ? 'Chỉnh sửa' : 'Tạo mới',
+        hasServerData: (typeof stagesFromServer !== 'undefined' && Array.isArray(stagesFromServer) && stagesFromServer.length > 0)
+    });
+
+    // Kiểm tra nếu có biến stagesFromServer đã được định nghĩa từ JSP
+    if (typeof stagesFromServer !== 'undefined' && Array.isArray(stagesFromServer) && stagesFromServer.length > 0) {
+        console.log('[DEBUG] Dùng dữ liệu vòng tuyển từ server:', stagesFromServer.length + ' vòng');
+        
+        // Log chi tiết từng vòng tuyển
+        stagesFromServer.forEach((stage, index) => {
+            console.log(`[DEBUG] Vòng tuyển #${index+1}: ${stage.stageName}, ID: ${stage.stageId}, Thời gian: ${stage.startDate} -> ${stage.endDate}`);
+        });
+        
+        // Log toàn bộ dữ liệu nhận được để debug
+        console.log('[DEBUG] Chi tiết tất cả vòng tuyển từ server:', JSON.stringify(stagesFromServer));
+        
+        // Điền dữ liệu giai đoạn vào form - Sử dụng ENUM values
+        stagesFromServer.forEach(stage => {
+            // Log chi tiết gồm ID và stageName để debug
+            console.log('[DEBUG] Đang xử lý vòng tuyển:', {
+                stageName: stage.stageName, 
+                stageId: stage.stageId, 
+                startDate: stage.startDate,
+                endDate: stage.endDate,
+                locationId: stage.locationId,
+                description: stage.description ? stage.description.substring(0, 30) + '...' : 'không có'
+            });
+            
+            const stageName = String(stage.stageName).toUpperCase().trim();
+            
+            // Hiển thị loại vòng tuyển đã chuyển đổi
+            console.log('[DEBUG] Loại vòng sau khi chuyển đổi:', stageName);
+            
+            if (stageName === "APPLICATION" || stageName.includes('APPLICATION') || stageName.includes('NỘP ĐƠN')) {
+                document.getElementById('applicationStageStart').value = formatDateForInput(new Date(stage.startDate));
+                document.getElementById('applicationStageEnd').value = formatDateForInput(new Date(stage.endDate));
+                console.log('[DEBUG] Đã điền dữ liệu vòng APPLICATION:', formatDateForInput(new Date(stage.startDate)), formatDateForInput(new Date(stage.endDate)));
+            } else if (stageName === "INTERVIEW" || stageName.includes('INTERVIEW') || stageName.includes('PHỎNG VẤN')) {
+                document.getElementById('interviewStageStart').value = formatDateForInput(new Date(stage.startDate));
+                document.getElementById('interviewStageEnd').value = formatDateForInput(new Date(stage.endDate));
+                if (stage.locationId) {
+                    document.getElementById('interviewLocationId').value = stage.locationId;
+                    console.log('[DEBUG] Đã điền vị trí phỏng vấn:', stage.locationId);
+                }
+                console.log('[DEBUG] Đã điền dữ liệu vòng INTERVIEW:', formatDateForInput(new Date(stage.startDate)), formatDateForInput(new Date(stage.endDate)));
+            } else if (stageName === "CHALLENGE" || stageName.includes('CHALLENGE') || stageName.includes('THỬ THÁCH')) {
+                document.getElementById('challengeStageStart').value = formatDateForInput(new Date(stage.startDate));
+                document.getElementById('challengeStageEnd').value = formatDateForInput(new Date(stage.endDate));
+                if (stage.description) {
+                    document.getElementById('challengeDescription').value = stage.description;
+                    console.log('[DEBUG] Đã điền mô tả thử thách:', stage.description.substring(0, 30) + (stage.description.length > 30 ? '...' : ''));
+                }
+                console.log('[DEBUG] Đã điền dữ liệu vòng CHALLENGE:', formatDateForInput(new Date(stage.startDate)), formatDateForInput(new Date(stage.endDate)));
+            } else {
+                console.warn('[DEBUG] Không nhận diện được loại vòng tuyển:', stage.stageName, '(đã chuyển đổi thành:', stageName, ')');
+            }
+        });
+        
+        // Kiểm tra thứ tự thời gian và chồng lấp
+        checkStageTimeOverlap();
+        
+        // Hiển thị thông tin debug về dữ liệu đã nhận
+        showDebugInfo('Đã điền dữ liệu từ ' + stagesFromServer.length + ' vòng tuyển', stagesFromServer);
         return;
     }
     
-    // Lấy dữ liệu các giai đoạn từ server
+    // Phương án dự phòng nếu không có dữ liệu từ server
+    const recruitmentId = document.querySelector('input[name="recruitmentId"]')?.value;
+    
+    if (!recruitmentId) {
+        console.error('[DEBUG] Không tìm thấy ID hoạt động tuyển quân để lấy dữ liệu giai đoạn');
+        showDebugInfo('Lỗi', 'Không tìm thấy ID hoạt động tuyển quân để lấy dữ liệu giai đoạn');
+        return;
+    }
+    
+    console.log('[DEBUG] Tải dữ liệu vòng tuyển qua API cho recruitmentId:', recruitmentId);
+    showDebugInfo('Đang tải dữ liệu vòng tuyển qua API...', { recruitmentId: recruitmentId });
+    
+    // Lấy dữ liệu các giai đoạn từ server qua API
     fetch(`${getContextPath()}/recruitment/stages?recruitmentId=${recruitmentId}`)
         .then(response => {
             if (!response.ok) {
@@ -492,32 +566,67 @@ function prefillStageData() {
             return response.json();
         })
         .then(data => {
-            if (data && data.stages && Array.isArray(data.stages)) {
-                // Điền dữ liệu giai đoạn vào form
+            if (data && data.success && data.stages && Array.isArray(data.stages)) {
+                console.log('[DEBUG] Nhận được dữ liệu từ API:', data);
+                
+                // Log toàn bộ dữ liệu nhận được từ API để debug
+                console.log('[DEBUG] Chi tiết tất cả vòng tuyển từ API:', JSON.stringify(data.stages));
+                
+                // Điền dữ liệu giai đoạn vào form - Sử dụng ENUM values
                 data.stages.forEach(stage => {
-                    if (stage.stageName.includes('Nộp đơn')) {
+                    // Log chi tiết gồm ID và stageName để debug
+                    console.log('[DEBUG] API - Đang xử lý vòng tuyển:', {
+                        stageName: stage.stageName, 
+                        stageId: stage.stageId || stage.stageID, 
+                        startDate: stage.startDate,
+                        endDate: stage.endDate,
+                        locationId: stage.locationId || stage.locationID,
+                        description: stage.description ? stage.description.substring(0, 30) + '...' : 'không có'
+                    });
+                    
+                    const stageName = String(stage.stageName).toUpperCase().trim();
+                    
+                    // Hiển thị loại vòng tuyển đã chuyển đổi
+                    console.log('[DEBUG] API - Loại vòng sau khi chuyển đổi:', stageName);
+                    
+                    if (stageName === "APPLICATION" || stageName.includes('APPLICATION') || stageName.includes('NỘP ĐƠN')) {
                         document.getElementById('applicationStageStart').value = formatDateForInput(new Date(stage.startDate));
                         document.getElementById('applicationStageEnd').value = formatDateForInput(new Date(stage.endDate));
-                    } else if (stage.stageName.includes('Phỏng vấn')) {
+                        console.log('[DEBUG] Đã điền dữ liệu vòng APPLICATION từ API:', formatDateForInput(new Date(stage.startDate)), formatDateForInput(new Date(stage.endDate)));
+                    } else if (stageName === "INTERVIEW" || stageName.includes('INTERVIEW') || stageName.includes('PHỎNG VẤN')) {
                         document.getElementById('interviewStageStart').value = formatDateForInput(new Date(stage.startDate));
                         document.getElementById('interviewStageEnd').value = formatDateForInput(new Date(stage.endDate));
-                        if (stage.locationID) {
-                            document.getElementById('interviewLocationId').value = stage.locationID;
+                        if (stage.locationID || stage.locationId) {
+                            document.getElementById('interviewLocationId').value = stage.locationID || stage.locationId;
+                            console.log('[DEBUG] Đã điền vị trí phỏng vấn từ API:', stage.locationID || stage.locationId);
                         }
-                    } else if (stage.stageName.includes('Thử thách')) {
+                        console.log('[DEBUG] Đã điền dữ liệu vòng INTERVIEW từ API:', formatDateForInput(new Date(stage.startDate)), formatDateForInput(new Date(stage.endDate)));
+                    } else if (stageName === "CHALLENGE" || stageName.includes('CHALLENGE') || stageName.includes('THỬ THÁCH')) {
                         document.getElementById('challengeStageStart').value = formatDateForInput(new Date(stage.startDate));
                         document.getElementById('challengeStageEnd').value = formatDateForInput(new Date(stage.endDate));
                         if (stage.description) {
                             document.getElementById('challengeDescription').value = stage.description;
+                            console.log('[DEBUG] Đã điền mô tả thử thách từ API:', stage.description.substring(0, 30) + (stage.description.length > 30 ? '...' : ''));
                         }
+                        console.log('[DEBUG] Đã điền dữ liệu vòng CHALLENGE từ API:', formatDateForInput(new Date(stage.startDate)), formatDateForInput(new Date(stage.endDate)));
+                    } else {
+                        console.warn('[DEBUG] API - Không nhận diện được loại vòng tuyển:', stage.stageName, '(đã chuyển đổi thành:', stageName, ')');
                     }
                 });
+                
+                // Kiểm tra thứ tự thời gian và chồng lấp
+                checkStageTimeOverlap();
+                
+                // Hiển thị thông tin debug
+                showDebugInfo('Đã lấy dữ liệu từ API: ' + data.stages.length + ' vòng tuyển', data);
             } else {
                 console.error('Dữ liệu giai đoạn không hợp lệ:', data);
+                showDebugInfo('Lỗi dữ liệu: Không lấy được dữ liệu vòng tuyển từ API', data);
             }
         })
         .catch(error => {
             console.error('Lỗi khi lấy dữ liệu giai đoạn:', error);
+            showDebugInfo('Lỗi khi lấy dữ liệu giai đoạn: ' + error.message);
         });
 }
 
@@ -533,41 +642,162 @@ function formatDateForInput(date) {
  * Điền thông tin vào màn hình xác nhận
  */
 function populateConfirmationStep() {
-    // Thông tin cơ bản
-    document.getElementById('confirmGen').textContent = document.getElementById('gen').value;
-    
-    const startDate = new Date(document.getElementById('startDate').value);
-    const endDate = new Date(document.getElementById('endDate').value);
-    document.getElementById('confirmTime').textContent = `${formatDate(startDate)} - ${formatDate(endDate)}`;
-    
-    const templateSelect = document.getElementById('templateId');
-    const selectedTemplate = templateSelect.options[templateSelect.selectedIndex].text;
-    document.getElementById('confirmForm').textContent = selectedTemplate;
-    
-    // Vòng nộp đơn
-    const appStartDate = new Date(document.getElementById('applicationStageStart').value);
-    const appEndDate = new Date(document.getElementById('applicationStageEnd').value);
-    document.getElementById('confirmApplicationStage').textContent = `${formatDate(appStartDate)} - ${formatDate(appEndDate)}`;
-    
-    // Vòng phỏng vấn
-    const intStartDate = new Date(document.getElementById('interviewStageStart').value);
-    const intEndDate = new Date(document.getElementById('interviewStageEnd').value);
-    const locationSelect = document.getElementById('interviewLocationId');
-    let locationText = '';
-    if (locationSelect.selectedIndex > 0) {
-        locationText = ` (${locationSelect.options[locationSelect.selectedIndex].text})`;
+    console.log("Đang điền thông tin vào màn hình xác nhận...");
+    try {
+        // Hàm bổ trợ kiểm tra phần tử an toàn
+        function setConfirmText(elementId, value) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = value || '';
+            } else {
+                console.error(`Không tìm thấy phần tử '${elementId}' để hiển thị kết quả`);
+            }
+        }
+        
+        // Hàm lấy giá trị an toàn từ phần tử input
+        function getSafeElementValue(id) {
+            const element = document.getElementById(id);
+            return element && element.value ? element.value : null;
+        }
+        
+        // Debug thông tin vòng tuyển để kiểm tra dữ liệu
+        const stageData = collectStageData();
+        console.log("DEBUG - Thông tin vòng tuyển gửi lên server:", stageData);
+        
+        // Thông tin cơ bản
+        const genValue = getSafeElementValue('gen');
+        if (genValue) {
+            setConfirmText('confirmGen', genValue);
+        } else {
+            console.error("Không tìm thấy phần tử 'gen' hoặc không có giá trị");
+            setConfirmText('confirmGen', 'Không có thông tin');
+        }
+        
+        const startDateValue = getSafeElementValue('startDate');
+        const endDateValue = getSafeElementValue('endDate');
+        if (startDateValue && endDateValue) {
+            const startDate = new Date(startDateValue);
+            const endDate = new Date(endDateValue);
+            if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+                setConfirmText('confirmTime', `${formatDate(startDate)} - ${formatDate(endDate)}`);
+            } else {
+                setConfirmText('confirmTime', 'Ngày không hợp lệ');
+            }
+        } else {
+            console.error("Không tìm thấy phần tử 'startDate' hoặc 'endDate', hoặc chúng không có giá trị");
+            setConfirmText('confirmTime', 'Không có thông tin');
+        }
+        
+        const templateSelect = document.getElementById('templateId');
+        if (templateSelect && templateSelect.selectedIndex >= 0 && 
+            templateSelect.options && templateSelect.selectedIndex < templateSelect.options.length) {
+            const selectedTemplate = templateSelect.options[templateSelect.selectedIndex].text;
+            setConfirmText('confirmForm', selectedTemplate);
+        } else {
+            console.error("Không tìm thấy phần tử 'templateId' hoặc chưa chọn mẫu đơn");
+            setConfirmText('confirmForm', 'Không có thông tin');
+        }
+        
+        // Vòng nộp đơn - APPLICATION
+        const appStartValue = getSafeElementValue('applicationStageStart');
+        const appEndValue = getSafeElementValue('applicationStageEnd');
+        if (appStartValue && appEndValue) {
+            const appStartDate = new Date(appStartValue);
+            const appEndDate = new Date(appEndValue);
+            if (!isNaN(appStartDate.getTime()) && !isNaN(appEndDate.getTime())) {
+                setConfirmText('confirmApplicationStage', `${formatDate(appStartDate)} - ${formatDate(appEndDate)}`);
+            } else {
+                setConfirmText('confirmApplicationStage', 'Ngày không hợp lệ');
+            }
+        } else {
+            console.error("Không tìm thấy phần tử 'applicationStageStart' hoặc 'applicationStageEnd', hoặc chúng không có giá trị");
+            setConfirmText('confirmApplicationStage', 'Không có thông tin');
+        }
+        
+        // Vòng phỏng vấn - INTERVIEW
+        const intStartValue = getSafeElementValue('interviewStageStart');
+        const intEndValue = getSafeElementValue('interviewStageEnd');
+        const locationSelect = document.getElementById('interviewLocationId');
+        
+        if (intStartValue && intEndValue) {
+            const intStartDate = new Date(intStartValue);
+            const intEndDate = new Date(intEndValue);
+            if (!isNaN(intStartDate.getTime()) && !isNaN(intEndDate.getTime())) {
+                let locationText = '';
+                
+                if (locationSelect && locationSelect.selectedIndex > 0 && 
+                    locationSelect.options && locationSelect.selectedIndex < locationSelect.options.length) {
+                    locationText = ` (${locationSelect.options[locationSelect.selectedIndex].text})`;
+                }
+                
+                setConfirmText('confirmInterviewStage', `${formatDate(intStartDate)} - ${formatDate(intEndDate)}${locationText}`);
+            } else {
+                setConfirmText('confirmInterviewStage', 'Ngày không hợp lệ');
+            }
+        } else {
+            console.error("Không tìm thấy phần tử 'interviewStageStart' hoặc 'interviewStageEnd', hoặc chúng không có giá trị");
+            setConfirmText('confirmInterviewStage', 'Không có thông tin');
+        }
+        
+        // Vòng thử thách - CHALLENGE
+        const chalStartValue = getSafeElementValue('challengeStageStart');
+        const chalEndValue = getSafeElementValue('challengeStageEnd');
+        const chalDescValue = getSafeElementValue('challengeDescription');
+        
+        if (chalStartValue && chalEndValue) {
+            const chalStartDate = new Date(chalStartValue);
+            const chalEndDate = new Date(chalEndValue);
+            if (!isNaN(chalStartDate.getTime()) && !isNaN(chalEndDate.getTime())) {
+                let challengeText = `${formatDate(chalStartDate)} - ${formatDate(chalEndDate)}`;
+                
+                if (chalDescValue) {
+                    challengeText += ` (${chalDescValue})`;
+                }
+                
+                setConfirmText('confirmChallengeStage', challengeText);
+            } else {
+                setConfirmText('confirmChallengeStage', 'Ngày không hợp lệ');
+            }
+        } else {
+            console.error("Không tìm thấy phần tử 'challengeStageStart' hoặc 'challengeStageEnd', hoặc chúng không có giá trị");
+            setConfirmText('confirmChallengeStage', 'Không có thông tin (tùy chọn)');
+        }
+        
+        console.log("Đã điền thông tin vào màn hình xác nhận thành công");
+    } catch (error) {
+        console.error("Lỗi khi điền thông tin vào màn hình xác nhận:", error);
+        
+        // Hiển thị debug panel với thông tin lỗi
+        showDebugInfo('Lỗi khi điền thông tin xác nhận', {
+            error: error.message,
+            stack: error.stack,
+            stageData: collectStageData()
+        });
     }
-    document.getElementById('confirmInterviewStage').textContent = `${formatDate(intStartDate)} - ${formatDate(intEndDate)}${locationText}`;
-    
-    // Vòng thử thách
-    const chalStartDate = new Date(document.getElementById('challengeStageStart').value);
-    const chalEndDate = new Date(document.getElementById('challengeStageEnd').value);
-    const chalDesc = document.getElementById('challengeDescription').value;
-    let challengeText = `${formatDate(chalStartDate)} - ${formatDate(chalEndDate)}`;
-    if (chalDesc) {
-        challengeText += ` (${chalDesc})`;
-    }
-    document.getElementById('confirmChallengeStage').textContent = challengeText;
+}
+
+// Hàm bổ sung để thu thập dữ liệu vòng tuyển để debug
+function collectStageData() {
+    const stageData = {
+        application: {
+            start: document.getElementById('applicationStageStart')?.value || null,
+            end: document.getElementById('applicationStageEnd')?.value || null,
+            stageName: "APPLICATION" // Đảm bảo sử dụng đúng ENUM value
+        },
+        interview: {
+            start: document.getElementById('interviewStageStart')?.value || null,
+            end: document.getElementById('interviewStageEnd')?.value || null,
+            locationId: document.getElementById('interviewLocationId')?.value || null,
+            stageName: "INTERVIEW" // Đảm bảo sử dụng đúng ENUM value
+        },
+        challenge: {
+            start: document.getElementById('challengeStageStart')?.value || null,
+            end: document.getElementById('challengeStageEnd')?.value || null,
+            description: document.getElementById('challengeDescription')?.value || null,
+            stageName: "CHALLENGE" // Đảm bảo sử dụng đúng ENUM value
+        }
+    };
+    return stageData;
 }
 
 /**
@@ -583,19 +813,29 @@ function formatDate(date) {
 function setupFormSubmission() {
     const form = document.getElementById('recruitmentForm');
     
-    if (!form) return;
+    if (!form) {
+        console.error("Không tìm thấy form với id 'recruitmentForm'");
+        return;
+    }
     
     form.addEventListener('submit', function(e) {
         e.preventDefault();
+        console.log("Đang gửi form...");
         
         // Xác thực form trước khi gửi
         if (!validateEntireForm()) {
             showToast('Vui lòng điền đầy đủ thông tin cần thiết', 'error');
+            console.error("Validation thất bại");
             return;
         }
         
         const formData = new FormData(form);
-        // Dùng biến global isEdit và contextPath đã khởi tạo
+        
+        // Debug: Log tất cả dữ liệu form
+        console.log("Dữ liệu form sẽ gửi:");
+        for (let pair of formData.entries()) {
+            console.log(pair[0] + ": " + pair[1]);
+        }
         
         // Kiểm tra các field quan trọng
         const requiredParams = ['clubId', 'gen', 'templateId', 'startDate', 'endDate', 'title', 
@@ -727,6 +967,17 @@ function setupFormSubmission() {
         
         console.log("URLSearchParams:", urlParams.toString());
         
+        // Debug: Log dữ liệu gửi đi
+        console.log("Đang gửi request đến:", finalUrl);
+        console.log("Dữ liệu gửi đi:", urlParams.toString());
+        
+        // Log các thông tin về vòng tuyển
+        console.log("Thông tin vòng tuyển:");
+        console.log("- Vòng nộp đơn:", urlParams.get('applicationStageStart'), "đến", urlParams.get('applicationStageEnd'));
+        console.log("- Vòng phỏng vấn:", urlParams.get('interviewStageStart'), "đến", urlParams.get('interviewStageEnd'));
+        console.log("- Vòng thử thách:", urlParams.get('challengeStageStart'), "đến", urlParams.get('challengeStageEnd'));
+        console.log("- Mô tả thử thách:", urlParams.get('challengeDescription') || '(Không có)');
+        
         // Submit form data bằng fetch API với timeout
         const fetchPromise = fetch(finalUrl, {
             method: 'POST',
@@ -758,8 +1009,19 @@ function setupFormSubmission() {
             return response.json();
         })
         .then(data => {
+            console.log("Response từ server:", data);
+            
             if (data.success) {
                 showToast(isEdit ? 'Cập nhật hoạt động thành công' : 'Tạo hoạt động mới thành công', 'success');
+                
+                // Debug: Log các thông tin về stages trả về (nếu có)
+                if (data.stagesCreated) {
+                    console.log("Số vòng tuyển đã tạo:", data.stagesCreated);
+                }
+                
+                if (data.stages) {
+                    console.log("Thông tin các vòng tuyển:", data.stages);
+                }
                 
                 // Redirect sau khi tạo/cập nhật thành công
                 setTimeout(() => {
@@ -811,6 +1073,14 @@ function setupFormSubmission() {
             
             // In ra tất cả các trường trong form data
             console.error('Chi tiết form data:');
+            
+            // Log chi tiết về các vòng tuyển để debug
+            console.error('Thông tin các vòng tuyển:');
+            console.error('- Vòng nộp đơn:', formData.get('applicationStageStart'), 'đến', formData.get('applicationStageEnd'));
+            console.error('- Vòng phỏng vấn:', formData.get('interviewStageStart'), 'đến', formData.get('interviewStageEnd'), 
+                         'tại địa điểm ID:', formData.get('interviewLocationId') || '(Không có)');
+            console.error('- Vòng thử thách:', formData.get('challengeStageStart'), 'đến', formData.get('challengeStageEnd'),
+                         'mô tả:', formData.get('challengeDescription') || '(Không có)');
             for (let pair of formData.entries()) {
                 console.error(pair[0] + ': ' + pair[1]);
             }
@@ -842,5 +1112,117 @@ function autoSelectSingleTemplate() {
     if (templateSelect && templateSelect.options.length === 2) {
         // Có 1 option thật + 1 option placeholder "Chọn form đăng ký"
         templateSelect.selectedIndex = 1; // Chọn option thứ 2 (index = 1)
+    }
+}
+
+/**
+ * Kiểm tra chồng lấn thời gian giữa các vòng tuyển
+ * @returns {Object} Kết quả kiểm tra với các thuộc tính: valid, message
+ */
+function checkStageOverlap() {
+    // Thu thập dữ liệu thời gian của các vòng
+    const stages = [
+        {
+            name: 'Nộp đơn',
+            startDate: new Date(document.getElementById('applicationStageStart').value),
+            endDate: new Date(document.getElementById('applicationStageEnd').value)
+        },
+        {
+            name: 'Phỏng vấn',
+            startDate: new Date(document.getElementById('interviewStageStart').value),
+            endDate: new Date(document.getElementById('interviewStageEnd').value)
+        },
+        {
+            name: 'Thử thách',
+            startDate: new Date(document.getElementById('challengeStageStart').value),
+            endDate: new Date(document.getElementById('challengeStageEnd').value)
+        }
+    ];
+    
+    // Lọc bỏ các vòng không có dữ liệu
+    const validStages = stages.filter(stage => 
+        !isNaN(stage.startDate) && !isNaN(stage.endDate)
+    );
+    
+    // Sắp xếp theo ngày bắt đầu
+    validStages.sort((a, b) => a.startDate - b.startDate);
+    
+    // Kiểm tra chồng lấn
+    for (let i = 0; i < validStages.length - 1; i++) {
+        const current = validStages[i];
+        const next = validStages[i + 1];
+        
+        // Kiểm tra nếu ngày kết thúc của vòng hiện tại > ngày bắt đầu của vòng tiếp theo
+        if (current.endDate > next.startDate) {
+            console.error('Phát hiện chồng lấn thời gian:', {
+                stage1: current,
+                stage2: next
+            });
+            return {
+                valid: false,
+                message: `Thời gian chồng lấn giữa vòng ${current.name} và vòng ${next.name}. Vòng ${current.name} kết thúc sau khi vòng ${next.name} bắt đầu.`
+            };
+        }
+    }
+    
+    return { valid: true };
+}
+
+/**
+ * Kiểm tra chồng lấn thời gian các vòng tuyển
+ */
+function checkStageTimeOverlap() {
+    // Lấy các trường ngày tháng
+    const appStart = document.getElementById('applicationStageStart').value;
+    const appEnd = document.getElementById('applicationStageEnd').value;
+    const interviewStart = document.getElementById('interviewStageStart').value;
+    const interviewEnd = document.getElementById('interviewStageEnd').value;
+    const challengeStart = document.getElementById('challengeStageStart').value;
+    const challengeEnd = document.getElementById('challengeStageEnd').value;
+    
+    // Kiểm tra các trường có dữ liệu không
+    if (!appStart || !appEnd || !interviewStart || !interviewEnd) {
+        console.log("[DEBUG] Thiếu dữ liệu cho một số vòng tuyển, không thể kiểm tra chồng lấn thời gian");
+        return;
+    }
+    
+    // Chuyển thành đối tượng Date
+    const appStartDate = new Date(appStart);
+    const appEndDate = new Date(appEnd);
+    const interviewStartDate = new Date(interviewStart);
+    const interviewEndDate = new Date(interviewEnd);
+    const challengeStartDate = challengeStart ? new Date(challengeStart) : null;
+    const challengeEndDate = challengeEnd ? new Date(challengeEnd) : null;
+    
+    const warnings = [];
+    
+    // Kiểm tra thứ tự thời gian của từng vòng
+    if (appStartDate > appEndDate) {
+        warnings.push("Ngày bắt đầu vòng Nộp đơn phải trước ngày kết thúc");
+    }
+    
+    if (interviewStartDate > interviewEndDate) {
+        warnings.push("Ngày bắt đầu vòng Phỏng vấn phải trước ngày kết thúc");
+    }
+    
+    if (challengeStartDate && challengeEndDate && challengeStartDate > challengeEndDate) {
+        warnings.push("Ngày bắt đầu vòng Thử thách phải trước ngày kết thúc");
+    }
+    
+    // Kiểm tra thứ tự giữa các vòng
+    if (interviewStartDate < appEndDate) {
+        warnings.push("Vòng Phỏng vấn nên bắt đầu sau khi vòng Nộp đơn kết thúc");
+    }
+    
+    if (challengeStartDate && challengeStartDate < interviewEndDate) {
+        warnings.push("Vòng Thử thách nên bắt đầu sau khi vòng Phỏng vấn kết thúc");
+    }
+    
+    // Hiển thị kết quả debug
+    if (warnings.length > 0) {
+        console.log("[DEBUG] Phát hiện vấn đề thời gian vòng tuyển:", warnings);
+        showDebugInfo("Cảnh báo về thời gian vòng tuyển", warnings);
+    } else {
+        console.log("[DEBUG] Thứ tự thời gian các vòng tuyển OK");
     }
 }
