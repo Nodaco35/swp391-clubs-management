@@ -19,26 +19,7 @@ public class EventsDAO {
     }
 
     
-    public Locations getLocationByID(int id) {
-        String sql = "SELECT * FROM Locations WHERE LocationID = ?";
-        try {
-            Connection connection = DBContext.getConnection();
-            PreparedStatement ps = connection.prepareStatement(sql);
-            ps.setInt(1, id);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                Locations location = new Locations();
-                location.setLocationID(rs.getInt("LocationID"));
-                location.setLocationName(rs.getString("LocationName"));
-                location.setTypeLocation(rs.getString("TypeLocation"));
-                return location;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error retrieving location by ID", e);
-        }
-        return null;
-    }
+
 
 
     public List<Events> findByUCID(String userID) {
@@ -75,6 +56,27 @@ public class EventsDAO {
     }
 
 
+    public Locations getLocationByID(int id) {
+        String sql = "SELECT * FROM Locations WHERE LocationID = ?";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                Locations location = new Locations();
+                location.setLocationID(rs.getInt("LocationID"));
+                location.setLocationName(rs.getString("LocationName"));
+                location.setTypeLocation(rs.getString("TypeLocation"));
+                return location;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error retrieving location by ID", e);
+        }
+        return null;
+    }
+
     public List<Events> getAllEvents() {
         List<Events> events = new ArrayList<Events>();
         String sql = "select * from Events";
@@ -105,7 +107,7 @@ public class EventsDAO {
     }
 
     public Events getEventByID(int id) {
-        String sql = "SELECT * FROM Events WHERE EventID = ?";
+        String sql = "SELECT e.*, c.clubName FROM Events as e JOIN Clubs c ON e.ClubID = c.ClubID WHERE EventID = ?";
         try {
             Connection connection = DBContext.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -120,6 +122,7 @@ public class EventsDAO {
                 event.setEventDate(rs.getTimestamp("EventDate"));
                 event.setEndTime(rs.getTimestamp("EndTime"));
                 event.setClubID(rs.getInt("ClubID"));
+                event.setClubName(rs.getString("ClubName"));
                 event.setPublic(rs.getBoolean("IsPublic"));
                 event.setCapacity(rs.getInt("Capacity"));
                 event.setStatus(rs.getString("Status"));
@@ -255,6 +258,7 @@ public class EventsDAO {
     public List<Events> searchEvents(String keyword, String publicFilter, String sortByDate, int limit, int offset) {
         List<Events> events = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT e.*, c.ClubName FROM Events e JOIN Clubs c ON e.ClubID = c.ClubID WHERE 1=1");
+        sql.append(" AND ApprovalStatus = 'APPROVED'");
 
         int paramIndex = 1;
         if (keyword != null && !keyword.trim().isEmpty()) {
@@ -316,6 +320,7 @@ public class EventsDAO {
 
     public int countEvents(String keyword, String publicFilter) {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Events WHERE 1=1");
+        sql.append(" AND ApprovalStatus = 'APPROVED'");
 
         if (keyword != null && !keyword.trim().isEmpty()) {
             sql.append(" AND EventName LIKE ?");
@@ -629,6 +634,103 @@ public class EventsDAO {
         }
     }
 
+    public List<Events> getEventsByPublic() {
+        List<Events> events = new ArrayList<>();
+        String sql = "SELECT e.*, c.ClubName " +
+                "FROM Events e " +
+                "INNER JOIN Clubs c ON e.ClubID = c.ClubID " +
+                "WHERE e.SemesterID = 'SU25' AND e.IsPublic = TRUE";
+
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()) {
+                Events event = new Events();
+                event.setEventID(rs.getInt("EventID"));
+                event.setEventName(rs.getString("EventName"));
+                event.setEventImg(rs.getString("EventImg"));
+                event.setDescription(rs.getString("Description"));
+                event.setEventDate(rs.getTimestamp("EventDate"));
+                event.setEndTime(rs.getTimestamp("EndTime"));
+                event.setClubID(rs.getInt("ClubID"));
+                event.setClubName(rs.getString("ClubName"));
+                event.setPublic(rs.getBoolean("IsPublic"));
+                event.setFormTemplateID(rs.getInt("FormTemplateID"));
+                event.setCapacity(rs.getInt("Capacity"));
+                event.setStatus(rs.getString("Status"));
+                event.setApprovalStatus(rs.getString("ApprovalStatus"));
+                event.setRejectionReason(rs.getString("RejectionReason"));
+                Locations l = getLocationByID(rs.getInt("LocationID"));
+                event.setLocation(l);
+                events.add(event);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return events;
+    }
+
+    public int countApprovedEvents() {
+        String sql = "SELECT COUNT(*) FROM Events WHERE SemesterID = 'SU25' AND IsPublic = TRUE AND ApprovalStatus = 'APPROVED'";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return 0;
+    }
+
+    public int countPendingEvents() {
+        String sql = "SELECT COUNT(*) FROM Events WHERE SemesterID = 'SU25' AND IsPublic = TRUE AND ApprovalStatus = 'PENDING'";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return 0;
+    }
+
+    public int countRejectedEvents() {
+        String sql = "SELECT COUNT(*) FROM Events WHERE SemesterID = 'SU25' AND IsPublic = TRUE AND ApprovalStatus = 'REJECTED'";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return 0;
+    }
+
+    public void updateApprovalStatus(int eventID, String status, String reason) {
+        String sql = "UPDATE Events SET ApprovalStatus = ?, RejectionReason = ? WHERE EventID = ?";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, status);
+            ps.setString(2, reason);
+            ps.setInt(3, eventID);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     public List<Agenda> getAgendasByEventID(int eventID) {
         List<Agenda> agendas = new ArrayList<>();
         String sql = "SELECT * FROM Agenda WHERE EventID = ? ORDER BY StartTime ASC";
@@ -873,7 +975,7 @@ public class EventsDAO {
             FROM FavoriteEvents fe
             JOIN Events e ON fe.EventID = e.EventID
             JOIN Clubs c ON e.ClubID = c.ClubID
-            WHERE fe.UserID = ? AND e.Status = 'PENDING'
+            WHERE fe.UserID = ? AND e.Status = 'PENDING' AND ApprovalStatus = 'APPROVED'
             ORDER BY fe.AddedDate DESC
             LIMIT ? OFFSET ?
         """;
@@ -910,7 +1012,7 @@ public class EventsDAO {
             SELECT COUNT(*) 
             FROM FavoriteEvents fe
             JOIN Events e ON fe.EventID = e.EventID
-            WHERE fe.UserID = ? AND e.Status = 'PENDING'
+            WHERE fe.UserID = ? AND e.Status = 'PENDING' and e.ApprovalStatus = 'APPROVED'
         """;
         try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, userID);

@@ -53,7 +53,9 @@ public class ApprovalAgendaServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-        processRequest(request, response);
+        String currentPath = request.getServletPath();
+        request.setAttribute("currentPath", currentPath);
+        request.getRequestDispatcher("/view/ic/approval-agenda.jsp").forward(request, response);
     } 
 
     /** 
