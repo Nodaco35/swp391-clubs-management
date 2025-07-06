@@ -639,6 +639,21 @@ body {
     color: #721c24;
 }
 
+.status.PENDING {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status.APPROVED {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status.REJECTED {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
 .btn-action {
     display: inline-flex;
     align-items: center;
@@ -655,6 +670,11 @@ body {
 
 .btn-action i {
     margin-right: 4px;
+}
+
+.btn-action.form {
+    background-color: #860bdc;
+    color: white;
 }
 
 .btn-action.edit {

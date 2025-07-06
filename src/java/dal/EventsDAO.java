@@ -123,6 +123,8 @@ public class EventsDAO {
                 event.setPublic(rs.getBoolean("IsPublic"));
                 event.setCapacity(rs.getInt("Capacity"));
                 event.setStatus(rs.getString("Status"));
+                event.setApprovalStatus(rs.getString("ApprovalStatus"));
+                event.setRejectionReason(rs.getString("RejectionReason"));
                 Locations l = getLocationByID(rs.getInt("LocationID"));
                 event.setLocation(l);
                 return event;
@@ -183,7 +185,7 @@ public class EventsDAO {
                     WHERE e.ClubID = ?
                     GROUP BY e.EventID, e.EventName, e.EventImg, e.Description, 
                              e.EventDate, e.LocationID, e.ClubID, e.IsPublic, 
-                             e.FormTemplateID, e.Capacity, e.Status
+                             e.FormTemplateID, e.Capacity, e.Status, e.ApprovalStatus, e.RejectionReason
                     ORDER BY e.EventDate DESC
                 """;
 
@@ -205,6 +207,8 @@ public class EventsDAO {
                 event.setFormTemplateID(rs.getInt("FormTemplateID"));
                 event.setCapacity(rs.getInt("Capacity"));
                 event.setStatus(rs.getString("Status"));
+                event.setApprovalStatus(rs.getString("ApprovalStatus"));
+                event.setRejectionReason(rs.getString("RejectionReason"));
                 event.setRegistered(rs.getInt("RegisteredCount"));
                 event.setSpotsLeft(rs.getInt("SpotsLeft"));
                 Locations l = getLocationByID(rs.getInt("LocationID"));

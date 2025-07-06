@@ -161,6 +161,14 @@
         <servlet-name>ForgotPasswordServlet</servlet-name>
         <servlet-class>controller.ForgotPasswordServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>ApprovalEventsServlet</servlet-name>
+        <servlet-class>controller.ApprovalEventsServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ApprovalAgendaServlet</servlet-name>
+        <servlet-class>controller.ApprovalAgendaServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ClubsServlet</servlet-name>
         <url-pattern>/clubs</url-pattern>
@@ -327,6 +335,14 @@
         <servlet-name>ForgotPasswordServlet</servlet-name>
         <url-pattern>/forgot-password</url-pattern>
         <url-pattern>/reset-password</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ApprovalEventsServlet</servlet-name>
+        <url-pattern>/ic/approval-events</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ApprovalAgendaServlet</servlet-name>
+        <url-pattern>/ic/approval-agenda</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>
