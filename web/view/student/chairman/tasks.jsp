@@ -170,7 +170,7 @@
 							        <h3><i class="fas fa-calendar-alt"></i> ${event.eventName}</h3>
 							        <div class="timeline-actions">
 								        <button class="btn-edit-timeline"><i class="fas fa-edit"></i> Chỉnh sửa</button>
-								        <button class="btn-delete-timeline"><i class="fas fa-trash"></i> Xóa</button>
+<%--								        <button class="btn-delete-timeline"><i class="fas fa-trash"></i> Xóa</button>--%>
 							        </div>
 						        </div>
 
@@ -187,8 +187,15 @@
 											        <span class="phase-status">Tổng số công việc: ${fn:length(tasks)}</span>
 										        </div>
 
-										        <!-- Hiển thị thời gian term - cần lấy từ EventTerms -->
+										        <!-- Hiển thị thời gian term -->
+										        <c:set var="termInfo" value="${requestScope['termInfoMap_'.concat(event.eventID)][term]}" />
 										        <c:choose>
+											        <c:when test="${not empty termInfo}">
+												        <p class="phase-description">Thời gian:
+													        <fmt:formatDate value="${termInfo.termStart}" pattern="dd/MM/yyyy" /> -
+													        <fmt:formatDate value="${termInfo.termEnd}" pattern="dd/MM/yyyy" />
+												        </p>
+											        </c:when>
 											        <c:when test="${not empty tasks}">
 												        <c:set var="firstTask" value="${tasks[0]}" />
 												        <p class="phase-description">Thời gian:
@@ -197,7 +204,6 @@
 												        </p>
 											        </c:when>
 											        <c:otherwise>
-												        <!-- Cần pass thông tin term từ servlet để hiển thị ngày -->
 												        <p class="phase-description">Chưa có thông tin thời gian</p>
 											        </c:otherwise>
 										        </c:choose>

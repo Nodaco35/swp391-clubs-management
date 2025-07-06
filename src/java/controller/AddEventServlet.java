@@ -108,9 +108,16 @@ public class AddEventServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         HttpSession session = request.getSession();
         Integer myClubID = (Integer) session.getAttribute("myClubID");
+        Users user = (Users) session.getAttribute("user");
+        ClubDAO clubDAO = new ClubDAO();
 
         if (myClubID == null || myClubID <= 0) {
             request.setAttribute("errorMessage", "Vui lòng đăng nhập với tư cách chủ nhiệm câu lạc bộ.");
+            if (user != null) {
+                String userID = user.getUserID();
+                ClubInfo club = clubDAO.getClubChairman(userID);
+                request.setAttribute("club", club);
+            }
             request.getRequestDispatcher("/view/student/chairman/add-event.jsp").forward(request, response);
             return;
         }
@@ -129,11 +136,17 @@ public class AddEventServlet extends HttpServlet {
                 eventTime == null || eventTime.trim().isEmpty() ||
                 eventEndTime == null || eventEndTime.trim().isEmpty()) {
 
-
             String locationType = request.getParameter("locationType");
             LocationDAO locationDAO = new LocationDAO();
             request.setAttribute("locations", locationDAO.getLocationsByType(locationType != null ? locationType : "OnCampus"));
             request.setAttribute("locationType", locationType);
+
+            // Add club attribute
+            if (user != null) {
+                String userID = user.getUserID();
+                ClubInfo club = clubDAO.getClubChairman(userID);
+                request.setAttribute("club", club);
+            }
 
             request.getRequestDispatcher("/view/student/chairman/add-event.jsp").forward(request, response);
             return;

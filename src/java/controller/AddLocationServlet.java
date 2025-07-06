@@ -65,7 +65,13 @@ public class AddLocationServlet extends HttpServlet {
         HttpSession session = request.getSession();
         Users user = (Users) session.getAttribute("user");
         ClubDAO clubDAO = new ClubDAO();
-        EventsDAO eventDAO = new EventsDAO();
+        Integer myClubID = (Integer) session.getAttribute("myClubID");
+
+        if (myClubID == null || myClubID <= 0) {
+            request.setAttribute("errorMessage", "Vui lòng đăng nhập với tư cách chủ nhiệm câu lạc bộ.");
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
         if (user != null) {
             String userID = user.getUserID();
             ClubInfo club = clubDAO.getClubChairman(userID);
@@ -90,35 +96,49 @@ public class AddLocationServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         LocationDAO locationDAO = new LocationDAO();
         String newLocationName = request.getParameter("newLocationName");
+        HttpSession session = request.getSession();
+        Users user = (Users) session.getAttribute("user");
+        ClubDAO clubDAO = new ClubDAO();
 
         if (newLocationName == null || newLocationName.trim().isEmpty()) {
             request.setAttribute("errorMessage", "Tên địa điểm không được để trống.");
             request.setAttribute("locations", locationDAO.getLocationsByType("OffCampus"));
             request.setAttribute("locationType", "OffCampus");
+            if (user != null) {
+                String userID = user.getUserID();
+                ClubInfo club = clubDAO.getClubChairman(userID);
+                request.setAttribute("club", club);
+            }
             request.getRequestDispatcher("/view/student/chairman/add-event.jsp").forward(request, response);
             return;
         }
 
         try {
-            // Kiểm tra trùng tên địa điểm
             if (locationDAO.isLocationNameExists(newLocationName.trim(), "OffCampus")) {
                 request.setAttribute("errorMessage", "Địa điểm '" + newLocationName + "' đã tồn tại.");
                 request.setAttribute("locations", locationDAO.getLocationsByType("OffCampus"));
-                request.setAttribute("locationType", "OffCampus");
+                request.setAttribute("locationType", "OffCampaign");
+                if (user != null) {
+                    String userID = user.getUserID();
+                    ClubInfo club = clubDAO.getClubChairman(userID);
+                    request.setAttribute("club", club);
+                }
                 request.getRequestDispatcher("/view/student/chairman/add-event.jsp").forward(request, response);
                 return;
             }
 
-            // Thêm địa điểm mới
             locationDAO.addOffCampusLocation(newLocationName.trim());
-            HttpSession session = request.getSession();
-
             session.setAttribute("successMsg", "Thêm địa điểm thành công!");
             response.sendRedirect(request.getContextPath() + "/chairman-page/myclub-events/add-event");
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", "Không thể thêm địa điểm: " + e.getMessage());
-            request.setAttribute("locations", locationDAO.getLocationsByType("OffCampus"));
-            request.setAttribute("locationType", "OffCampus");
+            request.setAttribute("locations", locationDAO.getLocationsByType("OffCampaign"));
+            request.setAttribute("locationType", "OffCampaign");
+            if (user != null) {
+                String userID = user.getUserID();
+                ClubInfo club = clubDAO.getClubChairman(userID);
+                request.setAttribute("club", club);
+            }
             request.getRequestDispatcher("/view/student/chairman/add-event.jsp").forward(request, response);
         }
     }

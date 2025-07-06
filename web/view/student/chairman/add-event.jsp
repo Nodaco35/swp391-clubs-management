@@ -107,7 +107,7 @@
 			<div class="club-info">
 				<div class="club-avatar">
 					<img src="${pageContext.request.contextPath}${club.clubImg}" alt="${club.clubName}"
-					     style="width: 60px; height: 60px; border-radius: 50%;">
+					     style="width: 72px; height: 72px; border-radius: 50%;">
 				</div>
 				<div class="club-details">
 					<h1>${club.clubName}</h1>

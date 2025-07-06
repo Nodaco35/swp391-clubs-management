@@ -124,8 +124,14 @@
         <section class="events-section">
             <div class="container">
                 <div class="section-header">
-                    <h2>Sự Kiện Sắp Tới</h2>
-                    <p>Khám phá các sự kiện thú vị và bổ ích đang chờ đón bạn</p>
+                    <h2>Khám phá các sự kiện thú vị và bổ ích đang chờ đón bạn</h2>
+                    <p style="margin-bottom: 20px">
+                        Tham gia các sự kiện để phát triển kỹ năng cũng như tạo nên những kỷ niệm đáng nhớ trong thời sinh
+                        viên.
+                    </p>
+                    <c:if test="${sessionScope.isChairman == true}">
+                        <a href="${pageContext.request.contextPath}/chairman-page/overview" class="btn btn-primary">Club Chairman Page</a>
+                    </c:if>
                 </div>
                 <div class="event-filters-wrapper">
                     <!-- Event Filter Buttons -->
@@ -161,9 +167,7 @@
                             <option value="newest" ${currentSortByDate == 'newest' ? 'selected' : ''}>Mới Nhất</option>
                             <option value="oldest" ${currentSortByDate == 'oldest' ? 'selected' : ''}>Cũ Nhất</option>
                         </select>
-	                    <c:if test="${sessionScope.isChairman == true}">
-		                    <a href="${pageContext.request.contextPath}/chairman-page/overview" class="btn btn-primary">Chairman</a>
-	                    </c:if>
+
                     </div>
                 </div>
 
@@ -188,7 +192,6 @@
                             </div>
                             <div class="event-content">
                                 <h3 class="event-title">${e.eventName}</h3>
-                                <%--                                    <p class="event-description">${e.description}</p>--%>
                                 <div class="event-details">
                                     <div class="event-detail">
                                         <i class="fas fa-calendar-alt"></i>

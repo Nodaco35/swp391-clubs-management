@@ -86,38 +86,46 @@ public class ChairmanTasksServlet extends HttpServlet {
 
                     // Lấy tất cả terms của event này
                     List<EventTerms> allTerms = taskDAO.getTermsByEventID(eventID);
-                    List<Tasks> allTasks = taskDAO.getTasksByEventID(eventID);
 
-                    // Set departments cho tasks
-                    for (Tasks task : allTasks) {
-                        List<TaskAssignees> assignees = taskDAO.getAssigneesByTaskID(task.getTaskID());
-                        List<Department> departments = new ArrayList<>();
-                        for (TaskAssignees ta : assignees) {
-                            if (ta.getDepartment() != null) {
-                                departments.add(ta.getDepartment());
+                    // Chỉ xử lý nếu event có terms
+                    if (!allTerms.isEmpty()) {
+                        List<Tasks> allTasks = taskDAO.getTasksByEventID(eventID);
+
+                        // Set departments cho tasks
+                        for (Tasks task : allTasks) {
+                            List<TaskAssignees> assignees = taskDAO.getAssigneesByTaskID(task.getTaskID());
+                            List<Department> departments = new ArrayList<>();
+                            for (TaskAssignees ta : assignees) {
+                                if (ta.getDepartment() != null) {
+                                    departments.add(ta.getDepartment());
+                                }
+                            }
+                            task.setDepartments(departments);
+                        }
+
+                        // Khởi tạo map với tất cả terms, ngay cả khi chưa có tasks
+                        Map<String, List<Tasks>> groupedByTerm = new LinkedHashMap<>();
+                        Map<String, EventTerms> termInfoMap = new LinkedHashMap<>();
+
+                        // Đầu tiên, khởi tạo tất cả terms với list rỗng và lưu thông tin term
+                        for (EventTerms term : allTerms) {
+                            groupedByTerm.put(term.getTermName(), new ArrayList<>());
+                            termInfoMap.put(term.getTermName(), term);
+                        }
+
+                        // Sau đó, group tasks vào các terms tương ứng
+                        for (Tasks task : allTasks) {
+                            String termName = task.getTerm().getTermName();
+                            if (groupedByTerm.containsKey(termName)) {
+                                groupedByTerm.get(termName).add(task);
                             }
                         }
-                        task.setDepartments(departments);
+
+                        // Chỉ add vào timelineMap khi event có terms
+                        timelineMap.put(selectedEvent, groupedByTerm);
+                        // Pass thông tin terms để JSP có thể hiển thị dates
+                        request.setAttribute("termInfoMap_" + eventID, termInfoMap);
                     }
-
-                    // Khởi tạo map với tất cả terms, ngay cả khi chưa có tasks
-                    Map<String, List<Tasks>> groupedByTerm = new LinkedHashMap<>();
-
-                    // Đầu tiên, khởi tạo tất cả terms với list rỗng
-                    for (EventTerms term : allTerms) {
-                        groupedByTerm.put(term.getTermName(), new ArrayList<>());
-                    }
-
-                    // Sau đó, group tasks vào các terms tương ứng
-                    for (Tasks task : allTasks) {
-                        String termName = task.getTerm().getTermName();
-                        if (groupedByTerm.containsKey(termName)) {
-                            groupedByTerm.get(termName).add(task);
-                        }
-                    }
-
-                    // Luôn add vào timelineMap, ngay cả khi không có tasks
-                    timelineMap.put(selectedEvent, groupedByTerm);
 
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
@@ -127,38 +135,45 @@ public class ChairmanTasksServlet extends HttpServlet {
                 for (Events event : eventList) {
                     // Lấy tất cả terms của event này
                     List<EventTerms> allTerms = taskDAO.getTermsByEventID(event.getEventID());
-                    List<Tasks> allTasks = taskDAO.getTasksByEventID(event.getEventID());
 
-                    // Set departments cho tasks
-                    for (Tasks task : allTasks) {
-                        List<TaskAssignees> assignees = taskDAO.getAssigneesByTaskID(task.getTaskID());
-                        List<Department> departments = new ArrayList<>();
-                        for (TaskAssignees ta : assignees) {
-                            if (ta.getDepartment() != null) {
-                                departments.add(ta.getDepartment());
+                    // Chỉ xử lý nếu event có terms
+                    if (!allTerms.isEmpty()) {
+                        List<Tasks> allTasks = taskDAO.getTasksByEventID(event.getEventID());
+
+                        // Set departments cho tasks
+                        for (Tasks task : allTasks) {
+                            List<TaskAssignees> assignees = taskDAO.getAssigneesByTaskID(task.getTaskID());
+                            List<Department> departments = new ArrayList<>();
+                            for (TaskAssignees ta : assignees) {
+                                if (ta.getDepartment() != null) {
+                                    departments.add(ta.getDepartment());
+                                }
+                            }
+                            task.setDepartments(departments);
+                        }
+
+                        // Khởi tạo map với tất cả terms
+                        Map<String, List<Tasks>> groupedByTerm = new LinkedHashMap<>();
+                        Map<String, EventTerms> termInfoMap = new LinkedHashMap<>();
+
+                        // Đầu tiên, khởi tạo tất cả terms với list rỗng và lưu thông tin term
+                        for (EventTerms term : allTerms) {
+                            groupedByTerm.put(term.getTermName(), new ArrayList<>());
+                            termInfoMap.put(term.getTermName(), term);
+                        }
+
+                        // Sau đó, group tasks vào các terms tương ứng
+                        for (Tasks task : allTasks) {
+                            String termName = task.getTerm().getTermName();
+                            if (groupedByTerm.containsKey(termName)) {
+                                groupedByTerm.get(termName).add(task);
                             }
                         }
-                        task.setDepartments(departments);
+
+                        // Chỉ add vào timelineMap khi event có terms
+                        timelineMap.put(event, groupedByTerm);
+                        request.setAttribute("termInfoMap_" + event.getEventID(), termInfoMap);
                     }
-
-                    // Khởi tạo map với tất cả terms
-                    Map<String, List<Tasks>> groupedByTerm = new LinkedHashMap<>();
-
-                    // Đầu tiên, khởi tạo tất cả terms với list rỗng
-                    for (EventTerms term : allTerms) {
-                        groupedByTerm.put(term.getTermName(), new ArrayList<>());
-                    }
-
-                    // Sau đó, group tasks vào các terms tương ứng
-                    for (Tasks task : allTasks) {
-                        String termName = task.getTerm().getTermName();
-                        if (groupedByTerm.containsKey(termName)) {
-                            groupedByTerm.get(termName).add(task);
-                        }
-                    }
-
-                    // Luôn add vào timelineMap
-                    timelineMap.put(event, groupedByTerm);
                 }
             }
 
