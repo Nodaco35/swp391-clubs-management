@@ -339,11 +339,13 @@ CREATE TABLE Events (
     EventDate DATETIME,
     EndTime DATETIME,
     LocationID INT,
-    ClubID INT NOT NULL,
+    ClubID INT NOT NULL, 
     IsPublic BOOLEAN DEFAULT 0,
     FormTemplateID INT,
     Capacity INT,
     Status ENUM('Pending', 'Processing', 'Completed'),
+    ApprovalStatus ENUM('PENDING', 'APPROVED', 'REJECTED') DEFAULT 'PENDING',
+    RejectionReason TEXT,
     SemesterID VARCHAR(10),
     FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID),
     FOREIGN KEY (FormTemplateID) REFERENCES ApplicationFormTemplates(TemplateID),
@@ -351,40 +353,38 @@ CREATE TABLE Events (
     FOREIGN KEY (LocationID) REFERENCES Locations(LocationID)
 );
 
-
-
-INSERT INTO Events (EventName, EventImg, Description, EventDate, EndTime, LocationID, ClubID, IsPublic, Capacity, Status, SemesterID) VALUES
+INSERT INTO Events (EventName, EventImg, Description, EventDate, EndTime, LocationID, ClubID, IsPublic, Capacity, Status, SemesterID, ApprovalStatus, RejectionReason) VALUES
 -- Spring 2025
-('Lễ Hội Âm Nhạc Tết 2025', 'images/events/tetmusic2025.jpg', '...', '2025-02-01 19:00:00', '2025-02-01 22:00:00', 2, 6, TRUE, 300, 'COMPLETED', 'SP25'),
-('Hội Thảo Kỹ Năng Viết Tiếng Anh', 'images/events/englishworkshop2025.jpg', '...', '2025-03-05 09:00:00', '2025-03-05 11:00:00', 9, 3, TRUE, 60, 'COMPLETED', 'SP25'),
-('Cuộc Thi Tranh Biện Xã Hội 2025', 'images/events/debate2025.jpg', '...', '2025-04-10 13:00:00', '2025-04-10 15:00:00', 3, 8, TRUE, 100, 'COMPLETED', 'SP25'),
-('Workshop: Xây dựng Website với Spring Boot', '/images/events/springboot_workshop.jpg', '...', '2025-04-20 14:00:00', '2025-04-20 17:00:00', 26, 4, 0, 100, 'COMPLETED', 'SP25'),
+('Lễ Hội Âm Nhạc Tết 2025', 'images/events/tetmusic2025.jpg', '...', '2025-02-01 19:00:00', '2025-02-01 22:00:00', 2, 6, TRUE, 300, 'COMPLETED', 'SP25', 'APPROVED', NULL),
+('Hội Thảo Kỹ Năng Viết Tiếng Anh', 'images/events/englishworkshop2025.jpg', '...', '2025-03-05 09:00:00', '2025-03-05 11:00:00', 9, 3, TRUE, 60, 'COMPLETED', 'SP25', 'APPROVED', NULL),
+('Cuộc Thi Tranh Biện Xã Hội 2025', 'images/events/debate2025.jpg', '...', '2025-04-10 13:00:00', '2025-04-10 15:00:00', 3, 8, TRUE, 100, 'COMPLETED', 'SP25', 'APPROVED', NULL),
+('Workshop: Xây dựng Website với Spring Boot', 'images/events/springboot_workshop.jpg', '...', '2025-04-20 14:00:00', '2025-04-20 17:00:00', 26, 4, 0, 100, 'COMPLETED', 'SP25', 'APPROVED', NULL),
 
--- Summer 2025 
-('FPTU Showcase 2025 Chung Kết', 'images/events/showcase2025.jpg', '...', '2025-06-30 09:00:00', '2025-06-30 13:00:00', 1, 7, TRUE, 200, 'PENDING', 'SU25'),
-('Thử Thách Lập Trình FPTU 2025', 'images/events/coding2025.jpg', '...', '2025-06-21 08:00:00', '2025-06-21 11:00:00', 25, 4, TRUE, 50, 'COMPLETED', 'SU25'),
-('Giải Bóng Đá Sinh Viên FPTU 2025', 'images/events/football2025.jpg', '...', '2025-08-05 08:00:00', '2025-09-05 10:00:00', 5, 1, TRUE, 120, 'PENDING', 'SU25'),
-('Chiến Dịch Tình Nguyện Xanh 2025', 'images/events/greenfuture2025.jpg', '...', '2025-07-25 07:00:00', '2025-07-25 12:00:00', 35, 5, TRUE, 40, 'PENDING', 'SU25'),
-('Giải Bóng Rổ 3x3 FPTU', 'images/events/basketball2025.jpg', '...', '2025-07-05 14:00:00', '2025-07-05 16:00:00', 4, 2, FALSE, 80, 'COMPLETED', 'SU25'),
-('Ngày Hội Âm Nhạc FPTU 2025', 'images/events/musicday2025.jpg', '...', '2025-07-10 10:00:00', '2025-07-10 13:00:00', 1, 6, FALSE, 250, 'PENDING', 'SU25'),
-('Hackathon Đổi Mới AI', 'images/events/aihackathon2025.jpg', '...', '2025-07-15 08:00:00', '2025-07-15 14:00:00', 25, 4, TRUE, 45, 'PENDING', 'SU25'),
-('Cuộc thi Code War: Thử thách thuật toán', '/images/events/codewar.jpg', '...', '2025-07-31 09:00:00', '2025-07-31 13:00:00', 27, 4, 1, 120, 'PENDING', 'SU25'),
+-- Summer 2025
+('FPTU Showcase 2025 Chung Kết', 'images/events/showcase2025.jpg', '...', '2025-08-02 09:00:00', '2025-08-02 13:00:00', 1, 7, TRUE, 200, 'PENDING', 'SU25', 'PENDING', NULL),
+('Thử Thách Lập Trình FPTU 2025', 'images/events/coding2025.jpg', '...', '2025-06-21 08:00:00', '2025-06-21 11:00:00', 25, 4, TRUE, 50, 'COMPLETED', 'SU25', 'APPROVED', NULL),
+('Giải Bóng Đá Sinh Viên FPTU 2025', 'images/events/football2025.jpg', '...', '2025-08-05 08:00:00', '2025-08-05 10:00:00', 5, 1, TRUE, 120, 'PENDING', 'SU25', 'PENDING', NULL),
+('Chiến Dịch Tình Nguyện Xanh 2025', 'images/events/greenfuture2025.jpg', '...', '2025-08-06 07:00:00', '2025-08-06 12:00:00', 35, 5, TRUE, 40, 'PENDING', 'SU25', 'PENDING', NULL),
+('Giải Bóng Rổ 3x3 FPTU', 'images/events/basketball2025.jpg', '...', '2025-07-05 14:00:00', '2025-07-05 16:00:00', 4, 2, FALSE, 80, 'COMPLETED', 'SU25', 'APPROVED', NULL),
+('Ngày Hội Âm Nhạc FPTU 2025', 'images/events/musicday2025.jpg', '...', '2025-08-08 10:00:00', '2025-08-08 13:00:00', 1, 6, FALSE, 250, 'PENDING', 'SU25', 'PENDING', NULL),
+('Hackathon Đổi Mới AI', 'images/events/aihackathon2025.jpg', '...', '2025-08-12 08:00:00', '2025-08-12 14:00:00', 25, 4, TRUE, 45, 'PENDING', 'SU25', 'PENDING', NULL),
+('Cuộc thi Code War: Thử thách thuật toán', 'images/events/codewar.jpg', '...', '2025-07-31 09:00:00', '2025-07-31 13:00:00', 27, 4, 1, 120, 'PENDING', 'SU25', 'PENDING', NULL),
 
 -- Spring 2024
-('Lễ Hội Làng Tết 2024', 'images/events/villagefest2024.jpg', '...', '2024-01-20 10:00:00', '2024-01-20 13:00:00', 36, 6, TRUE, 500, 'COMPLETED', 'SP24'),
+('Lễ Hội Làng Tết 2024', 'images/events/villagefest2024.jpg', '...', '2024-01-20 10:00:00', '2024-01-20 13:00:00', 36, 6, TRUE, 500, 'COMPLETED', 'SP24', 'APPROVED', NULL),
 
 -- Summer 2024
-('Chiến Dịch Tình Nguyện Hè 2024', 'images/events/summervolunteer2024.jpg', '...', '2024-07-15 07:00:00', '2024-07-15 12:00:00', 36, 5, FALSE, 35, 'COMPLETED', 'SU24'),
+('Chiến Dịch Tình Nguyện Hè 2024', 'images/events/summervolunteer2024.jpg', '...', '2024-07-15 07:00:00', '2024-07-15 12:00:00', 36, 5, FALSE, 35, 'COMPLETED', 'SU24', 'APPROVED', NULL),
 
 -- Fall 2024
-('Trại Lập Trình FPTU 2024', 'images/events/codingbootcamp2024.jpg', '...', '2024-11-20 08:00:00', '2024-11-20 12:00:00', 25, 4, TRUE, 60, 'COMPLETED', 'FA24'),
-('Đêm Nhạc Rock 2024', 'images/events/rocknight2024.jpg', '...', '2024-12-10 19:00:00', '2024-12-10 22:00:00', 1, 6, TRUE, 200, 'COMPLETED', 'FA24'),
-('Cuộc Thi Nói Tiếng Anh 2024', 'images/events/englishcontest2024.jpg', '...', '2024-11-25 09:00:00', '2024-11-25 11:00:00', 10, 3, TRUE, 70, 'COMPLETED', 'FA24'),
-('Giải Bóng Đá 5x5 FPTU 2024', 'images/events/football2024.jpg', '...', '2024-12-05 14:00:00', '2024-12-05 16:00:00', 5, 1, FALSE, 100, 'COMPLETED', 'FA24'),
-('Ngày Hội Nhảy FPTU 2024', 'images/events/dancefest2024.jpg', '...', '2024-12-15 10:00:00', '2024-12-15 13:00:00', 2, 7, TRUE, 400, 'COMPLETED', 'FA24'),
-('Hội Thảo Phát Triển Web 2024', 'images/events/webdev2024.jpg', '...', '2024-11-15 14:00:00', '2024-11-15 16:00:00', 11, 4, TRUE, 50, 'COMPLETED', 'FA24'),
-('FPTU Dance Battle 2024', 'images/events/dancebattle2024.jpg', '...', '2024-11-30 18:00:00', '2024-11-30 21:00:00', 1, 7, TRUE, 150, 'COMPLETED', 'FA24'),
-('Cuộc Thi Tranh Biện 2024', 'images/events/debate2024.jpg', '...', '2024-12-01 09:00:00', '2024-12-01 11:00:00', 12, 8, TRUE, 65, 'COMPLETED', 'FA24');
+('Trại Lập Trình FPTU 2024', 'images/events/codingbootcamp2024.jpg', '...', '2024-11-20 08:00:00', '2024-11-20 12:00:00', 25, 4, TRUE, 60, 'COMPLETED', 'FA24', 'APPROVED', NULL),
+('Đêm Nhạc Rock 2024', 'images/events/rocknight2024.jpg', '...', '2024-12-10 19:00:00', '2024-12-10 22:00:00', 1, 6, TRUE, 200, 'COMPLETED', 'FA24', 'APPROVED', NULL),
+('Cuộc Thi Nói Tiếng Anh 2024', 'images/events/englishcontest2024.jpg', '...', '2024-11-25 09:00:00', '2024-11-25 11:00:00', 10, 3, TRUE, 70, 'COMPLETED', 'FA24', 'APPROVED', NULL),
+('Giải Bóng Đá 5x5 FPTU 2024', 'images/events/football2024.jpg', '...', '2024-12-05 14:00:00', '2024-12-05 16:00:00', 5, 1, FALSE, 100, 'COMPLETED', 'FA24', 'APPROVED', NULL),
+('Ngày Hội Nhảy FPTU 2024', 'images/events/dancefest2024.jpg', '...', '2024-12-15 10:00:00', '2024-12-15 13:00:00', 2, 7, TRUE, 400, 'COMPLETED', 'FA24', 'APPROVED', NULL),
+('Hội Thảo Phát Triển Web 2024', 'images/events/webdev2024.jpg', '...', '2024-11-15 14:00:00', '2024-11-15 16:00:00', 11, 4, TRUE, 50, 'COMPLETED', 'FA24', 'APPROVED', NULL),
+('FPTU Dance Battle 2024', 'images/events/dancebattle2024.jpg', '...', '2024-11-30 18:00:00', '2024-11-30 21:00:00', 1, 7, TRUE, 150, 'COMPLETED', 'FA24', 'APPROVED', NULL),
+('Cuộc Thi Tranh Biện 2024', 'images/events/debate2024.jpg', '...', '2024-12-01 09:00:00', '2024-12-01 11:00:00', 12, 8, TRUE, 65, 'COMPLETED', 'FA24', 'APPROVED', NULL);
 
 
 UPDATE Events 
