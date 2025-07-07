@@ -184,9 +184,7 @@
 			</div>
 		</form>
 
-		<!-- Form chính dùng để cập nhật thông tin sự kiện -->
-		<!-- Thêm enctype="multipart/form-data" vào form chính -->
-		<form action="edit-event" method="post" enctype="multipart/form-data">
+		<form id="editEventForm" action="edit-event" method="post" enctype="multipart/form-data">
 			<input type="hidden" id="eventID" name="eventID" value="${event.eventID}"/>
 
 			<div class="form-grid">
@@ -279,7 +277,7 @@
 		</form>
 
 		<div class="form-grid-2">
-			<form action="${pageContext.request.contextPath}/agenda" method="post" id="agendaForm">
+			<form id="agendaForm" action="${pageContext.request.contextPath}/agenda" method="post" id="agendaForm">
 				<input type="hidden" name="eventID" value="${event.eventID}"/>
 				<div class="form-group full-width">
 					<label><i class="fas fa-list-alt"></i> Chương trình sự kiện (Agenda)</label>
@@ -315,6 +313,95 @@
 	</div>
 
 </main>
+<script>
+    // Gắn kiểm tra cho form chính
+    document.getElementById("editEventForm").addEventListener("submit", function (e) {
+
+        const eventDateInput = document.getElementById("eventDate");
+        const eventTimeInput = document.getElementById("eventTime");
+        const eventEndTimeInput = document.getElementById("eventEndTime");
+
+        if (!eventDateInput.value || !eventTimeInput.value || !eventEndTimeInput.value) {
+            return;
+        }
+
+        const eventDate = new Date(eventDateInput.value);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const minDate = new Date(today);
+        minDate.setDate(minDate.getDate() + 7);
+
+        if (eventDate < minDate) {
+            alert("Ngày tổ chức phải sau hôm nay ít nhất 7 ngày.");
+            e.preventDefault();
+            return;
+        }
+
+        const [startHour, startMin] = eventTimeInput.value.split(':').map(Number);
+        const [endHour, endMin] = eventEndTimeInput.value.split(':').map(Number);
+
+        const startTotalMin = startHour * 60 + startMin;
+        const endTotalMin = endHour * 60 + endMin;
+
+        if (endTotalMin - startTotalMin < 30) {
+            alert("Giờ kết thúc phải cách giờ bắt đầu ít nhất 30 phút.");
+            e.preventDefault();
+            return;
+        }
+
+    });
+
+    document.getElementById("agendaForm").addEventListener("submit", function (e) {
+
+        const eventTimeInput = document.getElementById("eventTime");
+        const eventEndTimeInput = document.getElementById("eventEndTime");
+
+        if (!eventTimeInput.value || !eventEndTimeInput.value) {
+            alert("Vui lòng điền giờ bắt đầu và kết thúc của sự kiện trước.");
+            e.preventDefault();
+            return;
+        }
+
+        const [startHour, startMin] = eventTimeInput.value.split(':').map(Number);
+        const [endHour, endMin] = eventEndTimeInput.value.split(':').map(Number);
+
+        const startTotalMin = startHour * 60 + startMin;
+        const endTotalMin = endHour * 60 + endMin;
+
+        const agendaStartTimes = document.getElementsByName("agendaStartTime[]");
+        const agendaEndTimes = document.getElementsByName("agendaEndTime[]");
+
+        for (let i = 0; i < agendaStartTimes.length; i++) {
+            const startValue = agendaStartTimes[i].value;
+            const endValue = agendaEndTimes[i].value;
+
+            if (!startValue || !endValue) continue;
+
+            const [aStartHour, aStartMin] = startValue.split(':').map(Number);
+            const [aEndHour, aEndMin] = endValue.split(':').map(Number);
+
+            const aStartTotalMin = aStartHour * 60 + aStartMin;
+            const aEndTotalMin = aEndHour * 60 + aEndMin;
+
+
+            if (aEndTotalMin <= aStartTotalMin) {
+                alert(`Agenda ${i + 1}: Thời gian kết thúc phải sau thời gian bắt đầu.`);
+                e.preventDefault();
+                return;
+            }
+
+            if (aStartTotalMin < startTotalMin || aEndTotalMin > endTotalMin) {
+                alert(`Agenda ${i + 1}: Thời gian phải nằm trong khung giờ sự kiện.`);
+                e.preventDefault();
+                return;
+            }
+        }
+
+    });
+</script>
+
+
+
 <script>
     function addAgendaItem() {
         const container = document.getElementById('agendaContainer');
