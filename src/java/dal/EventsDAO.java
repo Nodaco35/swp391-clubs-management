@@ -764,6 +764,7 @@ public class EventsDAO {
                 event.setEventDate(rs.getTimestamp("EventDate"));
                 event.setAgendaCount(rs.getInt("AgendaCount"));
 
+
                 agenda.setEvent(event);
 
                 list.add(agenda);
@@ -847,7 +848,7 @@ public class EventsDAO {
     public List<Agenda> getAgendaByEventID(int eventID) {
         List<Agenda> agendas = new ArrayList<>();
         String sql = """
-                    SELECT A.*, E.EventName, E.EventDate, E.ClubID, C.ClubName,
+                    SELECT A.*, E.EventName, E.EventDate, E.ClubID, C.ClubName, E.Capacity, E.LocationID,
                            (SELECT COUNT(*) FROM Agenda WHERE EventID = E.EventID) AS AgendaCount
                     FROM Agenda A
                     JOIN Events E ON A.EventID = E.EventID
@@ -877,6 +878,9 @@ public class EventsDAO {
                 event.setClubName(rs.getString("ClubName"));
                 event.setEventDate(rs.getTimestamp("EventDate"));
                 event.setAgendaCount(rs.getInt("AgendaCount"));
+                event.setCapacity(rs.getInt("Capacity"));
+                Locations l = getLocationByID(rs.getInt("LocationID"));
+                event.setLocation(l);
 
                 a.setEvent(event);
                 agendas.add(a);
