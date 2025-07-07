@@ -105,7 +105,7 @@
                                                         <a href="${pageContext.request.contextPath}/recruitment/view?id=${campaign.recruitmentID}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                                             <i class="fas fa-eye text-blue-500 mr-2"></i> Xem chi tiết
                                                         </a>
-                                                        <a href="${pageContext.request.contextPath}/recruitment/form?id=${campaign.recruitmentID}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                        <a href="${pageContext.request.contextPath}/recruitment/form/edit?recruitmentId=${campaign.recruitmentID}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                                             <i class="fas fa-edit text-blue-500 mr-2"></i> Sửa
                                                         </a>
                                                         <c:if test="${campaign.status eq 'ONGOING' || campaign.status eq 'UPCOMING'}">

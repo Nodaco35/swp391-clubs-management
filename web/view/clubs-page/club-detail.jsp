@@ -7,6 +7,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="contextPath" content="${pageContext.request.contextPath}">
         <title>${club.clubName} - Chi Tiết Câu Lạc Bộ - UniClub</title>
         <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -90,8 +91,8 @@
                                     </c:if>
                                 </div>
 
-                                <c:if test="${!isMember && displayClub.isRecruiting && sessionScope.user != null}">
-                                    <a href="${pageContext.request.contextPath}/club-apply?clubID=${displayClub.clubID}" 
+                                <c:if test="${!isMember && sessionScope.user != null}">
+                                    <a href="#" id="joinClubButton" 
                                        class="btn btn-primary right-btn">
                                         <i class="fas fa-user-plus"></i> Tham gia câu lạc bộ
                                     </a>
@@ -106,5 +107,46 @@
 
         <jsp:include page="../components/footer.jsp" />
         <script src="${pageContext.request.contextPath}/js/scripts.js"></script>
+        <script src="${pageContext.request.contextPath}/js/recruitment-status-checker.js"></script>
+        
+        <!-- Đánh dấu trang là club-detail-page để script nhận biết -->
+        <script>
+            // Thêm class vào body để script nhận biết
+            document.body.classList.add('club-detail-page');
+            
+            // Tạo data attribute để lưu clubId
+            document.addEventListener('DOMContentLoaded', function() {
+                const joinButton = document.getElementById('joinClubButton');
+                if (joinButton) {
+                    joinButton.setAttribute('data-club-id', '${displayClub.clubID}');
+                    
+                    // Khởi tạo trạng thái nút khi trang tải xong
+                    if (typeof initializeJoinClubButton === 'function') {
+                        initializeJoinClubButton();
+                    }
+                }
+            });
+        </script>
+        
+        <style>
+            /* CSS cho nút tham gia */
+            .join-club-btn {
+                transition: all 0.3s ease;
+            }
+            .join-club-btn.disabled {
+                opacity: 0.65;
+                cursor: not-allowed;
+                pointer-events: none;
+            }
+            /* Animation cho khi nút cập nhật */
+            @keyframes buttonUpdate {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
+            .button-updated {
+                animation: buttonUpdate 0.5s ease;
+            }
+        </style>
     </body>
 </html>

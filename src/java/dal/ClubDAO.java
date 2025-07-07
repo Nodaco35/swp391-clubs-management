@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
 import models.ClubInfo;
 import models.Clubs;
 import models.Department;
@@ -904,5 +903,37 @@ public class ClubDAO {
             }
         }
         return departmentIDs;
+    }
+    
+    /**
+     * Cập nhật trạng thái tuyển quân của câu lạc bộ
+     * @param clubID ID của câu lạc bộ cần cập nhật
+     * @param isRecruiting trạng thái tuyển quân mới (true = đang tuyển quân, false = không tuyển quân)
+     * @return true nếu cập nhật thành công, false nếu thất bại
+     */
+    public boolean updateIsRecruiting(int clubID, boolean isRecruiting) {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        
+        try {
+            conn = DBContext.getConnection();
+            String query = "UPDATE Clubs SET IsRecruiting = ? WHERE ClubID = ?";
+            stmt = conn.prepareStatement(query);
+            stmt.setBoolean(1, isRecruiting);
+            stmt.setInt(2, clubID);
+            
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            System.out.println("Lỗi khi cập nhật trạng thái tuyển quân: " + e.getMessage());
+            return false;
+        } finally {
+            try {
+                if (stmt != null) stmt.close();
+                if (conn != null) DBContext.closeConnection(conn);
+            } catch (SQLException e) {
+                System.out.println("Lỗi khi đóng kết nối: " + e.getMessage());
+            }
+        }
     }
 }

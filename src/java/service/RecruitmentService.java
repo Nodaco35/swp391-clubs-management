@@ -15,7 +15,7 @@ public class RecruitmentService {
     private final RecruitmentStageDAO stageDAO = new RecruitmentStageDAO();
     private final ApplicationStageDAO appStageDAO = new ApplicationStageDAO();
     
-    // Campaign management methods
+    // Các phương thức quản lý chiến dịch tuyển quân
     
     public RecruitmentCampaign getCampaignById(int recruitmentID) {
         return campaignDAO.getRecruitmentCampaignById(recruitmentID);
@@ -43,16 +43,24 @@ public class RecruitmentService {
     public boolean updateCampaign(RecruitmentCampaign campaign) {
         RecruitmentCampaign existingCampaign = campaignDAO.getRecruitmentCampaignById(campaign.getRecruitmentID());
         
-        // Check if campaign is ongoing and start date is being changed
+        // Kiểm tra nếu chiến dịch đang diễn ra và ngày bắt đầu bị thay đổi
         if ("ONGOING".equals(existingCampaign.getStatus()) && 
             !existingCampaign.getStartDate().equals(campaign.getStartDate())) {
-            return false; // Cannot change start date when campaign is ongoing
+            return false; // Không thể thay đổi ngày bắt đầu khi chiến dịch đang diễn ra
         }
         
-        // Validate time overlap (excluding this campaign)
+        // Kiểm tra nếu templateId bị thay đổi khi đã có đơn đăng ký
+        if (existingCampaign.getTemplateID() != campaign.getTemplateID()) {
+            dal.FormResponseDAO formResponseDAO = new dal.FormResponseDAO();
+            if (formResponseDAO.hasCampaignApplications(campaign.getRecruitmentID())) {
+                return false; // Không thể thay đổi mẫu đơn khi đã có đơn đăng ký
+            }
+        }
+        
+        // Xác thực chồng lấp thời gian (loại trừ chiến dịch này)
         if (campaignDAO.hasCampaignTimeOverlap(campaign.getClubID(), campaign.getStartDate(), 
                                               campaign.getEndDate(), campaign.getRecruitmentID())) {
-            return false; // Indicates time overlap error
+            return false; // Báo lỗi chồng lấp thời gian
         }
         
         return campaignDAO.updateRecruitmentCampaign(campaign);
@@ -70,7 +78,7 @@ public class RecruitmentService {
         return campaignDAO.getAllRecruitmentCampaigns();
     }
     
-    // Stage management methods
+    // Các phương thức quản lý vòng tuyển
     
     public RecruitmentStage getStageById(int stageID) {
         return stageDAO.getStageById(stageID);
@@ -81,33 +89,47 @@ public class RecruitmentService {
     }
     
     public int createStage(RecruitmentStage stage) {
-        // Validate time overlap within the campaign
+        // Xác thực chồng lấp thời gian trong chiến dịch
         if (stageDAO.hasStageTimeOverlap(stage.getRecruitmentID(), stage.getStartDate(), stage.getEndDate(), null)) {
-            return -1; // Indicates time overlap error
+            return -1; // Báo lỗi chồng lấp thời gian
         }
         
-        // Validate stage dates are within campaign dates
+        // Xác thực ngày vòng tuyển nằm trong khoảng thời gian chiến dịch
         RecruitmentCampaign campaign = campaignDAO.getRecruitmentCampaignById(stage.getRecruitmentID());
         if (stage.getStartDate().before(campaign.getStartDate()) || 
             stage.getEndDate().after(campaign.getEndDate())) {
-            return -2; // Indicates dates outside of campaign range
+            return -2; // Báo lỗi ngày nằm ngoài phạm vi chiến dịch
         }
         
         return stageDAO.createRecruitmentStage(stage);
     }
     
     public boolean updateStage(RecruitmentStage stage) {
-        // Validate time overlap (excluding this stage)
-        if (stageDAO.hasStageTimeOverlap(stage.getRecruitmentID(), stage.getStartDate(), 
-                                        stage.getEndDate(), stage.getStageID())) {
-            return false; // Indicates time overlap error
+        // Lấy vòng tuyển hiện có để kiểm tra trạng thái và thay đổi ngày bắt đầu
+        RecruitmentStage existingStage = stageDAO.getStageById(stage.getStageID());
+        if (existingStage == null) {
+            return false;
         }
         
-        // Validate stage dates are within campaign dates
+        // Kiểm tra nếu vòng tuyển đã bắt đầu và ngày bắt đầu bị thay đổi
+        Date currentDate = new Date();
+        boolean stageHasStarted = !currentDate.before(existingStage.getStartDate());
+        
+        if (stageHasStarted && !existingStage.getStartDate().equals(stage.getStartDate())) {
+            return false; // Không thể thay đổi ngày bắt đầu cho vòng tuyển đã diễn ra
+        }
+        
+        // Xác thực chồng lấp thời gian (loại trừ vòng tuyển này)
+        if (stageDAO.hasStageTimeOverlap(stage.getRecruitmentID(), stage.getStartDate(), 
+                                        stage.getEndDate(), stage.getStageID())) {
+            return false; // Báo lỗi chồng lấp thời gian
+        }
+        
+        // Xác thực ngày vòng tuyển nằm trong khoảng thời gian chiến dịch
         RecruitmentCampaign campaign = campaignDAO.getRecruitmentCampaignById(stage.getRecruitmentID());
         if (stage.getStartDate().before(campaign.getStartDate()) || 
             stage.getEndDate().after(campaign.getEndDate())) {
-            return false; // Indicates dates outside of campaign range
+            return false; // Báo lỗi ngày nằm ngoài phạm vi chiến dịch
         }
         
         return stageDAO.updateRecruitmentStage(stage);
@@ -117,7 +139,7 @@ public class RecruitmentService {
         return stageDAO.updateStageStatus(stageID, status);
     }
     
-    // Application stage management methods
+    // Các phương thức quản lý giai đoạn đơn đăng ký
     
     public ApplicationStage getApplicationStageById(int applicationStageID) {
         return appStageDAO.getApplicationStageById(applicationStageID);
@@ -143,9 +165,9 @@ public class RecruitmentService {
         return appStageDAO.updateApplicationStageStatus(applicationStageID, status, updatedBy);
     }
     
-    // Helper methods
+    // Các phương thức hỗ trợ
     
-    // Check if a recruitment campaign is active (not closed and current date is within range)
+    // Kiểm tra xem chiến dịch tuyển quân có đang hoạt động không (không đóng và ngày hiện tại nằm trong khoảng thời gian)
     public boolean isCampaignActive(int recruitmentID) {
         RecruitmentCampaign campaign = campaignDAO.getRecruitmentCampaignById(recruitmentID);
         if (campaign == null) {
@@ -158,7 +180,7 @@ public class RecruitmentService {
                !currentDate.after(campaign.getEndDate());
     }
     
-    // Check if a stage is active (current date is within range)
+    // Kiểm tra xem một vòng tuyển có đang hoạt động không (ngày hiện tại nằm trong khoảng thời gian)
     public boolean isStageActive(int stageID) {
         RecruitmentStage stage = stageDAO.getStageById(stageID);
         if (stage == null) {

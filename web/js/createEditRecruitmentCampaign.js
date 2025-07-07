@@ -6,6 +6,16 @@
 let isEdit = false;
 let contextPath = '';
 
+// Define critical fields that must be included in form submission even if disabled
+const criticalFields = [
+    'templateId', 
+    'applicationStageStart', 'applicationStageEnd',
+    'interviewStageStart', 'interviewStageEnd',
+    'challengeStageStart', 'challengeStageEnd',
+    'startDate', 'endDate',
+    'title', 'gen'
+];
+
 // Hàm hiển thị thông báo lỗi khi cần thiết
 function showDebugInfo(message, data = null) {
     const debugPanel = document.getElementById('debugPanel');
@@ -43,18 +53,27 @@ document.addEventListener('DOMContentLoaded', function() {
     if (form) {
         const hasValidId = document.querySelector('input[name="recruitmentId"]');
         isEdit = form.dataset.mode === 'edit' && hasValidId !== null;
+        
+        // Debug thông tin clubId
+        const clubIdInput = document.querySelector('input[name="clubId"]');
+        const clubIDInput = document.querySelector('input[name="clubID"]');
+        console.log("DEBUG - Hidden clubId field:", clubIdInput ? clubIdInput.value : "không tìm thấy");
+        
+        // Kiểm tra dữ liệu về đơn đăng ký từ server
+        const applicationCountInput = document.querySelector('input[name="applicationCount"]');
+        const hasApplicationsFlag = document.getElementById('hasApplicationsFlag');
+        
+        console.log("DEBUG - Application count:", applicationCountInput ? applicationCountInput.value : "không có thông tin");
+        console.log("DEBUG - Has applications flag:", hasApplicationsFlag ? hasApplicationsFlag.value : "không có thông tin");
+        
+        // Debug thông tin trong URL
+        const urlParams = new URLSearchParams(window.location.search);
+        console.log("DEBUG - URL clubId param:", urlParams.get('clubId'));
     } else {
         isEdit = false;
     }
     
     contextPath = getContextPath();
-    
-    // Hiển thị mode hiện tại
-    showDebugInfo('Thông tin mode', {
-        isEdit: isEdit,
-        mode: isEdit ? 'Chỉnh sửa' : 'Tạo mới',
-        contextPath: contextPath
-    });
     
     // Khởi tạo các bước trong wizard
     initializeWizard();
@@ -67,6 +86,29 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Tự động chọn form đăng ký nếu chỉ có một lựa chọn
     autoSelectSingleTemplate();
+    
+    // Đồng bộ hóa các thuộc tính về đơn đăng ký
+    if (isEdit) {
+        normalizeApplicationFlags();
+    }
+    
+    // Thiết lập các trường không thể chỉnh sửa nếu cần thiết
+    setupFieldRestrictions();
+    
+    // Thực hiện kiểm tra tự động nhưng không hiển thị nút debug
+    setTimeout(() => {
+        // Log kết quả kiểm tra fields bị disabled nếu đang ở chế độ edit
+        if (isEdit) {
+            const disabledFields = debugDisabledFields();
+            console.log('[INFO] Trạng thái trường bị disabled:', 
+                disabledFields.length > 0 ? 
+                `Có ${disabledFields.length} trường bị disabled` : 
+                'Không có trường nào bị disabled');
+        }
+    }, 1000);
+    
+    // Đồng bộ các thuộc tính data-has-applications và data-has_applications trong DOM
+    normalizeApplicationFlags();
 });
 
 /**
@@ -527,18 +569,13 @@ function prefillStageData() {
             } else if (stageName === "CHALLENGE" || stageName.includes('CHALLENGE') || stageName.includes('THỬ THÁCH')) {
                 document.getElementById('challengeStageStart').value = formatDateForInput(new Date(stage.startDate));
                 document.getElementById('challengeStageEnd').value = formatDateForInput(new Date(stage.endDate));
-                if (stage.description) {
-                    document.getElementById('challengeDescription').value = stage.description;
-                    console.log('[DEBUG] Đã điền mô tả thử thách:', stage.description.substring(0, 30) + (stage.description.length > 30 ? '...' : ''));
-                }
+                // Đã xóa xử lý mô tả của kỳ thử thách theo yêu cầu
                 console.log('[DEBUG] Đã điền dữ liệu vòng CHALLENGE:', formatDateForInput(new Date(stage.startDate)), formatDateForInput(new Date(stage.endDate)));
             } else {
                 console.warn('[DEBUG] Không nhận diện được loại vòng tuyển:', stage.stageName, '(đã chuyển đổi thành:', stageName, ')');
             }
         });
         
-        // Kiểm tra thứ tự thời gian và chồng lấp
-        checkStageTimeOverlap();
         
         // Hiển thị thông tin debug về dữ liệu đã nhận
         showDebugInfo('Đã điền dữ liệu từ ' + stagesFromServer.length + ' vòng tuyển', stagesFromServer);
@@ -604,18 +641,13 @@ function prefillStageData() {
                     } else if (stageName === "CHALLENGE" || stageName.includes('CHALLENGE') || stageName.includes('THỬ THÁCH')) {
                         document.getElementById('challengeStageStart').value = formatDateForInput(new Date(stage.startDate));
                         document.getElementById('challengeStageEnd').value = formatDateForInput(new Date(stage.endDate));
-                        if (stage.description) {
-                            document.getElementById('challengeDescription').value = stage.description;
-                            console.log('[DEBUG] Đã điền mô tả thử thách từ API:', stage.description.substring(0, 30) + (stage.description.length > 30 ? '...' : ''));
-                        }
+                        // Đã xóa xử lý mô tả thử thách theo yêu cầu
                         console.log('[DEBUG] Đã điền dữ liệu vòng CHALLENGE từ API:', formatDateForInput(new Date(stage.startDate)), formatDateForInput(new Date(stage.endDate)));
                     } else {
                         console.warn('[DEBUG] API - Không nhận diện được loại vòng tuyển:', stage.stageName, '(đã chuyển đổi thành:', stageName, ')');
                     }
                 });
                 
-                // Kiểm tra thứ tự thời gian và chồng lấp
-                checkStageTimeOverlap();
                 
                 // Hiển thị thông tin debug
                 showDebugInfo('Đã lấy dữ liệu từ API: ' + data.stages.length + ' vòng tuyển', data);
@@ -742,17 +774,12 @@ function populateConfirmationStep() {
         // Vòng thử thách - CHALLENGE
         const chalStartValue = getSafeElementValue('challengeStageStart');
         const chalEndValue = getSafeElementValue('challengeStageEnd');
-        const chalDescValue = getSafeElementValue('challengeDescription');
         
         if (chalStartValue && chalEndValue) {
             const chalStartDate = new Date(chalStartValue);
             const chalEndDate = new Date(chalEndValue);
             if (!isNaN(chalStartDate.getTime()) && !isNaN(chalEndDate.getTime())) {
                 let challengeText = `${formatDate(chalStartDate)} - ${formatDate(chalEndDate)}`;
-                
-                if (chalDescValue) {
-                    challengeText += ` (${chalDescValue})`;
-                }
                 
                 setConfirmText('confirmChallengeStage', challengeText);
             } else {
@@ -793,7 +820,6 @@ function collectStageData() {
         challenge: {
             start: document.getElementById('challengeStageStart')?.value || null,
             end: document.getElementById('challengeStageEnd')?.value || null,
-            description: document.getElementById('challengeDescription')?.value || null,
             stageName: "CHALLENGE" // Đảm bảo sử dụng đúng ENUM value
         }
     };
@@ -829,6 +855,33 @@ function setupFormSubmission() {
             return;
         }
         
+        // Đảm bảo clubId từ URL luôn được thêm vào form trước khi lấy dữ liệu
+        const formUrlParams = new URLSearchParams(window.location.search);
+        const formUrlClubId = formUrlParams.get('clubId');
+        if (formUrlClubId) {
+            // Thêm input ẩn nếu chưa có
+            let hiddenClubIdInput = document.querySelector('input[name="clubId"]');
+            if (!hiddenClubIdInput) {
+                hiddenClubIdInput = document.createElement('input');
+                hiddenClubIdInput.type = 'hidden';
+                hiddenClubIdInput.name = 'clubId';
+                form.appendChild(hiddenClubIdInput);
+            }
+            hiddenClubIdInput.value = formUrlClubId;
+            
+            // Thêm clubID cho trường hợp server cần cả hai loại tham số
+            let hiddenClubIDInput = document.querySelector('input[name="clubID"]');
+            if (!hiddenClubIDInput) {
+                hiddenClubIDInput = document.createElement('input');
+                hiddenClubIDInput.type = 'hidden';
+                hiddenClubIDInput.name = 'clubID';
+                form.appendChild(hiddenClubIDInput);
+            }
+            hiddenClubIDInput.value = formUrlClubId;
+            
+            console.log('[DEBUG] Đã đảm bảo clubId từ URL được thêm vào form:', formUrlClubId);
+        }
+        
         const formData = new FormData(form);
         
         // Debug: Log tất cả dữ liệu form
@@ -837,6 +890,24 @@ function setupFormSubmission() {
             console.log(pair[0] + ": " + pair[1]);
         }
         
+        // Kiểm tra xem có clubId không, và nếu không có thì thử lấy từ các nguồn khác
+        if (!formData.has('clubId') || formData.get('clubId') === '') {
+            // Thử lấy từ URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlClubId = urlParams.get('clubId');
+            if (urlClubId) {
+                console.log("Lấy clubId từ URL: " + urlClubId);
+                formData.set('clubId', urlClubId);
+            }
+            
+            // Hoặc thử lấy từ input ẩn khác
+            const hiddenClubIDInput = document.querySelector('input[name="clubID"]');
+            if (hiddenClubIDInput && hiddenClubIDInput.value) {
+                console.log("Lấy clubId từ input clubID: " + hiddenClubIDInput.value);
+                formData.set('clubId', hiddenClubIDInput.value);
+            }
+        }
+    
         // Kiểm tra các field quan trọng
         const requiredParams = ['clubId', 'gen', 'templateId', 'startDate', 'endDate', 'title', 
                                'applicationStageStart', 'applicationStageEnd', 
@@ -848,6 +919,7 @@ function setupFormSubmission() {
             const value = formData.get(param);
             if (!value || value.trim() === '') {
                 missingParams.push(param);
+                console.error(`Thiếu tham số: ${param}`);
             }
         });
         
@@ -869,9 +941,74 @@ function setupFormSubmission() {
             ? `${contextPath}/recruitmentForm/update` 
             : `${contextPath}/recruitmentForm/create`;
         
+        // Đảm bảo clubId tồn tại trong formData
+        const submitUrlParams = new URLSearchParams(window.location.search);
+        const submitUrlClubId = submitUrlParams.get('clubId');
+        
+        // Kiểm tra và bổ sung clubId từ URL nếu không có trong form
+        if ((!formData.get('clubId') || formData.get('clubId') === '') && submitUrlClubId) {
+            console.log('[DEBUG] Thêm clubId từ URL vào formData:', submitUrlClubId);
+            formData.set('clubId', submitUrlClubId);
+            formData.set('clubID', submitUrlClubId);
+        }
+        
+        // Tạo URLSearchParams từ formData để gửi lên server
+        const requestParams = new URLSearchParams();
+        
+        // Thêm tất cả các tham số từ formData vào requestParams
+        for (let pair of formData.entries()) {
+            requestParams.append(pair[0], pair[1]);
+        }
+        
+        // Thu thập tất cả các hidden inputs để đảm bảo chúng được đưa vào request
+        const hiddenInputs = document.querySelectorAll('input[type="hidden"]');
+        hiddenInputs.forEach(input => {
+            if (input.name && input.value) {
+                console.log(`[DEBUG] Thêm giá trị từ hidden input: ${input.name}=${input.value}`);
+                requestParams.set(input.name, input.value);
+            }
+        });
+        
+        // Đảm bảo các trường bị disabled vẫn được thêm vào trong requestParams
+        criticalFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field && field.disabled && field.value) {
+                console.log(`[DEBUG] Thêm giá trị từ field disabled: ${fieldId}=${field.value}`);
+                requestParams.set(fieldId, field.value);
+            }
+        });
+        
+        // Kiểm tra các tham số cần thiết trước khi gửi
+        const checkRequiredParams = ['templateId', 'applicationStageStart', 'applicationStageEnd', 
+                                     'interviewStageStart', 'interviewStageEnd',
+                                     'challengeStageStart', 'challengeStageEnd'];
+                                     
+        checkRequiredParams.forEach(param => {
+            // Tìm cả hidden input và field thông thường
+            const field = document.getElementById(param);
+            const hiddenInput = document.querySelector(`input[type="hidden"][name="${param}"]`);
+            
+            // Nếu field tồn tại và có giá trị, thêm vào request
+            if (field && field.value && !requestParams.has(param)) {
+                console.log(`[DEBUG] Thêm giá trị trường bắt buộc từ field: ${param}=${field.value}`);
+                requestParams.set(param, field.value);
+            } 
+            // Nếu hidden input tồn tại và có giá trị, thêm vào request
+            else if (hiddenInput && hiddenInput.value && !requestParams.has(param)) {
+                console.log(`[DEBUG] Thêm giá trị trường bắt buộc từ hidden input: ${param}=${hiddenInput.value}`);
+                requestParams.set(param, hiddenInput.value);
+            }
+        });
+        
+        // Log tất cả dữ liệu requestParams để debug
+        console.log('[DEBUG] Dữ liệu requestParams trước khi gửi:');
+        for (let pair of requestParams.entries()) {
+            console.log(pair[0] + ": " + pair[1]);
+        }
+        
         // Nếu đang chỉnh sửa, kiểm tra ID
         if (isEdit) {
-            const recruitmentId = formData.get('recruitmentId');
+            const recruitmentId = requestParams.get('recruitmentId');
             console.log("ID hoạt động cần cập nhật:", recruitmentId);
             if (!recruitmentId || recruitmentId === '0') {
                 showToast('Thiếu ID hoạt động tuyển quân hợp lệ khi cập nhật', 'error');
@@ -888,95 +1025,34 @@ function setupFormSubmission() {
         }
         
         // Double check - đảm bảo URL endpoint chính xác và tham số
-        const hasValidId = formData.get('recruitmentId') && formData.get('recruitmentId') !== '0';
+        const hasValidId = requestParams.get('recruitmentId') && requestParams.get('recruitmentId') !== '0';
         const finalUrl = isEdit && hasValidId
             ? `${contextPath}/recruitmentForm/update` 
             : `${contextPath}/recruitmentForm/create`;
-        
-        // Đảm bảo clubId tồn tại và hợp lệ
-        const clubId = formData.get('clubId');
-        
-        // Nếu không có clubId hoặc clubId không hợp lệ, hiển thị thông báo lỗi
-        if (!clubId || clubId === '0' || clubId === '') {
-            showToast('Thiếu thông tin CLB', 'error');
-            document.getElementById('submitBtn').disabled = false;
-            document.getElementById('submitBtn').innerHTML = isEdit ? 'Cập nhật hoạt động' : 'Tạo hoạt động';
             
-            // Hiển thị thông tin lỗi
-            showDebugInfo('Lỗi: Thiếu thông tin CLB', {
-                clubId: clubId
-            });
-            return;
-        }
+        // Log địa chỉ cuối cùng để debug
+        console.log('[DEBUG] URL endpoint cuối cùng:', finalUrl);
         
-        // Nếu đang tạo mới, xóa các trường không cần thiết để tránh lỗi
-        if (finalUrl.includes('/create')) {
-            formData.delete('recruitmentId');
-            formData.delete('status');
-        }
-        
-        // Đảm bảo clubId luôn được gửi đi với nhiều cách khác nhau
-        const clubIdValue = formData.get('clubId');
-        if (clubIdValue) {
-            // Thêm các biến thể của clubId với tên khác nhau để đảm bảo server nhận được
-            formData.append('clubID', clubIdValue);
-            formData.append('club_id', clubIdValue);
-            formData.append('club-id', clubIdValue);
-        } else {
-            // Nếu không tìm thấy clubId trong form, thử tìm từ các nguồn khác
-            const hiddenClubId = document.querySelector('input[name="clubId"]');
-            if (hiddenClubId && hiddenClubId.value) {
-                const value = hiddenClubId.value;
-                formData.append('clubId', value);
-                formData.append('clubID', value);
-                formData.append('club_id', value);
-                formData.append('club-id', value);
-            } else {
-                // Thử tìm từ URL hoặc data attribute
-                const urlParams = new URLSearchParams(window.location.search);
-                const urlClubId = urlParams.get('clubId');
-                if (urlClubId) {
-                    formData.append('clubId', urlClubId);
-                    formData.append('clubID', urlClubId);
-                } else {
-                    showDebugInfo('Không tìm thấy clubId từ bất kỳ nguồn nào', {
-                        fromURL: urlParams.get('clubId')
-                    });
-                }
+        // Chỉ gửi recruitmentId khi cập nhật để tránh trùng lặp tham số với id
+        if (isEdit && hasValidId) {
+            const recruitmentIdValue = requestParams.get('recruitmentId');
+            if (recruitmentIdValue) {
+                // Loại bỏ tham số "id" vì servlet RecruitmentFormServlet.handleUpdateCampaign đã kiểm tra và ưu tiên recruitmentId
+                requestParams.delete('id');
+                console.log('[DEBUG] Chỉ sử dụng recruitmentId:', recruitmentIdValue);
             }
         }
         
-        // Hiển thị loading
-        document.getElementById('submitBtn').disabled = true;
-        document.getElementById('submitBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
-        
-        // Tạo một đối tượng URLSearchParams để đảm bảo tham số được gửi đúng
-        const urlParams = new URLSearchParams();
-        for (const pair of formData.entries()) {
-            urlParams.append(pair[0], pair[1]);
-        }
-        
-        // Đảm bảo clubId luôn được gửi đi
-        if (!urlParams.has('clubId') || urlParams.get('clubId') === '') {
-            const hiddenClubId = document.querySelector('input[name="clubId"]');
-            if (hiddenClubId && hiddenClubId.value) {
-                urlParams.set('clubId', hiddenClubId.value);
-                console.log("Đã thêm clubId từ input hidden:", hiddenClubId.value);
+        // Double check: đảm bảo các trường quan trọng luôn được thêm vào dù có bị disabled hay không
+        criticalFields.forEach(fieldName => {
+            const field = document.getElementById(fieldName);
+            if (field && field.value && !requestParams.has(fieldName)) {
+                console.log(`[DEBUG] Double check - thêm giá trị trường quan trọng: ${fieldName}=${field.value}`);
+                requestParams.set(fieldName, field.value);
+            } else if (field && field.value) {
+                console.log(`[DEBUG] Double check - trường quan trọng ${fieldName} đã có giá trị: ${requestParams.get(fieldName)}`);
             }
-        }
-        
-        console.log("URLSearchParams:", urlParams.toString());
-        
-        // Debug: Log dữ liệu gửi đi
-        console.log("Đang gửi request đến:", finalUrl);
-        console.log("Dữ liệu gửi đi:", urlParams.toString());
-        
-        // Log các thông tin về vòng tuyển
-        console.log("Thông tin vòng tuyển:");
-        console.log("- Vòng nộp đơn:", urlParams.get('applicationStageStart'), "đến", urlParams.get('applicationStageEnd'));
-        console.log("- Vòng phỏng vấn:", urlParams.get('interviewStageStart'), "đến", urlParams.get('interviewStageEnd'));
-        console.log("- Vòng thử thách:", urlParams.get('challengeStageStart'), "đến", urlParams.get('challengeStageEnd'));
-        console.log("- Mô tả thử thách:", urlParams.get('challengeDescription') || '(Không có)');
+        });
         
         // Submit form data bằng fetch API với timeout
         const fetchPromise = fetch(finalUrl, {
@@ -984,9 +1060,15 @@ function setupFormSubmission() {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: urlParams.toString()
+            body: requestParams.toString()
         });
         
+        // Disable submit button to prevent double submission
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('submitBtn').innerHTML = isEdit ? 
+            '<i class="fas fa-spinner fa-spin"></i> Đang cập nhật...' : 
+            '<i class="fas fa-spinner fa-spin"></i> Đang tạo...';
+            
         // Thêm timeout để tránh trường hợp request bị treo
         const timeoutPromise = new Promise((_, reject) => 
             setTimeout(() => reject(new Error('Request timeout sau 10 giây')), 10000)
@@ -994,96 +1076,78 @@ function setupFormSubmission() {
         
         Promise.race([fetchPromise, timeoutPromise])
         .then(response => {
+            // Lưu lại response để có thể xem nội dung khi có lỗi
+            console.log(`[DEBUG] Server response status: ${response.status}`);
+            
             // Kiểm tra response status trước khi parse JSON
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                // Lấy text của response để hiểu rõ lỗi
+                return response.text().then(text => {
+                    console.error(`[ERROR] Server response: ${text}`);
+                    throw new Error(`HTTP error! Status: ${response.status}, Message: ${text.substring(0, 100)}...`);
+                });
             }
             
             // Thêm kiểm tra content-type
             const contentType = response.headers.get('content-type');
             if (!contentType || !contentType.includes('application/json')) {
-                throw new Error('Phản hồi không phải dạng JSON');
+                return response.text().then(text => {
+                    console.error(`[ERROR] Non-JSON response: ${text}`);
+                    throw new Error('Phản hồi không phải dạng JSON');
+                });
             }
             
             // Parse JSON
             return response.json();
         })
         .then(data => {
-            console.log("Response từ server:", data);
-            
-            if (data.success) {
-                showToast(isEdit ? 'Cập nhật hoạt động thành công' : 'Tạo hoạt động mới thành công', 'success');
-                
-                // Debug: Log các thông tin về stages trả về (nếu có)
-                if (data.stagesCreated) {
-                    console.log("Số vòng tuyển đã tạo:", data.stagesCreated);
-                }
-                
-                if (data.stages) {
-                    console.log("Thông tin các vòng tuyển:", data.stages);
-                }
-                
-                // Redirect sau khi tạo/cập nhật thành công
-                setTimeout(() => {
-                    const redirectUrl = isEdit 
-                        ? `${contextPath}/recruitment/view?id=${data.recruitmentId || formData.get('recruitmentId')}` 
-                        : `${contextPath}/recruitment?clubId=${formData.get('clubId')}`;
-                    window.location.href = redirectUrl;
-                }, 1500);
-            } else {
-                showToast(data.message || 'Có lỗi xảy ra khi xử lý yêu cầu', 'error');
-                document.getElementById('submitBtn').disabled = false;
-                document.getElementById('submitBtn').innerHTML = isEdit ? 'Cập nhật hoạt động' : 'Tạo hoạt động';
-                
-                // Hiển thị thông tin lỗi
-                showDebugInfo('Lỗi từ server', {
-                    message: data.message,
-                    url: finalUrl,
-                    requestedMode: isEdit ? 'UPDATE' : 'CREATE',
-                    formData: {
-                        clubId: formData.get('clubId'),
-                        gen: formData.get('gen'),
-                        templateId: formData.get('templateId'),
-                        title: formData.get('title')
-                    }
-                });
-            }
-        })
-        .catch(error => {
-            // Hiển thị thông báo lỗi 
-            let errorMessage = 'Đã xảy ra lỗi: ' + (error.message || 'Lỗi không xác định');
-            
-            if (error.message && error.message.includes('Thiếu ID hoạt động tuyển quân')) {
-                errorMessage = 'Thiếu ID hoạt động tuyển quân. Đây có thể là lỗi từ server khi xử lý request.';
-                
-                // Hiển thị thông tin lỗi cho trường hợp thiếu ID
-                showDebugInfo('Lỗi: Thiếu ID hoạt động tuyển quân', {
-                    mode: isEdit ? 'edit' : 'create',
-                    clubId: formData.get('clubId')
-                });
-            }
-            
-            showToast(errorMessage, 'error');
+            // Re-enable the button in any case
             document.getElementById('submitBtn').disabled = false;
             document.getElementById('submitBtn').innerHTML = isEdit ? 'Cập nhật hoạt động' : 'Tạo hoạt động';
             
-            // Hiển thị chi tiết dữ liệu form để debug
-            console.error('Form mode:', isEdit ? "edit" : "create");
-            console.error('Form URL đang được gọi:', url);
-            
-            // In ra tất cả các trường trong form data
-            console.error('Chi tiết form data:');
-            
-            // Log chi tiết về các vòng tuyển để debug
-            console.error('Thông tin các vòng tuyển:');
-            console.error('- Vòng nộp đơn:', formData.get('applicationStageStart'), 'đến', formData.get('applicationStageEnd'));
-            console.error('- Vòng phỏng vấn:', formData.get('interviewStageStart'), 'đến', formData.get('interviewStageEnd'), 
-                         'tại địa điểm ID:', formData.get('interviewLocationId') || '(Không có)');
-            console.error('- Vòng thử thách:', formData.get('challengeStageStart'), 'đến', formData.get('challengeStageEnd'),
-                         'mô tả:', formData.get('challengeDescription') || '(Không có)');
-            for (let pair of formData.entries()) {
-                console.error(pair[0] + ': ' + pair[1]);
+            // Handle response based on status
+            if (data.status === 'success') {
+                showToast(data.message || 'Thao tác thành công!', 'success');
+                
+                // Redirect to management page after success
+                setTimeout(() => {
+                    // Chuyển hướng về trang quản lý câu lạc bộ
+                    const clubId = submitUrlClubId || data.clubId;
+                    window.location.href = `${contextPath}/myclub?clubId=${clubId}`;
+                }, 1500);
+            } else {
+                // Show error message
+                showToast(data.message || 'Đã có lỗi xảy ra!', 'error');
+                
+                // Enable detailed logging when error occurs
+                if (data.errors) {
+                    showDebugInfo('Chi tiết lỗi', data.errors);
+                }
             }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('submitBtn').disabled = false;
+            document.getElementById('submitBtn').innerHTML = isEdit ? 'Cập nhật hoạt động' : 'Tạo hoạt động';
+            
+            // Hiển thị thông báo lỗi cụ thể hơn
+            let errorMessage = error.message;
+            if (errorMessage.includes('không thể thay đổi vì đã có người nộp đơn')) {
+                errorMessage = 'Mẫu đơn không thể thay đổi vì đã có người nộp đơn.';
+            } else if (errorMessage.includes('trùng lịch')) {
+                errorMessage = 'Không thể cập nhật hoạt động do trùng lịch với hoạt động khác.';
+            } else if (errorMessage.includes('đang diễn ra')) {
+                errorMessage = 'Không thể thay đổi thời gian của hoạt động đang diễn ra.';
+            }
+            
+            showToast('Đã có lỗi xảy ra: ' + errorMessage, 'error');
+            
+            // Show debug panel with error info
+            showDebugInfo('Lỗi khi gửi form', {
+                url: finalUrl,
+                error: error.toString(),
+                requestData: Object.fromEntries(requestParams.entries())
+            });
         });
     });
     
@@ -1116,113 +1180,336 @@ function autoSelectSingleTemplate() {
 }
 
 /**
- * Kiểm tra chồng lấn thời gian giữa các vòng tuyển
- * @returns {Object} Kết quả kiểm tra với các thuộc tính: valid, message
+ * Kiểm tra xem một vòng tuyển đã bắt đầu chưa dựa trên ngày hiện tại
+ * @param {Date} startDate Ngày bắt đầu của vòng tuyển
+ * @returns {boolean} True nếu vòng tuyển đã bắt đầu, ngược lại là false
  */
-function checkStageOverlap() {
-    // Thu thập dữ liệu thời gian của các vòng
-    const stages = [
-        {
-            name: 'Nộp đơn',
-            startDate: new Date(document.getElementById('applicationStageStart').value),
-            endDate: new Date(document.getElementById('applicationStageEnd').value)
-        },
-        {
-            name: 'Phỏng vấn',
-            startDate: new Date(document.getElementById('interviewStageStart').value),
-            endDate: new Date(document.getElementById('interviewStageEnd').value)
-        },
-        {
-            name: 'Thử thách',
-            startDate: new Date(document.getElementById('challengeStageStart').value),
-            endDate: new Date(document.getElementById('challengeStageEnd').value)
-        }
-    ];
+function hasStageStarted(startDate) {
+    const currentDate = new Date();
+    // Xóa phần thời gian để so sánh ngày chính xác
+    currentDate.setHours(0, 0, 0, 0);
     
-    // Lọc bỏ các vòng không có dữ liệu
-    const validStages = stages.filter(stage => 
-        !isNaN(stage.startDate) && !isNaN(stage.endDate)
-    );
+    // Tạo một đối tượng ngày mới từ startDate để tránh các vấn đề tham chiếu
+    const stageStartDate = new Date(startDate);
+    stageStartDate.setHours(0, 0, 0, 0);
     
-    // Sắp xếp theo ngày bắt đầu
-    validStages.sort((a, b) => a.startDate - b.startDate);
-    
-    // Kiểm tra chồng lấn
-    for (let i = 0; i < validStages.length - 1; i++) {
-        const current = validStages[i];
-        const next = validStages[i + 1];
-        
-        // Kiểm tra nếu ngày kết thúc của vòng hiện tại > ngày bắt đầu của vòng tiếp theo
-        if (current.endDate > next.startDate) {
-            console.error('Phát hiện chồng lấn thời gian:', {
-                stage1: current,
-                stage2: next
-            });
-            return {
-                valid: false,
-                message: `Thời gian chồng lấn giữa vòng ${current.name} và vòng ${next.name}. Vòng ${current.name} kết thúc sau khi vòng ${next.name} bắt đầu.`
-            };
-        }
-    }
-    
-    return { valid: true };
+    // Nếu ngày bắt đầu vòng tuyển là hôm nay hoặc trước đó, thì nó đã bắt đầu
+    return stageStartDate <= currentDate;
 }
 
 /**
- * Kiểm tra chồng lấn thời gian các vòng tuyển
+ * Kiểm tra xem một chiến dịch đã có đơn đăng ký nào được nộp chưa
+ * Điều này sẽ được xác định bởi server, cần một API riêng để kiểm tra
+ * @returns {boolean} True nếu có đơn đăng ký, ngược lại là false
  */
-function checkStageTimeOverlap() {
-    // Lấy các trường ngày tháng
-    const appStart = document.getElementById('applicationStageStart').value;
-    const appEnd = document.getElementById('applicationStageEnd').value;
-    const interviewStart = document.getElementById('interviewStageStart').value;
-    const interviewEnd = document.getElementById('interviewStageEnd').value;
-    const challengeStart = document.getElementById('challengeStageStart').value;
-    const challengeEnd = document.getElementById('challengeStageEnd').value;
+function hasCampaignApplications() {
+    // Tìm element có data-attribute đánh dấu đã có đơn đăng ký - kiểm tra nhiều cách viết
+    const hasApplicationsElement = document.querySelector('[data-has-applications="true"]');
+    const altApplicationsElement = document.querySelector('[data-has_applications="true"]');
+    const alt2ApplicationsElement = document.querySelector('[data-hasApplications="true"]');
+    const hasApplicationsFlag = document.getElementById('hasApplicationsFlag');
     
-    // Kiểm tra các trường có dữ liệu không
-    if (!appStart || !appEnd || !interviewStart || !interviewEnd) {
-        console.log("[DEBUG] Thiếu dữ liệu cho một số vòng tuyển, không thể kiểm tra chồng lấn thời gian");
-        return;
+    // Kiểm tra và log các nguồn thông tin về đơn đăng ký
+    console.log("[DEBUG] Kiểm tra thông tin đơn đăng ký:");
+    console.log("- hasApplicationsElement [data-has-applications]:", hasApplicationsElement ? "có" : "không có");
+    console.log("- altApplicationsElement [data-has_applications]:", altApplicationsElement ? "có" : "không có");
+    console.log("- alt2ApplicationsElement [data-hasApplications]:", alt2ApplicationsElement ? "có" : "không có");
+    console.log("- hasApplicationsFlag:", hasApplicationsFlag ? (hasApplicationsFlag.value === 'true' ? "true" : "false") : "không có");
+    
+    // Kiểm tra data-has-applications (chuẩn hóa dấu gạch ngang)
+    if (hasApplicationsElement) {
+        console.log("Đã tìm thấy đánh dấu có đơn đăng ký từ element [data-has-applications]");
+        return true;
     }
     
-    // Chuyển thành đối tượng Date
-    const appStartDate = new Date(appStart);
-    const appEndDate = new Date(appEnd);
-    const interviewStartDate = new Date(interviewStart);
-    const interviewEndDate = new Date(interviewEnd);
-    const challengeStartDate = challengeStart ? new Date(challengeStart) : null;
-    const challengeEndDate = challengeEnd ? new Date(challengeEnd) : null;
-    
-    const warnings = [];
-    
-    // Kiểm tra thứ tự thời gian của từng vòng
-    if (appStartDate > appEndDate) {
-        warnings.push("Ngày bắt đầu vòng Nộp đơn phải trước ngày kết thúc");
+    // Kiểm tra phiên bản thay thế data-has_applications (dùng dấu gạch dưới)
+    if (altApplicationsElement) {
+        console.log("Đã tìm thấy đánh dấu có đơn đăng ký từ element [data-has_applications]");
+        return true;
     }
     
-    if (interviewStartDate > interviewEndDate) {
-        warnings.push("Ngày bắt đầu vòng Phỏng vấn phải trước ngày kết thúc");
+    // Kiểm tra phiên bản thay thế data-hasApplications (camelCase)
+    if (alt2ApplicationsElement) {
+        console.log("Đã tìm thấy đánh dấu có đơn đăng ký từ element [data-hasApplications]");
+        return true;
     }
     
-    if (challengeStartDate && challengeEndDate && challengeStartDate > challengeEndDate) {
-        warnings.push("Ngày bắt đầu vòng Thử thách phải trước ngày kết thúc");
+    // Kiểm tra flag từ hidden input
+    if (hasApplicationsFlag && hasApplicationsFlag.value === 'true') {
+        console.log("Đã tìm thấy đánh dấu có đơn đăng ký từ flag");
+        return true;
     }
     
-    // Kiểm tra thứ tự giữa các vòng
-    if (interviewStartDate < appEndDate) {
-        warnings.push("Vòng Phỏng vấn nên bắt đầu sau khi vòng Nộp đơn kết thúc");
+    // Kiểm tra trong form có input hidden chứa thông tin về số lượng đơn đăng ký không
+    const applicationCountInput = document.querySelector('input[name="applicationCount"]');
+    if (applicationCountInput && parseInt(applicationCountInput.value) > 0) {
+        console.log("Đã tìm thấy đánh dấu có đơn đăng ký từ applicationCount:", applicationCountInput.value);
+        return true;
     }
     
-    if (challengeStartDate && challengeStartDate < interviewEndDate) {
-        warnings.push("Vòng Thử thách nên bắt đầu sau khi vòng Phỏng vấn kết thúc");
+    // Kiểm tra trong JSP có biến applicationCount đã được khai báo không
+    if (typeof applicationCount !== 'undefined' && applicationCount > 0) {
+        console.log("Đã tìm thấy đánh dấu có đơn đăng ký từ biến applicationCount:", applicationCount);
+        return true;
     }
     
-    // Hiển thị kết quả debug
-    if (warnings.length > 0) {
-        console.log("[DEBUG] Phát hiện vấn đề thời gian vòng tuyển:", warnings);
-        showDebugInfo("Cảnh báo về thời gian vòng tuyển", warnings);
+    // Kiểm tra thêm các thuộc tính data- khác
+    const allDataElements = document.querySelectorAll('[data-*]');
+    for (let i = 0; i < allDataElements.length; i++) {
+        const el = allDataElements[i];
+        const dataAttributes = el.dataset;
+        
+        // Kiểm tra các thuộc tính data- có chứa từ "application" và có giá trị "true" hoặc là số > 0
+        for (let key in dataAttributes) {
+            if (key.toLowerCase().includes('application') && 
+                (dataAttributes[key] === 'true' || parseInt(dataAttributes[key]) > 0)) {
+                console.log(`Đã tìm thấy đánh dấu có đơn đăng ký từ thuộc tính data-${key}:`, dataAttributes[key]);
+                return true;
+            }
+        }
+    }
+    
+    // Trong trường hợp không tìm thấy đánh dấu nào, trả về false - tức là không có đơn đăng ký
+    console.log("Không tìm thấy đánh dấu nào về đơn đăng ký - Có thể chỉnh sửa mẫu đơn");
+    return false;
+}
+
+/**
+ * Vô hiệu hóa các trường không được phép thay đổi dựa trên trạng thái chiến dịch
+ */
+function setupFieldRestrictions() {
+    if (!isEdit) {
+        return; // Không có hạn chế nào trong chế độ tạo mới
+    }
+    
+    console.log("Thiết lập các hạn chế trường trong chế độ chỉnh sửa");
+    
+    // 1. Vô hiệu hóa lựa chọn mẫu đơn nếu đã có người đăng ký
+    const templateSelect = document.getElementById('templateId');
+    if (templateSelect) {
+        // Kiểm tra đúng trạng thái của đơn đăng ký
+        const hasApplications = hasCampaignApplications();
+        console.log("Kiểm tra ràng buộc templateSelect - Có đơn đăng ký:", hasApplications);
+        
+        // Lưu lại giá trị ban đầu để đảm bảo không bị mất
+        const originalTemplateValue = templateSelect.value;
+        
+        // Xóa hidden input và warning message nếu đã tồn tại trước đó
+        const existingHiddenInput = templateSelect.parentNode.querySelector('input[type="hidden"][name="templateId"]');
+        if (existingHiddenInput) {
+            templateSelect.parentNode.removeChild(existingHiddenInput);
+        }
+        
+        const existingWarning = templateSelect.parentNode.querySelector('.text-warning');
+        if (existingWarning) {
+            templateSelect.parentNode.removeChild(existingWarning);
+        }
+        
+        // Luôn thêm hidden input để đảm bảo giá trị luôn được gửi đi
+        const hiddenTemplateInput = document.createElement('input');
+        hiddenTemplateInput.type = 'hidden';
+        hiddenTemplateInput.name = 'templateId';
+        hiddenTemplateInput.value = originalTemplateValue;
+        templateSelect.parentNode.appendChild(hiddenTemplateInput);
+        
+        if (hasApplications) {
+            templateSelect.disabled = true;
+            // Thêm ghi chú giải thích tại sao nó bị vô hiệu hóa
+            const noteElement = document.createElement('div');
+            noteElement.className = 'text-warning mt-1';
+            noteElement.innerHTML = '<small><i class="fas fa-info-circle"></i> Mẫu đơn không thể thay đổi khi đã có người nộp đơn.</small>';
+            templateSelect.parentNode.appendChild(noteElement);
+            console.log(`[DEBUG] Đã thêm hidden input cho templateId với giá trị: ${originalTemplateValue} (disabled)`);
+        } else {
+            console.log("Mẫu đơn có thể thay đổi vì chưa có đơn đăng ký");
+            templateSelect.disabled = false;
+            console.log(`[DEBUG] Đã thêm hidden input cho templateId với giá trị: ${originalTemplateValue} (enabled)`);
+        }
+    }
+    
+    // 2. Nếu vòng tuyển đã bắt đầu, vô hiệu hóa trường ngày bắt đầu
+    if (typeof stagesFromServer !== 'undefined' && Array.isArray(stagesFromServer) && stagesFromServer.length > 0) {
+        console.log("Checking stage dates for restrictions");
+        
+        // Tạo một bản sao của stagesFromServer để tránh các vấn đề tham chiếu
+        const stages = [...stagesFromServer];
+        
+        stages.forEach(stage => {
+            const stageName = String(stage.stageName || '').toUpperCase();
+            const stageStartDate = new Date(stage.startDate);
+            
+            // Nếu vòng tuyển đã bắt đầu, vô hiệu hóa trường ngày bắt đầu
+            if (hasStageStarted(stageStartDate)) {
+                console.log(`Vòng ${stageName} đã bắt đầu, vô hiệu hóa trường ngày bắt đầu`);
+                
+                let startDateFieldId;
+                switch (stageName) {
+                    case 'APPLICATION':
+                        startDateFieldId = 'applicationStageStart';
+                        break;
+                    case 'INTERVIEW':
+                        startDateFieldId = 'interviewStageStart';
+                        break;
+                    case 'CHALLENGE':
+                        startDateFieldId = 'challengeStageStart';
+                        break;
+                    default:
+                        console.log(`Tên vòng tuyển không xác định: ${stageName}`);
+                        return;
+                }
+                
+                const startDateField = document.getElementById(startDateFieldId);
+                if (startDateField) {
+                    // Lưu lại giá trị ban đầu
+                    const originalDateValue = startDateField.value;
+                    
+                    // Xóa hidden input và warning message nếu đã tồn tại trước đó
+                    const existingHiddenInput = startDateField.parentNode.querySelector(`input[type="hidden"][name="${startDateFieldId}"]`);
+                    if (existingHiddenInput) {
+                        startDateField.parentNode.removeChild(existingHiddenInput);
+                    }
+                    
+                    const existingWarning = startDateField.parentNode.querySelector('.text-warning');
+                    if (existingWarning) {
+                        startDateField.parentNode.removeChild(existingWarning);
+                    }
+                    
+                    startDateField.disabled = true;
+                    // Thêm ghi chú giải thích tại sao nó bị vô hiệu hóa
+                    const noteElement = document.createElement('div');
+                    noteElement.className = 'text-warning mt-1';
+                    noteElement.innerHTML = '<small><i class="fas fa-info-circle"></i> Ngày bắt đầu không thể thay đổi khi vòng đã diễn ra.</small>';
+                    startDateField.parentNode.appendChild(noteElement);
+                    
+                    // Thêm hidden input để đảm bảo giá trị vẫn được gửi đi
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = startDateFieldId;
+                    hiddenInput.value = originalDateValue;
+                    startDateField.parentNode.appendChild(hiddenInput);
+                    
+                    console.log(`[DEBUG] Đã thêm hidden input cho ${startDateFieldId} với giá trị: ${originalDateValue}`);
+                }
+            }
+        });
     } else {
-        console.log("[DEBUG] Thứ tự thời gian các vòng tuyển OK");
+        console.log("Không có dữ liệu về các vòng tuyển từ server");
     }
 }
+
+/**
+ * Debug function to check all disabled fields and their values
+ * This helps identify which fields need to be manually included in form submission
+ */
+function debugDisabledFields() {
+    console.log('[DEBUG] Checking disabled fields:');
+    
+    // Check all form elements
+    const formElements = document.querySelectorAll('#recruitmentForm input, #recruitmentForm select, #recruitmentForm textarea');
+    
+    let disabledFields = [];
+    
+    formElements.forEach(field => {
+        if (field.disabled) {
+            disabledFields.push({
+                name: field.name,
+                id: field.id,
+                value: field.value,
+                type: field.type,
+                tagName: field.tagName
+            });
+            console.log(`[DEBUG] Found disabled field: ${field.name || field.id}, value: ${field.value}`);
+            
+            // Check if there's a hidden input with the same name
+            const hiddenInput = field.parentNode.querySelector(`input[type="hidden"][name="${field.name}"]`);
+            if (hiddenInput) {
+                console.log(`[DEBUG] Hidden input found for ${field.name}: ${hiddenInput.value}`);
+            } else {
+                console.log(`[DEBUG] No hidden input found for ${field.name}`);
+            }
+        }
+    });
+    
+    if (disabledFields.length === 0) {
+        console.log('[DEBUG] No disabled fields found.');
+    }
+    
+    // Check critical fields
+    console.log('[DEBUG] Checking critical fields:');
+    criticalFields.forEach(fieldName => {
+        const field = document.getElementById(fieldName);
+        if (field) {
+            console.log(`[DEBUG] Critical field ${fieldName}: value=${field.value}, disabled=${field.disabled}`);
+        } else {
+            console.log(`[DEBUG] Critical field ${fieldName} not found in DOM`);
+        }
+    });
+    
+    return disabledFields;
+}
+
+/**
+ * Kiểm tra và sửa các thuộc tính data-* trong DOM để đảm bảo nhất quán
+ * Hàm này giúp đồng bộ các thuộc tính data-has-applications và data-has_applications
+ */
+function normalizeApplicationFlags() {
+    // Kiểm tra và đồng bộ hóa các flags
+    const dashElements = document.querySelectorAll('[data-has-applications]');
+    const underscoreElements = document.querySelectorAll('[data-has_applications]');
+    
+    // Log số lượng mỗi loại phần tử tìm thấy
+    console.log(`[DEBUG] Kiểm tra DOM: Tìm thấy ${dashElements.length} phần tử [data-has-applications] và ${underscoreElements.length} phần tử [data-has_applications]`);
+    
+    // Đồng bộ từ dash sang underscore
+    dashElements.forEach(el => {
+        const value = el.getAttribute('data-has-applications');
+        if (value === 'true') {
+            // Đồng bộ sang cả dạng underscore
+            el.setAttribute('data-has_applications', 'true');
+            console.log('[DEBUG] Đồng bộ data-has-applications -> data-has_applications: true');
+        }
+    });
+    
+    // Đồng bộ từ underscore sang dash
+    underscoreElements.forEach(el => {
+        const value = el.getAttribute('data-has_applications');
+        if (value === 'true') {
+            // Đồng bộ sang cả dạng dash
+            el.setAttribute('data-has-applications', 'true');
+            console.log('[DEBUG] Đồng bộ data-has_applications -> data-has-applications: true');
+        }
+    });
+    
+    // Đặt flag hidden nếu bất kỳ phần tử nào có giá trị true
+    let hasApplications = false;
+    
+    // Kiểm tra cả hai kiểu thuộc tính
+    dashElements.forEach(el => {
+        if (el.getAttribute('data-has-applications') === 'true') {
+            hasApplications = true;
+        }
+    });
+    
+    underscoreElements.forEach(el => {
+        if (el.getAttribute('data-has_applications') === 'true') {
+            hasApplications = true;
+        }
+    });
+    
+    // Nếu chưa có input flag, thêm vào
+    let hasApplicationsFlag = document.getElementById('hasApplicationsFlag');
+    if (!hasApplicationsFlag) {
+        hasApplicationsFlag = document.createElement('input');
+        hasApplicationsFlag.type = 'hidden';
+        hasApplicationsFlag.id = 'hasApplicationsFlag';
+        hasApplicationsFlag.name = 'hasApplicationsFlag';
+        document.getElementById('recruitmentForm').appendChild(hasApplicationsFlag);
+    }
+    
+    // Cập nhật giá trị flag
+    hasApplicationsFlag.value = hasApplications.toString();
+    console.log(`[DEBUG] Đã cập nhật hasApplicationsFlag = ${hasApplications}`);
+}
+
+
+
