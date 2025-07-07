@@ -205,7 +205,11 @@ public class FormResponseDAO extends DBContext {
     
 
     public boolean addUserToClub(String userId, int clubId, int departmentId) {
-        String sql = "INSERT INTO UserClubs (UserID, ClubID, ClubDepartmentID, RoleID, JoinDate) VALUES (?, ?, ?, ?, ?)";
+        String sql = """
+                    INSERT INTO UserClubs (UserID, ClubID, ClubDepartmentID, RoleID, JoinDate, Gen)
+                    SELECT ?, ?, ?, ?, ?, YEAR(CURRENT_DATE()) - YEAR(c.EstablishedDate)
+                    FROM Clubs c WHERE c.ClubID = ?
+                    """;
 
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -214,6 +218,7 @@ public class FormResponseDAO extends DBContext {
             ps.setInt(3, departmentId); 
             ps.setInt(4, 4); // Role 4 là member
             ps.setTimestamp(5, new Timestamp(new Date().getTime()));
+            ps.setInt(6, clubId); // ClubID lần thứ hai cho việc tính Gen
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error adding user to club", e);

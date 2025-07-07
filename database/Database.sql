@@ -339,11 +339,13 @@ CREATE TABLE Events (
     EventDate DATETIME,
     EndTime DATETIME,
     LocationID INT,
-    ClubID INT NOT NULL,
+    ClubID INT NOT NULL, 
     IsPublic BOOLEAN DEFAULT 0,
     FormTemplateID INT,
     Capacity INT,
     Status ENUM('Pending', 'Processing', 'Completed'),
+    ApprovalStatus ENUM('PENDING', 'APPROVED', 'REJECTED') DEFAULT 'PENDING',
+    RejectionReason TEXT,
     SemesterID VARCHAR(10),
     FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID),
     FOREIGN KEY (FormTemplateID) REFERENCES ApplicationFormTemplates(TemplateID),
@@ -351,40 +353,38 @@ CREATE TABLE Events (
     FOREIGN KEY (LocationID) REFERENCES Locations(LocationID)
 );
 
-
-
-INSERT INTO Events (EventName, EventImg, Description, EventDate, EndTime, LocationID, ClubID, IsPublic, Capacity, Status, SemesterID) VALUES
+INSERT INTO Events (EventName, EventImg, Description, EventDate, EndTime, LocationID, ClubID, IsPublic, Capacity, Status, SemesterID, ApprovalStatus, RejectionReason) VALUES
 -- Spring 2025
-('Lễ Hội Âm Nhạc Tết 2025', 'images/events/tetmusic2025.jpg', '...', '2025-02-01 19:00:00', '2025-02-01 22:00:00', 2, 6, TRUE, 300, 'COMPLETED', 'SP25'),
-('Hội Thảo Kỹ Năng Viết Tiếng Anh', 'images/events/englishworkshop2025.jpg', '...', '2025-03-05 09:00:00', '2025-03-05 11:00:00', 9, 3, TRUE, 60, 'COMPLETED', 'SP25'),
-('Cuộc Thi Tranh Biện Xã Hội 2025', 'images/events/debate2025.jpg', '...', '2025-04-10 13:00:00', '2025-04-10 15:00:00', 3, 8, TRUE, 100, 'COMPLETED', 'SP25'),
-('Workshop: Xây dựng Website với Spring Boot', '/images/events/springboot_workshop.jpg', '...', '2025-04-20 14:00:00', '2025-04-20 17:00:00', 26, 4, 0, 100, 'COMPLETED', 'SP25'),
+('Lễ Hội Âm Nhạc Tết 2025', 'images/events/tetmusic2025.jpg', '...', '2025-02-01 19:00:00', '2025-02-01 22:00:00', 2, 6, TRUE, 300, 'COMPLETED', 'SP25', 'APPROVED', NULL),
+('Hội Thảo Kỹ Năng Viết Tiếng Anh', 'images/events/englishworkshop2025.jpg', '...', '2025-03-05 09:00:00', '2025-03-05 11:00:00', 9, 3, TRUE, 60, 'COMPLETED', 'SP25', 'APPROVED', NULL),
+('Cuộc Thi Tranh Biện Xã Hội 2025', 'images/events/debate2025.jpg', '...', '2025-04-10 13:00:00', '2025-04-10 15:00:00', 3, 8, TRUE, 100, 'COMPLETED', 'SP25', 'APPROVED', NULL),
+('Workshop: Xây dựng Website với Spring Boot', 'images/events/springboot_workshop.jpg', '...', '2025-04-20 14:00:00', '2025-04-20 17:00:00', 26, 4, 0, 100, 'COMPLETED', 'SP25', 'APPROVED', NULL),
 
--- Summer 2025 
-('FPTU Showcase 2025 Chung Kết', 'images/events/showcase2025.jpg', '...', '2025-06-30 09:00:00', '2025-06-30 13:00:00', 1, 7, TRUE, 200, 'PENDING', 'SU25'),
-('Thử Thách Lập Trình FPTU 2025', 'images/events/coding2025.jpg', '...', '2025-06-21 08:00:00', '2025-06-21 11:00:00', 25, 4, TRUE, 50, 'COMPLETED', 'SU25'),
-('Giải Bóng Đá Sinh Viên FPTU 2025', 'images/events/football2025.jpg', '...', '2025-08-05 08:00:00', '2025-09-05 10:00:00', 5, 1, TRUE, 120, 'PENDING', 'SU25'),
-('Chiến Dịch Tình Nguyện Xanh 2025', 'images/events/greenfuture2025.jpg', '...', '2025-07-25 07:00:00', '2025-07-25 12:00:00', 35, 5, TRUE, 40, 'PENDING', 'SU25'),
-('Giải Bóng Rổ 3x3 FPTU', 'images/events/basketball2025.jpg', '...', '2025-07-05 14:00:00', '2025-07-05 16:00:00', 4, 2, FALSE, 80, 'COMPLETED', 'SU25'),
-('Ngày Hội Âm Nhạc FPTU 2025', 'images/events/musicday2025.jpg', '...', '2025-07-10 10:00:00', '2025-07-10 13:00:00', 1, 6, FALSE, 250, 'PENDING', 'SU25'),
-('Hackathon Đổi Mới AI', 'images/events/aihackathon2025.jpg', '...', '2025-07-15 08:00:00', '2025-07-15 14:00:00', 25, 4, TRUE, 45, 'PENDING', 'SU25'),
-('Cuộc thi Code War: Thử thách thuật toán', '/images/events/codewar.jpg', '...', '2025-07-31 09:00:00', '2025-07-31 13:00:00', 27, 4, 1, 120, 'PENDING', 'SU25'),
+-- Summer 2025
+('FPTU Showcase 2025 Chung Kết', 'images/events/showcase2025.jpg', '...', '2025-08-02 09:00:00', '2025-08-02 13:00:00', 1, 7, TRUE, 200, 'PENDING', 'SU25', 'PENDING', NULL),
+('Thử Thách Lập Trình FPTU 2025', 'images/events/coding2025.jpg', '...', '2025-06-21 08:00:00', '2025-06-21 11:00:00', 25, 4, TRUE, 50, 'COMPLETED', 'SU25', 'APPROVED', NULL),
+('Giải Bóng Đá Sinh Viên FPTU 2025', 'images/events/football2025.jpg', '...', '2025-08-05 08:00:00', '2025-08-05 10:00:00', 5, 1, TRUE, 120, 'PENDING', 'SU25', 'PENDING', NULL),
+('Chiến Dịch Tình Nguyện Xanh 2025', 'images/events/greenfuture2025.jpg', '...', '2025-08-06 07:00:00', '2025-08-06 12:00:00', 35, 5, TRUE, 40, 'PENDING', 'SU25', 'PENDING', NULL),
+('Giải Bóng Rổ 3x3 FPTU', 'images/events/basketball2025.jpg', '...', '2025-07-05 14:00:00', '2025-07-05 16:00:00', 4, 2, FALSE, 80, 'COMPLETED', 'SU25', 'APPROVED', NULL),
+('Ngày Hội Âm Nhạc FPTU 2025', 'images/events/musicday2025.jpg', '...', '2025-08-08 10:00:00', '2025-08-08 13:00:00', 1, 6, FALSE, 250, 'PENDING', 'SU25', 'PENDING', NULL),
+('Hackathon Đổi Mới AI', 'images/events/aihackathon2025.jpg', '...', '2025-08-12 08:00:00', '2025-08-12 14:00:00', 25, 4, TRUE, 45, 'PENDING', 'SU25', 'PENDING', NULL),
+('Cuộc thi Code War: Thử thách thuật toán', 'images/events/codewar.jpg', '...', '2025-07-31 09:00:00', '2025-07-31 13:00:00', 27, 4, 1, 120, 'PENDING', 'SU25', 'PENDING', NULL),
 
 -- Spring 2024
-('Lễ Hội Làng Tết 2024', 'images/events/villagefest2024.jpg', '...', '2024-01-20 10:00:00', '2024-01-20 13:00:00', 36, 6, TRUE, 500, 'COMPLETED', 'SP24'),
+('Lễ Hội Làng Tết 2024', 'images/events/villagefest2024.jpg', '...', '2024-01-20 10:00:00', '2024-01-20 13:00:00', 36, 6, TRUE, 500, 'COMPLETED', 'SP24', 'APPROVED', NULL),
 
 -- Summer 2024
-('Chiến Dịch Tình Nguyện Hè 2024', 'images/events/summervolunteer2024.jpg', '...', '2024-07-15 07:00:00', '2024-07-15 12:00:00', 36, 5, FALSE, 35, 'COMPLETED', 'SU24'),
+('Chiến Dịch Tình Nguyện Hè 2024', 'images/events/summervolunteer2024.jpg', '...', '2024-07-15 07:00:00', '2024-07-15 12:00:00', 36, 5, FALSE, 35, 'COMPLETED', 'SU24', 'APPROVED', NULL),
 
 -- Fall 2024
-('Trại Lập Trình FPTU 2024', 'images/events/codingbootcamp2024.jpg', '...', '2024-11-20 08:00:00', '2024-11-20 12:00:00', 25, 4, TRUE, 60, 'COMPLETED', 'FA24'),
-('Đêm Nhạc Rock 2024', 'images/events/rocknight2024.jpg', '...', '2024-12-10 19:00:00', '2024-12-10 22:00:00', 1, 6, TRUE, 200, 'COMPLETED', 'FA24'),
-('Cuộc Thi Nói Tiếng Anh 2024', 'images/events/englishcontest2024.jpg', '...', '2024-11-25 09:00:00', '2024-11-25 11:00:00', 10, 3, TRUE, 70, 'COMPLETED', 'FA24'),
-('Giải Bóng Đá 5x5 FPTU 2024', 'images/events/football2024.jpg', '...', '2024-12-05 14:00:00', '2024-12-05 16:00:00', 5, 1, FALSE, 100, 'COMPLETED', 'FA24'),
-('Ngày Hội Nhảy FPTU 2024', 'images/events/dancefest2024.jpg', '...', '2024-12-15 10:00:00', '2024-12-15 13:00:00', 2, 7, TRUE, 400, 'COMPLETED', 'FA24'),
-('Hội Thảo Phát Triển Web 2024', 'images/events/webdev2024.jpg', '...', '2024-11-15 14:00:00', '2024-11-15 16:00:00', 11, 4, TRUE, 50, 'COMPLETED', 'FA24'),
-('FPTU Dance Battle 2024', 'images/events/dancebattle2024.jpg', '...', '2024-11-30 18:00:00', '2024-11-30 21:00:00', 1, 7, TRUE, 150, 'COMPLETED', 'FA24'),
-('Cuộc Thi Tranh Biện 2024', 'images/events/debate2024.jpg', '...', '2024-12-01 09:00:00', '2024-12-01 11:00:00', 12, 8, TRUE, 65, 'COMPLETED', 'FA24');
+('Trại Lập Trình FPTU 2024', 'images/events/codingbootcamp2024.jpg', '...', '2024-11-20 08:00:00', '2024-11-20 12:00:00', 25, 4, TRUE, 60, 'COMPLETED', 'FA24', 'APPROVED', NULL),
+('Đêm Nhạc Rock 2024', 'images/events/rocknight2024.jpg', '...', '2024-12-10 19:00:00', '2024-12-10 22:00:00', 1, 6, TRUE, 200, 'COMPLETED', 'FA24', 'APPROVED', NULL),
+('Cuộc Thi Nói Tiếng Anh 2024', 'images/events/englishcontest2024.jpg', '...', '2024-11-25 09:00:00', '2024-11-25 11:00:00', 10, 3, TRUE, 70, 'COMPLETED', 'FA24', 'APPROVED', NULL),
+('Giải Bóng Đá 5x5 FPTU 2024', 'images/events/football2024.jpg', '...', '2024-12-05 14:00:00', '2024-12-05 16:00:00', 5, 1, FALSE, 100, 'COMPLETED', 'FA24', 'APPROVED', NULL),
+('Ngày Hội Nhảy FPTU 2024', 'images/events/dancefest2024.jpg', '...', '2024-12-15 10:00:00', '2024-12-15 13:00:00', 2, 7, TRUE, 400, 'COMPLETED', 'FA24', 'APPROVED', NULL),
+('Hội Thảo Phát Triển Web 2024', 'images/events/webdev2024.jpg', '...', '2024-11-15 14:00:00', '2024-11-15 16:00:00', 11, 4, TRUE, 50, 'COMPLETED', 'FA24', 'APPROVED', NULL),
+('FPTU Dance Battle 2024', 'images/events/dancebattle2024.jpg', '...', '2024-11-30 18:00:00', '2024-11-30 21:00:00', 1, 7, TRUE, 150, 'COMPLETED', 'FA24', 'APPROVED', NULL),
+('Cuộc Thi Tranh Biện 2024', 'images/events/debate2024.jpg', '...', '2024-12-01 09:00:00', '2024-12-01 11:00:00', 12, 8, TRUE, 65, 'COMPLETED', 'FA24', 'APPROVED', NULL);
 
 
 UPDATE Events 
@@ -660,6 +660,11 @@ StartedTime DATETIME,
 FOREIGN KEY (DepartmentID) REFERENCES Departments(DepartmentID)
 );
 
+ INSERT INTO DepartmentMeeting (ClubDepartmentID, URLMeeting, StartedTime) VALUES
+(3, 'https://meet.google.com/dept1', '2025-06-30 10:00:00'), 
+(1, 'https://meet.google.com/dept2', '2025-06-29 14:00:00'), 
+(5, 'https://meet.google.com/dept3', '2025-06-28 09:00:00');
+
 -- ================================================================================
 -- ========================================
 -- NOTIFICATIONS
@@ -821,7 +826,20 @@ INSERT INTO FavoriteClubs (UserID, ClubID, AddedDate) VALUES
 ('U002', 2, '2025-06-08 16:10:00'),
 ('U002', 5, '2025-06-08 16:15:00');
 
-
+CREATE TABLE FavoriteEvents (
+    FavoriteEventID INT PRIMARY KEY AUTO_INCREMENT,
+    UserID VARCHAR(10) NOT NULL,
+    EventID INT NOT NULL,
+    AddedDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE,
+    FOREIGN KEY (EventID) REFERENCES Events(EventID) ON DELETE CASCADE,
+    UNIQUE (UserID, EventID) -- Đảm bảo mỗi người dùng chỉ thêm một sự kiện yêu thích một lần
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+INSERT INTO FavoriteEvents (UserID, EventID, AddedDate) VALUES
+('U001', 1, '2025-06-15 10:00:00'),
+('U001', 3, '2025-06-15 10:05:00'),
+('U002', 2, '2025-06-15 10:10:00'),
+('U002', 5, '2025-06-15 10:15:00');
 
 -- ================================================================================
 -- ========================================
@@ -871,5 +889,360 @@ INSERT INTO Notifications (Title, Content, CreatedDate, ReceiverID, Priority, St
 ('Thông báo sự kiện mới', 'Câu lạc bộ Âm Nhạc vừa tạo sự kiện mới: Đêm Nhạc Acoustic', '2025-06-26 09:00:00', 'U001', 'LOW', 'UNREAD'),
 ('Thông báo đăng ký thành công', 'Bạn đã đăng ký tham gia sự kiện Giải Bóng Đá Sinh Viên 2025 thành công', '2025-06-23 10:00:00', 'U002', 'MEDIUM', 'UNREAD'),
 ('Thông báo sự kiện mới', 'Câu lạc bộ Âm Nhạc vừa tạo sự kiện mới: Đêm Nhạc Acoustic', '2025-06-26 09:00:00', 'U002', 'LOW', 'UNREAD');
+
+INSERT INTO Users (UserID, FullName, Email, Password, PermissionID, Status) VALUES
+('HA178166', 'Nguyễn Văn An', 'annvha178166@fpt.edu.vn', '123456', 1, 1),
+('HA188338', 'Trần Thị Bích', 'bichttha188338@fpt.edu.vn', '123456', 1, 1),
+('HA186808', 'Lê Mai Hương', 'huonglmha186808@fpt.edu.vn', '123456', 1, 1),
+('HS193994', 'Phạm Văn Cường', 'cuongpvhs193994@fpt.edu.vn', '123456', 1, 1),
+('HS202370', 'Đỗ Thị Dung', 'dungdths202370@fpt.edu.vn', '123456', 1, 1),
+('HS179821', 'Vũ Minh Hoa', 'hoavmhs179821@fpt.edu.vn', '123456', 1, 1),
+('HA171144', 'Ngô Thế Hùng', 'hungntha171144@fpt.edu.vn', '123456', 1, 1),
+('HS195569', 'Phạm Quốc Việt', 'vietpqhs195569@fpt.edu.vn', '123456', 1, 1),
+('HA180043', 'Nguyễn Thị Lan', 'lanntha180043@fpt.edu.vn', '123456', 1, 1),
+('HS189617', 'Lý Văn Tuấn', 'tuanlvhs189617@fpt.edu.vn', '123456', 1, 1),
+('HA192435', 'Bùi Minh Trí', 'tribmha192435@fpt.edu.vn', '123456', 1, 1),
+('HS207936', 'Hoàng Thị Hồng', 'honghths207936@fpt.edu.vn', '123456', 1, 1),
+('HS189043', 'Đinh Văn Đức', 'ducdvhs189043@fpt.edu.vn', '123456', 1, 1),
+('HA197461', 'Lê Thị Thu', 'thultha197461@fpt.edu.vn', '123456', 1, 1),
+('HS173913', 'Nguyễn Minh Quân', 'quannmhs173913@fpt.edu.vn', '123456', 1, 1),
+('HA193827', 'Trần Văn Khánh', 'khanhtvha193827@fpt.edu.vn', '123456', 1, 1),
+('HS165214', 'Phạm Thị Hà', 'hapths165214@fpt.edu.vn', '123456', 1, 1),
+('HA196247', 'Nguyễn Đức Anh', 'anhndha196247@fpt.edu.vn', '123456', 1, 1),
+('HS178116', 'Vũ Thị Mai', 'maivths178116@fpt.edu.vn', '123456', 1, 1),
+('HE178230', 'Lê Thanh Hùng', 'hunglthe178230@fpt.edu.vn', '123456', 1, 1),
+('HA181645', 'Trần Đình Hòa', 'hoatdha181645@fpt.edu.vn', '123456', 1, 1),
+('HS168618', 'Nguyễn Thị Yến', 'yennths168618@fpt.edu.vn', '123456', 1, 1),
+('HS162362', 'Bùi Văn Nam', 'nambvhs162362@fpt.edu.vn', '123456', 1, 1),
+('HS171226', 'Phạm Hồng Sơn', 'sonphhs171226@fpt.edu.vn', '123456', 1, 1),
+('HS185547', 'Nguyễn Thị Hạnh', 'hanhnths185547@fpt.edu.vn', '123456', 1, 1),
+('HA191316', 'Hoàng Văn Lâm', 'lamhvha191316@fpt.edu.vn', '123456', 1, 1),
+('HS206227', 'Đoàn Thị Tuyết', 'tuyetdths206227@fpt.edu.vn', '123456', 1, 1),
+('HS198865', 'Ngô Thị Hương', 'huongnths198865@fpt.edu.vn', '123456', 1, 1),
+('HE201122', 'Trịnh Văn Thắng', 'thangtvhe201122@fpt.edu.vn', '123456', 1, 1),
+('HE183728', 'Phan Thị Trang', 'trangpthe183728@fpt.edu.vn', '123456', 1, 1),
+('HA167111', 'Nguyễn Văn An', 'annvha167111@fpt.edu.vn', '123456', 1, 1),
+('HE167270', 'Trần Thị Bích', 'bichtthe167270@fpt.edu.vn', '123456', 1, 1),
+('HE180475', 'Lê Mai Hương', 'huonglmhe180475@fpt.edu.vn', '123456', 1, 1),
+('HE180920', 'Phạm Văn Cường', 'cuongpvhe180920@fpt.edu.vn', '123456', 1, 1),
+('HS186142', 'Đỗ Thị Dung', 'dungdths186142@fpt.edu.vn', '123456', 1, 1),
+('HS174001', 'Vũ Minh Hoa', 'hoavmhs174001@fpt.edu.vn', '123456', 1, 1),
+('HA199273', 'Ngô Thế Hùng', 'hungntha199273@fpt.edu.vn', '123456', 1, 1),
+('HA172786', 'Phạm Quốc Việt', 'vietpqha172786@fpt.edu.vn', '123456', 1, 1),
+('HE169986', 'Nguyễn Thị Lan', 'lannthe169986@fpt.edu.vn', '123456', 1, 1),
+('HS203946', 'Lý Văn Tuấn', 'tuanlvhs203946@fpt.edu.vn', '123456', 1, 1),
+('HS202345', 'Bùi Minh Trí', 'tribmhs202345@fpt.edu.vn', '123456', 1, 1),
+('HE194162', 'Hoàng Thị Hồng', 'honghthe194162@fpt.edu.vn', '123456', 1, 1),
+('HS180154', 'Đinh Văn Đức', 'ducdvhs180154@fpt.edu.vn', '123456', 1, 1),
+('HS188956', 'Lê Thị Thu', 'thulths188956@fpt.edu.vn', '123456', 1, 1),
+('HE167238', 'Nguyễn Minh Quân', 'quannmhe167238@fpt.edu.vn', '123456', 1, 1),
+('HS204902', 'Trần Văn Khánh', 'khanhtvhs204902@fpt.edu.vn', '123456', 1, 1),
+('HA194098', 'Phạm Thị Hà', 'haptha194098@fpt.edu.vn', '123456', 1, 1),
+('HS183264', 'Nguyễn Đức Anh', 'anhndhs183264@fpt.edu.vn', '123456', 1, 1),
+('HS191748', 'Vũ Thị Mai', 'maivths191748@fpt.edu.vn', '123456', 1, 1),
+('HE199371', 'Lê Thanh Hùng', 'hunglthe199371@fpt.edu.vn', '123456', 1, 1);
+
+INSERT INTO UserClubs (UserID, ClubID, ClubDepartmentID, RoleID, JoinDate, IsActive) VALUES
+('HA178166', 5, 16, 2, '2023-01-05', 1),
+('HA178166', 6, 10, 1, '2024-06-19', 1),
+('HA188338', 5, 9, 4, '2024-08-25', 1),
+('HA188338', 7, 11, 4, '2023-11-01', 1),
+('HA186808', 2, 6, 4, '2023-03-11', 1),
+('HS193994', 1, 5, 4, '2023-03-07', 1),
+('HS193994', 5, 16, 4, '2025-03-22', 1),
+('HS202370', 4, 13, 4, '2025-01-27', 1),
+('HS179821', 3, 7, 4, '2024-03-29', 1),
+('HS179821', 8, 12, 4, '2024-03-07', 1),
+('HA171144', 3, 7, 4, '2023-11-25', 1),
+('HS195569', 2, 4, 2, '2023-08-12', 1),
+('HS195569', 7, 11, 4, '2022-08-08', 1),
+('HA180043', 6, 10, 4, '2024-05-10', 1),
+('HA180043', 1, 5, 4, '2023-02-10', 1),
+('HS189617', 8, 12, 4, '2024-07-27', 1),
+('HA192435', 1, 1, 4, '2023-07-30', 1),
+('HS207936', 2, 3, 4, '2024-04-26', 1),
+('HS189043', 8, 12, 4, '2023-09-28', 1),
+('HS189043', 3, 7, 4, '2024-12-23', 1),
+('HA197461', 5, 16, 4, '2023-10-16', 1),
+('HA197461', 1, 1, 4, '2024-02-05', 1),
+('HS173913', 6, 10, 4, '2023-04-01', 1),
+('HS173913', 1, 5, 3, '2023-06-25', 1),
+('HA193827', 1, 5, 4, '2022-12-04', 1),
+('HS165214', 2, 6, 4, '2025-01-28', 1),
+('HA196247', 6, 10, 4, '2024-10-02', 1),
+('HS178116', 3, 7, 4, '2024-04-22', 1),
+('HS178116', 2, 6, 4, '2023-08-18', 1),
+('HE178230', 6, 10, 4, '2022-10-04', 1),
+('HA181645', 5, 9, 3, '2023-02-15', 1),
+('HS168618', 2, 4, 4, '2024-07-11', 1),
+('HS162362', 8, 12, 4, '2022-09-13', 1),
+('HS171226', 8, 12, 3, '2023-10-31', 1),
+('HS171226', 6, 10, 4, '2023-11-18', 1),
+('HS185547', 8, 12, 4, '2022-08-06', 1),
+('HS185547', 1, 1, 3, '2024-12-26', 1),
+('HA191316', 7, 11, 4, '2024-11-21', 1),
+('HA191316', 5, 9, 4, '2022-11-19', 1),
+('HS206227', 7, 11, 4, '2024-02-13', 1),
+('HS198865', 8, 12, 4, '2023-09-15', 1),
+('HS198865', 4, 15, 4, '2023-05-04', 1),
+('HE201122', 3, 7, 3, '2022-08-16', 1),
+('HE201122', 6, 10, 4, '2023-10-09', 1),
+('HE183728', 1, 2, 4, '2023-04-13', 1),
+('HA167111', 2, 4, 4, '2022-08-19', 1),
+('HA167111', 4, 8, 4, '2022-08-29', 1),
+('HE167270', 2, 6, 4, '2025-02-04', 1),
+('HE167270', 5, 9, 4, '2022-11-22', 1),
+('HE180475', 2, 4, 4, '2022-09-17', 1),
+('HE180475', 7, 11, 4, '2025-02-16', 1),
+('HE180920', 3, 7, 4, '2023-10-10', 1),
+('HS186142', 6, 10, 4, '2025-03-07', 1),
+('HS186142', 1, 1, 4, '2022-08-05', 1),
+('HS174001', 4, 15, 4, '2022-10-01', 1),
+('HA199273', 6, 10, 4, '2024-01-13', 1),
+('HA172786', 3, 7, 4, '2024-09-03', 1),
+('HE169986', 5, 16, 4, '2023-09-06', 1),
+('HS203946', 7, 11, 4, '2024-04-17', 1),
+('HS203946', 3, 7, 4, '2025-02-11', 1),
+('HS202345', 5, 9, 4, '2024-09-24', 1),
+('HS202345', 1, 1, 4, '2023-09-22', 1),
+('HE194162', 5, 16, 4, '2022-08-01', 1),
+('HS180154', 7, 11, 4, '2025-01-20', 1),
+('HS180154', 2, 6, 4, '2025-06-15', 1),
+('HS188956', 7, 11, 4, '2024-02-10', 1),
+('HE167238', 6, 10, 4, '2024-01-18', 1),
+('HS204902', 2, 3, 4, '2023-04-20', 1),
+('HS204902', 4, 15, 4, '2024-09-08', 1),
+('HA194098', 7, 11, 4, '2022-10-14', 1),
+('HS183264', 7, 11, 4, '2023-10-31', 1),
+('HS191748', 3, 7, 4, '2023-03-13', 1),
+('HS191748', 1, 5, 4, '2025-02-05', 1),
+('HE199371', 2, 3, 4, '2024-12-23', 1);
+
+INSERT INTO ActivedMemberClubs (UserID, ClubID, ActiveDate, LeaveDate, IsActive) VALUES
+('HA178166', 5, '2025-05-01', NULL, TRUE),
+('HA178166', 6, '2025-05-01', NULL, TRUE),
+('HA188338', 5, '2025-05-01', NULL, TRUE),
+('HA188338', 7, '2025-05-01', NULL, TRUE),
+('HA186808', 2, '2025-05-01', NULL, TRUE),
+('HS193994', 1, '2025-05-01', NULL, TRUE),
+('HS193994', 5, '2025-05-01', NULL, TRUE),
+('HS202370', 4, '2025-05-01', NULL, TRUE),
+('HS179821', 3, '2025-05-01', NULL, TRUE),
+('HS179821', 8, '2025-05-01', NULL, TRUE),
+('HA171144', 3, '2025-05-01', NULL, TRUE),
+('HS195569', 2, '2025-05-01', NULL, TRUE),
+('HS195569', 7, '2025-05-01', NULL, TRUE),
+('HA180043', 6, '2025-05-01', NULL, TRUE),
+('HA180043', 1, '2025-05-01', NULL, TRUE),
+('HS189617', 8, '2025-05-01', NULL, TRUE),
+('HA192435', 1, '2025-05-01', NULL, TRUE),
+('HS207936', 2, '2025-05-01', NULL, TRUE),
+('HS189043', 8, '2025-05-01', NULL, TRUE),
+('HS189043', 3, '2025-05-01', NULL, TRUE),
+('HA197461', 5, '2025-05-01', NULL, TRUE),
+('HA197461', 1, '2025-05-01', NULL, TRUE),
+('HS173913', 6, '2025-05-01', NULL, TRUE),
+('HS173913', 1, '2025-05-01', NULL, TRUE),
+('HA193827', 1, '2025-05-01', NULL, TRUE),
+('HS165214', 2, '2025-05-01', NULL, TRUE),
+('HA196247', 6, '2025-05-01', NULL, TRUE),
+('HS178116', 3, '2025-05-01', NULL, TRUE),
+('HS178116', 2, '2025-05-01', NULL, TRUE),
+('HE178230', 6, '2025-05-01', NULL, TRUE),
+('HA181645', 5, '2025-05-01', NULL, TRUE),
+('HS168618', 2, '2025-05-01', NULL, TRUE),
+('HS162362', 8, '2025-05-01', NULL, TRUE),
+('HS171226', 8, '2025-05-01', NULL, TRUE),
+('HS171226', 6, '2025-05-01', NULL, TRUE),
+('HS185547', 8, '2025-05-01', NULL, TRUE),
+('HS185547', 1, '2025-05-01', NULL, TRUE),
+('HA191316', 7, '2025-05-01', NULL, TRUE),
+('HA191316', 5, '2025-05-01', NULL, TRUE),
+('HS206227', 7, '2025-05-01', NULL, TRUE),
+('HS198865', 8, '2025-05-01', NULL, TRUE),
+('HS198865', 4, '2025-05-01', NULL, TRUE),
+('HE201122', 3, '2025-05-01', NULL, TRUE),
+('HE201122', 6, '2025-05-01', NULL, TRUE),
+('HE183728', 1, '2025-05-01', NULL, TRUE),
+('HA167111', 2, '2025-05-01', NULL, TRUE),
+('HA167111', 4, '2025-05-01', NULL, TRUE),
+('HE167270', 2, '2025-05-01', NULL, TRUE),
+('HE167270', 5, '2025-05-01', NULL, TRUE),
+('HE180475', 2, '2025-05-01', NULL, TRUE),
+('HE180475', 7, '2025-05-01', NULL, TRUE),
+('HE180920', 3, '2025-05-01', NULL, TRUE),
+('HS186142', 6, '2025-05-01', NULL, TRUE),
+('HS186142', 1, '2025-05-01', NULL, TRUE),
+('HS174001', 4, '2025-05-01', NULL, TRUE),
+('HA199273', 6, '2025-05-01', NULL, TRUE),
+('HA172786', 3, '2025-05-01', NULL, TRUE),
+('HE169986', 5, '2025-05-01', NULL, TRUE),
+('HS203946', 7, '2025-05-01', NULL, TRUE),
+('HS203946', 3, '2025-05-01', NULL, TRUE),
+('HS202345', 5, '2025-05-01', NULL, TRUE),
+('HS202345', 1, '2025-05-01', NULL, TRUE),
+('HE194162', 5, '2025-05-01', NULL, TRUE),
+('HS180154', 7, '2025-05-01', NULL, TRUE),
+('HS180154', 2, '2025-05-01', NULL, TRUE),
+('HS188956', 7, '2025-05-01', NULL, TRUE),
+('HE167238', 6, '2025-05-01', NULL, TRUE),
+('HS204902', 2, '2025-05-01', NULL, TRUE),
+('HS204902', 4, '2025-05-01', NULL, TRUE),
+('HA194098', 7, '2025-05-01', NULL, TRUE),
+('HS183264', 7, '2025-05-01', NULL, TRUE),
+('HS191748', 3, '2025-05-01', NULL, TRUE),
+('HS191748', 1, '2025-05-01', NULL, TRUE),
+('HE199371', 2, '2025-05-01', NULL, TRUE);
+
+
+-- ========================================
+-- Thêm người dùng mới (Users)
+-- Tổng hợp các người dùng từ U036 đến U045, đảm bảo không trùng email hoặc UserID
+-- ========================================
+INSERT INTO Users (UserID, FullName, Email, Password, PermissionID, Status) VALUES
+('U036', 'Lê Thị FF', 'ff@fpt.edu.vn', '123456', 1, 1),
+('U037', 'Hoàng Văn GG', 'gg@fpt.edu.vn', '123456', 1, 1),
+('U038', 'Bùi Thị HH', 'hh@fpt.edu.vn', '123456', 1, 1),
+('U039', 'Ngô Văn II', 'ii@fpt.edu.vn', '123456', 1, 1),
+('U040', 'Trịnh Thị JJ', 'jj@fpt.edu.vn', '123456', 1, 1),
+('U041', 'Nguyễn Thị KK', 'kk@fpt.edu.vn', '123456', 1, 1),
+('U042', 'Trần Văn LL', 'll@fpt.edu.vn', '123456', 1, 1),
+('U043', 'Phạm Thị MM', 'mm@fpt.edu.vn', '123456', 1, 1),
+('U044', 'Lê Văn NN', 'nn@fpt.edu.vn', '123456', 1, 1),
+('U045', 'Đỗ Thị OO', 'oo@fpt.edu.vn', '123456', 1, 1);
+
+-- ========================================
+-- Liên kết người dùng với câu lạc bộ và ban (UserClubs)
+-- Đảm bảo không trùng UserID với ClubID và ClubDepartmentID
+-- ========================================
+INSERT INTO UserClubs (UserID, ClubID, ClubDepartmentID, RoleID, JoinDate, IsActive) VALUES
+('U036', 1, 5, 4, '2025-07-01 00:00:00', 1),  -- Thành viên Ban Hậu cần CLB Bóng Đá
+('U037', 2, 4, 4, '2025-07-01 00:00:00', 1),  -- Thành viên Ban Chuyên môn CLB Bóng Rổ
+('U038', 3, 7, 4, '2025-07-01 00:00:00', 1),  -- Thành viên Ban Chủ nhiệm CLB Tiếng Anh
+('U039', 4, 13, 4, '2025-07-01 00:00:00', 1), -- Thành viên Ban Chuyên môn CLB Lập Trình
+('U040', 1, 2, 4, '2025-07-01 00:00:00', 1),  -- Thành viên Ban Truyền thông CLB Bóng Đá
+('U041', 1, 5, 4, '2025-07-10 00:00:00', 1),  -- Thành viên Ban Hậu cần CLB Bóng Đá
+('U042', 1, 5, 4, '2025-07-10 00:00:00', 1),  -- Thành viên Ban Hậu cần CLB Bóng Đá
+('U043', 1, 5, 4, '2025-07-10 00:00:00', 1),  -- Thành viên Ban Hậu cần CLB Bóng Đá
+('U044', 1, 5, 4, '2025-07-10 00:00:00', 1),  -- Thành viên Ban Hậu cần CLB Bóng Đá
+('U045', 1, 5, 4, '2025-07-10 00:00:00', 1);  -- Thành viên Ban Hậu cần CLB Bóng Đá
+
+-- ========================================
+-- Thêm nhiệm vụ mới (Tasks)
+-- Nhiệm vụ liên quan đến Ban Hậu cần và các CLB khác, đảm bảo không trùng Title
+-- ========================================
+INSERT INTO Tasks (ParentTaskID, EventID, ClubID, Title, Description, Status, Priority, ProgressPercent, StartDate, EndDate, CreatedBy) VALUES
+(NULL, (SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên FPTU 2025'), 1, 'Sắp xếp lịch thi đấu', 'Lên kế hoạch lịch thi đấu cho giải', 'ToDo', 'HIGH', 0, '2025-08-05 08:00:00', '2025-08-07 17:00:00', 'U001'),
+(NULL, NULL, 2, 'Chuẩn bị tài liệu huấn luyện', 'Soạn tài liệu cho buổi huấn luyện', 'ToDo', 'MEDIUM', 0, '2025-07-02 09:00:00', '2025-07-04 17:00:00', 'U003'),
+(NULL, (SELECT EventID FROM Events WHERE EventName = 'Hội thảo AI 2025'), 4, 'Liên hệ diễn giả', 'Mời diễn giả tham gia hội thảo', 'ToDo', 'HIGH', 0, '2025-09-01 08:00:00', '2025-09-03 17:00:00', 'U012'),
+(NULL, (SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên FPTU 2025'), 1, 'Chuẩn bị nước uống', 'Sắp xếp nước uống cho các đội thi đấu', 'ToDo', 'HIGH', 0, '2025-08-03 08:00:00', '2025-08-05 12:00:00', 'U002'),
+(NULL, (SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên FPTU 2025'), 1, 'Kiểm tra dụng cụ y tế', 'Kiểm tra và bổ sung hộp sơ cứu', 'ToDo', 'MEDIUM', 0, '2025-08-04 09:00:00', '2025-08-05 10:00:00', 'U002'),
+(NULL, NULL, 1, 'Dọn dẹp sân sau trận đấu', 'Dọn dẹp sân bãi sau các trận đấu', 'ToDo', 'MEDIUM', 0, '2025-08-05 16:00:00', '2025-08-05 18:00:00', 'U002');
+
+-- ========================================
+-- Phân công nhiệm vụ (TaskAssignees)
+-- Phân công nhiệm vụ cho các thành viên hoặc ban, đảm bảo không trùng TaskID và UserID/DepartmentID
+-- ========================================
+INSERT INTO TaskAssignees (TaskID, AssigneeType, UserID, DepartmentID) VALUES
+((SELECT TaskID FROM Tasks WHERE Title = 'Sắp xếp lịch thi đấu'), 'User', 'U036', NULL),
+((SELECT TaskID FROM Tasks WHERE Title = 'Chuẩn bị tài liệu huấn luyện'), 'Department', NULL, 4),
+((SELECT TaskID FROM Tasks WHERE Title = 'Liên hệ diễn giả'), 'User', 'U039', NULL),
+((SELECT TaskID FROM Tasks WHERE Title = 'Chuẩn bị nước uống'), 'User', 'U041', NULL),
+((SELECT TaskID FROM Tasks WHERE Title = 'Chuẩn bị nước uống'), 'User', 'U042', NULL),
+((SELECT TaskID FROM Tasks WHERE Title = 'Kiểm tra dụng cụ y tế'), 'User', 'U043', NULL),
+((SELECT TaskID FROM Tasks WHERE Title = 'Dọn dẹp sân sau trận đấu'), 'User', 'U044', NULL),
+((SELECT TaskID FROM Tasks WHERE Title = 'Dọn dẹp sân sau trận đấu'), 'User', 'U045', NULL);
+
+-- ========================================
+-- Ghi lại tiến độ nhiệm vụ (TaskProgressLogs)
+-- Cập nhật tiến độ cho các nhiệm vụ, đảm bảo không trùng TaskID và UserID
+-- ========================================
+INSERT INTO TaskProgressLogs (TaskID, UserID, Progress, Note) VALUES
+((SELECT TaskID FROM Tasks WHERE Title = 'Sắp xếp lịch thi đấu'), 'U036', 40, 'Đã sắp xếp 40% lịch thi đấu'),
+((SELECT TaskID FROM Tasks WHERE Title = 'Chuẩn bị tài liệu huấn luyện'), 'U037', 60, 'Tài liệu huấn luyện hoàn thành 60%'),
+((SELECT TaskID FROM Tasks WHERE Title = 'Liên hệ diễn giả'), 'U039', 25, 'Đã liên hệ được 1 diễn giả'),
+((SELECT TaskID FROM Tasks WHERE Title = 'Chuẩn bị nước uống'), 'U041', 50, 'Đã đặt mua 50% số lượng nước cần thiết'),
+((SELECT TaskID FROM Tasks WHERE Title = 'Chuẩn bị nước uống'), 'U042', 30, 'Đang liên hệ nhà cung cấp nước'),
+((SELECT TaskID FROM Tasks WHERE Title = 'Kiểm tra dụng cụ y tế'), 'U043', 70, 'Đã kiểm tra xong hộp sơ cứu, cần bổ sung băng gạc'),
+((SELECT TaskID FROM Tasks WHERE Title = 'Dọn dẹp sân sau trận đấu'), 'U044', 0, 'Chưa bắt đầu, chờ sau trận đấu'),
+((SELECT TaskID FROM Tasks WHERE Title = 'Dọn dẹp sân sau trận đấu'), 'U045', 0, 'Chưa bắt đầu, chờ sau trận đấu');
+
+-- ========================================
+-- Phản hồi nhiệm vụ (TaskFeedbacks)
+-- Trưởng ban hoặc chủ nhiệm đưa ra phản hồi, đảm bảo không trùng TaskID và ReviewerID
+-- ========================================
+INSERT INTO TaskFeedbacks (TaskID, ReviewerID, Rating, Comment, ProgressAdjustment) VALUES
+((SELECT TaskID FROM Tasks WHERE Title = 'Sắp xếp lịch thi đấu'), 'U001', 'Positive', 'Công việc đang đi đúng hướng', 10),
+((SELECT TaskID FROM Tasks WHERE Title = 'Chuẩn bị tài liệu huấn luyện'), 'U003', 'Neutral', 'Cần chú ý chi tiết hơn', 0),
+((SELECT TaskID FROM Tasks WHERE Title = 'Liên hệ diễn giả'), 'U012', 'Positive', 'Tốt, tiếp tục nỗ lực', 5),
+((SELECT TaskID FROM Tasks WHERE Title = 'Chuẩn bị nước uống'), 'U002', 'Positive', 'Tốt, hãy đảm bảo đủ số lượng trước ngày thi đấu', 5),
+((SELECT TaskID FROM Tasks WHERE Title = 'Kiểm tra dụng cụ y tế'), 'U002', 'Positive', 'Công việc ổn, cần bổ sung nhanh các vật dụng còn thiếu', 10),
+((SELECT TaskID FROM Tasks WHERE Title = 'Dọn dẹp sân sau trận đấu'), 'U002', 'Neutral', 'Chưa bắt đầu, cần chuẩn bị nhân sự sẵn sàng', 0);
+
+-- ========================================
+-- Thêm thông tin cuộc họp câu lạc bộ (ClubMeeting)
+-- Đảm bảo không trùng ClubID và StartedTime
+-- ========================================
+INSERT INTO ClubMeeting (ClubID, URLMeeting, StartedTime) VALUES
+(1, 'https://meet.example.com/club1_meeting3', '2025-07-03'),
+(2, 'https://meet.example.com/club4_meeting2', '2025-07-04');
+
+-- ========================================
+-- Thêm thông báo (Notifications)
+-- Đảm bảo không trùng ReceiverID, Title, và CreatedDate
+-- ========================================
+INSERT INTO Notifications (Title, Content, CreatedDate, ReceiverID, Priority, Status) VALUES
+('Nhắc nhở nhiệm vụ', 'Sắp xếp lịch thi đấu cần hoàn thành trước 07/08/2025', '2025-07-01 08:00:00', 'U036', 'HIGH', 'UNREAD'),
+('Thông báo nhiệm vụ', 'Chuẩn bị tài liệu huấn luyện trước 04/07/2025', '2025-07-01 08:00:00', 'U037', 'MEDIUM', 'UNREAD'),
+('Nhắc nhở nhiệm vụ', 'Liên hệ diễn giả trước 03/09/2025', '2025-07-01 08:00:00', 'U039', 'HIGH', 'UNREAD'),
+('Nhắc nhở nhiệm vụ', 'Chuẩn bị nước uống cho giải bóng đá cần hoàn thành trước 05/08/2025', '2025-08-01 08:00:00', 'U041', 'HIGH', 'UNREAD'),
+('Nhắc nhở nhiệm vụ', 'Chuẩn bị nước uống cho giải bóng đá cần hoàn thành trước 05/08/2025', '2025-08-01 08:00:00', 'U042', 'HIGH', 'UNREAD'),
+('Nhắc nhở nhiệm vụ', 'Kiểm tra dụng cụ y tế trước 05/08/2025', '2025-08-01 08:00:00', 'U043', 'MEDIUM', 'UNREAD'),
+('Nhắc nhở nhiệm vụ', 'Dọn dẹp sân sau trận đấu vào 05/08/2025', '2025-08-01 08:00:00', 'U044', 'MEDIUM', 'UNREAD'),
+('Nhắc nhở nhiệm vụ', 'Dọn dẹp sân sau trận đấu vào 05/08/2025', '2025-08-01 08:00:00', 'U045', 'MEDIUM', 'UNREAD'),
+('Nhắc nhở cuộc họp', 'Cuộc họp Ban Hậu cần vào 02/08/2025 lúc 14:00', '2025-08-01 08:00:00', 'U041', 'HIGH', 'UNREAD'),
+('Nhắc nhở cuộc họp', 'Cuộc họp Ban Hậu cần vào 02/08/2025 lúc 14:00', '2025-08-01 08:00:00', 'U042', 'HIGH', 'UNREAD'),
+('Nhắc nhở cuộc họp', 'Cuộc họp Ban Hậu cần vào 02/08/2025 lúc 14:00', '2025-08-01 08:00:00', 'U043', 'HIGH', 'UNREAD'),
+('Nhắc nhở cuộc họp', 'Cuộc họp Ban Hậu cần vào 02/08/2025 lúc 14:00', '2025-08-01 08:00:00', 'U044', 'HIGH', 'UNREAD'),
+('Nhắc nhở cuộc họp', 'Cuộc họp Ban Hậu cần vào 02/08/2025 lúc 14:00', '2025-08-01 08:00:00', 'U045', 'HIGH', 'UNREAD');
+
+-- ========================================
+-- Thêm đơn đăng ký (ClubApplications)
+-- Đảm bảo không trùng UserID và ClubID
+-- ========================================
+INSERT INTO ClubApplications (UserID, ClubID, Email, Status, SubmitDate) VALUES
+('U036', 1, 'ff@fpt.edu.vn', 'APPROVED', '2025-06-25 10:00:00'),
+('U037', 2, 'gg@fpt.edu.vn', 'APPROVED', '2025-06-25 10:00:00'),
+('U039', 4, 'ii@fpt.edu.vn', 'APPROVED', '2025-06-25 10:00:00'),
+('U041', 1, 'kk@fpt.edu.vn', 'APPROVED', '2025-07-05 10:00:00'),
+('U042', 1, 'll@fpt.edu.vn', 'APPROVED', '2025-07-05 10:00:00'),
+('U043', 1, 'mm@fpt.edu.vn', 'APPROVED', '2025-07-05 10:00:00'),
+('U044', 1, 'nn@fpt.edu.vn', 'APPROVED', '2025-07-05 10:00:00'),
+('U045', 1, 'oo@fpt.edu.vn', 'APPROVED', '2025-07-05 10:00:00');
+
+-- ========================================
+-- Thêm phản hồi cho sự kiện (Feedbacks)
+-- Đảm bảo không trùng EventID và UserID
+-- ========================================
+INSERT INTO Feedbacks (EventID, UserID, IsAnonymous, Rating, Content, Q1_Organization, Q2_Communication, Q3_Support, Q4_Relevance, Q5_Welcoming, Q6_Value, Q7_Timing, Q8_Participation, Q9_WillingnessToReturn, CreatedAt) VALUES
+((SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên FPTU 2025'), 'U041', 0, 4, 'Sự kiện rất sôi động, cần cải thiện khâu hậu cần', 4, 4, 3, 5, 4, 4, 4, 4, 4, '2025-08-06 10:00:00'),
+((SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên FPTU 2025'), 'U042', 0, 5, 'Tuyệt vời, mọi thứ được tổ chức tốt', 5, 5, 5, 5, 5, 5, 5, 5, 5, '2025-08-06 10:05:00'),
+((SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên FPTU 2025'), 'U043', 1, 3, 'Cần chuẩn bị kỹ hơn về nước uống', 3, 3, 2, 4, 3, 3, 3, 3, 3, '2025-08-06 10:10:00');
+
+-- ========================================
+-- Thêm thành viên hoạt động (ActivedMemberClubs)
+-- Đảm bảo không trùng UserID và ClubID
+-- ========================================
+INSERT INTO ActivedMemberClubs (UserID, ClubID, ActiveDate, IsActive) VALUES
+('U036', 1, '2025-07-01', TRUE),
+('U037', 2, '2025-07-01', TRUE),
+('U038', 3, '2025-07-01', TRUE),
+('U039', 4, '2025-07-01', TRUE),
+('U040', 1, '2025-07-01', TRUE),
+('U041', 1, '2025-07-10', TRUE),
+('U042', 1, '2025-07-10', TRUE),
+('U043', 1, '2025-07-10', TRUE),
+('U044', 1, '2025-07-10', TRUE),
+('U045', 1, '2025-07-10', TRUE);
 
 

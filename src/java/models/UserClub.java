@@ -15,6 +15,7 @@ public class UserClub {
     private String departmentName; // Thêm trường departmentName
     private String ClubImg;
     private String ClubName;
+    private int gen; // Thêm trường gen
             
     public UserClub() {
     }
@@ -27,6 +28,17 @@ public class UserClub {
         this.roleID = roleID;
         this.joinDate = joinDate;
         this.isActive = isActive;
+    }
+    
+    public UserClub(int userClubID, String userID, int clubID, int clubDepartmentID, int roleID, Date joinDate, boolean isActive, int gen) {
+        this.userClubID = userClubID;
+        this.userID = userID;
+        this.clubID = clubID;
+        this.clubDepartmentID = clubDepartmentID;
+        this.roleID = roleID;
+        this.joinDate = joinDate;
+        this.isActive = isActive;
+        this.gen = gen;
     }
 
     public String getClubName() {
@@ -126,6 +138,14 @@ public class UserClub {
     public void setDepartmentName(String departmentName) {
         this.departmentName = departmentName;
     }
+    
+    public int getGen() {
+        return gen;
+    }
+
+    public void setGen(int gen) {
+        this.gen = gen;
+    }
 
     @Override
     public String toString() {
@@ -140,6 +160,7 @@ public class UserClub {
                 ", fullName='" + fullName + '\'' +
                 ", roleName='" + roleName + '\'' +
                 ", departmentName='" + departmentName + '\'' +
+                ", gen=" + gen +
                 '}';
     }
     

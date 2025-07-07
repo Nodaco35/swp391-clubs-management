@@ -1,17 +1,28 @@
 package dal;
 
-import models.UserClub;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import models.Department;
 import models.Roles;
+import models.UserClub;
 
 public class UserClubDAO {
+
+    // Phương thức để kiểm tra xem một cột có tồn tại trong ResultSet hay không
+    private static boolean hasColumn(ResultSet rs, String columnName) throws SQLException {
+        ResultSetMetaData rsmd = rs.getMetaData();
+        for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+            if (columnName.equalsIgnoreCase(rsmd.getColumnName(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     // mới
     public static List<UserClub> findByUserID(String userID) {
@@ -41,6 +52,9 @@ public class UserClubDAO {
                 uc.setDepartmentName(rs.getString("DepartmentName"));
                 uc.setClubImg(rs.getString("ClubImg"));
                 uc.setClubName(rs.getString("ClubName"));
+                if (hasColumn(rs, "Gen")) {
+                    uc.setGen(rs.getInt("Gen"));
+                }
                 findByUserID.add(uc);
             }
         } catch (SQLException e) {
@@ -271,6 +285,9 @@ public class UserClubDAO {
                     // uc.setEmail(rs.getString("Email")); // Uncomment if Email is added to query
                     uc.setRoleName(rs.getString("RoleName"));
                     uc.setDepartmentName(rs.getString("DepartmentName"));
+                    if (hasColumn(rs, "Gen")) {
+                        uc.setGen(rs.getInt("Gen"));
+                    }
                     userClubs.add(uc);
                 }
             }
@@ -451,8 +468,9 @@ public class UserClubDAO {
         try {
             conn = DBContext.getConnection();
             String query = """
-                INSERT INTO UserClubs (UserID, ClubID, ClubDepartmentID, RoleID, JoinDate, IsActive)
-                VALUES (?, ?, ?, ?, NOW(), ?)
+                INSERT INTO UserClubs (UserID, ClubID, ClubDepartmentID, RoleID, JoinDate, IsActive, Gen)
+                SELECT ?, ?, ?, ?, NOW(), ?, YEAR(CURRENT_DATE()) - YEAR(c.EstablishedDate)
+                FROM Clubs c WHERE c.ClubID = ?
             """;
             stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);
             stmt.setString(1, uc.getUserID());
@@ -460,6 +478,7 @@ public class UserClubDAO {
             stmt.setInt(3, uc.getClubDepartmentID());
             stmt.setInt(4, uc.getRoleID());
             stmt.setBoolean(5, uc.isIsActive());
+            stmt.setInt(6, uc.getClubID()); // ClubID lần thứ hai cho việc tìm EstablishedDate
             int rows = stmt.executeUpdate();
 
             if (rows > 0) {
@@ -835,11 +854,8 @@ public class UserClubDAO {
         return false;
     }
     /**
-     * Check if a user has a management role in a specific club (roleID between 1-3)
-     * If clubId is null, get the first club where user has a management role
-     * @param userID The user ID to check
-     * @param clubId The club ID to check, can be null
-     * @return UserClub object with user's role in the specified club, or null if user has no management role
+     * Kiểm tra quyền sử dụng chức năng(roleID 1-3)
+     * nếu clubId null thì lấy quyền quản lý đầu tiên của user
      */
     public UserClub getUserClubManagementRole(String userID, Integer clubId) {
         UserClub userClub = null;
@@ -852,7 +868,6 @@ public class UserClubDAO {
             String query;
             
             if (clubId != null) {
-                // If clubId is provided, check for that specific club
                 query = """
                     SELECT uc.UserClubID, uc.UserID, uc.ClubID, uc.ClubDepartmentID, uc.RoleID, 
                            uc.JoinDate, uc.IsActive, u.FullName, r.RoleName, d.DepartmentName

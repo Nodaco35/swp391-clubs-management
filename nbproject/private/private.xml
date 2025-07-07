@@ -8,6 +8,16 @@
             <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/27_06/swp391-clubs-management/web/view/ic/approval-events.jsp</file>
             <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/27_06/swp391-clubs-management/src/java/controller/AddEventServlet.java</file>
             <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/27_06/swp391-clubs-management/web/css/ic-approval.css</file>
+            <file>file:/D:/ClubManagementSystem/swp391-clubs-management/src/java/service/NotificationService.java</file>
+            <file>file:/D:/ClubManagementSystem/swp391-clubs-management/web/js/recruitmentActivitiesManagement.js</file>
+            <file>file:/D:/ClubManagementSystem/swp391-clubs-management/src/java/dal/ApplicationFormTemplateDAO.java</file>
+            <file>file:/D:/ClubManagementSystem/swp391-clubs-management/src/java/controller/RecruitmentCampaignServlet.java</file>
+            <file>file:/D:/ClubManagementSystem/swp391-clubs-management/web/js/createEditRecruitmentCampaign.js</file>
+            <file>file:/D:/ClubManagementSystem/swp391-clubs-management/src/java/controller/RecruitmentStagesServlet.java</file>
+            <file>file:/D:/ClubManagementSystem/swp391-clubs-management/web/view/student/chairman/recruitmentActivitiesManagement.jsp</file>
+            <file>file:/D:/ClubManagementSystem/swp391-clubs-management/web/js/viewRecruitmentCampaign.js</file>
+            <file>file:/D:/ClubManagementSystem/swp391-clubs-management/src/java/controller/RecruitmentFormServlet.java</file>
+            <file>file:/D:/ClubManagementSystem/swp391-clubs-management/web/view/student/chairman/recruitmentCampaignForm.jsp</file>
         </group>
     </open-files>
 </project-private>
