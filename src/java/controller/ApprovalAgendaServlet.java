@@ -7,10 +7,14 @@ package controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
+
+import dal.EventsDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import models.Agenda;
 
 /**
  *
@@ -52,23 +56,49 @@ public class ApprovalAgendaServlet extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+            throws ServletException, IOException {
+        EventsDAO dao = new EventsDAO();
+
+        List<Agenda> agendaList = dao.getAgendaByEventPublic();
+        int pendingCount = dao.countEventHasPendingAgenda();
+        int approvedCount = dao.countEventHasApprovedAgenda();
+        int rejectedCount = dao.countEventHasRejectedAgenda();
+        request.setAttribute("agendaList", agendaList);
+        request.setAttribute("pendingCount", pendingCount);
+        request.setAttribute("approvedCount", approvedCount);
+        request.setAttribute("rejectedCount", rejectedCount);
+
+        String eventID = request.getParameter("eventID");
+        if (eventID != null && !eventID.isEmpty()) {
+            try {
+                List<Agenda> agendaDetails = dao.getAgendaByEventID(Integer.parseInt(eventID));
+                request.setAttribute("agendaDetails", agendaDetails);
+            } catch (NumberFormatException e) {
+                request.setAttribute("errorMessage", "ID sự kiện không hợp lệ!");
+            }
+        }
+
         String currentPath = request.getServletPath();
         request.setAttribute("currentPath", currentPath);
-        request.getRequestDispatcher("/view/ic/approval-agenda.jsp").forward(request, response);
-    } 
 
-    /** 
-     * Handles the HTTP <code>POST</code> method.
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
+        request.getRequestDispatcher("/view/ic/approval-agenda.jsp").forward(request, response);
+    }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-        processRequest(request, response);
+            throws ServletException, IOException {
+        String eventID = request.getParameter("eventID");
+        String status = request.getParameter("status");
+        String reason = request.getParameter("reason");
+
+        if (eventID != null && status != null) {
+            EventsDAO dao = new EventsDAO();
+            dao.updateAgendaStatus(Integer.parseInt(eventID), status, reason);
+            request.setAttribute("message", status.equals("approved") ?
+                    "Agenda đã được duyệt thành công!" : "Agenda đã bị từ chối!");
+        }
+
+        doGet(request, response);
     }
 
     /** 

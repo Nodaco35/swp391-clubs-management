@@ -34,6 +34,10 @@ public class Events {
 
     private Locations location;
 
+    private int agendaCount;
+
+
+
     public Events() {
     }
 
@@ -78,6 +82,10 @@ public class Events {
         this.description = description;
         this.eventName = eventName;
     }
+
+
+    public int getAgendaCount() { return agendaCount; }
+    public void setAgendaCount(int agendaCount) { this.agendaCount = agendaCount; }
 
     public String getRejectionReason() {
         return rejectionReason;

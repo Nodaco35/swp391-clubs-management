@@ -8,9 +8,11 @@ public class Agenda {
     private int eventID;
     private String title;
     private String description;
+    private String status;
+    private String reason;
     private Timestamp startTime;
     private Timestamp endTime;
-
+    private Events event;
     public Agenda() {
     }
 
@@ -21,6 +23,42 @@ public class Agenda {
         this.title = title;
         this.description = description;
         this.eventID = eventID;
+    }
+
+    public Agenda(Events event, Timestamp endTime, Timestamp startTime, String reason, String status, String description, String title, int eventID, int agendaID) {
+        this.event = event;
+        this.endTime = endTime;
+        this.startTime = startTime;
+        this.reason = reason;
+        this.status = status;
+        this.description = description;
+        this.title = title;
+        this.eventID = eventID;
+        this.agendaID = agendaID;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public Events getEvent() {
+        return event;
+    }
+
+    public void setEvent(Events event) {
+        this.event = event;
     }
 
     public int getAgendaID() {

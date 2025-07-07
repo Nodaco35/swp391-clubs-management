@@ -97,12 +97,13 @@
 				<h2>Danh sách Agenda cần duyệt</h2>
 				<div class="filters">
 					<span class="filter-label">Lọc theo trạng thái</span>
-					<select class="filter-select">
+					<select id="status-filter" class="filter-select">
 						<option value="all">Tất cả</option>
 						<option value="pending">Chờ duyệt</option>
 						<option value="approved">Đã duyệt</option>
 						<option value="rejected">Từ chối</option>
 					</select>
+
 				</div>
 			</div>
 
@@ -110,25 +111,26 @@
 				<div class="stat-card">
 					<i class="fas fa-clock"></i>
 					<div class="stat-info">
-						<span class="stat-number">4</span>
+						<span class="stat-number">${pendingCount}</span>
 						<span class="stat-label">Chờ duyệt</span>
 					</div>
 				</div>
 				<div class="stat-card approved">
 					<i class="fas fa-check-circle"></i>
 					<div class="stat-info">
-						<span class="stat-number">0</span>
+						<span class="stat-number">${approvedCount}</span>
 						<span class="stat-label">Đã duyệt</span>
 					</div>
 				</div>
 				<div class="stat-card rejected">
 					<i class="fas fa-times-circle"></i>
 					<div class="stat-info">
-						<span class="stat-number">0</span>
+						<span class="stat-number">${rejectedCount}</span>
 						<span class="stat-label">Từ chối</span>
 					</div>
 				</div>
 			</div>
+
 
 			<div class="table-container">
 				<table class="data-table">
@@ -143,87 +145,203 @@
 					</tr>
 					</thead>
 					<tbody id="agenda-table-body">
-					<tr>
-						<td>#A001</td>
-						<td>
-							<div class="agenda-info">
-								<strong>Thử Thách Lập Trình FPTU 2025</strong>
-								<small>CLB Lập trình</small>
-							</div>
-						</td>
-						<td>6 mục</td>
-						<td>2025-06-21</td>
-						<td><span class="status-badge pending">Chờ duyệt</span></td>
-						<td>
-							<div class="action-buttons">
-								<button class="btn-details" onclick="viewAgendaDetails('A001')">
-									<i class="fas fa-eye"></i>
-								</button>
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td>#A002</td>
-						<td>
-							<div class="agenda-info">
-								<strong>Hackathon Đổi Mới AI</strong>
-								<small>CLB Lập trình</small>
-							</div>
-						</td>
-						<td>6 mục</td>
-						<td>2025-07-15</td>
-						<td><span class="status-badge pending">Chờ duyệt</span></td>
-						<td>
-							<div class="action-buttons">
-								<button class="btn-details" onclick="viewAgendaDetails('A002')">
-									<i class="fas fa-eye"></i>
-								</button>
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td>#A003</td>
-						<td>
-							<div class="agenda-info">
-								<strong>Workshop: Xây dựng Website với Spring Boot</strong>
-								<small>CLB Lập trình</small>
-							</div>
-						</td>
-						<td>9 mục</td>
-						<td>2025-04-20</td>
-						<td><span class="status-badge pending">Chờ duyệt</span></td>
-						<td>
-							<div class="action-buttons">
-								<button class="btn-details" onclick="viewAgendaDetails('A003')">
-									<i class="fas fa-eye"></i>
-								</button>
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td>#A004</td>
-						<td>
-							<div class="agenda-info">
-								<strong>Giải Bóng Đá Sinh Viên FPTU 2025</strong>
-								<small>CLB Thể thao</small>
-							</div>
-						</td>
-						<td>6 mục</td>
-						<td>2025-08-05</td>
-						<td><span class="status-badge pending">Chờ duyệt</span></td>
-						<td>
-							<div class="action-buttons">
-								<button class="btn-details" onclick="viewAgendaDetails('A004')">
-									<i class="fas fa-eye"></i>
-								</button>
-							</div>
-						</td>
-					</tr>
+					<c:forEach var="a" items="${agendaList}" varStatus="loop">
+						<tr class="event-row status-${a.status}">
+							<td>#E${a.event.eventID}</td>
+							<td>
+								<div class="agenda-info">
+									<strong>${a.event.eventName}</strong>
+									<small>${a.event.clubName}</small>
+								</div>
+							</td>
+							<td>${a.event.agendaCount} mục</td>
+							<td><fmt:formatDate value="${a.event.eventDate}" pattern="yyyy-MM-dd HH:mm"/></td>
+							<td>
+								<c:choose>
+									<c:when test="${a.status == 'PENDING'}">
+										<span class="status-badge pending">Chờ duyệt</span>
+									</c:when>
+									<c:when test="${a.status == 'APPROVED'}">
+										<span class="status-badge approved">Đã duyệt</span>
+									</c:when>
+									<c:when test="${a.status == 'REJECTED'}">
+										<span class="status-badge rejected">Từ chối</span>
+									</c:when>
+								</c:choose>
+							</td>
+							<td>
+								<div class="action-buttons">
+									<button class="btn-details"
+									        onclick="viewAgendaDetailsByEvent('${a.event.eventID}')">
+										<i class="fas fa-eye"></i>
+									</button>
+								</div>
+							</td>
+						</tr>
+					</c:forEach>
 					</tbody>
+
+
 				</table>
 			</div>
+			<div id="pagination-controls" class="pagination-controls"></div>
 		</section>
 	</div>
+	<div id="detailsModal" class="modal">
+		<div class="modal-content">
+			<a href="${pageContext.request.contextPath}/ic/approval-agenda" class="close">×</a>
+			<div class="modal-header">
+				<h3>${agendaDetails[0].event.eventName}</h3>
+				<div class="event-organization">
+					<span>CLB ${agendaDetails[0].event.clubName}</span>
+				</div>
+			</div>
+			<div class="modal-body">
+				<c:if test="${not empty message}">
+					<div class="message">${message}</div>
+				</c:if>
+				<c:if test="${not empty errorMessage}">
+					<div class="error-message">${errorMessage}</div>
+				</c:if>
+				<div class="detail-card">
+					<h4><i class="fas fa-info-circle"></i> Thông tin cơ bản</h4>
+					<div class="detail-item">
+						<span class="detail-label">Trạng thái</span>
+						<span class="detail-value ${agendaDetails[0].status}">${agendaDetails[0].status}</span>
+					</div>
+					<div class="detail-item">
+						<span class="detail-label">Ngày diễn ra</span>
+						<span class="detail-value">
+                        <fmt:formatDate value="${agendaDetails[0].event.eventDate}" pattern="yyyy-MM-dd"/>
+                    </span>
+					</div>
+					<div class="detail-item">
+						<span class="detail-label">Giờ diễn ra</span>
+						<span class="detail-value">
+                        <fmt:formatDate value="${agendaDetails[0].event.eventDate}" pattern="HH:mm"/>
+                    </span>
+					</div>
+					<div class="detail-item">
+						<span class="detail-label">Tổng số mục</span>
+						<span class="detail-value">${agendaDetails.size()} mục</span>
+					</div>
+				</div>
+				<div class="agenda-timeline">
+					<h4><i class="fas fa-clock"></i> Chi tiết Agenda</h4>
+					<c:forEach var="agenda" items="${agendaDetails}" varStatus="loop">
+						<div class="agenda-item">
+							<div class="agenda-time">
+								<fmt:formatDate value="${agenda.startTime}" pattern="HH:mm"/> -
+								<fmt:formatDate value="${agenda.endTime}" pattern="HH:mm"/>
+							</div>
+							<div class="agenda-content">
+								<h5>${agenda.title}</h5>
+								<p>${agenda.description}</p>
+							</div>
+						</div>
+					</c:forEach>
+				</div>
+				<div class="rejection-section" style="display: none;">
+					<h4><i class="fas fa-exclamation-triangle"></i> Lý do từ chối</h4>
+					<form method="post" action="${pageContext.request.contextPath}/ic/approval-agenda">
+						<input type="hidden" name="eventID" value="${agendaDetails[0].event.eventID}">
+						<input type="hidden" name="status" value="rejected">
+						<label for="rejectionReason">Vui lòng nhập lý do từ chối agenda này:</label>
+						<textarea id="rejectionReason" name="reason" placeholder="Nhập lý do từ chối chi tiết..."
+						          rows="4" required></textarea>
+						<div class="modal-actions">
+							<button type="submit" class="modal-btn confirm-reject">
+								<i class="fas fa-ban"></i> Xác nhận từ chối
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+			<div class="modal-actions">
+				<a href="${pageContext.request.contextPath}/ic/approval-agenda" class="modal-btn cancel">
+					<i class="fas fa-times"></i> Đóng
+				</a>
+				<form method="post" action="${pageContext.request.contextPath}/ic/approval-agenda"
+				      style="display: inline;">
+					<input type="hidden" name="eventID" value="${agendaDetails[0].event.eventID}">
+					<input type="hidden" name="status" value="approved">
+					<button type="submit" class="modal-btn approve">
+						<i class="fas fa-check-circle"></i> Duyệt
+					</button>
+				</form>
+				<button class="modal-btn reject" onclick="showRejectionSection()">
+					<i class="fas fa-times-circle"></i> Từ chối
+				</button>
+			</div>
+		</div>
+	</div>
 </main>
+<script>
+    function viewAgendaDetailsByEvent(eventId) {
+        window.location.href = '${pageContext.request.contextPath}/ic/approval-agenda?eventID=' + eventId;
+    }
+
+    function showRejectionSection() {
+        const rejectionSection = document.querySelector('.rejection-section');
+        if (rejectionSection) {
+            rejectionSection.style.display = 'block';
+        }
+    }
+
+    <c:if test="${not empty agendaDetails}">
+    document.getElementById('detailsModal').style.display = 'block';
+    </c:if>
+</script>
+
+<script>
+    const rowsPerPage = 3;
+    let currentPage = 1;
+
+    function filterAndPaginate() {
+        const selected = document.getElementById("status-filter").value;
+        const allRows = Array.from(document.querySelectorAll(".event-row"));
+
+        // Hide all rows first
+        allRows.forEach(row => row.style.display = "none");
+
+        // Filter by status
+        let filteredRows = selected === "all"
+            ? allRows
+            : allRows.filter(row => row.classList.contains("status-" + selected.toUpperCase()));
+
+        // Pagination
+        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+        const startIndex = (currentPage - 1) * rowsPerPage;
+        const endIndex = startIndex + rowsPerPage;
+
+        filteredRows.slice(startIndex, endIndex).forEach(row => row.style.display = "");
+
+        renderPaginationControls(totalPages);
+    }
+
+    function renderPaginationControls(totalPages) {
+        const container = document.getElementById("pagination-controls");
+        if (!container) return;
+
+        container.innerHTML = "";
+        for (let i = 1; i <= totalPages; i++) {
+            const btn = document.createElement("button");
+            btn.textContent = i;
+            btn.className = i === currentPage ? "active" : "";
+            btn.onclick = function () {
+                currentPage = i;
+                filterAndPaginate();
+            };
+            container.appendChild(btn);
+        }
+    }
+
+    document.getElementById("status-filter").addEventListener("change", () => {
+        currentPage = 1;
+        filterAndPaginate();
+    });
+
+    window.onload = () => filterAndPaginate();
+</script>
 </body>
 </html>
