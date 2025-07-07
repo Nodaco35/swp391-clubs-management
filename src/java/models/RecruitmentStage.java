@@ -20,6 +20,10 @@ public class RecruitmentStage {
     private String recruitmentTitle;
     private String createdByName;
     
+    // Additional properties for JSON serialization (camelCase)
+    private int stageId;
+    private int locationId;
+    
     public RecruitmentStage() {
     }
     
@@ -169,6 +173,22 @@ public class RecruitmentStage {
 
     public void setCreatedByName(String createdByName) {
         this.createdByName = createdByName;
+    }
+
+    public int getStageId() {
+        return stageId > 0 ? stageId : stageID;
+    }
+    
+    public void setStageId(int stageId) {
+        this.stageId = stageId;
+    }
+    
+    public int getLocationId() {
+        return locationId > 0 ? locationId : locationID;
+    }
+    
+    public void setLocationId(int locationId) {
+        this.locationId = locationId;
     }
 
     @Override

@@ -19,19 +19,15 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-
 import models.RecruitmentCampaign;
 import models.RecruitmentStage;
 import models.ApplicationStage;
 import models.StageNotification;
 import models.NotificationTemplate;
-import models.Locations;
 import models.Users;
 import models.UserClub;
-import models.ApplicationFormTemplate;
 import service.RecruitmentService;
 import service.NotificationService;
 import dal.LocationDAO;
@@ -218,13 +214,36 @@ public class RecruitmentCampaignServlet extends HttpServlet {
                 String idParam = request.getParameter("id");
                 String clubIdParam = request.getParameter("clubId");
                 
+                logger.log(Level.INFO, "[DEBUG] Chuyển hướng sang RecruitmentFormServlet với tham số: id={0}, clubId={1}", 
+                          new Object[]{idParam, clubIdParam});
+                
                 if (idParam != null && !idParam.isEmpty()) {
                     // Chế độ chỉnh sửa
                     redirectUrl += "/edit?id=" + idParam;
                     
+                    // Thêm clubId vào URL nếu có
+                    if (clubIdParam != null && !clubIdParam.isEmpty()) {
+                        redirectUrl += "&clubId=" + clubIdParam;
+                        logger.log(Level.INFO, "[DEBUG] Thêm clubId từ param: {0}", clubIdParam);
+                    } else {
+                        // Nếu không có clubId, cố gắng lấy từ campaign
+                        try {
+                            RecruitmentCampaign campaign = recruitmentService.getCampaignById(Integer.parseInt(idParam));
+                            if (campaign != null) {
+                                clubIdParam = String.valueOf(campaign.getClubID());
+                                redirectUrl += "&clubId=" + clubIdParam;
+                                logger.log(Level.INFO, "[DEBUG] Thêm clubId={0} từ campaign vào URL chỉnh sửa", clubIdParam);
+                            } else {
+                                logger.log(Level.SEVERE, "[DEBUG] CAMPAIGN KHÔNG TỒN TẠI HOẶC NULL: {0}", idParam);
+                            }
+                        } catch (Exception e) {
+                            logger.log(Level.WARNING, "[DEBUG] Không thể lấy clubId từ campaign để thêm vào URL: {0}", e.getMessage());
+                        }
+                    }
+                    
                     // Log để debug luồng chuyển hướng
-                    logger.log(Level.INFO, "[DEBUG] LUỒNG CHUYỂN HƯỚNG: /recruitment/form?id={0} -> {1} (RecruitmentFormServlet)", 
-                              new Object[]{idParam, redirectUrl});
+                    logger.log(Level.INFO, "[DEBUG] LUỒNG CHUYỂN HƯỚNG: /recruitment/form?id={0}&clubId={1} -> {2} (RecruitmentFormServlet)", 
+                              new Object[]{idParam, clubIdParam != null ? clubIdParam : "null", redirectUrl});
                 } else {
                     // Chế độ tạo mới
                     redirectUrl += "/new";
@@ -242,12 +261,31 @@ public class RecruitmentCampaignServlet extends HttpServlet {
             } else if ("/edit".equals(pathInfo)) {
                 // Chuyển hướng sang endpoint form với id
                 String id = request.getParameter("id");
+                String clubIdParam = request.getParameter("clubId");
+                
                 if (id != null && !id.isEmpty()) {
-                    String redirectUrl = request.getContextPath() + "/recruitment/form?id=" + id;
+                    // Nếu không có clubId, cần lấy nó từ bản ghi chiến dịch
+                    if (clubIdParam == null || clubIdParam.isEmpty()) {
+                        try {
+                            RecruitmentCampaign campaign = recruitmentService.getCampaignById(Integer.parseInt(id));
+                            if (campaign != null) {
+                                clubIdParam = String.valueOf(campaign.getClubID());
+                                logger.log(Level.INFO, "[DEBUG] Đã lấy clubId={0} từ campaign ID={1}", 
+                                          new Object[]{clubIdParam, id});
+                            }
+                        } catch (Exception e) {
+                            logger.log(Level.WARNING, "[DEBUG] Không thể lấy clubId từ campaign: {0}", e.getMessage());
+                        }
+                    }
+                    
+                    String redirectUrl = request.getContextPath() + "/recruitment/form/edit?recruitmentId=" + id;
+                    if (clubIdParam != null && !clubIdParam.isEmpty()) {
+                        redirectUrl += "&clubId=" + clubIdParam;
+                    }
                     
                     // Log để debug luồng chuyển hướng
-                    logger.log(Level.INFO, "[DEBUG] LUỒNG CHUYỂN HƯỚNG: /recruitment/edit?id={0} -> {1} -> /recruitmentForm/edit?id={0}", 
-                              new Object[]{id, redirectUrl});
+                    logger.log(Level.INFO, "[DEBUG] LUỒNG CHUYỂN HƯỚNG: /recruitment/edit?id={0} -> {1} -> /recruitmentForm/edit?recruitmentId={0}&clubId={2}", 
+                              new Object[]{id, redirectUrl, clubIdParam != null ? clubIdParam : "null"});
                     
                     response.sendRedirect(redirectUrl);
                 } else {
@@ -430,6 +468,159 @@ public class RecruitmentCampaignServlet extends HttpServlet {
                     response.setContentType("application/json");
                     response.setCharacterEncoding("UTF-8");
                     response.getWriter().write("{\"success\":false,\"message\":\"Lỗi hệ thống: " + e.getMessage() + "\"}");
+                }
+                return;
+            } else if ("/active-campaigns".equals(pathInfo)) {
+                // API trả về danh sách các hoạt động đang diễn ra
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                PrintWriter out = response.getWriter();
+                
+                try {
+                    List<RecruitmentCampaign> activeCampaigns = recruitmentService.getActiveCampaigns();
+                    
+                    JsonObject jsonResponse = new JsonObject();
+                    jsonResponse.addProperty("success", true);
+                    
+                    com.google.gson.JsonArray campaignsArray = new com.google.gson.JsonArray();
+                    for (RecruitmentCampaign campaign : activeCampaigns) {
+                        JsonObject campaignJson = new JsonObject();
+                        campaignJson.addProperty("recruitmentId", campaign.getRecruitmentID());
+                        campaignJson.addProperty("clubId", campaign.getClubID());
+                        campaignJson.addProperty("title", campaign.getTitle());
+                        campaignJson.addProperty("description", campaign.getDescription());
+                        campaignJson.addProperty("status", campaign.getStatus());
+                        campaignJson.addProperty("startDate", campaign.getStartDate().toString());
+                        campaignJson.addProperty("endDate", campaign.getEndDate().toString());
+                        campaignJson.addProperty("templateId", campaign.getTemplateID());
+                        campaignsArray.add(campaignJson);
+                    }
+                    
+                    jsonResponse.add("campaigns", campaignsArray);
+                    out.print(jsonResponse.toString());
+                } catch (Exception e) {
+                    JsonObject errorResponse = new JsonObject();
+                    errorResponse.addProperty("success", false);
+                    errorResponse.addProperty("message", "Lỗi khi lấy danh sách hoạt động tuyển quân: " + e.getMessage());
+                    out.print(errorResponse.toString());
+                    logger.log(Level.SEVERE, "Lỗi khi lấy danh sách hoạt động tuyển quân", e);
+                }
+                return;
+            } else if ("/club-campaigns".equals(pathInfo)) {
+                // API trả về danh sách hoạt động tuyển quân của một câu lạc bộ
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                PrintWriter out = response.getWriter();
+                
+                String clubIdParam = request.getParameter("clubId");
+                if (clubIdParam == null || clubIdParam.isEmpty()) {
+                    JsonObject errorResponse = new JsonObject();
+                    errorResponse.addProperty("success", false);
+                    errorResponse.addProperty("message", "Thiếu tham số clubId");
+                    out.print(errorResponse.toString());
+                    return;
+                }
+                
+                try {
+                    int clubId = Integer.parseInt(clubIdParam);
+                    List<RecruitmentCampaign> clubCampaigns = recruitmentService.getCampaignsByClub(clubId);
+                    
+                    JsonObject jsonResponse = new JsonObject();
+                    jsonResponse.addProperty("success", true);
+                    
+                    com.google.gson.JsonArray campaignsArray = new com.google.gson.JsonArray();
+                    for (RecruitmentCampaign campaign : clubCampaigns) {
+                        JsonObject campaignJson = new JsonObject();
+                        campaignJson.addProperty("recruitmentId", campaign.getRecruitmentID());
+                        campaignJson.addProperty("clubId", campaign.getClubID());
+                        campaignJson.addProperty("title", campaign.getTitle());
+                        campaignJson.addProperty("description", campaign.getDescription());
+                        campaignJson.addProperty("status", campaign.getStatus());
+                        campaignJson.addProperty("startDate", campaign.getStartDate().toString());
+                        campaignJson.addProperty("endDate", campaign.getEndDate().toString());
+                        campaignJson.addProperty("templateId", campaign.getTemplateID());
+                        campaignsArray.add(campaignJson);
+                    }
+                    
+                    jsonResponse.add("campaigns", campaignsArray);
+                    out.print(jsonResponse.toString());
+                } catch (NumberFormatException e) {
+                    JsonObject errorResponse = new JsonObject();
+                    errorResponse.addProperty("success", false);
+                    errorResponse.addProperty("message", "Tham số clubId không hợp lệ");
+                    out.print(errorResponse.toString());
+                } catch (Exception e) {
+                    JsonObject errorResponse = new JsonObject();
+                    errorResponse.addProperty("success", false);
+                    errorResponse.addProperty("message", "Lỗi khi lấy danh sách hoạt động tuyển quân: " + e.getMessage());
+                    out.print(errorResponse.toString());
+                    logger.log(Level.SEVERE, "Lỗi khi lấy danh sách hoạt động tuyển quân của câu lạc bộ", e);
+                }
+                return;
+            } else if ("/checkExpired".equals(pathInfo)) {
+                // API endpoint to check and close expired recruitment campaigns
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                PrintWriter out = response.getWriter();
+                
+                try {
+                    // Get all active campaigns
+                    List<RecruitmentCampaign> activeCampaigns = recruitmentService.getActiveCampaigns();
+                    
+                    // Current date for comparison
+                    java.util.Date currentDate = new java.util.Date();
+                    
+                    // Count of campaigns closed in this check
+                    int closedCount = 0;
+                    JsonObject jsonResponse = new JsonObject();
+                    com.google.gson.JsonArray closedCampaignsArray = new com.google.gson.JsonArray();
+                    
+                    // Loop through active campaigns and check if any have passed their end date
+                    for (RecruitmentCampaign campaign : activeCampaigns) {
+                        java.util.Date endDate = campaign.getEndDate();
+                        
+                        // If campaign's end date has passed, close it
+                        if (endDate != null && endDate.before(currentDate)) {
+                            // Update campaign status to CLOSED
+                            campaign.setStatus("CLOSED");
+                            
+                            // Update the campaign
+                            boolean updateSuccess = recruitmentService.updateCampaign(campaign);
+                            
+                            if (updateSuccess) {
+                                // Update the club's recruiting status to false
+                                dal.ClubDAO clubDAO = new dal.ClubDAO();
+                                boolean clubUpdated = clubDAO.updateIsRecruiting(campaign.getClubID(), false);
+                                
+                                // Add to closed campaigns list
+                                JsonObject closedCampaign = new JsonObject();
+                                closedCampaign.addProperty("recruitmentId", campaign.getRecruitmentID());
+                                closedCampaign.addProperty("clubId", campaign.getClubID());
+                                closedCampaign.addProperty("title", campaign.getTitle());
+                                closedCampaign.addProperty("clubUpdated", clubUpdated);
+                                closedCampaignsArray.add(closedCampaign);
+                                
+                                closedCount++;
+                                logger.log(Level.INFO, 
+                                    "Auto-closed campaign ID {0} for club ID {1}. IsRecruiting updated: {2}", 
+                                    new Object[]{campaign.getRecruitmentID(), campaign.getClubID(), clubUpdated});
+                            }
+                        }
+                    }
+                    
+                    // Build response
+                    jsonResponse.addProperty("success", true);
+                    jsonResponse.addProperty("message", closedCount + " expired campaigns automatically closed");
+                    jsonResponse.addProperty("closedCount", closedCount);
+                    jsonResponse.add("closedCampaigns", closedCampaignsArray);
+                    
+                    out.print(jsonResponse.toString());
+                } catch (Exception e) {
+                    JsonObject errorResponse = new JsonObject();
+                    errorResponse.addProperty("success", false);
+                    errorResponse.addProperty("message", "Error checking expired campaigns: " + e.getMessage());
+                    out.print(errorResponse.toString());
+                    logger.log(Level.SEVERE, "Error checking expired campaigns", e);
                 }
                 return;
             } else { // Endpoint "/form" đã được xử lý ở trên
@@ -699,9 +890,8 @@ public class RecruitmentCampaignServlet extends HttpServlet {
                     jsonResponse.addProperty("message", "Không thể xóa hoạt động. Chiến dịch có thể đang diễn ra hoặc có dữ liệu liên quan.");
                 }
             } else if ("/close".equals(pathInfo)) {
-                // Kết thúc hoạt động tuyển quân (đổi trạng thái thành CLOSED)
+                // Kết thúc hoạt động tuyển quân
                 String recruitmentIdParam = request.getParameter("recruitmentId");
-                
                 if (recruitmentIdParam == null || recruitmentIdParam.isEmpty()) {
                     jsonResponse.addProperty("success", false);
                     jsonResponse.addProperty("message", "Thiếu ID hoạt động tuyển quân");
@@ -725,6 +915,12 @@ public class RecruitmentCampaignServlet extends HttpServlet {
                             jsonResponse.addProperty("success", true);
                             jsonResponse.addProperty("message", "Đã kết thúc hoạt động thành công");
                             logger.log(Level.INFO, "Campaign {0} successfully closed", recruitmentId);
+                            
+                            // Cập nhật trạng thái tuyển quân của câu lạc bộ
+                            dal.ClubDAO clubDAO = new dal.ClubDAO();
+                            boolean isUpdated = clubDAO.updateIsRecruiting(campaign.getClubID(), false);
+                            logger.log(Level.INFO, "Cập nhật IsRecruitting=false cho CLB ID {0}: {1}", 
+                                      new Object[]{campaign.getClubID(), isUpdated ? "thành công" : "thất bại"});
                         } else {
                             jsonResponse.addProperty("success", false);
                             jsonResponse.addProperty("message", "Không thể kết thúc hoạt động. Vui lòng thử lại sau.");
@@ -737,8 +933,8 @@ public class RecruitmentCampaignServlet extends HttpServlet {
                     }
                 } catch (NumberFormatException e) {
                     jsonResponse.addProperty("success", false);
-                    jsonResponse.addProperty("message", "ID hoạt động không hợp lệ");
-                    logger.log(Level.WARNING, "Invalid recruitmentId format: {0}", recruitmentIdParam);
+                    jsonResponse.addProperty("message", "ID hoạt động tuyển quân không hợp lệ");
+                    logger.log(Level.WARNING, "ERROR: Invalid recruitmentId parameter: {0}", recruitmentIdParam);
                 }
             } else {
                 jsonResponse.addProperty("success", false);

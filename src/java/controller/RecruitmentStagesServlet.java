@@ -28,7 +28,7 @@ public class RecruitmentStagesServlet extends HttpServlet {
 
     private static final Logger logger = Logger.getLogger(RecruitmentStagesServlet.class.getName());
     private final RecruitmentService recruitmentService = new RecruitmentService();
-    private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create();
+    private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -64,6 +64,12 @@ public class RecruitmentStagesServlet extends HttpServlet {
             
             // Lấy danh sách các giai đoạn
             List<RecruitmentStage> stages = recruitmentService.getStagesByCampaign(recruitmentId);
+            
+            // Đồng bộ các trường camelCase với trường snake_case
+            for (RecruitmentStage stage : stages) {
+                stage.setStageId(stage.getStageID());
+                stage.setLocationId(stage.getLocationID());
+            }
             
             // Trả về danh sách dưới dạng JSON
             jsonResponse.addProperty("success", true);
