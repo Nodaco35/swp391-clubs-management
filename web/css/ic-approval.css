@@ -511,6 +511,7 @@ body {
     /* Let content determine height */
 }
 
+
 @keyframes modalSlideIn {
     from {
         transform: translateY(-20px);
@@ -547,7 +548,7 @@ body {
     background: white;
 }
 
-.close a {
+a.close {
     text-decoration: none;
 }
 
@@ -618,6 +619,18 @@ body {
     flex: none;
     /* Don't flex to allow natural height */
 }
+
+.message, .error-message {
+    padding: 12px 16px;
+    margin: 10px 0;
+    border-radius: 6px;
+    font-weight: 500;
+    background-color: #f0f4f8;
+    color: #2c3e50;
+    border-left: 4px solid #3498db;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
 
 .detail-grid {
     display: grid;
@@ -945,7 +958,7 @@ body {
     border: 1px solid var(--border);
 }
 
-.modal-btn.cancel a {
+a.modal-btn.cancel {
     text-decoration: none;
 }
 

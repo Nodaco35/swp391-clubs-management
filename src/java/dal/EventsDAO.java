@@ -730,17 +730,137 @@ public class EventsDAO {
         }
     }
 
+    public List<Agenda> getAgendaByEventPublic() {
+        List<Agenda> list = new ArrayList<>();
+        String sql = """
+                    SELECT 
+                        E.EventID,
+                        E.EventName,
+                        C.ClubName,
+                        E.EventDate,
+                        A.Status,
+                        COUNT(A.AgendaID) AS AgendaCount
+                    FROM Events E
+                    JOIN Agenda A ON A.EventID = E.EventID
+                    JOIN Clubs C ON C.ClubID = E.ClubID
+                    WHERE E.SemesterID = 'SU25' AND E.IsPublic = TRUE
+                    GROUP BY E.EventID, E.EventName, C.ClubName, E.EventDate, A.Status
+                """;
 
-    public List<Agenda> getAgendasByEventID(int eventID) {
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Agenda agenda = new Agenda();
+
+                agenda.setEventID(rs.getInt("EventID"));
+                agenda.setStatus(rs.getString("Status"));
+
+                Events event = new Events();
+                event.setEventID(rs.getInt("EventID"));
+                event.setEventName(rs.getString("EventName"));
+                event.setClubName(rs.getString("ClubName"));
+                event.setEventDate(rs.getTimestamp("EventDate"));
+                event.setAgendaCount(rs.getInt("AgendaCount"));
+
+                agenda.setEvent(event);
+
+                list.add(agenda);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public int countEventHasPendingAgenda() {
+        String sql = """
+        SELECT COUNT(DISTINCT E.EventID)
+        FROM Agenda A 
+        JOIN Events E ON A.EventID = E.EventID 
+        WHERE A.Status = 'PENDING' AND E.SemesterID = 'SU25' AND E.IsPublic = TRUE
+    """;
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int countEventHasApprovedAgenda() {
+        String sql = """
+        SELECT COUNT(DISTINCT E.EventID)
+        FROM Agenda A 
+        JOIN Events E ON A.EventID = E.EventID 
+        WHERE A.Status = 'APPROVED' AND E.SemesterID = 'SU25' AND E.IsPublic = TRUE
+    """;
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int countEventHasRejectedAgenda() {
+        String sql = """
+        SELECT COUNT(DISTINCT E.EventID)
+        FROM Agenda A 
+        JOIN Events E ON A.EventID = E.EventID 
+        WHERE A.Status = 'REJECTED' AND E.SemesterID = 'SU25' AND E.IsPublic = TRUE
+    """;
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public void updateAgendaStatus(int eventID, String status, String reason) {
+        String sql = "UPDATE Agenda SET Status = ?, Reason = ? WHERE EventID = ?";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, status);
+            ps.setString(2, reason);
+            ps.setInt(3, eventID);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<Agenda> getAgendaByEventID(int eventID) {
         List<Agenda> agendas = new ArrayList<>();
-        String sql = "SELECT * FROM Agenda WHERE EventID = ? ORDER BY StartTime ASC";
+        String sql = """
+                    SELECT A.*, E.EventName, E.EventDate, E.ClubID, C.ClubName,
+                           (SELECT COUNT(*) FROM Agenda WHERE EventID = E.EventID) AS AgendaCount
+                    FROM Agenda A
+                    JOIN Events E ON A.EventID = E.EventID
+                    JOIN Clubs C ON E.ClubID = C.ClubID
+                    WHERE A.EventID = ?
+                    ORDER BY A.StartTime ASC
+                """;
 
-        try (Connection con = DBContext.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
             ps.setInt(1, eventID);
             ResultSet rs = ps.executeQuery();
-
             while (rs.next()) {
                 Agenda a = new Agenda();
                 a.setAgendaID(rs.getInt("AgendaID"));
@@ -749,6 +869,45 @@ public class EventsDAO {
                 a.setDescription(rs.getString("Description"));
                 a.setStartTime(rs.getTimestamp("StartTime"));
                 a.setEndTime(rs.getTimestamp("EndTime"));
+                a.setStatus(rs.getString("Status"));
+                a.setReason(rs.getString("Reason"));
+                Events event = new Events();
+                event.setEventID(rs.getInt("EventID"));
+                event.setEventName(rs.getString("EventName"));
+                event.setClubName(rs.getString("ClubName"));
+                event.setEventDate(rs.getTimestamp("EventDate"));
+                event.setAgendaCount(rs.getInt("AgendaCount"));
+
+                a.setEvent(event);
+                agendas.add(a);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return agendas;
+    }
+
+    public List<Agenda> getAgendasByEventID(int eventID) {
+        List<Agenda> agendas = new ArrayList<>();
+        String sql = "SELECT * FROM Agenda WHERE EventID = ? ORDER BY StartTime ASC";
+
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, eventID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Agenda a = new Agenda();
+                a.setAgendaID(rs.getInt("AgendaID"));
+                a.setEventID(rs.getInt("EventID"));
+                a.setTitle(rs.getString("Title"));
+                a.setDescription(rs.getString("Description"));
+                a.setStartTime(rs.getTimestamp("StartTime"));
+                a.setEndTime(rs.getTimestamp("EndTime"));
+                a.setStatus(rs.getString("Status"));
+                a.setReason(rs.getString("Reason"));
+
                 agendas.add(a);
             }
 
@@ -760,9 +919,9 @@ public class EventsDAO {
 
     public void insertAgenda(int eventID, String title, String description, Timestamp startTime, Timestamp endTime) {
         String sql = "INSERT INTO Agenda (EventID, Title, Description, StartTime, EndTime) VALUES (?, ?, ?, ?, ?)";
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
             ps.setInt(1, eventID);
             ps.setString(2, title);
             ps.setString(3, description);
@@ -777,8 +936,9 @@ public class EventsDAO {
 
     public void deleteAllByEventID(int eventID) {
         String sql = "DELETE FROM Agenda WHERE EventID = ?";
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
             ps.setInt(1, eventID);
             ps.executeUpdate();
         } catch (Exception e) {
