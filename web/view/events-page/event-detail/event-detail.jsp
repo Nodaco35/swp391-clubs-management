@@ -253,6 +253,11 @@
 													Đăng ký
 												</button>
 											</c:when>
+											<c:when test="${e.status == 'Processing' || e.status == 'PROCESSING'}">
+												<button type="button" class="register-btn disabled" disabled>
+													Đang diễn ra
+												</button>
+											</c:when>
 											<c:otherwise>
 												<button type="button" class="register-btn disabled" disabled>
 													Đã kết thúc

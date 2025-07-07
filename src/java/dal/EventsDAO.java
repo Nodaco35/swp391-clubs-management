@@ -461,7 +461,7 @@ public class EventsDAO {
     }
 
     public int countOngoingEvents(int clubID) {
-        String sql = "SELECT COUNT(*) FROM Events WHERE ClubID = ? AND DATE(EventDate) = CURDATE()";
+        String sql = "SELECT COUNT(*) FROM Events WHERE ClubID = ? AND  EventDate <= NOW() AND EndTime >= NOW();";
         try {
             Connection connection = DBContext.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -475,7 +475,7 @@ public class EventsDAO {
     }
 
     public int countPastEvents(int clubID) {
-        String sql = "SELECT COUNT(*) FROM Events WHERE ClubID = ? AND EventDate < NOW() AND DATE(EventDate) != CURDATE()";
+        String sql = "SELECT COUNT(*) FROM Events WHERE ClubID = ? AND EndTime < NOW()";
         try {
             Connection connection = DBContext.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
