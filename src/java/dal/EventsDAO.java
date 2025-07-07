@@ -513,29 +513,6 @@ public class EventsDAO {
         }
     }
 
-    // Thêm sự kiện mới vào bảng Events
-    public boolean addEvent(String eventName, String description, Timestamp eventDate, Timestamp endTime,
-                            int locationId, int clubId, boolean isPublic, int capacity) {
-
-        String sql = "INSERT INTO Events (EventName, Description, EventDate, EndTime, LocationID, ClubID, IsPublic, Capacity, Status, SemesterID) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', 'SU25')";
-        try {
-            Connection connection = DBContext.getConnection();
-            PreparedStatement ps = connection.prepareStatement(sql);
-            ps.setString(1, eventName);
-            ps.setString(2, description != null && !description.isEmpty() ? description : null);
-            ps.setTimestamp(3, eventDate);
-            ps.setTimestamp(4, endTime);
-            ps.setInt(5, locationId);
-            ps.setInt(6, clubId);
-            ps.setBoolean(7, isPublic);
-            ps.setInt(8, capacity);
-            int rowsAffected = ps.executeUpdate();
-            return rowsAffected > 0;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     public boolean isLocationConflict(int locationId, Timestamp start, Timestamp end) {
         String sql = "SELECT COUNT(*) FROM Events " +
@@ -563,6 +540,42 @@ public class EventsDAO {
         return false;
     }
 
+    public int addEvent(String eventName, String description, Timestamp eventDate, Timestamp endTime,
+                        int locationId, int clubId, boolean isPublic, int capacity, String eventImgPath) {
+        String sql = "INSERT INTO Events (EventName, Description, EventDate, EndTime, LocationID, ClubID, " +
+                "IsPublic, Capacity, Status, SemesterID, EventImg) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Pending', 'SU25', ?)";
+
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, eventName);
+            ps.setString(2, (description != null && !description.isEmpty()) ? description : null);
+            ps.setTimestamp(3, eventDate);
+            ps.setTimestamp(4, endTime);
+            ps.setInt(5, locationId);
+            ps.setInt(6, clubId);
+            ps.setBoolean(7, isPublic);
+            ps.setInt(8, capacity);
+            ps.setString(9, eventImgPath);
+
+            int affectedRows = ps.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Thêm sự kiện thất bại, không có bản ghi nào được thêm.");
+            }
+
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1); // Trả về ID của sự kiện vừa tạo
+                } else {
+                    throw new SQLException("Không thể lấy ID của sự kiện vừa tạo.");
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi khi thêm sự kiện: " + e.getMessage(), e);
+        }
+    }
+
     public void insertEvent(String eventName, String description, Timestamp eventDate, Timestamp endTime,
                             int locationId, int clubId, boolean isPublic, int capacity, String eventImgPath) {
 
@@ -570,9 +583,9 @@ public class EventsDAO {
                 "IsPublic, Capacity, Status, SemesterID, EventImg) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Pending', 'SU25', ?)";
 
-        try (Connection connection = DBContext.getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql)) {
-
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, eventName);
             ps.setString(2, (description != null && !description.isEmpty()) ? description : null);
             ps.setTimestamp(3, eventDate);

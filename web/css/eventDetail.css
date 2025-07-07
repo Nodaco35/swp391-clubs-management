@@ -476,7 +476,6 @@ body {
     line-height: 1.8;
     color: var(--text-light);
     font-size: 1.1rem;
-    white-space: pre-line;
 }
 
 .agenda-timeline {
@@ -504,7 +503,7 @@ body {
 .agenda-item {
     display: flex;
     gap: 1.5rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     padding: 1.5rem;
     background: #f8fafc;
     border-radius: 12px;
