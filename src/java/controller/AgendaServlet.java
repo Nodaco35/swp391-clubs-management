@@ -77,6 +77,8 @@ public class AgendaServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        String sourcePage = request.getParameter("sourcePage");
         int eventID = Integer.parseInt(request.getParameter("eventID"));
         String[] startTimes = request.getParameterValues("agendaStartTime[]");
         String[] endTimes = request.getParameterValues("agendaEndTime[]");
@@ -103,13 +105,18 @@ public class AgendaServlet extends HttpServlet {
                     eventsDAO.insertAgenda(eventID, title, "", startTS, endTS);
                 } catch (Exception e) {
                     e.printStackTrace();
+                    session.setAttribute("errorMessage", "Lỗi khi thêm chương trình sự kiện: " + e.getMessage());
                 }
             }
         }
-        HttpSession session = request.getSession();
-        session.setAttribute("successMsg", "Thêm chương trình sự kiện thành công!");
 
-        response.sendRedirect(request.getContextPath() + "/chairman-page/myclub-events/edit-event?eventID=" + eventID);
+        session.setAttribute("successMsg", "Thêm chương trình sự kiện thành công!");
+        if ("add-event".equals(sourcePage)) {
+            session.removeAttribute("newEventID"); // Clear newEventID after agenda is saved
+            response.sendRedirect(request.getContextPath() + "/chairman-page/myclub-events");
+        } else {
+            response.sendRedirect(request.getContextPath() + "/chairman-page/myclub-events/edit-event?eventID=" + eventID);
+        }
     }
 
     /** 

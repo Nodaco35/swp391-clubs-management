@@ -16,10 +16,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import models.EventOwnerInfo;
-import models.EventStats;
-import models.Events;
-import models.Users;
+import models.*;
 
 /**
  *
@@ -82,6 +79,8 @@ public class EventDetailServlet extends HttpServlet {
                 List<Events> relatedEvents = eventDAO.getEventsByClubID(e.getClubID(), id);
                 EventStats stats = eventDAO.getSpotsLeftEvent(id);
                 EventOwnerInfo ownerInfo = eventDAO.getEventOwnerInfo(id);
+                List<Agenda> agendaDetails = eventDAO.getAgendaByEventID(id);
+                request.setAttribute("agendaDetails", agendaDetails);
                 request.setAttribute("ownerInfo", ownerInfo);
                 request.setAttribute("relatedEvents", relatedEvents);
                 request.setAttribute("event", e);

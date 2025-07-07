@@ -275,7 +275,7 @@
 									<i class="fas fa-edit"></i>
 								</a>
 								<c:if test="${event.status == 'PENDING' || event.status == 'Pending'}">
-									<a href="${pageContext.request.contextPath}/chairman-page/myclub-events/tasks?eventID=${event.eventID}" class="btn-action assign" title="Giao việc">
+									<a href="${pageContext.request.contextPath}/chairman-page/myclub-events?eventID=${event.eventID}" class="btn-action assign" title="Giao việc">
 										<i class="fas fa-tasks"></i>
 									</a>
 								</c:if>

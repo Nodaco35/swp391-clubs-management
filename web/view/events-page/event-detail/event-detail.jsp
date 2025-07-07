@@ -194,6 +194,30 @@
 							${e.description}
 						</div>
 					</div>
+					<h3 class="section-title">
+						<i class="fas fa-clock"></i> Chi tiết Agenda
+					</h3>
+					<c:choose>
+						<c:when test="${not empty requestScope.agendaDetails}">
+							<div class="agenda-timeline">
+								<c:forEach var="agenda" items="${agendaDetails}" varStatus="loop">
+									<div class="agenda-item">
+										<div class="agenda-time">
+											<fmt:formatDate value="${agenda.startTime}" pattern="HH:mm"/> -
+											<fmt:formatDate value="${agenda.endTime}" pattern="HH:mm"/>
+										</div>
+										<div class="agenda-content">
+											<h5>${agenda.title}</h5>
+											<p>${agenda.description}</p>
+										</div>
+									</div>
+								</c:forEach>
+							</div>
+						</c:when>
+						<c:otherwise>
+							<p class="no-events"> Agenda của sự kiện đang được cập nhập.</p>
+						</c:otherwise>
+					</c:choose>
 
 					<!-- Organizer Info -->
 

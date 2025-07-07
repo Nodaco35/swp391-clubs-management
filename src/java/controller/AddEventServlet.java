@@ -97,7 +97,6 @@ public class AddEventServlet extends HttpServlet {
             String currentPath = request.getServletPath();
             request.setAttribute("currentPath", currentPath);
 
-
             request.setAttribute("locations", locationDAO.getLocationsByType("OnCampus"));
 
             request.getRequestDispatcher("/view/student/chairman/add-event.jsp").forward(request, response);
@@ -150,7 +149,6 @@ public class AddEventServlet extends HttpServlet {
         if (imagePart != null && imagePart.getSize() > 0) {
             String fileName = imagePart.getSubmittedFileName();
             if (fileName != null && !fileName.isEmpty()) {
-                // Kiểm tra định dạng file
                 String fileExtension = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
                 boolean isValidExtension = false;
                 for (String ext : ALLOWED_EXTENSIONS) {
@@ -169,11 +167,9 @@ public class AddEventServlet extends HttpServlet {
                 }
 
                 try {
-                    // Tạo tên file unique
                     String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
                     eventImgPath = UPLOAD_DIR + "/" + uniqueFileName;
 
-                    // 1. Lưu vào thư mục build (để hiển thị ngay lập tức)
                     String buildUploadPath = getServletContext().getRealPath("/") + UPLOAD_DIR;
                     System.err.println("Build Upload Path: " + buildUploadPath);
                     Path buildUploadDir = Paths.get(buildUploadPath);
@@ -183,25 +179,20 @@ public class AddEventServlet extends HttpServlet {
                     Path buildFilePath = buildUploadDir.resolve(uniqueFileName);
                     Files.copy(imagePart.getInputStream(), buildFilePath, StandardCopyOption.REPLACE_EXISTING);
 
-                    // 2. Lưu vào thư mục source (để không bị mất khi redeploy)
-                    // Lấy đường dẫn gốc của ứng dụng và đi ngược lên hai cấp để đến project root
                     String contextPath = getServletContext().getRealPath("/");
                     String projectRoot = Paths.get(contextPath).getParent().getParent().toString();
                     String sourceUploadPath = Paths.get(projectRoot, "web", UPLOAD_DIR).toString();
                     System.err.println("Source Upload Path: " + sourceUploadPath);
 
-                    // Tạo thư mục source nếu chưa tồn tại
                     Path sourceUploadDir = Paths.get(sourceUploadPath);
                     if (!Files.exists(sourceUploadDir)) {
                         System.err.println("Thư mục source không tồn tại, đang tạo: " + sourceUploadDir);
                         Files.createDirectories(sourceUploadDir);
                     }
 
-                    // Tạo đường dẫn file trong thư mục source
                     Path sourceFilePath = sourceUploadDir.resolve(uniqueFileName);
                     System.err.println("Source File Path: " + sourceFilePath);
 
-                    // Copy file từ build sang source
                     Files.copy(buildFilePath, sourceFilePath, StandardCopyOption.REPLACE_EXISTING);
                     System.err.println("File copied to: " + sourceFilePath);
 
@@ -225,7 +216,7 @@ public class AddEventServlet extends HttpServlet {
             LocationDAO locationDAO = new LocationDAO();
             request.setAttribute("locations", locationDAO.getLocationsByType(locationType != null ? locationType : "OnCampus"));
             request.setAttribute("locationType", locationType);
-            request.setAttribute("errorMessage", "Vui lòng điền đầy đủ thông tin bắt buộc.");
+            request.setAttribute("errorMessage", "Bạn có thể thêm địa điệm nếu chưa có sẵn!.");
 
             if (user != null) {
                 String userID = user.getUserID();
@@ -277,10 +268,13 @@ public class AddEventServlet extends HttpServlet {
 
             boolean isPublic = "public".equalsIgnoreCase(eventType);
 
-            dao.insertEvent(eventName, eventDescription, startDateTime, endDateTime, locationId, myClubID, isPublic, maxParticipants, eventImgPath);
+            // Insert event and get the generated event ID
+            int newEventID = dao.addEvent(eventName, eventDescription, startDateTime, endDateTime, locationId, myClubID, isPublic, maxParticipants, eventImgPath);
 
-            session.setAttribute("successMsg", "Thêm sự kiện thành công!");
-            response.sendRedirect(request.getContextPath() + "/chairman-page/myclub-events");
+            session.setAttribute("successMsg", "Thêm sự kiện thành công! Vui lòng thêm Agenda cho sự kiện ở bên dưới.");
+            session.setAttribute("newEventID", newEventID);
+            request.setAttribute("locations", locationDAO.getLocationsByType(locationType != null ? locationType : "OnCampus"));
+            request.getRequestDispatcher("/view/student/chairman/add-event.jsp").forward(request, response);
 
         } catch (NumberFormatException e) {
             request.setAttribute("errorMessage", "Dữ liệu không hợp lệ, vui lòng kiểm tra số lượng tối đa hoặc địa điểm.");

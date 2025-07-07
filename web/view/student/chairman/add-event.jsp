@@ -277,8 +277,44 @@
 				</button>
 			</div>
 		</form>
+		<div class="form-grid-2" id="agendaSection"
+		     style="display: ${not empty sessionScope.newEventID ? 'block' : 'none'};">
+			<form id="agendaForm" action="${pageContext.request.contextPath}/agenda" method="post">
+				<input type="hidden" name="eventID" value="${sessionScope.newEventID}"/>
+				<input type="hidden" name="sourcePage" value="add-event"/>
+				<div class="form-group full-width">
+					<label><i class="fas fa-list-alt"></i> Chương trình sự kiện (Agenda)</label>
+					<div id="agendaContainer">
+						<c:forEach var="agenda" items="${agendas}">
+							<div class="agenda-item">
+								<input type="time" name="agendaStartTime[]"
+								       value="<fmt:formatDate value='${agenda.startTime}' pattern='HH:mm' />"
+								       required/>
+								<input type="time" name="agendaEndTime[]"
+								       value="<fmt:formatDate value='${agenda.endTime}' pattern='HH:mm' />"
+								       required/>
+								<input type="text" name="agendaActivity[]" value="${agenda.title}"
+								       placeholder="Hoạt động" required/>
+								<button type="button" class="btn-remove-agenda" onclick="removeAgendaItem(this)">
+									<i class="fas fa-times"></i>
+								</button>
+							</div>
+						</c:forEach>
+					</div>
+					<button type="button" class="btn-add-agenda" onclick="addAgendaItem()">
+						<i class="fas fa-plus"></i> Thêm hoạt động
+					</button>
+					<div class="form-actions">
+						<button type="submit" class="btn-submit">
+							<i class="fas fa-save"></i> Lưu chương trình sự kiện
+						</button>
+					</div>
+				</div>
+			</form>
+		</div>
 
-
+		<%--agenda khi tạo xong cùng sự kiện thì đẩy sang cho IC duyệt--%>
+		<%--			(trong trang duyệt đó thì sẽ có 2 nút để duyệt, đầu tiên là duyện sự kiện, tiếp theo là duyệt agenda)--%>
 </main>
 <script>
     window.addEventListener('DOMContentLoaded', function () {
@@ -323,6 +359,51 @@
         }
     });
 
+    document.getElementById("agendaForm")?.addEventListener("submit", function (e) {
+        const eventTimeInput = document.getElementById("eventTime");
+        const eventEndTimeInput = document.getElementById("eventEndTime");
+
+        if (!eventTimeInput.value || !eventEndTimeInput.value) {
+            alert("Vui lòng điền giờ bắt đầu và kết thúc của sự kiện trước.");
+            e.preventDefault();
+            return;
+        }
+
+        const [startHour, startMin] = eventTimeInput.value.split(':').map(Number);
+        const [endHour, endMin] = eventEndTimeInput.value.split(':').map(Number);
+
+        const startTotalMin = startHour * 60 + startMin;
+        const endTotalMin = endHour * 60 + endMin;
+
+        const agendaStartTimes = document.getElementsByName("agendaStartTime[]");
+        const agendaEndTimes = document.getElementsByName("agendaEndTime[]");
+
+        for (let i = 0; i < agendaStartTimes.length; i++) {
+            const startValue = agendaStartTimes[i].value;
+            const endValue = agendaEndTimes[i].value;
+
+            if (!startValue || !endValue) continue;
+
+            const [aStartHour, aStartMin] = startValue.split(':').map(Number);
+            const [aEndHour, aEndMin] = endValue.split(':').map(Number);
+
+            const aStartTotalMin = aStartHour * 60 + aStartMin;
+            const aEndTotalMin = aEndHour * 60 + aEndMin;
+
+            if (aEndTotalMin <= aStartTotalMin) {
+                alert(`Agenda ${i + 1}: Thời gian kết thúc phải sau thời gian bắt đầu.`);
+                e.preventDefault();
+                return;
+            }
+
+            if (aStartTotalMin < startTotalMin || aEndTotalMin > endTotalMin) {
+                alert(`Agenda ${i + 1}: Thời gian phải nằm trong khung giờ sự kiện.`);
+                e.preventDefault();
+                return;
+            }
+        }
+    });
+
     function previewImage(input) {
         const preview = document.getElementById('imagePreview');
         const previewImg = document.getElementById('previewImg');
@@ -347,10 +428,28 @@
         newLocationGroup.style.display = locationType === 'OffCampus' ? 'block' : 'none';
     }
 
+    function addAgendaItem() {
+        const container = document.getElementById('agendaContainer');
+        const item = document.createElement('div');
+        item.classList.add('agenda-item');
+        item.innerHTML = `
+            <input type="time" name="agendaStartTime[]" required />
+            <input type="time" name="agendaEndTime[]" required />
+            <input type="text" name="agendaActivity[]" placeholder="Hoạt động" required />
+            <button type="button" class="btn-remove-agenda" onclick="removeAgendaItem(this)">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        container.appendChild(item);
+    }
+
+    function removeAgendaItem(button) {
+        button.parentElement.remove();
+    }
+
     window.onload = function () {
         toggleNewLocation();
     }
-
 </script>
 </body>
 </html>
