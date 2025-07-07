@@ -136,7 +136,6 @@
 				<table class="data-table">
 					<thead>
 					<tr>
-						<th>ID</th>
 						<th>Tên sự kiện</th>
 						<th>Số lượng mục</th>
 						<th>Ngày diễn ra</th>
@@ -147,7 +146,6 @@
 					<tbody id="agenda-table-body">
 					<c:forEach var="a" items="${agendaList}" varStatus="loop">
 						<tr class="event-row status-${a.status}">
-							<td>#E${a.event.eventID}</td>
 							<td>
 								<div class="agenda-info">
 									<strong>${a.event.eventName}</strong>
@@ -216,10 +214,21 @@
                     </span>
 					</div>
 					<div class="detail-item">
+						<span class="detail-label">Địa điểm diễn ra</span>
+						<span class="detail-value">${agendaDetails[0].event.location.locationName}
+                    </span>
+					</div>
+
+					<div class="detail-item">
 						<span class="detail-label">Giờ diễn ra</span>
 						<span class="detail-value">
                         <fmt:formatDate value="${agendaDetails[0].event.eventDate}" pattern="HH:mm"/>
                     </span>
+					</div>
+					<div class="detail-item">
+						<span class="detail-label">Sức chứa</span>
+						<span class="detail-value">${agendaDetails[0].event.capacity} người
+						</span>
 					</div>
 					<div class="detail-item">
 						<span class="detail-label">Tổng số mục</span>

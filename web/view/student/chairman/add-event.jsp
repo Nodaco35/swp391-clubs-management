@@ -281,6 +281,48 @@
 
 </main>
 <script>
+    window.addEventListener('DOMContentLoaded', function () {
+        const eventDateInput = document.getElementById('eventDate');
+        const today = new Date();
+        today.setDate(today.getDate() + 7);
+
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+
+        const minDate = `${year}-${month}-${day}`;
+        eventDateInput.min = minDate;
+    });
+
+    document.getElementById("eventForm").addEventListener("submit", function (e) {
+        const eventDate = new Date(document.getElementById("eventDate").value);
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        now.setDate(now.getDate() + 7);
+
+        if (eventDate < now) {
+            alert("Ngày tổ chức phải sau ngày hiện tại ít nhất 7 ngày.");
+            e.preventDefault();
+        }
+
+        const startTime = document.getElementById("eventTime").value;
+        const endTime = document.getElementById("eventEndTime").value;
+
+        if (!startTime || !endTime) return;
+
+        const [startHour, startMin] = startTime.split(':').map(Number);
+        const [endHour, endMin] = endTime.split(':').map(Number);
+
+        const startTotalMin = startHour * 60 + startMin;
+        const endTotalMin = endHour * 60 + endMin;
+
+        if (endTotalMin - startTotalMin < 30) {
+            alert("Giờ kết thúc phải cách giờ bắt đầu ít nhất 30 phút.");
+            e.preventDefault();
+            return;
+        }
+    });
+
     function previewImage(input) {
         const preview = document.getElementById('imagePreview');
         const previewImg = document.getElementById('previewImg');
