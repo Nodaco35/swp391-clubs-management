@@ -277,7 +277,7 @@
 		</form>
 
 		<div class="form-grid-2">
-			<form id="agendaForm" action="${pageContext.request.contextPath}/agenda" method="post" id="agendaForm">
+			<form id="agendaForm" action="${pageContext.request.contextPath}/agenda" method="post">
 				<input type="hidden" name="eventID" value="${event.eventID}"/>
 				<div class="form-group full-width">
 					<label><i class="fas fa-list-alt"></i> Chương trình sự kiện (Agenda)</label>
