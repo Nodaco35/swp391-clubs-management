@@ -292,6 +292,8 @@
 								       required/>
 								<input type="text" name="agendaActivity[]" value="${agenda.title}"
 								       placeholder="Hoạt động" required/>
+								<input type="text" name="agendaDescription[]" value="${agenda.description}"
+								       placeholder="Mô tả ngắn gọn hoạt động" required/>
 								<button type="button" class="btn-remove-agenda" onclick="removeAgendaItem(this)">
 									<i class="fas fa-times"></i>
 								</button>
@@ -400,8 +402,6 @@
     });
 </script>
 
-
-
 <script>
     function addAgendaItem() {
         const container = document.getElementById('agendaContainer');
@@ -411,6 +411,7 @@
         <input type="time" name="agendaStartTime[]" required />
         <input type="time" name="agendaEndTime[]" required />
         <input type="text" name="agendaActivity[]" placeholder="Hoạt động" required />
+		<input type="text" name="agendaDescription[]" placeholder="Mô tả ngắn gọn hoạt động" required/>
         <button type="button" class="btn-remove-agenda" onclick="removeAgendaItem(this)">
             <i class="fas fa-times"></i>
         </button>

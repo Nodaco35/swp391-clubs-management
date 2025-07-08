@@ -83,20 +83,17 @@ public class AgendaServlet extends HttpServlet {
         String[] startTimes = request.getParameterValues("agendaStartTime[]");
         String[] endTimes = request.getParameterValues("agendaEndTime[]");
         String[] activities = request.getParameterValues("agendaActivity[]");
+        String[] descriptions = request.getParameterValues("agendaDescription[]");
 
         EventsDAO eventsDAO = new EventsDAO();
 
-        // ============= LOGIC XỬ LÝ TRẠNG THÁI REJECTION =============
         // Kiểm tra trạng thái hiện tại của event
         String currentApprovalStatus = eventsDAO.getEventApprovalStatus(eventID);
-        System.out.println("Current event approval status: " + currentApprovalStatus);
 
         // Nếu event đang bị REJECTED, set về PENDING khi edit agenda
         if ("REJECTED".equals(currentApprovalStatus)) {
-            System.out.println("Event is REJECTED, setting to PENDING after agenda edit");
             eventsDAO.updateEventApprovalStatus(eventID, "PENDING");
         }
-        // ============================================================
 
         Events event = eventsDAO.getEventByID(eventID);
         Date date = event.getEventDate();
@@ -105,19 +102,20 @@ public class AgendaServlet extends HttpServlet {
         // Xóa tất cả agenda cũ
         eventsDAO.deleteAllByEventID(eventID);
 
-        if (startTimes != null && endTimes != null && activities != null) {
+        if (startTimes != null && endTimes != null && activities != null && descriptions != null) {
             for (int i = 0; i < activities.length; i++) {
                 try {
                     LocalTime start = LocalTime.parse(startTimes[i]);
                     LocalTime end = LocalTime.parse(endTimes[i]);
                     String title = activities[i];
+                    String description = descriptions[i] != null ? descriptions[i] : "";
+
 
                     Timestamp startTS = Timestamp.valueOf(LocalDateTime.of(eventDate, start));
                     Timestamp endTS = Timestamp.valueOf(LocalDateTime.of(eventDate, end));
 
                     // Insert agenda mới với status PENDING (nếu event đã bị REJECTED)
-                    eventsDAO.insertAgendas(eventID, title, "", startTS, endTS);
-                    System.out.println("Inserted new agenda: " + title);
+                    eventsDAO.insertAgendas(eventID, title, description, startTS, endTS);
                 } catch (Exception e) {
                     e.printStackTrace();
                     session.setAttribute("errorMessage", "Lỗi khi thêm chương trình sự kiện: " + e.getMessage());
@@ -127,7 +125,7 @@ public class AgendaServlet extends HttpServlet {
 
         session.setAttribute("successMsg", "Cập nhật chương trình sự kiện thành công!");
         if ("add-event".equals(sourcePage)) {
-            session.removeAttribute("newEventID"); // Clear newEventID after agenda is saved
+            session.removeAttribute("newEventID");
             response.sendRedirect(request.getContextPath() + "/chairman-page/myclub-events");
         } else {
             response.sendRedirect(request.getContextPath() + "/chairman-page/myclub-events/edit-event?eventID=" + eventID);

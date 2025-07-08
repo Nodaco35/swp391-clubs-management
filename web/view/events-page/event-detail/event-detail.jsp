@@ -269,7 +269,7 @@
 										</div>
 									</div>
 									<div class="event-footer">
-										<span class="attendees status-${fn:toLowerCase(e.status)}">${e.status}</span>
+<%--										<span class="attendees status-${fn:toLowerCase(e.status)}">${e.status}</span>--%>
 										<c:choose>
 											<c:when test="${e.status == 'PENDING' || e.status == 'Pending'}">
 												<button type="button" class="register-btn"
