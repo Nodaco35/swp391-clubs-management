@@ -224,7 +224,7 @@ public class RecruitmentFormServlet extends HttpServlet {
         }
         
         // Lấy danh sách địa điểm
-        List<Locations> locations = locationDAO.getAllLocations();
+        List<Locations> locations = locationDAO.getAllLocationsOnCampus();
         
         // Tạo JSON rỗng cho stages khi tạo mới
         String stagesJson = "[]";
@@ -345,7 +345,7 @@ public class RecruitmentFormServlet extends HttpServlet {
         }
         
         // Lấy danh sách địa điểm
-        List<Locations> locations = locationDAO.getAllLocations();
+        List<Locations> locations = locationDAO.getAllLocationsOnCampus();
         
         // Tạo JSON cho stages sử dụng Gson với định dạng ngày tương thích với JavaScript
         Gson gson = new GsonBuilder()
@@ -705,9 +705,9 @@ public class RecruitmentFormServlet extends HttpServlet {
                     Date appStartDate = dateFormat.parse(appStartStr);
                     Date appEndDate = dateFormat.parse(appEndStr);
                     
-                    // Get a valid location ID from the database
+                    
                     LocationDAO locationDAO = new LocationDAO();
-                    List<Locations> locations = locationDAO.getAllLocations();
+                    List<Locations> locations = locationDAO.getAllLocationsOnCampus();
                     int defaultLocationId = locations.isEmpty() ? 1 : locations.get(0).getLocationID();
                     
                     logger.log(Level.INFO, "DEBUG - Using location ID {0} for APPLICATION stage", defaultLocationId);
@@ -762,7 +762,7 @@ public class RecruitmentFormServlet extends HttpServlet {
                         
                         // Kiểm tra xem locationId có tồn tại trong database không
                         LocationDAO locationDAOInterview = new LocationDAO();
-                        List<Locations> locList = locationDAOInterview.getAllLocations();
+                        List<Locations> locList = locationDAOInterview.getAllLocationsOnCampus();
                         boolean isValid = false;
                         
                         // Verify the location ID exists
@@ -787,7 +787,7 @@ public class RecruitmentFormServlet extends HttpServlet {
                         logger.log(Level.WARNING, "Lỗi chuyển đổi locationId cho vòng Phỏng vấn: {0}", e.getMessage());
                         // Sử dụng location mặc định
                         LocationDAO locationDAODefault = new LocationDAO();
-                        List<Locations> locList = locationDAODefault.getAllLocations();
+                        List<Locations> locList = locationDAODefault.getAllLocationsOnCampus();
                         int defaultId = locList.isEmpty() ? 1 : locList.get(0).getLocationID();
                         interviewStage.setLocationID(defaultId);
                         logger.log(Level.INFO, "DEBUG - Sử dụng locationId mặc định: {0} cho vòng Phỏng vấn", defaultId);
@@ -795,7 +795,7 @@ public class RecruitmentFormServlet extends HttpServlet {
                 } else {
                     // Nếu không có location được chọn, sử dụng location mặc định
                     LocationDAO locationDAODefault = new LocationDAO();
-                    List<Locations> locList = locationDAODefault.getAllLocations();
+                    List<Locations> locList = locationDAODefault.getAllLocationsOnCampus();
                     int defaultId = locList.isEmpty() ? 1 : locList.get(0).getLocationID();
                     interviewStage.setLocationID(defaultId);
                     logger.log(Level.INFO, "DEBUG - Không có locationId được chọn, sử dụng mặc định: {0}", defaultId);
@@ -836,7 +836,7 @@ public class RecruitmentFormServlet extends HttpServlet {
                     } else {
                         // Get a valid location ID from the database for CHALLENGE stage
                         LocationDAO locationDAOChallenge = new LocationDAO();
-                        List<Locations> locationsChallenge = locationDAOChallenge.getAllLocations();
+                        List<Locations> locationsChallenge = locationDAOChallenge.getAllLocationsOnCampus();
                         int defaultLocationIdChallenge = locationsChallenge.isEmpty() ? 1 : locationsChallenge.get(0).getLocationID();
                         
                         logger.log(Level.INFO, "DEBUG - Using location ID {0} for CHALLENGE stage", defaultLocationIdChallenge);
@@ -1154,7 +1154,7 @@ public class RecruitmentFormServlet extends HttpServlet {
                     
                     // Get a valid location ID from the database
                     LocationDAO locationDAO = new LocationDAO();
-                    List<Locations> locations = locationDAO.getAllLocations();
+                    List<Locations> locations = locationDAO.getAllLocationsOnCampus();
                     int defaultLocationId = locations.isEmpty() ? 1 : locations.get(0).getLocationID();
                     
                     challengeStage.setLocationID(defaultLocationId);
@@ -1268,8 +1268,16 @@ public class RecruitmentFormServlet extends HttpServlet {
         }
         
         String templateId = request.getParameter("templateId");
+        logger.log(Level.INFO, "DEBUG - Parsing templateId: {0}", templateId);
         if (templateId != null && !templateId.isEmpty()) {
-            campaign.setTemplateID(Integer.parseInt(templateId));
+            try {
+                int templateIdInt = Integer.parseInt(templateId);
+                campaign.setTemplateID(templateIdInt);
+                logger.log(Level.INFO, "DEBUG - Đã set templateID: {0}", templateIdInt);
+            } catch (NumberFormatException e) {
+                logger.log(Level.SEVERE, "DEBUG - Lỗi parse templateId: {0}", e.getMessage());
+                throw new IllegalArgumentException("Form đăng ký không hợp lệ");
+            }
         } else {
             throw new IllegalArgumentException("Vui lòng chọn form đăng ký");
         }
@@ -1311,31 +1319,6 @@ public class RecruitmentFormServlet extends HttpServlet {
         }
         
         return campaign;
-    }
-    
-    /**
-     * Lấy clubId từ request một cách nhất quán
-     * @param request HttpServletRequest
-     * @param campaign Campaign hiện tại (có thể null nếu đang tạo mới)
-     * @return clubId hoặc null nếu không tìm thấy
-     */
-    private Integer getClubId(HttpServletRequest request, RecruitmentCampaign campaign) {
-        // Ưu tiên lấy từ parameter
-        String clubIdParam = request.getParameter("clubId");
-        if (clubIdParam != null && !clubIdParam.isEmpty()) {
-            try {
-                return Integer.parseInt(clubIdParam);
-            } catch (NumberFormatException e) {
-                logger.log(Level.WARNING, "Invalid clubId parameter: {0}", clubIdParam);
-            }
-        }
-        
-        // Nếu không có trong parameter và có campaign, lấy từ campaign
-        if (campaign != null) {
-            return campaign.getClubID();
-        }
-        
-        return null;
     }
 
 }

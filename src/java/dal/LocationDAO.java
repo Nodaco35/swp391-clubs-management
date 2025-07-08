@@ -73,10 +73,10 @@ public class LocationDAO {
         return 0;
     }
 
-    // Lấy tất cả các địa điểm
-    public List<Locations> getAllLocations() {
+    // Lấy tất cả các địa điểm On Campus
+    public List<Locations> getAllLocationsOnCampus() {
         List<Locations> locations = new ArrayList<>();
-        String sql = "SELECT LocationID, LocationName, TypeLocation FROM Locations ORDER BY LocationID";
+        String sql = "SELECT LocationID, LocationName, TypeLocation FROM Locations Where TypeLocation = 'OnCampus' ORDER BY LocationID ";
         try {
             Connection connection = DBContext.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);

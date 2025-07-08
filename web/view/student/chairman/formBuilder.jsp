@@ -481,7 +481,37 @@
                 updatePreviewFunc();
             }
         }
+        
+        // Back to top button functionality
+        const backToTopBtn = document.getElementById('backToTop');
+        
+        if (backToTopBtn) {
+            console.log('Back to top button found, setting up event listeners');
+            
+            // Show/hide button based on scroll position
+            window.addEventListener('scroll', function() {
+                if (window.pageYOffset > 300) {
+                    backToTopBtn.classList.add('visible');
+                } else {
+                    backToTopBtn.classList.remove('visible');
+                }
+            });
+            
+            // Smooth scroll to top when clicked
+            backToTopBtn.addEventListener('click', function() {
+                console.log('Back to top button clicked');
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        } else {
+            console.error('Back to top button not found!');
+        }
     });
 </script>
+<div class="back-to-top visible" id="backToTop" style="position: fixed; bottom: 20px; right: 20px; width: 40px; height: 40px; background-color: #00a6c0; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1000; opacity: 1; visibility: visible;">
+        <i class="fas fa-arrow-up"></i>
+    </div>
 </body>
 </html>

@@ -15,25 +15,41 @@ class FormSaver {
         this.keyPrefix = keyPrefix;
         this.expirationMinutes = expirationMinutes;
         this.form = document.getElementById(formId);
+        this.isActive = false;
         
         if (!this.form) {
             console.error(`FormSaver: Không tìm thấy form với ID "${formId}"`);
             return;
         }
         
+        // Kiểm tra mode của form - chỉ hoạt động với create mode
+        const formMode = this.form.getAttribute('data-mode');
+        if (formMode !== 'create') {
+            console.log(`FormSaver: Form đang ở mode "${formMode}" - FormSaver sẽ không hoạt động`);
+            return;
+        }
+        
+        this.isActive = true;
         this.storageKey = `${this.keyPrefix}_${window.location.pathname}`;
+        
+        console.log(`FormSaver: Khởi tạo thành công cho form ${formId} ở mode create`);
         
         // Tự động lưu khi thay đổi giá trị các trường
         this.setupAutoSave();
         
-        // Kiểm tra và khôi phục dữ liệu đã lưu nếu có
-        this.restoreFormData();
+        // KHÔNG tự động khôi phục dữ liệu trong constructor
+        // Để người dùng quyết định thông qua showRestorePrompt
     }
     
     /**
      * Thiết lập tự động lưu khi thay đổi giá trị các trường
      */
     setupAutoSave() {
+        if (!this.isActive) {
+            console.log('FormSaver: Không thiết lập auto-save vì FormSaver không active');
+            return;
+        }
+        
         const inputs = this.form.querySelectorAll('input, textarea, select');
         
         inputs.forEach(input => {
@@ -46,20 +62,20 @@ class FormSaver {
                 input.addEventListener('blur', () => this.saveFormData());
             }
         });
+        
+        console.log(`FormSaver: Đã thiết lập auto-save cho ${inputs.length} trường input`);
     }
     
     /**
      * Lưu dữ liệu form vào localStorage
      */
     saveFormData() {
-        if (!this.form) return;
+        if (!this.isActive || !this.form) {
+            return;
+        }
         
         const formData = {};
         const inputs = this.form.querySelectorAll('input, textarea, select');
-        
-        // Nếu là form chỉnh sửa, lưu ID để phân biệt
-        const idField = this.form.querySelector('input[name="recruitmentId"]');
-        const formMode = this.form.getAttribute('data-mode') || 'create';
         
         // Lấy giá trị của các trường
         inputs.forEach(input => {
@@ -76,11 +92,7 @@ class FormSaver {
         
         // Thêm thông tin thêm
         formData['_timestamp'] = new Date().getTime();
-        formData['_mode'] = formMode;
-        if (idField && idField.value) {
-            formData['_id'] = idField.value;
-            this.storageKey = `${this.keyPrefix}_${formMode}_${idField.value}`;
-        }
+        formData['_mode'] = 'create'; // Chỉ lưu cho create mode
         
         try {
             localStorage.setItem(this.storageKey, JSON.stringify(formData));
@@ -95,26 +107,17 @@ class FormSaver {
      * @returns {boolean} true nếu đã khôi phục dữ liệu thành công
      */
     restoreFormData() {
-        if (!this.form) return false;
+        if (!this.isActive || !this.form) {
+            console.log('FormSaver: Không khôi phục dữ liệu vì FormSaver không active');
+            return false;
+        }
         
         try {
-            // Nếu là form chỉnh sửa, kiểm tra ID để lấy dữ liệu đúng
-            const idField = this.form.querySelector('input[name="recruitmentId"]');
-            const formMode = this.form.getAttribute('data-mode') || 'create';
-            
-            if (idField && idField.value) {
-                // Nếu có ID, sử dụng key riêng cho form edit
-                const editStorageKey = `${this.keyPrefix}_${formMode}_${idField.value}`;
-                const savedDataStr = localStorage.getItem(editStorageKey);
-                if (savedDataStr) {
-                    this.storageKey = editStorageKey;
-                    return this._applyStoredData(savedDataStr);
-                }
-            }
-            
-            // Nếu không có ID hoặc không tìm thấy dữ liệu với ID, sử dụng key mặc định
             const savedDataStr = localStorage.getItem(this.storageKey);
-            if (!savedDataStr) return false;
+            if (!savedDataStr) {
+                console.log('FormSaver: Không có dữ liệu đã lưu để khôi phục');
+                return false;
+            }
             
             return this._applyStoredData(savedDataStr);
             
@@ -144,16 +147,10 @@ class FormSaver {
                 return false;
             }
             
-            // Kiểm tra mode form
-            const currentFormMode = this.form.getAttribute('data-mode') || 'create';
+            // Kiểm tra mode form - chỉ khôi phục cho create mode
             const savedFormMode = savedData['_mode'] || 'create';
-            const currentFormId = this.form.querySelector('input[name="recruitmentId"]')?.value;
-            const savedFormId = savedData['_id'];
-            
-            // Nếu mode khác nhau và có ID, không khôi phục
-            if (currentFormMode === 'edit' && currentFormId && 
-                (savedFormMode !== currentFormMode || savedFormId !== currentFormId)) {
-                console.log('FormSaver: Mode hoặc ID form đã thay đổi, không khôi phục dữ liệu');
+            if (savedFormMode !== 'create') {
+                console.log('FormSaver: Dữ liệu đã lưu không phải từ create mode, không khôi phục');
                 return false;
             }
             
@@ -185,6 +182,11 @@ class FormSaver {
      * Xóa dữ liệu đã lưu trong localStorage
      */
     clearSavedData() {
+        if (!this.isActive) {
+            console.log('FormSaver: Không xóa dữ liệu vì FormSaver không active');
+            return;
+        }
+        
         try {
             localStorage.removeItem(this.storageKey);
             console.log(`FormSaver: Đã xóa dữ liệu form ${this.formId} khỏi localStorage`);
@@ -239,5 +241,38 @@ class FormSaver {
             if (typeof onDiscard === 'function') onDiscard();
             promptElement.remove();
         });
+    }
+    
+    /**
+     * Utility method để xóa dữ liệu FormSaver cũ từ localStorage (static method)
+     * @param {string} keyPrefix - Tiền tố key cần xóa
+     * @param {string} pathname - Đường dẫn hiện tại
+     */
+    static clearOldFormData(keyPrefix, pathname = null) {
+        try {
+            const targetPath = pathname || window.location.pathname;
+            const possibleKeys = [
+                `${keyPrefix}_${targetPath}`,
+                `${keyPrefix}_create`,
+                `${keyPrefix}_edit`
+            ];
+            
+            let cleared = 0;
+            possibleKeys.forEach(key => {
+                if (localStorage.getItem(key)) {
+                    localStorage.removeItem(key);
+                    console.log(`FormSaver: Đã xóa dữ liệu cũ với key: ${key}`);
+                    cleared++;
+                }
+            });
+            
+            if (cleared > 0) {
+                console.log(`FormSaver: Đã xóa ${cleared} dữ liệu FormSaver cũ`);
+            } else {
+                console.log('FormSaver: Không có dữ liệu FormSaver cũ cần xóa');
+            }
+        } catch (e) {
+            console.error('FormSaver: Lỗi khi xóa dữ liệu FormSaver cũ', e);
+        }
     }
 }
