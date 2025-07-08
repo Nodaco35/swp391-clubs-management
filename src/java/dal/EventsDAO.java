@@ -955,9 +955,6 @@ public class EventsDAO {
             return false;
         }
     }
-
-    // Thêm các method này vào EventsDAO class
-
     /**
      * Lấy ApprovalStatus của event
      */
