@@ -353,6 +353,73 @@ CREATE TABLE Events (
     FOREIGN KEY (LocationID) REFERENCES Locations(LocationID)
 );
 
+
+DELIMITER $$
+
+CREATE TRIGGER trg_auto_approve_private_event_insert
+BEFORE INSERT ON Events
+FOR EACH ROW
+BEGIN
+    IF NEW.IsPublic = FALSE THEN
+        SET NEW.ApprovalStatus = 'APPROVED';
+    END IF;
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE TRIGGER trg_auto_handle_approval_status_update
+BEFORE UPDATE ON Events
+FOR EACH ROW
+BEGIN
+    IF NEW.IsPublic = TRUE AND OLD.IsPublic = FALSE THEN
+        SET NEW.ApprovalStatus = 'PENDING';
+    END IF;
+
+    IF NEW.IsPublic = FALSE AND OLD.IsPublic = TRUE AND NEW.ApprovalStatus <> 'APPROVED' THEN
+        SET NEW.ApprovalStatus = 'APPROVED';
+    END IF;
+END$$
+
+DELIMITER ;
+DELIMITER $$
+
+CREATE TRIGGER trg_reset_event_approval_on_event_edit
+BEFORE UPDATE ON Events
+FOR EACH ROW
+BEGIN
+    IF OLD.ApprovalStatus = 'REJECTED' AND (
+        OLD.EventName <> NEW.EventName OR
+        OLD.Description <> NEW.Description OR
+        OLD.EventDate <> NEW.EventDate OR
+        OLD.EndTime <> NEW.EndTime OR
+        OLD.LocationID <> NEW.LocationID OR
+        OLD.Capacity <> NEW.Capacity
+    ) THEN
+        SET NEW.ApprovalStatus = 'PENDING';
+    END IF;
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE TRIGGER trg_reset_agendas_after_event_approval_pending
+AFTER UPDATE ON Events
+FOR EACH ROW
+BEGIN
+    IF OLD.ApprovalStatus = 'REJECTED' AND NEW.ApprovalStatus = 'PENDING' THEN
+        UPDATE Agenda
+        SET Status = 'PENDING'
+        WHERE EventID = NEW.EventID AND Status = 'REJECTED';
+    END IF;
+END$$
+
+DELIMITER ;
+
+
+
 INSERT INTO Events (EventName, EventImg, Description, EventDate, EndTime, LocationID, ClubID, IsPublic, Capacity, Status, SemesterID, ApprovalStatus, RejectionReason) VALUES
 -- Spring 2025
 ('Lễ Hội Âm Nhạc Tết 2025', 'images/events/tetmusic2025.jpg', '...', '2025-02-01 19:00:00', '2025-02-01 22:00:00', 2, 6, TRUE, 300, 'COMPLETED', 'SP25', 'APPROVED', NULL),
@@ -385,6 +452,7 @@ INSERT INTO Events (EventName, EventImg, Description, EventDate, EndTime, Locati
 ('Hội Thảo Phát Triển Web 2024', 'images/events/webdev2024.jpg', '...', '2024-11-15 14:00:00', '2024-11-15 16:00:00', 11, 4, TRUE, 50, 'COMPLETED', 'FA24', 'APPROVED', NULL),
 ('FPTU Dance Battle 2024', 'images/events/dancebattle2024.jpg', '...', '2024-11-30 18:00:00', '2024-11-30 21:00:00', 1, 7, TRUE, 150, 'COMPLETED', 'FA24', 'APPROVED', NULL),
 ('Cuộc Thi Tranh Biện 2024', 'images/events/debate2024.jpg', '...', '2024-12-01 09:00:00', '2024-12-01 11:00:00', 12, 8, TRUE, 65, 'COMPLETED', 'FA24', 'APPROVED', NULL);
+
 
 
 UPDATE Events 
@@ -454,6 +522,7 @@ UPDATE Events
 SET Description = 'Cuộc Thi Tranh Biện 2024 là diễn đàn trí tuệ nơi sinh viên FPTU thể hiện khả năng lập luận, phản biện, và thuyết trình về các vấn đề xã hội, kinh tế, và giáo dục. Với format tranh biện chuyên nghiệp, các đội thi sẽ đối đầu qua các vòng thi căng thẳng, được chấm điểm bởi ban giám khảo là các chuyên gia và giảng viên. Sự kiện không chỉ nâng cao kỹ năng tư duy logic mà còn khuyến khích sinh viên bày tỏ quan điểm và kết nối với cộng đồng.' 
 WHERE EventName = 'Cuộc Thi Tranh Biện 2024' AND SemesterID = 'FA24';
 
+
 CREATE TABLE Agenda (
     AgendaID INT PRIMARY KEY AUTO_INCREMENT,
     EventID INT NOT NULL,
@@ -461,56 +530,94 @@ CREATE TABLE Agenda (
     Description TEXT,
     StartTime DATETIME NOT NULL,
     EndTime DATETIME NOT NULL,
+    Status ENUM('PENDING', 'APPROVED', 'REJECTED') DEFAULT 'PENDING',
+    Reason TEXT,
     FOREIGN KEY (EventID) REFERENCES Events(EventID)
 );
+DELIMITER $$
 
+CREATE TRIGGER trg_auto_approve_agenda_for_private_event
+BEFORE INSERT ON Agenda
+FOR EACH ROW
+BEGIN
+    DECLARE eventIsPublic BOOLEAN;
+
+    SELECT IsPublic INTO eventIsPublic
+    FROM Events
+    WHERE EventID = NEW.EventID;
+
+    IF eventIsPublic = FALSE THEN
+        SET NEW.Status = 'APPROVED';
+    END IF;
+END$$
+
+DELIMITER ;
+DELIMITER $$
+
+CREATE TRIGGER trg_set_agenda_pending_on_public_event
+AFTER UPDATE ON Events
+FOR EACH ROW
+BEGIN
+    IF NEW.IsPublic = TRUE AND OLD.IsPublic = FALSE THEN
+        UPDATE Agenda
+        SET Status = 'PENDING'
+        WHERE EventID = NEW.EventID AND Status != 'REJECTED';
+    END IF;
+END$$
+
+DELIMITER ;
 -- Thử Thách Lập Trình FPTU 2025
-INSERT INTO Agenda (EventID, Title, Description, StartTime, EndTime) VALUES
-((SELECT EventID FROM Events WHERE EventName = 'Thử Thách Lập Trình FPTU 2025'), 'Check-in & Nhận thẻ', 'Người tham dự check-in và nhận thẻ tham dự.', '2025-03-15 07:30:00', '2025-03-15 08:00:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Thử Thách Lập Trình FPTU 2025'), 'Phát biểu khai mạc', 'Ban tổ chức giới thiệu chương trình và mục tiêu cuộc thi.', '2025-03-15 08:00:00', '2025-03-15 08:15:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Thử Thách Lập Trình FPTU 2025'), 'Phổ biến thể lệ & luật chơi', 'Giới thiệu thể lệ cuộc thi và các quy tắc đánh giá.', '2025-03-15 08:15:00', '2025-03-15 08:45:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Thử Thách Lập Trình FPTU 2025'), 'Bắt đầu thi lập trình', 'Các đội/thí sinh bắt đầu làm bài.', '2025-03-15 08:45:00', '2025-03-15 11:30:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Thử Thách Lập Trình FPTU 2025'), 'Chấm điểm & chờ kết quả', 'Ban giám khảo chấm điểm và tổng hợp kết quả.', '2025-03-15 11:30:00', '2025-03-15 11:50:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Thử Thách Lập Trình FPTU 2025'), 'Tổng kết & chụp ảnh lưu niệm', 'Trao giải, chụp ảnh, kết thúc chương trình.', '2025-03-15 11:50:00', '2025-03-15 12:30:00');
+INSERT INTO Agenda (EventID, Title, Description, StartTime, EndTime, Status) VALUES
+((SELECT EventID FROM Events WHERE EventName = 'Thử Thách Lập Trình FPTU 2025'), 'Check-in & Nhận thẻ', 'Người tham dự check-in và nhận thẻ tham dự.', '2025-06-21 08:00:00', '2025-06-21 08:15:00', 'APPROVED'),
+((SELECT EventID FROM Events WHERE EventName = 'Thử Thách Lập Trình FPTU 2025'), 'Phát biểu khai mạc', 'Ban tổ chức giới thiệu chương trình và mục tiêu cuộc thi.', '2025-06-21 08:15:00', '2025-06-21 08:25:00', 'APPROVED'),
+((SELECT EventID FROM Events WHERE EventName = 'Thử Thách Lập Trình FPTU 2025'), 'Phổ biến thể lệ & luật chơi', 'Giới thiệu thể lệ cuộc thi và các quy tắc đánh giá.', '2025-06-21 08:25:00', '2025-06-21 08:40:00', 'APPROVED'),
+((SELECT EventID FROM Events WHERE EventName = 'Thử Thách Lập Trình FPTU 2025'), 'Bắt đầu thi lập trình', 'Các đội/thí sinh bắt đầu làm bài.', '2025-06-21 08:40:00', '2025-06-21 10:20:00', 'APPROVED'),
+((SELECT EventID FROM Events WHERE EventName = 'Thử Thách Lập Trình FPTU 2025'), 'Chấm điểm & chờ kết quả', 'Ban giám khảo chấm điểm và tổng hợp kết quả.', '2025-06-21 10:20:00', '2025-06-21 10:35:00', 'APPROVED'),
+((SELECT EventID FROM Events WHERE EventName = 'Thử Thách Lập Trình FPTU 2025'), 'Tổng kết & chụp ảnh lưu niệm', 'Trao giải, chụp ảnh, kết thúc chương trình.', '2025-06-21 10:35:00', '2025-06-21 10:55:00', 'APPROVED');
+
 -- Hackathon Đổi Mới AI
-INSERT INTO Agenda (EventID, Title, Description, StartTime, EndTime) VALUES
-((SELECT EventID FROM Events WHERE EventName = 'Hackathon Đổi Mới AI'), 'Check-in & Giới thiệu', 'Người tham gia đến check-in và nhận hướng dẫn.', '2025-06-05 07:30:00', '2025-06-05 08:00:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Hackathon Đổi Mới AI'), 'Phát động & chia đội', 'Ban tổ chức phổ biến đề bài và chia đội.', '2025-06-05 08:00:00', '2025-06-05 08:30:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Hackathon Đổi Mới AI'), 'Coding Marathon', 'Các đội bắt đầu lập trình và triển khai ý tưởng AI.', '2025-06-05 08:30:00', '2025-06-05 17:00:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Hackathon Đổi Mới AI'), 'Trình bày sản phẩm', 'Các đội trình bày giải pháp của mình.', '2025-06-05 17:00:00', '2025-06-05 18:00:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Hackathon Đổi Mới AI'), 'Trao giải & nhận xét', 'Ban giám khảo nhận xét và trao giải cho đội xuất sắc.', '2025-06-05 18:00:00', '2025-06-05 18:30:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Hackathon Đổi Mới AI'), 'Tổng kết & chụp ảnh lưu niệm', 'Tổng kết sự kiện, chụp ảnh, dọn dẹp địa điểm.', '2025-06-05 18:30:00', '2025-06-05 19:30:00');
+INSERT INTO Agenda (EventID, Title, Description, StartTime, EndTime, Status) VALUES
+((SELECT EventID FROM Events WHERE EventName = 'Hackathon Đổi Mới AI'), 'Check-in & Giới thiệu', 'Người tham gia đến check-in và nhận hướng dẫn.', '2025-08-12 08:00:00', '2025-08-12 08:15:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Hackathon Đổi Mới AI'), 'Phát động & chia đội', 'Ban tổ chức phổ biến đề bài và chia đội.', '2025-08-12 08:15:00', '2025-08-12 08:30:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Hackathon Đổi Mới AI'), 'Coding Marathon', 'Các đội bắt đầu lập trình và triển khai ý tưởng AI.', '2025-08-12 08:30:00', '2025-08-12 12:30:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Hackathon Đổi Mới AI'), 'Trình bày sản phẩm', 'Các đội trình bày giải pháp của mình.', '2025-08-12 12:30:00', '2025-08-12 13:15:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Hackathon Đổi Mới AI'), 'Trao giải & nhận xét', 'Ban giám khảo nhận xét và trao giải cho đội xuất sắc.', '2025-08-12 13:15:00', '2025-08-12 13:40:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Hackathon Đổi Mới AI'), 'Tổng kết & chụp ảnh lưu niệm', 'Tổng kết sự kiện, chụp ảnh, dọn dẹp địa điểm.', '2025-08-12 13:40:00', '2025-08-12 13:55:00', 'PENDING');
+
 -- Workshop: Xây dựng Website với Spring Boot
-INSERT INTO Agenda (EventID, Title, Description, StartTime, EndTime) VALUES
-((SELECT EventID FROM Events WHERE EventName = 'Workshop: Xây dựng Website với Spring Boot'), 'Chuẩn bị đón khách', 'Sắp xếp thiết bị, banner và kiểm tra âm thanh.', '2025-06-20 13:00:00', '2025-06-20 13:45:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Workshop: Xây dựng Website với Spring Boot'), 'Chào mừng và giới thiệu', 'MC giới thiệu sự kiện và diễn giả.', '2025-06-20 13:45:00', '2025-06-20 14:00:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Workshop: Xây dựng Website với Spring Boot'), 'Tổng quan Spring Boot', 'Giới thiệu về Spring Boot và kiến trúc cơ bản.', '2025-06-20 14:00:00', '2025-06-20 14:30:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Workshop: Xây dựng Website với Spring Boot'), 'Cấu hình dự án', 'Hướng dẫn cấu hình Maven và Spring Initializr.', '2025-06-20 14:30:00', '2025-06-20 15:00:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Workshop: Xây dựng Website với Spring Boot'), 'Kết nối Database', 'Tích hợp với MySQL/PostgreSQL sử dụng Spring Data JPA.', '2025-06-20 15:00:00', '2025-06-20 15:30:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Workshop: Xây dựng Website với Spring Boot'), 'Thực hành API CRUD', 'Tạo controller, service, repository cho quản lý người dùng.', '2025-06-20 15:30:00', '2025-06-20 16:15:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Workshop: Xây dựng Website với Spring Boot'), 'Q&A và chia sẻ kinh nghiệm', 'Tham gia hỏi đáp trực tiếp với diễn giả.', '2025-06-20 16:15:00', '2025-06-20 16:30:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Workshop: Xây dựng Website với Spring Boot'), 'Giải lao và networking', 'Tự do giao lưu, trao đổi kết nối.', '2025-06-20 16:30:00', '2025-06-20 17:00:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Workshop: Xây dựng Website với Spring Boot'), 'Dọn dẹp và kết thúc', 'Thu dọn thiết bị, chụp ảnh kỷ niệm và đóng sự kiện.', '2025-06-20 17:00:00', '2025-06-20 17:45:00');
+INSERT INTO Agenda (EventID, Title, Description, StartTime, EndTime, Status) VALUES
+((SELECT EventID FROM Events WHERE EventName = 'Workshop: Xây dựng Website với Spring Boot'), 'Chuẩn bị đón khách', 'Sắp xếp thiết bị, banner và kiểm tra âm thanh.', '2025-04-20 14:00:00', '2025-04-20 14:10:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Workshop: Xây dựng Website với Spring Boot'), 'Chào mừng và giới thiệu', 'MC giới thiệu sự kiện và diễn giả.', '2025-04-20 14:10:00', '2025-04-20 14:20:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Workshop: Xây dựng Website với Spring Boot'), 'Tổng quan Spring Boot', 'Giới thiệu về Spring Boot và kiến trúc cơ bản.', '2025-04-20 14:20:00', '2025-04-20 14:35:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Workshop: Xây dựng Website với Spring Boot'), 'Cấu hình dự án', 'Hướng dẫn cấu hình Maven và Spring Initializr.', '2025-04-20 14:35:00', '2025-04-20 14:55:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Workshop: Xây dựng Website với Spring Boot'), 'Kết nối Database', 'Tích hợp với MySQL/PostgreSQL sử dụng Spring Data JPA.', '2025-04-20 14:55:00', '2025-04-20 15:15:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Workshop: Xây dựng Website với Spring Boot'), 'Thực hành API CRUD', 'Tạo controller, service, repository cho quản lý người dùng.', '2025-04-20 15:15:00', '2025-04-20 15:45:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Workshop: Xây dựng Website với Spring Boot'), 'Q&A và chia sẻ kinh nghiệm', 'Tham gia hỏi đáp trực tiếp với diễn giả.', '2025-04-20 15:45:00', '2025-04-20 16:00:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Workshop: Xây dựng Website với Spring Boot'), 'Giải lao và networking', 'Tự do giao lưu, trao đổi kết nối.', '2025-04-20 16:00:00', '2025-04-20 16:20:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Workshop: Xây dựng Website với Spring Boot'), 'Dọn dẹp và kết thúc', 'Thu dọn thiết bị, chụp ảnh kỷ niệm và đóng sự kiện.', '2025-04-20 16:20:00', '2025-04-20 16:55:00', 'PENDING');
+
 -- Cuộc thi Code War: Thử thách thuật toán
-INSERT INTO Agenda (EventID, Title, Description, StartTime, EndTime) VALUES
-((SELECT EventID FROM Events WHERE EventName = 'Cuộc thi Code War: Thử thách thuật toán'), 'Check-in & Nhận số báo danh', 'Thí sinh đăng ký tại bàn check-in.', '2025-06-25 08:00:00', '2025-06-25 08:30:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Cuộc thi Code War: Thử thách thuật toán'), 'Khai mạc cuộc thi', 'Giới thiệu thể lệ, quy định và cơ cấu giải thưởng.', '2025-06-25 08:30:00', '2025-06-25 08:50:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Cuộc thi Code War: Thử thách thuật toán'), 'Làm bài Round 1', 'Giải 3 bài toán cơ bản trong 45 phút.', '2025-06-25 08:50:00', '2025-06-25 09:35:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Cuộc thi Code War: Thử thách thuật toán'), 'Giải lao ngắn', 'Nghỉ ngơi, ăn nhẹ.', '2025-06-25 09:35:00', '2025-06-25 09:50:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Cuộc thi Code War: Thử thách thuật toán'), 'Làm bài Round 2', 'Giải bài toán khó hơn và có tính ứng dụng.', '2025-06-25 09:50:00', '2025-06-25 10:40:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Cuộc thi Code War: Thử thách thuật toán'), 'Chấm điểm và giải lao', 'BTC chấm bài tự động + nghỉ ngơi.', '2025-06-25 10:40:00', '2025-06-25 11:00:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Cuộc thi Code War: Thử thách thuật toán'), 'Công bố kết quả', 'Công bố top 5 thí sinh xuất sắc.', '2025-06-25 11:00:00', '2025-06-25 11:15:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Cuộc thi Code War: Thử thách thuật toán'), 'Trao thưởng', 'Trao giải nhất, nhì, ba và quà lưu niệm.', '2025-06-25 11:15:00', '2025-06-25 11:30:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Cuộc thi Code War: Thử thách thuật toán'), 'Giao lưu & chụp hình', 'Giao lưu các bạn cùng đam mê lập trình.', '2025-06-25 11:30:00', '2025-06-25 12:00:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Cuộc thi Code War: Thử thách thuật toán'), 'Thu dọn và kết thúc sự kiện', 'Thu dọn bàn ghế, thiết bị, vệ sinh phòng.', '2025-06-25 12:00:00', '2025-06-25 12:45:00');
+INSERT INTO Agenda (EventID, Title, Description, StartTime, EndTime, Status) VALUES
+((SELECT EventID FROM Events WHERE EventName = 'Cuộc thi Code War: Thử thách thuật toán'), 'Check-in & Nhận số báo danh', 'Thí sinh đăng ký tại bàn check-in.', '2025-07-31 09:00:00', '2025-07-31 09:15:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Cuộc thi Code War: Thử thách thuật toán'), 'Khai mạc cuộc thi', 'Giới thiệu thể lệ, quy định và cơ cấu giải thưởng.', '2025-07-31 09:15:00', '2025-07-31 09:30:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Cuộc thi Code War: Thử thách thuật toán'), 'Làm bài Round 1', 'Giải 3 bài toán cơ bản trong 45 phút.', '2025-07-31 09:30:00', '2025-07-31 10:15:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Cuộc thi Code War: Thử thách thuật toán'), 'Giải lao ngắn', 'Nghỉ ngơi, ăn nhẹ.', '2025-07-31 10:15:00', '2025-07-31 10:25:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Cuộc thi Code War: Thử thách thuật toán'), 'Làm bài Round 2', 'Giải bài toán khó hơn và có tính ứng dụng.', '2025-07-31 10:25:00', '2025-07-31 11:10:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Cuộc thi Code War: Thử thách thuật toán'), 'Chấm điểm và giải lao', 'BTC chấm bài tự động + nghỉ ngơi.', '2025-07-31 11:10:00', '2025-07-31 11:25:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Cuộc thi Code War: Thử thách thuật toán'), 'Công bố kết quả', 'Công bố top 5 thí sinh xuất sắc.', '2025-07-31 11:25:00', '2025-07-31 11:35:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Cuộc thi Code War: Thử thách thuật toán'), 'Trao thưởng', 'Trao giải nhất, nhì, ba và quà lưu niệm.', '2025-07-31 11:35:00', '2025-07-31 11:50:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Cuộc thi Code War: Thử thách thuật toán'), 'Giao lưu & chụp hình', 'Giao lưu các bạn cùng đam mê lập trình.', '2025-07-31 11:50:00', '2025-07-31 12:15:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Cuộc thi Code War: Thử thách thuật toán'), 'Thu dọn và kết thúc sự kiện', 'Thu dọn bàn ghế, thiết bị, vệ sinh phòng.', '2025-07-31 12:15:00', '2025-07-31 12:55:00', 'PENDING');
+
 -- Giải Bóng Đá Sinh Viên FPTU 2025
-INSERT INTO Agenda (EventID, Title, Description, StartTime, EndTime) VALUES
-((SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên FPTU 2025'), 'Check-in & chia đội', 'Thí sinh đến check-in và nhận áo thi đấu.', '2025-07-05 07:15:00', '2025-07-05 07:45:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên FPTU 2025'), 'Phát biểu khai mạc', 'Ban tổ chức phát biểu và tuyên bố khai mạc.', '2025-07-05 07:45:00', '2025-07-05 08:00:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên FPTU 2025'), 'Trận vòng loại', 'Thi đấu các trận vòng loại.', '2025-07-05 08:00:00', '2025-07-05 11:00:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên FPTU 2025'), 'Nghỉ trưa', 'Nghỉ ăn nhẹ và chuẩn bị vòng tiếp theo.', '2025-07-05 11:00:00', '2025-07-05 12:00:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên FPTU 2025'), 'Bán kết & chung kết', 'Các đội mạnh nhất tranh tài.', '2025-07-05 12:00:00', '2025-07-05 14:00:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên FPTU 2025'), 'Lễ trao giải & bế mạc', 'Trao cúp, chụp ảnh, tổng kết & dọn dẹp.', '2025-07-05 14:00:00', '2025-07-05 15:30:00');
+INSERT INTO Agenda (EventID, Title, Description, StartTime, EndTime, Status) VALUES
+((SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên FPTU 2025'), 'Check-in & chia đội', 'Thí sinh đến check-in và nhận áo thi đấu.', '2025-08-05 08:00:00', '2025-08-05 08:10:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên FPTU 2025'), 'Phát biểu khai mạc', 'Ban tổ chức phát biểu và tuyên bố khai mạc.', '2025-08-05 08:10:00', '2025-08-05 08:20:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên FPTU 2025'), 'Trận vòng loại', 'Thi đấu các trận vòng loại.', '2025-08-05 08:20:00', '2025-08-05 09:00:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên FPTU 2025'), 'Nghỉ nhẹ', 'Nghỉ ăn nhẹ và chuẩn bị vòng tiếp theo.', '2025-08-05 09:00:00', '2025-08-05 09:10:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên FPTU 2025'), 'Bán kết & chung kết', 'Các đội mạnh nhất tranh tài.', '2025-08-05 09:10:00', '2025-08-05 09:45:00', 'PENDING'),
+((SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên FPTU 2025'), 'Lễ trao giải & bế mạc', 'Trao cúp, chụp ảnh, tổng kết & dọn dẹp.', '2025-08-05 09:45:00', '2025-08-05 09:55:00', 'PENDING');
+
 
 
 CREATE TABLE EventParticipants (
