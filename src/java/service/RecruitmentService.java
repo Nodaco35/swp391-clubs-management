@@ -40,30 +40,40 @@ public class RecruitmentService {
         return result;
     }
     
-    public boolean updateCampaign(RecruitmentCampaign campaign) {
+    public boolean updateCampaign(RecruitmentCampaign campaign) throws IllegalStateException {
         RecruitmentCampaign existingCampaign = campaignDAO.getRecruitmentCampaignById(campaign.getRecruitmentID());
         
+        if (existingCampaign == null) {
+            throw new IllegalStateException("Không tìm thấy hoạt động tuyển quân cần cập nhật");
+        }
+        
         // Kiểm tra nếu chiến dịch đang diễn ra và ngày bắt đầu bị thay đổi
+        // Sử dụng compareTo để so sánh chính xác thời gian thay vì equals
         if ("ONGOING".equals(existingCampaign.getStatus()) && 
-            !existingCampaign.getStartDate().equals(campaign.getStartDate())) {
-            return false; // Không thể thay đổi ngày bắt đầu khi chiến dịch đang diễn ra
+            existingCampaign.getStartDate().compareTo(campaign.getStartDate()) != 0) {
+            throw new IllegalStateException("Không thể thay đổi ngày bắt đầu khi chiến dịch đang diễn ra");
         }
         
         // Kiểm tra nếu templateId bị thay đổi khi đã có đơn đăng ký
         if (existingCampaign.getTemplateID() != campaign.getTemplateID()) {
             dal.FormResponseDAO formResponseDAO = new dal.FormResponseDAO();
             if (formResponseDAO.hasCampaignApplications(campaign.getRecruitmentID())) {
-                return false; // Không thể thay đổi mẫu đơn khi đã có đơn đăng ký
+                throw new IllegalStateException("Không thể thay đổi mẫu đơn khi đã có đơn đăng ký");
             }
         }
         
         // Xác thực chồng lấp thời gian (loại trừ chiến dịch này)
         if (campaignDAO.hasCampaignTimeOverlap(campaign.getClubID(), campaign.getStartDate(), 
                                               campaign.getEndDate(), campaign.getRecruitmentID())) {
-            return false; // Báo lỗi chồng lấp thời gian
+            throw new IllegalStateException("Thời gian hoạt động trùng với hoạt động tuyển quân khác của câu lạc bộ");
         }
         
-        return campaignDAO.updateRecruitmentCampaign(campaign);
+        boolean result = campaignDAO.updateRecruitmentCampaign(campaign);
+        if (!result) {
+            throw new IllegalStateException("Lỗi cơ sở dữ liệu khi cập nhật hoạt động tuyển quân");
+        }
+        
+        return result;
     }
     
     public boolean closeCampaign(int recruitmentID) {

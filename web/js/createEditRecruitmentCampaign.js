@@ -95,15 +95,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Thiết lập các trường không thể chỉnh sửa nếu cần thiết
     setupFieldRestrictions();
     
-    // Thực hiện kiểm tra tự động nhưng không hiển thị nút debug
+    // Thực hiện kiểm tra tự động trong chế độ edit
     setTimeout(() => {
-        // Log kết quả kiểm tra fields bị disabled nếu đang ở chế độ edit
+        // Log thông tin về mode hiện tại
         if (isEdit) {
-            const disabledFields = debugDisabledFields();
-            console.log('[INFO] Trạng thái trường bị disabled:', 
-                disabledFields.length > 0 ? 
-                `Có ${disabledFields.length} trường bị disabled` : 
-                'Không có trường nào bị disabled');
+            console.log('[INFO] Chế độ chỉnh sửa - Đã khởi tạo xong các ràng buộc trường');
         }
     }, 1000);
     
@@ -1008,20 +1004,26 @@ function setupFormSubmission() {
         
         // Nếu đang chỉnh sửa, kiểm tra ID
         if (isEdit) {
-            const recruitmentId = requestParams.get('recruitmentId');
-            console.log("ID hoạt động cần cập nhật:", recruitmentId);
-            if (!recruitmentId || recruitmentId === '0') {
-                showToast('Thiếu ID hoạt động tuyển quân hợp lệ khi cập nhật', 'error');
-                document.getElementById('submitBtn').disabled = false;
-                document.getElementById('submitBtn').innerHTML = 'Cập nhật hoạt động';
+            const recruitmentIdInput = document.querySelector('input[name="recruitmentId"]');
+            if (!recruitmentIdInput || !recruitmentIdInput.value || recruitmentIdInput.value === '0') {
+                console.error("Thiếu recruitmentId trong form khi chỉnh sửa");
+                showToast("Không tìm thấy ID hoạt động để cập nhật", "error");
                 
                 // Hiển thị thông tin debug
-                showDebugInfo('Lỗi: ID không hợp lệ khi cập nhật', {
-                    recruitmentId: recruitmentId,
-                    formMode: isEdit ? 'edit' : 'create'
+                showDebugInfo('Lỗi: Thiếu recruitmentId', {
+                    recruitmentIdInput: recruitmentIdInput ? recruitmentIdInput.value : 'không tìm thấy input',
+                    formMode: 'edit',
+                    allHiddenInputs: Array.from(document.querySelectorAll('input[type="hidden"]')).map(input => ({
+                        name: input.name,
+                        value: input.value
+                    }))
                 });
                 return;
             }
+            
+            // Đảm bảo recruitmentId được thêm vào requestParams
+            requestParams.set("recruitmentId", recruitmentIdInput.value);
+            console.log("DEBUG - Đã thêm recruitmentId vào request:", recruitmentIdInput.value);
         }
         
         // Double check - đảm bảo URL endpoint chính xác và tham số
@@ -1101,21 +1103,41 @@ function setupFormSubmission() {
             return response.json();
         })
         .then(data => {
+            // Debug: Log toàn bộ response để kiểm tra
+            console.log('Full response data:', data);
+            console.log('data.success type:', typeof data.success, 'value:', data.success);
+            
             // Re-enable the button in any case
             document.getElementById('submitBtn').disabled = false;
             document.getElementById('submitBtn').innerHTML = isEdit ? 'Cập nhật hoạt động' : 'Tạo hoạt động';
             
-            // Handle response based on status
-            if (data.status === 'success') {
+            // Handle response based on success field (not status)
+            if (data.success === true) {
+                console.log('Response success = true, hiển thị toast và chuẩn bị chuyển hướng...');
                 showToast(data.message || 'Thao tác thành công!', 'success');
                 
                 // Redirect to management page after success
                 setTimeout(() => {
-                    // Chuyển hướng về trang quản lý câu lạc bộ
+                    // Chuyển hướng về trang quản lý hoạt động tuyển quân
                     const clubId = submitUrlClubId || data.clubId;
-                    window.location.href = `${contextPath}/myclub?clubId=${clubId}`;
+                    console.log('URL đầy đủ:', `${contextPath}/recruitment/list?clubId=${clubId}`);
+                    // Kiểm tra clubId có hợp lệ không
+                    if (!clubId || clubId === 'undefined' || clubId === 'null') {
+                        console.error('ClubId không hợp lệ, chuyển hướng về trang chính');
+                        window.location.href = contextPath ? `${contextPath}/recruitment` : '/swp391-clubs-management/recruitment';
+                        return;
+                    }
+                    
+                    // Debug: Kiểm tra context path có hợp lệ không
+                    if (!contextPath || contextPath === '') {
+                        console.warn('Context path rỗng, sử dụng đường dẫn tuyệt đối');
+                        window.location.href = `/swp391-clubs-management/recruitment/list?clubId=${clubId}`;
+                    } else {
+                        window.location.href = `${contextPath}/recruitment/list?clubId=${clubId}`;
+                    }
                 }, 1500);
             } else {
+                console.log('Response success = false, hiển thị lỗi:', data.message);
                 // Show error message
                 showToast(data.message || 'Đã có lỗi xảy ra!', 'error');
                 
@@ -1130,14 +1152,21 @@ function setupFormSubmission() {
             document.getElementById('submitBtn').disabled = false;
             document.getElementById('submitBtn').innerHTML = isEdit ? 'Cập nhật hoạt động' : 'Tạo hoạt động';
             
-            // Hiển thị thông báo lỗi cụ thể hơn
+            // Xử lý các loại lỗi khác nhau
             let errorMessage = error.message;
-            if (errorMessage.includes('không thể thay đổi vì đã có người nộp đơn')) {
+            
+            if (errorMessage.includes('timeout')) {
+                errorMessage = 'Hết thời gian phản hồi từ server. Vui lòng thử lại.';
+            } else if (errorMessage.includes('không thể thay đổi vì đã có người nộp đơn')) {
                 errorMessage = 'Mẫu đơn không thể thay đổi vì đã có người nộp đơn.';
             } else if (errorMessage.includes('trùng lịch')) {
                 errorMessage = 'Không thể cập nhật hoạt động do trùng lịch với hoạt động khác.';
             } else if (errorMessage.includes('đang diễn ra')) {
                 errorMessage = 'Không thể thay đổi thời gian của hoạt động đang diễn ra.';
+            } else if (errorMessage.includes('Network response was not ok')) {
+                errorMessage = 'Lỗi kết nối mạng. Vui lòng kiểm tra kết nối internet.';
+            } else if (errorMessage.includes('JSON')) {
+                errorMessage = 'Lỗi xử lý dữ liệu từ server. Vui lòng thử lại.';
             }
             
             showToast('Đã có lỗi xảy ra: ' + errorMessage, 'error');
@@ -1146,7 +1175,9 @@ function setupFormSubmission() {
             showDebugInfo('Lỗi khi gửi form', {
                 url: finalUrl,
                 error: error.toString(),
-                requestData: Object.fromEntries(requestParams.entries())
+                errorType: error.name,
+                requestData: Object.fromEntries(requestParams.entries()),
+                timestamp: new Date().toISOString()
             });
         });
     });
@@ -1253,10 +1284,10 @@ function hasCampaignApplications() {
         return true;
     }
     
-    // Kiểm tra thêm các thuộc tính data- khác
-    const allDataElements = document.querySelectorAll('[data-*]');
-    for (let i = 0; i < allDataElements.length; i++) {
-        const el = allDataElements[i];
+    // Kiểm tra thêm các thuộc tính data- khác trên body và form
+    const formsWithDataAttrs = document.querySelectorAll('form[data-application-count], form[data-has-applications], body[data-application-count], body[data-has-applications]');
+    for (let i = 0; i < formsWithDataAttrs.length; i++) {
+        const el = formsWithDataAttrs[i];
         const dataAttributes = el.dataset;
         
         // Kiểm tra các thuộc tính data- có chứa từ "application" và có giá trị "true" hoặc là số > 0

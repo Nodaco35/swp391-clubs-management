@@ -533,6 +533,7 @@ public class RecruitmentFormServlet extends HttpServlet {
                 logger.log(Level.INFO, "DEBUG - Đã tạo thành công các vòng tuyển cho chiến dịch ID {0}", recruitmentId);
                 jsonResponse.addProperty("success", true);
                 jsonResponse.addProperty("recruitmentId", recruitmentId);
+                jsonResponse.addProperty("clubId", clubId);
                 jsonResponse.addProperty("stagesCreated", true);
                 jsonResponse.addProperty("message", "Đã tạo hoạt động tuyển quân và các vòng tuyển thành công");
                 
@@ -548,6 +549,7 @@ public class RecruitmentFormServlet extends HttpServlet {
             } else {
                 jsonResponse.addProperty("success", true);
                 jsonResponse.addProperty("recruitmentId", recruitmentId);
+                jsonResponse.addProperty("clubId", clubId);
                 jsonResponse.addProperty("stagesCreated", false);
                 jsonResponse.addProperty("message", "Đã tạo hoạt động tuyển quân thành công, nhưng có lỗi khi tạo các vòng tuyển");
                 
@@ -624,38 +626,47 @@ public class RecruitmentFormServlet extends HttpServlet {
         
         // Lấy thông tin từ form và cập nhật đối tượng RecruitmentCampaign
         RecruitmentCampaign updatedCampaign = parseRecruitmentCampaign(request, false);
+        updatedCampaign.setRecruitmentID(recruitmentId); // Đảm bảo ID được set đúng
         
-        // Kiểm tra nếu templateId đã thay đổi và đã có đơn đăng ký
-        dal.FormResponseDAO formResponseDAO = new dal.FormResponseDAO();
-        if (currentCampaign.getTemplateID() != updatedCampaign.getTemplateID() && 
-            formResponseDAO.hasCampaignApplications(recruitmentId)) {
-            logger.log(Level.WARNING, "Không thể thay đổi mẫu đơn đăng ký vì đã có người nộp đơn cho chiến dịch ID {0}", recruitmentId);
-            jsonResponse.addProperty("success", false);
-            jsonResponse.addProperty("message", "Không thể thay đổi mẫu đơn đăng ký vì đã có người nộp đơn.");
-            return;
-        }
+        // Log dữ liệu trước khi cập nhật để debug
+        logger.log(Level.INFO, "Dữ liệu cập nhật campaign: ID={0}, ClubID={1}, Title={2}, TemplateID={3}", 
+                  new Object[]{updatedCampaign.getRecruitmentID(), updatedCampaign.getClubID(), 
+                              updatedCampaign.getTitle(), updatedCampaign.getTemplateID()});
         
-        // Gọi service để cập nhật chiến dịch
-        boolean result = recruitmentService.updateCampaign(updatedCampaign);
-        
-        if (result) {
-            // Cập nhật các vòng tuyển
-            boolean stagesUpdated = updateRecruitmentStages(request, recruitmentId);
+        try {
+            // Gọi service để cập nhật chiến dịch
+            boolean result = recruitmentService.updateCampaign(updatedCampaign);
             
-            if (stagesUpdated) {
-                logger.log(Level.INFO, "Đã cập nhật thành công các vòng tuyển cho chiến dịch ID {0}", recruitmentId);
-                jsonResponse.addProperty("success", true);
-                jsonResponse.addProperty("message", "Đã cập nhật hoạt động tuyển quân và các vòng tuyển thành công");
-            } else {
-                logger.log(Level.WARNING, "Chiến dịch ID {0} được cập nhật nhưng các vòng tuyển thất bại", recruitmentId);
-                jsonResponse.addProperty("success", true);
-                jsonResponse.addProperty("message", "Đã cập nhật hoạt động tuyển quân thành công, nhưng có lỗi khi cập nhật các vòng tuyển");
-                jsonResponse.addProperty("stageUpdateError", true);
-                jsonResponse.addProperty("stageUpdateErrorMsg", "Không thể thay đổi ngày bắt đầu của vòng tuyển đã diễn ra.");
+            if (result) {
+                // Cập nhật các vòng tuyển
+                boolean stagesUpdated = updateRecruitmentStages(request, recruitmentId);
+                
+                if (stagesUpdated) {
+                    logger.log(Level.INFO, "Đã cập nhật thành công các vòng tuyển cho chiến dịch ID {0}", recruitmentId);
+                    jsonResponse.addProperty("success", true);
+                    jsonResponse.addProperty("message", "Đã cập nhật hoạt động tuyển quân và các vòng tuyển thành công");
+                    jsonResponse.addProperty("clubId", updatedCampaign.getClubID());
+                } else {
+                    logger.log(Level.WARNING, "Chiến dịch ID {0} được cập nhật nhưng các vòng tuyển thất bại", recruitmentId);
+                    jsonResponse.addProperty("success", true);
+                    jsonResponse.addProperty("message", "Đã cập nhật hoạt động tuyển quân thành công, nhưng có lỗi khi cập nhật các vòng tuyển");
+                    jsonResponse.addProperty("stageUpdateError", true);
+                    jsonResponse.addProperty("stageUpdateErrorMsg", "Không thể thay đổi ngày bắt đầu của vòng tuyển đã diễn ra.");
+                    jsonResponse.addProperty("clubId", updatedCampaign.getClubID());
+                }
             }
-        } else {
+        } catch (IllegalStateException e) {
+            // Xử lý các lỗi cụ thể từ service
+            logger.log(Level.WARNING, "Lỗi khi cập nhật campaign ID {0}: {1}", 
+                      new Object[]{recruitmentId, e.getMessage()});
             jsonResponse.addProperty("success", false);
-            jsonResponse.addProperty("message", "Không thể cập nhật hoạt động tuyển quân. Vui lòng kiểm tra trùng lịch, hoạt động đang diễn ra, hoặc mẫu đơn không thể thay đổi vì đã có người nộp đơn.");
+            jsonResponse.addProperty("message", e.getMessage());
+        } catch (Exception e) {
+            // Xử lý các lỗi khác
+            logger.log(Level.SEVERE, "Lỗi không xác định khi cập nhật campaign ID {0}: {1}", 
+                      new Object[]{recruitmentId, e.getMessage()});
+            jsonResponse.addProperty("success", false);
+            jsonResponse.addProperty("message", "Lỗi hệ thống khi cập nhật hoạt động tuyển quân: " + e.getMessage());
         }
     }
     
@@ -990,11 +1001,24 @@ public class RecruitmentFormServlet extends HttpServlet {
             String appStartStr = request.getParameter("applicationStageStart");
             String appEndStr = request.getParameter("applicationStageEnd");
             
-            if (appStartStr != null && !appStartStr.isEmpty() && appEndStr != null && !appEndStr.isEmpty()) {
-                logger.log(Level.INFO, "Xử lý vòng Nộp đơn: {0} - {1}", new Object[]{appStartStr, appEndStr});
-                
+            // Xác thực dữ liệu đầu vào
+            if (appStartStr == null || appStartStr.isEmpty() || appEndStr == null || appEndStr.isEmpty()) {
+                logger.log(Level.SEVERE, "Thiếu ngày tháng vòng nộp đơn: start={0}, end={1}", 
+                          new Object[]{appStartStr, appEndStr});
+                return false;
+            }
+            
+            logger.log(Level.INFO, "Xử lý vòng Nộp đơn: {0} - {1}", new Object[]{appStartStr, appEndStr});
+            
+            try {
                 Date appStartDate = dateFormat.parse(appStartStr);
                 Date appEndDate = dateFormat.parse(appEndStr);
+                
+                // Xác thực logic ngày tháng
+                if (appStartDate.after(appEndDate)) {
+                    logger.log(Level.SEVERE, "Ngày bắt đầu vòng nộp đơn phải trước ngày kết thúc");
+                    return false;
+                }
                 
                 // Tìm kiếm vòng nộp đơn theo tên tiếng Việt hoặc ENUM
                 RecruitmentStage appStage = stageMap.get("APPLICATION");
@@ -1030,6 +1054,9 @@ public class RecruitmentFormServlet extends HttpServlet {
                     int stageId = stageDAO.createRecruitmentStage(appStage);
                     logger.log(Level.INFO, "Đã tạo mới vòng APPLICATION ID {0}", stageId);
                 }
+            } catch (ParseException e) {
+                logger.log(Level.SEVERE, "Lỗi parse ngày tháng vòng nộp đơn: {0}", e.getMessage());
+                return false;
             }
             
             // 2. Vòng Phỏng vấn (Interview)
@@ -1258,14 +1285,20 @@ public class RecruitmentFormServlet extends HttpServlet {
         
         String startDate = request.getParameter("startDate");
         if (startDate != null && !startDate.isEmpty()) {
-            campaign.setStartDate(dateFormat.parse(startDate));
+            Date parsedStartDate = dateFormat.parse(startDate);
+            logger.log(Level.INFO, "Parsed start date: {0} -> {1}", 
+                      new Object[]{startDate, parsedStartDate});
+            campaign.setStartDate(parsedStartDate);
         } else {
             throw new IllegalArgumentException("Vui lòng chọn ngày bắt đầu");
         }
         
         String endDate = request.getParameter("endDate");
         if (endDate != null && !endDate.isEmpty()) {
-            campaign.setEndDate(dateFormat.parse(endDate));
+            Date parsedEndDate = dateFormat.parse(endDate);
+            logger.log(Level.INFO, "Parsed end date: {0} -> {1}", 
+                      new Object[]{endDate, parsedEndDate});
+            campaign.setEndDate(parsedEndDate);
         } else {
             throw new IllegalArgumentException("Vui lòng chọn ngày kết thúc");
         }
@@ -1278,6 +1311,31 @@ public class RecruitmentFormServlet extends HttpServlet {
         }
         
         return campaign;
+    }
+    
+    /**
+     * Lấy clubId từ request một cách nhất quán
+     * @param request HttpServletRequest
+     * @param campaign Campaign hiện tại (có thể null nếu đang tạo mới)
+     * @return clubId hoặc null nếu không tìm thấy
+     */
+    private Integer getClubId(HttpServletRequest request, RecruitmentCampaign campaign) {
+        // Ưu tiên lấy từ parameter
+        String clubIdParam = request.getParameter("clubId");
+        if (clubIdParam != null && !clubIdParam.isEmpty()) {
+            try {
+                return Integer.parseInt(clubIdParam);
+            } catch (NumberFormatException e) {
+                logger.log(Level.WARNING, "Invalid clubId parameter: {0}", clubIdParam);
+            }
+        }
+        
+        // Nếu không có trong parameter và có campaign, lấy từ campaign
+        if (campaign != null) {
+            return campaign.getClubID();
+        }
+        
+        return null;
     }
 
 }
