@@ -246,6 +246,37 @@
 					<h4><i class="fas fa-file-text"></i> Mô tả chi tiết</h4>
 					<p>${eventDetails.description}</p>
 				</div>
+				<div class="agenda-section">
+					<h4><i class="fas fa-clipboard-list"></i> Chi tiết Agenda</h4>
+					<c:choose>
+						<c:when test="${not empty agendaDetails}">
+							<div class="agenda-status-info">
+								<span class="detail-label">Trạng thái Agenda:</span>
+								<span class="detail-value status-${agendaStatus}">${agendaStatus}</span>
+							</div>
+							<div class="agenda-timeline">
+								<c:forEach var="agenda" items="${agendaDetails}" varStatus="loop">
+									<div class="agenda-item">
+										<div class="agenda-time">
+											<fmt:formatDate value="${agenda.startTime}" pattern="HH:mm"/> -
+											<fmt:formatDate value="${agenda.endTime}" pattern="HH:mm"/>
+										</div>
+										<div class="agenda-content">
+											<h5>${agenda.title}</h5>
+											<p>${agenda.description}</p>
+										</div>
+									</div>
+								</c:forEach>
+							</div>
+						</c:when>
+						<c:otherwise>
+							<div class="no-agenda-message">
+								<i class="fas fa-info-circle"></i>
+								<p>Sự kiện này chưa có agenda được tạo.</p>
+							</div>
+						</c:otherwise>
+					</c:choose>
+				</div>
 				<div class="rejection-section" style="display: none;">
 					<h4><i class="fas fa-exclamation-triangle"></i> Lý do từ chối</h4>
 					<form method="post" action="${pageContext.request.contextPath}/ic/approval-events">
@@ -261,6 +292,7 @@
 					</form>
 				</div>
 			</div>
+
 			<div class="modal-actions">
 				<a href="${pageContext.request.contextPath}/ic/approval-events" class="modal-btn cancel">
 					<i class="fas fa-times"></i> Đóng
@@ -268,6 +300,16 @@
 				<form method="post" action="${pageContext.request.contextPath}/ic/approval-events" style="display: inline;">
 					<input type="hidden" name="eventID" value="${eventDetails.eventID}">
 					<input type="hidden" name="status" value="approved">
+
+					<c:if test="${not empty agendaDetails and agendaStatus != 'APPROVED'}">
+						<div class="approve-agenda-option" style="display: none;">
+							<label>
+								<input type="checkbox" name="approveAgenda" checked>
+								Duyệt cả Agenda cùng lúc
+							</label>
+						</div>
+					</c:if>
+
 					<button type="submit" class="modal-btn approve">
 						<i class="fas fa-check-circle"></i> Duyệt
 					</button>
