@@ -23,7 +23,6 @@
                 <!-- Display Messages -->
                 <c:if test="${not empty sessionScope.message}">
                     <div class="message success">${sessionScope.message}</div>
-                    <c:remove var="message" scope="session"/> <%-- [THÊM] Remove after display --%>
                     <c:remove var="message" scope="session"/>
                     <script>
                         setTimeout(() => {
@@ -33,7 +32,6 @@
                 </c:if>
                 <c:if test="${not empty sessionScope.error}">
                     <div class="message error">${sessionScope.error}</div>
-                    <c:remove var="error" scope="session"/> <%-- [THÊM] Remove after display --%>
                     <c:remove var="error" scope="session"/>
                     <script>
                         setTimeout(() => {
@@ -43,16 +41,16 @@
                 </c:if>
 
                 <div class="filter-options flex justify-start items-center mb-4">
-                    <a href="${pageContext.request.contextPath}/clubs?category=all" class="filter-option ${selectedCategory == 'all' ? 'active' : ''}" data-category="all">Tất Cả</a>
-                    <a href="${pageContext.request.contextPath}/clubs?category=Thể Thao" class="filter-option ${selectedCategory == 'Thể Thao' ? 'active' : ''}" data-category="Thể Thao">Thể Thao</a>
-                    <a href="${pageContext.request.contextPath}/clubs?category=Học Thuật" class="filter-option ${selectedCategory == 'Học Thuật' ? 'active' : ''}" data-category="Học Thuật">Học Thuật</a>
-                    <a href="${pageContext.request.contextPath}/clubs?category=Phong Trào" class="filter-option ${selectedCategory == 'Phong Trào' ? 'active' : ''}" data-category="Phong Trào">Phong Trào</a>
+                    <a href="${pageContext.request.contextPath}/clubs?category=0" class="filter-option ${selectedCategory == 'all' ? 'active' : ''}" data-category="all">Tất Cả</a>
+                    <c:forEach items="${categories}" var="category">
+                        <a href="${pageContext.request.contextPath}/clubs?category=${category.categoryID}" class="filter-option ${selectedCategoryID == category.categoryID ? 'active' : ''}" data-category-id="${category.categoryID}">${category.categoryName}</a>
+                    </c:forEach>
                     <c:if test="${not empty sessionScope.user}">
                         <c:if test="${hasClubs}">
-                            <a href="${pageContext.request.contextPath}/clubs?category=myClubs" class="filter-option ${selectedCategory == 'myClubs' ? 'active' : ''}" data-category="myClubs">Club của tôi</a>
+                            <a href="${pageContext.request.contextPath}/clubs?category=-1" class="filter-option ${selectedCategory == 'myClubs' ? 'active' : ''}" data-category-id="-1">Club của tôi</a>
                         </c:if>
                         <c:if test="${hasFavoriteClubs}">
-                            <a href="${pageContext.request.contextPath}/clubs?category=favoriteClubs" class="filter-option ${selectedCategory == 'favoriteClubs' ? 'active' : ''}" data-category="favoriteClubs">Club yêu thích của tôi</a>
+                            <a href="${pageContext.request.contextPath}/clubs?category=-2" class="filter-option ${selectedCategory == 'favoriteClubs' ? 'active' : ''}" data-category-id="-2">Club yêu thích của tôi</a>
                         </c:if>
                     </c:if>
                 </div>
@@ -72,18 +70,18 @@
                 <!-- Pagination Controls -->
                 <div class="pagination">
                     <c:if test="${currentPage > 1}">
-                        <a href="${pageContext.request.contextPath}/clubs?category=${selectedCategory}&page=${currentPage - 1}">« Trước</a>
+                        <a href="${pageContext.request.contextPath}/clubs?category=${selectedCategoryID}&page=${currentPage - 1}">« Trước</a>
                     </c:if>
                     <c:if test="${currentPage <= 1}">
                         <a class="disabled">« Trước</a>
                     </c:if>
 
                     <c:forEach begin="1" end="${totalPages}" var="i">
-                        <a href="${pageContext.request.contextPath}/clubs?category=${selectedCategory}&page=${i}" class="${currentPage == i ? 'active' : ''}">${i}</a>
+                        <a href="${pageContext.request.contextPath}/clubs?category=${selectedCategoryID}&page=${i}" class="${currentPage == i ? 'active' : ''}">${i}</a>
                     </c:forEach>
 
                     <c:if test="${currentPage < totalPages}">
-                        <a href="${pageContext.request.contextPath}/clubs?category=${selectedCategory}&page=${currentPage + 1}">Tiếp »</a>
+                        <a href="${pageContext.request.contextPath}/clubs?category=${selectedCategoryID}&page=${currentPage + 1}">Tiếp »</a>
                     </c:if>
                     <c:if test="${currentPage >= totalPages}">
                         <a class="disabled">Tiếp »</a>
@@ -128,9 +126,9 @@
                     <select name="category" id="category" required
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="" disabled selected>Chọn danh mục</option>
-                        <option value="Học Thuật">Học Thuật</option>
-                        <option value="Thể Thao">Thể Thao</option>
-                        <option value="Phong Trào">Phong Trào</option>
+                        <c:forEach items="${categories}" var="category">
+                            <option value="${category.categoryID}">${category.categoryName}</option>
+                        </c:forEach>
                     </select>
                 </div>
                 <div class="buttons">

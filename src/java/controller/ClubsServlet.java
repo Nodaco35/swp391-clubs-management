@@ -2,6 +2,7 @@ package controller;
 
 import dal.ClubCreationPermissionDAO;
 import dal.ClubDAO;
+import dal.ClubCategoryDAO;
 import dal.DepartmentMemberDAO;
 import dal.UserClubDAO;
 import jakarta.servlet.ServletException;
@@ -12,6 +13,7 @@ import jakarta.servlet.http.HttpSession;
 import models.Clubs;
 import models.Users;
 import models.UserClub;
+import models.ClubCategory;
 import java.io.IOException;
 import java.util.List;
 
@@ -20,12 +22,14 @@ public class ClubsServlet extends HttpServlet {
     private ClubDAO clubDAO;
     private UserClubDAO userClubDAO;
     private ClubCreationPermissionDAO permissionDAO;
+    private ClubCategoryDAO clubCategoryDAO;
 
     @Override
     public void init() throws ServletException {
         clubDAO = new ClubDAO();
         userClubDAO = new UserClubDAO();
         permissionDAO = new ClubCreationPermissionDAO();
+        clubCategoryDAO = new ClubCategoryDAO();
     }
 
     @Override
@@ -51,9 +55,36 @@ public class ClubsServlet extends HttpServlet {
 
     private void handleClubsList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String category = request.getParameter("category");
-        if (category == null || category.isEmpty()) {
-            category = "all";
+        String categoryParam = request.getParameter("category");
+        int categoryID;
+        String selectedCategoryName = "all"; // Default for display purposes
+
+        // Fetch all categories
+        List<ClubCategory> categories = clubCategoryDAO.getAllCategories();
+        request.setAttribute("categories", categories);
+
+        // Parse category parameter
+        if (categoryParam == null || categoryParam.isEmpty() || categoryParam.equals("all")) {
+            categoryID = 0; // 0 represents "all" categories
+        } else if (categoryParam.equals("myClubs")) {
+            categoryID = -1; // -1 represents "myClubs"
+            selectedCategoryName = "myClubs";
+        } else if (categoryParam.equals("favoriteClubs")) {
+            categoryID = -2; // -2 represents "favoriteClubs"
+            selectedCategoryName = "favoriteClubs";
+        } else {
+            try {
+                categoryID = Integer.parseInt(categoryParam);
+                // Find CategoryName for display
+                for (ClubCategory category : categories) {
+                    if (category.getCategoryID() == categoryID) {
+                        selectedCategoryName = category.getCategoryName();
+                        break;
+                    }
+                }
+            } catch (NumberFormatException e) {
+                categoryID = 0; // Fallback to "all" if invalid
+            }
         }
 
         int page;
@@ -77,7 +108,7 @@ public class ClubsServlet extends HttpServlet {
         boolean hasFavoriteClubs = false;
         boolean hasPendingRequest = false;
         if (userID != null) {
-            int userClubCount = clubDAO.getTotalClubsByCategory("myClubs", userID);
+            int userClubCount = clubDAO.getTotalClubsByCategory(-1, userID); // -1 for myClubs
             hasClubs = userClubCount > 0;
             int favoriteClubCount = clubDAO.getTotalFavoriteClubs(userID);
             hasFavoriteClubs = favoriteClubCount > 0;
@@ -85,30 +116,29 @@ public class ClubsServlet extends HttpServlet {
         }
 
         // Handle favoriteClubs category
-        if ("favoriteClubs".equalsIgnoreCase(category)) {
+        if (categoryID == -2) { // favoriteClubs
             if (user == null || userID == null) {
-                clubs = clubDAO.getClubsByCategory("all", page, pageSize);
-                totalClubs = clubDAO.getTotalClubsByCategory("all", null);
-                category = "all";
+                clubs = clubDAO.getClubsByCategory(0, page, pageSize); // Fallback to all
+                totalClubs = clubDAO.getTotalClubsByCategory(0, null);
+                categoryID = 0;
+                selectedCategoryName = "all";
             } else {
                 clubs = clubDAO.getFavoriteClubs(userID, page, pageSize);
                 totalClubs = clubDAO.getTotalFavoriteClubs(userID);
             }
-        } else {
-            // Handle myClubs and other categories
-            if ("myClubs".equalsIgnoreCase(category)) {
-                if (user == null || userID == null) {
-                    clubs = clubDAO.getClubsByCategory("all", page, pageSize);
-                    totalClubs = clubDAO.getTotalClubsByCategory("all", null);
-                    category = "all";
-                } else {
-                    clubs = clubDAO.getUserClubs(userID, page, pageSize);
-                    totalClubs = clubDAO.getTotalClubsByCategory("myClubs", userID);
-                }
+        } else if (categoryID == -1) { // myClubs
+            if (user == null || userID == null) {
+                clubs = clubDAO.getClubsByCategory(0, page, pageSize); // Fallback to all
+                totalClubs = clubDAO.getTotalClubsByCategory(0, null);
+                categoryID = 0;
+                selectedCategoryName = "all";
             } else {
-                clubs = clubDAO.getClubsByCategory(category, page, pageSize);
-                totalClubs = clubDAO.getTotalClubsByCategory(category, userID);
+                clubs = clubDAO.getUserClubs(userID, page, pageSize);
+                totalClubs = clubDAO.getTotalClubsByCategory(-1, userID);
             }
+        } else {
+            clubs = clubDAO.getClubsByCategory(categoryID, page, pageSize);
+            totalClubs = clubDAO.getTotalClubsByCategory(categoryID, userID);
         }
 
         // Set favorite status for each club
@@ -125,7 +155,8 @@ public class ClubsServlet extends HttpServlet {
         boolean hasPermission = user != null && permissionDAO.hasActivePermission(userID);
 
         request.setAttribute("clubs", clubs);
-        request.setAttribute("selectedCategory", category);
+        request.setAttribute("selectedCategory", selectedCategoryName); // For display
+        request.setAttribute("selectedCategoryID", categoryID); // For pagination
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("pageSize", pageSize);
@@ -164,13 +195,13 @@ public class ClubsServlet extends HttpServlet {
         // Set favorite status
         if (user != null) {
             String userID = user.getUserID();
-            userClub = userClubDAO.getUserClub(userID, clubID);            if (userClub != null && userClub.isIsActive()) {
+            userClub = userClubDAO.getUserClub(userID, clubID);
+            if (userClub != null && userClub.isIsActive()) {
                 isMember = true;
                 if (userClub.getRoleID() == 1 || userClub.getRoleID() == 2) {
                     isPresident = true;
                 }
                 // Check if user is department leader
-                // Could be role 3 (Trưởng ban) or other department leadership roles
                 if (userClub.getRoleID() == 3) {
                     isDepartmentLeader = true;
                     int departmentID = userClub.getClubDepartmentID();
@@ -234,11 +265,11 @@ public class ClubsServlet extends HttpServlet {
             if ("removeFavorite".equals(action) && "favoriteClubs".equalsIgnoreCase(category)) {
                 int favoriteClubCount = clubDAO.getTotalFavoriteClubs(userID);
                 if (favoriteClubCount == 0) {
-                    response.sendRedirect(request.getContextPath() + "/clubs?category=all");
+                    response.sendRedirect(request.getContextPath() + "/clubs?category=0");
                     return;
                 }
             }
-            response.sendRedirect(referer != null ? referer : request.getContextPath() + "/clubs?category=" + (category != null ? category : "all"));
+            response.sendRedirect(referer != null ? referer : request.getContextPath() + "/clubs?category=" + (category != null ? category : "0"));
         } else {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error processing favorite action");
         }

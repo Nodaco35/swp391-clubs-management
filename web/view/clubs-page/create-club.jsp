@@ -57,10 +57,13 @@
                     <label for="category" class="block text-sm font-medium text-gray-700">Danh Mục: <span class="text-red-500">*</span></label>
                     <select name="category" id="category" ${isEdit ? '' : 'disabled'} required
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="" disabled ${isEdit && club.category == null ? 'selected' : ''}>Chọn danh mục</option>
-                        <option value="Học Thuật" ${isEdit && club.category == 'Học Thuật' || (!isEdit && approvedCategory == 'Học Thuật') ? 'selected' : ''}>Học Thuật</option>
-                        <option value="Thể Thao" ${isEdit && club.category == 'Thể Thao' || (!isEdit && approvedCategory == 'Thể Thao') ? 'selected' : ''}>Thể Thao</option>
-                        <option value="Phong Trào" ${isEdit && club.category == 'Phong Trào' || (!isEdit && approvedCategory == 'Phong Trào') ? 'selected' : ''}>Phong Trào</option>
+                        <option value="" disabled ${isEdit && club.categoryID == null ? 'selected' : ''}>Chọn danh mục</option>
+                        <c:forEach items="${categories}" var="category">
+                            <option value="${category.categoryID}" 
+                                    ${isEdit && club.categoryID == category.categoryID || (!isEdit && approvedCategoryID == category.categoryID) ? 'selected' : ''}>
+                                ${category.categoryName}
+                            </option>
+                        </c:forEach>
                     </select>
                     <c:if test="${!isEdit}">
                         <p class="text-sm text-gray-500 mt-1">Danh mục được lấy từ đơn xin quyền và không thể chỉnh sửa.</p>

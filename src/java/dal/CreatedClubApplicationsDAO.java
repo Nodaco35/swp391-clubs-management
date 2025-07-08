@@ -9,7 +9,7 @@ public class CreatedClubApplicationsDAO {
 
     public int countRequestsByStatus(String status) {
         int count = 0;
-        String sql = "SELECT COUNT(*) FROM CreatedClubApplications WHERE Status = ?";
+        String sql = "SELECT COUNT(*) FROM ClubCreationPermissions WHERE Status = ?";
 
         try {
             Connection conn = DBContext.getConnection();
@@ -67,18 +67,19 @@ public class CreatedClubApplicationsDAO {
         return false;
     }
 
-    public boolean insertRequest(String userID, String clubName, String category) {
-        if (userID == null || userID.trim().isEmpty() || clubName == null || clubName.trim().isEmpty() || category == null || category.trim().isEmpty()) {
+    public boolean insertRequest(String userID, String clubName, int categoryID) {
+        if (userID == null || userID.trim().isEmpty() || clubName == null || clubName.trim().isEmpty() || categoryID <= 0) {
             return false;
         }
         if (isClubNameTaken(clubName)) {
             return false;
         }
-        String query = "INSERT INTO ClubCreationPermissions (UserID, ClubName, Category, Status, RequestDate) VALUES (?, ?, ?, 'PENDING', NOW())";
-        try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
+        String query = "INSERT INTO ClubCreationPermissions (UserID, ClubName, CategoryID, Status, RequestDate) VALUES (?, ?, ?, 'PENDING', NOW())";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, userID.trim());
             stmt.setString(2, clubName.trim());
-            stmt.setString(3, category.trim());
+            stmt.setInt(3, categoryID);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -88,38 +89,43 @@ public class CreatedClubApplicationsDAO {
 
     public List<CreatedClubApplications> getApplicationsByStatus(String status) {
         List<CreatedClubApplications> applications = new ArrayList<>();
-        String query = "SELECT p.*, u.FullName FROM ClubCreationPermissions p " +
+        String query = "SELECT p.*, u.FullName, cc.CategoryName " +
+                      "FROM ClubCreationPermissions p " +
                       "JOIN Users u ON p.UserID = u.UserID " +
+                      "LEFT JOIN ClubCategories cc ON p.CategoryID = cc.CategoryID " +
                       "WHERE p.Status = ? ORDER BY p.RequestDate DESC";
-        try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, status);
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                CreatedClubApplications application = new CreatedClubApplications();
-                application.setId(rs.getInt("ID"));
-                application.setUserID(rs.getString("UserID"));
-                application.setUserName(rs.getString("FullName"));
-                application.setClubName(rs.getString("ClubName"));
-                application.setCategory(rs.getString("Category"));
-                application.setStatus(rs.getString("Status"));
-                Timestamp requestTimestamp = rs.getTimestamp("RequestDate");
-                if (requestTimestamp != null) {
-                    application.setRequestDate(requestTimestamp.toLocalDateTime());
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    CreatedClubApplications application = new CreatedClubApplications();
+                    application.setId(rs.getInt("ID"));
+                    application.setUserID(rs.getString("UserID"));
+                    application.setUserName(rs.getString("FullName"));
+                    application.setClubName(rs.getString("ClubName"));
+                    application.setCategoryID(rs.getInt("CategoryID"));
+                    application.setCategoryName(rs.getString("CategoryName"));
+                    application.setStatus(rs.getString("Status"));
+                    Timestamp requestTimestamp = rs.getTimestamp("RequestDate");
+                    if (requestTimestamp != null) {
+                        application.setRequestDate(requestTimestamp.toLocalDateTime());
+                    }
+                    Timestamp processedTimestamp = rs.getTimestamp("ProcessedDate");
+                    if (processedTimestamp != null) {
+                        application.setProcessedDate(processedTimestamp.toLocalDateTime());
+                    }
+                    application.setProcessedBy(rs.getString("ProcessedBy"));
+                    Timestamp grantedTimestamp = rs.getTimestamp("GrantedDate");
+                    if (grantedTimestamp != null) {
+                        application.setGrantedDate(grantedTimestamp.toLocalDateTime());
+                    }
+                    Timestamp usedTimestamp = rs.getTimestamp("UsedDate");
+                    if (usedTimestamp != null) {
+                        application.setUsedDate(usedTimestamp.toLocalDateTime());
+                    }
+                    applications.add(application);
                 }
-                Timestamp processedTimestamp = rs.getTimestamp("ProcessedDate");
-                if (processedTimestamp != null) {
-                    application.setProcessedDate(processedTimestamp.toLocalDateTime());
-                }
-                application.setProcessedBy(rs.getString("ProcessedBy"));
-                Timestamp grantedTimestamp = rs.getTimestamp("GrantedDate");
-                if (grantedTimestamp != null) {
-                    application.setGrantedDate(grantedTimestamp.toLocalDateTime());
-                }
-                Timestamp usedTimestamp = rs.getTimestamp("UsedDate");
-                if (usedTimestamp != null) {
-                    application.setUsedDate(usedTimestamp.toLocalDateTime());
-                }
-                applications.add(application);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -215,16 +221,22 @@ public class CreatedClubApplicationsDAO {
     }
 
     public CreatedClubApplications getActiveApplication(String userID) {
-        String query = "SELECT ID, ClubName, Category FROM ClubCreationPermissions WHERE UserID = ? AND Status = 'APPROVED' ORDER BY GrantedDate DESC LIMIT 1";
-        try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
+        String query = "SELECT p.ID, p.ClubName, p.CategoryID, cc.CategoryName " +
+                      "FROM ClubCreationPermissions p " +
+                      "LEFT JOIN ClubCategories cc ON p.CategoryID = cc.CategoryID " +
+                      "WHERE p.UserID = ? AND p.Status = 'APPROVED' ORDER BY p.GrantedDate DESC LIMIT 1";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, userID);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                CreatedClubApplications application = new CreatedClubApplications();
-                application.setId(rs.getInt("ID"));
-                application.setClubName(rs.getString("ClubName"));
-                application.setCategory(rs.getString("Category"));
-                return application;
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    CreatedClubApplications application = new CreatedClubApplications();
+                    application.setId(rs.getInt("ID"));
+                    application.setClubName(rs.getString("ClubName"));
+                    application.setCategoryID(rs.getInt("CategoryID"));
+                    application.setCategoryName(rs.getString("CategoryName"));
+                    return application;
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();

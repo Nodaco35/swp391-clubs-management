@@ -63,10 +63,23 @@ public class StudentServlet extends HttpServlet {
 
         String userId = user.getUserID();
         String clubName = request.getParameter("clubName");
-        String category = request.getParameter("category");
+        String categoryParam = request.getParameter("category");
+        int categoryID;
 
-        if (userId == null || userId.trim().isEmpty() || clubName == null || clubName.trim().isEmpty() || 
-            category == null || !List.of("Thể Thao", "Học Thuật", "Phong Trào").contains(category)) {
+        try {
+            categoryID = Integer.parseInt(categoryParam);
+            if (categoryID <= 0) {
+                session.setAttribute("error", "Danh mục không hợp lệ. Vui lòng chọn danh mục hợp lệ.");
+                response.sendRedirect(request.getContextPath() + "/clubs");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            session.setAttribute("error", "Danh mục không hợp lệ. Vui lòng chọn danh mục hợp lệ.");
+            response.sendRedirect(request.getContextPath() + "/clubs");
+            return;
+        }
+
+        if (userId == null || userId.trim().isEmpty() || clubName == null || clubName.trim().isEmpty()) {
             session.setAttribute("error", "Thông tin không hợp lệ. Vui lòng nhập đầy đủ và đúng định dạng.");
             response.sendRedirect(request.getContextPath() + "/clubs");
             return;
@@ -77,9 +90,9 @@ public class StudentServlet extends HttpServlet {
         } else if (applicationDAO.isClubNameTaken(clubName)) {
             session.setAttribute("error", "Tên câu lạc bộ '" + clubName + "' đã được sử dụng. Vui lòng chọn tên khác.");
         } else {
-            boolean success = applicationDAO.insertRequest(userId, clubName, category);
+            boolean success = applicationDAO.insertRequest(userId, clubName, categoryID);
             session.setAttribute(success ? "message" : "error",
-                    success ? "Đơn xin quyền tạo câu lạc bộ '" + clubName + "' (" + category + ") đã được gửi!" 
+                    success ? "Đơn xin quyền tạo câu lạc bộ '" + clubName + "' đã được gửi!" 
                             : "Gửi đơn thất bại. Vui lòng thử lại sau.");
         }
 

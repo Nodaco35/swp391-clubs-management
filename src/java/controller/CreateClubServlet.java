@@ -1,5 +1,6 @@
 package controller;
 
+import dal.ClubCategoryDAO;
 import dal.ClubDAO;
 import dal.UserClubDAO;
 import dal.CreatedClubApplicationsDAO;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.Timestamp;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -29,6 +31,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import models.ClubCategory;
 
 @MultipartConfig(
     fileSizeThreshold = 1024 * 1024, // 1MB
@@ -40,15 +43,15 @@ public class CreateClubServlet extends HttpServlet {
     private ClubDAO clubDAO;
     private UserClubDAO userClubDAO;
     private CreatedClubApplicationsDAO applicationDAO;
+    private ClubCategoryDAO clubCategoryDAO;
     private static final String UPLOAD_DIR = "img";
-    private static final List<String> ALLOWED_IMAGE_TYPES = Arrays.asList("image/jpeg", "image/png", "image/gif", "image/webp");
-    private static final List<String> VALID_CATEGORIES = Arrays.asList("Thể Thao", "Học Thuật", "Phong Trào");
 
     @Override
     public void init() throws ServletException {
         clubDAO = new ClubDAO();
         userClubDAO = new UserClubDAO();
         applicationDAO = new CreatedClubApplicationsDAO();
+        clubCategoryDAO = new ClubCategoryDAO();
     }
 
     @Override
@@ -91,11 +94,14 @@ public class CreateClubServlet extends HttpServlet {
         boolean hasApplication = applicationDAO.hasActiveApplication(user.getUserID());
         CreatedClubApplications application = hasApplication ? applicationDAO.getActiveApplication(user.getUserID()) : null;
         String approvedClubName = application != null ? application.getClubName() : null;
-        String approvedCategory = application != null ? application.getCategory() : null;
+        int approvedCategoryID = application != null ? application.getCategoryID() : 0;
+        
+        List<ClubCategory> categories = clubCategoryDAO.getAllCategories();
         List<models.Department> departments = clubDAO.getAllDepartments();
+        request.setAttribute("categories", categories);
         request.setAttribute("hasPermission", hasApplication);
         request.setAttribute("approvedClubName", approvedClubName);
-        request.setAttribute("approvedCategory", approvedCategory);
+        request.setAttribute("approvedCategoryID", approvedCategoryID);
         request.setAttribute("departments", departments);
         request.setAttribute("isEdit", false);
         request.getRequestDispatcher("/view/clubs-page/create-club.jsp").forward(request, response);
@@ -124,7 +130,9 @@ public class CreateClubServlet extends HttpServlet {
             request.setAttribute("error", "Bạn không có quyền chỉnh sửa câu lạc bộ này.");
             request.setAttribute("isPresident", false);
             request.setAttribute("club", club);
+            request.setAttribute("categories", clubCategoryDAO.getAllCategories());
             request.setAttribute("departments", clubDAO.getAllDepartments());
+            request.setAttribute("clubDepartmentIDs", clubDAO.getClubDepartmentIDs(clubID));
             request.setAttribute("isEdit", true);
             request.getRequestDispatcher("/view/clubs-page/create-club.jsp").forward(request, response);
             return;
@@ -133,6 +141,7 @@ public class CreateClubServlet extends HttpServlet {
         List<models.Department> departments = clubDAO.getAllDepartments();
         List<Integer> clubDepartmentIDs = clubDAO.getClubDepartmentIDs(clubID);
         request.setAttribute("club", club);
+        request.setAttribute("categories", clubCategoryDAO.getAllCategories());
         request.setAttribute("departments", departments);
         request.setAttribute("clubDepartmentIDs", clubDepartmentIDs);
         request.setAttribute("isEdit", true);
@@ -152,6 +161,7 @@ public class CreateClubServlet extends HttpServlet {
         if (!applicationDAO.hasActiveApplication(user.getUserID())) {
             request.setAttribute("error", "Bạn không có quyền tạo câu lạc bộ. Vui lòng xin quyền trước.");
             request.setAttribute("hasPermission", false);
+            request.setAttribute("categories", clubCategoryDAO.getAllCategories());
             request.setAttribute("departments", clubDAO.getAllDepartments());
             request.setAttribute("isEdit", false);
             request.getRequestDispatcher("/view/clubs-page/create-club.jsp").forward(request, response);
@@ -160,7 +170,7 @@ public class CreateClubServlet extends HttpServlet {
 
         CreatedClubApplications application = applicationDAO.getActiveApplication(user.getUserID());
         String clubName = application != null ? application.getClubName() : null;
-        String category = application != null ? application.getCategory() : null;
+        int approvedCategoryID = application != null ? application.getCategoryID() : 0;
 
         String description = request.getParameter("description");
         String contactPhone = request.getParameter("contactPhone");
@@ -177,8 +187,19 @@ public class CreateClubServlet extends HttpServlet {
         } else if (clubDAO.isClubNameTaken(clubName, 0)) {
             errors.add("Tên câu lạc bộ '" + clubName + "' đã được sử dụng. Vui lòng chọn tên khác.");
         }
-        if (category == null || !VALID_CATEGORIES.contains(category)) {
+        if (approvedCategoryID <= 0) {
             errors.add("Danh mục không hợp lệ.");
+        } else {
+            boolean validCategory = false;
+            for (ClubCategory category : clubCategoryDAO.getAllCategories()) {
+                if (category.getCategoryID() == approvedCategoryID) {
+                    validCategory = true;
+                    break;
+                }
+            }
+            if (!validCategory) {
+                errors.add("Danh mục không hợp lệ.");
+            }
         }
         if (contactGmail == null || contactGmail.trim().isEmpty()) {
             errors.add("Email liên hệ không được để trống.");
@@ -241,7 +262,8 @@ public class CreateClubServlet extends HttpServlet {
             request.setAttribute("error", String.join("<br>", errors));
             request.setAttribute("hasPermission", true);
             request.setAttribute("approvedClubName", clubName);
-            request.setAttribute("approvedCategory", category);
+            request.setAttribute("approvedCategoryID", approvedCategoryID);
+            request.setAttribute("categories", clubCategoryDAO.getAllCategories());
             request.setAttribute("departments", clubDAO.getAllDepartments());
             request.setAttribute("isEdit", false);
             request.getRequestDispatcher("/view/clubs-page/create-club.jsp").forward(request, response);
@@ -251,14 +273,14 @@ public class CreateClubServlet extends HttpServlet {
         Clubs club = new Clubs();
         club.setClubName(clubName);
         club.setDescription(description);
-        club.setCategory(category);
+        club.setCategoryID(approvedCategoryID);
         club.setClubImg(relativePath);
         club.setContactPhone(contactPhone);
         club.setContactGmail(contactGmail);
         club.setContactURL(contactURL);
         club.setEstablishedDate(establishedDate);
         club.setClubStatus(true);
-        club.setIsRecruiting(true);
+        club.setIsRecruiting(false);
 
         List<Integer> departmentIDList = departmentIDs != null ?
                 Arrays.stream(departmentIDs)
@@ -274,11 +296,15 @@ public class CreateClubServlet extends HttpServlet {
             int newClubID = clubDAO.createClub(club, departmentIDList);
             if (newClubID > 0) {
                 applicationDAO.markApplicationAsUsed(user.getUserID());
+                
+                int clubDepartmentID = userClubDAO.getClubDepartmentIdByClubAndDepartment(newClubID, 3);
+                
                 UserClub newUserClub = new UserClub();
                 newUserClub.setUserID(user.getUserID());
                 newUserClub.setClubID(newClubID);
                 newUserClub.setRoleID(1);
-                newUserClub.setClubDepartmentID(3);
+                newUserClub.setClubDepartmentID(clubDepartmentID);
+                newUserClub.setJoinDate(establishedDate ); // Convert Timestamp to Date
                 newUserClub.setIsActive(true);
                 userClubDAO.addUserClub(newUserClub);
                 Clubs createdClub = clubDAO.getClubById(newClubID);
@@ -300,7 +326,8 @@ public class CreateClubServlet extends HttpServlet {
 
         request.setAttribute("hasPermission", true);
         request.setAttribute("approvedClubName", clubName);
-        request.setAttribute("approvedCategory", category);
+        request.setAttribute("approvedCategoryID", approvedCategoryID);
+        request.setAttribute("categories", clubCategoryDAO.getAllCategories());
         request.setAttribute("departments", clubDAO.getAllDepartments());
         request.setAttribute("isEdit", false);
         request.getRequestDispatcher("/view/clubs-page/create-club.jsp").forward(request, response);
@@ -328,6 +355,7 @@ public class CreateClubServlet extends HttpServlet {
             request.setAttribute("error", "Bạn không có quyền chỉnh sửa câu lạc bộ này.");
             request.setAttribute("isPresident", false);
             request.setAttribute("club", clubDAO.getClubById(clubID));
+            request.setAttribute("categories", clubCategoryDAO.getAllCategories());
             request.setAttribute("departments", clubDAO.getAllDepartments());
             request.setAttribute("clubDepartmentIDs", clubDAO.getClubDepartmentIDs(clubID));
             request.setAttribute("isEdit", true);
@@ -337,7 +365,7 @@ public class CreateClubServlet extends HttpServlet {
 
         String clubName = request.getParameter("clubName");
         String description = request.getParameter("description");
-        String category = request.getParameter("category");
+        String categoryParam = request.getParameter("category");
         String contactPhone = request.getParameter("contactPhone");
         String contactGmail = request.getParameter("contactGmail");
         String contactURL = request.getParameter("contactURL");
@@ -345,8 +373,13 @@ public class CreateClubServlet extends HttpServlet {
         Part filePart = request.getPart("clubImg");
         String[] departmentIDs = request.getParameterValues("departmentIDs");
 
+        int categoryID;
+        try {
+            categoryID = Integer.parseInt(categoryParam);
+        } catch (NumberFormatException e) {
+            categoryID = 0;
+        }
         
-
         List<String> errors = new ArrayList<>();
         if (clubName == null || clubName.trim().isEmpty()) {
             errors.add("Tên câu lạc bộ không được để trống.");
@@ -356,12 +389,24 @@ public class CreateClubServlet extends HttpServlet {
         if (contactGmail == null || contactGmail.trim().isEmpty()) {
             errors.add("Email liên hệ không được để trống.");
         }
-        if (category == null || category.trim().isEmpty()) {
+        if (categoryID <= 0) {
             errors.add("Vui lòng chọn danh mục câu lạc bộ.");
-        } else if (!VALID_CATEGORIES.contains(category)) {
-            errors.add("Danh mục không hợp lệ. Vui lòng chọn Thể Thao, Học Thuật hoặc Phong Trào.");
+        } else {
+            boolean validCategory = false;
+            for (ClubCategory category : clubCategoryDAO.getAllCategories()) {
+                if (category.getCategoryID() == categoryID) {
+                    validCategory = true;
+                    break;
+                }
+            }
+            if (!validCategory) {
+                errors.add("Danh mục không hợp lệ.");
+            }
         }
-         if (contactPhone != null && !contactPhone.trim().isEmpty() && !contactPhone.matches("\\d{10}")) {
+        if (contactGmail == null || contactGmail.trim().isEmpty()) {
+            errors.add("Email liên hệ không được để trống.");
+        }
+        if (contactPhone != null && !contactPhone.trim().isEmpty() && !contactPhone.matches("\\d{10}")) {
             errors.add("Số điện thoại phải là 10 chữ số và không chứa chữ cái hoặc ký tự đặc biệt.");
         }
         Date establishedDate = null;
@@ -418,6 +463,7 @@ public class CreateClubServlet extends HttpServlet {
             request.setAttribute("error", String.join("<br>", errors));
             request.setAttribute("isPresident", true);
             request.setAttribute("club", clubDAO.getClubById(clubID));
+            request.setAttribute("categories", clubCategoryDAO.getAllCategories());
             request.setAttribute("departments", clubDAO.getAllDepartments());
             request.setAttribute("clubDepartmentIDs", clubDAO.getClubDepartmentIDs(clubID));
             request.setAttribute("isEdit", true);
@@ -427,7 +473,7 @@ public class CreateClubServlet extends HttpServlet {
 
         club.setClubName(clubName);
         club.setDescription(description);
-        club.setCategory(category);
+        club.setCategoryID(categoryID);
         club.setClubImg(relativePath);
         club.setContactPhone(contactPhone);
         club.setContactGmail(contactGmail);
@@ -472,17 +518,5 @@ public class CreateClubServlet extends HttpServlet {
         request.setAttribute("clubDepartmentIDs", clubDAO.getClubDepartmentIDs(clubID));
         request.setAttribute("isEdit", true);
         request.getRequestDispatcher("/view/clubs-page/create-club.jsp").forward(request, response);
-    }
-
-    private String extractFileName(Part part) {
-        String contentDisposition = part.getHeader("content-disposition");
-        String[] items = contentDisposition.split(";");
-        for (String s : items) {
-            if (s.trim().startsWith("filename")) {
-                String fileName = s.substring(s.indexOf("=") + 2, s.length() - 1);
-                return System.currentTimeMillis() + "_" + fileName.replaceAll("[^a-zA-Z0-9.-]", "_");
-            }
-        }
-        return "";
     }
 }

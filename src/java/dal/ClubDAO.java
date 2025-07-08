@@ -76,27 +76,30 @@ public class ClubDAO {
     }
 
     public Clubs getCLubByID(int clubID) {
-        String sql = "select * from Clubs where ClubID = ?";
-        try {
-            Connection connection = DBContext.getConnection();
-            PreparedStatement ps = connection.prepareStatement(sql);
+        String sql = "SELECT c.*, cc.CategoryName " +
+                     "FROM Clubs c " +
+                     "LEFT JOIN ClubCategories cc ON c.CategoryID = cc.CategoryID " +
+                     "WHERE c.ClubID = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, clubID);
-            ResultSet rs = ps.executeQuery();
-            if(rs.next()) {
-                Clubs club = new Clubs();
-                club.setClubID(rs.getInt("ClubID"));
-                club.setClubImg(rs.getString("ClubImg"));
-                club.setIsRecruiting(rs.getBoolean("IsRecruiting"));
-                club.setClubName(rs.getString("ClubName"));
-                club.setDescription(rs.getString("Description"));
-                club.setEstablishedDate(rs.getDate("EstablishedDate"));
-                club.setContactPhone(rs.getString("ContactPhone"));
-                club.setContactGmail(rs.getString("ContactGmail"));
-                club.setContactURL(rs.getString("ContactURL"));
-                club.setClubStatus(rs.getBoolean("ClubStatus"));
-                String category = rs.getString("Category");
-                club.setCategory(category != null ? category : getCategoryForClub(rs.getInt("ClubID")));
-                return club;
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Clubs club = new Clubs();
+                    club.setClubID(rs.getInt("ClubID"));
+                    club.setClubImg(rs.getString("ClubImg"));
+                    club.setIsRecruiting(rs.getBoolean("IsRecruiting"));
+                    club.setClubName(rs.getString("ClubName"));
+                    club.setDescription(rs.getString("Description"));
+                    club.setEstablishedDate(rs.getDate("EstablishedDate"));
+                    club.setContactPhone(rs.getString("ContactPhone"));
+                    club.setContactGmail(rs.getString("ContactGmail"));
+                    club.setContactURL(rs.getString("ContactURL"));
+                    club.setClubStatus(rs.getBoolean("ClubStatus"));
+                    club.setCategoryID(rs.getInt("CategoryID"));
+                    club.setCategoryName(rs.getString("CategoryName"));
+                    return club;
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -154,218 +157,200 @@ public class ClubDAO {
 
     public List<Clubs> getFeaturedClubs(int limit) {
         List<Clubs> clubs = new ArrayList<>();
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DBContext.getConnection();
-            String query = "SELECT c.*, "
-                    + "(SELECT COUNT(*) FROM UserClubs uc WHERE uc.ClubID = c.ClubID AND uc.IsActive = 1) as MemberCount "
-                    + "FROM Clubs c "
-                    + "WHERE c.IsRecruiting = 1 AND c.ClubStatus = 1 "
-                    + "ORDER BY MemberCount DESC "
-                    + "LIMIT ?";
-
-            stmt = conn.prepareStatement(query);
+        String query = "SELECT c.*, cc.CategoryName, " +
+                      "(SELECT COUNT(*) FROM UserClubs uc WHERE uc.ClubID = c.ClubID AND uc.IsActive = 1) AS MemberCount " +
+                      "FROM Clubs c " +
+                      "LEFT JOIN ClubCategories cc ON c.CategoryID = cc.CategoryID " +
+                      "WHERE c.IsRecruiting = 1 AND c.ClubStatus = 1 " +
+                      "ORDER BY MemberCount DESC " +
+                      "LIMIT ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, limit);
-            rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                Clubs club = new Clubs();
-                club.setClubID(rs.getInt("ClubID"));
-                club.setClubImg(rs.getString("ClubImg"));
-                club.setIsRecruiting(rs.getBoolean("IsRecruiting"));
-                club.setClubName(rs.getString("ClubName"));
-                club.setDescription(rs.getString("Description"));
-                club.setEstablishedDate(rs.getDate("EstablishedDate"));
-                club.setContactPhone(rs.getString("ContactPhone"));
-                club.setContactGmail(rs.getString("ContactGmail"));
-                club.setContactURL(rs.getString("ContactURL"));
-                club.setClubStatus(rs.getBoolean("ClubStatus"));
-                String category = rs.getString("Category");
-                club.setCategory(category != null ? category : getCategoryForClub(rs.getInt("ClubID")));
-                club.setMemberCount(rs.getInt("MemberCount"));
-                clubs.add(club);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Clubs club = new Clubs();
+                    club.setClubID(rs.getInt("ClubID"));
+                    club.setClubImg(rs.getString("ClubImg"));
+                    club.setIsRecruiting(rs.getBoolean("IsRecruiting"));
+                    club.setClubName(rs.getString("ClubName"));
+                    club.setDescription(rs.getString("Description"));
+                    club.setEstablishedDate(rs.getDate("EstablishedDate"));
+                    club.setContactPhone(rs.getString("ContactPhone"));
+                    club.setContactGmail(rs.getString("ContactGmail"));
+                    club.setContactURL(rs.getString("ContactURL"));
+                    club.setClubStatus(rs.getBoolean("ClubStatus"));
+                    club.setCategoryID(rs.getInt("CategoryID"));
+                    club.setCategoryName(rs.getString("CategoryName"));
+                    club.setMemberCount(rs.getInt("MemberCount"));
+                    clubs.add(club);
+                }
             }
         } catch (SQLException e) {
             System.out.println("Error getting featured clubs: " + e.getMessage());
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-                if (conn != null) DBContext.closeConnection(conn);
-            } catch (SQLException e) {
-                System.out.println("Error closing resources: " + e.getMessage());
-            }
         }
         return clubs;
     }
 
-    public List<Clubs> getClubsByCategory(String category, int page, int pageSize) {
+    public List<Clubs> getClubsByCategory(int categoryID, int page, int pageSize) {
         List<Clubs> clubs = new ArrayList<>();
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DBContext.getConnection();
-            String query;
-            int offset = (page - 1) * pageSize;
-
-            if ("all".equalsIgnoreCase(category)) {
-                query = "SELECT c.*, "
-                        + "(SELECT COUNT(*) FROM UserClubs uc WHERE uc.ClubID = c.ClubID AND uc.IsActive = 1) as MemberCount "
-                        + "FROM Clubs c "
-                        + "WHERE c.ClubStatus = 1 "
-                        + "ORDER BY c.ClubName "
-                        + "LIMIT ? OFFSET ?";
-                stmt = conn.prepareStatement(query);
-                stmt.setInt(1, pageSize);
-                stmt.setInt(2, offset);
+        String query;
+        int offset = (page - 1) * pageSize;
+        try (Connection conn = DBContext.getConnection()) {
+            if (categoryID == 0) { // Assuming 0 means "all" categories
+                query = "SELECT c.*, cc.CategoryName, " +
+                        "(SELECT COUNT(*) FROM UserClubs uc WHERE uc.ClubID = c.ClubID AND uc.IsActive = 1) AS MemberCount " +
+                        "FROM Clubs c " +
+                        "LEFT JOIN ClubCategories cc ON c.CategoryID = cc.CategoryID " +
+                        "WHERE c.ClubStatus = 1 " +
+                        "ORDER BY c.ClubName " +
+                        "LIMIT ? OFFSET ?";
+                try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                    stmt.setInt(1, pageSize);
+                    stmt.setInt(2, offset);
+                    try (ResultSet rs = stmt.executeQuery()) {
+                        while (rs.next()) {
+                            Clubs club = new Clubs();
+                            club.setClubID(rs.getInt("ClubID"));
+                            club.setClubImg(rs.getString("ClubImg"));
+                            club.setIsRecruiting(rs.getBoolean("IsRecruiting"));
+                            club.setClubName(rs.getString("ClubName"));
+                            club.setDescription(rs.getString("Description"));
+                            club.setEstablishedDate(rs.getDate("EstablishedDate"));
+                            club.setContactPhone(rs.getString("ContactPhone"));
+                            club.setContactGmail(rs.getString("ContactGmail"));
+                            club.setContactURL(rs.getString("ContactURL"));
+                            club.setClubStatus(rs.getBoolean("ClubStatus"));
+                            club.setCategoryID(rs.getInt("CategoryID"));
+                            club.setCategoryName(rs.getString("CategoryName"));
+                            club.setMemberCount(rs.getInt("MemberCount"));
+                            clubs.add(club);
+                        }
+                    }
+                }
             } else {
-                query = "SELECT c.*, "
-                        + "(SELECT COUNT(*) FROM UserClubs uc WHERE uc.ClubID = c.ClubID AND uc.IsActive = 1) as MemberCount "
-                        + "FROM Clubs c "
-                        + "WHERE c.ClubStatus = 1 AND c.Category = ? "
-                        + "ORDER BY c.ClubName "
-                        + "LIMIT ? OFFSET ?";
-                stmt = conn.prepareStatement(query);
-                stmt.setString(1, category);
-                stmt.setInt(2, pageSize);
-                stmt.setInt(3, offset);
-            }
-
-            rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                Clubs club = new Clubs();
-                club.setClubID(rs.getInt("ClubID"));
-                club.setClubImg(rs.getString("ClubImg"));
-                club.setIsRecruiting(rs.getBoolean("IsRecruiting"));
-                club.setClubName(rs.getString("ClubName"));
-                club.setDescription(rs.getString("Description"));
-                club.setEstablishedDate(rs.getDate("EstablishedDate"));
-                club.setContactPhone(rs.getString("ContactPhone"));
-                club.setContactGmail(rs.getString("ContactGmail"));
-                club.setContactURL(rs.getString("ContactURL"));
-                club.setClubStatus(rs.getBoolean("ClubStatus"));
-                String dbCategory = rs.getString("Category");
-                club.setCategory(dbCategory != null ? dbCategory : getCategoryForClub(rs.getInt("ClubID")));
-                club.setMemberCount(rs.getInt("MemberCount"));
-                clubs.add(club);
+                query = "SELECT c.*, cc.CategoryName, " +
+                        "(SELECT COUNT(*) FROM UserClubs uc WHERE uc.ClubID = c.ClubID AND uc.IsActive = 1) AS MemberCount " +
+                        "FROM Clubs c " +
+                        "LEFT JOIN ClubCategories cc ON c.CategoryID = cc.CategoryID " +
+                        "WHERE c.ClubStatus = 1 AND c.CategoryID = ? " +
+                        "ORDER BY c.ClubName " +
+                        "LIMIT ? OFFSET ?";
+                try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                    stmt.setInt(1, categoryID);
+                    stmt.setInt(2, pageSize);
+                    stmt.setInt(3, offset);
+                    try (ResultSet rs = stmt.executeQuery()) {
+                        while (rs.next()) {
+                            Clubs club = new Clubs();
+                            club.setClubID(rs.getInt("ClubID"));
+                            club.setClubImg(rs.getString("ClubImg"));
+                            club.setIsRecruiting(rs.getBoolean("IsRecruiting"));
+                            club.setClubName(rs.getString("ClubName"));
+                            club.setDescription(rs.getString("Description"));
+                            club.setEstablishedDate(rs.getDate("EstablishedDate"));
+                            club.setContactPhone(rs.getString("ContactPhone"));
+                            club.setContactGmail(rs.getString("ContactGmail"));
+                            club.setContactURL(rs.getString("ContactURL"));
+                            club.setClubStatus(rs.getBoolean("ClubStatus"));
+                            club.setCategoryID(rs.getInt("CategoryID"));
+                            club.setCategoryName(rs.getString("CategoryName"));
+                            club.setMemberCount(rs.getInt("MemberCount"));
+                            clubs.add(club);
+                        }
+                    }
+                }
             }
         } catch (SQLException e) {
             System.out.println("Error getting clubs by category: " + e.getMessage());
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-                if (conn != null) DBContext.closeConnection(conn);
-            } catch (SQLException e) {
-                System.out.println("Error closing resources: " + e.getMessage());
-            }
         }
         return clubs;
     }
 
     public List<Clubs> getUserClubs(String userID, int page, int pageSize) {
         List<Clubs> clubs = new ArrayList<>();
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
         if (userID == null || userID.isEmpty()) {
             return clubs;
         }
-
-        try {
-            conn = DBContext.getConnection();
-            String query = "SELECT c.*, "
-                    + "(SELECT COUNT(*) FROM UserClubs uc WHERE uc.ClubID = c.ClubID AND uc.IsActive = 1) as MemberCount "
-                    + "FROM Clubs c "
-                    + "JOIN UserClubs uc ON c.ClubID = uc.ClubID "
-                    + "WHERE uc.UserID = ? AND uc.IsActive = 1 AND c.ClubStatus = 1 "
-                    + "ORDER BY c.ClubName "
-                    + "LIMIT ? OFFSET ?";
-            stmt = conn.prepareStatement(query);
+        String query = "SELECT c.*, cc.CategoryName, " +
+                      "(SELECT COUNT(*) FROM UserClubs uc WHERE uc.ClubID = c.ClubID AND uc.IsActive = 1) AS MemberCount " +
+                      "FROM Clubs c " +
+                      "JOIN UserClubs uc ON c.ClubID = uc.ClubID " +
+                      "LEFT JOIN ClubCategories cc ON c.CategoryID = cc.CategoryID " +
+                      "WHERE uc.UserID = ? AND uc.IsActive = 1 AND c.ClubStatus = 1 " +
+                      "ORDER BY c.ClubName " +
+                      "LIMIT ? OFFSET ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, userID);
             stmt.setInt(2, pageSize);
             stmt.setInt(3, (page - 1) * pageSize);
-            rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                Clubs club = new Clubs();
-                club.setClubID(rs.getInt("ClubID"));
-                club.setClubImg(rs.getString("ClubImg"));
-                club.setIsRecruiting(rs.getBoolean("IsRecruiting"));
-                club.setClubName(rs.getString("ClubName"));
-                club.setDescription(rs.getString("Description"));
-                club.setEstablishedDate(rs.getDate("EstablishedDate"));
-                club.setContactPhone(rs.getString("ContactPhone"));
-                club.setContactGmail(rs.getString("ContactGmail"));
-                club.setContactURL(rs.getString("ContactURL"));
-                club.setClubStatus(rs.getBoolean("ClubStatus"));
-                String dbCategory = rs.getString("Category");
-                club.setCategory(dbCategory != null ? dbCategory : getCategoryForClub(rs.getInt("ClubID")));
-                club.setMemberCount(rs.getInt("MemberCount"));
-                clubs.add(club);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Clubs club = new Clubs();
+                    club.setClubID(rs.getInt("ClubID"));
+                    club.setClubImg(rs.getString("ClubImg"));
+                    club.setIsRecruiting(rs.getBoolean("IsRecruiting"));
+                    club.setClubName(rs.getString("ClubName"));
+                    club.setDescription(rs.getString("Description"));
+                    club.setEstablishedDate(rs.getDate("EstablishedDate"));
+                    club.setContactPhone(rs.getString("ContactPhone"));
+                    club.setContactGmail(rs.getString("ContactGmail"));
+                    club.setContactURL(rs.getString("ContactURL"));
+                    club.setClubStatus(rs.getBoolean("ClubStatus"));
+                    club.setCategoryID(rs.getInt("CategoryID"));
+                    club.setCategoryName(rs.getString("CategoryName"));
+                    club.setMemberCount(rs.getInt("MemberCount"));
+                    clubs.add(club);
+                }
             }
         } catch (SQLException e) {
             System.out.println("Error getting user clubs: " + e.getMessage());
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-                if (conn != null) DBContext.closeConnection(conn);
-            } catch (SQLException e) {
-                System.out.println("Error closing resources: " + e.getMessage());
-            }
         }
         return clubs;
     }
 
-    public int getTotalClubsByCategory(String category, String userID) {
+    public int getTotalClubsByCategory(int categoryID, String userID) {
         int count = 0;
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DBContext.getConnection();
-            String query;
-            if ("all".equalsIgnoreCase(category)) {
+        String query;
+        try (Connection conn = DBContext.getConnection()) {
+            if (categoryID == 0) { // Assuming 0 means "all" categories
                 query = "SELECT COUNT(*) FROM Clubs WHERE ClubStatus = 1";
-                stmt = conn.prepareStatement(query);
-            } else if ("myClubs".equalsIgnoreCase(category)) {
+                try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                    try (ResultSet rs = stmt.executeQuery()) {
+                        if (rs.next()) {
+                            count = rs.getInt(1);
+                        }
+                    }
+                }
+            } else if (categoryID == -1) { // Assuming -1 means "myClubs"
                 if (userID == null || userID.isEmpty()) {
                     return 0;
                 }
-                query = "SELECT COUNT(*) FROM Clubs c "
-                        + "JOIN UserClubs uc ON c.ClubID = uc.ClubID "
-                        + "WHERE uc.UserID = ? AND uc.IsActive = 1 AND c.ClubStatus = 1";
-                stmt = conn.prepareStatement(query);
-                stmt.setString(1, userID);
+                query = "SELECT COUNT(*) FROM Clubs c " +
+                        "JOIN UserClubs uc ON c.ClubID = uc.ClubID " +
+                        "WHERE uc.UserID = ? AND uc.IsActive = 1 AND c.ClubStatus = 1";
+                try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                    stmt.setString(1, userID);
+                    try (ResultSet rs = stmt.executeQuery()) {
+                        if (rs.next()) {
+                            count = rs.getInt(1);
+                        }
+                    }
+                }
             } else {
-                query = "SELECT COUNT(*) FROM Clubs WHERE ClubStatus = 1 AND Category = ?";
-                stmt = conn.prepareStatement(query);
-                stmt.setString(1, category);
-            }
-            rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                count = rs.getInt(1);
+                query = "SELECT COUNT(*) FROM Clubs WHERE ClubStatus = 1 AND CategoryID = ?";
+                try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                    stmt.setInt(1, categoryID);
+                    try (ResultSet rs = stmt.executeQuery()) {
+                        if (rs.next()) {
+                            count = rs.getInt(1);
+                        }
+                    }
+                }
             }
         } catch (SQLException e) {
             System.out.println("Error getting total clubs by category: " + e.getMessage());
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-                if (conn != null) DBContext.closeConnection(conn);
-            } catch (SQLException e) {
-                System.out.println("Error closing resources: " + e.getMessage());
-            }
         }
         return count;
     }
@@ -457,44 +442,44 @@ public class ClubDAO {
         return count;
     }
 
-    private String getCategoryForClub(int clubID) {
-        String category = "Học Thuật";
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DBContext.getConnection();
-            String query = "SELECT ClubName, Description FROM Clubs WHERE ClubID = ?";
-            stmt = conn.prepareStatement(query);
-            stmt.setInt(1, clubID);
-            rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                String name = rs.getString("ClubName").toLowerCase();
-                String desc = rs.getString("Description") != null ? rs.getString("Description").toLowerCase() : "";
-
-                if (name.contains("thể thao") || name.contains("bóng") || name.contains("cầu lông")
-                        || desc.contains("thể thao") || desc.contains("bóng") || desc.contains("cầu lông")) {
-                    category = "Thể Thao";
-                } else if (name.contains("tình nguyện") || name.contains("thanh niên") || name.contains("phong trào")
-                        || desc.contains("tình nguyện") || desc.contains("thanh niên") || desc.contains("phong trào")) {
-                    category = "Phong Trào";
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Error getting category for club: " + e.getMessage());
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-                if (conn != null) DBContext.closeConnection(conn);
-            } catch (SQLException e) {
-                System.out.println("Error closing resources: " + e.getMessage());
-            }
-        }
-        return category;
-    }
+//    private String getCategoryForClub(int clubID) {
+//        String category = "Học Thuật";
+//        Connection conn = null;
+//        PreparedStatement stmt = null;
+//        ResultSet rs = null;
+//
+//        try {
+//            conn = DBContext.getConnection();
+//            String query = "SELECT ClubName, Description FROM Clubs WHERE ClubID = ?";
+//            stmt = conn.prepareStatement(query);
+//            stmt.setInt(1, clubID);
+//            rs = stmt.executeQuery();
+//
+//            if (rs.next()) {
+//                String name = rs.getString("ClubName").toLowerCase();
+//                String desc = rs.getString("Description") != null ? rs.getString("Description").toLowerCase() : "";
+//
+//                if (name.contains("thể thao") || name.contains("bóng") || name.contains("cầu lông")
+//                        || desc.contains("thể thao") || desc.contains("bóng") || desc.contains("cầu lông")) {
+//                    category = "Thể Thao";
+//                } else if (name.contains("tình nguyện") || name.contains("thanh niên") || name.contains("phong trào")
+//                        || desc.contains("tình nguyện") || desc.contains("thanh niên") || desc.contains("phong trào")) {
+//                    category = "Phong Trào";
+//                }
+//            }
+//        } catch (SQLException e) {
+//            System.out.println("Error getting category for club: " + e.getMessage());
+//        } finally {
+//            try {
+//                if (rs != null) rs.close();
+//                if (stmt != null) stmt.close();
+//                if (conn != null) DBContext.closeConnection(conn);
+//            } catch (SQLException e) {
+//                System.out.println("Error closing resources: " + e.getMessage());
+//            }
+//        }
+//        return category;
+//    }
 
     public List<Clubs> getActiveClubs() {
         return getClubsByStatus(true);
@@ -506,27 +491,31 @@ public class ClubDAO {
 
     private List<Clubs> getClubsByStatus(boolean isActive) {
         List<Clubs> clubs = new ArrayList<>();
-        String sql = "SELECT * FROM Clubs WHERE ClubStatus = ? ORDER BY EstablishedDate DESC";
-
-        try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+        String sql = "SELECT c.*, cc.CategoryName " +
+                     "FROM Clubs c " +
+                     "LEFT JOIN ClubCategories cc ON c.CategoryID = cc.CategoryID " +
+                     "WHERE c.ClubStatus = ? " +
+                     "ORDER BY c.EstablishedDate DESC";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setBoolean(1, isActive);
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                Clubs club = new Clubs();
-                club.setClubID(rs.getInt("ClubID"));
-                club.setClubImg(rs.getString("ClubImg"));
-                club.setIsRecruiting(rs.getBoolean("IsRecruiting"));
-                club.setClubName(rs.getString("ClubName"));
-                club.setDescription(rs.getString("Description"));
-                club.setEstablishedDate(rs.getDate("EstablishedDate"));
-                club.setContactPhone(rs.getString("ContactPhone"));
-                club.setContactGmail(rs.getString("ContactGmail"));
-                club.setContactURL(rs.getString("ContactURL"));
-                club.setClubStatus(rs.getBoolean("ClubStatus"));
-                String dbCategory = rs.getString("Category");
-                club.setCategory(dbCategory != null ? dbCategory : getCategoryForClub(rs.getInt("ClubID")));
-                clubs.add(club);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Clubs club = new Clubs();
+                    club.setClubID(rs.getInt("ClubID"));
+                    club.setClubImg(rs.getString("ClubImg"));
+                    club.setIsRecruiting(rs.getBoolean("IsRecruiting"));
+                    club.setClubName(rs.getString("ClubName"));
+                    club.setDescription(rs.getString("Description"));
+                    club.setEstablishedDate(rs.getDate("EstablishedDate"));
+                    club.setContactPhone(rs.getString("ContactPhone"));
+                    club.setContactGmail(rs.getString("ContactGmail"));
+                    club.setContactURL(rs.getString("ContactURL"));
+                    club.setClubStatus(rs.getBoolean("ClubStatus"));
+                    club.setCategoryID(rs.getInt("CategoryID"));
+                    club.setCategoryName(rs.getString("CategoryName"));
+                    clubs.add(club);
+                }
             }
         } catch (SQLException e) {
             System.out.println("Error getting clubs: " + e.getMessage());
@@ -535,48 +524,37 @@ public class ClubDAO {
     }
 
     public Clubs getClubById(int clubID) {
-        Clubs club = null;
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DBContext.getConnection();
-            String query = "SELECT c.*, "
-                    + "(SELECT COUNT(*) FROM UserClubs uc WHERE uc.ClubID = c.ClubID AND uc.IsActive = 1) as MemberCount "
-                    + "FROM Clubs c WHERE c.ClubID = ? AND c.ClubStatus = 1";
-            stmt = conn.prepareStatement(query);
+        String query = "SELECT c.*, cc.CategoryName, " +
+                      "(SELECT COUNT(*) FROM UserClubs uc WHERE uc.ClubID = c.ClubID AND uc.IsActive = 1) AS MemberCount " +
+                      "FROM Clubs c " +
+                      "LEFT JOIN ClubCategories cc ON c.CategoryID = cc.CategoryID " +
+                      "WHERE c.ClubID = ? AND c.ClubStatus = 1";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, clubID);
-            rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                club = new Clubs();
-                club.setClubID(rs.getInt("ClubID"));
-                club.setClubImg(rs.getString("ClubImg"));
-                club.setIsRecruiting(rs.getBoolean("IsRecruiting"));
-                club.setClubName(rs.getString("ClubName"));
-                club.setDescription(rs.getString("Description"));
-                club.setEstablishedDate(rs.getDate("EstablishedDate"));
-                club.setContactPhone(rs.getString("ContactPhone"));
-                club.setContactGmail(rs.getString("ContactGmail"));
-                club.setContactURL(rs.getString("ContactURL"));
-                club.setClubStatus(rs.getBoolean("ClubStatus"));
-                String dbCategory = rs.getString("Category");
-                club.setCategory(dbCategory != null ? dbCategory : getCategoryForClub(clubID));
-                club.setMemberCount(rs.getInt("MemberCount"));
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Clubs club = new Clubs();
+                    club.setClubID(rs.getInt("ClubID"));
+                    club.setClubImg(rs.getString("ClubImg"));
+                    club.setIsRecruiting(rs.getBoolean("IsRecruiting"));
+                    club.setClubName(rs.getString("ClubName"));
+                    club.setDescription(rs.getString("Description"));
+                    club.setEstablishedDate(rs.getDate("EstablishedDate"));
+                    club.setContactPhone(rs.getString("ContactPhone"));
+                    club.setContactGmail(rs.getString("ContactGmail"));
+                    club.setContactURL(rs.getString("ContactURL"));
+                    club.setClubStatus(rs.getBoolean("ClubStatus"));
+                    club.setCategoryID(rs.getInt("CategoryID"));
+                    club.setCategoryName(rs.getString("CategoryName"));
+                    club.setMemberCount(rs.getInt("MemberCount"));
+                    return club;
+                }
             }
         } catch (SQLException e) {
             System.out.println("Error getting club by ID: " + e.getMessage());
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-                if (conn != null) DBContext.closeConnection(conn);
-            } catch (SQLException e) {
-                System.out.println("Error closing resources: " + e.getMessage());
-            }
         }
-        return club;
+        return null;
     }
 
     public int getMemberCount(int clubID) {
@@ -636,14 +614,15 @@ public class ClubDAO {
 
     public List<Clubs> getFavoriteClubs(String userID, int page, int pageSize) {
         List<Clubs> clubs = new ArrayList<>();
-        String query = """
-            SELECT c.* FROM FavoriteClubs fc
-            JOIN Clubs c ON fc.ClubID = c.ClubID
-            WHERE fc.UserID = ? AND c.ClubStatus = 1
-            ORDER BY fc.AddedDate DESC
-            LIMIT ? OFFSET ?
-        """;
-        try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
+        String query = "SELECT c.*, cc.CategoryName " +
+                      "FROM FavoriteClubs fc " +
+                      "JOIN Clubs c ON fc.ClubID = c.ClubID " +
+                      "LEFT JOIN ClubCategories cc ON c.CategoryID = cc.CategoryID " +
+                      "WHERE fc.UserID = ? AND c.ClubStatus = 1 " +
+                      "ORDER BY fc.AddedDate DESC " +
+                      "LIMIT ? OFFSET ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, userID);
             stmt.setInt(2, pageSize);
             stmt.setInt(3, (page - 1) * pageSize);
@@ -655,13 +634,13 @@ public class ClubDAO {
                     club.setIsRecruiting(rs.getBoolean("IsRecruiting"));
                     club.setClubName(rs.getString("ClubName"));
                     club.setDescription(rs.getString("Description"));
-                    String dbCategory = rs.getString("Category");
-                    club.setCategory(dbCategory != null ? dbCategory : getCategoryForClub(rs.getInt("ClubID")));
                     club.setEstablishedDate(rs.getDate("EstablishedDate"));
                     club.setContactPhone(rs.getString("ContactPhone"));
                     club.setContactGmail(rs.getString("ContactGmail"));
                     club.setContactURL(rs.getString("ContactURL"));
                     club.setClubStatus(rs.getBoolean("ClubStatus"));
+                    club.setCategoryID(rs.getInt("CategoryID"));
+                    club.setCategoryName(rs.getString("CategoryName"));
                     club.setMemberCount(getMemberCount(club.getClubID()));
                     club.setFavorite(true);
                     clubs.add(club);
@@ -730,12 +709,12 @@ public class ClubDAO {
             conn = DBContext.getConnection();
             conn.setAutoCommit(false);
 
-            String clubQuery = "INSERT INTO Clubs (ClubName, Description, Category, ClubImg, ContactPhone, ContactGmail, ContactURL, EstablishedDate, ClubStatus, IsRecruiting) "
-                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String clubQuery = "INSERT INTO Clubs (ClubName, Description, CategoryID, ClubImg, ContactPhone, ContactGmail, ContactURL, EstablishedDate, ClubStatus, IsRecruiting) " +
+                              "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             clubStmt = conn.prepareStatement(clubQuery, PreparedStatement.RETURN_GENERATED_KEYS);
             clubStmt.setString(1, club.getClubName());
             clubStmt.setString(2, club.getDescription());
-            clubStmt.setString(3, club.getCategory());
+            clubStmt.setInt(3, club.getCategoryID());
             clubStmt.setString(4, club.getClubImg());
             clubStmt.setString(5, club.getContactPhone());
             clubStmt.setString(6, club.getContactGmail());
@@ -803,12 +782,11 @@ public class ClubDAO {
             conn = DBContext.getConnection();
             conn.setAutoCommit(false);
 
-            String clubQuery = "UPDATE Clubs SET ClubName = ?, Description = ?, Category = ?, ClubImg = ?, ContactPhone = ?, ContactGmail = ?, ContactURL = ?, EstablishedDate = ? WHERE ClubID = ?";
+            String clubQuery = "UPDATE Clubs SET ClubName = ?, Description = ?, CategoryID = ?, ClubImg = ?, ContactPhone = ?, ContactGmail = ?, ContactURL = ?, EstablishedDate = ? WHERE ClubID = ?";
             clubStmt = conn.prepareStatement(clubQuery);
             clubStmt.setString(1, club.getClubName());
             clubStmt.setString(2, club.getDescription());
-            clubStmt.setString(3, club.getCategory());
-            System.out.println("Updating club ID " + club.getClubID() + " with category: " + club.getCategory());
+            clubStmt.setInt(3, club.getCategoryID());
             clubStmt.setString(4, club.getClubImg());
             clubStmt.setString(5, club.getContactPhone());
             clubStmt.setString(6, club.getContactGmail());
@@ -821,7 +799,6 @@ public class ClubDAO {
             clubStmt.setInt(9, club.getClubID());
 
             int rows = clubStmt.executeUpdate();
-            System.out.println("Updated " + rows + " rows in Clubs table for club ID " + club.getClubID());
             if (rows == 0) {
                 conn.rollback();
                 return false;
@@ -838,14 +815,13 @@ public class ClubDAO {
                 if (deptID != null && !existingDepartmentIDs.contains(deptID)) {
                     checkDeptStmt.setInt(1, club.getClubID());
                     checkDeptStmt.setInt(2, deptID);
-                    ResultSet rs = checkDeptStmt.executeQuery();
-                    if (rs.next() && rs.getInt(1) == 0) {
-                        insertDeptStmt.setInt(1, deptID);
-                        insertDeptStmt.setInt(2, club.getClubID());
-                        insertDeptStmt.addBatch();
-                        System.out.println("Adding new DepartmentID=" + deptID + " for ClubID=" + club.getClubID());
+                    try (ResultSet rs = checkDeptStmt.executeQuery()) {
+                        if (rs.next() && rs.getInt(1) == 0) {
+                            insertDeptStmt.setInt(1, deptID);
+                            insertDeptStmt.setInt(2, club.getClubID());
+                            insertDeptStmt.addBatch();
+                        }
                     }
-                    rs.close();
                 }
             }
             insertDeptStmt.executeBatch();
@@ -853,7 +829,6 @@ public class ClubDAO {
             conn.commit();
             return true;
         } catch (SQLException e) {
-            System.out.println("SQLException during club update: " + e.getMessage());
             try {
                 if (conn != null) conn.rollback();
             } catch (SQLException rollbackEx) {

@@ -9,6 +9,9 @@ import jakarta.servlet.http.HttpSession;
 import models.Users;
 import models.UserClub;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import models.Department;
 import models.Roles;
@@ -55,8 +58,8 @@ public class UserClubServlet extends HttpServlet {
 
         List<Department> departments = userClubDAO.getDepartmentsByClubId(clubID);
         List<Roles> roles = userClubDAO.getRoles();
-
         String clubName = userClubDAO.getClubNameById(clubID);
+        String establishedDate = userClubDAO.getClubEstablishedDate(clubID);
 
         request.setAttribute("userClubs", userClubs);
         request.setAttribute("currentPage", page);
@@ -66,6 +69,7 @@ public class UserClubServlet extends HttpServlet {
         request.setAttribute("clubName", clubName);
         request.setAttribute("departments", departments);
         request.setAttribute("roles", roles);
+        request.setAttribute("establishedDate", establishedDate);
 
         String action = request.getParameter("action");
         if ("edit".equals(action)) {
@@ -80,13 +84,12 @@ public class UserClubServlet extends HttpServlet {
                 userClubs = userClubDAO.getAllUserClubsByClubId(clubID, page, pageSize);
                 request.setAttribute("userClubs", userClubs);
             } else {
-                userClubs = userClubDAO.searchUserClubsByKeyWord(clubID, keyWords, page, pageSize);
-
+                userClubs = userClubDAO.searchUserClubsByClubId(clubID, keyWords, page, pageSize);
                 if (userClubs != null && !userClubs.isEmpty()) {
                     request.setAttribute("userClubs", userClubs);
                     request.setAttribute("message", "Tìm kiếm thành công");
                 } else {
-                    request.setAttribute("message", "Không tìm thấy");
+                    request.setAttribute("error", "Không tìm thấy");
                 }
             }
         }
@@ -119,23 +122,61 @@ public class UserClubServlet extends HttpServlet {
         }
 
         String action = request.getParameter("action");
+        String establishedDate = userClubDAO.getClubEstablishedDate(clubID);
+        if (establishedDate == null) {
+            request.setAttribute("error", "Không thể thêm thành viên: Ngày thành lập câu lạc bộ không được xác định!");
+            doGet(request, response);
+            return;
+        }
 
         if ("add".equals(action)) {
             String userID = request.getParameter("userID").trim();
             int roleID;
             int departmentID;
+            String joinDateStr = request.getParameter("joinDate");
+            Timestamp joinDate;
             try {
                 roleID = Integer.parseInt(request.getParameter("roleID"));
                 departmentID = Integer.parseInt(request.getParameter("departmentID"));
+                if (joinDateStr == null || joinDateStr.trim().isEmpty()) {
+                    request.setAttribute("error", "Ngày tham gia không được để trống!");
+                    doGet(request, response);
+                    return;
+                }
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                dateFormat.setLenient(false);
+                java.util.Date parsedDate = dateFormat.parse(joinDateStr);
+                joinDate = new Timestamp(parsedDate.getTime());
+                java.util.Date estDate = dateFormat.parse(establishedDate.split(" ")[0]);
+                if (joinDate.before(new Timestamp(estDate.getTime()))) {
+                    request.setAttribute("error", "Ngày tham gia phải sau ngày thành lập câu lạc bộ!");
+                    doGet(request, response);
+                    return;
+                }
+                if (joinDate.after(new Timestamp(System.currentTimeMillis()))) {
+                    request.setAttribute("error", "Ngày tham gia không được là ngày trong tương lai!");
+                    doGet(request, response);
+                    return;
+                }
             } catch (NumberFormatException e) {
                 request.setAttribute("error", "Vai trò hoặc ban không hợp lệ!");
+                doGet(request, response);
+                return;
+            } catch (ParseException e) {
+                request.setAttribute("error", "Định dạng ngày tham gia không hợp lệ!");
+                doGet(request, response);
+                return;
+            }
+
+            if (!userClubDAO.isUserExists(userID)) {
+                request.setAttribute("error", "Mã thành viên không tồn tại!");
                 doGet(request, response);
                 return;
             }
 
             if (roleID == 1 || roleID == 2) {
                 departmentID = 3;
-            } else if (departmentID ==3) {
+            } else if (departmentID == 3) {
                 request.setAttribute("error", "Vai trò này chỉ thuộc các ban còn lại!");
                 doGet(request, response);
                 return;
@@ -143,26 +184,26 @@ public class UserClubServlet extends HttpServlet {
 
             if (userClubDAO.isUserClubExists(userID, clubID)) {
                 request.setAttribute("error", "Thành viên đã tồn tại trong câu lạc bộ này!");
-            }
-            else if (roleID == 1 && userClubDAO.hasClubPresident(clubID)) {
+            } else if (roleID == 1 && userClubDAO.hasClubPresident(clubID)) {
                 request.setAttribute("error", "Câu lạc bộ đã có chủ nhiệm!");
-            }
-            else if (roleID == 3 && userClubDAO.hasDepartmentHead(clubID, departmentID)) {
-                request.setAttribute("error", "Ban này đã có trưởng ban!");            } else {
-                // Get the correct clubDepartmentID based on clubID and departmentID
+            } else if (roleID == 3 && userClubDAO.hasDepartmentHead(clubID, departmentID)) {
+                request.setAttribute("error", "Ban này đã có trưởng ban!");
+            } else {
                 int clubDepartmentID = userClubDAO.getClubDepartmentIdByClubAndDepartment(clubID, departmentID);
                 if (clubDepartmentID == -1) {
                     request.setAttribute("error", "Không tìm thấy ban trong câu lạc bộ này!");
                     doGet(request, response);
                     return;
                 }
-                
+
                 UserClub uc = new UserClub();
                 uc.setUserID(userID);
                 uc.setClubID(clubID);
                 uc.setClubDepartmentID(clubDepartmentID);
                 uc.setRoleID(roleID);
                 uc.setIsActive(request.getParameter("isActive") != null);
+                uc.setJoinDate(joinDate);
+                System.out.println("Adding UserClub: userID=" + userID + ", clubID=" + clubID + ", clubDepartmentID=" + clubDepartmentID + ", roleID=" + roleID + ", joinDate=" + joinDate + ", isActive=" + uc.isIsActive());
                 try {
                     int newUserClubID = userClubDAO.addUserClub(uc);
                     if (newUserClubID != -1) {
@@ -170,7 +211,7 @@ public class UserClubServlet extends HttpServlet {
                     } else {
                         request.setAttribute("error", "Thêm thành viên thất bại! Vui lòng kiểm tra dữ liệu đầu vào.");
                     }
-                } catch (Exception e) {
+                } catch (RuntimeException e) {
                     request.setAttribute("error", "Lỗi khi thêm thành viên: " + e.getMessage());
                 }
             }
@@ -178,19 +219,45 @@ public class UserClubServlet extends HttpServlet {
             int userClubID;
             int roleID;
             int departmentID;
+            String joinDateStr = request.getParameter("joinDate");
+            Timestamp joinDate;
             try {
                 userClubID = Integer.parseInt(request.getParameter("userClubID"));
                 roleID = Integer.parseInt(request.getParameter("roleID"));
                 departmentID = Integer.parseInt(request.getParameter("departmentID"));
+                if (joinDateStr == null || joinDateStr.trim().isEmpty()) {
+                    request.setAttribute("error", "Ngày tham gia không được để trống!");
+                    doGet(request, response);
+                    return;
+                }
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                dateFormat.setLenient(false);
+                java.util.Date parsedDate = dateFormat.parse(joinDateStr);
+                joinDate = new Timestamp(parsedDate.getTime());
+                java.util.Date estDate = dateFormat.parse(establishedDate.split(" ")[0]);
+                if (joinDate.before(new Timestamp(estDate.getTime()))) {
+                    request.setAttribute("error", "Ngày tham gia phải sau ngày thành lập câu lạc bộ!");
+                    doGet(request, response);
+                    return;
+                }
+                if (joinDate.after(new Timestamp(System.currentTimeMillis()))) {
+                    request.setAttribute("error", "Ngày tham gia không được là ngày trong tương lai!");
+                    doGet(request, response);
+                    return;
+                }
             } catch (NumberFormatException e) {
                 request.setAttribute("error", "Dữ liệu không hợp lệ!");
+                doGet(request, response);
+                return;
+            } catch (ParseException e) {
+                request.setAttribute("error", "Định dạng ngày tham gia không hợp lệ!");
                 doGet(request, response);
                 return;
             }
 
             if (roleID == 1 || roleID == 2) {
-                departmentID = 3; 
-            } else if (departmentID == 3 ) {
+                departmentID = 3;
+            } else if (departmentID == 3) {
                 request.setAttribute("error", "Vai trò này chỉ thuộc các ban còn lại!");
                 doGet(request, response);
                 return;
@@ -200,30 +267,32 @@ public class UserClubServlet extends HttpServlet {
 
             if (roleID == 1 && userClubDAO.hasClubPresident(clubID) && currentUc.getRoleID() != 1) {
                 request.setAttribute("error", "Câu lạc bộ đã có chủ nhiệm!");
-            }
-            else if (roleID == 3 && departmentID != 0 && userClubDAO.hasDepartmentHead(clubID, departmentID) &&
+            } else if (roleID == 3 && departmentID != 0 && userClubDAO.hasDepartmentHead(clubID, departmentID) &&
                      currentUc.getRoleID() != 3) {
-                request.setAttribute("error", "Ban này đã có trưởng ban!");            } else {
-                // Get the correct clubDepartmentID based on clubID and departmentID
+                request.setAttribute("error", "Ban này đã có trưởng ban!");
+            } else {
                 int clubDepartmentID = userClubDAO.getClubDepartmentIdByClubAndDepartment(clubID, departmentID);
                 if (clubDepartmentID == -1) {
                     request.setAttribute("error", "Không tìm thấy ban trong câu lạc bộ này!");
                     doGet(request, response);
                     return;
                 }
-                
+
                 UserClub uc = new UserClub();
                 uc.setUserClubID(userClubID);
+                uc.setClubID(clubID);
                 uc.setClubDepartmentID(clubDepartmentID);
                 uc.setRoleID(roleID);
                 uc.setIsActive(request.getParameter("isActive") != null);
+                uc.setJoinDate(joinDate);
+                System.out.println("Updating UserClub: userClubID=" + userClubID + ", clubID=" + clubID + ", clubDepartmentID=" + clubDepartmentID + ", roleID=" + roleID + ", joinDate=" + joinDate + ", isActive=" + uc.isIsActive());
                 try {
                     if (userClubDAO.updateUserClub(uc)) {
                         request.setAttribute("message", "Cập nhật thành viên thành công!");
                     } else {
                         request.setAttribute("error", "Cập nhật thành viên thất bại! Vui lòng kiểm tra dữ liệu đầu vào.");
                     }
-                } catch (Exception e) {
+                } catch (RuntimeException e) {
                     request.setAttribute("error", "Lỗi khi cập nhật thành viên: " + e.getMessage());
                 }
             }

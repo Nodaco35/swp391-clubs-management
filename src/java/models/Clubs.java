@@ -13,16 +13,17 @@ public class Clubs {
     private String contactGmail;
     private String contactURL;
     private boolean clubStatus;
-    private String category;
+    private int categoryID;
+    private String categoryName;
     private int memberCount;
-    private boolean isFavorite; // Thêm trường isFavorite
+    private boolean isFavorite;
 
     public Clubs() {
     }
 
     public Clubs(int clubID, String clubImg, boolean isRecruiting, String clubName, String description,
                  Date establishedDate, String contactPhone, String contactGmail, String contactURL,
-                 boolean clubStatus, String category, int memberCount, boolean isFavorite) {
+                 boolean clubStatus, int categoryID, String categoryName, int memberCount, boolean isFavorite) {
         this.clubID = clubID;
         this.clubImg = clubImg;
         this.isRecruiting = isRecruiting;
@@ -33,7 +34,8 @@ public class Clubs {
         this.contactGmail = contactGmail;
         this.contactURL = contactURL;
         this.clubStatus = clubStatus;
-        this.category = category;
+        this.categoryID = categoryID;
+        this.categoryName = categoryName;
         this.memberCount = memberCount;
         this.isFavorite = isFavorite;
     }
@@ -118,12 +120,20 @@ public class Clubs {
         this.clubStatus = clubStatus;
     }
 
-    public String getCategory() {
-        return category;
+    public int getCategoryID() {
+        return categoryID;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
+    public void setCategoryID(int categoryID) {
+        this.categoryID = categoryID;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 
     public int getMemberCount() {

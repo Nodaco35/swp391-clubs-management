@@ -14,8 +14,10 @@ public class ClubCreationPermissionDAO {
 
     public List<ClubCreationPermissions> getAllRequests() {
         List<ClubCreationPermissions> permissions = new ArrayList<>();
-        String query = "SELECT p.*, u.FullName FROM ClubCreationPermissions p " +
+        String query = "SELECT p.*, u.FullName, c.CategoryName " +
+                      "FROM ClubCreationPermissions p " +
                       "LEFT JOIN Users u ON p.UserID = u.UserID " +
+                      "LEFT JOIN ClubCategories c ON p.CategoryID = c.CategoryID " +
                       "ORDER BY p.RequestDate DESC";
         try (Connection conn = DBContext.getConnection(); 
              PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -26,7 +28,8 @@ public class ClubCreationPermissionDAO {
                 permission.setUserID(rs.getString("UserID"));
                 permission.setUserName(rs.getString("FullName"));
                 permission.setClubName(rs.getString("ClubName"));
-                permission.setCategory(rs.getString("Category"));
+                permission.setCategoryID(rs.getInt("CategoryID"));
+                permission.setCategoryName(rs.getString("CategoryName"));
                 permission.setStatus(rs.getString("Status"));
                 Timestamp requestTimestamp = rs.getTimestamp("RequestDate");
                 if (requestTimestamp != null) {
@@ -48,6 +51,7 @@ public class ClubCreationPermissionDAO {
         }
         return permissions;
     }
+
 
     // Insert a new permission request
     public boolean insertRequest(String userID) {

@@ -64,6 +64,7 @@
                                 <th class="p-3 text-left">Ban</th>
                                 <th class="p-3 text-left">Vai trò</th>
                                 <th class="p-3 text-left">Ngày tham gia</th>
+                                <th class="p-3 text-left">Thế hệ</th>
                                 <th class="p-3 text-left">Trạng thái</th>
                                 <th class="p-3 text-left">Hành động</th>
                             </tr>
@@ -76,9 +77,10 @@
                                     <td class="p-3 border-b">${uc.departmentName}</td>
                                     <td class="p-3 border-b">${uc.roleName}</td>
                                     <td class="p-3 border-b">${uc.joinDate}</td>
+                                    <td class="p-3 border-b">${uc.gen}</td>
                                     <td class="p-3 border-b">${uc.isActive ? 'Hoạt động' : 'Không hoạt động'}</td>
                                     <td class="p-3 border-b flex gap-2">
-                                        <button class="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition" onclick="toggleEditForm(${uc.userClubID}, '${uc.userID}', ${uc.clubDepartmentID}, ${uc.roleID}, ${uc.isActive})">Sửa</button>
+                                        <button class="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition" onclick="toggleEditForm(${uc.userClubID}, '${uc.userID}', ${uc.clubDepartmentID}, ${uc.roleID}, ${uc.isActive}, '${uc.joinDate}')">Sửa</button>
                                         <form action="${pageContext.request.contextPath}/club-members" method="post" class="inline">
                                             <input type="hidden" name="clubID" value="${clubID}">
                                             <input type="hidden" name="userClubID" value="${uc.userClubID}">
@@ -99,6 +101,7 @@
                         <input type="hidden" name="clubID" value="${clubID}">
                         <input type="hidden" name="action" id="formAction" value="add">
                         <input type="hidden" name="userClubID" id="userClubID">
+                        <input type="hidden" id="establishedDate" value="${establishedDate}">
 
                         <div>
                             <label for="userID" class="block text-sm font-medium text-gray-700">Mã thành viên:</label>
@@ -121,6 +124,11 @@
                                     <option value="${role.roleID}">${role.roleName}</option>
                                 </c:forEach>
                             </select>
+                        </div>
+
+                        <div>
+                            <label for="joinDate" class="block text-sm font-medium text-gray-700">Ngày tham gia:</label>
+                            <input type="date" name="joinDate" id="joinDate" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
 
                         <div class="flex items-center">
@@ -183,9 +191,10 @@
                     showEditForm(
                         ${editUserClub.userClubID},
                         '${editUserClub.userID}',
-                        ${editUserClub.departmentID},
+                        ${editUserClub.clubDepartmentID},
                         ${editUserClub.roleID},
-                        ${editUserClub.isActive}
+                        ${editUserClub.isActive},
+                        '${editUserClub.joinDate}'
                     );
                     updateRoleOptions();
                 </c:if>
@@ -199,11 +208,9 @@
                 const roleSelect = document.getElementById('roleID');
                 const currentRoleID = roleSelect.value;
 
-                // Xóa tất cả tùy chọn hiện tại
                 roleSelect.innerHTML = '';
 
                 if (departmentID === '3') {
-                    // Chỉ hiển thị vai trò Chủ nhiệm (1) và Phó chủ nhiệm (2) cho Ban Chủ nhiệm
                     roles.forEach(role => {
                         if (role.id === 1 || role.id === 2) {
                             const option = document.createElement('option');
@@ -213,7 +220,6 @@
                         }
                     });
                 } else {
-                    // Chỉ hiển thị vai trò Thành viên (3) và Trưởng ban (4) cho các ban khác
                     roles.forEach(role => {
                         if (role.id === 3 || role.id === 4) {
                             const option = document.createElement('option');
@@ -224,7 +230,6 @@
                     });
                 }
 
-                // Đặt giá trị mặc định
                 roleSelect.value = currentRoleID && roleSelect.querySelector(`option[value="${currentRoleID}"]`) ? currentRoleID : 
                     (departmentID === '3' ? '1' : '3');
             }
@@ -238,19 +243,17 @@
                 }
             }
 
-            // Toggle form sửa
-            function toggleEditForm(userClubID, userID, departmentID, roleID, isActive) {
+            function toggleEditForm(userClubID, userID, departmentID, roleID, isActive, joinDate) {
                 const form = document.getElementById('memberForm');
                 if (form.classList.contains('block') && currentEditUserClubID === userClubID) {
                     hideForm();
                     currentEditUserClubID = null;
                 } else {
-                    showEditForm(userClubID, userID, departmentID, roleID, isActive);
+                    showEditForm(userClubID, userID, departmentID, roleID, isActive, joinDate);
                     currentEditUserClubID = userClubID;
                 }
             }
 
-            // Hiển thị form thêm
             function showAddForm() {
                 const form = document.getElementById('memberForm');
                 const formTitle = document.getElementById('formTitle');
@@ -268,12 +271,12 @@
                 document.getElementById('userClubID').value = '';
                 document.getElementById('isActive').checked = true;
                 document.getElementById('departmentID').value = departments.length > 0 ? '1' : '';
+                document.getElementById('joinDate').value = new Date().toISOString().split('T')[0];
                 updateRoleOptions();
                 currentEditUserClubID = null;
             }
 
-            // Hiển thị form sửa
-            function showEditForm(userClubID, userID, departmentID, roleID, isActive) {
+            function showEditForm(userClubID, userID, departmentID, roleID, isActive, joinDate) {
                 const form = document.getElementById('memberForm');
                 const formTitle = document.getElementById('formTitle');
                 const formAction = document.getElementById('formAction');
@@ -291,11 +294,11 @@
                 document.getElementById('userID').value = userID;
                 document.getElementById('departmentID').value = departmentID;
                 document.getElementById('isActive').checked = isActive;
+                document.getElementById('joinDate').value = joinDate.split(' ')[0]; // Format to yyyy-MM-dd
                 updateRoleOptions();
                 document.getElementById('roleID').value = roleID;
             }
 
-            // Ẩn form
             function hideForm() {
                 document.getElementById('memberForm').classList.add('hidden');
                 document.getElementById('memberForm').classList.remove('block');
@@ -303,19 +306,41 @@
                 currentEditUserClubID = null;
             }
 
-            // Đóng modal lỗi
             function closeErrorModal() {
                 document.getElementById('errorModal').classList.add('hidden');
             }
 
-            // Validation client-side trước khi submit
             document.getElementById('formData').addEventListener('submit', function(e) {
                 const userID = document.getElementById('userID').value.trim();
                 const roleID = document.getElementById('roleID').value;
                 const departmentID = document.getElementById('departmentID').value;
+                const joinDate = document.getElementById('joinDate').value;
+                const establishedDate = document.getElementById('establishedDate').value;
 
                 if (!userID) {
                     alert('Mã thành viên không được để trống!');
+                    e.preventDefault();
+                    return;
+                }
+
+                if (!joinDate) {
+                    alert('Ngày tham gia không được để trống!');
+                    e.preventDefault();
+                    return;
+                }
+
+                const selectedDate = new Date(joinDate);
+                const today = new Date();
+                const estDate = establishedDate ? new Date(establishedDate) : new Date('2000-01-01');
+
+                if (selectedDate > today) {
+                    alert('Ngày tham gia không được là ngày trong tương lai!');
+                    e.preventDefault();
+                    return;
+                }
+
+                if (selectedDate < estDate) {
+                    alert('Ngày tham gia phải sau ngày thành lập câu lạc bộ!');
                     e.preventDefault();
                     return;
                 }

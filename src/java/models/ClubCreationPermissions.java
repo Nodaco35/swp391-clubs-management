@@ -3,20 +3,20 @@ package models;
 import java.time.LocalDateTime;
 
 public class ClubCreationPermissions {
+
     private int id;
     private String userID;
     private String userName;
     private String clubName;
-    private String category;
+    private int categoryID;
+    private String categoryName;
     private String status;
     private LocalDateTime requestDate;
     private String processedBy;
     private LocalDateTime grantedDate;
     private LocalDateTime usedDate;
 
-    public ClubCreationPermissions() {
-    }
-
+    // Getters and Setters
     public int getId() {
         return id;
     }
@@ -49,14 +49,21 @@ public class ClubCreationPermissions {
         this.clubName = clubName;
     }
 
-    public String getCategory() {
-        return category;
+    public int getCategoryID() {
+        return categoryID;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
+    public void setCategoryID(int categoryID) {
+        this.categoryID = categoryID;
     }
 
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
 
     public String getStatus() {
         return status;
@@ -96,5 +103,5 @@ public class ClubCreationPermissions {
 
     public void setUsedDate(LocalDateTime usedDate) {
         this.usedDate = usedDate;
-    } 
+    }
 }

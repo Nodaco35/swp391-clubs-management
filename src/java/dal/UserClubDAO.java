@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import models.Department;
@@ -62,7 +63,7 @@ public class UserClubDAO {
         }
         return findByUserID;
     }
-    
+
     public static List<UserClub> findByClubID(int clubID) {
         List<UserClub> findByClubID = new ArrayList<>();
         String sql = """
@@ -360,6 +361,22 @@ public class UserClubDAO {
 
         return userClubs;
     }
+    
+    public boolean isUserExists(String userID) {
+        String query = "SELECT COUNT(*) FROM Users WHERE UserID = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, userID);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error checking user existence: " + e.getMessage());
+        }
+        return false;
+    }
 
     public int countUserClubs(int clubID, String search) {
         Connection conn = null;
@@ -459,85 +476,118 @@ public class UserClubDAO {
         return uc;
     }
 
-    public int addUserClub(UserClub uc) {
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet generatedKeys = null;
-        int generatedId = -1;
+    // Get club's founding year
+    public int getClubFoundingYear(int clubID) {
+        String sql = "SELECT EstablishedDate FROM Clubs WHERE ClubID = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, clubID);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next() && rs.getTimestamp("EstablishedDate") != null) {
+                    return rs.getTimestamp("EstablishedDate").toLocalDateTime().getYear();
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting club established year: " + e.getMessage());
+            System.err.println("SQL State: " + e.getSQLState() + ", Error Code: " + e.getErrorCode());
+        }
+        return -1; // Indicate error or null EstablishedDate
+    }
 
-        try {
-            conn = DBContext.getConnection();
-            String query = """
-                INSERT INTO UserClubs (UserID, ClubID, ClubDepartmentID, RoleID, JoinDate, IsActive, Gen)
-                SELECT ?, ?, ?, ?, NOW(), ?, YEAR(CURRENT_DATE()) - YEAR(c.EstablishedDate)
-                FROM Clubs c WHERE c.ClubID = ?
-            """;
-            stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);
+    // Get club's EstablishedDate as string
+    public String getClubEstablishedDate(int clubID) {
+        String sql = "SELECT EstablishedDate FROM Clubs WHERE ClubID = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, clubID);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next() && rs.getTimestamp("EstablishedDate") != null) {
+                    return rs.getTimestamp("EstablishedDate").toString();
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting club established date: " + e.getMessage());
+            System.err.println("SQL State: " + e.getSQLState() + ", Error Code: " + e.getErrorCode());
+        }
+        return null;
+    }
+
+    // Calculate Gen based on join year and club founding year
+    private int calculateGen(int clubID, java.sql.Timestamp joinDate) {
+        if (joinDate == null) {
+            throw new RuntimeException("JoinDate cannot be null for ClubID: " + clubID);
+        }
+        int foundingYear = getClubFoundingYear(clubID);
+        if (foundingYear == -1) {
+            throw new RuntimeException("Cannot determine club established year for ClubID: " + clubID + ". Ensure EstablishedDate is not null.");
+        }
+        int joinYear = joinDate.toLocalDateTime().getYear();
+        int gen = joinYear - foundingYear + 1;
+        if (gen < 1) {
+            throw new RuntimeException("Invalid Gen calculated: " + gen + ". JoinDate (" + joinDate + ") must not be before EstablishedDate for ClubID: " + clubID);
+        }
+        return gen;
+    }
+
+    public int addUserClub(UserClub uc) {
+        String query = """
+            INSERT INTO UserClubs (UserID, ClubID, ClubDepartmentID, RoleID, JoinDate, IsActive, Gen)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """;
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            int gen = calculateGen(uc.getClubID(),(Timestamp) uc.getJoinDate());
             stmt.setString(1, uc.getUserID());
             stmt.setInt(2, uc.getClubID());
             stmt.setInt(3, uc.getClubDepartmentID());
             stmt.setInt(4, uc.getRoleID());
-            stmt.setBoolean(5, uc.isIsActive());
-            stmt.setInt(6, uc.getClubID()); // ClubID lần thứ hai cho việc tìm EstablishedDate
+            stmt.setTimestamp(5, (Timestamp)uc.getJoinDate());
+            stmt.setBoolean(6, uc.isIsActive());
+            stmt.setInt(7, gen);
+            System.out.println("Executing INSERT: userID=" + uc.getUserID() + ", clubID=" + uc.getClubID() + ", clubDepartmentID=" + uc.getClubDepartmentID() + ", roleID=" + uc.getRoleID() + ", joinDate=" + uc.getJoinDate() + ", isActive=" + uc.isIsActive() + ", gen=" + gen);
             int rows = stmt.executeUpdate();
 
             if (rows > 0) {
-                generatedKeys = stmt.getGeneratedKeys();
-                if (generatedKeys.next()) {
-                    generatedId = generatedKeys.getInt(1);
+                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        return generatedKeys.getInt(1);
+                    }
                 }
+            } else {
+                System.err.println("No rows inserted for UserClub: userID=" + uc.getUserID() + ", clubID=" + uc.getClubID());
             }
         } catch (SQLException e) {
-            System.out.println("Error adding user club: " + e.getMessage());
-        } finally {
-            try {
-                if (generatedKeys != null) {
-                    generatedKeys.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (conn != null) {
-                    DBContext.closeConnection(conn);
-                }
-            } catch (SQLException e) {
-                System.out.println("Error closing resources: " + e.getMessage());
-            }
+            System.err.println("Error adding user club: " + e.getMessage());
+            System.err.println("SQL State: " + e.getSQLState());
+            System.err.println("Error Code: " + e.getErrorCode());
+            throw new RuntimeException("Failed to add user club: " + e.getMessage(), e);
         }
-        return generatedId;
+        return -1;
     }
 
     public boolean updateUserClub(UserClub uc) {
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        try {
-            conn = DBContext.getConnection();
-            String query = """
-                UPDATE UserClubs 
-                SET ClubDepartmentID = ?, RoleID = ?, IsActive = ?
-                WHERE UserClubID = ?
-            """;
-            stmt = conn.prepareStatement(query);
+        String query = """
+            UPDATE UserClubs 
+            SET ClubDepartmentID = ?, RoleID = ?, IsActive = ?, JoinDate = ?, Gen = ?
+            WHERE UserClubID = ?
+        """;
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            int gen = calculateGen(uc.getClubID(), (Timestamp) uc.getJoinDate());
             stmt.setInt(1, uc.getClubDepartmentID());
             stmt.setInt(2, uc.getRoleID());
             stmt.setBoolean(3, uc.isIsActive());
-            stmt.setInt(4, uc.getUserClubID());
+            stmt.setTimestamp(4, (Timestamp)uc.getJoinDate());
+            stmt.setInt(5, gen);
+            stmt.setInt(6, uc.getUserClubID());
+            System.out.println("Executing UPDATE: userClubID=" + uc.getUserClubID() + ", clubDepartmentID=" + uc.getClubDepartmentID() + ", roleID=" + uc.getRoleID() + ", joinDate=" + uc.getJoinDate() + ", isActive=" + uc.isIsActive() + ", gen=" + gen);
             int rows = stmt.executeUpdate();
             return rows > 0;
         } catch (SQLException e) {
-            System.out.println("Error updating user club: " + e.getMessage());
-            return false;
-        } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (conn != null) {
-                    DBContext.closeConnection(conn);
-                }
-            } catch (SQLException e) {
-                System.out.println("Error closing resources: " + e.getMessage());
-            }
+            System.err.println("Error updating user club: " + e.getMessage());
+            System.err.println("SQL State: " + e.getSQLState());
+            System.err.println("Error Code: " + e.getErrorCode());
+            throw new RuntimeException("Failed to update user club: " + e.getMessage(), e);
         }
     }
 
@@ -576,14 +626,13 @@ public class UserClubDAO {
 
         try {
             conn = DBContext.getConnection();
-            String query =
-                    """
+            String query
+                    = """
                     SELECT cd.DepartmentID, d.DepartmentName 
                     FROM ClubDepartments cd
                     JOIN Departments d ON cd.DepartmentID = d.DepartmentID
                     WHERE cd.ClubID = ? AND d.DepartmentStatus = 1
-                    """
-                    ;
+                    """;
             stmt = conn.prepareStatement(query);
             stmt.setInt(1, clubID);
             rs = stmt.executeQuery();
@@ -656,7 +705,8 @@ public class UserClubDAO {
         UserClub userClub = null;
         Connection conn = null;
         PreparedStatement stmt = null;
-        ResultSet rs = null;        try {
+        ResultSet rs = null;
+        try {
             conn = DBContext.getConnection();
             String query = """
                 SELECT uc.*, u.FullName, r.RoleName, d.DepartmentName , d.DepartmentID
@@ -667,10 +717,12 @@ public class UserClubDAO {
                 JOIN Departments d ON cd.DepartmentID = d.DepartmentID
                 WHERE uc.UserID = ? AND uc.ClubID = ? AND uc.IsActive = 1
                 ORDER BY uc.RoleID ASC
-            """;            stmt = conn.prepareStatement(query);
+            """;
+            stmt = conn.prepareStatement(query);
             stmt.setString(1, userID);
             stmt.setInt(2, clubID);
-            rs = stmt.executeQuery();if (rs.next()) {
+            rs = stmt.executeQuery();
+            if (rs.next()) {
                 userClub = new UserClub();
                 userClub.setUserClubID(rs.getInt("UserClubID"));
                 userClub.setUserID(rs.getString("UserID"));
@@ -678,12 +730,12 @@ public class UserClubDAO {
                 userClub.setClubDepartmentID(rs.getInt("ClubDepartmentID"));
                 userClub.setRoleID(rs.getInt("RoleID"));
                 userClub.setJoinDate(rs.getTimestamp("JoinDate"));
-                userClub.setIsActive(rs.getBoolean("IsActive"));                userClub.setFullName(rs.getString("FullName"));
+                userClub.setIsActive(rs.getBoolean("IsActive"));
+                userClub.setFullName(rs.getString("FullName"));
                 userClub.setRoleName(rs.getString("RoleName"));
                 userClub.setDepartmentName(rs.getString("DepartmentName"));
-                
-                // ClubDepartmentID đã được set ở trên, không cần set lại
 
+                // ClubDepartmentID đã được set ở trên, không cần set lại
             }
         } catch (SQLException e) {
             System.out.println("Error getting user club: " + e.getMessage());
@@ -853,9 +905,10 @@ public class UserClubDAO {
         }
         return false;
     }
+
     /**
-     * Kiểm tra quyền sử dụng chức năng(roleID 1-3)
-     * nếu clubId null thì lấy quyền quản lý đầu tiên của user
+     * Kiểm tra quyền sử dụng chức năng(roleID 1-3) nếu clubId null thì lấy
+     * quyền quản lý đầu tiên của user
      */
     public UserClub getUserClubManagementRole(String userID, Integer clubId) {
         UserClub userClub = null;
@@ -866,7 +919,7 @@ public class UserClubDAO {
         try {
             conn = DBContext.getConnection();
             String query;
-            
+
             if (clubId != null) {
                 query = """
                     SELECT uc.UserClubID, uc.UserID, uc.ClubID, uc.ClubDepartmentID, uc.RoleID, 
@@ -919,9 +972,15 @@ public class UserClubDAO {
             System.out.println("Error checking management role in club: " + e.getMessage());
         } finally {
             try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-                if (conn != null) DBContext.closeConnection(conn);
+                if (rs != null) {
+                    rs.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    DBContext.closeConnection(conn);
+                }
             } catch (SQLException e) {
                 System.out.println("Error closing resources: " + e.getMessage());
             }
@@ -938,14 +997,14 @@ public class UserClubDAO {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         int clubDepartmentID = -1;
-        
+
         try {
             conn = DBContext.getConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, clubID);
             stmt.setInt(2, departmentID);
             rs = stmt.executeQuery();
-            
+
             if (rs.next()) {
                 clubDepartmentID = rs.getInt("ClubDepartmentID");
             }
@@ -953,17 +1012,23 @@ public class UserClubDAO {
             System.out.println("Error getting clubDepartmentID: " + e.getMessage());
         } finally {
             try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-                if (conn != null) DBContext.closeConnection(conn);
+                if (rs != null) {
+                    rs.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    DBContext.closeConnection(conn);
+                }
             } catch (SQLException e) {
                 System.out.println("Error closing resources: " + e.getMessage());
             }
         }
-        
+
         return clubDepartmentID;
     }
-    
+
     public static List<UserClub> findByCDID(int clubDepartmentID) {
         List<UserClub> findByCDID = new ArrayList<>();
         String sql = """

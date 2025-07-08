@@ -140,7 +140,7 @@
                                                     </div>
                                                 </td>
                                                 <td>${fn:escapeXml(request.clubName)}</td>
-                                                <td>${request.category}</td>
+                                                <td>${request.categoryName}</td>
                                                 <td><c:out value="${request.requestDate}"></c:out></td>
                                                     <td><span class="badge badge-pending"><i class="fas fa-clock"></i> Chờ duyệt</span></td>
                                                     <td class="table-actions">
