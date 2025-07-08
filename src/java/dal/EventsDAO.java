@@ -226,7 +226,7 @@ public class EventsDAO {
 
     public List<Events> getEventsByClubID(int clubID, int eventID) {
         List<Events> events = new ArrayList<>();
-        String sql = "SELECT * FROM Events WHERE ClubID = ? and eventID <> ?";
+        String sql = "SELECT * FROM Events WHERE ClubID = ? and eventID <> ? ORDER BY EventDate DESC LIMIT 3";
         try {
             Connection connection = DBContext.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);

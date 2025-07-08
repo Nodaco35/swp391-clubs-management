@@ -83,6 +83,7 @@ public class AgendaServlet extends HttpServlet {
         String[] startTimes = request.getParameterValues("agendaStartTime[]");
         String[] endTimes = request.getParameterValues("agendaEndTime[]");
         String[] activities = request.getParameterValues("agendaActivity[]");
+        String[] descriptions = request.getParameterValues("agendaDescription[]");
 
         EventsDAO eventsDAO = new EventsDAO();
 
@@ -101,18 +102,20 @@ public class AgendaServlet extends HttpServlet {
         // Xóa tất cả agenda cũ
         eventsDAO.deleteAllByEventID(eventID);
 
-        if (startTimes != null && endTimes != null && activities != null) {
+        if (startTimes != null && endTimes != null && activities != null && descriptions != null) {
             for (int i = 0; i < activities.length; i++) {
                 try {
                     LocalTime start = LocalTime.parse(startTimes[i]);
                     LocalTime end = LocalTime.parse(endTimes[i]);
                     String title = activities[i];
+                    String description = descriptions[i] != null ? descriptions[i] : "";
+
 
                     Timestamp startTS = Timestamp.valueOf(LocalDateTime.of(eventDate, start));
                     Timestamp endTS = Timestamp.valueOf(LocalDateTime.of(eventDate, end));
 
                     // Insert agenda mới với status PENDING (nếu event đã bị REJECTED)
-                    eventsDAO.insertAgendas(eventID, title, "", startTS, endTS);
+                    eventsDAO.insertAgendas(eventID, title, description, startTS, endTS);
                 } catch (Exception e) {
                     e.printStackTrace();
                     session.setAttribute("errorMessage", "Lỗi khi thêm chương trình sự kiện: " + e.getMessage());
