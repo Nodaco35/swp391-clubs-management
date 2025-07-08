@@ -559,4 +559,62 @@ public class FormResponseDAO extends DBContext {
         }
         return templateIdsWithResponses;
     }
+    
+    /**
+     * Kiểm tra xem một chiến dịch tuyển quân đã có đơn đăng ký hay chưa
+     * @param campaignId ID của chiến dịch cần kiểm tra
+     * @return true nếu đã có đơn đăng ký, false nếu chưa có
+     */
+    public boolean hasCampaignApplications(int campaignId) {
+        String sql = """
+                     SELECT COUNT(*) as count
+                     FROM ClubApplications ca
+                     JOIN RecruitmentCampaigns rc ON ca.ClubId = rc.ClubID
+                     WHERE rc.RecruitmentID = ?
+                     """;
+                     
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, campaignId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int count = rs.getInt("count");
+                    return count > 0;
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error checking if campaign has applications", e);
+        }
+        return false;
+    }
+    
+    /**
+     * Kiểm tra số lượng đơn đã nộp cho một mẫu đơn cụ thể trong một chiến dịch
+     * @param templateId ID của mẫu đơn
+     * @param campaignId ID của chiến dịch tuyển quân
+     * @return Số lượng đơn đã nộp
+     */
+    public int countApplicationsForTemplate(int templateId, int campaignId) {
+        String sql = """
+                     SELECT COUNT(*) as count
+                     FROM ClubApplications ca
+                     JOIN ApplicationResponses ar ON ca.ResponseId = ar.ResponseID
+                     JOIN RecruitmentCampaigns rc ON ca.ClubId = rc.ClubID
+                     WHERE ar.TemplateID = ? AND rc.RecruitmentID = ?
+                     """;
+                     
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, templateId);
+            ps.setInt(2, campaignId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("count");
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error counting applications for template in campaign", e);
+        }
+        return 0;
+    }
 }

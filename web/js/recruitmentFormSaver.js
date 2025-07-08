@@ -4,12 +4,6 @@
  */
  
 class FormSaver {
-    /**
-     * Khởi tạo với ID form và prefix key để lưu trong localStorage
-     * @param {string} formId - ID của form cần lưu dữ liệu
-     * @param {string} keyPrefix - Tiền tố cho key trong localStorage
-     * @param {number} expirationMinutes - Thời gian hết hạn (phút), mặc định là 30 phút
-     */
     constructor(formId, keyPrefix, expirationMinutes = 30) {
         this.formId = formId;
         this.keyPrefix = keyPrefix;
