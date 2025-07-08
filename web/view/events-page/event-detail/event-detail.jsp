@@ -232,7 +232,7 @@
 						</div>
 						<a href="mailto:${ownerInfo.email}" class="contact-btn">
 							<i class="fas fa-envelope"></i>
-							Liên hệ
+							Liên hệ: ${ownerInfo.email}
 						</a>
 					</div>
 
@@ -269,7 +269,7 @@
 										</div>
 									</div>
 									<div class="event-footer">
-										<span class="attendees status-${fn:toLowerCase(e.status)}">${e.status}</span>
+<%--										<span class="attendees status-${fn:toLowerCase(e.status)}">${e.status}</span>--%>
 										<c:choose>
 											<c:when test="${e.status == 'PENDING' || e.status == 'Pending'}">
 												<button type="button" class="register-btn"
@@ -292,11 +292,12 @@
 								</div>
 							</div>
 						</c:forEach>
-						<c:if test="${empty requestScope.relatedEvents}">
-							<p class="no-events"><i class="fas fa-search search-icon"></i> Không có sự kiện liên quan
-								nào để hiển thị.</p>
-						</c:if>
+
 					</div>
+					<c:if test="${empty requestScope.relatedEvents}">
+						<p class="no-events"><i class="fas fa-search search-icon"></i> Không có sự kiện liên quan
+							nào để hiển thị.</p>
+					</c:if>
 				</div>
 
 				<!-- Registration Section -->

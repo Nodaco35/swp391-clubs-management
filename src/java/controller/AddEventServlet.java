@@ -216,7 +216,7 @@ public class AddEventServlet extends HttpServlet {
             LocationDAO locationDAO = new LocationDAO();
             request.setAttribute("locations", locationDAO.getLocationsByType(locationType != null ? locationType : "OnCampus"));
             request.setAttribute("locationType", locationType);
-            request.setAttribute("errorMessage", "Bạn có thể thêm địa điệm nếu chưa có sẵn!.");
+            request.setAttribute("errorMessage", "Bạn có thể thêm địa điểm nếu chưa có sẵn!.");
 
             if (user != null) {
                 String userID = user.getUserID();

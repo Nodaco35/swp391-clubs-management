@@ -391,13 +391,13 @@
             const aEndTotalMin = aEndHour * 60 + aEndMin;
 
             if (aEndTotalMin <= aStartTotalMin) {
-                alert(`Agenda ${i + 1}: Thời gian kết thúc phải sau thời gian bắt đầu.`);
+                alert(`Thời gian kết thúc phải sau thời gian bắt đầu.`);
                 e.preventDefault();
                 return;
             }
 
             if (aStartTotalMin < startTotalMin || aEndTotalMin > endTotalMin) {
-                alert(`Agenda ${i + 1}: Thời gian phải nằm trong khung giờ sự kiện.`);
+                alert(`Thời gian phải nằm trong khung giờ sự kiện.`);
                 e.preventDefault();
                 return;
             }

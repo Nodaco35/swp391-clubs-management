@@ -211,7 +211,7 @@
                                     <strong>Club Name:</strong> ${e.clubName}
                                 </div>
                                 <div class="event-footer">
-                                    <span class="attendees status-${fn:toLowerCase(e.status)}">${e.status}</span>
+<%--                                    <span class="attendees status-${fn:toLowerCase(e.status)}">${e.status}</span>--%>
                                     <c:set var="isMyEvent" value="false"/>
                                     <c:forEach var="id" items="${sessionScope.myEventIDs}">
                                         <c:if test="${id == e.eventID}">

@@ -292,6 +292,8 @@
 								       required/>
 								<input type="text" name="agendaActivity[]" value="${agenda.title}"
 								       placeholder="Hoạt động" required/>
+								<input type="text" name="agendaDescription[]" value="${agenda.description}"
+								       placeholder="Mô tả ngắn gọn hoạt động" required/>
 								<button type="button" class="btn-remove-agenda" onclick="removeAgendaItem(this)">
 									<i class="fas fa-times"></i>
 								</button>
@@ -385,13 +387,13 @@
 
 
             if (aEndTotalMin <= aStartTotalMin) {
-                alert(`Agenda ${i + 1}: Thời gian kết thúc phải sau thời gian bắt đầu.`);
+                alert(`Thời gian kết thúc phải sau thời gian bắt đầu.`);
                 e.preventDefault();
                 return;
             }
 
             if (aStartTotalMin < startTotalMin || aEndTotalMin > endTotalMin) {
-                alert(`Agenda ${i + 1}: Thời gian phải nằm trong khung giờ sự kiện.`);
+                alert(`Thời gian phải nằm trong khung giờ sự kiện.`);
                 e.preventDefault();
                 return;
             }
@@ -399,8 +401,6 @@
 
     });
 </script>
-
-
 
 <script>
     function addAgendaItem() {
@@ -411,6 +411,7 @@
         <input type="time" name="agendaStartTime[]" required />
         <input type="time" name="agendaEndTime[]" required />
         <input type="text" name="agendaActivity[]" placeholder="Hoạt động" required />
+		<input type="text" name="agendaDescription[]" placeholder="Mô tả ngắn gọn hoạt động" required/>
         <button type="button" class="btn-remove-agenda" onclick="removeAgendaItem(this)">
             <i class="fas fa-times"></i>
         </button>

@@ -226,7 +226,7 @@ public class EventsDAO {
 
     public List<Events> getEventsByClubID(int clubID, int eventID) {
         List<Events> events = new ArrayList<>();
-        String sql = "SELECT * FROM Events WHERE ClubID = ? and eventID <> ?";
+        String sql = "SELECT * FROM Events WHERE ClubID = ? and eventID <> ? ORDER BY EventDate DESC LIMIT 3";
         try {
             Connection connection = DBContext.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -932,6 +932,106 @@ public class EventsDAO {
             e.printStackTrace();
         }
         return agendas;
+    }
+
+
+    public boolean insertAgendas(int eventID, String title, String description, Timestamp startTime, Timestamp endTime) {
+        String sql = "INSERT INTO Agenda (EventID, Title, Description, StartTime, EndTime, Status) VALUES (?, ?, ?, ?, ?, 'PENDING')";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, eventID);
+            ps.setString(2, title);
+            ps.setString(3, description);
+            ps.setTimestamp(4, startTime);
+            ps.setTimestamp(5, endTime);
+
+            int rowsAffected = ps.executeUpdate();
+            System.out.println("Inserted agenda with PENDING status: " + title);
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            System.err.println("Error inserting agenda: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+    /**
+     * Lấy ApprovalStatus của event
+     */
+    public String getEventApprovalStatus(int eventID) {
+        String sql = "SELECT ApprovalStatus FROM Events WHERE EventID = ?";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, eventID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("ApprovalStatus");
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting event approval status: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Cập nhật ApprovalStatus của event
+     */
+    public boolean updateEventApprovalStatus(int eventID, String approvalStatus) {
+        String sql = "UPDATE Events SET ApprovalStatus = ? WHERE EventID = ?";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, approvalStatus);
+            ps.setInt(2, eventID);
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            System.err.println("Error updating event approval status: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Cập nhật status của tất cả agenda thuộc event
+     */
+    public boolean updateAllAgendaStatus(int eventID, String status) {
+        String sql = "UPDATE Agenda SET Status = ? WHERE EventID = ?";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, status);
+            ps.setInt(2, eventID);
+            int rowsAffected = ps.executeUpdate();
+            System.out.println("Updated " + rowsAffected + " agenda items to status: " + status);
+            return rowsAffected >= 0; // Trả về true ngay cả khi không có agenda nào được update
+        } catch (SQLException e) {
+            System.err.println("Error updating agenda status: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Kiểm tra xem event có agenda nào bị REJECTED không
+     */
+    public boolean hasRejectedAgenda(int eventID) {
+        String sql = "SELECT COUNT(*) FROM Agenda WHERE EventID = ? AND Status = 'REJECTED'";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, eventID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error checking rejected agenda: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public void insertAgenda(int eventID, String title, String description, Timestamp startTime, Timestamp endTime) {
