@@ -754,6 +754,107 @@ a.close {
 
 /* Agenda and button */
 
+/* Agenda Section Styling */
+.agenda-section {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.agenda-section h4 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.agenda-section h4 i {
+    color: var(--primary);
+}
+
+.agenda-status-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+}
+
+.agenda-status-info .detail-label {
+    font-weight: 600;
+    margin-right: 10px;
+}
+
+.agenda-status-info .detail-value {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.agenda-status-info .status-PENDING {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.agenda-status-info .status-APPROVED {
+    background: #d4edda;
+    color: #155724;
+}
+
+.agenda-status-info .status-REJECTED {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.no-agenda-message {
+    text-align: center;
+    padding: 30px;
+    color: #6c757d;
+    background: white;
+    border-radius: 6px;
+    border: 2px dashed #dee2e6;
+}
+
+.no-agenda-message i {
+    font-size: 2em;
+    margin-bottom: 10px;
+    color: #adb5bd;
+}
+
+.no-agenda-message p {
+    margin: 0;
+    font-style: italic;
+}
+
+.approve-agenda-option {
+    padding: 8px;
+    background: #e3f2fd;
+    border-radius: 4px;
+    border: 1px solid #bbdefb;
+}
+
+.approve-agenda-option label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin: 0;
+    font-weight: 500;
+    color: #1976d2;
+}
+
+.approve-agenda-option input[type="checkbox"] {
+    margin-right: 8px;
+    transform: scale(1.2);
+}
 /* Agenda Timeline */
 .agenda-timeline {
     background: white;
@@ -932,7 +1033,7 @@ a.close {
 .modal-btn.approve {
     background-color: var(--success);
     color: white;
-    height: 100%;
+    width: 100%;
 }
 
 .modal-btn.approve:hover {

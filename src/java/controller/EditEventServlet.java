@@ -244,16 +244,12 @@ public class EditEventServlet extends HttpServlet {
                 }
             }
 
-            // Cập nhật event
             EventsDAO eventDAO = new EventsDAO();
             if (imageName != null) {
-                // Cập nhật với ảnh mới
                 eventDAO.updateEventWithImage(eventID, eventName, description, eventStart, eventEnd, locationID, capacity, isPublic, imageName);
             } else {
-                // Cập nhật không thay đổi ảnh
                 eventDAO.updateEvent(eventID, eventName, description, eventStart, eventEnd, locationID, capacity, isPublic);
             }
-
             session.setAttribute("successMsg", "Chỉnh sửa sự kiện thành công!");
             response.sendRedirect(request.getContextPath() + "/chairman-page/myclub-events/edit-event?eventID=" + eventID);
 

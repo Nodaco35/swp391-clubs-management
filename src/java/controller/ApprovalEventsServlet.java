@@ -14,6 +14,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import models.Agenda;
 import models.Events;
 
 /**
@@ -74,6 +75,17 @@ public class ApprovalEventsServlet extends HttpServlet {
             try {
                 Events eventDetails = dao.getEventByID(Integer.parseInt(eventID));
                 request.setAttribute("eventDetails", eventDetails);
+
+                // Thêm phần lấy agenda details
+                List<Agenda> agendaDetails = dao.getAgendaByEventID(Integer.parseInt(eventID));
+                request.setAttribute("agendaDetails", agendaDetails);
+
+                // Kiểm tra trạng thái agenda của event này
+                if (!agendaDetails.isEmpty()) {
+                    String agendaStatus = agendaDetails.get(0).getStatus(); // Giả sử tất cả agenda cùng status
+                    request.setAttribute("agendaStatus", agendaStatus);
+                }
+
             } catch (NumberFormatException e) {
                 request.setAttribute("errorMessage", "ID sự kiện không hợp lệ!");
             }
@@ -91,12 +103,28 @@ public class ApprovalEventsServlet extends HttpServlet {
         String eventID = request.getParameter("eventID");
         String status = request.getParameter("status");
         String reason = request.getParameter("reason");
+        String approveAgenda = request.getParameter("approveAgenda"); // Checkbox để duyệt cả agenda
 
         if (eventID != null && status != null) {
             EventsDAO dao = new EventsDAO();
+
+            // Cập nhật trạng thái event
             dao.updateApprovalStatus(Integer.parseInt(eventID), status, reason);
-            request.setAttribute("message", status.equals("approved") ?
-                    "Event đã được duyệt thành công!" : "Event đã bị từ chối!");
+
+            // Nếu checkbox được chọn và event được duyệt, thì duyệt cả agenda
+            if ("on".equals(approveAgenda) && "approved".equals(status)) {
+                dao.updateAgendaStatus(Integer.parseInt(eventID), "approved", null);
+                request.setAttribute("message", "Event và Agenda đã được duyệt thành công!");
+            }
+            // Nếu event bị từ chối, có thể tự động từ chối agenda
+            else if ("rejected".equals(status)) {
+                dao.updateAgendaStatus(Integer.parseInt(eventID), "rejected", reason);
+                request.setAttribute("message", "Event và Agenda đã bị từ chối!");
+            }
+            else {
+                request.setAttribute("message", status.equals("approved") ?
+                        "Event đã được duyệt thành công!" : "Event đã bị từ chối!");
+            }
         }
 
         doGet(request, response);
