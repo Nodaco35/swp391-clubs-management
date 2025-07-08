@@ -364,7 +364,7 @@
     </div>
     
     <!-- Script cho form và wizard -->
-    <script src="${pageContext.request.contextPath}/js/formSaver.js"></script>
+    <script src="${pageContext.request.contextPath}/js/recruitmentSaver.js"></script>
     <script src="${pageContext.request.contextPath}/js/recruitmentCommon.js"></script>
     <script src="${pageContext.request.contextPath}/js/createEditRecruitmentCampaign.js"></script>
     <!-- Back to top button -->
@@ -373,26 +373,47 @@
     </div>
     
     <script>
-        // Khởi tạo FormSaver khi DOM đã sẵn sàng
+        // Khởi tạo FormSaver khi DOM đã sẵn sàng - CHỈ cho chế độ tạo mới
         document.addEventListener('DOMContentLoaded', function() {
-            // Khởi tạo FormSaver với ID form và prefix key
-            const formSaver = new FormSaver('recruitmentForm', 'recruitment_campaign', 60); // 60 phút
+            const recruitmentForm = document.getElementById('recruitmentForm');
+            const formMode = recruitmentForm.dataset.mode;
             
-            // Kiểm tra nếu có dữ liệu đã lưu và hiện prompt khôi phục
-            const hasStoredData = localStorage.getItem(formSaver.storageKey);
-            
-            if (hasStoredData && document.getElementById('recruitmentForm').dataset.mode !== 'edit') {
-                formSaver.showRestorePrompt(
-                    'Phát hiện dữ liệu bạn đã điền trước đó nhưng chưa lưu. Bạn có muốn khôi phục không?',
-                    function() { formSaver.restoreFormData(); }, // Khôi phục dữ liệu
-                    function() { formSaver.clearSavedData(); }   // Xóa dữ liệu đã lưu
-                );
+            // CHỈ khởi tạo FormSaver khi ở chế độ tạo mới
+            if (formMode === 'create') {
+                console.log('[FormSaver] Khởi tạo FormSaver cho chế độ tạo mới');
+                
+                // Khởi tạo FormSaver với ID form và prefix key
+                const formSaver = new FormSaver('recruitmentForm', 'recruitment_campaign', 60); // 60 phút
+                
+                // Kiểm tra nếu có dữ liệu đã lưu và hiện prompt khôi phục
+                const hasStoredData = localStorage.getItem(formSaver.storageKey);
+                
+                if (hasStoredData) {
+                    formSaver.showRestorePrompt(
+                        'Phát hiện dữ liệu bạn đã điền trước đó nhưng chưa lưu. Bạn có muốn khôi phục không?',
+                        function() { 
+                            formSaver.restoreFormData(); 
+                            console.log('[FormSaver] Đã khôi phục dữ liệu đã lưu');
+                        }, // Khôi phục dữ liệu
+                        function() { 
+                            formSaver.clearSavedData(); 
+                            console.log('[FormSaver] Đã xóa dữ liệu đã lưu theo yêu cầu người dùng');
+                        }   // Xóa dữ liệu đã lưu
+                    );
+                }
+                
+                // Xóa dữ liệu đã lưu khi form được submit thành công
+                recruitmentForm.addEventListener('submit', function() {
+                    formSaver.clearSavedData();
+                    console.log('[FormSaver] Đã xóa dữ liệu đã lưu do form được submit');
+                });
+            } else {
+                console.log('[FormSaver] Chế độ chỉnh sửa - Không khởi tạo FormSaver, hiển thị dữ liệu từ server');
+                
+                // Trong chế độ edit, đảm bảo không có dữ liệu FormSaver cũ can thiệp
+                // Sử dụng static method để xóa dữ liệu cũ
+                FormSaver.clearOldFormData('recruitment_campaign');
             }
-            
-            // Xóa dữ liệu đã lưu khi form được submit thành công
-            document.getElementById('recruitmentForm').addEventListener('submit', function() {
-                formSaver.clearSavedData();
-            });
         });
     </script>
 
