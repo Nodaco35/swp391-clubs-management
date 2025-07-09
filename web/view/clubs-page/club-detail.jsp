@@ -7,6 +7,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="contextPath" content="${pageContext.request.contextPath}">
     <title>${club.clubName} - Chi Tiết Câu Lạc Bộ - UniClub</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -87,8 +88,8 @@
                                 </c:if>
                             </div>
 
-                            <c:if test="${!isMember && displayClub.isRecruiting && sessionScope.user != null}">
-                                <a href="${pageContext.request.contextPath}/club-apply?clubID=${displayClub.clubID}" 
+                            <c:if test="${!isMember && sessionScope.user != null}">
+                                    <a href="#" id="joinClubButton"
                                    class="btn btn-primary right-btn">
                                     <i class="fas fa-user-plus"></i> Tham gia câu lạc bộ
                                 </a>
