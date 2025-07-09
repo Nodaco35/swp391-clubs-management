@@ -73,7 +73,7 @@
 						<form action="${pageContext.request.contextPath}/logout" method="post">
 							<input class="btn btn-primary" type="submit" value="Logout">
 						</form>
-						<a href="${pageContext.request.contextPath}/my-club" class="btn btn-primary">MyClub</a>
+						<a href="${pageContext.request.contextPath}/myclub" class="btn btn-primary">MyClub</a>
 					</div>
 				</c:when>
 				<c:otherwise>
@@ -123,17 +123,17 @@
 	<nav class="dashboard-nav">
 		<ul>
 			<li>
-				<a href="#">
+				<a href="#" class="nav-item">
 					<i class="fas fa-tachometer-alt"></i> Tổng quan
 				</a>
 			</li>
 			<li>
-				<a href="#">
+				<a href="#" class="nav-item">
 					<i class="fas fa-tachometer-alt"></i> Tổng quan
 				</a>
 			</li>
 			<li>
-				<a href="#">
+				<a href="#" class="nav-item">
 					<i class="fas fa-tachometer-alt"></i> Tổng quan
 				</a>
 			</li>
