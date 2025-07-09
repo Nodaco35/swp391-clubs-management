@@ -9,7 +9,6 @@ import jakarta.servlet.http.HttpSession;
 import models.Users;
 import models.UserClub;
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -134,7 +133,7 @@ public class UserClubServlet extends HttpServlet {
             int roleID;
             int departmentID;
             String joinDateStr = request.getParameter("joinDate");
-            Timestamp joinDate;
+            java.util.Date joinDate;
             try {
                 roleID = Integer.parseInt(request.getParameter("roleID"));
                 departmentID = Integer.parseInt(request.getParameter("departmentID"));
@@ -145,15 +144,14 @@ public class UserClubServlet extends HttpServlet {
                 }
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                 dateFormat.setLenient(false);
-                java.util.Date parsedDate = dateFormat.parse(joinDateStr);
-                joinDate = new Timestamp(parsedDate.getTime());
+                joinDate = dateFormat.parse(joinDateStr);
                 java.util.Date estDate = dateFormat.parse(establishedDate.split(" ")[0]);
-                if (joinDate.before(new Timestamp(estDate.getTime()))) {
+                if (joinDate.before(estDate)) {
                     request.setAttribute("error", "Ngày tham gia phải sau ngày thành lập câu lạc bộ!");
                     doGet(request, response);
                     return;
                 }
-                if (joinDate.after(new Timestamp(System.currentTimeMillis()))) {
+                if (joinDate.after(new java.util.Date())) {
                     request.setAttribute("error", "Ngày tham gia không được là ngày trong tương lai!");
                     doGet(request, response);
                     return;
@@ -220,7 +218,7 @@ public class UserClubServlet extends HttpServlet {
             int roleID;
             int departmentID;
             String joinDateStr = request.getParameter("joinDate");
-            Timestamp joinDate;
+            java.util.Date joinDate;
             try {
                 userClubID = Integer.parseInt(request.getParameter("userClubID"));
                 roleID = Integer.parseInt(request.getParameter("roleID"));
@@ -232,15 +230,14 @@ public class UserClubServlet extends HttpServlet {
                 }
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                 dateFormat.setLenient(false);
-                java.util.Date parsedDate = dateFormat.parse(joinDateStr);
-                joinDate = new Timestamp(parsedDate.getTime());
+                joinDate = dateFormat.parse(joinDateStr);
                 java.util.Date estDate = dateFormat.parse(establishedDate.split(" ")[0]);
-                if (joinDate.before(new Timestamp(estDate.getTime()))) {
+                if (joinDate.before(estDate)) {
                     request.setAttribute("error", "Ngày tham gia phải sau ngày thành lập câu lạc bộ!");
                     doGet(request, response);
                     return;
                 }
-                if (joinDate.after(new Timestamp(System.currentTimeMillis()))) {
+                if (joinDate.after(new java.util.Date())) {
                     request.setAttribute("error", "Ngày tham gia không được là ngày trong tương lai!");
                     doGet(request, response);
                     return;

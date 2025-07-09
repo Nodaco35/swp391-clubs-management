@@ -184,7 +184,6 @@
                 </c:forEach>
             ];
 
-            // Ẩn form khi tải trang
             document.addEventListener('DOMContentLoaded', function () {
                 hideForm();
                 <c:if test="${editUserClub != null}">
