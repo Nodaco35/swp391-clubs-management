@@ -11,6 +11,7 @@ import java.util.List;
 import models.Department;
 import models.Roles;
 import models.UserClub;
+import models.Users;
 
 public class UserClubDAO {
 
@@ -1038,4 +1039,28 @@ public class UserClubDAO {
         }
         return findByCDID;
     }
+    public Users getClubLeader(int clubId) {
+    String sql = """
+        SELECT u.* FROM UserClubs uc 
+        JOIN Users u ON uc.UserID = u.UserID 
+        WHERE uc.ClubID = ? AND uc.RoleID = 1 AND uc.IsActive = 1
+        """;
+
+    try (Connection conn = DBContext.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setInt(1, clubId);
+        try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                Users u = new Users();
+                u.setUserID(rs.getString("UserID"));
+                u.setFullName(rs.getString("FullName"));
+                u.setEmail(rs.getString("Email"));
+                return u;
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return null;
+}
 }

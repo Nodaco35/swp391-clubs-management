@@ -9,6 +9,7 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
         <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
         <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     </head>
     
     <body class="bg-gray-100 font-sans antialiased">

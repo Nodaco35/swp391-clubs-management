@@ -4,6 +4,7 @@ import dal.ClubCreationPermissionDAO;
 import dal.ClubDAO;
 import dal.ClubCategoryDAO;
 import dal.DepartmentMemberDAO;
+import dal.EventsDAO;
 import dal.UserClubDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -16,6 +17,7 @@ import models.UserClub;
 import models.ClubCategory;
 import java.io.IOException;
 import java.util.List;
+import models.Events;
 
 public class ClubsServlet extends HttpServlet {
 
@@ -23,6 +25,7 @@ public class ClubsServlet extends HttpServlet {
     private UserClubDAO userClubDAO;
     private ClubCreationPermissionDAO permissionDAO;
     private ClubCategoryDAO clubCategoryDAO;
+    private EventsDAO eventsDAO;
 
     @Override
     public void init() throws ServletException {
@@ -30,6 +33,7 @@ public class ClubsServlet extends HttpServlet {
         userClubDAO = new UserClubDAO();
         permissionDAO = new ClubCreationPermissionDAO();
         clubCategoryDAO = new ClubCategoryDAO();
+        eventsDAO = new EventsDAO();
     }
 
     @Override
@@ -90,7 +94,9 @@ public class ClubsServlet extends HttpServlet {
         int page;
         try {
             page = Integer.parseInt(request.getParameter("page"));
-            if (page < 1) page = 1;
+            if (page < 1) {
+                page = 1;
+            }
         } catch (NumberFormatException e) {
             page = 1;
         }
@@ -219,6 +225,8 @@ public class ClubsServlet extends HttpServlet {
             isFavorite = clubDAO.isFavoriteClub(userID, clubID);
             club.setFavorite(isFavorite);
         }
+        List<Events> events = eventsDAO.getEventsByClubID(clubID);
+        request.setAttribute("clubEvents", events);
 
         // Check for club creation permission
         boolean hasPermission = user != null && permissionDAO.hasActivePermission(user.getUserID());

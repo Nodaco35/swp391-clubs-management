@@ -1303,4 +1303,44 @@ public class EventsDAO {
         }
         return 0;
     }
+    
+    public List<Events> getEventsByClubId(int clubId) {
+    List<Events> events = new ArrayList<>();
+    String sql = """
+        SELECT e.*, c.ClubName, c.ClubImg
+        FROM Events e
+        JOIN Clubs c ON e.ClubID = c.ClubID
+        WHERE e.ClubID = ?
+        ORDER BY e.EventDate DESC
+        """;
+
+    try (Connection conn = DBContext.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setInt(1, clubId);
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            Events e = new Events();
+            e.setEventImg(rs.getString("EventImg"));
+            e.setEventID(rs.getInt("EventID"));
+            e.setEventName(rs.getString("EventName"));
+            e.setDescription(rs.getString("Description"));
+            e.setEventDate(rs.getTimestamp("EventDate")); // nếu có giờ
+            e.setStatus(rs.getString("Status"));
+            e.setCapacity(rs.getInt("Capacity"));
+            e.setSpotsLeft(rs.getInt("SpotsLeft"));
+
+            // Lấy thêm thông tin CLB
+            e.setClubName(rs.getString("ClubName"));
+            e.setClubImg(rs.getString("ClubImg"));
+
+            events.add(e);
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return events;
+}
+
+    
 }
