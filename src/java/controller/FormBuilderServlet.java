@@ -26,7 +26,6 @@ import java.util.logging.Logger;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.JSONException;
 
 
 @WebServlet(name = "FormBuilderServlet", urlPatterns = {"/formBuilder"})
@@ -49,7 +48,7 @@ public class FormBuilderServlet extends HttpServlet {    private ApplicationForm
             return;
         }        
         
-        // Lấy clubId từ request parameter nếu có
+        // Lấy clubId từ request parameter
         String clubIdParam = request.getParameter("clubId");
         Integer clubId = null;
         
@@ -74,7 +73,7 @@ public class FormBuilderServlet extends HttpServlet {    private ApplicationForm
         session.setAttribute("userClub", userClub);
         
         // Lấy danh sách các ban hoạt động của câu lạc bộ hiện tại
-        List<ClubDepartment> clubDepartments = departmentDAO.getActiveClubDepartments(userClub.getClubID());
+        List<ClubDepartment> clubDepartments = departmentDAO.getCanRegisterClubDepartments(userClub.getClubID());
         request.setAttribute("clubDepartments", clubDepartments);
 
         String templateIdStr = request.getParameter("templateId");

@@ -95,6 +95,27 @@ document.addEventListener('DOMContentLoaded', function() {
     // Thiết lập các trường không thể chỉnh sửa nếu cần thiết
     setupFieldRestrictions();
     
+    // Debug templateId selection sau khi setup restrictions
+    if (isEdit) {
+        setTimeout(() => {
+            const templateSelect = document.getElementById('templateId');
+            if (templateSelect) {
+                console.log(`[DEBUG] TemplateId sau setup: value="${templateSelect.value}", selectedIndex=${templateSelect.selectedIndex}, disabled=${templateSelect.disabled}`);
+                if (templateSelect.selectedIndex >= 0 && templateSelect.options[templateSelect.selectedIndex]) {
+                    console.log(`[DEBUG] Selected option text: "${templateSelect.options[templateSelect.selectedIndex].text}"`);
+                }
+                
+                // Kiểm tra hidden input
+                const hiddenTemplateInput = templateSelect.parentNode.querySelector('input[type="hidden"][name="templateId"]');
+                if (hiddenTemplateInput) {
+                    console.log(`[DEBUG] Hidden templateId input: value="${hiddenTemplateInput.value}"`);
+                } else {
+                    console.log(`[DEBUG] Không có hidden templateId input`);
+                }
+            }
+        }, 100);
+    }
+    
     // Thực hiện kiểm tra tự động trong chế độ edit
     setTimeout(() => {
         // Log thông tin về mode hiện tại
@@ -956,26 +977,55 @@ function setupFormSubmission() {
             requestParams.append(pair[0], pair[1]);
         }
         
-        // Thu thập tất cả các hidden inputs để đảm bảo chúng được đưa vào request
+        // Xử lý đặc biệt cho templateId để tránh trùng lặp
+        const templateSelect = document.getElementById('templateId');
+        if (templateSelect) {
+            // Đảm bảo trạng thái nhất quán trước khi lấy giá trị
+            manageTemplateIdConsistency();
+            
+            // Xóa tất cả entry templateId hiện có trong requestParams trước
+            requestParams.delete('templateId');
+            
+            if (templateSelect.disabled) {
+                // Nếu disabled, lấy từ hidden input
+                const hiddenTemplateInput = templateSelect.parentNode.querySelector('input[type="hidden"][name="templateId"]');
+                if (hiddenTemplateInput && hiddenTemplateInput.value) {
+                    requestParams.set('templateId', hiddenTemplateInput.value);
+                    console.log(`[DEBUG] Sử dụng templateId từ hidden input: ${hiddenTemplateInput.value}`);
+                } else if (templateSelect.value) {
+                    // Fallback nếu không có hidden input
+                    requestParams.set('templateId', templateSelect.value);
+                    console.log(`[DEBUG] Fallback - sử dụng templateId từ disabled select: ${templateSelect.value}`);
+                }
+            } else {
+                // Nếu enabled, lấy từ select element
+                if (templateSelect.value) {
+                    requestParams.set('templateId', templateSelect.value);
+                    console.log(`[DEBUG] Sử dụng templateId từ select element: ${templateSelect.value}`);
+                }
+            }
+        }
+        
+        // Thu thập tất cả các hidden inputs để đảm bảo chúng được đưa vào request (trừ templateId đã xử lý)
         const hiddenInputs = document.querySelectorAll('input[type="hidden"]');
         hiddenInputs.forEach(input => {
-            if (input.name && input.value) {
+            if (input.name && input.value && input.name !== 'templateId') {
                 console.log(`[DEBUG] Thêm giá trị từ hidden input: ${input.name}=${input.value}`);
                 requestParams.set(input.name, input.value);
             }
         });
         
-        // Đảm bảo các trường bị disabled vẫn được thêm vào trong requestParams
+        // Đảm bảo các trường bị disabled vẫn được thêm vào trong requestParams (trừ templateId đã xử lý)
         criticalFields.forEach(fieldId => {
             const field = document.getElementById(fieldId);
-            if (field && field.disabled && field.value) {
+            if (field && field.disabled && field.value && fieldId !== 'templateId') {
                 console.log(`[DEBUG] Thêm giá trị từ field disabled: ${fieldId}=${field.value}`);
                 requestParams.set(fieldId, field.value);
             }
         });
         
-        // Kiểm tra các tham số cần thiết trước khi gửi
-        const checkRequiredParams = ['templateId', 'applicationStageStart', 'applicationStageEnd', 
+        // Kiểm tra các tham số cần thiết trước khi gửi (trừ templateId đã xử lý riêng)
+        const checkRequiredParams = ['applicationStageStart', 'applicationStageEnd', 
                                      'interviewStageStart', 'interviewStageEnd',
                                      'challengeStageStart', 'challengeStageEnd'];
                                      
@@ -1000,6 +1050,15 @@ function setupFormSubmission() {
         console.log('[DEBUG] Dữ liệu requestParams trước khi gửi:');
         for (let pair of requestParams.entries()) {
             console.log(pair[0] + ": " + pair[1]);
+        }
+        
+        // Kiểm tra cuối cùng templateId
+        if (!requestParams.has('templateId') || !requestParams.get('templateId')) {
+            console.error('[ERROR] TemplateId bị thiếu trong requestParams!');
+            showToast('Thiếu thông tin mẫu đơn đăng ký', 'error');
+            return;
+        } else {
+            console.log(`[DEBUG] TemplateId cuối cùng sẽ gửi: ${requestParams.get('templateId')}`);
         }
         
         // Nếu đang chỉnh sửa, kiểm tra ID
@@ -1235,21 +1294,21 @@ function hasStageStarted(startDate) {
  */
 function hasCampaignApplications() {
     // Tìm element có data-attribute đánh dấu đã có đơn đăng ký - kiểm tra nhiều cách viết
-    const hasApplicationsElement = document.querySelector('[data-has-applications="true"]');
+    const hasApplicationsElement = document.querySelector('[data-has_applications="true"]');
     const altApplicationsElement = document.querySelector('[data-has_applications="true"]');
     const alt2ApplicationsElement = document.querySelector('[data-hasApplications="true"]');
     const hasApplicationsFlag = document.getElementById('hasApplicationsFlag');
     
     // Kiểm tra và log các nguồn thông tin về đơn đăng ký
     console.log("[DEBUG] Kiểm tra thông tin đơn đăng ký:");
-    console.log("- hasApplicationsElement [data-has-applications]:", hasApplicationsElement ? "có" : "không có");
+    console.log("- hasApplicationsElement [data-has_applications]:", hasApplicationsElement ? "có" : "không có");
     console.log("- altApplicationsElement [data-has_applications]:", altApplicationsElement ? "có" : "không có");
     console.log("- alt2ApplicationsElement [data-hasApplications]:", alt2ApplicationsElement ? "có" : "không có");
     console.log("- hasApplicationsFlag:", hasApplicationsFlag ? (hasApplicationsFlag.value === 'true' ? "true" : "false") : "không có");
     
     // Kiểm tra data-has-applications (chuẩn hóa dấu gạch ngang)
     if (hasApplicationsElement) {
-        console.log("Đã tìm thấy đánh dấu có đơn đăng ký từ element [data-has-applications]");
+        console.log("Đã tìm thấy đánh dấu có đơn đăng ký từ element [data-has_applications]");
         return true;
     }
     
@@ -1285,7 +1344,7 @@ function hasCampaignApplications() {
     }
     
     // Kiểm tra thêm các thuộc tính data- khác trên body và form
-    const formsWithDataAttrs = document.querySelectorAll('form[data-application-count], form[data-has-applications], body[data-application-count], body[data-has-applications]');
+    const formsWithDataAttrs = document.querySelectorAll('form[data-application-count], form[data-has_applications], body[data-application-count], body[data-has_applications]');
     for (let i = 0; i < formsWithDataAttrs.length; i++) {
         const el = formsWithDataAttrs[i];
         const dataAttributes = el.dataset;
@@ -1315,6 +1374,51 @@ function setupFieldRestrictions() {
     
     console.log("Thiết lập các hạn chế trường trong chế độ chỉnh sửa");
     
+    // 0. Kiểm tra ngày bắt đầu chiến dịch - vô hiệu hóa nếu chiến dịch đang diễn ra
+    const campaignStartDateField = document.getElementById('startDate');
+    if (campaignStartDateField && campaignStartDateField.value) {
+        const campaignStartDate = new Date(campaignStartDateField.value);
+        const currentDate = new Date();
+        
+        // Xóa phần thời gian để so sánh ngày chính xác
+        currentDate.setHours(0, 0, 0, 0);
+        campaignStartDate.setHours(0, 0, 0, 0);
+        
+        if (campaignStartDate <= currentDate) {
+            console.log("Chiến dịch đã bắt đầu, vô hiệu hóa ngày bắt đầu");
+            
+            // Lưu lại giá trị ban đầu
+            const originalStartDateValue = campaignStartDateField.value;
+            
+            // Xóa hidden input và warning message nếu đã tồn tại trước đó
+            const existingHiddenInput = campaignStartDateField.parentNode.querySelector('input[type="hidden"][name="startDate"]');
+            if (existingHiddenInput) {
+                campaignStartDateField.parentNode.removeChild(existingHiddenInput);
+            }
+            
+            const existingWarning = campaignStartDateField.parentNode.querySelector('.text-warning');
+            if (existingWarning) {
+                campaignStartDateField.parentNode.removeChild(existingWarning);
+            }
+            
+            campaignStartDateField.disabled = true;
+            // Thêm ghi chú giải thích
+            const noteElement = document.createElement('div');
+            noteElement.className = 'text-warning mt-1';
+            noteElement.innerHTML = '<small><i class="fas fa-info-circle"></i> Ngày bắt đầu không thể thay đổi khi hoạt động đã bắt đầu.</small>';
+            campaignStartDateField.parentNode.appendChild(noteElement);
+            
+            // Thêm hidden input để đảm bảo giá trị vẫn được gửi đi
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'startDate';
+            hiddenInput.value = originalStartDateValue;
+            campaignStartDateField.parentNode.appendChild(hiddenInput);
+            
+            console.log(`[DEBUG] Đã vô hiệu hóa ngày bắt đầu chiến dịch và thêm hidden input với giá trị: ${originalStartDateValue}`);
+        }
+    }
+    
     // 1. Vô hiệu hóa lựa chọn mẫu đơn nếu đã có người đăng ký
     const templateSelect = document.getElementById('templateId');
     if (templateSelect) {
@@ -1336,13 +1440,6 @@ function setupFieldRestrictions() {
             templateSelect.parentNode.removeChild(existingWarning);
         }
         
-        // Luôn thêm hidden input để đảm bảo giá trị luôn được gửi đi
-        const hiddenTemplateInput = document.createElement('input');
-        hiddenTemplateInput.type = 'hidden';
-        hiddenTemplateInput.name = 'templateId';
-        hiddenTemplateInput.value = originalTemplateValue;
-        templateSelect.parentNode.appendChild(hiddenTemplateInput);
-        
         if (hasApplications) {
             templateSelect.disabled = true;
             // Thêm ghi chú giải thích tại sao nó bị vô hiệu hóa
@@ -1350,12 +1447,31 @@ function setupFieldRestrictions() {
             noteElement.className = 'text-warning mt-1';
             noteElement.innerHTML = '<small><i class="fas fa-info-circle"></i> Mẫu đơn không thể thay đổi khi đã có người nộp đơn.</small>';
             templateSelect.parentNode.appendChild(noteElement);
+            
+            // Chỉ thêm hidden input khi disabled
+            const hiddenTemplateInput = document.createElement('input');
+            hiddenTemplateInput.type = 'hidden';
+            hiddenTemplateInput.name = 'templateId';
+            hiddenTemplateInput.value = originalTemplateValue;
+            templateSelect.parentNode.appendChild(hiddenTemplateInput);
+            
             console.log(`[DEBUG] Đã thêm hidden input cho templateId với giá trị: ${originalTemplateValue} (disabled)`);
         } else {
             console.log("Mẫu đơn có thể thay đổi vì chưa có đơn đăng ký");
             templateSelect.disabled = false;
-            console.log(`[DEBUG] Đã thêm hidden input cho templateId với giá trị: ${originalTemplateValue} (enabled)`);
+            // Không thêm hidden input khi enabled để tránh trùng lặp dữ liệu
+            console.log(`[DEBUG] TemplateId enabled, không thêm hidden input`);
         }
+        
+        // Thêm event listener để xử lý khi người dùng thay đổi template (cho cả enabled và disabled)
+        templateSelect.addEventListener('change', function() {
+            console.log(`[DEBUG] Template đã thay đổi thành: ${this.value}`);
+            // Sử dụng hàm helper để quản lý nhất quán
+            manageTemplateIdConsistency();
+        });
+        
+        // Gọi hàm helper để đảm bảo trạng thái ban đầu nhất quán
+        manageTemplateIdConsistency();
     }
     
     // 2. Nếu vòng tuyển đã bắt đầu, vô hiệu hóa trường ngày bắt đầu
@@ -1540,6 +1656,39 @@ function normalizeApplicationFlags() {
     // Cập nhật giá trị flag
     hasApplicationsFlag.value = hasApplications.toString();
     console.log(`[DEBUG] Đã cập nhật hasApplicationsFlag = ${hasApplications}`);
+}
+
+/**
+ * Helper function để quản lý templateId một cách nhất quán
+ * Đảm bảo không có xung đột giữa select element và hidden input
+ */
+function manageTemplateIdConsistency() {
+    const templateSelect = document.getElementById('templateId');
+    if (!templateSelect) return;
+    
+    const hiddenTemplateInput = templateSelect.parentNode.querySelector('input[type="hidden"][name="templateId"]');
+    
+    if (templateSelect.disabled) {
+        // Nếu select bị disabled, đảm bảo có hidden input với giá trị đúng
+        if (!hiddenTemplateInput) {
+            const newHiddenInput = document.createElement('input');
+            newHiddenInput.type = 'hidden';
+            newHiddenInput.name = 'templateId';
+            newHiddenInput.value = templateSelect.value;
+            templateSelect.parentNode.appendChild(newHiddenInput);
+            console.log(`[DEBUG] Tạo hidden input cho templateId disabled: ${templateSelect.value}`);
+        } else {
+            // Cập nhật giá trị hidden input
+            hiddenTemplateInput.value = templateSelect.value;
+            console.log(`[DEBUG] Cập nhật hidden input cho templateId disabled: ${templateSelect.value}`);
+        }
+    } else {
+        // Nếu select không bị disabled, loại bỏ hidden input nếu có
+        if (hiddenTemplateInput) {
+            templateSelect.parentNode.removeChild(hiddenTemplateInput);
+            console.log(`[DEBUG] Loại bỏ hidden input cho templateId enabled`);
+        }
+    }
 }
 
 

@@ -278,4 +278,59 @@ public class ClubDepartmentDAO {
         }
     }
 
+    /**
+     * Get all active departments for a specific club except for department of director
+     *
+     * @param clubId The ID of the club
+     * @return List of active ClubDepartment objects
+     */
+    public List<ClubDepartment> getCanRegisterClubDepartments(int clubId) {
+        List<ClubDepartment> departments = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBContext.getConnection();
+            String sql = "SELECT cd.ClubDepartmentID, d.DepartmentID, d.DepartmentName, d.DepartmentStatus, d.Description, cd.ClubID "
+                    + "FROM ClubDepartments cd "
+                    + "JOIN Departments d ON cd.DepartmentID = d.DepartmentID "
+                    + "WHERE cd.ClubID = ? AND d.DepartmentStatus = 1 AND d.DepartmentID <> 3 "
+                    + "ORDER BY d.DepartmentName";
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, clubId);
+            rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                ClubDepartment department = new ClubDepartment();
+                department.setClubDepartmentId(rs.getInt("ClubDepartmentID"));
+                department.setDepartmentId(rs.getInt("DepartmentID"));
+                department.setDepartmentName(rs.getString("DepartmentName"));
+                department.setDepartmentStatus(rs.getBoolean("DepartmentStatus"));
+                department.setDescription(rs.getString("Description"));
+                department.setClubId(rs.getInt("ClubID"));
+                departments.add(department);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error fetching club departments: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (conn != null) {
+                    DBContext.closeConnection(conn);
+                }
+            } catch (SQLException e) {
+                System.out.println("Error closing resources: " + e.getMessage());
+            }
+        }
+
+        return departments;
+    }
+
 }
