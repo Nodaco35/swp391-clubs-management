@@ -125,6 +125,7 @@
                                                 <c:when test="${uc.roleID == 3}">
                                                     <a href="${pageContext.request.contextPath}/department-dashboard?clubID=${uc.clubID}" class="mt-4 inline-block text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-full transition">MyClub Dashboard</a>
                                                 </c:when>
+<%--                                            Phúc, Huy sửa URL để chuyển qua trang của mình nhé--%>
                                                 <c:when test="${uc.roleID == 4}">
                                                     <a href="${pageContext.request.contextPath}/myclub" class="mt-4 inline-block text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-full transition">MyClub Dashboard</a>
                                                 </c:when>

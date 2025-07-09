@@ -18,10 +18,10 @@
 <body>
 <jsp:include page="/view/student/components/myclub-header.jsp"/>
 
+<%--tham khảo thêm ở /view/student/chairman/myclub-event.jsp nếu cần nhé--%>
 <%--setup xong header nhé, cần làm chức năng gì thì anh em làm vào ở main--%>
 <main class="dashboard-content">
 	<%--setup xong header nhé, cần làm chức năng gì thì anh em làm vào ở main--%>
-
 </main>
 </body>
 </html>
