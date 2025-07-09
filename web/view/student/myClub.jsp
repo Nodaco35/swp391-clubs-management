@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -117,7 +118,20 @@
                                                     <p class="text-sm text-gray-600">Ngày tham gia: ${uc.joinDate}</p>
                                                 </div>
                                             </div>
-                                            <a href="${pageContext.request.contextPath}/club-detail?id=${uc.clubID}" class="mt-4 inline-block text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-full transition">Xem chi tiết</a>
+                                            <c:choose>
+                                                <c:when test="${uc.roleID == 1}">
+                                                    <a href="${pageContext.request.contextPath}/chairman-page/overview" class="mt-4 inline-block text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-full transition">MyClub Dashboard</a>
+                                                </c:when>
+                                                <c:when test="${uc.roleID == 3}">
+                                                    <a href="${pageContext.request.contextPath}/department-dashboard?clubID=${uc.clubID}" class="mt-4 inline-block text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-full transition">MyClub Dashboard</a>
+                                                </c:when>
+                                                <c:when test="${uc.roleID == 4}">
+                                                    <a href="${pageContext.request.contextPath}/myclub" class="mt-4 inline-block text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-full transition">MyClub Dashboard</a>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <a href="#" class="btn btn-primary">MyClub Dashboard</a>
+                                                </c:otherwise>
+                                            </c:choose>
                                         </div>
                                     </c:forEach>
                                 </div>
