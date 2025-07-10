@@ -70,9 +70,6 @@
                                 <a href="${pageContext.request.contextPath}/profile?action=myProfile" class="btn btn-outline">
                                     <i class="fa-solid fa-user"></i>
                                 </a>
-                                <a href="${pageContext.request.contextPath}/student?action=history" class="btn btn-outline">
-                                    <i class="fa-solid fa-calendar-days"></i>
-                                </a>
                                 <form action="${pageContext.request.contextPath}/logout" method="post">
                                     <input class="btn btn-primary" type="submit" value="Logout">
                                 </form>
