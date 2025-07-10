@@ -33,7 +33,6 @@ import service.NotificationService;
 import dal.LocationDAO;
 import dal.UserClubDAO;
 import dal.ApplicationFormTemplateDAO;
-import java.sql.SQLException;
 
 @WebServlet(name = "RecruitmentCampaignServlet", urlPatterns = {"/recruitment/*"})
 public class RecruitmentCampaignServlet extends HttpServlet {
@@ -159,8 +158,9 @@ public class RecruitmentCampaignServlet extends HttpServlet {
                 response.sendRedirect(redirectUrl);
                 return;
             } else if ("/view".equals(pathInfo)) {
-                // Lấy id từ request parameter
+                // Chuyển hướng đến servlet mới để xử lý việc xem chi tiết hoạt động tuyển quân
                 String idParam = request.getParameter("id");
+                
                 if (idParam == null || idParam.trim().isEmpty()) {
                     // Nếu không có id, chuyển hướng về myclub với thông báo lỗi
                     response.sendRedirect(request.getContextPath() + "/myclub?error=missing_parameter&message=" + 
@@ -168,46 +168,14 @@ public class RecruitmentCampaignServlet extends HttpServlet {
                     return;
                 }
                 
-                try {
-                    // Hiển thị chi tiết hoạt động tuyển quân
-                    int recruitmentId = Integer.parseInt(idParam);
-                    RecruitmentCampaign campaign = recruitmentService.getCampaignById(recruitmentId);
-                    
-                    if (campaign == null) {
-                        // Hoạt động không tồn tại
-                        response.sendRedirect(request.getContextPath() + "/myclub?error=not_found&message=" + 
-                            URLEncoder.encode("Không tìm thấy hoạt động tuyển quân", StandardCharsets.UTF_8.name()));
-                        return;
-                    }
-                    
-                    // Kiểm tra quyền truy cập - chỉ cho phép chủ nhiệm CLB (roleId = 1) xem hoạt động
-                    UserClub userClub = userClubDAO.getUserClubManagementRole(currentUser.getUserID(), campaign.getClubID());
-                    
-                    if (userClub == null || userClub.getRoleID() != 1) {
-                        // Không có quyền, chuyển hướng về myclub với thông báo lỗi
-                        response.sendRedirect(request.getContextPath() + "/myclub?error=access_denied&message=" + 
-                            URLEncoder.encode("Bạn không có quyền xem hoạt động tuyển quân này", StandardCharsets.UTF_8.name()));
-                        return;
-                    }
-                    
-                    // Có quyền, lấy dữ liệu và hiển thị
-                    List<RecruitmentStage> stages = recruitmentService.getStagesByCampaign(recruitmentId);
-                    
-                    request.setAttribute("campaign", campaign);
-                    request.setAttribute("stages", stages);
-                    request.getRequestDispatcher("/view/student/chairman/viewRecruitmentCampaign.jsp").forward(request, response);
-                } catch (NumberFormatException e) {
-                    // Xử lý lỗi id không hợp lệ
-                    response.sendRedirect(request.getContextPath() + "/myclub?error=invalid_parameter&message=" + 
-                        URLEncoder.encode("ID hoạt động tuyển quân không hợp lệ", StandardCharsets.UTF_8.name()));
-                    return;
-                } catch (Exception e) {
-                    // Xử lý các lỗi khác
-                    logger.log(Level.SEVERE, "Lỗi khi hiển thị chi tiết hoạt động tuyển quân: ", e);
-                    response.sendRedirect(request.getContextPath() + "/myclub?error=system_error&message=" + 
-                        URLEncoder.encode("Lỗi hệ thống: " + e.getMessage(), StandardCharsets.UTF_8.name()));
-                    return;
-                }
+                String redirectUrl = request.getContextPath() + "/recruitment/recruitmentDetail?recruitmentId=" + idParam;
+                
+                // Log để debug luồng chuyển hướng
+                logger.log(Level.INFO, "Chuyển hướng từ /recruitment/view?id={0} sang {1}", 
+                        new Object[]{idParam, redirectUrl});
+                
+                response.sendRedirect(redirectUrl);
+                return;
             } else if ("/form".equals(pathInfo)) {
                 // Chuyển hướng sang servlet mới để xử lý việc tạo/chỉnh sửa hoạt động tuyển quân
                 String redirectUrl = request.getContextPath() + "/recruitmentForm";

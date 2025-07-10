@@ -1,8 +1,6 @@
 package dal;
 
-import dal.DBContext;
 import models.Users;
-
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -918,4 +916,32 @@ public class UserDAO {
         return false;
     }
 
+    /**
+     * Lấy tên người dùng theo UserID
+     * @param userId ID của người dùng
+     * @return Tên đầy đủ của người dùng, hoặc null nếu không tìm thấy
+     */
+    public String getUserName(String userId) {
+        if (userId == null || userId.trim().isEmpty()) {
+            return null;
+        }
+        
+        String sql = "SELECT FullName FROM Users WHERE UserID = ?";
+        
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, userId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("FullName");
+                }
+            }
+        } catch (SQLException e) {
+            Logger.getLogger(UserDAO.class.getName()).log(Level.SEVERE, 
+                "Error getting user name for userId: " + userId, e);
+        }
+        
+        return null;
+    }
 }

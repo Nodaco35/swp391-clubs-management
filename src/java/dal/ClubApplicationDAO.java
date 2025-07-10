@@ -1,7 +1,6 @@
 package dal;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -135,10 +134,10 @@ public class ClubApplicationDAO {
 
         return count;
     }
-    public void saveClubApplication(ClubApplication app) throws SQLException {
+    public int saveClubApplication(ClubApplication app) throws SQLException {
         Connection conn = DBContext.getConnection();
         String sql = "INSERT INTO ClubApplications (UserID, ClubID, Email, EventID, ResponseID, Status, SubmitDate) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, app.getUserId());
             ps.setInt(2, app.getClubId());
             ps.setString(3, app.getEmail());
@@ -155,9 +154,94 @@ public class ClubApplicationDAO {
                 ps.setNull(7, java.sql.Types.TIMESTAMP);
             }
             ps.executeUpdate();
+            
+            // Lấy ID vừa được tạo
+            int generatedId = -1;
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    generatedId = generatedKeys.getInt(1);
+                }
+            }
+            return generatedId;
         }
     }
 
-    
+    // Lấy thông tin đơn ứng tuyển theo ID
+    public ClubApplication getApplicationById(int applicationId) {
+        ClubApplication application = null;
+        String sql = """
+            SELECT ca.ApplicationID, ca.UserID, ca.ClubID, ca.Email, ca.EventID, ca.ResponseID, 
+                   ca.Status, ca.SubmitDate, c.ClubName, u.FullName
+            FROM ClubApplications ca
+            LEFT JOIN Clubs c ON ca.ClubID = c.ClubID
+            LEFT JOIN Users u ON ca.UserID = u.UserID
+            WHERE ca.ApplicationID = ?
+        """;
+
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, applicationId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                application = new ClubApplication();
+                application.setApplicationId(rs.getInt("ApplicationID"));
+                application.setUserId(rs.getString("UserID"));
+                application.setClubId(rs.getInt("ClubID"));
+                application.setEmail(rs.getString("Email"));
+                application.setEventId(rs.getObject("EventID") != null ? rs.getInt("EventID") : null);
+                application.setResponseId(rs.getInt("ResponseID"));
+                application.setStatus(rs.getString("Status"));
+                application.setSubmitDate(rs.getTimestamp("SubmitDate"));
+                application.setClubName(rs.getString("ClubName"));
+                application.setUserName(rs.getString("FullName"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return application;
+    }
+
+    // Lấy danh sách ứng viên theo chiến dịch tuyển quân và vòng tuyển
+    public List<ClubApplication> getApplicationsByCampaignAndStage(int campaignId, String stageType) {
+        List<ClubApplication> applications = new ArrayList<>();
+        String sql = """
+            SELECT DISTINCT ca.ApplicationID, ca.UserID, ca.ClubID, ca.Email, ca.EventID, 
+                   ca.ResponseID, ca.Status, ca.SubmitDate, u.FullName,
+                   ast.Status as StageStatus, ast.UpdatedAt as StageUpdatedAt
+            FROM ClubApplications ca
+            JOIN ApplicationStages ast ON ca.ApplicationID = ast.ApplicationID
+            JOIN RecruitmentStages rs ON ast.StageID = rs.StageID
+            LEFT JOIN Users u ON ca.UserID = u.UserID
+            WHERE rs.RecruitmentID = ? AND rs.StageName = ?
+            ORDER BY ca.SubmitDate DESC
+        """;
+
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, campaignId);
+            ps.setString(2, stageType);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                ClubApplication app = new ClubApplication();
+                app.setApplicationId(rs.getInt("ApplicationID"));
+                app.setUserId(rs.getString("UserID"));
+                app.setClubId(rs.getInt("ClubID"));
+                app.setEmail(rs.getString("Email"));
+                app.setEventId(rs.getObject("EventID") != null ? rs.getInt("EventID") : null);
+                app.setResponseId(rs.getInt("ResponseID"));
+                app.setStatus(rs.getString("StageStatus")); // Trạng thái trong vòng này
+                app.setSubmitDate(rs.getTimestamp("SubmitDate"));
+                app.setUserName(rs.getString("FullName") != null ? rs.getString("FullName") : rs.getString("Email"));
+                applications.add(app);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return applications;
+    }
 
 }

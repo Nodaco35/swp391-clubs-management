@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import models.ApplicationStage;
+import models.RecruitmentStage;
 
 public class ApplicationStageDAO {
     
@@ -237,6 +238,135 @@ public class ApplicationStageDAO {
         return appStages;
     }
     
+    // Get statistics for candidates by stage and status for a recruitment campaign
+    public java.util.Map<Integer, java.util.Map<String, Integer>> getStageStats(int recruitmentId) {
+        java.util.Map<Integer, java.util.Map<String, Integer>> stageStats = new java.util.HashMap<>();
+        
+        try {
+            conn = DBContext.getConnection();
+            String sql = "SELECT rs.StageID, " +
+                        "ast.Status, " +
+                        "COUNT(*) as StatusCount " +
+                        "FROM RecruitmentStages rs " +
+                        "LEFT JOIN ApplicationStages ast ON rs.StageID = ast.StageID " +
+                        "LEFT JOIN ClubApplications ca ON ast.ApplicationID = ca.ApplicationID " +
+                        "WHERE rs.RecruitmentID = ? " +
+                        "GROUP BY rs.StageID, ast.Status " +
+                        "ORDER BY rs.StageID";
+            
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, recruitmentId);
+            rs = ps.executeQuery();
+            
+            while (rs.next()) {
+                int stageId = rs.getInt("StageID");
+                String status = rs.getString("Status");
+                int count = rs.getInt("StatusCount");
+                
+                if (!stageStats.containsKey(stageId)) {
+                    stageStats.put(stageId, new java.util.HashMap<>());
+                }
+                
+                if (status != null) {
+                    stageStats.get(stageId).put(status.toUpperCase(), count);
+                }
+            }
+            
+            // Calculate totals and fill missing statuses
+            for (Integer stageId : stageStats.keySet()) {
+                java.util.Map<String, Integer> statMap = stageStats.get(stageId);
+                
+                // Ensure all status types exist
+                statMap.putIfAbsent("PENDING", 0);
+                statMap.putIfAbsent("APPROVED", 0);
+                statMap.putIfAbsent("REJECTED", 0);
+                
+                // Calculate total
+                int total = statMap.get("PENDING") + statMap.get("APPROVED") + statMap.get("REJECTED");
+                statMap.put("TOTAL", total);
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+        
+        return stageStats;
+    }
+
+    // Debug method to test database connection and stage stats
+    public void testStageStats() {
+        System.out.println("=== Testing ApplicationStageDAO.getStageStats ===");
+        
+        try {
+            conn = DBContext.getConnection();
+            System.out.println("Database connection: SUCCESS");
+            
+            // Test với recruitmentId = 1
+            java.util.Map<Integer, java.util.Map<String, Integer>> testResult = getStageStats(1);
+            System.out.println("Stage stats for recruitment ID 1: " + testResult.size() + " stages found");
+            
+            for (Integer stageId : testResult.keySet()) {
+                java.util.Map<String, Integer> stats = testResult.get(stageId);
+                System.out.println("Stage " + stageId + " stats: " + stats);
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Database connection ERROR: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+    }
+
+    // Lấy vòng tuyển đầu tiên (APPLICATION) của chiến dịch tuyển quân hiện tại của CLB
+    public RecruitmentStage getFirstRecruitmentStage(int clubId) {
+        RecruitmentStage stage = null;
+        try {
+            conn = DBContext.getConnection();
+            // Truy vấn vòng APPLICATION của chiến dịch hiện tại (ONGOING hoặc UPCOMING gần nhất) của CLB
+            String sql = """
+                SELECT rs.* 
+                FROM RecruitmentStages rs
+                JOIN RecruitmentCampaigns rc ON rs.RecruitmentID = rc.RecruitmentID
+                WHERE rc.ClubID = ? 
+                AND rs.StageName = 'APPLICATION'
+                AND (rc.Status = 'ONGOING' OR rc.Status = 'UPCOMING')
+                ORDER BY rc.StartDate DESC, rs.StartDate ASC
+                LIMIT 1
+                """;
+            
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, clubId);
+            rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                stage = new RecruitmentStage();
+                stage.setStageID(rs.getInt("StageID"));
+                stage.setRecruitmentID(rs.getInt("RecruitmentID"));
+                stage.setStageName(rs.getString("StageName"));
+                stage.setStatus(rs.getString("Status"));
+                stage.setStartDate(rs.getDate("StartDate"));
+                stage.setEndDate(rs.getDate("EndDate"));
+                stage.setLocationID(rs.getInt("LocationID"));
+                stage.setDescription(rs.getString("Description"));
+                stage.setCreatedAt(rs.getTimestamp("CreatedAt"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (ps != null) ps.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return stage;
+    }
+
     // Helper method to close database resources
     private void closeResources() {
         try {

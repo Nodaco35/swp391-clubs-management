@@ -6,6 +6,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 import jakarta.servlet.ServletException;
@@ -15,7 +16,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import models.ApplicationFormTemplate;
 import models.ApplicationResponse;
+import models.ApplicationStage;
 import models.ClubApplication;
+import models.RecruitmentStage;
 import models.Users;
 
 
@@ -24,6 +27,7 @@ public class ApplicationFormServlet extends HttpServlet {
     private ApplicationResponseDAO responseDAO;
     private ClubApplicationDAO clubDAO;
     private UserDAO userDAO;
+    private ApplicationStageDAO applicationStageDAO;
    
     @Override
     public void init() throws ServletException {
@@ -31,6 +35,7 @@ public class ApplicationFormServlet extends HttpServlet {
         responseDAO = new ApplicationResponseDAO();
         clubDAO = new ClubApplicationDAO();
         userDAO = new UserDAO();
+        applicationStageDAO = new ApplicationStageDAO();
     }
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -229,7 +234,6 @@ public class ApplicationFormServlet extends HttpServlet {
             java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(cal.getTimeInMillis());
             clubApp.setSubmitDate(currentTimestamp);
             
-            System.out.println("Debug - Đặt thời gian gửi đơn: " + currentTimestamp);
             
             // Lấy thông tin người dùng từ cơ sở dữ liệu
             Users user = userDAO.getUserByID(userId);
@@ -246,7 +250,37 @@ public class ApplicationFormServlet extends HttpServlet {
             // Đặt email, đảm bảo không null
             clubApp.setEmail(email != null ? email : "");
             
-            clubDAO.saveClubApplication(clubApp);
+            // Lưu đơn đăng ký và lấy ApplicationID được tạo ra
+            int applicationId = clubDAO.saveClubApplication(clubApp);
+            
+            // Tìm vòng tuyển đầu tiên (APPLICATION) của chiến dịch tuyển quân hiện tại
+            try {
+                // Tìm chiến dịch tuyển quân hiện tại cho CLB này
+                RecruitmentStage firstStage = applicationStageDAO.getFirstRecruitmentStage(clubId);
+                
+                if (firstStage != null) {
+                    // Tạo bản ghi trong ApplicationStages để liên kết đơn với vòng đầu tiên
+                    ApplicationStage appStage = new ApplicationStage();
+                    appStage.setApplicationID(applicationId);
+                    appStage.setStageID(firstStage.getStageID());
+                    appStage.setStatus("PENDING");
+                    
+                    // Sử dụng các trường hiện có trong model ApplicationStage
+                    appStage.setUpdatedBy(null); // Cập nhật tự động, không có người dùng cụ thể
+                    appStage.setStatusDate(new Date()); // Đặt thời gian cập nhật trạng thái
+                    
+                    // Lưu vào bảng ApplicationStages
+                    int appStageId = applicationStageDAO.createApplicationStage(appStage);
+                    
+                    System.out.println("Đã tạo bản ghi ApplicationStages #" + appStageId + " cho đơn ứng tuyển #" + applicationId + " ở vòng " + firstStage.getStageName());
+                } else {
+                    System.out.println("Không tìm thấy vòng tuyển nào cho CLB #" + clubId);
+                }
+            } catch (Exception e) {
+                // Ghi log lỗi nhưng không ngừng xử lý
+                System.err.println("Lỗi khi tạo bản ghi ApplicationStages: " + e.getMessage());
+                e.printStackTrace();
+            }
             
             // Chuyển hướng hoặc hiển thị thành công
             response.sendRedirect(request.getContextPath() + "/applicationForm?success=true&templateId=" + templateId);
