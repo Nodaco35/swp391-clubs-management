@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -12,7 +13,7 @@
         <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/club-detail.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/club-detail.css?v=<%= System.currentTimeMillis() %>">
     </head>
     <body>
         <jsp:include page="../components/header.jsp" />
@@ -100,7 +101,6 @@
                 </div>
 
                 <!-- Club President -->
-                <!-- Club President -->
                 <%
                     dal.UserClubDAO userClubDAO = new dal.UserClubDAO();
                     int clubIdInt = Integer.parseInt(clubID);
@@ -111,16 +111,18 @@
                 <div class="president-card">
                     <c:choose>
                         <c:when test="${presidentUser != null}">
-                            <div class="flex items-center gap-4">
-                                <div class="president-info">
-                                    <p class="president-name">${presidentUser.fullName}</p>
-                                    <p class="president-role">Chủ nhiệm</p>
-                                    <div class="president-email">
-                                        <i class="fas fa-envelope text-primary mr-2"></i>
-                                        <span>${presidentUser.email}</span>
-                                    </div>
-                                </div>
+                            <!-- ✅ Avatar đưa lên trước -->
+                           <!-- <img src="${pageContext.request.contextPath}/images/default-user.jpg?t=<%= System.currentTimeMillis() %>" 
+                                 alt="${presidentUser.fullName}" class="president-image"> -->
 
+                            <!-- ✅ Thông tin căn trái -->
+                            <div class="president-info">
+                                <p class="president-name">${presidentUser.fullName}</p>
+                                <p class="president-role">Chủ nhiệm</p>
+                                <div class="president-email">
+                                    <i class="fas fa-envelope text-primary mr-2"></i>
+                                    <span>${presidentUser.email}</span>
+                                </div>
                             </div>
                         </c:when>
                         <c:otherwise>
@@ -129,17 +131,57 @@
                     </c:choose>
                 </div>
 
-                <!-- Sự kiện Câu Lạc Bộ -->
 
+                <!-- Events Section -->
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Sự Kiện Câu Lạc Bộ</h2>
                 <div class="bg-white rounded-2xl shadow-lg p-8">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Sự Kiện Của Câu Lạc Bộ</h2>
+
+                    <%
+                        java.util.List<models.Events> events = (java.util.List<models.Events>) request.getAttribute("clubEvents");
+                        int eventsPerPage = 3;
+                        int currentPage = 1;
+                        try {
+                            if (request.getParameter("page") != null) {
+                                currentPage = Integer.parseInt(request.getParameter("page"));
+                            }
+                        } catch (NumberFormatException e) {
+                            currentPage = 1;
+                        }
+
+                        int totalEvents = (events != null) ? events.size() : 0;
+                        int totalPages = (int) Math.ceil((double) totalEvents / eventsPerPage);
+                        int startIndex = (currentPage - 1) * eventsPerPage;
+                        int endIndex = Math.min(startIndex + eventsPerPage, totalEvents);
+                    %>
+
                     <c:choose>
                         <c:when test="${not empty clubEvents}">
                             <div class="events-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                <c:forEach var="event" items="${clubEvents}">
-                                    <c:set var="event" value="${event}" scope="request" />
-                                    <jsp:include page="../components/event-card.jsp" />
-                                </c:forEach>
+                                <%
+                                    for (int i = startIndex; i < endIndex; i++) {
+                                        request.setAttribute("event", events.get(i));
+                                %>
+                                <jsp:include page="../components/event-card.jsp" />
+                                <%
+                                    }
+                                %>
+                            </div>
+
+                            <div class="pagination">
+                                <c:if test="<%= currentPage > 1 %>">
+                                    <a href="?id=${displayClub.clubID}&page=<%= currentPage - 1 %>" class="pagination-btn">Trước</a>
+                                </c:if>
+                                <%
+                                    for (int pageNum = 1; pageNum <= totalPages; pageNum++) {
+                                        String activeClass = (pageNum == currentPage) ? "active" : "";
+                                %>
+                                <a href="?id=${displayClub.clubID}&page=<%= pageNum %>" class="pagination-btn <%= activeClass %>"><%= pageNum %></a>
+                                <%
+                                    }
+                                %>
+                                <c:if test="<%= currentPage < totalPages %>">
+                                    <a href="?id=${displayClub.clubID}&page=<%= currentPage + 1 %>" class="pagination-btn">Sau</a>
+                                </c:if>
                             </div>
                         </c:when>
                         <c:otherwise>
@@ -147,6 +189,8 @@
                         </c:otherwise>
                     </c:choose>
                 </div>
+
+
         </section>
 
         <jsp:include page="../components/footer.jsp" />
