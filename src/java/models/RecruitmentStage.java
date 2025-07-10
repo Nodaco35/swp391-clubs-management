@@ -191,6 +191,23 @@ public class RecruitmentStage {
         this.locationId = locationId;
     }
 
+    /**
+     * Lấy địa điểm dưới dạng chuỗi (tên hoặc địa chỉ nếu có)
+     * @return Địa điểm của vòng tuyển
+     */
+    public String getLocation() {
+        if (locationName != null && !locationName.trim().isEmpty()) {
+            if (locationAddress != null && !locationAddress.trim().isEmpty()) {
+                return locationName + " - " + locationAddress;
+            }
+            return locationName;
+        }
+        if (locationAddress != null && !locationAddress.trim().isEmpty()) {
+            return locationAddress;
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         return "RecruitmentStage{" +
