@@ -658,24 +658,34 @@ CREATE TABLE EventTerms (
 );
 -- Giai đoạn cho Hackathon AI
 INSERT INTO EventTerms (EventID, TermName, TermStart, TermEnd) VALUES
-(11, 'Trước sự kiện', '2025-07-01', '2025-07-14'),
-(11, 'Trong sự kiện', '2025-07-15', '2025-07-15'),
-(11, 'Sau sự kiện', '2025-07-16', '2025-07-17'),
+(11, 'Trước sự kiện', '2025-08-01', '2025-08-11'),
+(11, 'Trong sự kiện', '2025-08-12', '2025-08-12'),
+(11, 'Sau sự kiện', '2025-08-13', '2025-08-14'),
 -- Giai đoạn cho Code War
 (12, 'Trước sự kiện', '2025-07-20', '2025-07-30'),
-(12, 'Trong sự kiện', '2025-07-31', '2025-07-31');
+(12, 'Trong sự kiện', '2025-07-31', '2025-07-31'),
+(12, 'Sau sự kiện', '2025-08-01', '2025-08-02');
 
 CREATE TABLE Tasks (
     TaskID INT PRIMARY KEY AUTO_INCREMENT,
-    ParentTaskID INT, -- NULL nếu là nhiệm vụ cấp cao nhất (dành cho ban)
+    ParentTaskID INT, -- NULL nếu là nhiệm vụ dành cho ban, không null - nhiệm vụ cho thành viên trong từng ban
     TermID INT,
     EventID INT,
+
+    AssigneeType ENUM('User', 'Department') NOT NULL,
+    UserID VARCHAR(10),
+    DepartmentID INT,
     ClubID INT,
+
     Title VARCHAR(100) NOT NULL,
     Description TEXT,
-    Status ENUM('ToDo', 'InProgress', 'Review', 'Done') DEFAULT 'ToDo',
-    Priority ENUM('LOW', 'MEDIUM', 'HIGH') DEFAULT 'MEDIUM',
-    ProgressPercent INT DEFAULT 0,
+    Content TEXT,
+
+    Status ENUM('ToDo', 'InProgress', 'Review', 'Rejected','Done') DEFAULT 'ToDo',
+    Rating ENUM('Positive', 'Neutral', 'Negative') ,
+    LastRejectReason TEXT NULL,
+
+    ReviewComment TEXT,
     StartDate DATETIME,
     EndDate DATETIME,
     CreatedBy VARCHAR(10),
@@ -683,28 +693,8 @@ CREATE TABLE Tasks (
     FOREIGN KEY (EventID) REFERENCES Events(EventID),
     FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID),
     FOREIGN KEY (CreatedBy) REFERENCES Users(UserID),
-    FOREIGN KEY (TermID) REFERENCES EventTerms(TermID)
-);
--- Hackathon AI
-INSERT INTO Tasks (ParentTaskID, TermID, EventID, ClubID, Title, Description, Status, Priority, ProgressPercent, StartDate, EndDate, CreatedBy) VALUES
-(NULL, 1, 11, 4, 'Thiết kế poster sự kiện', 'Thiết kế và duyệt poster truyền thông cho sự kiện Hackathon AI.', 'ToDo', 'MEDIUM', 0, '2025-07-05 08:00:00', '2025-07-10 17:00:00', 'U012'),
-(NULL, 1, 11, 4, 'Chuẩn bị đề bài Hackathon', 'Xây dựng bộ đề thi cho Hackathon AI', 'ToDo', 'HIGH', 0, '2025-07-01 09:00:00', '2025-07-14 17:00:00', 'U012'),
-(NULL, 2, 11, 4, 'Hỗ trợ kỹ thuật tại sự kiện', 'Giải quyết các sự cố kỹ thuật trong suốt sự kiện', 'ToDo', 'MEDIUM', 0, '2025-07-15 07:30:00', '2025-07-15 14:00:00', 'U012'),
-(NULL, 2, 11, 4, 'Ghi hình & Livestream sự kiện', 'Phụ trách quay video và livestream trên fanpage CLB.', 'ToDo', 'HIGH', 0, '2025-07-15 07:45:00', '2025-07-15 14:00:00', 'U012'),
-(NULL, 3, 11, 4, 'Tổng kết kết quả và gửi email cảm ơn', 'Tổng hợp kết quả thi, gửi thư cảm ơn đến người tham gia', 'ToDo', 'LOW', 0, '2025-07-16 09:00:00', '2025-07-17 17:00:00', 'U012'),
--- Code War
-(NULL, 4, 12, 4, 'Ra đề và chuẩn bị test case', 'Xây dựng đề thi và bộ test case cho cuộc thi Code War.', 'ToDo', 'HIGH', 0, '2025-07-20 08:00:00', '2025-07-30 17:00:00', 'U012'),
-(NULL, 5, 12, 4, 'Quản lý hệ thống thi và hỗ trợ thí sinh', 'Theo dõi hệ thống thi, xử lý lỗi kỹ thuật và hỗ trợ thí sinh khi cần.', 'ToDo', 'MEDIUM', 0, '2025-07-31 08:00:00', '2025-07-31 13:00:00', 'U012');
+    FOREIGN KEY (TermID) REFERENCES EventTerms(TermID),
 
-
-CREATE TABLE TaskAssignees (
-    TaskAssigneeID INT PRIMARY KEY AUTO_INCREMENT,
-    TaskID INT NOT NULL,
-    AssigneeType ENUM('User', 'Department') NOT NULL,
-    UserID VARCHAR(10),
-    DepartmentID INT,
-
-    FOREIGN KEY (TaskID) REFERENCES Tasks(TaskID),
     FOREIGN KEY (UserID) REFERENCES Users(UserID),
     FOREIGN KEY (DepartmentID) REFERENCES Departments(DepartmentID),
 
@@ -713,39 +703,19 @@ CREATE TABLE TaskAssignees (
         (AssigneeType = 'Department' AND DepartmentID IS NOT NULL AND UserID IS NULL)
     )
 );
-INSERT INTO TaskAssignees (TaskID, AssigneeType, DepartmentID) VALUES 
-(1, 'Department', 2),   -- Ban Truyền thông
-(2, 'Department', 1),   -- Ban Nội dung
-(3, 'Department', 5),   -- Ban Hậu cần
-(3, 'Department', 2),   -- Ban Truyền thông
-(4, 'Department', 2),   -- Ban Truyền thông
-(5, 'Department', 1),   -- Ban Nội dung
-(6, 'Department', 1),   -- Ban Nội dung
-(7, 'Department', 5);   -- Ban Hậu cần
-CREATE TABLE TaskProgressLogs (
-    LogID INT PRIMARY KEY AUTO_INCREMENT,
-    TaskID INT NOT NULL,
-    UserID VARCHAR(10) NOT NULL,
-    Progress INT NOT NULL, -- 0 ~ 100 (%)
-    Note TEXT, -- “Đã làm phần báo cáo xong…”
-    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (TaskID) REFERENCES Tasks(TaskID),
-    FOREIGN KEY (UserID) REFERENCES Users(UserID)
-);
 
 CREATE TABLE TaskFeedbacks (
     FeedbackID INT PRIMARY KEY AUTO_INCREMENT,
     TaskID INT NOT NULL,
-    ReviewerID VARCHAR(10) NOT NULL,
-    Rating ENUM('Positive', 'Neutral', 'Negative') DEFAULT 'Neutral',
+
     Comment TEXT,
-    ProgressAdjustment INT DEFAULT 0, -- ±%
+    Status ENUM('ToDo', 'InProgress', 'Review', 'Rejected','Done') DEFAULT 'ToDo',
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (TaskID) REFERENCES Tasks(TaskID),
-    FOREIGN KEY (ReviewerID) REFERENCES Users(UserID)
+    FOREIGN KEY (TaskID) REFERENCES Tasks(TaskID)
 );
+
 -- ================================================================================
 -- ========================================
 -- MEETINGS
