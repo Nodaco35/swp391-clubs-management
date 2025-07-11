@@ -717,7 +717,7 @@ public class RecruitmentFormServlet extends HttpServlet {
                     appStage.setStageName("APPLICATION"); // Sử dụng ENUM value thay vì tên tiếng Việt
                     appStage.setStartDate(appStartDate);
                     appStage.setEndDate(appEndDate);
-                    appStage.setStatus("UPCOMING"); // Mặc định là sắp diễn ra
+                    // Status sẽ được tính toán dựa trên ngày trong DAO
                     appStage.setLocationID(defaultLocationId); // Sử dụng ID hợp lệ từ bảng Locations
                     appStage.setDescription("Vòng nộp đơn đăng ký");
                     stages.add(appStage);
@@ -753,7 +753,7 @@ public class RecruitmentFormServlet extends HttpServlet {
                 interviewStage.setStageName("INTERVIEW"); // Sử dụng ENUM value thay vì tên tiếng Việt
                 interviewStage.setStartDate(interviewStartDate);
                 interviewStage.setEndDate(interviewEndDate);
-                interviewStage.setStatus("UPCOMING");
+                // Status sẽ được tính toán dựa trên ngày trong DAO
                 
                 // Xử lý locationId nếu có
                 if (interviewLocationIdStr != null && !interviewLocationIdStr.isEmpty()) {
@@ -846,7 +846,7 @@ public class RecruitmentFormServlet extends HttpServlet {
                         challengeStage.setStageName("CHALLENGE"); // Sử dụng ENUM value thay vì tên tiếng Việt
                         challengeStage.setStartDate(challengeStartDate);
                         challengeStage.setEndDate(challengeEndDate);
-                        challengeStage.setStatus("UPCOMING");
+                        // Status sẽ được tính toán dựa trên ngày trong DAO
                         challengeStage.setLocationID(defaultLocationIdChallenge); // Sử dụng ID hợp lệ từ bảng Locations
                         
                         // Thêm mô tả thử thách nếu có
@@ -1104,7 +1104,7 @@ public class RecruitmentFormServlet extends HttpServlet {
                     interviewStage.setStageName("INTERVIEW"); // Dùng ENUM value
                     interviewStage.setStartDate(interviewStartDate);
                     interviewStage.setEndDate(interviewEndDate);
-                    interviewStage.setStatus("UPCOMING");
+                    // Status sẽ được tính toán dựa trên ngày trong DAO
                     interviewStage.setLocationID(interviewLocationId > 0 ? interviewLocationId : 0);
                     interviewStage.setDescription("Vòng phỏng vấn");
                     int stageId = stageDAO.createRecruitmentStage(interviewStage);
@@ -1150,7 +1150,7 @@ public class RecruitmentFormServlet extends HttpServlet {
                     challengeStage.setStageName("CHALLENGE"); // Dùng ENUM value
                     challengeStage.setStartDate(challengeStartDate);
                     challengeStage.setEndDate(challengeEndDate);
-                    challengeStage.setStatus("UPCOMING");
+                    // Status sẽ được tính toán dựa trên ngày trong DAO
                     
                     // Get a valid location ID from the database
                     LocationDAO locationDAO = new LocationDAO();

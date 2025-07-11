@@ -21,14 +21,14 @@
     <!-- Toast Container -->
     <div class="recruitment-toast-container" id="toastContainer"></div>
     
-    <div class="container mx-auto px-4 py-8">
-        <div class="flex items-center mb-6">
-            <a href="${pageContext.request.contextPath}/recruitment/list?clubId=${campaign.clubID}" class="inline-flex items-center text-blue-500 hover:text-blue-700 mr-4">
+    <div class="recruitment-container">
+        <div class="page-header">
+            <a href="${pageContext.request.contextPath}/recruitment/list?clubId=${campaign.clubID}" class="back-btn">
                 <i class="fas fa-arrow-left mr-2"></i> Quay lại
             </a>
-            <h1 class="text-3xl font-bold text-gray-800">Chi Tiết Chiến Dịch Tuyển Quân</h1>
+            <h1 class="page-title">Chi Tiết Chiến Dịch Tuyển Quân</h1>
         </div>
-        <div class="campaign-info full-width">
+        <div class="campaign-info">
                 <div class="campaign-main">
                     <div class="campaign-title-section">
                         <h1 class="campaign-title">${campaign.title}</h1>
@@ -68,7 +68,7 @@
                 
                 <div class="campaign-actions">
                     <a href="${pageContext.request.contextPath}/recruitment/form/edit?recruitmentId=${campaign.recruitmentID}" 
-                       class="btn btn-outline">
+                       class="recruitment-btn btn-outline">
                         <i class="fas fa-edit"></i> Chỉnh sửa
                     </a>
                 </div>
@@ -125,7 +125,7 @@
                 </div>
             </div>
 
-            <!-- Stages Overview Cards (like in the image) -->
+            <!-- Stages Overview Cards -->
             <div class="stages-cards-grid">
                 <c:forEach var="stage" items="${stages}" varStatus="status">
                     <div class="stage-overview-card">
@@ -177,7 +177,7 @@
                                     <div class="stat-number" data-stage-id="${stage.stageID}" data-stat="pending">
                                         ${stageStats[stage.stageID]['PENDING'] != null ? stageStats[stage.stageID]['PENDING'] : 0}
                                     </div>
-                                    <div class="stat-label">Chờ</div>
+                                    <div class="stat-label">Đang Chờ</div>
                                 </div>
                             </div>
                             <div class="stat-row">
@@ -185,7 +185,7 @@
                                     <div class="stat-number" data-stage-id="${stage.stageID}" data-stat="approved">
                                         ${stageStats[stage.stageID]['APPROVED'] != null ? stageStats[stage.stageID]['APPROVED'] : 0}
                                     </div>
-                                    <div class="stat-label">Duyệt</div>
+                                    <div class="stat-label">Đã Duyệt</div>
                                 </div>
                                 <div class="stat-item rejected">
                                     <div class="stat-number" data-stage-id="${stage.stageID}" data-stat="rejected">
@@ -198,7 +198,7 @@
                         
                         <div class="stage-card-actions">
                             <div class="notification-buttons">
-                                <button class="btn btn-primary btn-sm show-notification-modal-btn" 
+                                <button class="recruitment-btn btn-primary btn-sm show-notification-modal-btn" 
                                         data-stage-id="${stage.stageID}" 
                                         data-stage-name="${stage.stageName}">
                                     <i class="fas fa-bell"></i> Gửi thông báo
@@ -215,7 +215,7 @@
                 <div class="stage-detail-header">
                     <h3><i class="fas fa-file-alt"></i> Vòng nộp đơn</h3>
                     <div class="header-actions">
-                        <button class="btn btn-primary" onclick="viewFormResponses('APPLICATION')">
+                        <button class="recruiment-btn btn-primary" onclick="viewFormResponses('APPLICATION')">
                             <i class="fas fa-eye"></i> Xem chi tiết đơn
                         </button>
                     </div>
@@ -231,7 +231,6 @@
                                         <th>Email</th>
                                         <th>Ngày nộp</th>
                                         <th>Trạng thái</th>
-                                        <th>Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody id="application-candidates">
@@ -257,7 +256,7 @@
                                 </div>
                             </c:if>
                         </c:forEach>
-                        <button class="btn btn-primary" onclick="viewFormResponses('INTERVIEW')">
+                        <button class="recruitment-btn btn-primary" onclick="viewFormResponses('INTERVIEW')">
                             <i class="fas fa-eye"></i> Xem chi tiết đơn
                         </button>
                     </div>
@@ -273,7 +272,6 @@
                                         <th>Email</th>
                                         <th>Ngày nộp đơn</th>
                                         <th>Trạng thái</th>
-                                        <th>Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody id="interview-candidates">
@@ -291,7 +289,7 @@
                 <div class="stage-detail-header">
                     <h3><i class="fas fa-trophy"></i> Vòng thử thách</h3>
                     <div class="header-actions">
-                        <button class="btn btn-primary" onclick="viewFormResponses('CHALLENGE')">
+                        <button class="recruitment-btn btn-primary" onclick="viewFormResponses('CHALLENGE')">
                             <i class="fas fa-eye"></i> Xem chi tiết đơn
                         </button>
                     </div>
@@ -307,7 +305,6 @@
                                         <th>Email</th>
                                         <th>Ngày hoàn thành</th>
                                         <th>Trạng thái</th>
-                                        <th>Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody id="challenge-candidates">
@@ -329,9 +326,9 @@
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body">
-                <!-- Layout 2 cột -->
+                <!-- Layout dạng cột dọc -->
                 <div class="notification-layout">
-                    <!-- Cột 1: Soạn thông báo -->
+                    <!-- 1. Soạn thông báo -->
                     <div class="notification-compose-column">
                         <h4 class="section-title">Soạn thông báo</h4>
                         <form id="notificationForm">
@@ -356,13 +353,13 @@
                         </div>
                     </div>
                     
-                    <!-- Cột 2: Danh sách người nhận -->
+                    <!-- 2. Danh sách người nhận -->
                     <div class="notification-recipients-column">
                         <h4 class="section-title">Danh sách người nhận</h4>
                         <div class="recipients-header">
                             <div class="form-group">
                                 <label for="recipientFilter">Lọc theo trạng thái:</label>
-                                <select id="recipientFilter" class="form-control">
+                                <select id="recipientFilter" class="form-control" onchange="filterRecipients(this.value)">
                                     <option value="">Tất cả ứng viên</option>
                                     <option value="approved">Đã duyệt</option>
                                     <option value="rejected">Đã từ chối</option>
@@ -374,7 +371,8 @@
                                     <input type="checkbox" id="selectAllRecipients">
                                     <label for="selectAllRecipients">Chọn tất cả</label>
                                 </div>
-                                <span class="selection-count"><span id="selectedCount">0</span> người đã chọn</span>
+                                <span class="selection-count">
+                                    <span id="selectedCount">0</span> người đã chọn</span>
                             </div>
                         </div>
                         <div class="recipients-list" id="recipientsList">
@@ -384,39 +382,36 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Phần mẫu thông báo ở dưới -->
-                <div class="templates-section">
-                    <h4 class="section-title">Mẫu thông báo</h4>
-                    <div class="form-group">
-                        <label for="templateSelect">Chọn mẫu thông báo:</label>
-                        <div class="template-select-container">
-                            <select id="templateSelect" class="form-control">
-                                <option value="">-- Chọn mẫu thông báo --</option>
-                            </select>
-                            <button type="button" class="btn btn-primary" id="loadTemplateBtn">
-                                <i class="fas fa-download"></i> Tải mẫu
-                            </button>
-                        </div>
-                    </div>
                     
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="saveAsTemplate">
-                            <label for="saveAsTemplate">Lưu làm mẫu thông báo</label>
+                    <!-- 3. Mẫu thông báo -->
+                    <div class="templates-section">
+                        <h4 class="section-title">Mẫu thông báo</h4>
+                        <div class="form-group">
+                            <label for="templateSelect">Chọn mẫu thông báo:</label>
+                            <div class="template-select-container">
+                                <select id="templateSelect" class="form-control">
+                                    <option value="">-- Chọn mẫu thông báo --</option>
+                                </select>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="form-group template-name-group" style="display: none;">
-                        <label for="templateName">Tên mẫu thông báo:</label>
-                        <input type="text" id="templateName" class="form-control" placeholder="Nhập tên mẫu thông báo">
+                        
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="saveAsTemplate">
+                                <label for="saveAsTemplate">Lưu làm mẫu thông báo</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group template-name-group" style="display: none;">
+                            <label for="templateName">Tên mẫu thông báo:</label>
+                            <input type="text" id="templateName" class="form-control" placeholder="Nhập tên mẫu thông báo">
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline cancel-btn">Hủy</button>
-                <button type="button" class="btn btn-primary" id="sendNotificationBtn" onclick="confirmSendNotification()">
+                <button type="button" class="recruitment-btn btn-outline cancel-btn">Hủy</button>
+                <button type="button" class="recruitment-btn btn-primary" id="sendNotificationBtn" onclick="confirmSendNotification()">
                     <i class="fas fa-paper-plane"></i> Gửi thông báo
                 </button>
             </div>
@@ -445,38 +440,14 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline cancel-btn">Hủy</button>
-                <button type="button" class="btn btn-primary" id="confirmSendBtn">
+                <button type="button" class="recruitment-btn btn-outline cancel-btn">Hủy</button>
+                <button type="button" class="recruitment-btn btn-primary" id="confirmSendBtn">
                     <i class="fas fa-check"></i> Xác nhận gửi
                 </button>
             </div>
         </div>
     </div>
-
-    <!-- Candidate Detail Modal -->
-    <div id="candidateModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Chi tiết ứng viên</h3>
-                <span class="close">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div id="candidateDetails">
-                    <!-- Candidate details will be loaded here -->
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline cancel-btn">Đóng</button>
-                <button class="btn btn-success approve-btn" style="display: none;">
-                    <i class="fas fa-check"></i> Duyệt
-                </button>
-                <button class="btn btn-danger reject-btn" style="display: none;">
-                    <i class="fas fa-times"></i> Từ chối
-                </button>
-            </div>
-        </div>
-    </div>
-
+    
     <!-- Toast Notifications -->
     <div id="successToast" class="toast success">
         <i class="fas fa-check-circle"></i>
@@ -503,16 +474,17 @@
             stageName: '${stage.stageName}',
             status: '${stage.status}',
             stats: {
-                total: 0,
-                pending: 0,
-                approved: 0,
-                rejected: 0
+                // Get stats from the stageStats object passed from the server
+                total: ${stageStats[stage.stageID]['TOTAL'] != null ? stageStats[stage.stageID]['TOTAL'] : 0},
+                pending: ${stageStats[stage.stageID]['PENDING'] != null ? stageStats[stage.stageID]['PENDING'] : 0},
+                approved: ${stageStats[stage.stageID]['APPROVED'] != null ? stageStats[stage.stageID]['APPROVED'] : 0},
+                rejected: ${stageStats[stage.stageID]['REJECTED'] != null ? stageStats[stage.stageID]['REJECTED'] : 0}
             }
         });
         </c:forEach>
     </script>
     
-    <script src="${pageContext.request.contextPath}/js/recruitmentCommon.js?v=<%= System.currentTimeMillis() %>"></script>
+    <script src="${pageContext.request.contextPath}/js/recruitmentCommon.js?v=<%= System.currentTimeMillis() %>"></script>s
     <script src="${pageContext.request.contextPath}/js/viewRecruitmentCampaign.js?v=<%= System.currentTimeMillis() %>"></script>
 </body>
 </html>

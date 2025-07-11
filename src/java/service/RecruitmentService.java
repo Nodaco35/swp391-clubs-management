@@ -201,4 +201,9 @@ public class RecruitmentService {
         return !currentDate.before(stage.getStartDate()) && 
                !currentDate.after(stage.getEndDate());
     }
+    
+    // Đồng bộ tất cả trạng thái vòng tuyển dựa trên ngày hiện tại
+    public int syncAllStageStatus() {
+        return stageDAO.syncAllStagesStatus();
+    }
 }

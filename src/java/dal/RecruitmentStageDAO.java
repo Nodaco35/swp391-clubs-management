@@ -39,32 +39,28 @@ public class RecruitmentStageDAO {
             ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setInt(1, stage.getRecruitmentID());
             ps.setString(2, stage.getStageName());
-            ps.setString(3, stage.getStatus() != null ? stage.getStatus() : "UPCOMING");
+            
+            // Tính toán status dựa trên ngày bắt đầu và kết thúc
+            String status = stage.getStatus();
+            if (status == null || status.isEmpty()) {
+                status = determineStageStatus(stage.getStartDate(), stage.getEndDate());
+            }
+            ps.setString(3, status);
+            
             ps.setTimestamp(4, stage.getStartDate() != null ? new Timestamp(stage.getStartDate().getTime()) : null);
             ps.setTimestamp(5, stage.getEndDate() != null ? new Timestamp(stage.getEndDate().getTime()) : null);
             ps.setInt(6, stage.getLocationID());
             ps.setString(7, stage.getDescription() != null ? stage.getDescription() : "");
             ps.setTimestamp(8, new Timestamp(new Date().getTime())); // Current timestamp
             
-            System.out.println("DEBUG - RecruitmentStageDAO: Thực thi SQL insert stage: " + 
-                               "RecruitmentID=" + stage.getRecruitmentID() + 
-                               ", StageName=" + stage.getStageName() + 
-                               ", StartDate=" + (stage.getStartDate() != null ? stage.getStartDate() : "null") + 
-                               ", EndDate=" + (stage.getEndDate() != null ? stage.getEndDate() : "null"));
-            
             int affectedRows = ps.executeUpdate();
             if (affectedRows > 0) {
                 rs = ps.getGeneratedKeys();
                 if (rs.next()) {
                     newStageId = rs.getInt(1);
-                    System.out.println("DEBUG - RecruitmentStageDAO: Tạo vòng thành công, ID=" + newStageId);
                 }
-            } else {
-                System.out.println("DEBUG - RecruitmentStageDAO: Không có dòng nào được thêm vào DB");
             }
         } catch (SQLException e) {
-            System.out.println("DEBUG - RecruitmentStageDAO: Lỗi SQL Exception: " + e.getMessage());
-            System.out.println("DEBUG - SQL State: " + e.getSQLState() + ", Error Code: " + e.getErrorCode());
             e.printStackTrace();
         } catch (Exception e) {
             System.out.println("DEBUG - RecruitmentStageDAO: Lỗi Exception khác: " + e.getMessage());
@@ -85,7 +81,14 @@ public class RecruitmentStageDAO {
                     + "WHERE StageID = ? AND RecruitmentID = ?";
             ps = conn.prepareStatement(sql);
             ps.setString(1, stage.getStageName());
-            ps.setString(2, stage.getStatus());
+            
+            // Tính toán status dựa trên ngày bắt đầu và kết thúc khi cập nhật
+            String status = stage.getStatus();
+            if (status == null || status.isEmpty()) {
+                status = determineStageStatus(stage.getStartDate(), stage.getEndDate());
+            }
+            ps.setString(2, status);
+            
             ps.setTimestamp(3, stage.getStartDate() != null ? new Timestamp(stage.getStartDate().getTime()) : null);
             ps.setTimestamp(4, stage.getEndDate() != null ? new Timestamp(stage.getEndDate().getTime()) : null);
             ps.setInt(5, stage.getLocationID());
@@ -261,6 +264,57 @@ public class RecruitmentStageDAO {
             return false;
         } finally {
             closeResources();
+        }
+    }
+    
+    // Cập nhật trạng thái của tất cả các vòng tuyển dựa trên ngày hiện tại
+    public int syncAllStagesStatus() {
+        int updatedCount = 0;
+        try {
+            conn = DBContext.getConnection();
+            
+            // Cập nhật vòng đã kết thúc
+            String sqlClosed = "UPDATE RecruitmentStages SET Status = 'CLOSED' WHERE EndDate < CURRENT_DATE";
+            ps = conn.prepareStatement(sqlClosed);
+            updatedCount += ps.executeUpdate();
+            
+            // Cập nhật vòng đang diễn ra
+            String sqlOngoing = "UPDATE RecruitmentStages SET Status = 'ONGOING' " +
+                               "WHERE StartDate <= CURRENT_DATE AND EndDate >= CURRENT_DATE";
+            ps = conn.prepareStatement(sqlOngoing);
+            updatedCount += ps.executeUpdate();
+            
+            // Cập nhật vòng sắp tới
+            String sqlUpcoming = "UPDATE RecruitmentStages SET Status = 'UPCOMING' " +
+                                "WHERE StartDate > CURRENT_DATE";
+            ps = conn.prepareStatement(sqlUpcoming);
+            updatedCount += ps.executeUpdate();
+            
+            System.out.println("DEBUG - RecruitmentStageDAO: Đã đồng bộ " + updatedCount + " trạng thái vòng tuyển");
+            
+        } catch (SQLException e) {
+            System.out.println("DEBUG - RecruitmentStageDAO: Lỗi đồng bộ status: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+        return updatedCount;
+    }
+    
+    // Helper method to determine stage status based on dates
+    public String determineStageStatus(Date startDate, Date endDate) {
+        if (startDate == null || endDate == null) {
+            return "UPCOMING"; // Default if dates not provided
+        }
+        
+        Date today = new Date(); // Current date
+        
+        if (today.before(startDate)) {
+            return "UPCOMING";
+        } else if (today.after(endDate)) {
+            return "CLOSED";
+        } else {
+            return "ONGOING";
         }
     }
     
