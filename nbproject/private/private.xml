@@ -3,7 +3,15 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/SU25/SWP/Trash/V9/swp391-clubs-management/web/view/events-page/header.jsp</file>
+            <file>file:/C:/SU25/SWP/Trash/V10/swp391-clubs-management/src/java/dal/ClubDAO.java</file>
+            <file>file:/C:/SU25/SWP/Trash/V10/swp391-clubs-management/src/java/dal/ClubRequestModelDAO.java</file>
+            <file>file:/C:/SU25/SWP/Trash/V10/swp391-clubs-management/src/java/models/ClubRequestModel.java</file>
+            <file>file:/C:/SU25/SWP/Trash/V10/swp391-clubs-management/src/java/models/Department.java</file>
+            <file>file:/C:/SU25/SWP/Trash/V10/swp391-clubs-management/src/java/models/DepartmentMember.java</file>
+            <file>file:/C:/SU25/SWP/Trash/V10/swp391-clubs-management/src/java/models/ClubDepartmentDetail.java</file>
+            <file>file:/C:/SU25/SWP/Trash/V10/swp391-clubs-management/src/java/models/UserClub.java</file>
+            <file>file:/C:/SU25/SWP/Trash/V10/swp391-clubs-management/src/java/controller/HomepageServlet.java</file>
+            <file>file:/C:/SU25/SWP/Trash/V10/swp391-clubs-management/web/view/homepage/featured-clubs.jsp</file>
         </group>
     </open-files>
 </project-private>

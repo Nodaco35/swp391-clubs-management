@@ -161,7 +161,7 @@ public class ClubDAO {
                       "(SELECT COUNT(*) FROM UserClubs uc WHERE uc.ClubID = c.ClubID AND uc.IsActive = 1) AS MemberCount " +
                       "FROM Clubs c " +
                       "LEFT JOIN ClubCategories cc ON c.CategoryID = cc.CategoryID " +
-                      "WHERE c.IsRecruiting = 1 AND c.ClubStatus = 1 " +
+                      "WHERE c.ClubStatus = 1 " +
                       "ORDER BY MemberCount DESC " +
                       "LIMIT ?";
         try (Connection conn = DBContext.getConnection();
