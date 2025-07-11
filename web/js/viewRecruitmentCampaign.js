@@ -74,15 +74,51 @@ function initializeTabs() {
 
 // Biểu đồ Chart.js
 function initializeChart() {
+  debug("CHART", "Initializing chart");
   const ctx = document.getElementById("stageProgressChart");
-  if (!ctx || !window.campaignData) return;
+  if (!ctx) {
+    debug("CHART", "Chart canvas not found");
+    return;
+  }
+  if (!window.campaignData) {
+    debug("CHART", "Campaign data not available");
+    return;
+  }
 
+  // Debug campaign data
+  debug("CHART", "Campaign data:", window.campaignData);
+
+  // Cần kiểm tra xem stageStats từ server đã được chuyển đúng sang campaignData.stages chưa
   const stages = window.campaignData.stages;
-  const labels = stages.map((stage) => stage.stageName);
-  const totalData = stages.map((stage) => stage.stats.total);
-  const pendingData = stages.map((stage) => stage.stats.pending);
-  const approvedData = stages.map((stage) => stage.stats.approved);
-  const rejectedData = stages.map((stage) => stage.stats.rejected);
+  debug("CHART", "Stages data for chart:", stages);
+
+  // Map data for chart
+  const labels = stages.map((stage) => {
+    // Chuyển đổi tên stage sang tiếng Việt cho chart
+    switch(stage.stageName) {
+      case 'APPLICATION': return 'Vòng nộp đơn';
+      case 'INTERVIEW': return 'Vòng phỏng vấn';
+      case 'CHALLENGE': return 'Vòng thử thách';
+      default: return stage.stageName;
+    }
+  });
+  
+  // Debug data points
+  const totalData = stages.map((stage) => {
+    debug("CHART", `Stage ${stage.stageName} total:`, stage.stats.total);
+    return stage.stats.total || 0;
+  });
+  const pendingData = stages.map((stage) => stage.stats.pending || 0);
+  const approvedData = stages.map((stage) => stage.stats.approved || 0);
+  const rejectedData = stages.map((stage) => stage.stats.rejected || 0);
+  
+  debug("CHART", "Chart data points:", {
+    labels,
+    totalData,
+    pendingData, 
+    approvedData,
+    rejectedData
+  });
 
   new Chart(ctx, {
     type: "bar",
@@ -166,6 +202,18 @@ function initializeModals() {
     });
   });
   
+  // Xử lý nút xác nhận gửi trong modal xác nhận
+  const confirmSendBtn = document.getElementById('confirmSendBtn');
+  if (confirmSendBtn) {
+    debug("INIT", "Thiết lập sự kiện cho nút xác nhận gửi thông báo");
+    confirmSendBtn.addEventListener('click', () => {
+      // Ẩn modal xác nhận
+      if (confirmationModal) confirmationModal.style.display = 'none';
+      // Gọi hàm gửi thông báo
+      sendBulkNotification();
+    });
+  }
+  
   // Xử lý click bên ngoài modal
   window.addEventListener('click', (e) => {
     if (e.target === notificationModal) notificationModal.style.display = 'none';
@@ -187,6 +235,23 @@ function initializeModals() {
   // Xử lý xem trước nội dung
   const titleInput = document.getElementById('notificationTitle');
   const contentInput = document.getElementById('notificationContent');
+  
+  if (titleInput && contentInput) {
+    // Cập nhật xem trước khi nhập
+    titleInput.addEventListener('input', updatePreview);
+    contentInput.addEventListener('input', updatePreview);
+    
+    // Hàm cập nhật xem trước
+    function updatePreview() {
+      const previewTitle = document.querySelector('#notificationPreview h5');
+      const previewContent = document.querySelector('#notificationPreview p');
+      
+      if (previewTitle && previewContent) {
+        previewTitle.textContent = titleInput.value || 'Tiêu đề thông báo sẽ hiển thị ở đây';
+        previewContent.textContent = contentInput.value || 'Nội dung thông báo sẽ hiển thị ở đây...';
+      }
+    }
+  }
   
   // Xử lý chọn mẫu thông báo
   const templateSelector = document.getElementById('templateSelector');
@@ -258,11 +323,10 @@ function initializeNotificationPanel() {
     });
   }
   
-  // Nút gửi thông báo
+  // Nút gửi thông báo - xóa onclick handler vì đã có xử lý trong HTML
   const sendBtn = document.getElementById('sendNotificationBtn');
-  if (sendBtn) {
-    sendBtn.addEventListener('click', sendBulkNotification);
-  }
+  
+  // Event listener cho confirmSendBtn đã được thiết lập trong initializeModals()
   
   // Cập nhật số lượng đã chọn khi thay đổi checkbox
   document.addEventListener('change', function(e) {
@@ -312,6 +376,50 @@ function updateSelectedCount() {
   if (countSpan) countSpan.textContent = count;
   if (sendBtn) sendBtn.disabled = count === 0;
 }
+//Hiển thị modal xác nhận gửi thông báo
+function confirmSendNotification() {
+  debug("FUNCTION", "Hiển thị modal xác nhận gửi thông báo");
+  
+  // Kiểm tra các trường bắt buộc
+  const title = document.getElementById('notificationTitle').value;
+  const content = document.getElementById('notificationContent').value;
+  const selectedRecipients = document.querySelectorAll('.recipient-checkbox:checked');
+  
+  // Kiểm tra các điều kiện trước khi gửi
+  if (!title || !content) {
+    showToast('Vui lòng nhập đầy đủ tiêu đề và nội dung thông báo', 'error');
+    return;
+  }
+  
+  if (selectedRecipients.length === 0) {
+    showToast('Vui lòng chọn ít nhất một ứng viên', 'error');
+    return;
+  }
+  
+  // Lấy thông tin vòng tuyển từ modal
+  const notificationModal = document.getElementById('notificationModal');
+  let stageName = "Không xác định";
+  
+  if (notificationModal && notificationModal.dataset.stageName) {
+    stageName = getStageNameInVietnamese(notificationModal.dataset.stageName);
+  }
+  
+  // Cập nhật thông tin vào modal xác nhận
+  document.getElementById('confirmStage').textContent = stageName;
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmCount').textContent = selectedRecipients.length;
+  
+  // Hiển thị modal xác nhận
+  const confirmationModal = document.getElementById('confirmationModal');
+  if (confirmationModal) {
+    debug("UI", "Hiển thị modal xác nhận");
+    confirmationModal.style.display = 'flex';
+  } else {
+    debug("ERROR", "Không tìm thấy modal xác nhận");
+    // Nếu không tìm thấy modal xác nhận, gọi trực tiếp hàm gửi
+    sendBulkNotification();
+  }
+}
 
 // Gửi thông báo hàng loạt
 function sendBulkNotification() {
@@ -351,7 +459,7 @@ function sendBulkNotification() {
   };
   
   // Gửi thông báo
-  fetch(`${contextPath}/api/sendBulkNotification`, {
+  fetch(`${contextPath}/notification?action=sendBulkNotification`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -389,6 +497,8 @@ function sendBulkNotification() {
   });
 }
 
+
+
 // Tải danh sách người nhận cho panel thông báo
 function loadRecipientsForNotification(stageId, stageType) {
   const recipientsList = document.getElementById('recipientsList');
@@ -402,9 +512,16 @@ function loadRecipientsForNotification(stageId, stageType) {
   debug("API", `Gọi API stageCandidates với campaignId=${window.campaignData.campaignId}, stageType=${stageTypeParam}`);
   
   // Lấy danh sách ứng viên cho vòng này
+  debug("RECIPIENTS", "Bắt đầu gọi API stageCandidates");
+  
   fetch(`${contextPath}/api/stageCandidates?campaignId=${window.campaignData.campaignId}&stageType=${stageTypeParam}`)
-    .then(response => response.json())
+    .then(response => {
+      debug("RECIPIENTS", "Phản hồi API nhận được, status:", response.status);
+      return response.json();
+    })
     .then(candidates => {
+      debug("RECIPIENTS", "Nhận danh sách ứng viên, kiểu dữ liệu:", typeof candidates);
+      debug("RECIPIENTS", "Số lượng ứng viên:", candidates ? (Array.isArray(candidates) ? candidates.length : 'không phải mảng') : 'null');
       debug("DATA", "Nhận danh sách ứng viên", candidates);
       
       // Kiểm tra nếu có lỗi từ API
@@ -418,17 +535,27 @@ function loadRecipientsForNotification(stageId, stageType) {
         return;
       }
       
+      // Debug dữ liệu ứng viên nhận được
+      debug("RECIPIENTS", "Raw candidates data:", candidates);
+      
       // Lọc ứng viên theo trạng thái nếu cần
       // Đảm bảo candidates là một mảng trước khi dùng filter
       const candidatesArray = Array.isArray(candidates) ? candidates : Object.values(candidates);
+      debug("RECIPIENTS", "Formatted candidates array:", candidatesArray);
+      
       const filteredCandidates = candidatesArray;
       
       try {
+        debug("RECIPIENTS", "Bắt đầu tạo HTML cho danh sách người nhận...");
+        
         // Tạo HTML cho danh sách người nhận
-        const recipientsHTML = filteredCandidates.map(candidate => {
-          // Kiểm tra candidate và candidate.status tồn tại
+        let htmlContent = '';
+        
+        // Lặp qua danh sách ứng viên để tạo nội dung HTML
+        filteredCandidates.forEach(candidate => {
+          // Kiểm tra candidate tồn tại
           if (!candidate) {
-            return '';
+            return; // Skip nếu không có dữ liệu
           }
           
           // Xác định trạng thái và kiểm tra giá trị hợp lệ
@@ -437,7 +564,8 @@ function loadRecipientsForNotification(stageId, stageType) {
           const statusText = status === 'APPROVED' ? 'Đã duyệt' : 
                             status === 'REJECTED' ? 'Từ chối' : 'Chờ xử lý';
           
-          return `
+          // Thêm vào chuỗi HTML
+          htmlContent += `
         <div class="recipient-item" data-status="${statusLower}">
           <div class="recipient-info">
             <input type="checkbox" class="recipient-checkbox" 
@@ -461,16 +589,18 @@ function loadRecipientsForNotification(stageId, stageType) {
           </div>
         </div>
         `;
-        }).join('');
+        });
         
-        recipientsList.innerHTML = recipientsHTML;
+        debug("RECIPIENTS", "HTML được tạo thành công, độ dài:", htmlContent.length);
+        
+        // Gán HTML vào container
+        recipientsList.innerHTML = htmlContent;
       } catch (error) {
+        debug("RECIPIENTS", "Lỗi khi tạo HTML:", error);
         console.error('Lỗi khi tạo HTML cho danh sách người nhận:', error);
         recipientsList.innerHTML = '<div class="error-state"><p>Có lỗi xảy ra khi tải danh sách ứng viên</p></div>';
         return;
       }
-      
-      recipientsList.innerHTML = recipientsHTML;
       
       // Đặt lại số lượng đã chọn
       updateSelectedCount();
@@ -504,19 +634,33 @@ function viewStageDetails(stageId, stageName) {
 }
 
 function loadCandidatesForActiveTab() {
+  debug("CANDIDATES", "Loading candidates for active tab");
+  
   const activeTab = document.querySelector('.tab-btn.active');
-  if (!activeTab) return;
+  if (!activeTab) {
+    debug("CANDIDATES", "No active tab found");
+    return;
+  }
   
   const tabId = activeTab.getAttribute('data-tab');
+  debug("CANDIDATES", "Active tab:", tabId);
   
-  if (tabId === 'overviewTab') {
+  // Check which tab is active and load appropriate data
+  if (tabId === 'overview') {
     // Không cần làm gì trong tab tổng quan vì dữ liệu đã được tải
-  } else if (tabId === 'candidatesTab') {
-    // Tải danh sách ứng viên cho tab ứng viên
-    loadAllCandidates();
-  } else if (tabId === 'notificationsTab') {
-    // Tải lịch sử thông báo cho tab thông báo
-    loadNotificationHistory();
+    debug("CANDIDATES", "Overview tab active - no additional data loading needed");
+  } else if (tabId === 'application') {
+    // Tải danh sách ứng viên cho vòng nộp đơn
+    debug("CANDIDATES", "Loading APPLICATION stage candidates");
+    loadStageCandidates('application-candidates', 'APPLICATION');
+  } else if (tabId === 'interview') {
+    // Tải danh sách ứng viên cho vòng phỏng vấn
+    debug("CANDIDATES", "Loading INTERVIEW stage candidates");
+    loadStageCandidates('interview-candidates', 'INTERVIEW');
+  } else if (tabId === 'challenge') {
+    // Tải danh sách ứng viên cho vòng thử thách
+    debug("CANDIDATES", "Loading CHALLENGE stage candidates");
+    loadStageCandidates('challenge-candidates', 'CHALLENGE');
   }
 }
 
@@ -841,6 +985,24 @@ function formatDate(dateString) {
 function showToast(message, type = 'info') {
   debug("UI", "Hiển thị toast", {message, type});
   
+  // Thêm vào container
+  const container = document.getElementById('toastContainer');
+  if (!container) {
+    debug("ERROR", "Không tìm thấy toast container");
+    console.error("Không tìm thấy toast container");
+    return;
+  }
+  
+  // Kiểm tra xem có toast với cùng nội dung đang hiển thị không
+  const existingToasts = Array.from(container.querySelectorAll('.toast'));
+  for (const existingToast of existingToasts) {
+    const existingMessage = existingToast.querySelector('span')?.textContent;
+    if (existingMessage === message) {
+      debug("UI", "Đã có toast với cùng nội dung đang hiển thị, bỏ qua");
+      return;
+    }
+  }
+  
   // Tạo phần tử toast
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
@@ -849,14 +1011,6 @@ function showToast(message, type = 'info') {
     <span>${message}</span>
     <button class="toast-close">&times;</button>
   `;
-  
-  // Thêm vào container
-  const container = document.getElementById('toastContainer');
-  if (!container) {
-    debug("ERROR", "Không tìm thấy toast container");
-    console.error("Không tìm thấy toast container");
-    return;
-  }
   
   // Thêm nút đóng
   const closeBtn = toast.querySelector('.toast-close');
@@ -887,6 +1041,109 @@ function showToast(message, type = 'info') {
       }
     }, 300);
   }, 3000);
+}
+function loadStageCandidates(targetElementId, stageType) {
+  debug("STAGE_CANDIDATES", `Loading candidates for stage ${stageType} into element ${targetElementId}`);
+  
+  const candidatesContainer = document.getElementById(targetElementId);
+  if (!candidatesContainer) {
+    debug("STAGE_CANDIDATES", `Target element #${targetElementId} not found`);
+    return;
+  }
+  
+  // Hiển thị trạng thái đang tải
+  candidatesContainer.innerHTML = '<tr><td colspan="6" class="text-center"><div class="loading"><i class="fas fa-spinner fa-spin"></i> Đang tải danh sách ứng viên...</div></td></tr>';
+  
+  // Debug request params
+  debug("STAGE_CANDIDATES", `API Request params: campaignId=${window.campaignData.campaignId}, stageType=${stageType}`);
+  
+  // Gọi API để lấy danh sách ứng viên
+  fetch(`${contextPath}/api/stageCandidates?campaignId=${window.campaignData.campaignId}&stageType=${stageType}`)
+    .then(response => {
+      debug("STAGE_CANDIDATES", `API Response status: ${response.status}`);
+      return response.json();
+    })
+    .then(candidates => {
+      // Log dữ liệu nhận được
+      debug("STAGE_CANDIDATES", `Received ${candidates ? candidates.length : 0} candidates:`, candidates);
+      
+      // Kiểm tra dữ liệu trả về
+      if (!candidates || candidates.length === 0) {
+        candidatesContainer.innerHTML = '<tr><td colspan="6" class="text-center">Không có ứng viên nào trong vòng này</td></tr>';
+        return;
+      }
+      
+      // Xử lý và hiển thị danh sách ứng viên
+      try {
+        const candidatesHtml = candidates.map((candidate, index) => {
+          // Format date
+          const submitDate = candidate.submitDate ? new Date(candidate.submitDate).toLocaleDateString('vi-VN') : 'N/A';
+          
+          // Status badge class and text
+          const statusClass = getStatusClass(candidate.status);
+          const statusText = getStatusText(candidate.status);
+          
+          return `
+            <tr>
+              <td>${index + 1}</td>
+              <td>${escapeHtml(candidate.userName || 'Không có tên')}</td>
+              <td>${escapeHtml(candidate.email || 'N/A')}</td>
+              <td>${submitDate}</td>
+              <td>
+                <span class="status-badge ${statusClass}">${statusText}</span>
+              </td>
+            </tr>
+          `;
+        }).join('');
+        
+        candidatesContainer.innerHTML = candidatesHtml;
+        debug("STAGE_CANDIDATES", `Successfully rendered ${candidates.length} candidates for ${stageType}`);
+      } catch (error) {
+        debug("STAGE_CANDIDATES", `Error rendering candidates: ${error.message}`, error);
+        candidatesContainer.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Có lỗi xảy ra khi hiển thị danh sách ứng viên</td></tr>';
+      }
+    })
+    .catch(error => {
+      debug("STAGE_CANDIDATES", `API Error: ${error.message}`, error);
+      candidatesContainer.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Không thể tải dữ liệu từ server</td></tr>';
+    });
+}
+
+/**
+ * Helper function to get CSS class for status badge
+ */
+function getStatusClass(status) {
+  switch(status) {
+    case 'APPROVED': return 'approved';
+    case 'REJECTED': return 'rejected';
+    case 'PENDING':
+    default: return 'pending';
+  }
+}
+
+/**
+ * Helper function to get status text in Vietnamese
+ */
+function getStatusText(status) {
+  switch(status) {
+    case 'APPROVED': return 'Đã duyệt';
+    case 'REJECTED': return 'Từ chối';
+    case 'PENDING':
+    default: return 'Chờ xử lý';
+  }
+}
+
+/**
+ * Helper function to escape HTML special chars
+ */
+function escapeHtml(unsafe) {
+  if (!unsafe) return '';
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 // Công khai hàm để sử dụng toàn cục

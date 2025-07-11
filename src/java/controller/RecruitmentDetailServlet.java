@@ -160,6 +160,19 @@ public class RecruitmentDetailServlet extends HttpServlet {
                 logger.log(Level.INFO, "Đang lấy thống kê ứng viên theo giai đoạn cho hoạt động tuyển quân ID: {0}", recruitmentId);
                 java.util.Map<Integer, java.util.Map<String, Integer>> stageStats = applicationStageDAO.getStageStats(recruitmentId);
                 
+                // DEBUG: In ra chi tiết từng giai đoạn và thống kê của nó
+                logger.log(Level.INFO, "============ DEBUG STAGE STATS ============");
+                for (Integer stageId : stageStats.keySet()) {
+                    java.util.Map<String, Integer> stats = stageStats.get(stageId);
+                    logger.log(Level.INFO, "Stage ID: {0}, Stats: TOTAL={1}, PENDING={2}, APPROVED={3}, REJECTED={4}", 
+                        new Object[]{stageId, 
+                                    stats.getOrDefault("TOTAL", 0),
+                                    stats.getOrDefault("PENDING", 0), 
+                                    stats.getOrDefault("APPROVED", 0), 
+                                    stats.getOrDefault("REJECTED", 0)});
+                }
+                logger.log(Level.INFO, "=========================================");
+                
                 request.setAttribute("campaign", campaign);
                 request.setAttribute("stages", stages);
                 request.setAttribute("stageStats", stageStats);
@@ -268,6 +281,10 @@ public class RecruitmentDetailServlet extends HttpServlet {
         String campaignIdStr = request.getParameter("campaignId");
         String stageType = request.getParameter("stageType");
         
+        logger.log(Level.INFO, "======== DEBUG API: stageCandidates ========");
+        logger.log(Level.INFO, "Request params: campaignId={0}, stageType={1}", 
+                new Object[]{campaignIdStr, stageType});
+        
         if (campaignIdStr == null || stageType == null) {
             sendErrorResponse(response, "Missing campaignId or stageType parameter", 400);
             return;
@@ -278,22 +295,32 @@ public class RecruitmentDetailServlet extends HttpServlet {
             
             // Lấy thông tin stage từ campaign và stageType
             List<RecruitmentStage> stages = recruitmentService.getStagesByCampaign(campaignId);
+            logger.log(Level.INFO, "Found {0} stages for campaign ID {1}", 
+                    new Object[]{stages.size(), campaignId});
+            
             RecruitmentStage targetStage = null;
             
             for (RecruitmentStage stage : stages) {
+                logger.log(Level.INFO, "Checking stage: ID={0}, Name={1}", 
+                        new Object[]{stage.getStageID(), stage.getStageName()});
                 if (stage.getStageName().equals(stageType)) {
                     targetStage = stage;
+                    logger.log(Level.INFO, "Found matching stage: ID={0}, Name={1}", 
+                            new Object[]{stage.getStageID(), stage.getStageName()});
                     break;
                 }
             }
             
             if (targetStage == null) {
+                logger.log(Level.WARNING, "Stage not found for stageType={0}", stageType);
                 sendErrorResponse(response, "Stage not found", 404);
                 return;
             }
             
             // Lấy danh sách ApplicationStage của vòng này
             List<ApplicationStage> applicationStages = applicationStageDAO.getApplicationStagesByStageId(targetStage.getStageID());
+            logger.log(Level.INFO, "Found {0} application stages for stageID={1}", 
+                    new Object[]{applicationStages.size(), targetStage.getStageID()});
             
             // Chuyển đổi sang JSON format đơn giản
             StringBuilder jsonBuilder = new StringBuilder();
@@ -305,6 +332,11 @@ public class RecruitmentDetailServlet extends HttpServlet {
                 
                 // Lấy thông tin application chi tiết
                 ClubApplication application = getApplicationById(appStage.getApplicationID());
+                
+                // Debug thông tin ứng viên
+                logger.log(Level.INFO, "Processing application: ID={0}, Stage={1}, Status={2}, User={3}", 
+                        new Object[]{appStage.getApplicationID(), targetStage.getStageName(), appStage.getStatus(), 
+                                    application != null ? getUserName(application.getUserId()) : "null"});
                 
                 jsonBuilder.append("{")
                     .append("\"applicationId\":").append(appStage.getApplicationID()).append(",")
@@ -319,11 +351,18 @@ public class RecruitmentDetailServlet extends HttpServlet {
             
             jsonBuilder.append("]");
             
+            String jsonResult = jsonBuilder.toString();
+            
+            // Debug JSON output
+            logger.log(Level.INFO, "JSON Result for stageCandidates: {0}", 
+                    jsonResult.substring(0, Math.min(300, jsonResult.length())) + (jsonResult.length() > 300 ? "..." : ""));
+            
             PrintWriter out = response.getWriter();
-            out.print(jsonBuilder.toString());
+            out.print(jsonResult);
             
             logger.log(Level.INFO, "Loaded {0} candidates for campaign {1}, stage {2}", 
                     new Object[]{applicationStages.size(), campaignId, stageType});
+            logger.log(Level.INFO, "======== END DEBUG API: stageCandidates ========");
             
         } catch (NumberFormatException e) {
             sendErrorResponse(response, "Invalid campaignId format", 400);
