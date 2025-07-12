@@ -1,8 +1,6 @@
 package controller;
 
 import dal.ApplicationStageDAO;
-import dal.ClubApplicationDAO;
-import dal.NotificationDAO;
 import dal.UserClubDAO;
 import dal.UserDAO;
 import jakarta.servlet.ServletException;
@@ -11,27 +9,24 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import models.*;
-import service.NotificationService;
 import service.RecruitmentService;
 
 /**
- * Servlet để xử lý việc xem chi tiết hoạt động tuyển quân và các API endpoints
+ * Servlet để xử lý việc xem chi tiết hoạt động tuyển quân
+ * Các chức năng API đã được chuyển sang RecruitmentApiServlet
  */
 public class RecruitmentDetailServlet extends HttpServlet {
 
     private static final Logger logger = Logger.getLogger(RecruitmentDetailServlet.class.getName());
     private final RecruitmentService recruitmentService = new RecruitmentService();
     private final UserClubDAO userClubDAO = new UserClubDAO();
-    private final NotificationService notificationService = new NotificationService();
     private final ApplicationStageDAO applicationStageDAO = new ApplicationStageDAO();
-    private final ClubApplicationDAO clubApplicationDAO = new ClubApplicationDAO();
     private final UserDAO userDAO = new UserDAO();
 
     @Override
@@ -42,51 +37,8 @@ public class RecruitmentDetailServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
         
-        String servletPath = request.getServletPath();
-        
-        // Xử lý API endpoints
-        if (servletPath.startsWith("/api/")) {
-            handleAPIRequest(request, response, servletPath);
-            return;
-        }
-        
         // Xử lý trang chi tiết hoạt động tuyển quân
         handleDetailPageRequest(request, response);
-    }
-    
-    /**
-     * Xử lý các API requests
-     */
-    private void handleAPIRequest(HttpServletRequest request, HttpServletResponse response, String servletPath)
-            throws IOException {
-        
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        
-        // Kiểm tra người dùng đã đăng nhập
-        HttpSession session = request.getSession();
-        Users currentUser = (Users) session.getAttribute("user");
-        
-        if (currentUser == null) {
-            sendErrorResponse(response, "Unauthorized", 401);
-            return;
-        }
-        
-        try {
-            switch (servletPath) {
-                case "/api/notificationTemplates":
-                    handleGetNotificationTemplates(request, response, currentUser);
-                    break;
-                case "/api/stageCandidates":
-                    handleGetStageCandidates(request, response, currentUser);
-                    break;
-                default:
-                    sendErrorResponse(response, "API endpoint not found", 404);
-            }
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error in API request: " + servletPath, e);
-            sendErrorResponse(response, "Server error: " + e.getMessage(), 500);
-        }
     }
     
     /**
@@ -208,393 +160,14 @@ public class RecruitmentDetailServlet extends HttpServlet {
         }
     }
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        
-        String servletPath = request.getServletPath();
-        
-        // Chỉ xử lý API endpoint sendStageNotification
-        if ("/api/sendStageNotification".equals(servletPath)) {
-            handleSendStageNotification(request, response);
-        } else {
-            // Hiện tại chưa cần xử lý method POST khác
-            response.setContentType("application/json");
-            PrintWriter out = response.getWriter();
-            out.print("{\"success\":false,\"message\":\"Method not supported\"}");
-        }
-    }
+    // Phương thức doPost đã được xóa vì chức năng API đã chuyển sang RecruitmentApiServlet
 
-    /**
-     * API: Lấy danh sách notification templates theo clubId
-     */
-    private void handleGetNotificationTemplates(HttpServletRequest request, HttpServletResponse response, Users currentUser)
-            throws IOException {
-        
-        String clubIdStr = request.getParameter("clubId");
-        if (clubIdStr == null || clubIdStr.trim().isEmpty()) {
-            sendErrorResponse(response, "Missing clubId parameter", 400);
-            return;
-        }
-        
-        try {
-            int clubId = Integer.parseInt(clubIdStr);
-            
-            // Lấy danh sách template có thể tái sử dụng
-            List<NotificationTemplate> templates = notificationService.getReusableTemplatesByClub(clubId);
-            
-            // Chuyển đổi sang JSON format đơn giản
-            StringBuilder jsonBuilder = new StringBuilder();
-            jsonBuilder.append("[");
-            
-            for (int i = 0; i < templates.size(); i++) {
-                NotificationTemplate template = templates.get(i);
-                if (i > 0) jsonBuilder.append(",");
-                
-                jsonBuilder.append("{")
-                    .append("\"templateId\":").append(template.getTemplateID()).append(",")
-                    .append("\"templateName\":\"").append(escapeJson(template.getTemplateName())).append("\",")
-                    .append("\"title\":\"").append(escapeJson(template.getTitle())).append("\",")
-                    .append("\"content\":\"").append(escapeJson(template.getContent())).append("\"")
-                    .append("}");
-            }
-            
-            jsonBuilder.append("]");
-            
-            PrintWriter out = response.getWriter();
-            out.print(jsonBuilder.toString());
-            
-            logger.log(Level.INFO, "Loaded {0} notification templates for club {1}", 
-                    new Object[]{templates.size(), clubId});
-            
-        } catch (NumberFormatException e) {
-            sendErrorResponse(response, "Invalid clubId format", 400);
-        }
-    }
-
-    /**
-     * API: Lấy danh sách ứng viên theo campaign và stage type
-     */
-    private void handleGetStageCandidates(HttpServletRequest request, HttpServletResponse response, Users currentUser)
-            throws IOException {
-        
-        String campaignIdStr = request.getParameter("campaignId");
-        String stageType = request.getParameter("stageType");
-        
-        logger.log(Level.INFO, "======== DEBUG API: stageCandidates ========");
-        logger.log(Level.INFO, "Request params: campaignId={0}, stageType={1}", 
-                new Object[]{campaignIdStr, stageType});
-        
-        if (campaignIdStr == null || stageType == null) {
-            sendErrorResponse(response, "Missing campaignId or stageType parameter", 400);
-            return;
-        }
-        
-        try {
-            int campaignId = Integer.parseInt(campaignIdStr);
-            
-            // Lấy thông tin stage từ campaign và stageType
-            List<RecruitmentStage> stages = recruitmentService.getStagesByCampaign(campaignId);
-            logger.log(Level.INFO, "Found {0} stages for campaign ID {1}", 
-                    new Object[]{stages.size(), campaignId});
-            
-            RecruitmentStage targetStage = null;
-            
-            for (RecruitmentStage stage : stages) {
-                logger.log(Level.INFO, "Checking stage: ID={0}, Name={1}", 
-                        new Object[]{stage.getStageID(), stage.getStageName()});
-                if (stage.getStageName().equals(stageType)) {
-                    targetStage = stage;
-                    logger.log(Level.INFO, "Found matching stage: ID={0}, Name={1}", 
-                            new Object[]{stage.getStageID(), stage.getStageName()});
-                    break;
-                }
-            }
-            
-            if (targetStage == null) {
-                logger.log(Level.WARNING, "Stage not found for stageType={0}", stageType);
-                sendErrorResponse(response, "Stage not found", 404);
-                return;
-            }
-            
-            // Lấy danh sách ApplicationStage của vòng này
-            List<ApplicationStage> applicationStages = applicationStageDAO.getApplicationStagesByStageId(targetStage.getStageID());
-            logger.log(Level.INFO, "Found {0} application stages for stageID={1}", 
-                    new Object[]{applicationStages.size(), targetStage.getStageID()});
-            
-            // Chuyển đổi sang JSON format đơn giản
-            StringBuilder jsonBuilder = new StringBuilder();
-            jsonBuilder.append("[");
-            
-            for (int i = 0; i < applicationStages.size(); i++) {
-                ApplicationStage appStage = applicationStages.get(i);
-                if (i > 0) jsonBuilder.append(",");
-                
-                // Lấy thông tin application chi tiết
-                ClubApplication application = getApplicationById(appStage.getApplicationID());
-                
-                // Debug thông tin ứng viên
-                logger.log(Level.INFO, "Processing application: ID={0}, Stage={1}, Status={2}, User={3}", 
-                        new Object[]{appStage.getApplicationID(), targetStage.getStageName(), appStage.getStatus(), 
-                                    application != null ? getUserName(application.getUserId()) : "null"});
-                
-                jsonBuilder.append("{")
-                    .append("\"applicationId\":").append(appStage.getApplicationID()).append(",")
-                    .append("\"applicationStageId\":").append(appStage.getApplicationStageID()).append(",")
-                    .append("\"userName\":\"").append(escapeJson(application != null ? getUserName(application.getUserId()) : "")).append("\",")
-                    .append("\"email\":\"").append(escapeJson(application != null ? application.getEmail() : "")).append("\",")
-                    .append("\"status\":\"").append(appStage.getStatus()).append("\",")
-                    .append("\"submitDate\":\"").append(application != null && application.getSubmitDate() != null ? 
-                        application.getSubmitDate().toString() : "").append("\"")
-                    .append("}");
-            }
-            
-            jsonBuilder.append("]");
-            
-            String jsonResult = jsonBuilder.toString();
-            
-            // Debug JSON output
-            logger.log(Level.INFO, "JSON Result for stageCandidates: {0}", 
-                    jsonResult.substring(0, Math.min(300, jsonResult.length())) + (jsonResult.length() > 300 ? "..." : ""));
-            
-            PrintWriter out = response.getWriter();
-            out.print(jsonResult);
-            
-            logger.log(Level.INFO, "Loaded {0} candidates for campaign {1}, stage {2}", 
-                    new Object[]{applicationStages.size(), campaignId, stageType});
-            logger.log(Level.INFO, "======== END DEBUG API: stageCandidates ========");
-            
-        } catch (NumberFormatException e) {
-            sendErrorResponse(response, "Invalid campaignId format", 400);
-        }
-    }
-
-    /**
-     * API: Gửi thông báo stage notification
-     */
-    private void handleSendStageNotification(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
-        
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        
-        // Kiểm tra đăng nhập
-        HttpSession session = request.getSession();
-        Users currentUser = (Users) session.getAttribute("user");
-        
-        if (currentUser == null) {
-            sendErrorResponse(response, "Unauthorized", 401);
-            return;
-        }
-        
-        // Đọc JSON data từ request body (cách đơn giản)
-        StringBuilder jsonBuffer = new StringBuilder();
-        String line;
-        try {
-            while ((line = request.getReader().readLine()) != null) {
-                jsonBuffer.append(line);
-            }
-        } catch (IOException e) {
-            sendErrorResponse(response, "Error reading request", 400);
-            return;
-        }
-        
-        // Parse JSON đơn giản (không dùng Gson để tránh dependency)
-        String jsonString = jsonBuffer.toString();
-        
-        try {
-            // Extract values từ JSON string đơn giản
-            int stageId = extractIntFromJson(jsonString, "stageId");
-            String status = extractStringFromJson(jsonString, "status");
-            String title = extractStringFromJson(jsonString, "title");
-            String content = extractStringFromJson(jsonString, "content");
-            boolean saveAsTemplate = extractBooleanFromJson(jsonString, "saveAsTemplate");
-            String templateName = extractStringFromJson(jsonString, "templateName");
-            
-            // Tạo StageNotification
-            StageNotification stageNotification = new StageNotification();
-            stageNotification.setStageID(stageId);
-            stageNotification.setTitle(title);
-            stageNotification.setContent(content);
-            stageNotification.setCreatedBy(currentUser.getUserID());
-            
-            // Lưu template mới nếu được yêu cầu
-            if (saveAsTemplate && templateName != null && !templateName.trim().isEmpty()) {
-                RecruitmentStage stage = recruitmentService.getStageById(stageId);
-                if (stage != null) {
-                    RecruitmentCampaign campaign = recruitmentService.getCampaignById(stage.getRecruitmentID());
-                    if (campaign != null) {
-                        NotificationTemplate template = new NotificationTemplate();
-                        template.setClubID(campaign.getClubID());
-                        template.setTemplateName(templateName);
-                        template.setTitle(title);
-                        template.setContent(content);
-                        template.setCreatedBy(currentUser.getUserID());
-                        template.setReusable(true);
-                        
-                        int templateId = notificationService.createTemplate(template);
-                        if (templateId > 0) {
-                            stageNotification.setTemplateID(templateId);
-                        }
-                    }
-                }
-            }
-            
-            // Tạo stage notification
-            int notificationId = notificationService.createStageNotification(stageNotification);
-            
-            if (notificationId > 0) {
-                // Gửi thông báo hàng loạt đến ứng viên có status tương ứng
-                List<ApplicationStage> targetApplications = applicationStageDAO.getApplicationStagesByStageAndStatus(stageId, status);
-                
-                int sentCount = 0;
-                for (ApplicationStage appStage : targetApplications) {
-                    ClubApplication application = getApplicationById(appStage.getApplicationID());
-                    if (application != null && application.getUserId() != null) {
-                        
-                        // Thay thế các biến động trong nội dung
-                        String personalizedTitle = replaceVariables(title, application, stageId);
-                        String personalizedContent = replaceVariables(content, application, stageId);
-                        
-                        // Gửi thông báo (sử dụng method có sẵn)
-                        NotificationDAO.sentToPerson(currentUser.getUserID(), application.getUserId(), 
-                                personalizedTitle, personalizedContent);
-                        sentCount++;
-                    }
-                }
-                
-                // Gửi response thành công
-                PrintWriter out = response.getWriter();
-                out.print("{\"success\": true, \"message\": \"Đã gửi thông báo tới " + sentCount + " ứng viên\", \"sentCount\": " + sentCount + "}");
-                
-                logger.log(Level.INFO, "Sent stage notification to {0} candidates for stage {1}, status {2}", 
-                        new Object[]{sentCount, stageId, status});
-                
-            } else {
-                sendErrorResponse(response, "Failed to create stage notification", 500);
-            }
-            
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error sending stage notification", e);
-            sendErrorResponse(response, "Error: " + e.getMessage(), 500);
-        }
-    }
-
-    /**
-     * Helper methods
-     */
-    private void sendErrorResponse(HttpServletResponse response, String message, int statusCode) throws IOException {
-        response.setStatus(statusCode);
-        PrintWriter out = response.getWriter();
-        out.print("{\"success\": false, \"message\": \"" + escapeJson(message) + "\"}");
-    }
-    
-    private String escapeJson(String value) {
-        if (value == null) return "";
-        return value.replace("\\", "\\\\")
-                   .replace("\"", "\\\"")
-                   .replace("\n", "\\n")
-                   .replace("\r", "\\r")
-                   .replace("\t", "\\t");
-    }
-    
-    // Các method extract JSON đơn giản (không dùng library)
-    private int extractIntFromJson(String json, String key) {
-        String pattern = "\"" + key + "\"\\s*:\\s*(\\d+)";
-        java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
-        java.util.regex.Matcher m = p.matcher(json);
-        if (m.find()) {
-            return Integer.parseInt(m.group(1));
-        }
-        return 0;
-    }
-    
-    private String extractStringFromJson(String json, String key) {
-        String pattern = "\"" + key + "\"\\s*:\\s*\"([^\"]*)\"|\"" + key + "\"\\s*:\\s*'([^']*)'";
-        java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
-        java.util.regex.Matcher m = p.matcher(json);
-        if (m.find()) {
-            return m.group(1) != null ? m.group(1) : m.group(2);
-        }
-        return "";
-    }
-    
-    private boolean extractBooleanFromJson(String json, String key) {
-        String pattern = "\"" + key + "\"\\s*:\\s*(true|false)";
-        java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
-        java.util.regex.Matcher m = p.matcher(json);
-        if (m.find()) {
-            return Boolean.parseBoolean(m.group(1));
-        }
-        return false;
-    }
-    
-    private ClubApplication getApplicationById(int applicationId) {
-        try {
-            return clubApplicationDAO.getApplicationById(applicationId);
-        } catch (Exception e) {
-            logger.log(Level.WARNING, "Error getting application by id: " + applicationId, e);
-            return null;
-        }
-    }
-    
+    // Helper methods cho trang chi tiết hoạt động tuyển quân
     private String getUserName(String userId) {
         try {
             return userDAO.getUserName(userId);
         } catch (Exception e) {
             logger.log(Level.WARNING, "Error getting user name for userId: " + userId, e);
-            return null;
-        }
-    }
-    
-    private String replaceVariables(String template, ClubApplication application, int stageId) {
-        String result = template;
-        
-        // Lấy tên ứng viên
-        String candidateName = getUserName(application.getUserId());
-        if (candidateName == null || candidateName.trim().isEmpty()) {
-            candidateName = application.getEmail().split("@")[0]; // Dùng phần trước @ của email
-        }
-        
-        // Lấy tên vòng
-        String stageName = getStageName(stageId);
-        
-        // Lấy địa điểm (nếu là vòng phỏng vấn)
-        String location = getStageLocation(stageId);
-        
-        // Thay thế các biến
-        result = result.replace("{Tên ứng viên}", candidateName);
-        result = result.replace("{Tên vòng}", stageName);
-        result = result.replace("{Địa điểm}", location != null ? location : "Sẽ thông báo sau");
-        result = result.replace("{Thời gian}", "Sẽ thông báo chi tiết qua email");
-        
-        return result;
-    }
-    
-    private String getStageName(int stageId) {
-        try {
-            RecruitmentStage stage = recruitmentService.getStageById(stageId);
-            if (stage != null) {
-                String stageName = stage.getStageName();
-                switch (stageName) {
-                    case "APPLICATION": return "Vòng nộp đơn";
-                    case "INTERVIEW": return "Vòng phỏng vấn";
-                    case "CHALLENGE": return "Vòng thử thách";
-                    default: return stageName;
-                }
-            }
-        } catch (Exception e) {
-            logger.log(Level.WARNING, "Error getting stage name for stageId: " + stageId, e);
-        }
-        return "Vòng tuyển";
-    }
-    
-    private String getStageLocation(int stageId) {
-        try {
-            RecruitmentStage stage = recruitmentService.getStageById(stageId);
-            return stage != null ? stage.getLocation() : null;
-        } catch (Exception e) {
-            logger.log(Level.WARNING, "Error getting stage location for stageId: " + stageId, e);
             return null;
         }
     }

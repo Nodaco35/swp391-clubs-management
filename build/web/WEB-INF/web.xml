@@ -359,9 +359,6 @@
     <servlet-mapping>
         <servlet-name>RecruitmentDetailServlet</servlet-name>
         <url-pattern>/recruitment/recruitmentDetail/*</url-pattern>
-        <url-pattern>/api/notificationTemplates</url-pattern>
-        <url-pattern>/api/stageCandidates</url-pattern>
-        <url-pattern>/api/sendStageNotification</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>

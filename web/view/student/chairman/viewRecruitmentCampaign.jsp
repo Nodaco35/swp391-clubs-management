@@ -332,6 +332,8 @@
                     <div class="notification-compose-column">
                         <h4 class="section-title">Soạn thông báo</h4>
                         <form id="notificationForm">
+                            <div id="notificationFormError" class="form-error" style="display:none; color: #dc3545; margin-bottom: 15px; padding: 8px; border-radius: 4px; background-color: #f8d7da; border: 1px solid #f5c6cb;">
+                            </div>
                             <div class="form-group">
                                 <label for="notificationTitle">Tiêu đề thông báo:</label>
                                 <input type="text" id="notificationTitle" class="form-control" placeholder="Nhập tiêu đề thông báo" required>
@@ -340,7 +342,7 @@
                             <div class="form-group">
                                 <label for="notificationContent">Nội dung thông báo:</label>
                                 <textarea id="notificationContent" class="form-control" rows="8" 
-                                      placeholder="Bạn có thể sử dụng các biến: {Tên ứng viên}, {Tên vòng}, {Địa điểm}, {Thời gian}" required></textarea>
+                                      placeholder="Bạn có thể sử dụng các biến: {Tên ứng viên}, {Tên vòng}, {Địa điểm(Vòng phỏng vấn)}" required></textarea>
                             </div>
                         </form>
                         
@@ -389,7 +391,7 @@
                         <div class="form-group">
                             <label for="templateSelect">Chọn mẫu thông báo:</label>
                             <div class="template-select-container">
-                                <select id="templateSelect" class="form-control">
+                                <select id="templateSelector" class="form-control">
                                     <option value="">-- Chọn mẫu thông báo --</option>
                                 </select>
                             </div>
@@ -460,13 +462,20 @@
     </div>
 
     <script>
+        console.log("JSP campaign data:", {
+            recruitmentID: '${campaign.recruitmentID}',
+            templateID: '${campaign.templateID}',
+            clubID: '${campaign.clubID}'
+        });
+        
         // Pass data to JavaScript
         window.campaignData = {
-            campaignId: parseInt('${campaign.recruitmentID}'),
-            templateId: parseInt('${campaign.templateID}'),
-            clubId: parseInt('${campaign.clubID}'),
+            campaignId: parseInt('${campaign.recruitmentID}') || 0,
+            templateId: parseInt('${campaign.templateID}') || 0,
+            clubId: parseInt('${campaign.clubID}') || 0,  // Chỉ sử dụng tên biến nhất quán là "clubId"
             stages: []
         };
+        console.log("Initialized window.campaignData:", window.campaignData);
         
         <c:forEach var="stage" items="${stages}" varStatus="status">
         window.campaignData.stages.push({
@@ -484,7 +493,7 @@
         </c:forEach>
     </script>
     
-    <script src="${pageContext.request.contextPath}/js/recruitmentCommon.js?v=<%= System.currentTimeMillis() %>"></script>s
+    <script src="${pageContext.request.contextPath}/js/recruitmentCommon.js?v=<%= System.currentTimeMillis() %>"></script>
     <script src="${pageContext.request.contextPath}/js/viewRecruitmentCampaign.js?v=<%= System.currentTimeMillis() %>"></script>
 </body>
 </html>

@@ -14,13 +14,12 @@ public class RecruitmentStage {
     private String createdBy;
     private Date createdAt;
     
-    // Additional fields for UI display
     private String locationName;
     private String locationAddress;
     private String recruitmentTitle;
     private String createdByName;
     
-    // Additional properties for JSON serialization (camelCase)
+
     private int stageId;
     private int locationId;
     
