@@ -10,9 +10,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Khởi tạo các modal và buttons
     initializeModals();
-    
-    // Phát hiện và cập nhật trạng thái hoạt động
-    updateCampaignStatus();
 });
 
 // Xử lý dropdown menu
@@ -235,10 +232,4 @@ function closeCampaign(campaignId) {
         console.error('Error:', error);
         showToast('Đã xảy ra lỗi khi kết thúc hoạt động', 'error');
     });
-}
-
-// Hàm cập nhật trạng thái hoạt động (có thể được gọi định kỳ)
-function updateCampaignStatus() {
-    // Hàm này có thể được mở rộng trong tương lai để cập nhật trạng thái tự động
-    console.log('Campaign status updated');
 }
