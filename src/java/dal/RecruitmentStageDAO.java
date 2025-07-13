@@ -17,7 +17,7 @@ public class RecruitmentStageDAO {
     private PreparedStatement ps;
     private ResultSet rs;
     
-    // Create new recruitment stage
+    // Tạo mới một vòng tuyển quân
     public int createRecruitmentStage(RecruitmentStage stage) {
         int newStageId = 0;
         try {
@@ -71,7 +71,7 @@ public class RecruitmentStageDAO {
         return newStageId;
     }
     
-    // Update recruitment stage
+    // Cập nhật thông tin vòng tuyển quân
     public boolean updateRecruitmentStage(RecruitmentStage stage) {
         try {
             conn = DBContext.getConnection();
@@ -106,7 +106,7 @@ public class RecruitmentStageDAO {
         }
     }
     
-    // Update recruitment stage status only
+    // Chỉ cập nhật trạng thái của vòng tuyển quân
     public boolean updateStageStatus(int stageID, String status) {
         try {
             conn = DBContext.getConnection();
@@ -125,7 +125,7 @@ public class RecruitmentStageDAO {
         }
     }
     
-    // Get stage by ID
+    // Lấy thông tin vòng tuyển theo ID
     public RecruitmentStage getStageById(int stageID) {
         RecruitmentStage stage = null;
         try {
@@ -165,7 +165,7 @@ public class RecruitmentStageDAO {
         return stage;
     }
     
-    // Get all stages for a recruitment campaign
+    // Lấy tất cả các vòng tuyển của một chiến dịch tuyển quân
     public List<RecruitmentStage> getStagesByRecruitmentId(int recruitmentID) {
         List<RecruitmentStage> stages = new ArrayList<>();
         try {
@@ -207,7 +207,7 @@ public class RecruitmentStageDAO {
         return stages;
     }
     
-    // Check for stage time overlap within the same recruitment campaign
+    // Kiểm tra xem có sự trùng lặp thời gian giữa các vòng trong cùng một chiến dịch
     public boolean hasStageTimeOverlap(int recruitmentID, Date startDate, Date endDate, Integer excludeStageId) {
         try {
             conn = DBContext.getConnection();
@@ -249,7 +249,7 @@ public class RecruitmentStageDAO {
         return false;
     }
     
-    // Delete a recruitment stage (usually not recommended)
+    // Xóa một vòng tuyển quân (thường không khuyến khích)
     public boolean deleteRecruitmentStage(int stageID) {
         try {
             conn = DBContext.getConnection();
@@ -301,7 +301,7 @@ public class RecruitmentStageDAO {
         return updatedCount;
     }
     
-    // Helper method to determine stage status based on dates
+    // Phương thức hỗ trợ xác định trạng thái vòng dựa trên ngày
     public String determineStageStatus(Date startDate, Date endDate) {
         if (startDate == null || endDate == null) {
             return "UPCOMING"; // Default if dates not provided
@@ -318,7 +318,48 @@ public class RecruitmentStageDAO {
         }
     }
     
-    // Helper method to close database resources
+    /**
+     * Kiểm tra xem vòng APPLICATION của một hoạt động tuyển quân có phản hồi chưa
+     * @param recruitmentID ID của hoạt động tuyển quân
+     * @return Số lượng đơn đăng ký cho vòng APPLICATION
+     */
+    public int countApplicationResponses(int recruitmentID) {
+        int count = 0;
+        try {
+            conn = DBContext.getConnection();
+            String sql = """
+                SELECT COUNT(*) AS ApplicationCount
+                FROM ApplicationStages ast
+                JOIN RecruitmentStages rs ON ast.StageID = rs.StageID
+                WHERE rs.StageName = 'APPLICATION'
+                  AND rs.RecruitmentID = ?
+                """;
+                
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, recruitmentID);
+            rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                count = rs.getInt("ApplicationCount");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+        return count;
+    }
+    
+    /**
+     * Kiểm tra xem hoạt động tuyển quân có đơn đăng ký cho vòng APPLICATION hay không
+     * @param recruitmentID ID của hoạt động tuyển quân
+     * @return true nếu có ít nhất 1 đơn đăng ký, false nếu không có
+     */
+    public boolean hasApplicationResponses(int recruitmentID) {
+        return countApplicationResponses(recruitmentID) > 0;
+    }
+
+    // Phương thức hỗ trợ đóng kết nối cơ sở dữ liệu
     private void closeResources() {
         try {
             if (rs != null) {

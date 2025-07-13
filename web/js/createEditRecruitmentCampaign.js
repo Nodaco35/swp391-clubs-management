@@ -56,7 +56,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Debug thông tin clubId
         const clubIdInput = document.querySelector('input[name="clubId"]');
-        const clubIDInput = document.querySelector('input[name="clubID"]');
         console.log("DEBUG - Hidden clubId field:", clubIdInput ? clubIdInput.value : "không tìm thấy");
         
         // Kiểm tra dữ liệu về đơn đăng ký từ server
@@ -68,7 +67,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Debug thông tin trong URL
         const urlParams = new URLSearchParams(window.location.search);
-        console.log("DEBUG - URL clubId param:", urlParams.get('clubId'));
     } else {
         isEdit = false;
     }
@@ -86,11 +84,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Tự động chọn form đăng ký nếu chỉ có một lựa chọn
     autoSelectSingleTemplate();
-    
-    // Đồng bộ hóa các thuộc tính về đơn đăng ký
-    if (isEdit) {
-        normalizeApplicationFlags();
-    }
     
     // Thiết lập các trường không thể chỉnh sửa nếu cần thiết
     setupFieldRestrictions();
@@ -123,9 +116,6 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('[INFO] Chế độ chỉnh sửa - Đã khởi tạo xong các ràng buộc trường');
         }
     }, 1000);
-    
-    // Đồng bộ các thuộc tính data-has-applications và data-has_applications trong DOM
-    normalizeApplicationFlags();
 });
 
 /**
@@ -886,16 +876,6 @@ function setupFormSubmission() {
             }
             hiddenClubIdInput.value = formUrlClubId;
             
-            // Thêm clubID cho trường hợp server cần cả hai loại tham số
-            let hiddenClubIDInput = document.querySelector('input[name="clubID"]');
-            if (!hiddenClubIDInput) {
-                hiddenClubIDInput = document.createElement('input');
-                hiddenClubIDInput.type = 'hidden';
-                hiddenClubIDInput.name = 'clubID';
-                form.appendChild(hiddenClubIDInput);
-            }
-            hiddenClubIDInput.value = formUrlClubId;
-            
             console.log('[DEBUG] Đã đảm bảo clubId từ URL được thêm vào form:', formUrlClubId);
         }
         
@@ -909,19 +889,12 @@ function setupFormSubmission() {
         
         // Kiểm tra xem có clubId không, và nếu không có thì thử lấy từ các nguồn khác
         if (!formData.has('clubId') || formData.get('clubId') === '') {
-            // Thử lấy từ URL
+            // Lấy từ URL
             const urlParams = new URLSearchParams(window.location.search);
             const urlClubId = urlParams.get('clubId');
             if (urlClubId) {
                 console.log("Lấy clubId từ URL: " + urlClubId);
                 formData.set('clubId', urlClubId);
-            }
-            
-            // Hoặc thử lấy từ input ẩn khác
-            const hiddenClubIDInput = document.querySelector('input[name="clubID"]');
-            if (hiddenClubIDInput && hiddenClubIDInput.value) {
-                console.log("Lấy clubId từ input clubID: " + hiddenClubIDInput.value);
-                formData.set('clubId', hiddenClubIDInput.value);
             }
         }
     
@@ -966,7 +939,6 @@ function setupFormSubmission() {
         if ((!formData.get('clubId') || formData.get('clubId') === '') && submitUrlClubId) {
             console.log('[DEBUG] Thêm clubId từ URL vào formData:', submitUrlClubId);
             formData.set('clubId', submitUrlClubId);
-            formData.set('clubID', submitUrlClubId);
         }
         
         // Tạo URLSearchParams từ formData để gửi lên server
@@ -1019,7 +991,6 @@ function setupFormSubmission() {
         criticalFields.forEach(fieldId => {
             const field = document.getElementById(fieldId);
             if (field && field.disabled && field.value && fieldId !== 'templateId') {
-                console.log(`[DEBUG] Thêm giá trị từ field disabled: ${fieldId}=${field.value}`);
                 requestParams.set(fieldId, field.value);
             }
         });
@@ -1036,12 +1007,10 @@ function setupFormSubmission() {
             
             // Nếu field tồn tại và có giá trị, thêm vào request
             if (field && field.value && !requestParams.has(param)) {
-                console.log(`[DEBUG] Thêm giá trị trường bắt buộc từ field: ${param}=${field.value}`);
                 requestParams.set(param, field.value);
             } 
             // Nếu hidden input tồn tại và có giá trị, thêm vào request
             else if (hiddenInput && hiddenInput.value && !requestParams.has(param)) {
-                console.log(`[DEBUG] Thêm giá trị trường bắt buộc từ hidden input: ${param}=${hiddenInput.value}`);
                 requestParams.set(param, hiddenInput.value);
             }
         });
@@ -1162,10 +1131,6 @@ function setupFormSubmission() {
             return response.json();
         })
         .then(data => {
-            // Debug: Log toàn bộ response để kiểm tra
-            console.log('Full response data:', data);
-            console.log('data.success type:', typeof data.success, 'value:', data.success);
-            
             // Re-enable the button in any case
             document.getElementById('submitBtn').disabled = false;
             document.getElementById('submitBtn').innerHTML = isEdit ? 'Cập nhật hoạt động' : 'Tạo hoạt động';
@@ -1196,7 +1161,6 @@ function setupFormSubmission() {
                     }
                 }, 1500);
             } else {
-                console.log('Response success = false, hiển thị lỗi:', data.message);
                 // Show error message
                 showToast(data.message || 'Đã có lỗi xảy ra!', 'error');
                 
@@ -1229,15 +1193,6 @@ function setupFormSubmission() {
             }
             
             showToast('Đã có lỗi xảy ra: ' + errorMessage, 'error');
-            
-            // Show debug panel with error info
-            showDebugInfo('Lỗi khi gửi form', {
-                url: finalUrl,
-                error: error.toString(),
-                errorType: error.name,
-                requestData: Object.fromEntries(requestParams.entries()),
-                timestamp: new Date().toISOString()
-            });
         });
     });
     
@@ -1289,79 +1244,17 @@ function hasStageStarted(startDate) {
 
 /**
  * Kiểm tra xem một chiến dịch đã có đơn đăng ký nào được nộp chưa
- * Điều này sẽ được xác định bởi server, cần một API riêng để kiểm tra
- * @returns {boolean} True nếu có đơn đăng ký, ngược lại là false
  */
 function hasCampaignApplications() {
-    // Tìm element có data-attribute đánh dấu đã có đơn đăng ký - kiểm tra nhiều cách viết
-    const hasApplicationsElement = document.querySelector('[data-has_applications="true"]');
-    const altApplicationsElement = document.querySelector('[data-has_applications="true"]');
-    const alt2ApplicationsElement = document.querySelector('[data-hasApplications="true"]');
-    const hasApplicationsFlag = document.getElementById('hasApplicationsFlag');
-    
-    // Kiểm tra và log các nguồn thông tin về đơn đăng ký
-    console.log("[DEBUG] Kiểm tra thông tin đơn đăng ký:");
-    console.log("- hasApplicationsElement [data-has_applications]:", hasApplicationsElement ? "có" : "không có");
-    console.log("- altApplicationsElement [data-has_applications]:", altApplicationsElement ? "có" : "không có");
-    console.log("- alt2ApplicationsElement [data-hasApplications]:", alt2ApplicationsElement ? "có" : "không có");
-    console.log("- hasApplicationsFlag:", hasApplicationsFlag ? (hasApplicationsFlag.value === 'true' ? "true" : "false") : "không có");
-    
-    // Kiểm tra data-has-applications (chuẩn hóa dấu gạch ngang)
-    if (hasApplicationsElement) {
-        console.log("Đã tìm thấy đánh dấu có đơn đăng ký từ element [data-has_applications]");
-        return true;
+    const hasApplicationsInput = document.querySelector('input[name="hasApplications"]');
+    if (!hasApplicationsInput) {
+        console.warn("[DEBUG] Không tìm thấy input hasApplications, mặc định không có đơn đăng ký.");
+        return false;
     }
     
-    // Kiểm tra phiên bản thay thế data-has_applications (dùng dấu gạch dưới)
-    if (altApplicationsElement) {
-        console.log("Đã tìm thấy đánh dấu có đơn đăng ký từ element [data-has_applications]");
-        return true;
-    }
-    
-    // Kiểm tra phiên bản thay thế data-hasApplications (camelCase)
-    if (alt2ApplicationsElement) {
-        console.log("Đã tìm thấy đánh dấu có đơn đăng ký từ element [data-hasApplications]");
-        return true;
-    }
-    
-    // Kiểm tra flag từ hidden input
-    if (hasApplicationsFlag && hasApplicationsFlag.value === 'true') {
-        console.log("Đã tìm thấy đánh dấu có đơn đăng ký từ flag");
-        return true;
-    }
-    
-    // Kiểm tra trong form có input hidden chứa thông tin về số lượng đơn đăng ký không
-    const applicationCountInput = document.querySelector('input[name="applicationCount"]');
-    if (applicationCountInput && parseInt(applicationCountInput.value) > 0) {
-        console.log("Đã tìm thấy đánh dấu có đơn đăng ký từ applicationCount:", applicationCountInput.value);
-        return true;
-    }
-    
-    // Kiểm tra trong JSP có biến applicationCount đã được khai báo không
-    if (typeof applicationCount !== 'undefined' && applicationCount > 0) {
-        console.log("Đã tìm thấy đánh dấu có đơn đăng ký từ biến applicationCount:", applicationCount);
-        return true;
-    }
-    
-    // Kiểm tra thêm các thuộc tính data- khác trên body và form
-    const formsWithDataAttrs = document.querySelectorAll('form[data-application-count], form[data-has_applications], body[data-application-count], body[data-has_applications]');
-    for (let i = 0; i < formsWithDataAttrs.length; i++) {
-        const el = formsWithDataAttrs[i];
-        const dataAttributes = el.dataset;
-        
-        // Kiểm tra các thuộc tính data- có chứa từ "application" và có giá trị "true" hoặc là số > 0
-        for (let key in dataAttributes) {
-            if (key.toLowerCase().includes('application') && 
-                (dataAttributes[key] === 'true' || parseInt(dataAttributes[key]) > 0)) {
-                console.log(`Đã tìm thấy đánh dấu có đơn đăng ký từ thuộc tính data-${key}:`, dataAttributes[key]);
-                return true;
-            }
-        }
-    }
-    
-    // Trong trường hợp không tìm thấy đánh dấu nào, trả về false - tức là không có đơn đăng ký
-    console.log("Không tìm thấy đánh dấu nào về đơn đăng ký - Có thể chỉnh sửa mẫu đơn");
-    return false;
+    const hasApplications = hasApplicationsInput.value === 'true';
+    console.log("[DEBUG] Kiểm tra đơn đăng ký: hasApplications =", hasApplications);
+    return hasApplications;
 }
 
 /**
@@ -1459,8 +1352,6 @@ function setupFieldRestrictions() {
         } else {
             console.log("Mẫu đơn có thể thay đổi vì chưa có đơn đăng ký");
             templateSelect.disabled = false;
-            // Không thêm hidden input khi enabled để tránh trùng lặp dữ liệu
-            console.log(`[DEBUG] TemplateId enabled, không thêm hidden input`);
         }
         
         // Thêm event listener để xử lý khi người dùng thay đổi template (cho cả enabled và disabled)
@@ -1595,68 +1486,6 @@ function debugDisabledFields() {
     return disabledFields;
 }
 
-/**
- * Kiểm tra và sửa các thuộc tính data-* trong DOM để đảm bảo nhất quán
- * Hàm này giúp đồng bộ các thuộc tính data-has-applications và data-has_applications
- */
-function normalizeApplicationFlags() {
-    // Kiểm tra và đồng bộ hóa các flags
-    const dashElements = document.querySelectorAll('[data-has-applications]');
-    const underscoreElements = document.querySelectorAll('[data-has_applications]');
-    
-    // Log số lượng mỗi loại phần tử tìm thấy
-    console.log(`[DEBUG] Kiểm tra DOM: Tìm thấy ${dashElements.length} phần tử [data-has-applications] và ${underscoreElements.length} phần tử [data-has_applications]`);
-    
-    // Đồng bộ từ dash sang underscore
-    dashElements.forEach(el => {
-        const value = el.getAttribute('data-has-applications');
-        if (value === 'true') {
-            // Đồng bộ sang cả dạng underscore
-            el.setAttribute('data-has_applications', 'true');
-            console.log('[DEBUG] Đồng bộ data-has-applications -> data-has_applications: true');
-        }
-    });
-    
-    // Đồng bộ từ underscore sang dash
-    underscoreElements.forEach(el => {
-        const value = el.getAttribute('data-has_applications');
-        if (value === 'true') {
-            // Đồng bộ sang cả dạng dash
-            el.setAttribute('data-has-applications', 'true');
-            console.log('[DEBUG] Đồng bộ data-has_applications -> data-has-applications: true');
-        }
-    });
-    
-    // Đặt flag hidden nếu bất kỳ phần tử nào có giá trị true
-    let hasApplications = false;
-    
-    // Kiểm tra cả hai kiểu thuộc tính
-    dashElements.forEach(el => {
-        if (el.getAttribute('data-has-applications') === 'true') {
-            hasApplications = true;
-        }
-    });
-    
-    underscoreElements.forEach(el => {
-        if (el.getAttribute('data-has_applications') === 'true') {
-            hasApplications = true;
-        }
-    });
-    
-    // Nếu chưa có input flag, thêm vào
-    let hasApplicationsFlag = document.getElementById('hasApplicationsFlag');
-    if (!hasApplicationsFlag) {
-        hasApplicationsFlag = document.createElement('input');
-        hasApplicationsFlag.type = 'hidden';
-        hasApplicationsFlag.id = 'hasApplicationsFlag';
-        hasApplicationsFlag.name = 'hasApplicationsFlag';
-        document.getElementById('recruitmentForm').appendChild(hasApplicationsFlag);
-    }
-    
-    // Cập nhật giá trị flag
-    hasApplicationsFlag.value = hasApplications.toString();
-    console.log(`[DEBUG] Đã cập nhật hasApplicationsFlag = ${hasApplications}`);
-}
 
 /**
  * Helper function để quản lý templateId một cách nhất quán
