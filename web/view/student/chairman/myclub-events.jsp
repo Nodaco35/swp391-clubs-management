@@ -71,7 +71,7 @@
 						<form action="${pageContext.request.contextPath}/logout" method="post">
 							<input class="btn btn-primary" type="submit" value="Logout">
 						</form>
-						<a href="${pageContext.request.contextPath}/my-club" class="btn btn-primary">MyClub</a>
+						<a href="${pageContext.request.contextPath}/myclub" class="btn btn-primary">MyClub</a>
 					</div>
 				</c:when>
 				<c:otherwise>
@@ -97,8 +97,8 @@
 			</ul>
 		</nav>
 	</div>
-	<c:if test="${not empty club}">
 		<div class="club-header">
+			<c:if test="${not empty club}">
 			<div class="club-info">
 				<div class="club-avatar">
 					<img src="${pageContext.request.contextPath}${club.clubImg}" alt="${club.clubName}" style="width: 60px; height: 60px; border-radius: 50%;">
@@ -108,8 +108,8 @@
 					<p>Chủ nhiệm: ${club.clubChairmanName}</p>
 				</div>
 			</div>
+			</c:if>
 		</div>
-	</c:if>
 
 	<nav class="dashboard-nav">
 		<ul>

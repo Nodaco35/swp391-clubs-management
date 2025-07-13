@@ -22,7 +22,6 @@
 			<span>UniClub</span>
 		</div>
 
-		<!-- Search Bar -->
 		<div class="search-container">
 			<div class="search-box">
 				<form action="${pageContext.request.contextPath}/events-page" method="get">
@@ -72,7 +71,7 @@
 						<form action="${pageContext.request.contextPath}/logout" method="post">
 							<input class="btn btn-primary" type="submit" value="Logout">
 						</form>
-						<a href="${pageContext.request.contextPath}/my-club" class="btn btn-primary">MyClub</a>
+						<a href="${pageContext.request.contextPath}/myclub" class="btn btn-primary">MyClub</a>
 					</div>
 				</c:when>
 				<c:otherwise>
