@@ -8,6 +8,7 @@ import models.DepartmentMeeting;
 import models.Users;
 import models.UserClub;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import jakarta.servlet.ServletException;
@@ -23,6 +24,7 @@ public class DepartmentMeetingServlet extends HttpServlet {
     private UserClubDAO userClubDAO;
     private static final Pattern GOOGLE_MEET_PATTERN = Pattern.compile("^https://meet\\.google\\.com/[a-z]{3}-[a-z]{4}-[a-z]{3}$");
     private static final Pattern ZOOM_PATTERN = Pattern.compile("^https://([a-z0-9-]+\\.)?zoom\\.us/j/[0-9]{9,11}(\\?pwd=[a-zA-Z0-9]+)?$");
+    private static final Pattern GOOGLE_DRIVE_PATTERN = Pattern.compile("^https://drive\\.google\\.com/.*$");
     
     @Override
     public void init() throws ServletException {
@@ -41,7 +43,6 @@ public class DepartmentMeetingServlet extends HttpServlet {
             return;
         }
 
-        // Lấy thông tin department
         models.DepartmentDashboard dashboard = dashboardDAO.getDepartmentInfo(user.getUserID());
         if (dashboard == null) {
             request.setAttribute("error", "Không tìm thấy thông tin ban");
@@ -81,6 +82,8 @@ public class DepartmentMeetingServlet extends HttpServlet {
             if (meeting == null) {
                 request.setAttribute("error", "Không tìm thấy cuộc họp!");
             } else {
+                List<String> participants = meetingDAO.getMeetingParticipants(meetingId);
+                meeting.setParticipantUserIds(participants);
                 request.setAttribute("editMeeting", meeting);
             }
             meetings = meetingDAO.getDepartmentMeetings(clubDepartmentId, page, pageSize);
@@ -115,6 +118,8 @@ public class DepartmentMeetingServlet extends HttpServlet {
             totalPages = (int) Math.ceil((double) totalRecords / pageSize);
         }
 
+        List<Users> departmentMembers = meetingDAO.getDepartmentMembers(clubDepartmentId);
+        request.setAttribute("departmentMembers", departmentMembers);
         request.setAttribute("meetings", meetings);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
@@ -147,9 +152,20 @@ public class DepartmentMeetingServlet extends HttpServlet {
 
         String action = request.getParameter("action");
 
-        if ("add".equals(action)) {
+        if ("add".equals(action) || "update".equals(action)) {
+            String title = request.getParameter("title");
             String urlMeeting = request.getParameter("urlMeeting");
+            String documentLink = request.getParameter("documentLink");
             String startedTime = request.getParameter("startedTime");
+            String[] participantIds = request.getParameterValues("participants");
+            boolean selectAll = "true".equals(request.getParameter("selectAll"));
+
+            if (title == null || title.trim().isEmpty()) {
+                request.setAttribute("error", "Tiêu đề cuộc họp không được để trống!");
+                request.setAttribute("showAddForm", true);
+                doGet(request, response);
+                return;
+            }
 
             if (urlMeeting == null || urlMeeting.trim().isEmpty() || startedTime == null || startedTime.trim().isEmpty()) {
                 request.setAttribute("error", "Liên kết cuộc họp hoặc thời gian không được để trống!");
@@ -165,86 +181,79 @@ public class DepartmentMeetingServlet extends HttpServlet {
                 return;
             }
 
-            try {
-                String formattedTime = startedTime.replace("T", " ") + ":00"; // Convert yyyy-MM-dd'T'HH:mm to yyyy-MM-dd HH:mm:ss
-                meetingDAO.createMeeting(clubDepartmentId, formattedTime, urlMeeting);
-                
-                // Send notifications to department members
-                List<UserClub> members = userClubDAO.findByCDID(clubDepartmentId);
-                for (UserClub member : members) {
-                    String title = "Thông báo cuộc họp mới";
-                    String content = String.format("Cuộc họp mới tại %s được tổ chức vào %s. Liên kết: %s",
-                            member.getDepartmentName(), formattedTime, urlMeeting);
-                    NotificationDAO.sentToPerson(user.getUserID(), member.getUserID(), title, content);
+            if (documentLink != null && !documentLink.trim().isEmpty() && !GOOGLE_DRIVE_PATTERN.matcher(documentLink).matches()) {
+                request.setAttribute("error", "Liên kết tài liệu không hợp lệ! Vui lòng nhập URL Google Drive hợp lệ.");
+                request.setAttribute("showAddForm", true);
+                doGet(request, response);
+                return;
+            }
+
+            List<String> participants = new ArrayList<>();
+            if (selectAll) {
+                List<Users> members = meetingDAO.getDepartmentMembers(clubDepartmentId);
+                for (Users member : members) {
+                    participants.add(member.getUserID());
                 }
-                
-                request.setAttribute("message", "Tạo cuộc họp thành công và đã gửi thông báo đến các thành viên!");
-            } catch (Exception e) {
-                request.setAttribute("error", "Lỗi khi tạo cuộc họp: " + e.getMessage());
-                request.setAttribute("showAddForm", true);
-            }
-        } else if ("update".equals(action)) {
-            int meetingId;
-            String urlMeeting = request.getParameter("urlMeeting");
-            String startedTime = request.getParameter("startedTime");
-
-            try {
-                meetingId = Integer.parseInt(request.getParameter("meetingId"));
-            } catch (NumberFormatException e) {
-                request.setAttribute("error", "ID cuộc họp không hợp lệ!");
-                doGet(request, response);
-                return;
-            }
-
-            if (urlMeeting == null || urlMeeting.trim().isEmpty() || startedTime == null || startedTime.trim().isEmpty()) {
-                request.setAttribute("error", "Liên kết cuộc họp hoặc thời gian không được để trống!");
-                DepartmentMeeting meeting = new DepartmentMeeting();
-                meeting.setDepartmentMeetingID(meetingId);
-                meeting.setURLMeeting(urlMeeting);
-                request.setAttribute("editMeeting", meeting);
-                doGet(request, response);
-                return;
-            }
-
-            if (!GOOGLE_MEET_PATTERN.matcher(urlMeeting).matches() && !ZOOM_PATTERN.matcher(urlMeeting).matches()) {
-                request.setAttribute("error", "Liên kết cuộc họp không hợp lệ! Vui lòng nhập URL Google Meet (VD: https://meet.google.com/abc-defg-hij) hoặc Zoom (VD: https://zoom.us/j/1234567890).");
-                DepartmentMeeting meeting = new DepartmentMeeting();
-                meeting.setDepartmentMeetingID(meetingId);
-                meeting.setURLMeeting(urlMeeting);
-                request.setAttribute("editMeeting", meeting);
-                doGet(request, response);
-                return;
+            } else if (participantIds != null) {
+                for (String id : participantIds) {
+                    participants.add(id);
+                }
             }
 
             try {
-                String formattedTime = startedTime.replace("T", " ") + ":00"; // Convert yyyy-MM-dd'T'HH:mm to yyyy-MM-dd HH:mm:ss
-                DepartmentMeeting meeting = new DepartmentMeeting();
-                meeting.setDepartmentMeetingID(meetingId);
-                meeting.setClubDepartmentID(clubDepartmentId);
-                meeting.setURLMeeting(urlMeeting);
-                meeting.setStartedTime(java.sql.Timestamp.valueOf(formattedTime));
-
-                if (meetingDAO.updateMeeting(meeting)) {
-                    // Send notifications to department members
+                String formattedTime = startedTime.replace("T", " ") + ":00";
+                if ("add".equals(action)) {
+                    meetingDAO.createMeeting(clubDepartmentId, title, urlMeeting, documentLink, formattedTime, participants);
+                    
                     List<UserClub> members = userClubDAO.findByCDID(clubDepartmentId);
                     for (UserClub member : members) {
-                        String title = "Cập nhật thông tin cuộc họp";
-                        String content = String.format("Cuộc họp tại ban %s đã được cập nhật. Thời gian: %s, Liên kết: %s",
-                                member.getDepartmentName(), formattedTime, urlMeeting);
-                        NotificationDAO.sentToPerson(user.getUserID(), member.getUserID(), title, content);
+                        if (participants.contains(member.getUserID())) {
+                            String notifTitle = "Thông báo cuộc họp mới: " + title;
+                            String content = String.format("Cuộc họp '%s' tại %s được tổ chức vào %s. Liên kết: %s%s",
+                                    title, member.getDepartmentName(), formattedTime, urlMeeting,
+                                    documentLink != null && !documentLink.isEmpty() ? "\nTài liệu: " + documentLink : "");
+                            NotificationDAO.sentToPerson(user.getUserID(), member.getUserID(), notifTitle, content);
+                        }
                     }
-                    
-                    request.setAttribute("message", "Cập nhật cuộc họp thành công và đã gửi thông báo đến các thành viên!");
+                    request.setAttribute("message", "Tạo cuộc họp thành công và đã gửi thông báo đến các thành viên!");
                 } else {
-                    request.setAttribute("error", "Cập nhật cuộc họp thất bại!");
-                    request.setAttribute("editMeeting", meeting);
+                    int meetingId;
+                    try {
+                        meetingId = Integer.parseInt(request.getParameter("meetingId"));
+                    } catch (NumberFormatException e) {
+                        request.setAttribute("error", "ID cuộc họp không hợp lệ!");
+                        doGet(request, response);
+                        return;
+                    }
+
+                    DepartmentMeeting meeting = new DepartmentMeeting();
+                    meeting.setDepartmentMeetingID(meetingId);
+                    meeting.setClubDepartmentID(clubDepartmentId);
+                    meeting.setTitle(title);
+                    meeting.setURLMeeting(urlMeeting);
+                    meeting.setDocumentLink(documentLink);
+                    meeting.setStartedTime(java.sql.Timestamp.valueOf(formattedTime));
+
+                    if (meetingDAO.updateMeeting(meeting, participants)) {
+                        List<UserClub> members = userClubDAO.findByCDID(clubDepartmentId);
+                        for (UserClub member : members) {
+                            if (participants.contains(member.getUserID())) {
+                                String notifTitle = "Cập nhật cuộc họp: " + title;
+                                String content = String.format("Cuộc họp '%s' tại ban %s đã được cập nhật. Thời gian: %s, Liên kết: %s%s",
+                                        title, member.getDepartmentName(), formattedTime, urlMeeting,
+                                        documentLink != null && !documentLink.isEmpty() ? "\nTài liệu: " + documentLink : "");
+                                NotificationDAO.sentToPerson(user.getUserID(), member.getUserID(), notifTitle, content);
+                            }
+                        }
+                        request.setAttribute("message", "Cập nhật cuộc họp thành công và đã gửi thông báo đến các thành viên!");
+                    } else {
+                        request.setAttribute("error", "Cập nhật cuộc họp thất bại!");
+                        request.setAttribute("editMeeting", meeting);
+                    }
                 }
             } catch (Exception e) {
-                request.setAttribute("error", "Lỗi khi cập nhật cuộc họp: " + e.getMessage());
-                DepartmentMeeting meeting = new DepartmentMeeting();
-                meeting.setDepartmentMeetingID(meetingId);
-                meeting.setURLMeeting(urlMeeting);
-                request.setAttribute("editMeeting", meeting);
+                request.setAttribute("error", "Lỗi khi " + ("add".equals(action) ? "tạo" : "cập nhật") + " cuộc họp: " + e.getMessage());
+                request.setAttribute("showAddForm", true);
             }
         } else if ("delete".equals(action)) {
             int meetingId;

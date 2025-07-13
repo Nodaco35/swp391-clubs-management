@@ -1,22 +1,19 @@
-
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package models;
 import java.sql.Timestamp;
-/**
- *
- * @author he181
- */
+import java.util.List;
+
 public class DepartmentMeeting {
     private int departmentMeetingID;
     private int clubDepartmentID;
-    private String URLMeeting;
+    private String title;
+    private String urlMeeting;
+    private String documentLink;
     private Timestamp startedTime;
     private String departmentName;
     private String clubName;
     private String clubImg;
+    private List<String> participantUserIds;
+
     public DepartmentMeeting() {
     }
 
@@ -36,20 +33,36 @@ public class DepartmentMeeting {
         this.clubDepartmentID = clubDepartmentID;
     }
 
-    public String getURLMeeting() {
-        return URLMeeting;
+    public String getTitle() {
+        return title;
     }
 
-    public void setURLMeeting(String URLMeeting) {
-        this.URLMeeting = URLMeeting;
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getURLMeeting() {
+        return urlMeeting;
+    }
+
+    public void setURLMeeting(String urlMeeting) {
+        this.urlMeeting = urlMeeting;
+    }
+
+    public String getDocumentLink() {
+        return documentLink;
+    }
+
+    public void setDocumentLink(String documentLink) {
+        this.documentLink = documentLink;
     }
 
     public Timestamp getStartedTime() {
         return startedTime;
     }
 
-    public void setStartedTime(Timestamp statedTime) {
-        this.startedTime = statedTime;
+    public void setStartedTime(Timestamp startedTime) {
+        this.startedTime = startedTime;
     }
 
     public String getDepartmentName() {
@@ -76,10 +89,11 @@ public class DepartmentMeeting {
         this.clubImg = clubImg;
     }
 
-    
-    
-    
-            
-            
-            
+    public List<String> getParticipantUserIds() {
+        return participantUserIds;
+    }
+
+    public void setParticipantUserIds(List<String> participantUserIds) {
+        this.participantUserIds = participantUserIds;
+    }
 }

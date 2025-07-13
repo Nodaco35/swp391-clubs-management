@@ -8,18 +8,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý cuộc họp - Ban ${sessionScope.departmentName}</title>
     
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <!-- Custom CSS -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/department-leader.css">
 </head>
 <body>
     <div class="department-leader-container">
-        <!-- Sidebar -->
         <nav class="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
@@ -27,7 +21,6 @@
                     <span>Quản lý Ban</span>
                 </div>
             </div>
-            
             <ul class="sidebar-menu">
                 <li class="menu-item">
                     <a href="${pageContext.request.contextPath}/department-dashboard" class="menu-link">
@@ -60,7 +53,6 @@
                     </a>
                 </li>
             </ul>
-            
             <div class="sidebar-footer">
                 <div class="user-info">
                     <div class="user-avatar">
@@ -74,9 +66,7 @@
             </div>
         </nav>
 
-        <!-- Main Content -->
         <main class="main-content">
-            <!-- Header -->
             <header class="header mb-4">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
@@ -95,7 +85,6 @@
                 </div>
             </header>
 
-            <!-- Hiển thị thông báo -->
             <c:if test="${not empty message}">
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     ${message}
@@ -121,7 +110,6 @@
                 </div>
             </c:if>
 
-            <!-- Search and Add Section -->
             <div class="row mb-4">
                 <div class="col-12">
                     <div class="card shadow-sm">
@@ -135,7 +123,7 @@
                                                 <i class="fas fa-search"></i>
                                             </span>
                                             <input type="text" name="search" class="form-control" 
-                                                   placeholder="Tìm kiếm theo liên kết hoặc thời gian..." 
+                                                   placeholder="Tìm kiếm theo tiêu đề, liên kết hoặc thời gian..." 
                                                    value="${search}">
                                             <button class="btn btn-outline-primary" type="submit">Tìm kiếm</button>
                                         </div>
@@ -152,7 +140,6 @@
                 </div>
             </div>
 
-            <!-- Form thêm/sửa cuộc họp -->
             <div class="row mb-4 ${editMeeting != null || showAddForm ? 'd-block' : 'd-none'}" id="meetingForm">
                 <div class="col-12">
                     <div class="card shadow-sm">
@@ -168,15 +155,47 @@
                                 <input type="hidden" name="meetingId" id="meetingId" value="${editMeeting != null ? editMeeting.departmentMeetingID : ''}">
                                 <input type="hidden" name="clubDepartmentId" value="${sessionScope.clubDepartmentID}">
                                 <div class="mb-3">
+                                    <label for="title" class="form-label">Tiêu đề cuộc họp</label>
+                                    <input type="text" name="title" id="title" class="form-control" 
+                                           placeholder="Nhập tiêu đề cuộc họp" 
+                                           value="${editMeeting != null ? editMeeting.title : ''}" required>
+                                </div>
+                                <div class="mb-3">
                                     <label for="urlMeeting" class="form-label">Liên kết cuộc họp</label>
                                     <input type="url" name="urlMeeting" id="urlMeeting" class="form-control" 
                                            placeholder="Nhập URL Google Meet hoặc Zoom (VD: https://meet.google.com/abc-defg-hij)" 
                                            value="${editMeeting != null ? editMeeting.URLMeeting : ''}" required>
                                 </div>
                                 <div class="mb-3">
+                                    <label for="documentLink" class="form-label">Liên kết tài liệu (Google Drive)</label>
+                                    <input type="url" name="documentLink" id="documentLink" class="form-control" 
+                                           placeholder="Nhập URL Google Drive (nếu có)" 
+                                           value="${editMeeting != null ? editMeeting.documentLink : ''}">
+                                </div>
+                                <div class="mb-3">
                                     <label for="startedTime" class="form-label">Thời gian bắt đầu</label>
                                     <input type="datetime-local" name="startedTime" id="startedTime" class="form-control" 
                                            value="${editMeeting != null ? editMeeting.startedTime : ''}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Người tham gia</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="selectAll" id="selectAll" 
+                                               onchange="toggleParticipants(this)" ${editMeeting != null && editMeeting.participantUserIds.size() == departmentMembers.size() ? 'checked' : ''}>
+                                        <label class="form-check-label" for="selectAll">Tất cả thành viên</label>
+                                    </div>
+                                    <div id="participantsList" class="${editMeeting != null && editMeeting.participantUserIds.size() == departmentMembers.size() ? 'd-none' : 'd-block'}">
+                                        <c:forEach var="member" items="${departmentMembers}">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="participants" 
+                                                       value="${member.userID}" id="participant_${member.userID}"
+                                                       ${editMeeting != null && editMeeting.participantUserIds.contains(member.userID) ? 'checked' : ''}>
+                                                <label class="form-check-label" for="participant_${member.userID}">
+                                                    ${member.fullName}
+                                                </label>
+                                            </div>
+                                        </c:forEach>
+                                    </div>
                                 </div>
                                 <div class="d-flex justify-content-end">
                                     <button type="button" class="btn btn-secondary me-2" onclick="hideForm()">Hủy</button>
@@ -191,7 +210,6 @@
                 </div>
             </div>
 
-            <!-- Meetings List -->
             <div class="row">
                 <div class="col-12">
                     <div class="card shadow-sm">
@@ -200,7 +218,7 @@
                                 <h5 class="mb-0">
                                     <i class="fas fa-calendar-alt me-2"></i>Danh sách cuộc họp
                                 </h5>
-                                <span class="badge bg-primary">${totalMeetings} cuộc họp</span>
+                                <span class="badge bg-primary">${totalRecords} cuộc họp</span>
                             </div>
                         </div>
                         <div class="card-body p-0">
@@ -212,6 +230,7 @@
                                                 <th scope="col" class="ps-4">Cuộc họp</th>
                                                 <th scope="col">Thời gian</th>
                                                 <th scope="col">Liên kết</th>
+                                                <th scope="col">Tài liệu</th>
                                                 <th scope="col">Trạng thái</th>
                                                 <th scope="col" class="text-center">Hành động</th>
                                             </tr>
@@ -226,8 +245,9 @@
                                                                      alt="Club Logo" class="rounded-circle" style="width: 45px; height: 45px; object-fit: cover;">
                                                             </div>
                                                             <div>
-                                                                <h6 class="mb-1 fw-semibold">${meeting.departmentName} - ${meeting.clubName}</h6>
-                                                                <small class="text-muted">ID: ${meeting.departmentMeetingID}</small>
+                                                                <h6 class="mb-1 fw-semibold">${meeting.title}</h6>
+                                                                <small class="text-muted">${meeting.departmentName} - ${meeting.clubName}</small>
+                                                                <small class="text-muted d-block">ID: ${meeting.departmentMeetingID}</small>
                                                             </div>
                                                         </div>
                                                     </td>
@@ -238,6 +258,18 @@
                                                         <a href="${meeting.URLMeeting}" target="_blank" class="text-decoration-none">
                                                             <i class="fas fa-link me-1"></i>Tham gia
                                                         </a>
+                                                    </td>
+                                                    <td>
+                                                        <c:choose>
+                                                            <c:when test="${not empty meeting.documentLink}">
+                                                                <a href="${meeting.documentLink}" target="_blank" class="text-decoration-none">
+                                                                    <i class="fas fa-file-alt me-1"></i>Xem tài liệu
+                                                                </a>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <span class="text-muted">Không có</span>
+                                                            </c:otherwise>
+                                                        </c:choose>
                                                     </td>
                                                     <td>
                                                         <span class="badge ${meeting.startedTime > now ? 'bg-info' : 'bg-secondary'}">
@@ -284,7 +316,6 @@
                 </div>
             </div>
 
-            <!-- Pagination -->
             <c:if test="${totalPages > 1}">
                 <div class="row mt-4">
                     <div class="col-12">
@@ -342,7 +373,7 @@
                         </nav>
                         <div class="text-center mt-2">
                             <small class="text-muted">
-                                Hiển thị trang ${currentPage} / ${totalPages} - Tổng ${totalMeetings} cuộc họp
+                                Hiển thị trang ${currentPage} / ${totalPages} - Tổng ${totalRecords} cuộc họp
                             </small>
                         </div>
                     </div>
@@ -351,18 +382,18 @@
         </main>
     </div>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         let currentEditMeetingId = null;
 
-        // Ẩn form khi tải trang
         document.addEventListener('DOMContentLoaded', function () {
             hideForm();
             <c:if test="${editMeeting != null}">
                 showEditForm(
                     ${editMeeting.departmentMeetingID},
+                    '${editMeeting.title}',
                     '${editMeeting.URLMeeting}',
+                    '${editMeeting.documentLink}',
                     '<fmt:formatDate value="${editMeeting.startedTime}" pattern="yyyy-MM-dd\'T\'HH:mm"/>'
                 );
             </c:if>
@@ -371,7 +402,6 @@
             </c:if>
         });
 
-        // Toggle form thêm
         function toggleAddForm() {
             const form = document.getElementById('meetingForm');
             if (form.classList.contains('d-block') && document.getElementById('formAction').value === 'add') {
@@ -381,19 +411,17 @@
             }
         }
 
-        // Toggle form sửa
-        function toggleEditForm(meetingId, urlMeeting, startedTime) {
+        function toggleEditForm(meetingId, title, urlMeeting, documentLink, startedTime) {
             const form = document.getElementById('meetingForm');
             if (form.classList.contains('d-block') && currentEditMeetingId === meetingId) {
                 hideForm();
                 currentEditMeetingId = null;
             } else {
-                showEditForm(meetingId, urlMeeting, startedTime);
+                showEditForm(meetingId, title, urlMeeting, documentLink, startedTime);
                 currentEditMeetingId = meetingId;
             }
         }
 
-        // Hiển thị form thêm
         function showAddForm() {
             const form = document.getElementById('meetingForm');
             const formTitle = document.querySelector('#meetingForm .card-header h5');
@@ -407,11 +435,12 @@
             submitButton.textContent = 'Tạo';
             document.getElementById('formData').reset();
             document.getElementById('meetingId').value = '';
+            document.getElementById('selectAll').checked = false;
+            toggleParticipants(document.getElementById('selectAll'));
             currentEditMeetingId = null;
         }
 
-        // Hiển thị form sửa
-        function showEditForm(meetingId, urlMeeting, startedTime) {
+        function showEditForm(meetingId, title, urlMeeting, documentLink, startedTime) {
             const form = document.getElementById('meetingForm');
             const formTitle = document.querySelector('#meetingForm .card-header h5');
             const formAction = document.getElementById('formAction');
@@ -424,11 +453,12 @@
             submitButton.textContent = 'Cập nhật';
 
             document.getElementById('meetingId').value = meetingId;
+            document.getElementById('title').value = title;
             document.getElementById('urlMeeting').value = urlMeeting;
+            document.getElementById('documentLink').value = documentLink;
             document.getElementById('startedTime').value = startedTime;
         }
 
-        // Ẩn form
         function hideForm() {
             const form = document.getElementById('meetingForm');
             form.classList.add('d-none');
@@ -437,15 +467,35 @@
             currentEditMeetingId = null;
         }
 
-        // Đóng modal lỗi
         function closeErrorModal() {
             document.getElementById('errorModal').style.display = 'none';
         }
 
-        // Validation client-side trước khi submit
+        function toggleParticipants(checkbox) {
+            const participantsList = document.getElementById('participantsList');
+            if (checkbox.checked) {
+                participantsList.classList.add('d-none');
+                participantsList.classList.remove('d-block');
+                document.querySelectorAll('#participantsList input[type=checkbox]').forEach(cb => cb.checked = false);
+            } else {
+                participantsList.classList.remove('d-none');
+                participantsList.classList.add('d-block');
+            }
+        }
+
         document.getElementById('formData').addEventListener('submit', function(e) {
+            const title = document.getElementById('title').value.trim();
             const urlMeeting = document.getElementById('urlMeeting').value.trim();
+            const documentLink = document.getElementById('documentLink').value.trim();
             const startedTime = document.getElementById('startedTime').value;
+            const selectAll = document.getElementById('selectAll').checked;
+            const participants = document.querySelectorAll('#participantsList input[type=checkbox]:checked');
+
+            if (!title) {
+                alert('Tiêu đề cuộc họp không được để trống!');
+                e.preventDefault();
+                return;
+            }
 
             if (!urlMeeting) {
                 alert('Liên kết cuộc họp không được để trống!');
@@ -459,11 +509,22 @@
                 return;
             }
 
-            // Validate Google Meet or Zoom URL
+            if (!selectAll && participants.length === 0) {
+                alert('Vui lòng chọn ít nhất một người tham gia hoặc chọn tất cả thành viên!');
+                e.preventDefault();
+                return;
+            }
+
             const googleMeetPattern = /^https:\/\/meet\.google\.com\/[a-z]{3}-[a-z]{4}-[a-z]{3}$/;
             const zoomPattern = /^https:\/\/([a-z0-9-]+\.)?zoom\.us\/j\/[0-9]{9,11}(\?pwd=[a-zA-Z0-9]+)?$/;
             if (!googleMeetPattern.test(urlMeeting) && !zoomPattern.test(urlMeeting)) {
                 alert('Liên kết cuộc họp không hợp lệ! Vui lòng nhập URL Google Meet (VD: https://meet.google.com/abc-defg-hij) hoặc Zoom (VD: https://zoom.us/j/1234567890).');
+                e.preventDefault();
+                return;
+            }
+
+            if (documentLink && !/^https:\/\/drive\.google\.com\/.*$/.test(documentLink)) {
+                alert('Liên kết tài liệu không hợp lệ! Vui lòng nhập URL Google Drive hợp lệ.');
                 e.preventDefault();
                 return;
             }

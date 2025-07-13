@@ -49,7 +49,7 @@ public class UserClubServlet extends HttpServlet {
 
         String search = request.getParameter("search") != null ? request.getParameter("search") : "";
         int page = request.getParameter("page") != null ? Integer.parseInt(request.getParameter("page")) : 1;
-        int pageSize = 3;
+        int pageSize = 6;
 
         List<UserClub> userClubs = userClubDAO.getAllUserClubsByClubId(clubID, page, pageSize);
         int totalRecords = userClubDAO.countUserClubs(clubID, search);
