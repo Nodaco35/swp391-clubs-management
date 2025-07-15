@@ -216,11 +216,14 @@
 						<input type="text" id="eventName" name="eventName" value="${param.eventName}" required>
 					</div>
 					<div class="form-group">
-						<label for="eventType">Loại sự kiện *</label>
-						<select id="eventType" name="eventType">
-							<option value="public" ${param.eventType == 'public' ? 'selected' : ''}>Công khai</option>
-							<option value="private" ${param.eventType == 'private' ? 'selected' : ''}>Riêng tư</option>
-						</select>
+						<label>Loại sự kiện *</label>
+						<div>
+							<input type="radio" id="public" name="eventType" value="public" ${param.eventType == 'public' ? 'checked' : ''}>
+							<label for="public" style="margin-right: 20px">Công khai</label>
+
+							<input type="radio" id="private" name="eventType" value="private" ${param.eventType == 'private' ? 'checked' : ''}>
+							<label for="private">Riêng tư</label>
+						</div>
 					</div>
 
 					<!-- THÊM PHẦN UPLOAD ẢNH -->
@@ -249,7 +252,7 @@
 						<input type="date" id="eventDate" name="eventDate" value="${param.eventDate}" required>
 					</div>
 					<div class="form-group">
-						<label for="maxParticipants">Số lượng tối đa *</label>
+						<label for="maxParticipants">Số người tham gia tối đa *</label>
 						<input type="number" id="maxParticipants" name="maxParticipants"
 						       value="${param.maxParticipants}" required>
 					</div>
