@@ -2,59 +2,82 @@ package models;
 
 public class ApplicationFormTemplate {
     private int templateId;
-    private int clubId;
-    private Integer eventId;
-    private String formType; // 'Club', 'Event', 'Other'
-    private String title;
+    private int formId;
     private String fieldName;
     private String fieldType; // 'Text', 'Textarea', 'Dropdown', etc.
-    private boolean isRequired;
+    private boolean Required;
     private String options; // JSON hoặc text
-    private boolean published;
     private int displayOrder; // Thứ tự hiển thị của câu hỏi trong form
 
-    public ApplicationFormTemplate() {}    public ApplicationFormTemplate(int templateId, int clubId, Integer eventId, String formType, String title,
-                                   String fieldName, String fieldType, boolean isRequired, String options, boolean published) {
-        this(templateId, clubId, eventId, formType, title, fieldName, fieldType, isRequired, options, published, 0);
+    public ApplicationFormTemplate() {
     }
 
-    public ApplicationFormTemplate(int templateId, int clubId, Integer eventId, String formType, String title,
-                                   String fieldName, String fieldType, boolean isRequired, String options, boolean published, int displayOrder) {
+    public ApplicationFormTemplate(int templateId, int formId, String fieldName, String fieldType,
+            boolean isRequired, String options, int displayOrder) {
         this.templateId = templateId;
-        this.clubId = clubId;
-        this.eventId = eventId;
-        this.formType = formType;
-        this.title = title;
+        this.formId = formId;
         this.fieldName = fieldName;
         this.fieldType = fieldType;
-        this.isRequired = isRequired;
+        this.Required = isRequired;
         this.options = options;
-        this.published = published;
+        this.displayOrder = displayOrder;
+    }
+    
+    public int getTemplateId() {
+        return templateId;
+    }
+
+    public void setTemplateId(int templateId) {
+        this.templateId = templateId;
+    }
+
+    public int getFormId() {
+        return formId;
+    }
+
+    public void setFormId(int formId) {
+        this.formId = formId;
+    }
+
+    public String getFieldName() {
+        return fieldName;
+    }
+
+    public void setFieldName(String fieldName) {
+        this.fieldName = fieldName;
+    }
+
+    public String getFieldType() {
+        return fieldType;
+    }
+
+    public void setFieldType(String fieldType) {
+        this.fieldType = fieldType;
+    }
+
+    public boolean isRequired() {
+        return Required;
+    }
+
+    public void setRequired(boolean Required) {
+        this.Required = Required;
+    }
+
+    public String getOptions() {
+        return options;
+    }
+
+    public void setOptions(String options) {
+        this.options = options;
+    }
+
+    public int getDisplayOrder() {
+        return displayOrder;
+    }
+    public void setDisplayOrder(int displayOrder) {    
         this.displayOrder = displayOrder;
     }
 
-    // Getters và Setters
-    public int getTemplateId() { return templateId; }
-    public void setTemplateId(int templateId) { this.templateId = templateId; }
-    public int getClubId() { return clubId; }
-    public void setClubId(int clubId) { this.clubId = clubId; }
-    public Integer getEventId() { return eventId; }
-    public void setEventId(Integer eventId) { this.eventId = eventId; }
-    public String getFormType() { return formType; }
-    public void setFormType(String formType) { this.formType = formType; }
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-    public String getFieldName() { return fieldName; }
-    public void setFieldName(String fieldName) { this.fieldName = fieldName; }
-    public String getFieldType() { return fieldType; }
-    public void setFieldType(String fieldType) { this.fieldType = fieldType; }
-    public boolean isRequired() { return isRequired; }
-    public void setIsRequired(boolean isRequired) { this.isRequired = isRequired; }
-    public String getOptions() { return options; }
-    public void setOptions(String options) { this.options = options; }    public boolean isPublished() { return published; }
-    public void setPublished(boolean published) { this.published = published; }
-    public int getDisplayOrder() { return displayOrder; }
-    public void setDisplayOrder(int displayOrder) { this.displayOrder = displayOrder; }
     public String getClassName() {
         return this.getClass().getName();
     }

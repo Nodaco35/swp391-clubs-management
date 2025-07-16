@@ -521,11 +521,11 @@ public class FormResponseDAO extends DBContext {
     }
 
     // Phương thức để kiểm tra xem một form có bất kỳ phản hồi nào hay không
-    public boolean hasResponses(int templateId) {
-        String sql = "SELECT COUNT(*) FROM ApplicationResponses WHERE TemplateID = ?";
+    public boolean hasResponses(int formId) {
+        String sql = "SELECT COUNT(*) FROM ApplicationResponses WHERE FormID = ?";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, templateId);
+            ps.setInt(1, formId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     int count = rs.getInt(1);
@@ -538,12 +538,12 @@ public class FormResponseDAO extends DBContext {
         return false;
     }
     
-    // Phương thức lấy danh sách templateId có phản hồi
+    // Phương thức lấy danh sách formId có phản hồi
     public List<Integer> getTemplateIdsWithResponses(int clubId) {
         List<Integer> templateIdsWithResponses = new ArrayList<>();
-        String sql = "SELECT DISTINCT ar.TemplateID " +
+        String sql = "SELECT DISTINCT ar.formId " +
                      "FROM ApplicationResponses ar " +
-                     "JOIN ApplicationFormTemplates aft ON ar.TemplateID = aft.TemplateID " +
+                     "JOIN ApplicationForms aft ON ar.FormID = aft.FormID " +
                      "WHERE aft.ClubID = ?";
         
         try (Connection conn = getConnection();
@@ -551,7 +551,7 @@ public class FormResponseDAO extends DBContext {
             ps.setInt(1, clubId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    templateIdsWithResponses.add(rs.getInt("TemplateID"));
+                    templateIdsWithResponses.add(rs.getInt("FormID"));
                 }
             }
         } catch (SQLException ex) {
