@@ -613,8 +613,8 @@ public class DepartmentMemberDAO {
                         task.setTitle(rs.getString("Title") != null ? rs.getString("Title") : "");
                         task.setDescription(rs.getString("Description") != null ? rs.getString("Description") : "");
                         task.setStatus(rs.getString("Status") != null ? rs.getString("Status") : "");
-                        task.setPriority(rs.getString("Priority") != null ? rs.getString("Priority") : "");
-                        task.setProgressPercent(rs.getInt("ProgressPercent"));
+                        //task.setPriority(rs.getString("Priority") != null ? rs.getString("Priority") : "");
+                        //task.setProgressPercent(rs.getInt("ProgressPercent"));
                         task.setStartDate(rs.getDate("StartDate"));
                         task.setEndDate(rs.getDate("EndDate"));
                         task.setCreatedAt(rs.getDate("CreatedAt"));

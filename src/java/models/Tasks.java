@@ -5,50 +5,46 @@ import java.util.List;
 
 public class Tasks {
     private int taskID;
-    private int parentTaskID; // nếu NULL là nhiệm vụ giao cho ban
-    private EventTerms term; // 'Trước sự kiện', 'Trong sự kiện', 'Sau sự kiện'
-    private Events event; // foreign key -> Events
-    private Clubs club;   // foreign key -> Clubs
+    private Integer parentTaskID; // NULL nếu là task dành cho ban
+
+    private EventTerms term;      // foreign key: TermID
+    private Events event;         // foreign key: EventID
+    private Clubs club;           // foreign key: ClubID
+
+    private String assigneeType;  // ENUM('User', 'Department')
+    private Users userAssignee;         // nếu AssigneeType = 'User'
+    private Department departmentAssignee; // nếu AssigneeType = 'Department'
+
     private String title;
     private String description;
-    private String status; // 'ToDo', 'InProgress', 'Review', 'Done'
-    private String priority; // 'LOW', 'MEDIUM', 'HIGH'
-    private int progressPercent;
+    private String status;        // ENUM('ToDo', 'InProgress', 'Review', 'Rejected', 'Done')
+    private String reviewComment;
+
     private Date startDate;
     private Date endDate;
-    private Users createdBy; // foreign key -> Users
+
+    private Users createdBy;      // foreign key: CreatedBy
     private Date createdAt;
 
-    private List<Department> departments;
+    public Tasks() {}
 
-
-
-
-    public Tasks() {
-    }
-
-    public Tasks(int parentTaskID, int taskID, EventTerms term, Events event, Clubs club, String title, String status, String description, String priority, int progressPercent, Date startDate, Date endDate, Users createdBy, Date createdAt) {
-        this.parentTaskID = parentTaskID;
+    public Tasks(int taskID, Date createdAt, Users createdBy, Date endDate, Date startDate, String reviewComment, String status, String description, String title, Department departmentAssignee, Users userAssignee, String assigneeType, Clubs club, Events event, EventTerms term, Integer parentTaskID) {
         this.taskID = taskID;
-        this.term = term;
-        this.event = event;
-        this.club = club;
-        this.title = title;
+        this.createdAt = createdAt;
+        this.createdBy = createdBy;
+        this.endDate = endDate;
+        this.startDate = startDate;
+        this.reviewComment = reviewComment;
         this.status = status;
         this.description = description;
-        this.priority = priority;
-        this.progressPercent = progressPercent;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.createdBy = createdBy;
-        this.createdAt = createdAt;
-    }
-
-    public List<Department> getDepartments() {
-        return departments;
-    }
-    public void setDepartments(List<Department> departments) {
-        this.departments = departments;
+        this.title = title;
+        this.departmentAssignee = departmentAssignee;
+        this.userAssignee = userAssignee;
+        this.assigneeType = assigneeType;
+        this.club = club;
+        this.event = event;
+        this.term = term;
+        this.parentTaskID = parentTaskID;
     }
 
     public int getTaskID() {
@@ -59,52 +55,60 @@ public class Tasks {
         this.taskID = taskID;
     }
 
-    public Date getCreatedAt() {
-        return createdAt;
+    public Integer getParentTaskID() {
+        return parentTaskID;
     }
 
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
+    public void setParentTaskID(Integer parentTaskID) {
+        this.parentTaskID = parentTaskID;
     }
 
-    public Users getCreatedBy() {
-        return createdBy;
+    public EventTerms getTerm() {
+        return term;
     }
 
-    public void setCreatedBy(Users createdBy) {
-        this.createdBy = createdBy;
+    public void setTerm(EventTerms term) {
+        this.term = term;
     }
 
-    public Date getEndDate() {
-        return endDate;
+    public Events getEvent() {
+        return event;
     }
 
-    public void setEndDate(Date endDate) {
-        this.endDate = endDate;
+    public void setEvent(Events event) {
+        this.event = event;
     }
 
-    public Date getStartDate() {
-        return startDate;
+    public Clubs getClub() {
+        return club;
     }
 
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
+    public void setClub(Clubs club) {
+        this.club = club;
     }
 
-    public int getProgressPercent() {
-        return progressPercent;
+    public String getAssigneeType() {
+        return assigneeType;
     }
 
-    public void setProgressPercent(int progressPercent) {
-        this.progressPercent = progressPercent;
+    public void setAssigneeType(String assigneeType) {
+        this.assigneeType = assigneeType;
     }
 
-    public String getPriority() {
-        return priority;
+    public Users getUserAssignee() {
+        return userAssignee;
     }
 
-    public void setPriority(String priority) {
-        this.priority = priority;
+    public void setUserAssignee(Users userAssignee) {
+        this.userAssignee = userAssignee;
+    }
+
+    public Department getDepartmentAssignee() {
+        return departmentAssignee;
+    }
+
+    public void setDepartmentAssignee(Department departmentAssignee) {
+        this.departmentAssignee = departmentAssignee;
     }
 
     public String getTitle() {
@@ -131,35 +135,43 @@ public class Tasks {
         this.status = status;
     }
 
-    public int getParentTaskID() {
-        return parentTaskID;
+    public String getReviewComment() {
+        return reviewComment;
     }
 
-    public void setParentTaskID(int parentTaskID) {
-        this.parentTaskID = parentTaskID;
+    public void setReviewComment(String reviewComment) {
+        this.reviewComment = reviewComment;
     }
 
-    public EventTerms getTerm() {
-        return term;
+    public Date getStartDate() {
+        return startDate;
     }
 
-    public void setTerm(EventTerms term) {
-        this.term = term;
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
     }
 
-    public Events getEvent() {
-        return event;
+    public Date getEndDate() {
+        return endDate;
     }
 
-    public void setEvent(Events event) {
-        this.event = event;
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
     }
 
-    public Clubs getClub() {
-        return club;
+    public Users getCreatedBy() {
+        return createdBy;
     }
 
-    public void setClub(Clubs club) {
-        this.club = club;
+    public void setCreatedBy(Users createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 }

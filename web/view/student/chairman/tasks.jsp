@@ -219,15 +219,22 @@
 													<i class="fas fa-users"></i>
 													<c:set var="deptSet" value=""/>
 													<c:forEach var="task" items="${tasks}">
-														<c:forEach var="d" items="${task.departments}">
-															<c:if test="${not deptSet.contains(d.departmentName)}">
-																<c:set var="deptSet"
-																       value="${deptSet},${d.departmentName}"/>
-															</c:if>
-														</c:forEach>
+														<c:set var="deptName" value="${task.departmentAssignee.departmentName}" />
+														<c:if test="${not empty deptName && not fn:contains(deptSet, deptName)}">
+															<c:choose>
+																<c:when test="${empty deptSet}">
+																	<c:set var="deptSet" value="${deptName}"/>
+																</c:when>
+																<c:otherwise>
+																	<c:set var="deptSet" value="${deptSet}, ${deptName}"/>
+																</c:otherwise>
+															</c:choose>
+														</c:if>
 													</c:forEach>
-														${fn:replace(deptSet, ",", ", ")}
+														${deptSet}
+
 												</div>
+
 											</div>
 										</c:if>
 
@@ -250,10 +257,7 @@
 																	<div class="phase-task-meta">
 																		<div class="phase-task-department">
 																			<i class="fas fa-user"></i>
-																			<c:forEach var="d"
-																			           items="${task.departments}">
-																				${d.departmentName}<br/>
-																			</c:forEach>
+																				${task.departmentAssignee.departmentName}
 																		</div>
 																		<div class="phase-task-deadline">
 																			<i class="fas fa-calendar-alt"></i>
