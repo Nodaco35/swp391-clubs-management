@@ -10,6 +10,8 @@ import java.util.List;
  * @author he181
  */
 public class ClubMeeting {
+
+   
     private int clubMeetingID;
     private int clubID;
     private String URLMeeting;

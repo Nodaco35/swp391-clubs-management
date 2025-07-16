@@ -65,8 +65,7 @@ public class ChairmanClubMeetingController extends HttpServlet {
                 List<String> participants = ClubMeetingDAO.getClubDepartmentID(meetingId);
                 meeting.setParticipantClubDepartmentIds(participants);
                 request.setAttribute("editMeeting", meeting);
-                long duration = (meeting.getEndTime().getTime() - meeting.getStartedTime().getTime()) / 60000;
-                request.setAttribute("duration", duration);
+                
             }
             meetings = ClubMeetingDAO.findByClubID(club.getClubID(), search, page, pageSize);
 
@@ -113,167 +112,175 @@ public class ChairmanClubMeetingController extends HttpServlet {
 
     }
 
-    public static void main(String[] args) {
-        ClubMeeting meeting = ClubMeetingDAO.findByClubID(1, "", 1, Integer.MAX_VALUE)
-                .stream()
-                .filter(m -> m.getClubMeetingID() == 6)
-                .findFirst()
-                .orElse(null);
-        List<String> participants = ClubMeetingDAO.getClubDepartmentID(6);
-        meeting.setParticipantClubDepartmentIds(participants);
-        System.out.println(participants);
+   
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Users user = (Users) session.getAttribute("user");
+        ClubInfo club = (ClubInfo) session.getAttribute("club");
+        int clubid = club.getClubID();
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
 
-        List<ClubDepartment> departmentMembers = ClubDepartmentDAO.findByClubId(1);
-        for (ClubDepartment departmentMember : departmentMembers) {
-            if (participants.contains(String.valueOf(departmentMember.getClubDepartmentId()))) {
-                System.out.println(departmentMember.getDepartmentName());
+        String action = request.getParameter("action");
+
+        if ("add".equals(action) || "update".equals(action)) {
+            String title = request.getParameter("title");
+            String urlMeeting = request.getParameter("urlMeeting");
+            String documentLink = request.getParameter("documentLink");
+            String startedTime = request.getParameter("startedTime");
+            String[] participantIds = request.getParameterValues("participants");
+            
+            boolean selectAll = "true".equals(request.getParameter("selectAll"));
+
+            if (title == null || title.trim().isEmpty()) {
+                request.setAttribute("error", "Tiêu đề cuộc họp không được để trống!");
+                request.setAttribute("showAddForm", true);
+                doGet(request, response);
+                return;
+            }
+
+            if (urlMeeting == null || urlMeeting.trim().isEmpty() || startedTime == null || startedTime.trim().isEmpty()) {
+                request.setAttribute("error", "Liên kết cuộc họp hoặc thời gian không được để trống!");
+                request.setAttribute("showAddForm", true);
+                doGet(request, response);
+                return;
+            }
+
+            if (!GOOGLE_MEET_PATTERN.matcher(urlMeeting).matches() && !ZOOM_PATTERN.matcher(urlMeeting).matches()) {
+                request.setAttribute("error", "Liên kết cuộc họp không hợp lệ! Vui lòng nhập URL Google Meet (VD: https://meet.google.com/abc-defg-hij) hoặc Zoom (VD: https://zoom.us/j/1234567890).");
+                request.setAttribute("showAddForm", true);
+                doGet(request, response);
+                return;
+            }
+
+            if (documentLink != null && !documentLink.trim().isEmpty() && !GOOGLE_DRIVE_PATTERN.matcher(documentLink).matches()) {
+                request.setAttribute("error", "Liên kết tài liệu không hợp lệ! Vui lòng nhập URL Google Drive hợp lệ.");
+                request.setAttribute("showAddForm", true);
+                doGet(request, response);
+                return;
+            }
+
+            List<String> participants = new ArrayList<>();
+            if (selectAll) {
+                List<ClubDepartment> departmentMembers = ClubDepartmentDAO.findByClubId(club.getClubID());
+                for (ClubDepartment member : departmentMembers) {
+                    participants.add(member.getDepartmentName());
+                }
+            } else if (participantIds != null) {
+                for (String id : participantIds) {
+                    participants.add(id);
+                }
+            }
+
+            try {
+
+                String formattedStartedTime = startedTime.replace("T", " ").substring(0, 16);
+
+                if ("add".equals(action)) {
+                    boolean check = ClubMeetingDAO.createMeeting(club.getClubID(), title, urlMeeting, documentLink, formattedStartedTime);
+                    //lấy về clubMeetingId mới nhất
+                    if (check) {
+                        ClubMeeting clubMeeting = ClubMeetingDAO.getNewest(club.getClubID());
+                        for (String participant : participants) {
+                            ClubMeetingDAO.insertParticipants(clubMeeting.getClubMeetingID(), Integer.parseInt(participant));
+                        }
+                    } else {
+                        request.setAttribute("error", "Tạo cuộc họp thất bại");
+                        request.setAttribute("showAddForm", true);
+                        doGet(request, response);
+                        return;
+                    }
+
+                    List<UserClub> members = UserClubDAO.findByClubIDAndDepartmentId(club.getClubID());
+                    String content;
+                    if (documentLink.isEmpty()) {
+                        content = "Link tham gia: <a href=\"" + urlMeeting + "\">" + urlMeeting + "</a><br/>Thời gian bắt đầu: <strong>" + formattedStartedTime + "</strong>";
+
+                    } else {
+                        content = "Link tham gia: <a href=\"" + urlMeeting + "\">" + urlMeeting + "</a><br/>Tài liệu đi kèm: <a href=\"" + documentLink + "\">" + documentLink + "</a><br/>Thời gian bắt đầu: <strong>" + formattedStartedTime + "</strong>";
+
+                    }
+
+                    for (UserClub member : members) {
+                        if (participants.contains(String.valueOf(member.getClubDepartmentID()))) {
+                            NotificationDAO.sentToPerson(user.getUserID(), member.getUserID(), "Cuộc họp mới", content);
+
+                        }
+                    }
+
+                    request.setAttribute("message", "Tạo cuộc họp thành công và đã gửi thông báo đến các thành viên!");
+                } else {
+                    int meetingId;
+                    try {
+                        meetingId = Integer.parseInt(request.getParameter("meetingId"));
+                    } catch (NumberFormatException e) {
+                        request.setAttribute("error", "ID cuộc họp không hợp lệ!");
+                        doGet(request, response);
+                        return;
+                    }
+
+                    ClubMeeting meeting = new ClubMeeting();
+                    meeting.setMeetingTitle(title);
+                    meeting.setURLMeeting(urlMeeting);
+                    meeting.setDocument(documentLink);
+                    meeting.setStartedTime(java.sql.Timestamp.valueOf(formattedStartedTime));
+
+                    if (ClubMeetingDAO.updateMeeting(meeting)) {
+                        List<UserClub> members = UserClubDAO.findByClubIDAndDepartmentId(club.getClubID());
+                        String content;
+                        if (documentLink.isEmpty()) {
+                            content = "Link tham gia: <a href=\"" + urlMeeting + "\">" + urlMeeting + "</a><br/>Thời gian bắt đầu: <strong>" + formattedStartedTime + "</strong>";
+
+                        } else {
+                            content = "Link tham gia: <a href=\"" + urlMeeting + "\">" + urlMeeting + "</a><br/>Tài liệu đi kèm: <a href=\"" + documentLink + "\">" + documentLink + "</a><br/>Thời gian bắt đầu: <strong>" + formattedStartedTime + "</strong>";
+
+                        }
+
+                        for (UserClub member : members) {
+                            if (participants.contains(String.valueOf(member.getClubDepartmentID()))) {
+                                NotificationDAO.sentToPerson(user.getUserID(), member.getUserID(), "Thay đổi về cuộc họp", content);
+
+                            }
+                        }
+                        request.setAttribute("message", "Cập nhật cuộc họp thành công và đã gửi thông báo đến các thành viên!");
+                    } else {
+                        request.setAttribute("error", "Cập nhật cuộc họp thất bại!");
+                        request.setAttribute("editMeeting", meeting);
+                    }
+                }
+            } catch (Exception e) {
+                request.setAttribute("error", "Lỗi khi " + ("add".equals(action) ? "tạo" : "cập nhật") + " cuộc họp: " + e.getMessage());
+                request.setAttribute("showAddForm", true);
+            }
+        } else if ("delete".equals(action)) {
+            int meetingId;
+            try {
+                meetingId = Integer.parseInt(request.getParameter("meetingId"));
+            } catch (NumberFormatException e) {
+                request.setAttribute("error", "ID cuộc họp không hợp lệ!");
+                doGet(request, response);
+                return;
+            }
+
+            try {
+                if (ClubMeetingDAO.deleteMeeting(meetingId)) {
+                    request.setAttribute("message", "Xóa cuộc họp thành công!");
+                } else {
+                    request.setAttribute("error", "Xóa cuộc họp thất bại!");
+                }
+            } catch (Exception e) {
+                request.setAttribute("error", "Lỗi khi xóa cuộc họp: " + e.getMessage());
             }
         }
+
+        doGet(request, response);
     }
 
-//    @Override
-//    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-//            throws ServletException, IOException {
-//        HttpSession session = request.getSession();
-//        Users user = (Users) session.getAttribute("user");
-//        ClubInfo club = (ClubInfo) session.getAttribute("club");
-//        if (user == null) {
-//            response.sendRedirect(request.getContextPath() + "/login");
-//            return;
-//        }
-//
-//        String action = request.getParameter("action");
-//
-//        if ("add".equals(action) || "update".equals(action)) {
-//            String title = request.getParameter("title");
-//            String urlMeeting = request.getParameter("urlMeeting");
-//            String documentLink = request.getParameter("documentLink");
-//            String startedTime = request.getParameter("startedTime");
-//            String[] participantIds = request.getParameterValues("participants");
-//            boolean selectAll = "true".equals(request.getParameter("selectAll"));
-//
-//            if (title == null || title.trim().isEmpty()) {
-//                request.setAttribute("error", "Tiêu đề cuộc họp không được để trống!");
-//                request.setAttribute("showAddForm", true);
-//                doGet(request, response);
-//                return;
-//            }
-//
-//            if (urlMeeting == null || urlMeeting.trim().isEmpty() || startedTime == null || startedTime.trim().isEmpty()) {
-//                request.setAttribute("error", "Liên kết cuộc họp hoặc thời gian không được để trống!");
-//                request.setAttribute("showAddForm", true);
-//                doGet(request, response);
-//                return;
-//            }
-//
-//            if (!GOOGLE_MEET_PATTERN.matcher(urlMeeting).matches() && !ZOOM_PATTERN.matcher(urlMeeting).matches()) {
-//                request.setAttribute("error", "Liên kết cuộc họp không hợp lệ! Vui lòng nhập URL Google Meet (VD: https://meet.google.com/abc-defg-hij) hoặc Zoom (VD: https://zoom.us/j/1234567890).");
-//                request.setAttribute("showAddForm", true);
-//                doGet(request, response);
-//                return;
-//            }
-//
-//            if (documentLink != null && !documentLink.trim().isEmpty() && !GOOGLE_DRIVE_PATTERN.matcher(documentLink).matches()) {
-//                request.setAttribute("error", "Liên kết tài liệu không hợp lệ! Vui lòng nhập URL Google Drive hợp lệ.");
-//                request.setAttribute("showAddForm", true);
-//                doGet(request, response);
-//                return;
-//            }
-//
-//            List<String> participants = new ArrayList<>();
-//            if (selectAll) {
-//                 List<ClubDepartment> departmentMembers = ClubDepartmentDAO.findByClubId(club.getClubID());
-//                for (ClubDepartment member : departmentMembers) {
-//                    participants.add(member.getDepartmentName());
-//                }
-//            } else if (participantIds != null) {
-//                for (String id : participantIds) {
-//                    participants.add(id);
-//                }
-//            }
-//
-//            try {
-//                String formattedStartedTime = startedTime.replace("T", " ").substring(0, 16);
-//                if ("add".equals(action)) {
-//                    ClubMeetingDAO.createMeeting(title, urlMeeting, documentLink, formattedStartedTime, participants);
-//
-//                    List<UserClub> members = userClubDAO.findByCDID(clubDepartmentId);
-//                    for (UserClub member : members) {
-//                        if (participants.contains(member.getUserID())) {
-//                            String notifTitle = "Thông báo cuộc họp mới: " + title;
-//                            String content = String.format("Cuộc họp '%s' tại %s được tổ chức vào %s. Liên kết: %s%s",
-//                                    title, member.getDepartmentName(), formattedTime, urlMeeting,
-//                                    documentLink != null && !documentLink.isEmpty() ? "\nTài liệu: " + documentLink : "");
-//                            NotificationDAO.sentToPerson(user.getUserID(), member.getUserID(), notifTitle, content);
-//                        }
-//                    }
-//                    request.setAttribute("message", "Tạo cuộc họp thành công và đã gửi thông báo đến các thành viên!");
-//                } else {
-//                    int meetingId;
-//                    try {
-//                        meetingId = Integer.parseInt(request.getParameter("meetingId"));
-//                    } catch (NumberFormatException e) {
-//                        request.setAttribute("error", "ID cuộc họp không hợp lệ!");
-//                        doGet(request, response);
-//                        return;
-//                    }
-//
-//                    DepartmentMeeting meeting = new DepartmentMeeting();
-//                    meeting.setDepartmentMeetingID(meetingId);
-//                    meeting.setClubDepartmentID(clubDepartmentId);
-//                    meeting.setTitle(title);
-//                    meeting.setURLMeeting(urlMeeting);
-//                    meeting.setDocumentLink(documentLink);
-//                    meeting.setStartedTime(java.sql.Timestamp.valueOf(formattedTime));
-//
-//                    if (meetingDAO.updateMeeting(meeting, participants)) {
-//                        List<UserClub> members = userClubDAO.findByCDID(clubDepartmentId);
-//                        for (UserClub member : members) {
-//                            if (participants.contains(member.getUserID())) {
-//                                String notifTitle = "Cập nhật cuộc họp: " + title;
-//                                String content = String.format("Cuộc họp '%s' tại ban %s đã được cập nhật. Thời gian: %s, Liên kết: %s%s",
-//                                        title, member.getDepartmentName(), formattedTime, urlMeeting,
-//                                        documentLink != null && !documentLink.isEmpty() ? "\nTài liệu: " + documentLink : "");
-//                                NotificationDAO.sentToPerson(user.getUserID(), member.getUserID(), notifTitle, content);
-//                            }
-//                        }
-//                        request.setAttribute("message", "Cập nhật cuộc họp thành công và đã gửi thông báo đến các thành viên!");
-//                    } else {
-//                        request.setAttribute("error", "Cập nhật cuộc họp thất bại!");
-//                        request.setAttribute("editMeeting", meeting);
-//                    }
-//                }
-//            } catch (Exception e) {
-//                request.setAttribute("error", "Lỗi khi " + ("add".equals(action) ? "tạo" : "cập nhật") + " cuộc họp: " + e.getMessage());
-//                request.setAttribute("showAddForm", true);
-//            }
-//        } else if ("delete".equals(action)) {
-//            int meetingId;
-//            try {
-//                meetingId = Integer.parseInt(request.getParameter("meetingId"));
-//            } catch (NumberFormatException e) {
-//                request.setAttribute("error", "ID cuộc họp không hợp lệ!");
-//                doGet(request, response);
-//                return;
-//            }
-//
-//            try {
-//                if (meetingDAO.deleteMeeting(meetingId, clubDepartmentId)) {
-//                    request.setAttribute("message", "Xóa cuộc họp thành công!");
-//                } else {
-//                    request.setAttribute("error", "Xóa cuộc họp thất bại!");
-//                }
-//            } catch (Exception e) {
-//                request.setAttribute("error", "Lỗi khi xóa cuộc họp: " + e.getMessage());
-//            }
-//        }
-//
-//        doGet(request, response);
-//    }
-
-    
-
-protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
@@ -291,7 +298,7 @@ protected void processRequest(HttpServletRequest request, HttpServletResponse re
     }
 
     @Override
-public String getServletInfo() {
+    public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
 

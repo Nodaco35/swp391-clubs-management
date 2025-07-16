@@ -86,6 +86,31 @@ public class UserClubDAO {
         return findByClubID;
     }
 
+    public static List<UserClub> findByClubIDAndDepartmentId(int clubID) {
+        List<UserClub> findByClubID = new ArrayList<>();
+        String sql = """
+                     Select *
+                     from Userclubs uc
+                     join Clubs c on uc.ClubID = c.ClubID
+                     where c.ClubID = ? and uc.RoleID = 3""";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setObject(1, clubID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                UserClub uc = new UserClub();
+                uc.setUserID(rs.getString("UserID"));
+                uc.setClubDepartmentID(rs.getInt("ClubDepartmentID"));
+                findByClubID.add(uc);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return findByClubID;
+    }
+    
+    
+
     public boolean isUserMemberOfClub(int clubID, String userID) {
         String sql = "SELECT 1 FROM UserClubs WHERE ClubID = ? AND UserID = ? AND IsActive = 1";
         try {

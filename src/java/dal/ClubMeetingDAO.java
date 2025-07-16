@@ -200,12 +200,87 @@ public class ClubMeetingDAO {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, meetingId);
             ResultSet rs = ps.executeQuery();
-            while (rs.next()) {                
+            while (rs.next()) {
                 getClubDepartmentID.add(rs.getString("ClubDepartmentID"));
-               
+
             }
         } catch (Exception e) {
         }
         return getClubDepartmentID;
     }
+
+    public static boolean createMeeting(int clubId, String title, String urlMeeting, String documentLink, String formattedStartedTime) {
+        String sql = """
+                     INSERT INTO ClubMeeting (
+                         ClubID,
+                         MeetingTitle,
+                         URLMeeting,
+                         StartedTime,
+                         Document
+                     ) VALUES (
+                         ?,?,?,?,?
+                     );""";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setObject(1, clubId);
+            ps.setObject(2, title);
+            ps.setObject(3, urlMeeting);
+            ps.setObject(4, formattedStartedTime);
+            ps.setObject(5, documentLink);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public static ClubMeeting getNewest(int clubID) {
+        ClubMeeting cm = new ClubMeeting();
+        String sql = """
+                     SELECT * 
+                                          FROM clubmanagementsystem.clubmeeting 
+                                          Where ClubID = ?
+                                          ORDER BY ClubMeetingID DESC 
+                                          LIMIT 1;""";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setObject(1, clubID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {      
+                cm.setClubMeetingID(rs.getInt("ClubMeetingID"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return cm;
+    }
+
+    public static void insertParticipants(int clubMeetingId, int parseInt) {
+        String sql = """
+                     INSERT INTO `clubmanagementsystem`.`clubmeetingparticipants`
+                     (`ClubMeetingID`,
+                     `ClubDepartmentID`)
+                     VALUES
+                     (?,
+                     ?);""";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setObject(1, clubMeetingId);
+            ps.setObject(2, parseInt);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+    }
+
+    public static boolean updateMeeting(ClubMeeting meeting) {
+        return true;
+    }
+
+    public static boolean deleteMeeting(int meetingId) {
+        return true;
+    }
+    
 }

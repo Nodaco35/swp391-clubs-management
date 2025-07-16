@@ -233,11 +233,7 @@
                                            value="${editMeeting != null ? editMeeting.startedTime : ''}" required>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label for="duration" class="form-label">Thời gian diễn ra (phút)</label>
-                                    <input type="number" name="duration" id="duration" class="form-control" 
-                                           value="${editMeeting != null ? duration : ''}" required>
-                                </div>
+                                
 
                                 <div class="mb-3">
                                     <label class="form-label">Các ban tham gia</label>
@@ -295,7 +291,7 @@
                                             <tr>
                                                 <th scope="col" class="ps-4">Cuộc họp</th>
                                                 <th scope="col">Thời gian bắt đầu</th>
-                                                <th scope="col">Thời gian kết thúc</th>
+                                               
                                                 <th scope="col">Liên kết</th>
                                                 <th scope="col">Tài liệu</th>
                                                 <th scope="col">Trạng thái</th>
@@ -322,9 +318,7 @@
                                                         <fmt:formatDate value="${meeting.startedTime}" pattern="dd/MM/yyyy HH:mm" />
                                                     </td>
 
-                                                    <td>
-                                                        <fmt:formatDate value="${meeting.endTime}" pattern="dd/MM/yyyy HH:mm" />
-                                                    </td>
+                                                    
                                                     <td>
                                                         <a href="${meeting.URLMeeting}" target="_blank" class="text-decoration-none">
                                                             <i class="fas fa-link me-1"></i>Tham gia
