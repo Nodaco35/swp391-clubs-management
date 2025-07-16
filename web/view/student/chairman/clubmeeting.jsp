@@ -251,11 +251,11 @@
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" name="participants" 
                                                        value="${member.clubDepartmentId}" id="participant_${member.clubDepartmentId}"
-                                                       ${editMeeting != null && editMeeting.participantClubDepartmentIds.contains(member.clubDepartmentId) ? 'checked' : ''}>
+                                                       ${editMeeting != null && editMeeting.participantClubDepartmentIds.contains(member.departmentName) ? 'checked' : ''}>
                                                 <label class="form-check-label" for="participant_${member.clubDepartmentId}">
                                                     ${member.departmentName}
                                                 </label>
-                                            </div>
+                                            </div>  
                                         </c:forEach>
                                     </div>
                                 </div>

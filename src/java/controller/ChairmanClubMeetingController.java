@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 import models.*;
 
 public class ChairmanClubMeetingController extends HttpServlet {
+
     private static final Pattern GOOGLE_MEET_PATTERN = Pattern.compile("^https://meet\\.google\\.com/[a-z]{3}-[a-z]{4}-[a-z]{3}$");
     private static final Pattern ZOOM_PATTERN = Pattern.compile("^https://([a-z0-9-]+\\.)?zoom\\.us/j/[0-9]{9,11}(\\?pwd=[a-zA-Z0-9]+)?$");
     private static final Pattern GOOGLE_DRIVE_PATTERN = Pattern.compile("^https://drive\\.google\\.com/.*$");
@@ -61,14 +62,14 @@ public class ChairmanClubMeetingController extends HttpServlet {
             if (meeting == null) {
                 request.setAttribute("error", "Không tìm thấy cuộc họp!");
             } else {
-                List<String> participants = ClubMeetingDAO.getClubDepartmentID(meetingId);
+                List<String> participants = ClubMeetingDAO.getClubDepartmentName(meetingId);
                 meeting.setParticipantClubDepartmentIds(participants);
                 request.setAttribute("editMeeting", meeting);
                 long duration = (meeting.getEndTime().getTime() - meeting.getStartedTime().getTime()) / 60000;
                 request.setAttribute("duration", duration);
             }
             meetings = ClubMeetingDAO.findByClubID(club.getClubID(), search, page, pageSize);
-            
+
             totalRecords = ClubMeetingDAO.countByClubID(club.getClubID(), search);
             totalPages = (int) Math.ceil((double) totalRecords / pageSize);
         } else if ("search".equals(action)) {
@@ -99,7 +100,7 @@ public class ChairmanClubMeetingController extends HttpServlet {
             totalRecords = ClubMeetingDAO.countByClubID(club.getClubID(), search);
             totalPages = (int) Math.ceil((double) totalRecords / pageSize);
         }
-        List<ClubDepartment> departmentMembers = ClubDepartmentDAO.findByClubId(club.getClubID()); 
+        List<ClubDepartment> departmentMembers = ClubDepartmentDAO.findByClubId(club.getClubID());
         request.setAttribute("departmentMembers", departmentMembers);
         request.setAttribute("meetings", meetings);
         request.setAttribute("currentPage", page);
@@ -107,22 +108,37 @@ public class ChairmanClubMeetingController extends HttpServlet {
         request.setAttribute("totalRecords", totalRecords);
         request.setAttribute("search", search);
         request.setAttribute("now", new java.util.Date());
-        
+
         request.getRequestDispatcher("/view/student/chairman/clubmeeting.jsp").forward(request, response);
 
     }
 
     public static void main(String[] args) {
-        List<String> participants = ClubMeetingDAO.getClubDepartmentID(6);
-        for (String participant : participants) {
-            System.out.println(participant);
+        ClubMeeting meeting = ClubMeetingDAO.findByClubID(1, "", 1, Integer.MAX_VALUE)
+                .stream()
+                .filter(m -> m.getClubMeetingID() == 6)
+                .findFirst()
+                .orElse(null);
+
+        List<String> participants = ClubMeetingDAO.getClubDepartmentName(meeting.getClubMeetingID());
+        List<ClubDepartment> departmentMembers = ClubDepartmentDAO.findByClubId(1);
+        meeting.setParticipantClubDepartmentIds(participants);
+        System.out.println(meeting.getParticipantClubDepartmentIds());
+//    meeting.getParticipantClubDepartmentIds() =    [Ban Chủ nhiệm, Ban Truyền thông]
+        for (ClubDepartment departmentMember : departmentMembers) {
+            for (String participantName : meeting.getParticipantClubDepartmentIds()) {
+                if (departmentMember.getDepartmentName().contains(participantName)) {
+                    System.out.println(departmentMember.getDepartmentName());
+                    break; // tránh in trùng nếu khớp nhiều participant
+                }
+            }
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
     }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)

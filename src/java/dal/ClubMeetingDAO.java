@@ -187,19 +187,21 @@ public class ClubMeetingDAO {
         return total;
     }
 
-    public static List<String> getClubDepartmentID(int meetingId) {
+    public static List<String> getClubDepartmentName(int meetingId) {
         List<String> getClubDepartmentID = new ArrayList();
         String sql = """
-                     SELECT `clubmeetingparticipants`.`ClubMeetingID`,
-                         `clubmeetingparticipants`.`ClubDepartmentID`
-                     FROM `clubmanagementsystem`.`clubmeetingparticipants`
-                     where ClubMeetingID =  ?""";
+                     SELECT cmp.ClubMeetingID,
+                                             cmp.ClubDepartmentID, cd.DepartmentID, d.DepartmentName
+                                          FROM `clubmanagementsystem`.`clubmeetingparticipants` cmp
+                                          join clubdepartments cd on cmp.ClubDepartmentID = cd.ClubDepartmentID
+                                          join departments d on cd.DepartmentID = d.DepartmentID
+                                          where cmp.ClubMeetingID =  ?""";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, meetingId);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {                
-                getClubDepartmentID.add(rs.getString("ClubDepartmentID"));
+                getClubDepartmentID.add(rs.getString("DepartmentName"));
                
             }
         } catch (Exception e) {
