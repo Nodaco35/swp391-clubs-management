@@ -2,7 +2,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
-
 package controller;
 
 import java.io.IOException;
@@ -13,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import dal.ClubDAO;
+import dal.DepartmentDAO;
 import dal.EventsDAO;
 import dal.TaskDAO;
 import jakarta.servlet.ServletException;
@@ -27,34 +27,37 @@ import models.*;
  * @author LE VAN THUAN
  */
 public class ChairmanTasksServlet extends HttpServlet {
-   
-    /** 
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
+
+    /**
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
+     * methods.
+     *
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+            throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet ChairmanTasksServlet</title>");  
+            out.println("<title>Servlet ChairmanTasksServlet</title>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet ChairmanTasksServlet at " + request.getContextPath () + "</h1>");
+            out.println("<h1>Servlet ChairmanTasksServlet at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
-    } 
+    }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /** 
+    /**
      * Handles the HTTP <code>GET</code> method.
+     *
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
@@ -72,6 +75,7 @@ public class ChairmanTasksServlet extends HttpServlet {
             ClubDAO clubDAO = new ClubDAO();
             EventsDAO eventDAO = new EventsDAO();
             TaskDAO taskDAO = new TaskDAO();
+            DepartmentDAO deptDAO = new DepartmentDAO();
 
             ClubInfo club = clubDAO.getClubChairman(userID);
             List<Events> eventList = eventDAO.getEventsByClubIdForTask(club.getClubID());
@@ -84,36 +88,24 @@ public class ChairmanTasksServlet extends HttpServlet {
                     int eventID = Integer.parseInt(eventIDParam);
                     Events selectedEvent = eventDAO.getEventByID(eventID);
 
-                    // Lấy tất cả terms của event này
                     List<EventTerms> allTerms = taskDAO.getTermsByEventID(eventID);
 
-                    // Chỉ xử lý nếu event có terms
                     if (!allTerms.isEmpty()) {
                         List<Tasks> allTasks = taskDAO.getTasksByEventID(eventID);
 
-                        // Set departments cho tasks
                         for (Tasks task : allTasks) {
-                            List<TaskAssignees> assignees = taskDAO.getAssigneesByTaskID(task.getTaskID());
-                            List<Department> departments = new ArrayList<>();
-                            for (TaskAssignees ta : assignees) {
-                                if (ta.getDepartment() != null) {
-                                    departments.add(ta.getDepartment());
-                                }
-                            }
-                            task.setDepartments(departments);
+                            Department dept = deptDAO.getDepartmentByID(task.getDepartmentAssignee().getDepartmentID());
+                            task.setDepartmentAssignee(dept);
                         }
 
-                        // Khởi tạo map với tất cả terms, ngay cả khi chưa có tasks
                         Map<String, List<Tasks>> groupedByTerm = new LinkedHashMap<>();
                         Map<String, EventTerms> termInfoMap = new LinkedHashMap<>();
 
-                        // Đầu tiên, khởi tạo tất cả terms với list rỗng và lưu thông tin term
                         for (EventTerms term : allTerms) {
                             groupedByTerm.put(term.getTermName(), new ArrayList<>());
                             termInfoMap.put(term.getTermName(), term);
                         }
 
-                        // Sau đó, group tasks vào các terms tương ứng
                         for (Tasks task : allTasks) {
                             String termName = task.getTerm().getTermName();
                             if (groupedByTerm.containsKey(termName)) {
@@ -121,9 +113,7 @@ public class ChairmanTasksServlet extends HttpServlet {
                             }
                         }
 
-                        // Chỉ add vào timelineMap khi event có terms
                         timelineMap.put(selectedEvent, groupedByTerm);
-                        // Pass thông tin terms để JSP có thể hiển thị dates
                         request.setAttribute("termInfoMap_" + eventID, termInfoMap);
                     }
 
@@ -131,38 +121,25 @@ public class ChairmanTasksServlet extends HttpServlet {
                     e.printStackTrace();
                 }
             } else {
-                // Xử lý tương tự cho trường hợp hiển thị tất cả events
                 for (Events event : eventList) {
-                    // Lấy tất cả terms của event này
                     List<EventTerms> allTerms = taskDAO.getTermsByEventID(event.getEventID());
 
-                    // Chỉ xử lý nếu event có terms
                     if (!allTerms.isEmpty()) {
                         List<Tasks> allTasks = taskDAO.getTasksByEventID(event.getEventID());
 
-                        // Set departments cho tasks
                         for (Tasks task : allTasks) {
-                            List<TaskAssignees> assignees = taskDAO.getAssigneesByTaskID(task.getTaskID());
-                            List<Department> departments = new ArrayList<>();
-                            for (TaskAssignees ta : assignees) {
-                                if (ta.getDepartment() != null) {
-                                    departments.add(ta.getDepartment());
-                                }
-                            }
-                            task.setDepartments(departments);
+                            Department dept = deptDAO.getDepartmentByID(task.getDepartmentAssignee().getDepartmentID());
+                            task.setDepartmentAssignee(dept);
                         }
 
-                        // Khởi tạo map với tất cả terms
                         Map<String, List<Tasks>> groupedByTerm = new LinkedHashMap<>();
                         Map<String, EventTerms> termInfoMap = new LinkedHashMap<>();
 
-                        // Đầu tiên, khởi tạo tất cả terms với list rỗng và lưu thông tin term
                         for (EventTerms term : allTerms) {
                             groupedByTerm.put(term.getTermName(), new ArrayList<>());
                             termInfoMap.put(term.getTermName(), term);
                         }
 
-                        // Sau đó, group tasks vào các terms tương ứng
                         for (Tasks task : allTasks) {
                             String termName = task.getTerm().getTermName();
                             if (groupedByTerm.containsKey(termName)) {
@@ -170,7 +147,6 @@ public class ChairmanTasksServlet extends HttpServlet {
                             }
                         }
 
-                        // Chỉ add vào timelineMap khi event có terms
                         timelineMap.put(event, groupedByTerm);
                         request.setAttribute("termInfoMap_" + event.getEventID(), termInfoMap);
                     }
@@ -188,10 +164,9 @@ public class ChairmanTasksServlet extends HttpServlet {
         }
     }
 
-
-
-    /** 
+    /**
      * Handles the HTTP <code>POST</code> method.
+     *
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
@@ -199,12 +174,13 @@ public class ChairmanTasksServlet extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+            throws ServletException, IOException {
         processRequest(request, response);
     }
 
-    /** 
+    /**
      * Returns a short description of the servlet.
+     *
      * @return a String containing servlet description
      */
     @Override

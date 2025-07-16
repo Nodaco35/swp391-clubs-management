@@ -69,6 +69,7 @@ public class TaskDAO {
         EventsDAO ed = new EventsDAO();
         ClubDAO cd = new ClubDAO();
         UserDAO ud = new UserDAO();
+        DepartmentDAO dd = new DepartmentDAO();
         try {
             Connection connection = DBContext.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -79,7 +80,8 @@ public class TaskDAO {
                 Tasks t = new Tasks();
 
                 t.setTaskID(rs.getInt("TaskID"));
-                t.setParentTaskID(rs.getInt("ParentTaskID"));
+                int parentId = rs.getInt("ParentTaskID");
+                t.setParentTaskID(rs.wasNull() ? null : parentId); // nullable check
 
                 EventTerms et = getEventTermsByID(rs.getInt("TermID"));
                 Events event = ed.getEventByID(rs.getInt("EventID"));
@@ -90,14 +92,24 @@ public class TaskDAO {
                 t.setEvent(event);
                 t.setClub(club);
                 t.setCreatedBy(creator);
+
                 t.setTitle(rs.getString("Title"));
                 t.setDescription(rs.getString("Description"));
                 t.setStatus(rs.getString("Status"));
-                t.setPriority(rs.getString("Priority"));
-                t.setProgressPercent(rs.getInt("ProgressPercent"));
+                t.setReviewComment(rs.getString("ReviewComment"));
                 t.setStartDate(rs.getTimestamp("StartDate"));
                 t.setEndDate(rs.getTimestamp("EndDate"));
                 t.setCreatedAt(rs.getTimestamp("CreatedAt"));
+
+                String assigneeType = rs.getString("AssigneeType");
+                t.setAssigneeType(assigneeType);
+                if ("User".equals(assigneeType)) {
+                    Users userAssignee = ud.getUserByID(rs.getString("UserID"));
+                    t.setUserAssignee(userAssignee);
+                } else if ("Department".equals(assigneeType)) {
+                    Department dept = dd.getDepartmentByID(rs.getInt("DepartmentID"));
+                    t.setDepartmentAssignee(dept);
+                }
 
                 return t;
             }
@@ -113,11 +125,11 @@ public class TaskDAO {
         EventsDAO ed = new EventsDAO();
         ClubDAO cd = new ClubDAO();
         UserDAO ud = new UserDAO();
+        DepartmentDAO dd = new DepartmentDAO();
 
         try {
             Connection connection = DBContext.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
-
             ps.setInt(1, eventID);
             ResultSet rs = ps.executeQuery();
 
@@ -125,7 +137,9 @@ public class TaskDAO {
                 Tasks t = new Tasks();
 
                 t.setTaskID(rs.getInt("TaskID"));
-                t.setParentTaskID(rs.getInt("ParentTaskID"));
+                int parentId = rs.getInt("ParentTaskID");
+                t.setParentTaskID(rs.wasNull() ? null : parentId);
+
                 EventTerms et = getEventTermsByID(rs.getInt("TermID"));
                 Events event = ed.getEventByID(rs.getInt("EventID"));
                 Clubs club = cd.getCLubByID(rs.getInt("ClubID"));
@@ -139,11 +153,20 @@ public class TaskDAO {
                 t.setTitle(rs.getString("Title"));
                 t.setDescription(rs.getString("Description"));
                 t.setStatus(rs.getString("Status"));
-                t.setPriority(rs.getString("Priority"));
-                t.setProgressPercent(rs.getInt("ProgressPercent"));
+                t.setReviewComment(rs.getString("ReviewComment"));
                 t.setStartDate(rs.getTimestamp("StartDate"));
                 t.setEndDate(rs.getTimestamp("EndDate"));
                 t.setCreatedAt(rs.getTimestamp("CreatedAt"));
+
+                String assigneeType = rs.getString("AssigneeType");
+                t.setAssigneeType(assigneeType);
+                if ("User".equals(assigneeType)) {
+                    Users userAssignee = ud.getUserByID(rs.getString("UserID"));
+                    t.setUserAssignee(userAssignee);
+                } else if ("Department".equals(assigneeType)) {
+                    Department dept = dd.getDepartmentByID(rs.getInt("DepartmentID"));
+                    t.setDepartmentAssignee(dept);
+                }
 
                 taskList.add(t);
             }
