@@ -186,4 +186,24 @@ public class ClubMeetingDAO {
         }
         return total;
     }
+
+    public static List<String> getClubDepartmentID(int meetingId) {
+        List<String> getClubDepartmentID = new ArrayList();
+        String sql = """
+                     SELECT `clubmeetingparticipants`.`ClubMeetingID`,
+                         `clubmeetingparticipants`.`ClubDepartmentID`
+                     FROM `clubmanagementsystem`.`clubmeetingparticipants`
+                     where ClubMeetingID =  ?""";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setObject(1, meetingId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {                
+                getClubDepartmentID.add(rs.getString("ClubDepartmentID"));
+               
+            }
+        } catch (Exception e) {
+        }
+        return getClubDepartmentID;
+    }
 }

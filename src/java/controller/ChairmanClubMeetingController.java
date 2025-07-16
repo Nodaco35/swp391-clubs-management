@@ -13,9 +13,13 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
+import java.util.regex.Pattern;
 import models.*;
 
 public class ChairmanClubMeetingController extends HttpServlet {
+    private static final Pattern GOOGLE_MEET_PATTERN = Pattern.compile("^https://meet\\.google\\.com/[a-z]{3}-[a-z]{4}-[a-z]{3}$");
+    private static final Pattern ZOOM_PATTERN = Pattern.compile("^https://([a-z0-9-]+\\.)?zoom\\.us/j/[0-9]{9,11}(\\?pwd=[a-zA-Z0-9]+)?$");
+    private static final Pattern GOOGLE_DRIVE_PATTERN = Pattern.compile("^https://drive\\.google\\.com/.*$");
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -57,11 +61,14 @@ public class ChairmanClubMeetingController extends HttpServlet {
             if (meeting == null) {
                 request.setAttribute("error", "Không tìm thấy cuộc họp!");
             } else {
-//                List<String> participants = meetingDAO.getMeetingParticipants(meetingId);
-//                meeting.setParticipantUserIds(participants);
+                List<String> participants = ClubMeetingDAO.getClubDepartmentID(meetingId);
+                meeting.setParticipantClubDepartmentIds(participants);
                 request.setAttribute("editMeeting", meeting);
+                long duration = (meeting.getEndTime().getTime() - meeting.getStartedTime().getTime()) / 60000;
+                request.setAttribute("duration", duration);
             }
             meetings = ClubMeetingDAO.findByClubID(club.getClubID(), search, page, pageSize);
+            
             totalRecords = ClubMeetingDAO.countByClubID(club.getClubID(), search);
             totalPages = (int) Math.ceil((double) totalRecords / pageSize);
         } else if ("search".equals(action)) {
@@ -92,7 +99,8 @@ public class ChairmanClubMeetingController extends HttpServlet {
             totalRecords = ClubMeetingDAO.countByClubID(club.getClubID(), search);
             totalPages = (int) Math.ceil((double) totalRecords / pageSize);
         }
-
+        List<ClubDepartment> departmentMembers = ClubDepartmentDAO.findByClubId(club.getClubID()); 
+        request.setAttribute("departmentMembers", departmentMembers);
         request.setAttribute("meetings", meetings);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
@@ -105,27 +113,16 @@ public class ChairmanClubMeetingController extends HttpServlet {
     }
 
     public static void main(String[] args) {
-        ClubMeeting meeting = ClubMeetingDAO.findByClubID(1, "", 1, Integer.MAX_VALUE)
-                .stream()
-                .filter(m -> m.getClubMeetingID() == 1)
-                .findFirst()
-                .orElse(null);
-        System.out.println(meeting);
+        List<String> participants = ClubMeetingDAO.getClubDepartmentID(6);
+        for (String participant : participants) {
+            System.out.println(participant);
+        }
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String action = request.getParameter("action");
-        Users user = (Users) request.getSession().getAttribute("user");
-        ClubInfo club = (ClubInfo) request.getSession().getAttribute("club");
-        switch (action) {
-            case "add":
-
-                break;
-
-        }
-        doGet(request, response);
+        
     }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)

@@ -4,6 +4,7 @@
  */
 package models;
 import java.sql.Timestamp;
+import java.util.List;
 /**
  *
  * @author he181
@@ -20,6 +21,9 @@ public class ClubMeeting {
     private String meetingTitle;
     private String description;
     private String document;
+    
+    List<String> participantClubDepartmentIds;
+    
 
     public ClubMeeting() {
     }
@@ -103,6 +107,16 @@ public class ClubMeeting {
     public void setDocument(String document) {
         this.document = document;
     }
+
+    public List<String> getParticipantClubDepartmentIds() {
+        return participantClubDepartmentIds;
+    }
+
+    public void setParticipantClubDepartmentIds(List<String> participantClubDepartmentIds) {
+        this.participantClubDepartmentIds = participantClubDepartmentIds;
+    }
+    
+    
 
     @Override
     public String toString() {

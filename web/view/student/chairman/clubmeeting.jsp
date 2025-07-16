@@ -13,7 +13,7 @@
         <title>Cuộc họp của câu lạc bộ</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-        
+
         <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/chairmanPage.css">
 
 
@@ -208,7 +208,7 @@
                             <form action="${pageContext.request.contextPath}/chairman-page/clubmeeting" method="post" id="formData">
                                 <input type="hidden" name="action" id="formAction" value="${editMeeting != null ? 'update' : 'add'}">
                                 <input type="hidden" name="meetingId" id="meetingId" value="${editMeeting != null ? editMeeting.clubMeetingID : ''}">
-                                
+
                                 <div class="mb-3">
                                     <label for="title" class="form-label">Tiêu đề cuộc họp</label>
                                     <input type="text" name="title" id="title" class="form-control" 
@@ -232,8 +232,32 @@
                                     <input type="datetime-local" name="startedTime" id="startedTime" class="form-control" 
                                            value="${editMeeting != null ? editMeeting.startedTime : ''}" required>
                                 </div>
+
                                 <div class="mb-3">
-                                   
+                                    <label for="duration" class="form-label">Thời gian diễn ra (phút)</label>
+                                    <input type="number" name="duration" id="duration" class="form-control" 
+                                           value="${editMeeting != null ? duration : ''}" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Các ban tham gia</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="selectAll" id="selectAll" 
+                                               onchange="toggleParticipants(this)" ${editMeeting != null && editMeeting.participantClubDepartmentIds.size() == departmentMembers.size() ? 'checked' : ''}>
+                                        <label class="form-check-label" for="selectAll">Tất cả các ban</label>
+                                    </div>
+                                    <div id="participantsList" class="${editMeeting != null && editMeeting.participantClubDepartmentIds.size() == departmentMembers.size() ? 'd-none' : 'd-block'}">
+                                        <c:forEach var="member" items="${departmentMembers}">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="participants" 
+                                                       value="${member.clubDepartmentId}" id="participant_${member.clubDepartmentId}"
+                                                       ${editMeeting != null && editMeeting.participantClubDepartmentIds.contains(member.clubDepartmentId) ? 'checked' : ''}>
+                                                <label class="form-check-label" for="participant_${member.clubDepartmentId}">
+                                                    ${member.departmentName}
+                                                </label>
+                                            </div>
+                                        </c:forEach>
+                                    </div>
                                 </div>
                                 <div class="d-flex justify-content-end">
                                     <button type="button" class="btn btn-secondary me-2" onclick="hideForm()">Hủy</button>
@@ -247,7 +271,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="row">
                 <div class="col-12">
                     <div class="card shadow-sm">
@@ -285,7 +309,7 @@
                                                             </div>
                                                             <div>
                                                                 <h6 class="mb-1 fw-semibold">${meeting.meetingTitle}</h6>
-                                                                <small class="text-muted">{meeting.clubName}</small>
+                                                                <small class="text-muted">${meeting.clubName}</small>
                                                                 <small class="text-muted d-block">ID: ${meeting.clubMeetingID}</small>
                                                             </div>
                                                         </div>
@@ -427,150 +451,150 @@
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-                                            let currentEditMeetingId = null;
+                                        let currentEditMeetingId = null;
 
-                                            document.addEventListener('DOMContentLoaded', function () {
-                                                hideForm();
+                                        document.addEventListener('DOMContentLoaded', function () {
+                                            hideForm();
             <c:if test="${editMeeting != null}">
-                                                showEditForm(
+                                            showEditForm(
                 ${editMeeting.clubMeetingID},
-                                                        '${editMeeting.meetingTitle}',
-                                                        '${editMeeting.URLMeeting}',
-                                                        '${editMeeting.document}',
-                                                        '<fmt:formatDate value="${editMeeting.startedTime}" pattern="yyyy-MM-dd\'T\'HH:mm"/>'
-                                                        );
+                                                    '${editMeeting.meetingTitle}',
+                                                    '${editMeeting.URLMeeting}',
+                                                    '${editMeeting.document}',
+                                                    '<fmt:formatDate value="${editMeeting.startedTime}" pattern="yyyy-MM-dd\'T\'HH:mm"/>'
+                                                    );
             </c:if>
             <c:if test="${not empty error}">
-                                                document.getElementById('errorModal').style.display = 'block';
+                                            document.getElementById('errorModal').style.display = 'block';
             </c:if>
-                                            });
+                                        });
 
-                                            function toggleAddForm() {
-                                                const form = document.getElementById('meetingForm');
-                                                if (form.classList.contains('d-block') && document.getElementById('formAction').value === 'add') {
-                                                    hideForm();
-                                                } else {
-                                                    showAddForm();
-                                                }
+                                        function toggleAddForm() {
+                                            const form = document.getElementById('meetingForm');
+                                            if (form.classList.contains('d-block') && document.getElementById('formAction').value === 'add') {
+                                                hideForm();
+                                            } else {
+                                                showAddForm();
                                             }
+                                        }
 
-                                            function toggleEditForm(meetingId, title, urlMeeting, documentLink, startedTime) {
-                                                const form = document.getElementById('meetingForm');
-                                                if (form.classList.contains('d-block') && currentEditMeetingId === meetingId) {
-                                                    hideForm();
-                                                    currentEditMeetingId = null;
-                                                } else {
-                                                    showEditForm(meetingId, title, urlMeeting, documentLink, startedTime);
-                                                    currentEditMeetingId = meetingId;
-                                                }
-                                            }
-
-                                            function showAddForm() {
-                                                const form = document.getElementById('meetingForm');
-                                                const formTitle = document.querySelector('#meetingForm .card-header h5');
-                                                const formAction = document.getElementById('formAction');
-                                                const submitButton = document.getElementById('submitButton');
-
-                                                form.classList.remove('d-none');
-                                                form.classList.add('d-block');
-                                                formTitle.textContent = 'Tạo cuộc họp mới';
-                                                formAction.value = 'add';
-                                                submitButton.textContent = 'Tạo';
-                                                document.getElementById('formData').reset();
-                                                document.getElementById('meetingId').value = '';
-                                                document.getElementById('selectAll').checked = false;
-                                                toggleParticipants(document.getElementById('selectAll'));
+                                        function toggleEditForm(meetingId, title, urlMeeting, documentLink, startedTime) {
+                                            const form = document.getElementById('meetingForm');
+                                            if (form.classList.contains('d-block') && currentEditMeetingId === meetingId) {
+                                                hideForm();
                                                 currentEditMeetingId = null;
+                                            } else {
+                                                showEditForm(meetingId, title, urlMeeting, documentLink, startedTime);
+                                                currentEditMeetingId = meetingId;
+                                            }
+                                        }
+
+                                        function showAddForm() {
+                                            const form = document.getElementById('meetingForm');
+                                            const formTitle = document.querySelector('#meetingForm .card-header h5');
+                                            const formAction = document.getElementById('formAction');
+                                            const submitButton = document.getElementById('submitButton');
+
+                                            form.classList.remove('d-none');
+                                            form.classList.add('d-block');
+                                            formTitle.textContent = 'Tạo cuộc họp mới';
+                                            formAction.value = 'add';
+                                            submitButton.textContent = 'Tạo';
+                                            document.getElementById('formData').reset();
+                                            document.getElementById('meetingId').value = '';
+                                            document.getElementById('selectAll').checked = false;
+                                            toggleParticipants(document.getElementById('selectAll'));
+                                            currentEditMeetingId = null;
+                                        }
+
+                                        function showEditForm(meetingId, title, urlMeeting, documentLink, startedTime) {
+                                            const form = document.getElementById('meetingForm');
+                                            const formTitle = document.querySelector('#meetingForm .card-header h5');
+                                            const formAction = document.getElementById('formAction');
+                                            const submitButton = document.getElementById('submitButton');
+
+                                            form.classList.remove('d-none');
+                                            form.classList.add('d-block');
+                                            formTitle.textContent = 'Sửa cuộc họp';
+                                            formAction.value = 'update';
+                                            submitButton.textContent = 'Cập nhật';
+
+                                            document.getElementById('meetingId').value = meetingId;
+                                            document.getElementById('title').value = title;
+                                            document.getElementById('urlMeeting').value = urlMeeting;
+                                            document.getElementById('documentLink').value = documentLink;
+                                            document.getElementById('startedTime').value = startedTime;
+                                        }
+
+                                        function hideForm() {
+                                            const form = document.getElementById('meetingForm');
+                                            form.classList.add('d-none');
+                                            form.classList.remove('d-block');
+                                            document.getElementById('formData').reset();
+                                            currentEditMeetingId = null;
+                                        }
+
+                                        function closeErrorModal() {
+                                            document.getElementById('errorModal').style.display = 'none';
+                                        }
+
+                                        function toggleParticipants(checkbox) {
+                                            const participantsList = document.getElementById('participantsList');
+                                            if (checkbox.checked) {
+                                                participantsList.classList.add('d-none');
+                                                participantsList.classList.remove('d-block');
+                                                document.querySelectorAll('#participantsList input[type=checkbox]').forEach(cb => cb.checked = false);
+                                            } else {
+                                                participantsList.classList.remove('d-none');
+                                                participantsList.classList.add('d-block');
+                                            }
+                                        }
+
+                                        document.getElementById('formData').addEventListener('submit', function (e) {
+                                            const title = document.getElementById('title').value.trim();
+                                            const urlMeeting = document.getElementById('urlMeeting').value.trim();
+                                            const documentLink = document.getElementById('documentLink').value.trim();
+                                            const startedTime = document.getElementById('startedTime').value;
+                                            const selectAll = document.getElementById('selectAll').checked;
+                                            const participants = document.querySelectorAll('#participantsList input[type=checkbox]:checked');
+                                            if (!title) {
+                                                alert('Tiêu đề cuộc họp không được để trống!');
+                                                e.preventDefault();
+                                                return;
                                             }
 
-                                            function showEditForm(meetingId, title, urlMeeting, documentLink, startedTime) {
-                                                const form = document.getElementById('meetingForm');
-                                                const formTitle = document.querySelector('#meetingForm .card-header h5');
-                                                const formAction = document.getElementById('formAction');
-                                                const submitButton = document.getElementById('submitButton');
-
-                                                form.classList.remove('d-none');
-                                                form.classList.add('d-block');
-                                                formTitle.textContent = 'Sửa cuộc họp';
-                                                formAction.value = 'update';
-                                                submitButton.textContent = 'Cập nhật';
-
-                                                document.getElementById('meetingId').value = meetingId;
-                                                document.getElementById('title').value = title;
-                                                document.getElementById('urlMeeting').value = urlMeeting;
-                                                document.getElementById('documentLink').value = documentLink;
-                                                document.getElementById('startedTime').value = startedTime;
+                                            if (!urlMeeting) {
+                                                alert('Liên kết cuộc họp không được để trống!');
+                                                e.preventDefault();
+                                                return;
                                             }
 
-                                            function hideForm() {
-                                                const form = document.getElementById('meetingForm');
-                                                form.classList.add('d-none');
-                                                form.classList.remove('d-block');
-                                                document.getElementById('formData').reset();
-                                                currentEditMeetingId = null;
+                                            if (!startedTime) {
+                                                alert('Thời gian bắt đầu không được để trống!');
+                                                e.preventDefault();
+                                                return;
                                             }
 
-                                            function closeErrorModal() {
-                                                document.getElementById('errorModal').style.display = 'none';
+                                            if (!selectAll && participants.length === 0) {
+                                                alert('Vui lòng chọn ít nhất một người tham gia hoặc chọn tất cả thành viên!');
+                                                e.preventDefault();
+                                                return;
                                             }
 
-                                            function toggleParticipants(checkbox) {
-                                                const participantsList = document.getElementById('participantsList');
-                                                if (checkbox.checked) {
-                                                    participantsList.classList.add('d-none');
-                                                    participantsList.classList.remove('d-block');
-                                                    document.querySelectorAll('#participantsList input[type=checkbox]').forEach(cb => cb.checked = false);
-                                                } else {
-                                                    participantsList.classList.remove('d-none');
-                                                    participantsList.classList.add('d-block');
-                                                }
+                                            const googleMeetPattern = /^https:\/\/meet\.google\.com\/[a-z]{3}-[a-z]{4}-[a-z]{3}$/;
+                                            const zoomPattern = /^https:\/\/([a-z0-9-]+\.)?zoom\.us\/j\/[0-9]{9,11}(\?pwd=[a-zA-Z0-9]+)?$/;
+                                            if (!googleMeetPattern.test(urlMeeting) && !zoomPattern.test(urlMeeting)) {
+                                                alert('Liên kết cuộc họp không hợp lệ! Vui lòng nhập URL Google Meet (VD: https://meet.google.com/abc-defg-hij) hoặc Zoom (VD: https://zoom.us/j/1234567890).');
+                                                e.preventDefault();
+                                                return;
                                             }
 
-                                            document.getElementById('formData').addEventListener('submit', function (e) {
-                                                const title = document.getElementById('title').value.trim();
-                                                const urlMeeting = document.getElementById('urlMeeting').value.trim();
-                                                const documentLink = document.getElementById('documentLink').value.trim();
-                                                const startedTime = document.getElementById('startedTime').value;
-                                                const selectAll = document.getElementById('selectAll').checked;
-                                                const participants = document.querySelectorAll('#participantsList input[type=checkbox]:checked');
-                                                if (!title) {
-                                                    alert('Tiêu đề cuộc họp không được để trống!');
-                                                    e.preventDefault();
-                                                    return;
-                                                }
-
-                                                if (!urlMeeting) {
-                                                    alert('Liên kết cuộc họp không được để trống!');
-                                                    e.preventDefault();
-                                                    return;
-                                                }
-
-                                                if (!startedTime) {
-                                                    alert('Thời gian bắt đầu không được để trống!');
-                                                    e.preventDefault();
-                                                    return;
-                                                }
-
-                                                if (!selectAll && participants.length === 0) {
-                                                    alert('Vui lòng chọn ít nhất một người tham gia hoặc chọn tất cả thành viên!');
-                                                    e.preventDefault();
-                                                    return;
-                                                }
-
-                                                const googleMeetPattern = /^https:\/\/meet\.google\.com\/[a-z]{3}-[a-z]{4}-[a-z]{3}$/;
-                                                const zoomPattern = /^https:\/\/([a-z0-9-]+\.)?zoom\.us\/j\/[0-9]{9,11}(\?pwd=[a-zA-Z0-9]+)?$/;
-                                                if (!googleMeetPattern.test(urlMeeting) && !zoomPattern.test(urlMeeting)) {
-                                                    alert('Liên kết cuộc họp không hợp lệ! Vui lòng nhập URL Google Meet (VD: https://meet.google.com/abc-defg-hij) hoặc Zoom (VD: https://zoom.us/j/1234567890).');
-                                                    e.preventDefault();
-                                                    return;
-                                                }
-
-                                                if (documentLink && !/^https:\/\/drive\.google\.com\/.*$/.test(documentLink)) {
-                                                    alert('Liên kết tài liệu không hợp lệ! Vui lòng nhập URL Google Drive hợp lệ.');
-                                                    e.preventDefault();
-                                                    return;
-                                                }
-                                            });
+                                            if (documentLink && !/^https:\/\/drive\.google\.com\/.*$/.test(documentLink)) {
+                                                alert('Liên kết tài liệu không hợp lệ! Vui lòng nhập URL Google Drive hợp lệ.');
+                                                e.preventDefault();
+                                                return;
+                                            }
+                                        });
         </script>
     </body>
 </html>
