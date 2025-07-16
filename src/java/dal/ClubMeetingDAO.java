@@ -329,7 +329,26 @@ public class ClubMeetingDAO {
     }
 
     public static boolean deleteMeeting(int meetingId) {
-        return true;
+        String sql1 = """
+                      DELETE FROM `clubmanagementsystem`.`clubmeeting`
+                      WHERE ClubMeetingID = ?;""";
+        String sql2 = """
+                      DELETE FROM `clubmanagementsystem`.`clubmeetingparticipants`
+                      WHERE ClubMeetingID = ?;""";
+        
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql1);
+            PreparedStatement ps2 = DBContext.getConnection().prepareStatement(sql2);
+            ps.setObject(1, meetingId);
+            ps2.setObject(1, meetingId);
+            
+            ps.executeUpdate();
+            ps2.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            return false;
+        }
+        
     }
 
 }
