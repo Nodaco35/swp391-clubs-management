@@ -1,0 +1,443 @@
+/*
+Click nfs://SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nfs://SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : May 30, 2025, 11:14:34 PM
+    Author     : FPT Shop
+*/
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Roboto', sans-serif;
+    background-color: #f7f9fc;
+}
+
+main {
+    flex: 1;
+    padding: 20px 0;
+}
+
+footer {
+    margin-top: auto;
+    padding: 1rem 0;
+    background-color: #1a1a1a;
+    color: #e5e7eb;
+    text-align: center;
+    font-size: 0.875rem;
+}
+
+.section {
+    padding: 1.5rem 0;
+}
+
+.containerr {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Club Detail Section (Reverted to original layout) */
+.club-detail {
+    background-color: #ffffff !important;
+    border-radius: 12px !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05) !important;
+    padding: 24px !important;
+    margin-bottom: 1.5rem !important;
+    display: flex !important;
+    gap: 24px !important;
+}
+
+.club-detail .club-header {
+    display: flex !important;
+    gap: 24px !important;
+    align-items: flex-start !important;
+    width: 100% !important;
+}
+
+.club-detail .club-image {
+    width: 100% !important;
+    max-width: 350px !important;
+    height: auto !important;
+    border-radius: 8px !important;
+    object-fit: cover !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+.club-detail .club-info {
+    flex: 1 !important;
+    text-align: left !important;
+    
+}
+
+.club-detail .club-title {
+    font-size: 2rem !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    margin-bottom: 10px !important;
+}
+
+.club-detail .club-category {
+    font-size: 0.95rem !important;
+    font-weight: 500 !important;
+    color: #64748b !important;
+    margin-bottom: 12px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+.club-detail .club-description {
+    font-size: 0.95rem !important;
+    color: #475569 !important;
+    line-height: 1.6 !important;
+    margin-bottom: 16px !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+}
+
+
+.club-detail .club-meta-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px 20px !important;
+    font-size: 0.85rem !important;
+    color: #64748b !important;
+    margin-bottom: 20px !important;
+}
+
+.club-detail .club-meta-grid div {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.club-detail .badge {
+    padding: 4px 10px !important;
+    border-radius: 4px !important;
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+}
+
+.club-detail .badge-primary {
+    background-color: #3b82f6 !important;
+    color: #ffffff !important;
+}
+
+.club-detail .badge-secondary {
+    background-color: #94a3b8 !important;
+    color: #ffffff !important;
+}
+
+.club-detail .btn {
+    padding: 8px 16px !important;
+    font-size: 0.85rem !important;
+    border-radius: 6px !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    transition: all 0.3s ease !important;
+    cursor: pointer !important;
+}
+
+.club-detail .btn-primary {
+    background-color: #3b82f6 !important;
+    color: #ffffff !important;
+    border: none !important;
+}
+
+.club-detail .btn-primary:hover {
+    background-color: #2563eb !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2) !important;
+}
+
+.club-detail .btn-success {
+    background-color: #10b981 !important;
+    color: #ffffff !important;
+    border: none !important;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2) !important;
+}
+
+.club-detail .btn-success:hover {
+    background-color: #059669 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3) !important;
+}
+
+.club-detail .club-buttons-row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+    justify-content: flex-start !important;
+    margin-top: 16px !important;
+}
+
+.club-detail .left-buttons {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+}
+
+.club-detail .right-btn {
+    margin-left: auto !important;
+}
+
+/* President Card Section */
+.president-title {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    margin-bottom: 1rem !important;
+    text-align: left !important;
+}
+
+.president-card {
+    background-color: #ffffff !important;
+    border-radius: 12px !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05) !important;
+    padding: 16px !important;
+    display: flex !important;
+    flex-direction: row !important; /* ✅ đã chỉnh lại */
+    gap: 16px !important;
+    align-items: center !important;
+    margin-bottom: 1.5rem !important;
+}
+
+
+.president-card .president-image {
+    width: 80px !important;
+    height: 80px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+    flex-shrink: 0 !important;
+}
+
+.president-card .president-info {
+    flex: 1 !important;
+    text-align: left !important;
+}
+
+.president-card .president-name {
+    font-size: 1.125rem !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    margin-bottom: 4px !important;
+}
+
+.president-card .president-role {
+    font-size: 0.9rem !important;
+    color: #64748b !important;
+    margin-bottom: 8px !important;
+}
+
+.president-card .president-email {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    font-size: 0.85rem !important;
+    color: #64748b !important;
+}
+
+.president-card .president-email i {
+    font-size: 0.9rem !important;
+    margin-right: 0.5rem !important;
+}
+
+.president-card .no-president {
+    font-size: 0.9rem !important;
+    color: #64748b !important;
+    text-align: center !important;
+}
+
+/* Events Section */
+.bg-white.rounded-2xl.shadow-lg.p-8 {
+    background-color: #ffffff !important;
+    border-radius: 16px !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05) !important;
+    padding: 32px !important;
+    margin-bottom: 1.5rem !important;
+}
+
+.bg-white.rounded-2xl.shadow-lg.p-8 .text-2xl.font-bold.text-gray-900.mb-6 {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    margin-bottom: 1.5rem !important;
+}
+
+.events-grid {
+    display: grid !important;
+    grid-template-columns: repeat(1, 1fr) !important;
+}
+
+@media (min-width: 640px) {
+    .events-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+@media (min-width: 1024px) {
+    .events-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+}
+
+.events-grid .event-card {
+    background-color: #ffffff !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05) !important;
+    padding: 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
+
+.events-grid .event-card .event-title {
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    margin-bottom: 4px !important;
+}
+
+.events-grid .event-card .event-meta {
+    font-size: 0.85rem !important;
+    color: #64748b !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+}
+
+.events-grid .event-card .event-meta i {
+    margin-right: 4px !important;
+}
+
+.events-grid .event-card .event-btn {
+    margin-top: auto !important;
+    align-self: flex-end !important;
+}
+
+.events-grid .no-events {
+    font-size: 0.9rem !important;
+    color: #64748b !important;
+    text-align: center !important;
+    padding: 1rem !important;
+}
+
+/* Pagination for Events (3 events per page) */
+.pagination {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-top: 1rem !important;
+    padding: 1rem 0 !important;
+}
+
+.pagination .pagination-btn {
+    padding: 6px 12px !important;
+    font-size: 0.8rem !important;
+    border-radius: 6px !important;
+    text-decoration: none !important;
+    color: #64748b !important;
+    background-color: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
+    transition: all 0.3s ease !important;
+}
+
+.pagination .pagination-btn:hover {
+    background-color: #3b82f6 !important;
+    color: #ffffff !important;
+    border-color: #3b82f6 !important;
+}
+
+.pagination .pagination-btn.active {
+    background-color: #3b82f6 !important;
+    color: #ffffff !important;
+    border-color: #3b82f6 !important;
+    font-weight: 600 !important;
+}
+
+.pagination .pagination-btn:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+}
+
+/* Responsive Adjustments */
+@media (min-width: 1024px) {
+    .club-detail {
+        flex-direction: row !important;
+    }
+
+    .club-detail .club-header {
+        align-items: flex-start !important;
+    }
+
+    .club-detail .club-info {
+        text-align: left !important;
+    }
+
+    .president-card {
+        flex-direction: row-reverse !important;
+    }
+
+    .president-card .president-info {
+        text-align: left !important;
+    }
+}
+
+@media (max-width: 1024px) {
+    .club-detail, .president-card, .bg-white.rounded-2xl.shadow-lg.p-8 {
+        padding: 16px !important;
+    }
+
+    .club-detail .club-header, .president-card {
+        flex-direction: column !important;
+        align-items: center !important;
+    }
+
+    .club-detail .club-image, .president-card .president-image {
+        max-width: 100% !important;
+        margin-bottom: 16px !important;
+    }
+
+    .club-detail .club-info, .president-card .president-info {
+        text-align: center !important;
+    }
+
+    .president-title {
+        text-align: center !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .events-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .club-detail .club-buttons-row {
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+
+    .club-detail .right-btn {
+        margin-left: 0 !important;
+        width: 100% !important;
+        text-align: center !important;
+    }
+
+    .club-detail .club-meta-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .pagination {
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+    }
+}

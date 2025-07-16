@@ -1,0 +1,176 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : May 24, 2025, 11:23:30 PM
+    Author     : Admin
+*/
+
+body {
+    background-color: #f5f5f5;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.profile-container {
+    max-width: 900px;
+    margin: 50px auto;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.profile-container h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+}
+.form-label {
+    font-weight: 500;
+    color: #555;
+}
+.form-control {
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+}
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+.btn-primary, .btn-secondary {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 16px;
+}
+.alert {
+    margin-top: 20px;
+    text-align: center;
+}
+.avatar-box {
+    border: 1px solid #ced4da;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    background-color: #f8f9fa;
+}
+.avatar-img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #007bff;
+}
+.avatar-upload {
+    margin-top: 10px;
+}
+.info-section {
+    padding-left: 20px;
+}
+
+/* CSS cho phần đổi mật khẩu */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 15px 20px;
+}
+
+.card-header h3 {
+    font-size: 18px;
+    margin: 0;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+#passwordMatchError {
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+/* Nút đổi mật khẩu */
+#passwordChangeForm .btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+#passwordChangeForm .btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+.container {
+    margin-left: 150px; /* tránh bị đè */
+    padding: 20px;
+}
+
+.main-content {
+    margin-left: 150px;
+    padding: 20px;
+}
+
+.nav-list li.active a {
+    background-color: #1abc9c;
+    color: white;
+    border-left: 4px solid #16a085;
+}
+
+
+/* Sidebar wrapper */
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 220px;
+    height: 100vh;
+    background-color: #2c3e50;
+    color: white;
+    padding-top: 20px;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Logo / tiêu đề */
+.sidebar .logo {
+    text-align: center;
+    font-size: 22px;
+    margin-bottom: 30px;
+    font-weight: bold;
+    color: #ecf0f1;
+}
+
+/* Danh sách nav */
+.sidebar .nav-list {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.sidebar .nav-list li {
+    margin: 10px 0;
+}
+
+.sidebar .nav-list li a {
+    color: #ecf0f1;
+    text-decoration: none;
+    padding: 10px 20px;
+    display: block;
+    transition: background 0.3s ease;
+}
+
+.sidebar .nav-list li a:hover {
+    background-color: #34495e;
+    border-left: 4px solid #1abc9c;
+}
+footer {
+    clear: both;
+    margin-left: 150px; /* canh cùng chiều với nội dung */
+    background-color: #34495e;
+    color: white;
+    text-align: center;
+    padding: 16px;
+}
+

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Layout - Department Leader</title>
+    
+    <!-- Include the problematic style.css first -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Then our department-leader.css should override -->
+    <link rel="stylesheet" href="css/department-leader.css">
+    
+    <style>
+        /* Additional debug styles */
+        body {
+            border: 2px solid red !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        .department-leader-container {
+            border: 3px solid blue !important;
+        }
+        
+        .sidebar {
+            border: 4px solid green !important;
+        }
+        
+        /* Debug info */
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            font-size: 12px;
+            z-index: 9999;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-info">
+        <div>Body margin: <span id="bodyMargin"></span></div>
+        <div>Container margin: <span id="containerMargin"></span></div>
+        <div>Sidebar left: <span id="sidebarLeft"></span></div>
+        <div>Window width: <span id="windowWidth"></span></div>
+    </div>
+
+    <div class="department-leader-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-users-gear"></i>
+                    <span>Test Sidebar</span>
+                </div>
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li class="menu-item active">
+                    <a href="#" class="menu-link">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div class="header-left">
+                    <h1>Test Layout</h1>
+                    <p>Kiểm tra xem sidebar có sát mép trái không</p>
+                </div>
+            </header>
+            
+            <div style="padding: 20px;">
+                <h2>Test Content</h2>
+                <p>Nếu sidebar sát mép trái thì layout đã đúng.</p>
+                <p>Nếu vẫn còn khoảng trắng bên trái sidebar thì cần điều chỉnh thêm.</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function updateDebugInfo() {
+            const body = document.body;
+            const container = document.querySelector('.department-leader-container');
+            const sidebar = document.querySelector('.sidebar');
+            
+            const bodyStyle = window.getComputedStyle(body);
+            const containerStyle = window.getComputedStyle(container);
+            const sidebarStyle = window.getComputedStyle(sidebar);
+            
+            document.getElementById('bodyMargin').textContent = bodyStyle.marginLeft;
+            document.getElementById('containerMargin').textContent = containerStyle.marginLeft;
+            document.getElementById('sidebarLeft').textContent = sidebarStyle.left;
+            document.getElementById('windowWidth').textContent = window.innerWidth + 'px';
+        }
+        
+        // Update debug info every second
+        setInterval(updateDebugInfo, 1000);
+        updateDebugInfo();
+        
+        // Update on resize
+        window.addEventListener('resize', updateDebugInfo);
+    </script>
+</body>
+</html>
