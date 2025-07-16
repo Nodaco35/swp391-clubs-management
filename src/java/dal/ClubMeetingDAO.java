@@ -17,12 +17,13 @@ public class ClubMeetingDAO {
 
     public static List<ClubMeeting> findByUserID(String userID) {
         String sql = """
-                     SELECT DISTINCT cm.*, c.ClubName, c.ClubImg
-                     FROM ClubMeeting cm
-                     JOIN Clubs c ON cm.ClubID = c.ClubID
-                     JOIN UserClubs uc ON c.ClubID = uc.ClubID
-                     WHERE uc.UserID = ?
-                       AND cm.StartedTime >= NOW() - INTERVAL 1 HOUR;""";
+                     SELECT distinct  cm.*, cmp.*, c.ClubName, c.ClubImg
+                                          FROM ClubMeeting cm
+                                           Join clubmeetingparticipants cmp on cm.ClubMeetingID = cmp.ClubMeetingID
+                                          JOIN Clubs c ON cm.ClubID = c.ClubID
+                                          JOIN UserClubs uc ON c.ClubID = uc.ClubID
+                                          WHERE uc.UserID = ? and uc.ClubDepartmentID = cmp.ClubDepartmentID
+                                            AND cm.StartedTime >= NOW() - INTERVAL 1 HOUR;""";
         List<ClubMeeting> findByUserID = new ArrayList<>();
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
@@ -47,14 +48,15 @@ public class ClubMeetingDAO {
         }
         return findByUserID;
     }
-
+ 
     public static int countByUserID(String userID) {
         String sql = """
-                     SELECT count(distinct clubmeetingID) as total
-                                          FROM ClubMeeting cm 
-                                          JOIN UserClubs uc ON cm.ClubID = uc.ClubID 
-                                          WHERE uc.UserID = ?
-                                          AND cm.StartedTime > CURRENT_TIMESTAMP""";
+                     SELECT count(distinct cm.clubmeetingID) as total
+                                                               FROM ClubMeeting cm 
+                                                               Join clubmeetingparticipants cmp on cm.ClubMeetingID = cmp.ClubMeetingID
+                                                                JOIN UserClubs uc ON cm.ClubID = uc.ClubID
+                                                               WHERE uc.UserID = ?  and uc.ClubDepartmentID = cmp.ClubDepartmentID
+                                                               AND cm.StartedTime >= NOW() - INTERVAL 1 HOUR;""";
         int count = 0;
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
@@ -335,20 +337,20 @@ public class ClubMeetingDAO {
         String sql2 = """
                       DELETE FROM `clubmanagementsystem`.`clubmeetingparticipants`
                       WHERE ClubMeetingID = ?;""";
-        
+
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql1);
             PreparedStatement ps2 = DBContext.getConnection().prepareStatement(sql2);
             ps.setObject(1, meetingId);
             ps2.setObject(1, meetingId);
-            
+
             ps.executeUpdate();
             ps2.executeUpdate();
             return true;
         } catch (SQLException e) {
             return false;
         }
-        
+
     }
 
 }

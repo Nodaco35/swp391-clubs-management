@@ -111,12 +111,7 @@ public class ChairmanClubMeetingController extends HttpServlet {
         request.getRequestDispatcher("/view/student/chairman/clubmeeting.jsp").forward(request, response);
 
     }
-    public static void main(String[] args) {
-       List<UserClub> members = UserClubDAO.findByClubIDAndDepartmentId(1);
-        for (UserClub member : members) {
-            System.out.println(member.getUserID());
-        }
-    }
+    
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

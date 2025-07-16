@@ -98,17 +98,7 @@ public class MyClubController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String action = request.getParameter("action");
         
-        if (action.equals("submitCreateMeeting")) {
-            createClubMeeting(request, response);
-        }
-        if (action.equals("submitUpdateMeeting")) {
-            submitUpdateMeeting(request, response);
-        }
-        if (action.equals("deleteClubMeeting")) {
-            deleteClubMeeting(request, response);
-        }
     }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
