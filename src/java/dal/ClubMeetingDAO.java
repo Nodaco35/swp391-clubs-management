@@ -247,7 +247,7 @@ public class ClubMeetingDAO {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, clubID);
             ResultSet rs = ps.executeQuery();
-            while (rs.next()) {      
+            while (rs.next()) {
                 cm.setClubMeetingID(rs.getInt("ClubMeetingID"));
             }
         } catch (SQLException e) {
@@ -272,15 +272,66 @@ public class ClubMeetingDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
+
     }
 
-    public static boolean updateMeeting(ClubMeeting meeting) {
+    public static boolean updateMeeting(ClubMeeting meeting, List<String> participants) {
+        String sqlUpdatemeeting = """
+                                  UPDATE `clubmanagementsystem`.`clubmeeting`
+                                  SET
+                                  
+                                  
+                                  `MeetingTitle` =?,
+                                  
+                                  `URLMeeting` = ?,
+                                  `StartedTime` = ?,
+                                  `Document` = ?
+                                  WHERE `ClubMeetingID` = ?;""";
+        String sqlDlOldPar = """
+                             DELETE FROM `clubmanagementsystem`.`clubmeetingparticipants`
+                             WHERE ClubMeetingID=?;""";
+        String sqlNewPar = """
+                           INSERT INTO `clubmanagementsystem`.`clubmeetingparticipants`
+                                                (`ClubMeetingID`,
+                                                `ClubDepartmentID`)
+                                                VALUES
+                                                (?,
+                                                ?);""";
+        String sql4 = "";
+
+        try {
+            PreparedStatement ps1 = DBContext.getConnection().prepareStatement(sqlUpdatemeeting);
+            PreparedStatement ps2 = DBContext.getConnection().prepareStatement(sqlDlOldPar);
+            PreparedStatement ps3 = DBContext.getConnection().prepareStatement(sqlNewPar);
+            PreparedStatement ps4 = DBContext.getConnection().prepareStatement(sql4);
+
+            ps1.setObject(1, meeting.getMeetingTitle());
+            ps1.setObject(2, meeting.getURLMeeting());
+            ps1.setObject(3, meeting.getStartedTime());
+            ps1.setObject(4, meeting.getDocument());
+            ps1.setObject(5, meeting.getClubMeetingID());
+            boolean updated = ps1.executeUpdate() > 0;
+            if (updated) {
+                ps2.setObject(1, meeting.getClubMeetingID());
+                ps2.executeUpdate();
+                    if (!participants.isEmpty()) {
+                        for (String clubmeetingid : participants) {
+                            ps3.setObject(1, meeting.getClubMeetingID());
+                            ps3.setObject(2, String.valueOf(clubmeetingid));
+                        }
+                        ps3.executeUpdate();
+                }
+            }
+
+        } catch (SQLException e) {
+            return false;
+        }
+
         return true;
     }
 
     public static boolean deleteMeeting(int meetingId) {
         return true;
     }
-    
+
 }

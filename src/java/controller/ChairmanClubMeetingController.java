@@ -65,7 +65,7 @@ public class ChairmanClubMeetingController extends HttpServlet {
                 List<String> participants = ClubMeetingDAO.getClubDepartmentID(meetingId);
                 meeting.setParticipantClubDepartmentIds(participants);
                 request.setAttribute("editMeeting", meeting);
-                
+
             }
             meetings = ClubMeetingDAO.findByClubID(club.getClubID(), search, page, pageSize);
 
@@ -112,7 +112,6 @@ public class ChairmanClubMeetingController extends HttpServlet {
 
     }
 
-   
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -133,7 +132,7 @@ public class ChairmanClubMeetingController extends HttpServlet {
             String documentLink = request.getParameter("documentLink");
             String startedTime = request.getParameter("startedTime");
             String[] participantIds = request.getParameterValues("participants");
-            
+
             boolean selectAll = "true".equals(request.getParameter("selectAll"));
 
             if (title == null || title.trim().isEmpty()) {
@@ -165,14 +164,15 @@ public class ChairmanClubMeetingController extends HttpServlet {
             }
 
             List<String> participants = new ArrayList<>();
-            if (selectAll) {
-                List<ClubDepartment> departmentMembers = ClubDepartmentDAO.findByClubId(club.getClubID());
-                for (ClubDepartment member : departmentMembers) {
-                    participants.add(member.getDepartmentName());
-                }
-            } else if (participantIds != null) {
+            if (participantIds != null) {
                 for (String id : participantIds) {
                     participants.add(id);
+                }
+
+            } else {
+                List<ClubDepartment> departmentMembers = ClubDepartmentDAO.findByClubId(club.getClubID());
+                for (ClubDepartment member : departmentMembers) {
+                    participants.add(String.valueOf(member.getClubDepartmentId()));
                 }
             }
 
@@ -206,9 +206,14 @@ public class ChairmanClubMeetingController extends HttpServlet {
                     }
 
                     for (UserClub member : members) {
+                        if (participants.isEmpty()) {
+                            request.setAttribute("error", "Tạo cuộc họp thất bại");
+                            request.setAttribute("showAddForm", true);
+                            doGet(request, response);
+                            return;
+                        }
                         if (participants.contains(String.valueOf(member.getClubDepartmentID()))) {
-                            NotificationDAO.sentToPerson(user.getUserID(), member.getUserID(), "Cuộc họp mới", content);
-
+                            NotificationDAO.sentToPerson1(user.getUserID(), member.getUserID(), "Cuộc họp mới", content, "high");
                         }
                     }
 
@@ -229,7 +234,8 @@ public class ChairmanClubMeetingController extends HttpServlet {
                     meeting.setDocument(documentLink);
                     meeting.setStartedTime(java.sql.Timestamp.valueOf(formattedStartedTime));
 
-                    if (ClubMeetingDAO.updateMeeting(meeting)) {
+                    if (ClubMeetingDAO.updateMeeting(meeting, participants)) {
+
                         List<UserClub> members = UserClubDAO.findByClubIDAndDepartmentId(club.getClubID());
                         String content;
                         if (documentLink.isEmpty()) {
@@ -242,8 +248,7 @@ public class ChairmanClubMeetingController extends HttpServlet {
 
                         for (UserClub member : members) {
                             if (participants.contains(String.valueOf(member.getClubDepartmentID()))) {
-                                NotificationDAO.sentToPerson(user.getUserID(), member.getUserID(), "Thay đổi về cuộc họp", content);
-
+                                NotificationDAO.sentToPerson1(user.getUserID(), member.getUserID(), "Thay đổi về cuộc họp", content, "high");
                             }
                         }
                         request.setAttribute("message", "Cập nhật cuộc họp thành công và đã gửi thông báo đến các thành viên!");
