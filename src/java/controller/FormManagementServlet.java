@@ -2,6 +2,7 @@
 
 package controller;
 
+import dal.ApplicationFormDAO;
 import dal.ApplicationFormTemplateDAO;
 import dal.ApplicationResponseDAO;
 import dal.UserClubDAO;
@@ -20,7 +21,7 @@ import java.util.logging.Logger;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
-import models.ApplicationFormTemplate;
+import models.ApplicationForm;
 import models.UserClub;
 
 /**
@@ -31,13 +32,16 @@ public class FormManagementServlet extends HttpServlet {
     private ApplicationFormTemplateDAO templateDAO;
     private ApplicationResponseDAO responseDAO;
     private UserClubDAO userClubDAO;
-    private static final Logger LOGGER = Logger.getLogger(FormBuilderServlet.class.getName());
+    private ApplicationFormDAO applicationFormDAO;
+    private static final Logger LOGGER = Logger.getLogger(FormManagementServlet.class.getName());
 
     @Override
     public void init() {
         templateDAO = new ApplicationFormTemplateDAO();
         responseDAO = new ApplicationResponseDAO();
         userClubDAO = new UserClubDAO();
+        applicationFormDAO = new ApplicationFormDAO();
+        LOGGER.info("FormManagementServlet initialized");
     }    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
@@ -70,14 +74,23 @@ public class FormManagementServlet extends HttpServlet {
 
             // Kiểm tra quyền truy cập trong club cụ thể (chỉ cho roleId 1-3)
             UserClub userClub = userClubDAO.getUserClubManagementRole(userId, clubId);
+            LOGGER.log(Level.INFO, "Kiểm tra quyền truy cập cho user {0} trong club {1}: {2}", 
+                      new Object[]{userId, clubId, userClub != null ? "Có quyền" : "Không có quyền"});
+            
             if (userClub == null) {
                 response.sendRedirect(request.getContextPath() + "/myclub?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền quản lý form.", StandardCharsets.UTF_8.name()));
                 return;
             }            
             session.setAttribute("userClub", userClub);
-            // Use the templateDAO already initialized
+            
+            LOGGER.log(Level.INFO, "form for clubId: {0}", clubId);
+            
+            //Danh sách form đã lưu và đã xuất bản
             List<Map<String, Object>> savedForms = templateDAO.getFormsByClubAndStatus(clubId, false);
+            LOGGER.log(Level.INFO, "Number of savedForms: {0}", savedForms != null ? savedForms.size() : 0);
+            
             List<Map<String, Object>> publishedForms = templateDAO.getFormsByClubAndStatus(clubId, true);
+            LOGGER.log(Level.INFO, "Số lượng publishedForms đã lấy: {0}", publishedForms != null ? publishedForms.size() : 0);
 
         request.setAttribute("savedForms", savedForms);
         request.setAttribute("publishedForms", publishedForms);
@@ -88,7 +101,17 @@ public class FormManagementServlet extends HttpServlet {
                 .forward(request, response);
 
         } catch (SQLException e) {
-             e.printStackTrace();            
+             LOGGER.log(Level.SEVERE, "SQL Exception in FormManagementServlet", e);
+             e.printStackTrace();
+            
+             // In chi tiết stack trace để debug
+             StringBuilder stackTrace = new StringBuilder();
+             for (StackTraceElement element : e.getStackTrace()) {
+                 stackTrace.append(element.toString()).append("\n");
+                 LOGGER.log(Level.SEVERE, "StackTrace: {0}", element.toString());
+             }
+             LOGGER.log(Level.SEVERE, "SQL Exception complete stack trace: {0}", stackTrace.toString());
+            
             // Encode error message for URL
             String errorMessage = "Lỗi SQL: " + e.getMessage();
             try {
@@ -121,47 +144,31 @@ public class FormManagementServlet extends HttpServlet {
             return;
         }
         String action = request.getParameter("action");
-        String templateIdStr = request.getParameter("templateId");
-        
-        if (templateIdStr == null || templateIdStr.trim().isEmpty()) {
-            sendJsonResponse(response, false, "Template ID không hợp lệ.");
+        String formIdStr = request.getParameter("formId");
+        if (formIdStr == null || formIdStr.trim().isEmpty()) {
+            sendJsonResponse(response, false, "Form ID không hợp lệ.");
             return;
         }
-
-        int templateId;
-        try {
-                templateId = Integer.parseInt(templateIdStr);
-            } catch (NumberFormatException e) {
-                sendJsonResponse(response, false, "Template ID không hợp lệ.");
-                return;
-            }
-            // Lấy title của form từ templateId
-            ApplicationFormTemplate template = templateDAO.getTemplateById(templateId);
-            if (template == null) {
-                sendJsonResponse(response, false, "Form không tồn tại.");
-                return;
-            }
-            String title = template.getTitle();
-
-            // Kiểm tra quyền sở hữu
-            if (template.getClubId() != userClub.getClubID()) {
-                sendJsonResponse(response, false, "Bạn không có quyền thao tác với form này.");
-                return;
-            }
-
+        int formId = Integer.parseInt(formIdStr);
+        ApplicationFormDAO formDAO = new ApplicationFormDAO();
+        ApplicationForm form = formDAO.getFormById(formId);
+        if (form == null || form.getClubId() != userClub.getClubID()) {
+            sendJsonResponse(response, false, "Bạn không có quyền thao tác với form này.");
+            return;
+        }
             boolean success = false;
             String message = "";
             switch (action) {
                 case "publish":
-                    success = templateDAO.publishFormsByTitle(title);
+                    success = applicationFormDAO.publishFormById(formId);
                     message = success ? "Form đã được xuất bản thành công!" : "Không thể xuất bản form.";
                     break;
                 case "unpublish":
-                    success = templateDAO.unpublishFormsByTitle(title);
+                    success = applicationFormDAO.unpublishFormById(formId);
                     message = success ? "Form đã được hủy xuất bản thành công!" : "Không thể hủy xuất bản form.";
                     break;
                 case "delete":
-                    success = templateDAO.deleteFormsByTitle(title);
+                    success = applicationFormDAO.deleteFormById(formId);
                     message = success ? "Form đã được xóa thành công!" : "Không thể xóa form.";
                     break;
                 default:

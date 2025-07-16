@@ -459,11 +459,11 @@
     <c:if test="${not empty param.templateId}">
         <input type="hidden" name="editingTemplateId" value="${param.templateId}" />
     </c:if>
+    <%-- Truyền editingFormId nếu đang ở chế độ chỉnh sửa --%>
+    <c:if test="${not empty editingFormId}">
+        <input type="hidden" name="editingFormId" value="${fn:escapeXml(editingFormId)}">
+    </c:if>
 </form>
-<%-- Truyền editingTemplateId nếu đang ở chế độ chỉnh sửa --%>
-<c:if test="${not empty editingTemplateId}">
-    <input type="hidden" name="editingTemplateId" value="${fn:escapeXml(editingTemplateId)}">
-</c:if>
 </form>
 
 <script src="${pageContext.request.contextPath}/js/formBuilder.js"></script>

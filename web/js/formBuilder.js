@@ -27,6 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const formTypeHidden = document.getElementById("formTypeHidden")
   const questionsHidden = document.getElementById("questionsHidden")
   const editingTemplateIdInput = document.querySelector('input[name="editingTemplateId"]')
+  const editingFormId = document.querySelector('input[name="editingFormId"]')
 
   const questionTemplateHtml = document.getElementById("questionTemplate")?.innerHTML
   const optionTemplateHtml = document.getElementById("optionTemplate")?.innerHTML
@@ -106,6 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
       url.searchParams.delete("error")
       url.searchParams.delete("action")
       url.searchParams.delete("message")
+      // Không xóa formId và clubId để duy trì trạng thái chỉnh sửa
       window.history.replaceState({}, document.title, url.toString())
     }, 5000)
   }
@@ -118,6 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
       url.searchParams.delete("error")
       url.searchParams.delete("action")
       url.searchParams.delete("message")
+      // Không xóa formId và clubId để duy trì trạng thái chỉnh sửa
       window.history.replaceState({}, document.title, url.toString())
     }, 7000)
   }
@@ -239,22 +242,22 @@ document.addEventListener("DOMContentLoaded", () => {
         !formTypeHidden ||
         !questionsHidden
     ) {
-      console.error("Lỗi: Thiếu một hoặc nhiều element của form ẩn để submit.")
-      alert("Đã có lỗi xảy ra, không thể gửi form. Vui lòng thử lại.")
-      return
+      console.error("Lỗi: Thiếu một hoặc nhiều element của form ẩn để submit.");
+      alert("Đã có lỗi xảy ra, không thể gửi form. Vui lòng thử lại.");
+      return;
     }
     if (formTitleInput.value.trim() === "") {
-      alert("Tiêu đề form không được để trống!")
-      formTitleInput.focus()
-      return
+      alert("Tiêu đề form không được để trống!");
+      formTitleInput.focus();
+      return;
     }
-    const formTypeVal = formTypeSelect.value
+    const formTypeVal = formTypeSelect.value;
     if (formTypeVal === "") {
       const formTypeError = document.getElementById("formTypeError")
       if (formTypeError) formTypeError.style.display = "block"
       alert("Vui lòng chọn loại form!")
       formTypeSelect.focus()
-      return
+      return;
     } else {
       const formTypeError = document.getElementById("formTypeError")
       if (formTypeError) formTypeError.style.display = "none"
@@ -263,8 +266,12 @@ document.addEventListener("DOMContentLoaded", () => {
     actionInput.value = actionType
     formTitleHidden.value = formTitleInput.value
     formTypeHidden.value = formTypeVal
-    const formData = getFormData()
-    questionsHidden.value = JSON.stringify(formData)
+    const formData = getFormData();
+    if (formData.length === 0) {
+        alert("Form phải có ít nhất một câu hỏi!");
+        return;
+    }
+    questionsHidden.value = JSON.stringify(formData);
 
     console.log(
         "formBuilder.js: Gửi form. Action:",
@@ -273,14 +280,13 @@ document.addEventListener("DOMContentLoaded", () => {
         formTitleHidden.value,
         "Loại Form:",
         formTypeHidden.value,
-    )
-    console.log("formBuilder.js: Dữ liệu câu hỏi (JSON):", questionsHidden.value)
+    );
+    console.log("formBuilder.js: Dữ liệu câu hỏi (JSON):", questionsHidden.value);
     console.log(
-        "formBuilder.js: EditingTemplateID (nếu có):",
-        editingTemplateIdInput ? editingTemplateIdInput.value : "Không có",
-    )
-
-    formBuilderForm.submit()
+        "formBuilder.js: EditingFormID (nếu có):",
+        editingFormId ? editingFormId.value : "Không có",
+    );
+    formBuilderForm.submit();
   }
 
   function addNewQuestion(type = "text") {
@@ -881,8 +887,9 @@ function toggleEventField(selectElement) {
   function protectRequiredQuestions() {
     if (!questionsList) return;
     
-    // Lấy loại form hiện tại
-    const formType = formTypeSelect ? formTypeSelect.value : "member";
+    // Lấy loại form hiện tại - sửa lỗi formTypeSelect undefined
+    const formTypeElement = document.getElementById("formType");
+    const formType = formTypeElement ? formTypeElement.value : "member";
     
     const allCards = Array.from(questionsList.querySelectorAll(".question-card"));
     
