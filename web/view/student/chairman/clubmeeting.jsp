@@ -249,14 +249,18 @@
                                     <div id="participantsList" class="${editMeeting != null && editMeeting.participantClubDepartmentIds.size() == departmentMembers.size() ? 'd-none' : 'd-block'}">
                                         <c:forEach var="member" items="${departmentMembers}">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="participants" 
-                                                       value="${member.clubDepartmentId}" id="participant_${member.clubDepartmentId}"
-                                                       ${editMeeting != null && editMeeting.participantClubDepartmentIds.contains(member.departmentName) ? 'checked' : ''}>
+                                                <input class="form-check-input"
+                                                       type="checkbox"
+                                                       name="participants"
+                                                       value="${member.clubDepartmentId}"
+                                                       id="participant_${member.clubDepartmentId}"
+                                                       <c:if test="${editMeeting != null && editMeeting.participantClubDepartmentIds.contains(member.clubDepartmentId.toString())}">checked</c:if>>
                                                 <label class="form-check-label" for="participant_${member.clubDepartmentId}">
                                                     ${member.departmentName}
                                                 </label>
-                                            </div>  
+                                            </div>
                                         </c:forEach>
+
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-end">

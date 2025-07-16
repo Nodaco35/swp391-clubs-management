@@ -187,7 +187,7 @@ public class ClubMeetingDAO {
         return total;
     }
 
-    public static List<String> getClubDepartmentName(int meetingId) {
+    public static List<String> getClubDepartmentID(int meetingId) {
         List<String> getClubDepartmentID = new ArrayList();
         String sql = """
                      SELECT cmp.ClubMeetingID,
@@ -201,7 +201,7 @@ public class ClubMeetingDAO {
             ps.setObject(1, meetingId);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {                
-                getClubDepartmentID.add(rs.getString("DepartmentName"));
+                getClubDepartmentID.add(rs.getString("ClubDepartmentID"));
                
             }
         } catch (Exception e) {
