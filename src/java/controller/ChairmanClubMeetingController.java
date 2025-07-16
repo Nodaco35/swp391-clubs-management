@@ -178,7 +178,7 @@ public class ChairmanClubMeetingController extends HttpServlet {
 
             try {
 
-                String formattedStartedTime = startedTime.replace("T", " ").substring(0, 16);
+                String formattedStartedTime = startedTime.replace("T", " ") + ":00";
 
                 if ("add".equals(action)) {
                     boolean check = ClubMeetingDAO.createMeeting(club.getClubID(), title, urlMeeting, documentLink, formattedStartedTime);
@@ -229,11 +229,13 @@ public class ChairmanClubMeetingController extends HttpServlet {
                     }
 
                     ClubMeeting meeting = new ClubMeeting();
+                    meeting.setClubID(clubid);
+                    meeting.setClubMeetingID(meetingId);
                     meeting.setMeetingTitle(title);
                     meeting.setURLMeeting(urlMeeting);
                     meeting.setDocument(documentLink);
                     meeting.setStartedTime(java.sql.Timestamp.valueOf(formattedStartedTime));
-
+                    
                     if (ClubMeetingDAO.updateMeeting(meeting, participants)) {
 
                         List<UserClub> members = UserClubDAO.findByClubIDAndDepartmentId(club.getClubID());

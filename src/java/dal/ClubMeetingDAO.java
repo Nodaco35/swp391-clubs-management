@@ -297,13 +297,11 @@ public class ClubMeetingDAO {
                                                 VALUES
                                                 (?,
                                                 ?);""";
-        String sql4 = "";
 
         try {
             PreparedStatement ps1 = DBContext.getConnection().prepareStatement(sqlUpdatemeeting);
             PreparedStatement ps2 = DBContext.getConnection().prepareStatement(sqlDlOldPar);
             PreparedStatement ps3 = DBContext.getConnection().prepareStatement(sqlNewPar);
-            PreparedStatement ps4 = DBContext.getConnection().prepareStatement(sql4);
 
             ps1.setObject(1, meeting.getMeetingTitle());
             ps1.setObject(2, meeting.getURLMeeting());
@@ -314,20 +312,20 @@ public class ClubMeetingDAO {
             if (updated) {
                 ps2.setObject(1, meeting.getClubMeetingID());
                 ps2.executeUpdate();
-                    if (!participants.isEmpty()) {
-                        for (String clubmeetingid : participants) {
-                            ps3.setObject(1, meeting.getClubMeetingID());
-                            ps3.setObject(2, String.valueOf(clubmeetingid));
-                        }
+                if (!participants.isEmpty()) {
+                    for (String clubmeetingid : participants) {
+                        ps3.setObject(1, meeting.getClubMeetingID());
+                        ps3.setObject(2, String.valueOf(clubmeetingid));
                         ps3.executeUpdate();
+                    }
+
                 }
             }
-
+            return true;
         } catch (SQLException e) {
             return false;
         }
 
-        return true;
     }
 
     public static boolean deleteMeeting(int meetingId) {
