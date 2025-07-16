@@ -169,6 +169,10 @@
         <servlet-name>ApprovalAgendaServlet</servlet-name>
         <servlet-class>controller.ApprovalAgendaServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>ChairmanClubMeetingController</servlet-name>
+        <servlet-class>controller.ChairmanClubMeetingController</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ClubsServlet</servlet-name>
         <url-pattern>/clubs</url-pattern>
@@ -359,6 +363,10 @@
     <servlet-mapping>
         <servlet-name>RecruitmentDetailServlet</servlet-name>
         <url-pattern>/recruitment/recruitmentDetail/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ChairmanClubMeetingController</servlet-name>
+        <url-pattern>/chairman-page/clubmeeting</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>
