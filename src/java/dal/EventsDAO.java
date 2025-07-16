@@ -1062,14 +1062,7 @@ public class EventsDAO {
             e.printStackTrace();
         }
     }
-
-
-
-
-
-
-
-
+    
     public List<Events> getUpcomingEvents(int limit) {
         List<Events> events = new ArrayList<>();
         Connection conn = null;
@@ -1092,7 +1085,8 @@ public class EventsDAO {
             while (rs.next()) {
                 Events event = new Events();
                 event.setEventID(rs.getInt("EventID"));
-                event.setEventName(rs.getString("EventName"));
+                event.setEventName(rs.getString("EventName"));   
+                event.setEventImg(rs.getString("EventImg"));
                 event.setDescription(rs.getString("Description"));
                 event.setEventDate(rs.getTimestamp("EventDate"));
                 event.setClubID(rs.getInt("ClubID"));

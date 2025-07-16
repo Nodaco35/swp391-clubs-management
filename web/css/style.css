@@ -573,7 +573,7 @@ button, .btn {
 }
 
 .event-image {
-    height: 200px;
+    height: 400px;
 }
 
 .event-image img {
@@ -697,3 +697,12 @@ html, body {
 .container {
     flex: 1;
 }
+.club-card:hover{
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(34, 40, 49, 0.3);
+}
+
+.club-card.show {
+    animation: fadeIn 0.5s ease-in;
+}
+
