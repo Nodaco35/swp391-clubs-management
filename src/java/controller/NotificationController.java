@@ -116,7 +116,15 @@ public class NotificationController extends HttpServlet {
     }
 
     private void delete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        Integer id = Integer.parseInt(request.getParameter("id"));
+        String error, msg;
+        int id = Integer.parseInt(request.getParameter("id"));
+        Notification noti = NotificationDAO.findByNotificationID(id);
+        if (noti.getPrioity().equalsIgnoreCase("high")) {
+            request.setAttribute("error", "Không thể xóa tin nhắn quan trọng!");
+            myNotification(request, response);
+            return;
+        }
+        request.setAttribute("msg", "Đã xóa thông báo!");
         NotificationDAO.delete(id);
         myNotification(request, response);
     }
