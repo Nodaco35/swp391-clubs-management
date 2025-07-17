@@ -55,7 +55,7 @@ public class DepartmentDashboardServlet extends HttpServlet {
            
             //mới đức
             boolean accessFinancial = false;
-            if (dashboardDAO.isDepartmentLeaderIndoingoai(currentUser.getUserID())) {
+            if (dashboardDAO.isDepartmentLeaderIndoingoai(currentUser.getUserID(), clubID)) {
                 accessFinancial = true;
             }
             session.setAttribute("isAccess", accessFinancial);

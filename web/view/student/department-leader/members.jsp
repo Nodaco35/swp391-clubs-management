@@ -89,7 +89,7 @@
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb mb-0">
                                     <li class="breadcrumb-item">
-                                        <a href="${pageContext.request.contextPath}/department-dashboard" class="text-decoration-none">
+                                        <a href="${pageContext.request.contextPath}/department-dashboard?clubID=${clubID}" class="text-decoration-none">
                                             Dashboard
                                         </a>
                                     </li>

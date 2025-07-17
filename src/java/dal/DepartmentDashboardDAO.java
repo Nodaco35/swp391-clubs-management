@@ -229,17 +229,17 @@ public class DepartmentDashboardDAO {    /**
         return 0;
     }
     
-     public boolean isDepartmentLeaderIndoingoai(String userId) {
+     public boolean isDepartmentLeaderIndoingoai(String userId, int clubID) {
         String sql = """
-                     SELECT uc.ClubDepartmentID
-                                 FROM UserClubs uc
-                                 Join clubdepartments cd on uc.ClubID = cd.ClubID
-                                 WHERE uc.UserID = ? AND uc.RoleID = 3 AND uc.IsActive = 1 AND cd.DepartmentID=6""";
+                     SELECT  uc.ClubDepartmentID
+                     FROM UserClubs uc
+                     WHERE uc.UserID = ? AND uc.RoleID = 3 AND uc.IsActive = 1 AND uc.ClubDepartmentID=6 and uc.ClubID = ?""";
         
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, userId);
+            ps.setObject(2, clubID);
             ResultSet rs = ps.executeQuery();
             
             return rs.next(); // Trả về true nếu tìm thấy ít nhất 1 record

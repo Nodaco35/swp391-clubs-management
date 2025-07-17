@@ -5,12 +5,14 @@
 package controller;
 
 import dal.DepartmentDashboardDAO;
+import dal.PermissionDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 import models.*;
 
 public class DepartmentFinancialServlet extends HttpServlet {
@@ -21,7 +23,8 @@ public class DepartmentFinancialServlet extends HttpServlet {
     public void init() throws ServletException {
         dashboardDAO = new DepartmentDashboardDAO();
     }
-
+    
+  
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -31,7 +34,7 @@ public class DepartmentFinancialServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-        if (!dashboardDAO.isDepartmentLeaderIndoingoai(user.getUserID())) {
+        if (!dashboardDAO.isDepartmentLeaderIndoingoai(user.getUserID(), clubID)) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập trang này");
             return;
         }
