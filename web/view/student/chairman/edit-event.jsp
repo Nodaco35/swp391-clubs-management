@@ -218,12 +218,19 @@
 				</div>
 
 				<div class="form-group">
-					<label for="eventType"><i class="fas fa-eye"></i> Loại sự kiện</label>
-					<select id="eventType" name="eventType">
-						<option value="public" ${event.isPublic() ? 'selected' : ''}>Công khai</option>
-						<option value="private" ${!event.isPublic() ? 'selected' : ''}>Riêng tư (CLB)</option>
-					</select>
+					<label><i class="fas fa-eye"></i> Loại sự kiện</label>
+					<div>
+						<label for="publicEvent">
+							<input type="radio" id="publicEvent" name="eventType" value="public" ${event.isPublic() ? 'checked' : ''}> Công khai
+						</label>
+					</div>
+					<div>
+						<label for="privateEvent">
+							<input type="radio" id="privateEvent" name="eventType" value="private" ${!event.isPublic() ? 'checked' : ''}> Riêng tư (CLB)
+						</label>
+					</div>
 				</div>
+
 
 				<div class="form-group">
 					<label for="eventLocation"><i class="fas fa-building"></i> Địa điểm *</label>
