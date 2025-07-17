@@ -156,7 +156,7 @@
 	<div class="modal-content">
 		<c:if test="${not empty sessionScope.errorMessage}">
 			<div class="error-message" style="color: red">${sessionScope.errorMessage}</div>
-			<c:remove var="successMsg" scope="session" />
+			<c:remove var="successMsg" scope="session"/>
 
 		</c:if>
 		<c:if test="${not empty requestScope.errorMessage}">
@@ -165,7 +165,7 @@
 		</c:if>
 		<c:if test="${not empty sessionScope.successMsg}">
 			<div class="error-message" style="color: green">${sessionScope.successMsg}</div>
-			<c:remove var="successMsg" scope="session" />
+			<c:remove var="successMsg" scope="session"/>
 		</c:if>
 		<div class="modal-header">
 			<h3 id="modalTitle">Chi tiết sự kiện</h3>
@@ -186,8 +186,23 @@
 
 		<form id="editEventForm" action="edit-event" method="post" enctype="multipart/form-data">
 			<input type="hidden" id="eventID" name="eventID" value="${event.eventID}"/>
+			<div class="form-grid-2">
 
+				<div class="form-group">
+					<label for="eventLocation"><i class="fas fa-building"></i> Địa điểm *</label>
+					<select id="eventLocation" name="eventLocation" required>
+						<option value="">Chọn địa điểm...</option>
+						<c:forEach var="location" items="${locations}">
+							<option value="${location.locationID}"
+								${event.location != null && event.location.locationID == location.locationID ? 'selected' : ''}>
+									${location.locationName}
+							</option>
+						</c:forEach>
+					</select>
+				</div>
+			</div>
 			<div class="form-grid">
+
 				<div class="form-group">
 					<label for="eventName"><i class="fas fa-calendar-alt"></i> Tên sự kiện *</label>
 					<input type="text" id="eventName" name="eventName" required value="${event.eventName}"/>
@@ -220,30 +235,17 @@
 				<div class="form-group">
 					<label><i class="fas fa-eye"></i> Loại sự kiện</label>
 					<div>
-						<label for="publicEvent">
-							<input type="radio" id="publicEvent" name="eventType" value="public" ${event.isPublic() ? 'checked' : ''}> Công khai
+						<label for="publicEvent" style="margin-right: 20px">
+							<input type="radio" id="publicEvent" name="eventType"
+							       value="public" ${event.isPublic() ? 'checked' : ''}> Công khai
 						</label>
-					</div>
-					<div>
 						<label for="privateEvent">
-							<input type="radio" id="privateEvent" name="eventType" value="private" ${!event.isPublic() ? 'checked' : ''}> Riêng tư (CLB)
+							<input type="radio" id="privateEvent" name="eventType"
+							       value="private" ${!event.isPublic() ? 'checked' : ''}> Riêng tư (CLB)
 						</label>
 					</div>
 				</div>
 
-
-				<div class="form-group">
-					<label for="eventLocation"><i class="fas fa-building"></i> Địa điểm *</label>
-					<select id="eventLocation" name="eventLocation" required>
-						<option value="">Chọn địa điểm...</option>
-						<c:forEach var="location" items="${locations}">
-							<option value="${location.locationID}"
-								${event.location != null && event.location.locationID == location.locationID ? 'selected' : ''}>
-									${location.locationName}
-							</option>
-						</c:forEach>
-					</select>
-				</div>
 
 				<!-- Thêm phần upload ảnh -->
 				<div class="form-group full-width">
