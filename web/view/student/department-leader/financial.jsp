@@ -1,6 +1,8 @@
 
 
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html>
     <head>
@@ -103,7 +105,7 @@
                             <div class="stat-icon income">
                                 <i class="fas fa-arrow-trend-up"></i>
                             </div>
-                            <div class="stat-change positive">+12%</div>
+                            <div class="stat-change positive">${compIncomeWithPreTerm}</div>
                         </div>
                         <div class="stat-content">
                             <h3>Tổng thu nhập</h3>
@@ -119,7 +121,7 @@
                             <div class="stat-icon expense">
                                 <i class="fas fa-arrow-trend-down"></i>
                             </div>
-                            <div class="stat-change negative">-8%</div>
+                            <div class="stat-change negative">${compExpensesWithPreTerm}</div>
                         </div>
                         <div class="stat-content">
                             <h3>Tổng chi phí</h3>
@@ -135,7 +137,7 @@
                             <div class="stat-icon balance">
                                 <i class="fas fa-wallet"></i>
                             </div>
-                            <div class="stat-change positive">+5%</div>
+                            <div class="stat-change positive">${compBalanceWithPreTerm}</div>
                         </div>
                         <div class="stat-content">
                             <h3>Số dư hiện tại</h3>
