@@ -173,6 +173,10 @@
         <servlet-name>ChairmanClubMeetingController</servlet-name>
         <servlet-class>controller.ChairmanClubMeetingController</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>DepartmentFinancialServlet</servlet-name>
+        <servlet-class>controller.DepartmentFinancialServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ClubsServlet</servlet-name>
         <url-pattern>/clubs</url-pattern>
@@ -367,6 +371,10 @@
     <servlet-mapping>
         <servlet-name>ChairmanClubMeetingController</servlet-name>
         <url-pattern>/chairman-page/clubmeeting</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DepartmentFinancialServlet</servlet-name>
+        <url-pattern>/department/financial</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>

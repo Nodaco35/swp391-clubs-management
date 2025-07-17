@@ -37,9 +37,9 @@ public class DepartmentDashboardServlet extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập trang này");
                 return;
             }
-            
+      
             int clubID = Integer.parseInt(request.getParameter("clubID"));
-            request.setAttribute("clubID",clubID);
+            session.setAttribute("clubID",clubID);
             
             // Lấy dữ liệu dashboard
             DepartmentDashboard dashboard = dashboardDAO.getCompleteDashboard(currentUser.getUserID());

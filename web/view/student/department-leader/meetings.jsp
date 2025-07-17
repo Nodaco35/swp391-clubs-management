@@ -23,13 +23,13 @@
             </div>
             <ul class="sidebar-menu">
                 <li class="menu-item">
-                    <a href="${pageContext.request.contextPath}/department-dashboard" class="menu-link">
+                    <a href="${pageContext.request.contextPath}/department-dashboard?clubID=${clubID}" class="menu-link">
                         <i class="fas fa-chart-pie"></i>
                         <span>Dashboard</span>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="${pageContext.request.contextPath}/department-members" class="menu-link">
+                    <a href="${pageContext.request.contextPath}/department-members?clubID=${clubID}" class="menu-link">
                         <i class="fas fa-users"></i>
                         <span>Quản lý thành viên</span>
                     </a>
@@ -46,6 +46,12 @@
                         <span>Quản lý cuộc họp</span>
                     </a>
                 </li>
+                <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/department/financial" class="menu-link">
+                            <i class="fa-dollar-sign"></i>
+                            <span>Tài chính</span>
+                        </a>
+                    </li>
                 <li class="menu-item">
                     <a href="${pageContext.request.contextPath}/" class="menu-link">
                         <i class="fas fa-home"></i>
