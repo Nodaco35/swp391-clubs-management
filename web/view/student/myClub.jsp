@@ -8,6 +8,8 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Câu Lạc Bộ Của Tôi - UniClub</title>
+        
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/myClub.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/eventsPage.css">
@@ -53,6 +55,30 @@
                 </aside>
             </aside>
             <main class="ml-64 flex-1 p-6">
+                <c:if test="${not empty message}">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </c:if>
+                <c:if test="${not empty error}">
+                    <div class="modal fade show" id="errorModal" tabindex="-1" style="display: block;" aria-labelledby="errorModalLabel" aria-modal="true" role="dialog">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header bg-danger text-white">
+                                    <h5 class="modal-title" id="errorModalLabel">Lỗi</h5>
+                                    <button type="button" class="btn-close btn-close-white" onclick="closeErrorModal()" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    ${error}
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-danger" onclick="closeErrorModal()">Đóng</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </c:if>
 
                 <div class="container mx-auto px-4 py-8">
                     <section class="mb-10">
@@ -530,6 +556,9 @@
                 });
             });
         });
+        function closeErrorModal() {
+            document.getElementById('errorModal').style.display = 'none';
+        }
 
 
     </script>
