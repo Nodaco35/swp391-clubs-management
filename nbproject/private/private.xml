@@ -3,11 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/E:/Kì_5/SWP391/FixDepartmentmeetingg/swp391-clubs-management/src/java/controller/DepartmentDashboardServlet.java</file>
-            <file>file:/E:/Kì_5/SWP391/FixDepartmentmeetingg/swp391-clubs-management/src/java/dal/DepartmentDashboardDAO.java</file>
             <file>file:/E:/Kì_5/SWP391/FixDepartmentmeetingg/swp391-clubs-management/src/java/controller/DepartmentMeetingServlet.java</file>
-            <file>file:/E:/Kì_5/SWP391/FixDepartmentmeetingg/swp391-clubs-management/src/java/dal/DepartmentMeetingDAO.java</file>
-            <file>file:/E:/Kì_5/SWP391/FixDepartmentmeetingg/swp391-clubs-management/src/java/dal/ClubDAO.java</file>
+            <file>file:/E:/Kì_5/SWP391/FixDepartmentmeetingg/swp391-clubs-management/src/java/dal/DepartmentDashboardDAO.java</file>
+            <file>file:/E:/Kì_5/SWP391/FixDepartmentmeetingg/swp391-clubs-management/src/java/controller/DepartmentDashboardServlet.java</file>
         </group>
     </open-files>
 </project-private>
