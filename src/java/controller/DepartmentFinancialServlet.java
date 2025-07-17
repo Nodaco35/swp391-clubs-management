@@ -45,10 +45,7 @@ public class DepartmentFinancialServlet extends HttpServlet {
             return;
         }
         
-        
-        
         request.getRequestDispatcher("/view/student/department-leader/financial.jsp").forward(request, response);
-        
     }
 
     @Override
