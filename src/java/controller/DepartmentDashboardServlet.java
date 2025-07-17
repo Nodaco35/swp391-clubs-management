@@ -51,6 +51,14 @@ public class DepartmentDashboardServlet extends HttpServlet {
             request.setAttribute("dashboard", dashboard);
             request.setAttribute("currentUser", currentUser);
             request.setAttribute("departmentName", dashboard.getDepartmentName());
+            
+           
+            //mới đức
+            boolean accessFinancial = false;
+            if (dashboardDAO.isDepartmentLeaderIndoingoai(currentUser.getUserID())) {
+                accessFinancial = true;
+            }
+            session.setAttribute("isAccess", accessFinancial);
             // Forward đến JSP
             request.getRequestDispatcher("view/student/department-leader/dashboard.jsp").forward(request, response);
             

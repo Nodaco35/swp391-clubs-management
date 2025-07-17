@@ -47,12 +47,14 @@
                             <span>Quản lý cuộc họp</span>
                         </a>
                     </li>
-                    <li class="menu-item active">
-                        <a href="${pageContext.request.contextPath}/department/financial" class="menu-link">
-                            <i class="fa-dollar-sign"></i>
-                            <span>Tài chính</span>
-                        </a>
-                    </li>
+                    <c:if test="${isAccess}">
+                        <li class="menu-item active">
+                            <a href="${pageContext.request.contextPath}/department/financial" class="menu-link">
+                                <i class="fa-dollar-sign"></i>
+                                <span>Tài chính</span>
+                            </a>
+                        </li>
+                    </c:if>
                     <li class="menu-item">
                         <a href="${pageContext.request.contextPath}/" class="menu-link">
                             <i class="fas fa-home"></i>
@@ -75,10 +77,23 @@
 
 
             <main class="main-content">
-                <div class="page-header">
-                    <h1 class="page-title">Tổng quan tài chính</h1>
-                    <p class="page-description">Theo dõi và quản lý tài chính câu lạc bộ một cách hiệu quả</p>
-                </div>
+                <header class="header mb-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="h3 mb-1">Quản lý tài chính</h1>
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb mb-0">
+                                    <li class="breadcrumb-item">
+                                        <a href="${pageContext.request.contextPath}/department-dashboard?clubID=${clubID}" class="text-decoration-none">
+                                            Dashboard
+                                        </a>
+                                    </li>
+                                    <li class="breadcrumb-item active" aria-current="page">Tài chính</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                </header> 
 
                 <!-- Financial Overview Cards -->
                 <div class="stats-grid">
@@ -204,7 +219,7 @@
                                 <div class="quick-actions-grid">
                                     <form action="${pageContext.request.contextPath}/department/financial">
                                         <button  
-                                                class="action-button income">
+                                            class="action-button income">
                                             <i class="fas fa-plus"></i>
                                             Thêm thu nhập
                                         </button>

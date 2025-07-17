@@ -228,4 +228,24 @@ public class DepartmentDashboardDAO {    /**
         }
         return 0;
     }
+    
+     public boolean isDepartmentLeaderIndoingoai(String userId) {
+        String sql = """
+                     SELECT uc.ClubDepartmentID
+                                 FROM UserClubs uc
+                                 Join clubdepartments cd on uc.ClubID = cd.ClubID
+                                 WHERE uc.UserID = ? AND uc.RoleID = 3 AND uc.IsActive = 1 AND cd.DepartmentID=6""";
+        
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setString(1, userId);
+            ResultSet rs = ps.executeQuery();
+            
+            return rs.next(); // Trả về true nếu tìm thấy ít nhất 1 record
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

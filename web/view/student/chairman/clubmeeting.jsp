@@ -129,7 +129,7 @@
 
                     <li>
                         <a href="${pageContext.request.contextPath}/chairman-page/clubmeeting"
-                           class="nav-item ${currentPath == '/chairman-page/clubmeeting' ? 'active' : ''}">
+                           class="nav-item active">
                             <i class="fas fa-clock"></i> Cuộc họp
                         </a>
                     </li>
