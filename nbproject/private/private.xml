@@ -3,9 +3,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/src/java/controller/DepartmentFinancialServlet.java</file>
-            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/web/view/student/department-leader/financial.jsp</file>
-            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/src/java/dal/IncomeDAO.java</file>
+            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/src/java/dal/FeedbackDAO.java</file>
+            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/src/java/controller/ChairmanClubMeetingController.java</file>
+            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/src/java/dal/FinancialDAO.java</file>
+            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/src/java/controller/DF_MemberIncomeServlet.java</file>
+            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/src/java/dal/NotificationDAO.java</file>
+            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/web/view/student/department-leader/financial-income-member.jsp</file>
         </group>
     </open-files>
 </project-private>

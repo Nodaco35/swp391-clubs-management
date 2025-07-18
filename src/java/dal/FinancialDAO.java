@@ -252,8 +252,8 @@ public class FinancialDAO {
         }
         sql += " ORDER BY mic.ContributionID LIMIT ? OFFSET ?";
 
-        try {
-            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+        try(PreparedStatement ps = DBContext.getConnection().prepareStatement(sql)) {
+            
             int paramIndex = 1;
             ps.setInt(paramIndex++, incomeID);
             if (keyword != null && !keyword.trim().isEmpty()) {
@@ -487,11 +487,6 @@ public class FinancialDAO {
         }
         return l;
     }
-    public static void main(String[] args) {
-        List<MemberIncomeContributions> getUserUnpaidInComeIDs = getUserUnpaidInComeIDs(7);
-        for (MemberIncomeContributions userUnpaidInComeID : getUserUnpaidInComeIDs) {
-            System.out.println("đã gửi cho" + userUnpaidInComeID.getUserID());
-        }
-    }
+    
 }
 

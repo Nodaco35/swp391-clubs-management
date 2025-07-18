@@ -61,6 +61,11 @@ public class DF_MemberIncomeServlet extends HttpServlet {
                 case "complete":
                     if (FinancialDAO.completeIncome(incomeID)) {
                         request.setAttribute("message", "Đã hoàn thành thu phí thành viên!");
+                        incomeID = FinancialDAO.getIncomeIDPending(clubID, term.getTermID());
+                        incomeParam = request.getParameter("incomeID");
+                        if (incomeParam != null && !incomeParam.isEmpty()) {
+                            incomeID = Integer.parseInt(incomeParam);
+                        }
                     } else {
                         request.setAttribute("error", "Không thể hoàn thành thu phí thành viên!");
                     }

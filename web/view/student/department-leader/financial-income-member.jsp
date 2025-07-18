@@ -186,7 +186,7 @@
                                     <input type="hidden" name="keyword" value="${param.keyword}"/>
                                     <input type="hidden" name="status" value="${param.status}"/>
                                     <input type="hidden" name="page" value="${currentPage}"/>
-                                    <button type="submit" class="btn btn-success" onclick="return confirm('Xác nhận hoàn thành thu phí thành viên này?')" ${allPaid ? '' : 'disabled'}>Hoàn thành</button>
+                                    <button type="submit" class="btn btn-success" onclick="return confirm('Xác nhận hoàn thành khoản phí thành viên này?')" ${allPaid ? '' : 'disabled'}>Hoàn thành</button>
                                 </form>
                             </div>
                         </div>
@@ -233,7 +233,7 @@
                                                     <div class="payment-date">
                                                         <c:choose>
                                                             <c:when test="${not empty memberIncome.paidDate}">
-                                                                 ${memberIncome.paidDate}
+                                                                ${memberIncome.paidDate}
                                                             </c:when>
                                                             <c:otherwise>Chưa nộp, hạn cuối: <strong>${memberIncome.dueDate}</strong></c:otherwise>
                                                         </c:choose>
@@ -336,7 +336,7 @@
                                                                 }
 
                                                                 function confirmComplete(incomeID) {
-                                                                    if (confirm('Xác nhận hoàn thành thu phí thành viên này?')) {
+                                                                    if (confirm('Xác nhận hoàn thành khoản phí thành viên này?')) {
                                                                         window.location.href = '${pageContext.request.contextPath}/department/financial/income.member?action=complete&incomeID=' + incomeID;
                                                                     }
                                                                 }
