@@ -19,7 +19,7 @@ public class FinancialDAO {
         BigDecimal getTotalAmount = BigDecimal.ZERO;
         String sql = "SELECT SUM(amount) AS total\n"
                 + "FROM income\n"
-                + "WHERE ClubID = ? AND TermID = ?";
+                + "WHERE ClubID = ? AND TermID = ? and status = 'Đã nhận'";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, clubID);
@@ -62,9 +62,10 @@ public class FinancialDAO {
 
     public static BigDecimal getTotalExpenseAmount(int clubID, String termID) {
         BigDecimal getTotalAmount = BigDecimal.ZERO;
-        String sql = "SELECT SUM(amount) AS total\n"
-                + "                FROM expenses\n"
-                + "                WHERE ClubID = ? AND TermID = ?";
+        String sql = """
+                     SELECT SUM(amount) AS total
+                                     FROM expenses
+                                     WHERE ClubID = ? AND TermID = ? and approved = 1;""";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, clubID);
@@ -75,6 +76,58 @@ public class FinancialDAO {
             }
         } catch (SQLException e) {
             return BigDecimal.ZERO;
+        }
+        return getTotalAmount;
+    }
+
+    public static BigDecimal getTotalIncomeMemberPending(int clubID, String termID) {
+        BigDecimal getTotalAmount = BigDecimal.ZERO;
+        String sql = """
+                     SELECT 
+                         
+                         SUM(mic.Amount) AS TotalPendingAmount
+                     FROM MemberIncomeContributions mic
+                     WHERE mic.TermID = ?
+                     AND mic.ClubID = ?
+                     AND mic.ContributionStatus = 'Pending';""";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setObject(2, clubID);
+            ps.setObject(1, termID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                getTotalAmount = rs.getBigDecimal("TotalPendingAmount");
+            }
+        } catch (SQLException e) {
+            return BigDecimal.ZERO;
+        }
+        return getTotalAmount;
+    }
+
+    public static void main(String[] args) {
+
+    }
+
+    public static int getTotalIncomePersonPending(int clubID, String termID) {
+        int getTotalAmount = 0;
+        String sql = """
+                     SELECT 
+                          COUNT(DISTINCT mic.UserID) AS UniquePendingMembers
+                         
+                     FROM MemberIncomeContributions mic
+                     WHERE mic.TermID = ?
+                     AND mic.ClubID = ?
+                     AND mic.ContributionStatus = 'Pending';""";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setObject(2, clubID);
+            ps.setObject(1, termID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                getTotalAmount = rs.getInt("UniquePendingMembers");
+            }
+        } catch (SQLException e) {
+            return 0;
         }
         return getTotalAmount;
     }

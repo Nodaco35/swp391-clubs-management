@@ -153,11 +153,13 @@
                             <div class="stat-icon pending">
                                 <i class="fas fa-users"></i>
                             </div>
-                            <div class="stat-change neutral">2 thành viên</div>
+                            <div class="stat-change neutral">${memberPendingIncome} thành viên</div>
                         </div>
                         <div class="stat-content">
                             <h3>Phí chưa thu</h3>
-                            <div class="stat-value">200.000₫</div>
+                             <div class="stat-value">
+                                <fmt:formatNumber value="${incomeMemberPending}" type="currency" currencySymbol="₫" groupingUsed="true"/>
+                            </div>
                         </div>
                     </div>
                 </div>
