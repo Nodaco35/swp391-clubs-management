@@ -268,6 +268,29 @@
 																		</div>
 																	</div>
 																</div>
+																<div class="phase-task-status">
+																	<c:choose>
+																		<c:when test="${task.status == 'ToDo'}">
+																			<span class="badge badge-secondary">Chưa bắt đầu</span>
+																		</c:when>
+																		<c:when test="${task.status == 'InProgress'}">
+																			<span class="badge badge-warning">Đang thực hiện</span>
+																		</c:when>
+																		<c:when test="${task.status == 'Review'}">
+																			<span class="badge badge-info">Chờ duyệt</span>
+																		</c:when>
+																		<c:when test="${task.status == 'Rejected'}">
+																			<span class="badge badge-danger">Bị từ chối</span>
+																		</c:when>
+																		<c:when test="${task.status == 'Done'}">
+																			<span class="badge badge-success">Hoàn thành</span>
+																		</c:when>
+																		<c:otherwise>
+																			<span class="badge badge-dark">Không xác định</span>
+																		</c:otherwise>
+																	</c:choose>
+																</div>
+
 																<div class="phase-task-actions">
 																	<button class="btn-task-action-small"
 																	        title="Xem chi tiết">

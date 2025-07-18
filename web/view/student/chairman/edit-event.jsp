@@ -187,7 +187,6 @@
 		<form id="editEventForm" action="edit-event" method="post" enctype="multipart/form-data">
 			<input type="hidden" id="eventID" name="eventID" value="${event.eventID}"/>
 			<div class="form-grid-2">
-
 				<div class="form-group">
 					<label for="eventLocation"><i class="fas fa-building"></i> Địa điểm *</label>
 					<select id="eventLocation" name="eventLocation" required>
