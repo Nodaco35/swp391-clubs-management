@@ -317,6 +317,29 @@
 							<i class="fas fa-arrow-left"></i>
 							Xem sự kiện khác
 						</a>
+						<%@ page import="dal.UserClubDAO" %>
+						<c:if test="${sessionScope.user != null}">
+							<c:set var="clubId" value="${event.clubID}"/>
+							<c:set var="userId" value="${sessionScope.user.userID}"/>
+							<c:set var="eventId" value="${event.eventID}"/>
+							<%
+								// Lấy giá trị từ EL expressions
+								String userIdStr = (String) pageContext.findAttribute("userId");
+								Integer clubIdInt = (Integer) pageContext.findAttribute("clubId");
+								Integer eventIdInt = (Integer) pageContext.findAttribute("eventId");
+
+								UserClubDAO userClubDAO = new UserClubDAO();
+								boolean isClubPresident = false;
+								
+								// Kiểm tra null trước khi gọi method
+								if (userIdStr != null && clubIdInt != null) {
+									isClubPresident = userClubDAO.isClubPresident(userIdStr, clubIdInt);
+								}
+
+								pageContext.setAttribute("isClubPresident", isClubPresident);
+							%>
+						</c:if>
+						
 						<c:choose>
 							<c:when test="${sessionScope.isChairman == true && e.clubID == sessionScope.myClubID}">
 								<a href="${pageContext.request.contextPath}/chairman-page/overview"
@@ -367,49 +390,28 @@
 														Đã kết thúc
 													</button>
 
-														<%-- Kiểm tra xem người dùng có phải chủ nhiệm/trưởng ban của CLB tổ chức hay không --%>
-													<%@ page import="dal.UserClubDAO" %>
 													<c:if test="${sessionScope.user != null}">
-														<c:set var="clubId" value="${event.clubID}"/>
-														<c:set var="userId" value="${sessionScope.user.userID}"/>
-														<%
-															String userIdStr = (String) pageContext.getAttribute("userId");
-															Integer clubIdInt = (Integer) pageContext.getAttribute("clubId");
-															Integer eventIdInt = (Integer) pageContext.getAttribute("eventId");
-
-															UserClubDAO userClubDAO = new UserClubDAO();
-															boolean isClubPresident = userClubDAO.isClubPresident(userIdStr, clubIdInt);
-
-															pageContext.setAttribute("isClubPresident", isClubPresident);
-														%>
-
-														<%-- Nút xem feedback cho chủ nhiệm/trưởng ban --%>
-														<c:if test="${isClubPresident}">
-															<a href="${pageContext.request.contextPath}/viewFeedback?eventId=${event.eventID}"
-															   class="view-feedback-btn">
-																<i class="fas fa-chart-bar"></i> Xem feedback
-															</a>
-														</c:if>
-													</c:if>
-
-													<c:if test="${sessionScope.user != null}">
-														<c:set var="eventId" value="${event.eventID}"/>
-														<c:set var="userId" value="${sessionScope.user.userID}"/>
 														<%-- Kiểm tra xem người dùng đã tham gia sự kiện và đã gửi feedback chưa --%>
 														<%@ page import="dal.EventParticipantDAO" %>
 														<%@ page import="dal.FeedbackDAO" %>
 														<%
-															String userIdStr = (String) pageContext.getAttribute("userId");
-															Integer eventIdInt = (Integer) pageContext.getAttribute("eventId");
+															// Lấy giá trị từ EL expressions
+															String userIdStr = (String) pageContext.findAttribute("userId");
+															Integer eventIdInt = (Integer) pageContext.findAttribute("eventId");
 
 															EventParticipantDAO participantDAO = new EventParticipantDAO();
 															FeedbackDAO feedbackDAO = new FeedbackDAO();
 
-															boolean hasParticipated = participantDAO.hasUserParticipatedInEvent(userIdStr, eventIdInt);
+															boolean hasParticipated = false;
 															boolean hasFeedback = false;
-
-															if (hasParticipated) {
-																hasFeedback = feedbackDAO.hasFeedbackForEvent(eventIdInt, userIdStr);
+															
+															// Kiểm tra null trước khi gọi method
+															if (userIdStr != null && eventIdInt != null) {
+																hasParticipated = participantDAO.hasUserParticipatedInEvent(userIdStr, eventIdInt);
+																
+																if (hasParticipated) {
+																	hasFeedback = feedbackDAO.hasFeedbackForEvent(eventIdInt, userIdStr);
+																}
 															}
 
 															pageContext.setAttribute("hasParticipated", hasParticipated);
@@ -438,6 +440,16 @@
 								</c:choose>
 							</c:otherwise>
 						</c:choose>
+						
+
+						<c:if test="${sessionScope.user != null && e.status != 'PENDING' && e.status != 'Pending' && e.status != 'Processing' && e.status != 'PROCESSING'}">
+							<c:if test="${isClubPresident}">
+								<a href="${pageContext.request.contextPath}/viewFeedback?eventId=${event.eventID}"
+								   class="view-feedback-btn">
+									<i class="fas fa-chart-bar"></i> Xem feedback
+								</a>
+							</c:if>
+						</c:if>
 
 					</div>
 				</div>

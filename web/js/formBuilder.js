@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let activeTab = "edit"
 
   const formTitleInput = document.getElementById("formTitle")
-  const formTypeSelect = document.getElementById("formType")
+  const formTypeSelect = document.getElementById("formType");
   const questionsList = document.getElementById("questionsList")
   const addQuestionBtn = document.getElementById("addQuestionBtn")
   const addInfoBtn = document.getElementById("addInfoBtn")
@@ -157,23 +157,30 @@ document.addEventListener("DOMContentLoaded", () => {
                     : "Đơn đăng ký mới"
         formTitleInput.value = newTitle
         if (previewTitle) previewTitle.textContent = newTitle
-      }      // Xử lý hiển thị/ẩn câu hỏi chọn ban dựa trên loại form
-      const departmentQuestionCard = document.getElementById('departmentQuestion')
-      if (departmentQuestionCard) {
-        if (type === "member") {
-          departmentQuestionCard.style.display = "block"
-        } else {
-          departmentQuestionCard.style.display = "none"
-        }
-      }
+      }      
       
-      // Gọi hàm protectRequiredQuestions khi thay đổi loại form để cập nhật trạng thái các nút
-      if (typeof protectRequiredQuestions === "function") {
-        protectRequiredQuestions();
+    const departmentQuestionCard = document.querySelector('.question-card[data-required-type="department"]');
+    if (type === "member") {
+      if (!departmentQuestionCard) {
+        addDepartmentQuestion();
       }
+    } else {
+      if (departmentQuestionCard) {
+        departmentQuestionCard.remove();
+        questionCount--;
+        updateQuestionCountDisplay();
+        checkQuestionLimit();
+        updateQuestionNumbers();
+        console.log("formBuilder.js: Đã xóa câu hỏi 'Chọn ban' khi không phải loại thành viên.");
+      }
+    }
 
-      if (typeof window.updatePreview === "function") window.updatePreview()
-    })
+    if (typeof protectRequiredQuestions === "function") {
+      protectRequiredQuestions();
+    }
+
+    if (typeof window.updatePreview === "function") window.updatePreview();
+  });
   }
 
   if (addQuestionBtn) addQuestionBtn.addEventListener("click", () => addNewQuestion("text"))
@@ -280,11 +287,6 @@ document.addEventListener("DOMContentLoaded", () => {
         formTitleHidden.value,
         "Loại Form:",
         formTypeHidden.value,
-    );
-    console.log("formBuilder.js: Dữ liệu câu hỏi (JSON):", questionsHidden.value);
-    console.log(
-        "formBuilder.js: EditingFormID (nếu có):",
-        editingFormId ? editingFormId.value : "Không có",
     );
     formBuilderForm.submit();
   }
@@ -522,14 +524,36 @@ document.addEventListener("DOMContentLoaded", () => {
       (questionCard.querySelector(".question-label")?.value.includes("Chọn ban") && 
        questionCard.querySelector(".question-type")?.value === "radio");
     
+    // Vô hiệu hóa nút thêm tùy chọn và các nút xóa tùy chọn nếu là câu hỏi chọn ban
+    if (isDepartmentQuestion) {
+      const addOptionBtn = questionCard.querySelector(".add-option");
+      if (addOptionBtn) {
+        addOptionBtn.disabled = true;
+        addOptionBtn.style.opacity = "0.5";
+      }
+      
+      // Vô hiệu hóa nút xóa tùy chọn
+      questionCard.querySelectorAll(".delete-option").forEach(btn => {
+        btn.disabled = true;
+        btn.style.opacity = "0.5";
+      });
+      
+      // Đặt trường input thành chỉ đọc
+      questionCard.querySelectorAll(".option-value").forEach(input => {
+        input.readOnly = true;
+      });
+    }
+    
     if (isHardcodedRequiredQuestion) {
-      if (moveUpBtn) moveUpBtn.disabled = true
-      if (moveDownBtn) moveDownBtn.disabled = true
-      if (duplicateBtn) duplicateBtn.disabled = true
+      if (moveUpBtn) moveUpBtn.disabled = true;
+      if (moveDownBtn) moveDownBtn.disabled = true;
+      if (duplicateBtn) duplicateBtn.disabled = true;
+      // Vô hiệu hóa nút xóa cho câu hỏi bắt buộc
+      if (deleteBtn) deleteBtn.disabled = true;
     } else {
-      if (moveUpBtn) moveUpBtn.disabled = false
-      if (moveDownBtn) moveDownBtn.disabled = false
-      if (deleteBtn) deleteBtn.disabled = false
+      if (moveUpBtn) moveUpBtn.disabled = false;
+      if (moveDownBtn) moveDownBtn.disabled = false;
+      if (deleteBtn) deleteBtn.disabled = false;
     }
     if (moveUpBtn)
       moveUpBtn.addEventListener("click", () => {
@@ -554,7 +578,12 @@ document.addEventListener("DOMContentLoaded", () => {
           (questionCard.querySelector(".question-label")?.value.includes("Chọn ban") && 
            questionCard.querySelector(".question-type")?.value === "radio");
         
-        // Always allow deletion, even for department questions
+        // Không cho phép xóa câu hỏi chọn ban nếu form là loại member
+        if (isDepartmentQuestion && document.getElementById("formType")?.value === "member") {
+          alert("Không thể xóa câu hỏi chọn ban trong form đăng ký thành viên.");
+          return;
+        }
+        
         questionCard.remove()
         questionCount--
         updateQuestionCountDisplay()
@@ -726,8 +755,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function getFormData() {
     const questions = [];
     if (!questionsList) return questions;
-    console.log("formBuilder.js: Bắt đầu getFormData.");
-    
     // Lấy tất cả question cards theo thứ tự DOM hiện tại sau khi kéo thả
     const cards = Array.from(questionsList.querySelectorAll(".question-card"));
     
@@ -863,6 +890,75 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     return input
   }
+  
+  //Hàm tạo câu hỏi chọn ban
+  function addDepartmentQuestion() {
+    if (questionCount >= MAX_QUESTIONS) {
+      showAlert(maxQuestionsAlert);
+      return;
+    }
+    questionCount++;
+    updateQuestionCountDisplay();
+    checkQuestionLimit();
+
+    const domId = "qDepartment" + Date.now();
+    const html = questionTemplateHtml.replace(/{{id}}/g, domId).replace(/{{number}}/g, questionCount);
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+    const newQuestionCard = tempDiv.firstElementChild;
+    newQuestionCard.dataset.id = domId;
+    newQuestionCard.dataset.requiredType = "department";
+    newQuestionCard.classList.add("required-question");
+
+    const labelInput = newQuestionCard.querySelector(".question-label");
+    if (labelInput) labelInput.value = "Chọn ban muốn vào CLB";
+
+    const typeSelect = newQuestionCard.querySelector(".question-type");
+    if (typeSelect) {
+      typeSelect.value = "radio";
+      typeSelect.disabled = true;
+    }
+
+    const requiredCheckbox = newQuestionCard.querySelector(".question-required");
+    if (requiredCheckbox) {
+      requiredCheckbox.checked = true;
+      requiredCheckbox.disabled = true;
+    }
+
+    const optionsList = newQuestionCard.querySelector(".options-list");
+    if (optionsList && window.clubDepartments) {
+      window.clubDepartments.forEach((dept, index) => {
+        const optionId = "opt-dept-" + dept.id;
+        const html = optionTemplateHtml
+          .replace(/{{id}}/g, optionId)
+          .replace(/{{number}}/g, index + 1)
+          .replace(/{{value}}/g, dept.name);
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = html;
+      });
+    }
+
+    const questionHeader = newQuestionCard.querySelector(".question-header");
+    if (questionHeader) {
+      const requiredBadge = document.createElement("span");
+      requiredBadge.classList.add("required-badge");
+      requiredBadge.textContent = "Cố định";
+      questionHeader.appendChild(requiredBadge);
+    }
+
+    const moveUpBtn = newQuestionCard.querySelector(".move-up");
+    const moveDownBtn = newQuestionCard.querySelector(".move-down");
+    const duplicateBtn = newQuestionCard.querySelector(".duplicate");
+    if (moveUpBtn) moveUpBtn.disabled = true;
+    if (moveDownBtn) moveDownBtn.disabled = true;
+    if (duplicateBtn) duplicateBtn.disabled = true;
+
+    questionsList.insertBefore(newQuestionCard, questionsList.firstChild); // Thêm vào đầu danh sách
+    addQuestionEventListeners(newQuestionCard);
+    updateQuestionNumbers();
+    if (typeof window.updatePreview === "function") window.updatePreview();
+  }
+  
   console.log("formBuilder.js: Khởi tạo hoàn tất.")
 })
 
@@ -916,23 +1012,33 @@ function toggleEventField(selectElement) {
             requiredBadge.textContent = "Cố định";
             questionHeader.appendChild(requiredBadge);
           }
-            // Vô hiệu hóa nút di chuyển và nhân bản, nhưng KHÔNG vô hiệu hóa nút xóa
+            // Vô hiệu hóa nút di chuyển, nhân bản và xóa
           const moveUpBtn = card.querySelector(".move-up");
           const moveDownBtn = card.querySelector(".move-down");
           const duplicateBtn = card.querySelector(".duplicate");
           const deleteBtn = card.querySelector(".delete");
+          const addOptionBtn = card.querySelector(".add-option");
           
           if (moveUpBtn) moveUpBtn.disabled = true;
           if (moveDownBtn) moveDownBtn.disabled = true;
           if (duplicateBtn) duplicateBtn.disabled = true;
+          if (deleteBtn) deleteBtn.disabled = true;
           
-          // Ensure the delete button is always enabled for department questions
-          if (deleteBtn) {
-            deleteBtn.disabled = false;
-            deleteBtn.style.opacity = "1";
-            deleteBtn.style.cursor = "pointer";
-            deleteBtn.style.pointerEvents = "auto";
+          // Vô hiệu hóa nút thêm tùy chọn
+          if (addOptionBtn) {
+            addOptionBtn.disabled = true;
+            addOptionBtn.style.opacity = "0.5";
           }
+          
+          // Vô hiệu hóa các nút xóa tùy chọn và đặt input thành chỉ đọc
+          card.querySelectorAll(".delete-option").forEach(btn => {
+            btn.disabled = true;
+            btn.style.opacity = "0.5";
+          });
+          
+          card.querySelectorAll(".option-value").forEach(input => {
+            input.readOnly = true;
+          });
           
           // Vô hiệu hóa loại câu hỏi
           typeSelect.disabled = true;
@@ -941,26 +1047,6 @@ function toggleEventField(selectElement) {
           if (requiredCheckbox) {
             requiredCheckbox.checked = true;
             requiredCheckbox.disabled = true;
-          }
-        } else {
-          // Nếu là form event, bỏ bảo vệ câu hỏi chọn ban
-          card.classList.remove("required-question");
-          delete card.dataset.requiredType;
-          
-          // Xóa badge nếu có
-          const requiredBadge = card.querySelector(".required-badge");
-          if (requiredBadge) requiredBadge.remove();
-          
-          // Bật tất cả các nút
-          const allButtons = card.querySelectorAll(".question-actions button");
-          allButtons.forEach(btn => btn.disabled = false);
-          
-          // Bỏ vô hiệu hóa loại câu hỏi
-          typeSelect.disabled = false;
-          
-          const requiredCheckbox = card.querySelector(".question-required");
-          if (requiredCheckbox) {
-            requiredCheckbox.disabled = false;
           }
         }
       }
@@ -972,3 +1058,76 @@ function toggleEventField(selectElement) {
   if (window.existingQuestions && Array.isArray(window.existingQuestions) && window.existingQuestions.length > 0) {
     setTimeout(protectRequiredQuestions, 500); // Đợi 500ms để đảm bảo DOM đã được tạo hoàn chỉnh
   }
+  //Hàm tạo câu hỏi chọn ban
+  function addDepartmentQuestion() {
+  if (questionCount >= MAX_QUESTIONS) {
+    showAlert(maxQuestionsAlert);
+    return;
+  }
+  questionCount++;
+  updateQuestionCountDisplay();
+  checkQuestionLimit();
+
+  const domId = "qDepartment" + Date.now();
+  const html = questionTemplateHtml.replace(/{{id}}/g, domId).replace(/{{number}}/g, questionCount);
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = html;
+  const newQuestionCard = tempDiv.firstElementChild;
+  newQuestionCard.dataset.id = domId;
+  newQuestionCard.dataset.requiredType = "department";
+  newQuestionCard.classList.add("required-question");
+
+  const labelInput = newQuestionCard.querySelector(".question-label");
+  if (labelInput) labelInput.value = "Chọn ban muốn vào CLB";
+
+  const typeSelect = newQuestionCard.querySelector(".question-type");
+  if (typeSelect) {
+    typeSelect.value = "radio";
+    typeSelect.disabled = true;
+  }
+
+  const requiredCheckbox = newQuestionCard.querySelector(".question-required");
+  if (requiredCheckbox) {
+    requiredCheckbox.checked = true;
+    requiredCheckbox.disabled = true;
+  }
+
+  const optionsList = newQuestionCard.querySelector(".options-list");
+  if (optionsList && window.clubDepartments) {
+    window.clubDepartments.forEach((dept, index) => {
+      const optionId = "opt-dept-" + dept.id;
+      const html = optionTemplateHtml
+        .replace(/{{id}}/g, optionId)
+        .replace(/{{number}}/g, index + 1)
+        .replace(/{{value}}/g, dept.name);
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = html;
+      const newOption = tempDiv.firstElementChild;
+      optionsList.appendChild(newOption);
+      const optionInput = newOption.querySelector(".option-value");
+      if (optionInput) optionInput.readOnly = true;
+      const deleteBtn = newOption.querySelector(".delete-option");
+      if (deleteBtn) deleteBtn.disabled = true;
+    });
+  }
+
+  const questionHeader = newQuestionCard.querySelector(".question-header");
+  if (questionHeader) {
+    const requiredBadge = document.createElement("span");
+    requiredBadge.classList.add("required-badge");
+    requiredBadge.textContent = "Cố định";
+    questionHeader.appendChild(requiredBadge);
+  }
+
+  const moveUpBtn = newQuestionCard.querySelector(".move-up");
+  const moveDownBtn = newQuestionCard.querySelector(".move-down");
+  const duplicateBtn = newQuestionCard.querySelector(".duplicate");
+  if (moveUpBtn) moveUpBtn.disabled = true;
+  if (moveDownBtn) moveDownBtn.disabled = true;
+  if (duplicateBtn) duplicateBtn.disabled = true;
+
+  questionsList.insertBefore(newQuestionCard, questionsList.firstChild); // Thêm vào đầu danh sách
+  addQuestionEventListeners(newQuestionCard);
+  updateQuestionNumbers();
+  if (typeof window.updatePreview === "function") window.updatePreview();
+}

@@ -10,18 +10,19 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/formManagement.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/formManagement.css">
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 </head>
 <body>
     <jsp:include page="/view/events-page/header.jsp" />
     
-    <div class="container">
+    <div class="form-management-container">
         <!-- Page Header -->
         <div class="page-header">
             <h1><i class="fas fa-clipboard-list"></i>Quản lý Form</h1>
-            <div class="header-actions">            <a href="${pageContext.request.contextPath}/formBuilder?clubId=${param.clubId}" class="btn btn-primary">
+            <div class="header-actions">            
+                <a href="${pageContext.request.contextPath}/formBuilder?clubId=${param.clubId}" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Tạo Form Mới
                 </a>
             </div>
