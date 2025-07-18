@@ -168,6 +168,12 @@ public class FormManagementServlet extends HttpServlet {
                     message = success ? "Form đã được hủy xuất bản thành công!" : "Không thể hủy xuất bản form.";
                     break;
                 case "delete":
+                    // Kiểm tra xem form đã có người điền chưa
+                    boolean hasResponses = responseDAO.hasResponsesByFormId(formId);
+                    if (hasResponses) {
+                        sendJsonResponse(response, false, "Không thể xóa form đã có người điền!");
+                        return;
+                    }
                     success = applicationFormDAO.deleteFormById(formId);
                     message = success ? "Form đã được xóa thành công!" : "Không thể xóa form.";
                     break;
@@ -179,7 +185,8 @@ public class FormManagementServlet extends HttpServlet {
             sendJsonResponse(response, success, message);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error processing action in FormManagementServlet", e);
-            sendJsonResponse(response, false, "Có lỗi xảy ra: " + e.getMessage());
+            // Không hiển thị chi tiết lỗi cho người dùng, chỉ log lỗi
+            sendJsonResponse(response, false, "Có lỗi xảy ra. Vui lòng thử lại sau.");
         }
     }
     private void sendJsonResponse(HttpServletResponse response, boolean success, String message) throws IOException {

@@ -271,12 +271,16 @@ document.addEventListener("DOMContentLoaded", () => {
           hideLoading()
           console.error("Error details:", error)
 
+          // Hiển thị thông báo chung
           if (error.message.includes("HTTP error! status: 404")) {
-            showToast("Không tìm thấy servlet. Kiểm tra URL mapping.", "error")
+            console.error("404 Error: Servlet not found - URL mapping issue")
+            showToast("Có lỗi xảy ra. Vui lòng thử lại sau.", "error")
           } else if (error.message.includes("Response is not JSON")) {
-            showToast("Server trả về HTML thay vì JSON. Kiểm tra servlet.", "error")
+            console.error("Response format error: Server returned HTML instead of JSON")
+            showToast("Có lỗi xảy ra. Vui lòng thử lại sau.", "error")
           } else {
-            showToast("Có lỗi xảy ra khi thực hiện hành động: " + error.message, "error")
+            console.error("General error:", error.message)
+            showToast("Có lỗi xảy ra. Vui lòng thử lại sau.", "error")
           }
         })
   }

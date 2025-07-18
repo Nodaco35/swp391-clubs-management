@@ -1,10 +1,9 @@
 /* Form Management Styles */
-.container {
+.form-management-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
 }
-
 .form-management-container {
   max-width: 100%;
   margin: 0;
