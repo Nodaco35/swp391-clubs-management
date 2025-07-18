@@ -108,7 +108,7 @@ public class FinancialDAO {
 
     }
 
-    public static int getTotalIncomePersonPending(int clubID, String termID) {
+    public static int getTotalIncomePersonByType(int clubID, String termID, String type) {
         int getTotalAmount = 0;
         String sql = """
                      SELECT 
@@ -117,11 +117,25 @@ public class FinancialDAO {
                      FROM MemberIncomeContributions mic
                      WHERE mic.TermID = ?
                      AND mic.ClubID = ?
-                     AND mic.ContributionStatus = 'Pending';""";
+                     AND mic.ContributionStatus = ?; """;
+        if (type == "") {
+            sql = """
+                     SELECT 
+                          COUNT(DISTINCT mic.UserID) AS UniquePendingMembers
+                         
+                     FROM MemberIncomeContributions mic
+                     WHERE mic.TermID = ?
+                     AND mic.ClubID = ?
+                      """;
+        }
+
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(2, clubID);
             ps.setObject(1, termID);
+            if (type != "") {
+                ps.setString(3, type);
+            }
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 getTotalAmount = rs.getInt("UniquePendingMembers");
@@ -130,6 +144,42 @@ public class FinancialDAO {
             return 0;
         }
         return getTotalAmount;
+    }
+
+    public static List<MemberIncomeContributions> getPreviewIncomeMemberSrc(int clubID, String termID) {
+        List<MemberIncomeContributions> getPreviewIncomeMemberSrc = new ArrayList<>();
+        String sql = """
+                     SELECT mic.*, u.FullName, u.Email, u.AvatarSrc FROM memberincomecontributions mic
+                     
+                     join users u on mic.UserID = u.UserID 
+                     Where mic.ClubID = ? and mic.TermID = ?
+                     limit 2
+                     ;""";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setObject(1, clubID);
+            ps.setObject(2, termID);
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()){
+                MemberIncomeContributions mic = new MemberIncomeContributions();
+                mic.setContributionID(rs.getInt("ContributionID"));
+                mic.setIncomeID(rs.getInt("IncomeID"));
+                mic.setUserID(rs.getString("UserID"));
+                mic.setClubID(rs.getInt("ClubID"));
+                mic.setTermID(rs.getString("TermID"));
+                mic.setAmount(rs.getBigDecimal("Amount"));
+                mic.setContributionStatus(rs.getString("ContributionStatus"));
+                mic.setPaidDate(rs.getTimestamp("PaidDate"));
+                mic.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                mic.setUserName(rs.getString("FullName"));
+                mic.setEmail(rs.getString("Email"));
+                mic.setAvtSrc(rs.getString("AvatarSrc"));
+                getPreviewIncomeMemberSrc.add(mic);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return getPreviewIncomeMemberSrc.isEmpty() ? null : getPreviewIncomeMemberSrc;
     }
 
 }

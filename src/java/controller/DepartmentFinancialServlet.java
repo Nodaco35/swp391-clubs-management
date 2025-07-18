@@ -41,7 +41,7 @@ public class DepartmentFinancialServlet extends HttpServlet {
             request.getRequestDispatcher("/myclub").forward(request, response);
             return;
         }
-        
+
         if (!dashboardDAO.isDepartmentLeaderIndoingoai(user.getUserID(), clubID)) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập trang này");
             return;
@@ -56,11 +56,11 @@ public class DepartmentFinancialServlet extends HttpServlet {
         BigDecimal totalExpenses = FinancialDAO.getTotalExpenseAmount(clubID, term.getTermID());
         BigDecimal balance = totalIncome.subtract(totalExpenses);
         BigDecimal balancePre = totalIncomePre.subtract(totalExpensesPre);
-        
+
         BigDecimal incomeMemberPending = FinancialDAO.getTotalIncomeMemberPending(clubID, term.getTermID());
         double comp = totalIncome.divide(totalIncomePre, 4, RoundingMode.HALF_UP).doubleValue();
         double comp2 = totalExpenses.divide(totalExpensesPre, 4, RoundingMode.HALF_UP).doubleValue();
-        double comp3 =  balance.divide(balancePre,4, RoundingMode.HALF_UP).doubleValue();
+        double comp3 = balance.divide(balancePre, 4, RoundingMode.HALF_UP).doubleValue();
         if (comp >= 1) {
             compIncomeWithPreTerm = "+" + comp + "%";
         } else {
@@ -77,10 +77,12 @@ public class DepartmentFinancialServlet extends HttpServlet {
         } else {
             compBalanceWithPreTerm = "-" + comp3 + "%";
         }
-        
-        int memberPendingIncome = FinancialDAO.getTotalIncomePersonPending(clubID,term.getTermID());
-        
 
+        int memberPendingIncome = FinancialDAO.getTotalIncomePersonByType(clubID, term.getTermID(), "Pending");
+        int totalMember = FinancialDAO.getTotalIncomePersonByType(clubID, term.getTermID(), "");
+        int totalPaidMember = FinancialDAO.getTotalIncomePersonByType(clubID, term.getTermID(), "Paid");
+        
+        List<MemberIncomeContributions> previewIncomeMemberSrc = FinancialDAO.getPreviewIncomeMemberSrc(clubID, term.getTermID());
         request.setAttribute("term", term);
         request.setAttribute("compIncomeWithPreTerm", compIncomeWithPreTerm);
         request.setAttribute("compExpensesWithPreTerm", compExpensesWithPreTerm);
@@ -90,8 +92,10 @@ public class DepartmentFinancialServlet extends HttpServlet {
         request.setAttribute("compBalanceWithPreTerm", compBalanceWithPreTerm);
         request.setAttribute("incomeMemberPending", incomeMemberPending);
         request.setAttribute("memberPendingIncome", memberPendingIncome);
-        
-        
+        request.setAttribute("totalMember", totalMember);
+        request.setAttribute("totalPaidMember", totalPaidMember);
+        request.setAttribute("previewIncomeMemberSrc", previewIncomeMemberSrc);
+
         request.getRequestDispatcher("/view/student/department-leader/financial.jsp").forward(request, response);
     }
 

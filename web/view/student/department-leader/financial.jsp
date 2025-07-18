@@ -157,7 +157,7 @@
                         </div>
                         <div class="stat-content">
                             <h3>Phí chưa thu</h3>
-                             <div class="stat-value">
+                            <div class="stat-value">
                                 <fmt:formatNumber value="${incomeMemberPending}" type="currency" currencySymbol="₫" groupingUsed="true"/>
                             </div>
                         </div>
@@ -249,7 +249,7 @@
                                     <i class="fas fa-users" style="color: #8b5cf6;"></i>
                                     Phí thành viên
                                 </h2>
-                                <a href="${pageContext.request.contextPath}/member" 
+                                <a href="${pageContext.request.contextPath}/department/financial/income.member" 
                                    class="btn btn-primary">
                                     Quản lý
                                 </a>
@@ -257,54 +257,52 @@
                             <div class="card-body">
                                 <div class="member-stats">
                                     <div class="member-stat">
-                                        <div class="member-stat-value total">12</div>
+                                        <div class="member-stat-value total">${totalMember}</div>
                                         <div class="member-stat-label">Tổng thành viên</div>
                                     </div>
                                     <div class="member-stat">
-                                        <div class="member-stat-value paid">10</div>
+                                        <div class="member-stat-value paid">${totalPaidMember}</div>
                                         <div class="member-stat-label">Đã đóng</div>
                                     </div>
                                     <div class="member-stat">
-                                        <div class="member-stat-value unpaid">2</div>
+                                        <div class="member-stat-value unpaid">${memberPendingIncome}</div>
                                         <div class="member-stat-label">Chưa đóng</div>
                                     </div>
                                 </div>
 
-                                <div class="member-list">
-                                    <div class="member-item">
-                                        <div class="member-info">
-                                            <div class="member-avatar">N</div>
-                                            <div class="member-details">
-                                                <h4>Nguyễn Văn An</h4>
-                                                <div class="member-email">an.nguyen@email.com</div>
+                                <c:if test="${not empty previewIncomeMemberSrc}">
+                                    <div class="member-list">
+                                        <c:forEach var="memberIncome" items="${previewIncomeMemberSrc}">
+                                            <div class="member-item">
+                                                <div class="member-info">
+                                                    <div class="user-avatar">
+                                                        <img src="${pageContext.request.contextPath}/${memberIncome.avtSrc}" alt="Avatar">
+                                                    </div>
+                                                    <div class="member-details">
+                                                        <h4>${memberIncome.userName}</h4>
+                                                        <div class="member-email">${memberIncome.email}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="member-payment">
+                                                    <div class="payment-info">
+                                                        <div class="payment-amount">
+                                                            <fmt:formatNumber value="${memberIncome.amount}" type="currency" currencySymbol="₫" maxFractionDigits="0"/>
+                                                        </div>
+                                                        <div class="payment-date">
+                                                            <c:choose>
+                                                                <c:when test="${not empty memberIncome.paidDate}">
+                                                                    <fmt:formatDate value="${memberIncome.paidDate}" pattern="dd/MM/yyyy"/>
+                                                                </c:when>
+                                                                <c:otherwise>Chưa nộp</c:otherwise>
+                                                            </c:choose>
+                                                        </div>
+                                                    </div>
+                                                    <i class="fas fa-${memberIncome.contributionStatus == 'Paid' ? 'check-circle payment-status paid' : 'times-circle payment-status unpaid'}"></i>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="member-payment">
-                                            <div class="payment-info">
-                                                <div class="payment-amount">100.000₫</div>
-                                                <div class="payment-date">01/12/2024</div>
-                                            </div>
-                                            <i class="fas fa-check-circle payment-status paid"></i>
-                                        </div>
+                                        </c:forEach>
                                     </div>
-
-                                    <div class="member-item">
-                                        <div class="member-info">
-                                            <div class="member-avatar">T</div>
-                                            <div class="member-details">
-                                                <h4>Trần Thị Bình</h4>
-                                                <div class="member-email">binh.tran@email.com</div>
-                                            </div>
-                                        </div>
-                                        <div class="member-payment">
-                                            <div class="payment-info">
-                                                <div class="payment-amount">100.000₫</div>
-                                                <div class="payment-date">01/11/2024</div>
-                                            </div>
-                                            <i class="fas fa-times-circle payment-status unpaid"></i>
-                                        </div>
-                                    </div>
-                                </div>
+                                </c:if>
                             </div>
                         </div>
                     </div>
