@@ -191,6 +191,12 @@
                             </div>
                         </div>
                         <div class="card-body">
+                            <c:if test="${not empty message}">
+                                <div class="alert alert-success">${message}</div>
+                            </c:if>
+                            <c:if test="${not empty error}">
+                                <div class="alert alert-danger">${error}</div>
+                            </c:if>
                             <form class="filter-form" action="${pageContext.request.contextPath}/department/financial/income.member" method="get">
 
                                 <input type="text" name="keyword" value="${param.keyword}" placeholder="Tìm theo tên hoặc email..." class="form-control"/>
@@ -227,9 +233,9 @@
                                                     <div class="payment-date">
                                                         <c:choose>
                                                             <c:when test="${not empty memberIncome.paidDate}">
-                                                                <fmt:formatDate value="${memberIncome.paidDate}" pattern="dd/MM/yyyy"/>
+                                                                 ${memberIncome.paidDate}
                                                             </c:when>
-                                                            <c:otherwise>Chưa nộp</c:otherwise>
+                                                            <c:otherwise>Chưa nộp, hạn cuối: <strong>${memberIncome.dueDate}</strong></c:otherwise>
                                                         </c:choose>
                                                     </div>
                                                 </div>

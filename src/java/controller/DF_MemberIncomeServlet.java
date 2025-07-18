@@ -5,6 +5,7 @@
 package controller;
 
 import dal.FinancialDAO;
+import dal.NotificationDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -49,8 +50,10 @@ public class DF_MemberIncomeServlet extends HttpServlet {
                     break;
 
                 case "remindAll":
-                    if (FinancialDAO.remindAllPending(incomeID)) {
+                    if (sentToMemberPendingPaid(request, response, clubID, term.getTermID(), incomeID)) {
+
                         request.setAttribute("message", "Đã gửi thông báo nhắc nhở tới tất cả thành viên chưa đóng phí!");
+
                     } else {
                         request.setAttribute("error", "Không thể gửi thông báo nhắc nhở!");
                     }
@@ -116,5 +119,20 @@ public class DF_MemberIncomeServlet extends HttpServlet {
     @Override
     public String getServletInfo() {
         return "Servlet for managing member income contributions";
+    }
+
+    private boolean sentToMemberPendingPaid(HttpServletRequest request, HttpServletResponse response, int clubID, String termID, int incomeID) {
+        List<MemberIncomeContributions> UserUnpaidInComeIDs = FinancialDAO.getUserUnpaidInComeIDs(incomeID);
+        for (MemberIncomeContributions UserUnpaidInComeID : UserUnpaidInComeIDs) {
+            String content = String.format(
+                    "Bạn hiện chưa hoàn thành đóng phí thành viên cho kỳ hạn %s với số tiền là %,d₫. "
+                    + "Hạn chót nộp là ngày %1$td/%1$tm/%1$tY. "
+                    + "Vui lòng hoàn tất thanh toán đúng hạn để đảm bảo quyền lợi thành viên.",
+                    UserUnpaidInComeID.getDueDate(), // java.sql.Timestamp
+                    UserUnpaidInComeID.getAmount().intValue()
+            );
+            NotificationDAO.sentToPerson1(null, UserUnpaidInComeID.getUserID(), "Thông báo về việc đóng phí thành viên", content, "High");
+        }
+        return true;
     }
 }

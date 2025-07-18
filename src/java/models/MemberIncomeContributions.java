@@ -20,6 +20,7 @@ public class MemberIncomeContributions {
     private String contributionStatus;
     private Timestamp paidDate;
     private Timestamp createdAt;
+    private Timestamp dueDate;
     private String userName;
     private String email;
     private String avtSrc;
@@ -126,6 +127,14 @@ public class MemberIncomeContributions {
     @Override
     public String toString() {
         return "MemberIncomeContributions{" + "contributionID=" + contributionID + ", incomeID=" + incomeID + ", userID=" + userID + ", clubID=" + clubID + ", termID=" + termID + ", amount=" + amount + ", contributionStatus=" + contributionStatus + ", paidDate=" + paidDate + ", createdAt=" + createdAt + ", userName=" + userName + ", email=" + email + ", avtSrc=" + avtSrc + '}';
+    }
+
+    public Timestamp getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(Timestamp dueDate) {
+        this.dueDate = dueDate;
     }
 
     

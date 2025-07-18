@@ -170,6 +170,7 @@ public class FinancialDAO {
                 mic.setUserName(rs.getString("FullName"));
                 mic.setEmail(rs.getString("Email"));
                 mic.setAvtSrc(rs.getString("AvatarSrc"));
+                mic.setDueDate(rs.getTimestamp("DueDate"));
                 getPreviewIncomeMemberSrc.add(mic);
             }
         } catch (SQLException e) {
@@ -278,6 +279,7 @@ public class FinancialDAO {
                 mic.setContributionStatus(rs.getString("ContributionStatus"));
                 mic.setAmount(rs.getBigDecimal("Amount"));
                 mic.setPaidDate(rs.getTimestamp("PaidDate"));
+                mic.setDueDate(rs.getTimestamp("DueDate"));
                 list.add(mic);
             }
         } catch (SQLException e) {
@@ -451,6 +453,44 @@ public class FinancialDAO {
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    public static List<MemberIncomeContributions> getUserUnpaidInComeIDs(int incomeID) {
+        String sql = """
+                     SELECT *
+                                          FROM MemberIncomeContributions mic
+                                          Join users  u on mic.UserID = u.UserID
+                                          WHERE 
+                                          mic.ContributionStatus = 'Pending' and mic.incomeID = ?""";
+        List<MemberIncomeContributions> l = new ArrayList<>();
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setObject(1, incomeID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                MemberIncomeContributions mic = new MemberIncomeContributions();
+                mic.setContributionID(rs.getInt("ContributionID"));
+                mic.setIncomeID(rs.getInt("IncomeID"));
+                mic.setUserID(rs.getString("UserID"));
+                mic.setAvtSrc(rs.getString("AvatarSrc"));
+                mic.setUserName(rs.getString("FullName"));
+                mic.setEmail(rs.getString("Email"));
+                mic.setContributionStatus(rs.getString("ContributionStatus"));
+                mic.setAmount(rs.getBigDecimal("Amount"));
+                mic.setPaidDate(rs.getTimestamp("PaidDate"));
+                mic.setDueDate(rs.getTimestamp("DueDate"));
+                l.add(mic);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return l;
+    }
+    public static void main(String[] args) {
+        List<MemberIncomeContributions> getUserUnpaidInComeIDs = getUserUnpaidInComeIDs(7);
+        for (MemberIncomeContributions userUnpaidInComeID : getUserUnpaidInComeIDs) {
+            System.out.println("đã gửi cho" + userUnpaidInComeID.getUserID());
         }
     }
 }
