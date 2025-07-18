@@ -252,8 +252,8 @@ public class FinancialDAO {
         }
         sql += " ORDER BY mic.ContributionID LIMIT ? OFFSET ?";
 
-        try(PreparedStatement ps = DBContext.getConnection().prepareStatement(sql)) {
-            
+        try (PreparedStatement ps = DBContext.getConnection().prepareStatement(sql)) {
+
             int paramIndex = 1;
             ps.setInt(paramIndex++, incomeID);
             if (keyword != null && !keyword.trim().isEmpty()) {
@@ -347,12 +347,6 @@ public class FinancialDAO {
         }
         return getIncomeMemberPendings;
     }
-    
-    
-
-    
-
-    
 
     public static boolean markContributionPaid(int contributionID) {
         String sql = """
@@ -402,20 +396,39 @@ public class FinancialDAO {
         }
     }
 
-    public static boolean completeIncome(int incomeID) {
+    public static boolean completeIncome(int incomeID, String termID, int clubID, Income income, String userID) {
         String sql = """
                      UPDATE income 
                      SET status = 'Đã nhận' 
                      WHERE IncomeID = ? AND status = 'Đang chờ'""";
+        String sql2 = """
+                      INSERT INTO Transactions (ClubID, TermID, Type, Amount, TransactionDate, Description, Attachment, Status, ReferenceID, CreatedBy)
+                      VALUES
+                      (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            PreparedStatement ps2 = DBContext.getConnection().prepareStatement(sql2);
             ps.setInt(1, incomeID);
+            ps2.setObject(1, clubID);
+            ps2.setObject(2, termID);
+            ps2.setObject(3, "Income");
+            ps2.setObject(4, income.getAmount());
+            ps2.setObject(5, new Timestamp(System.currentTimeMillis()));
+            ps2.setObject(6, income.getDescription());
+            ps2.setObject(7, income.getAttachment());
+            ps2.setObject(8, "Approved");
+            ps2.setObject(9, incomeID);
+            ps2.setObject(10, userID);
             int rowsAffected = ps.executeUpdate();
-            return rowsAffected > 0;
+            int row = ps2.executeUpdate();
+            
+            return (row > 0 && rowsAffected > 0);
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+
         }
+
     }
 
     public static boolean areAllContributionsPaid(int incomeID) {
@@ -487,6 +500,36 @@ public class FinancialDAO {
         }
         return l;
     }
-    
-}
 
+    public static Income findByIncomeID(int incomeID) {
+        String sql = """
+                     SELECT *
+                                          FROM Income
+                                          
+                                          WHERE 
+                                          IncomeID = ?""";
+        List<Income> l = new ArrayList<>();
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setObject(1, incomeID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Income i = new Income();
+                i.setIncomeID(rs.getInt("IncomeID"));
+                i.setClubID(rs.getInt("ClubID"));
+                i.setTermID(rs.getString("TermID"));
+                i.setSource(rs.getString("Source"));
+                i.setAmount(rs.getBigDecimal("Amount"));
+                i.setIncomeDate(rs.getTimestamp("IncomeDate"));
+                i.setDescription(rs.getString("Description"));
+                i.setAttachment(rs.getString("Attachment"));
+                i.setStatus(rs.getString("Status"));
+                l.add(i);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return l.get(0);
+    }
+
+}
