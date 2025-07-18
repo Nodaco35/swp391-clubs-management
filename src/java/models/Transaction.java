@@ -26,10 +26,20 @@ public class Transaction {
     private Timestamp createdDate;
     private int referenceID;
     private String CreateBy;
+    private String createdName;
 
     public Timestamp getCreatedDate() {
         return createdDate;
     }
+
+    public String getCreatedName() {
+        return createdName;
+    }
+
+    public void setCreatedName(String createdName) {
+        this.createdName = createdName;
+    }
+    
 
     public void setCreatedDate(Timestamp createdDate) {
         this.createdDate = createdDate;

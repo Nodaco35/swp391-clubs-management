@@ -185,13 +185,13 @@
                                         <div class="transaction-item fade-in">
                                             <div class="transaction-info">
                                                 <div class="transaction-icon ${transaction.type}">
-                                                    <i class="fas ${transaction.type == 'Income' ? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
+                                                    <i class="fas ${transaction.type == 'Income' ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down'}"></i>
                                                 </div>
                                                 <div class="transaction-details">
                                                     <h4>${transaction.description}</h4>
                                                     <div class="transaction-meta">
                                                         Ngày nhận • 
-                                                        <fmt:formatDate value="${transaction.createdDate}" pattern="dd/MM/yyyy"/>
+                                                        <fmt:formatDate value="${transaction.transactionDate}" pattern="dd/MM/yyyy"/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -200,7 +200,7 @@
                                                     ${transaction.type == 'Income' ? '+' : '-'}
                                                     <fmt:formatNumber value="${transaction.amount}" type="currency" currencySymbol="₫" groupingUsed="true"/>
                                                 </div>
-                                                <div class="amount-creator">Người gửi: ${transaction.createBy}</div>
+                                                <div class="amount-creator">Người gửi: ${transaction.createdName}</div>
                                             </div>
                                         </div>
                                     </c:forEach>
@@ -221,20 +221,31 @@
                             </div>
                             <div class="card-body">
                                 <div class="quick-actions-grid">
-                                    <form action="${pageContext.request.contextPath}/department/financial">
-                                        <button  
+                                    <button onclick="openAddTransactionModal('income')" 
                                             class="action-button income">
-                                            <i class="fas fa-plus"></i>
-                                            Thêm thu nhập
+                                        <i class="fas fa-plus"></i>
+                                        Tạo nguồn thu thủ công
+                                    </button>
+
+
+                                    <form action="${pageContext.request.contextPath}/department/#" >
+                                        <button type="submit"
+                                                class="action-button income">
+                                            <i class="fas fa-credit-card"></i>
+                                            Quản lý nguồn thu                   
                                         </button>
                                     </form>
+
                                     <!-- phuc day -->
-                                    <form action="${pageContext.request.contextPath}/department/financial" >
-                                        <button 
-                                            class="action-button expense">
-                                            <i class="fa-regular fa-credit-card"></i>
+                                    <form action="${pageContext.request.contextPath}/department/#" >
+                                        <button type="submit"
+                                                class="action-button expense">
+                                            <i class="fas fa-credit-card"></i>
                                             Quản lý chi tiêu                   
                                         </button>
+                                    </form>
+                                    <form>
+
                                     </form>
                                     <!-- đến đây-->
 
@@ -249,10 +260,13 @@
                                     <i class="fas fa-users" style="color: #8b5cf6;"></i>
                                     Phí thành viên
                                 </h2>
-                                <a href="${pageContext.request.contextPath}/department/financial/income.member" 
-                                   class="btn btn-primary">
-                                    Quản lý
-                                </a>
+                                <form action="${pageContext.request.contextPath}/department/financial/income.member">
+                                    <button type="submit"
+                                            class="btn btn-primary">
+                                        Quản lý
+                                    </button>
+                                </form>
+                                
                             </div>
                             <div class="card-body">
                                 <div class="member-stats">
@@ -316,10 +330,13 @@
                         <h3 class="modal-title">Thêm giao dịch mới</h3>
                     </div>
 
-                    <form action="${pageContext.request.contextPath}/transaction" method="post">
+                    <form action="${pageContext.request.contextPath}/department/finanical?action=transaction-income" method="post">
+
+                        <input type="hidden" name="clubId" value="${clubID}">
+                        <input type="hidden" name="termId" value="${term.termID}">
                         <div class="form-group">
                             <label class="form-label">Loại giao dịch</label>
-                            <select name="type" id="transactionType" class="form-select">
+                            <select name="type" id="transactionType" class="form-select" disabled>
                                 <option value="income">Thu nhập</option>
                                 <option value="expense">Chi phí</option>
                             </select>
@@ -331,23 +348,29 @@
                         </div>
 
                         <div class="form-group">
+                            <label class="form-label">Nguồn thu</label>
+                            <select name="category" required class="form-select">
+                                <option value="">Chọn nguồn</option>
+                                <option value="Phí thành viên">Phí thành viên</option>
+                                <option value="Tài trợ">Tài trợ</option>
+                                <option value="Doanh thu sự kiện">Doanh thu sự kiện</option>
+                                <option value="Khác">Khác</option>                         
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Ngày giao dịch</label>
+                            <input type="datetime-local" name="transactionDate" required  class="form-input">
+                        </div>
+                        <div class="form-group">
                             <label class="form-label">Mô tả</label>
                             <input type="text" name="description" required class="form-input" placeholder="Nhập mô tả giao dịch">
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Danh mục</label>
-                            <select name="category" required class="form-select">
-                                <option value="">Chọn danh mục</option>
-                                <option value="Phí thành viên">Phí thành viên</option>
-                                <option value="Sự kiện">Sự kiện</option>
-                                <option value="Cơ sở vật chất">Cơ sở vật chất</option>
-                                <option value="Văn phòng phẩm">Văn phòng phẩm</option>
-                                <option value="Marketing">Marketing</option>
-                            </select>
+                            <label class="form-label">Attachment</label>
+                            <input type="file" name="attachment" required class="form-input" placeholder="Nhập ảnh hoặc hóa đơn điện tử(nếu có)">
                         </div>
-
-                        <input type="hidden" name="createdBy" value="Admin">
+                        <input type="hidden" name="createdBy" value="${user.userID}">
 
                         <div class="modal-footer">
                             <button type="button" onclick="closeAddTransactionModal()" class="btn btn-secondary">
@@ -366,6 +389,7 @@
             <script>
                 function openAddTransactionModal(type) {
                     document.getElementById('transactionType').value = type;
+
                     document.getElementById('addTransactionModal').classList.remove('hidden');
 
                     // Add fade-in animation

@@ -125,8 +125,10 @@ public class MemberIncomeContributions {
 
     @Override
     public String toString() {
-        return "MemberIncomeContributions{" + "contributionID=" + contributionID + ", incomeID=" + incomeID + ", userID=" + userID + ", clubID=" + clubID + ", termID=" + termID + ", amount=" + amount + ", contributionStatus=" + contributionStatus + ", paidDate=" + paidDate + ", createdAt=" + createdAt + '}';
+        return "MemberIncomeContributions{" + "contributionID=" + contributionID + ", incomeID=" + incomeID + ", userID=" + userID + ", clubID=" + clubID + ", termID=" + termID + ", amount=" + amount + ", contributionStatus=" + contributionStatus + ", paidDate=" + paidDate + ", createdAt=" + createdAt + ", userName=" + userName + ", email=" + email + ", avtSrc=" + avtSrc + '}';
     }
+
+    
     
     
     

@@ -177,6 +177,10 @@
         <servlet-name>DepartmentFinancialServlet</servlet-name>
         <servlet-class>controller.DepartmentFinancialServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>DF_MemberIncomeServlet</servlet-name>
+        <servlet-class>controller.DF_MemberIncomeServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ClubsServlet</servlet-name>
         <url-pattern>/clubs</url-pattern>
@@ -375,6 +379,10 @@
     <servlet-mapping>
         <servlet-name>DepartmentFinancialServlet</servlet-name>
         <url-pattern>/department/financial</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DF_MemberIncomeServlet</servlet-name>
+        <url-pattern>/department/financial/income.member</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>
