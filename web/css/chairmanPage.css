@@ -1581,6 +1581,22 @@ body {
     color: #fd7e14;
 }
 
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    color: #fff;
+    margin: 8px;
+}
+.badge-secondary { background-color: #6c757d; }
+.badge-warning { background-color: #ffc107; color: #212529; }
+.badge-info { background-color: #17a2b8; }
+.badge-danger { background-color: #dc3545; }
+.badge-success { background-color: #28a745; }
+.badge-dark { background-color: #343a40; }
+
+
 .phase-task-actions {
     display: flex;
     gap: 5px;
