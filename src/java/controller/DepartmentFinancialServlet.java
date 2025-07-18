@@ -81,8 +81,9 @@ public class DepartmentFinancialServlet extends HttpServlet {
         int memberPendingIncome = FinancialDAO.getTotalIncomePersonByType(clubID, term.getTermID(), "Pending");
         int totalMember = FinancialDAO.getTotalIncomePersonByType(clubID, term.getTermID(), "");
         int totalPaidMember = FinancialDAO.getTotalIncomePersonByType(clubID, term.getTermID(), "Paid");
-        
+
         List<MemberIncomeContributions> previewIncomeMemberSrc = FinancialDAO.getPreviewIncomeMemberSrc(clubID, term.getTermID());
+        List<Transaction> recentTransactions = FinancialDAO.getRecentTransactions(clubID, term.getTermID());
         request.setAttribute("term", term);
         request.setAttribute("compIncomeWithPreTerm", compIncomeWithPreTerm);
         request.setAttribute("compExpensesWithPreTerm", compExpensesWithPreTerm);
@@ -95,6 +96,7 @@ public class DepartmentFinancialServlet extends HttpServlet {
         request.setAttribute("totalMember", totalMember);
         request.setAttribute("totalPaidMember", totalPaidMember);
         request.setAttribute("previewIncomeMemberSrc", previewIncomeMemberSrc);
+        request.setAttribute("recentTransactions", recentTransactions);
 
         request.getRequestDispatcher("/view/student/department-leader/financial.jsp").forward(request, response);
     }

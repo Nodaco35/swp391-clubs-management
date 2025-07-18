@@ -6,11 +6,13 @@ package models;
 
 import java.math.BigDecimal;
 import java.sql.*;
+
 /**
  *
  * @author he181
  */
 public class Transaction {
+
     private int transactionID;
     private int clubID;
     private String termID;
@@ -20,6 +22,34 @@ public class Transaction {
     private String description;
     private String attachment;
     private String status;
+    private String category;
+    private Timestamp createdDate;
+    private int referenceID;
+    private String CreateBy;
+
+    public Timestamp getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Timestamp createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public int getReferenceID() {
+        return referenceID;
+    }
+
+    public void setReferenceID(int referenceID) {
+        this.referenceID = referenceID;
+    }
+
+    public String getCreateBy() {
+        return CreateBy;
+    }
+
+    public void setCreateBy(String CreateBy) {
+        this.CreateBy = CreateBy;
+    }
 
     public Transaction() {
     }
@@ -96,9 +126,17 @@ public class Transaction {
         this.status = status;
     }
 
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
     @Override
     public String toString() {
-        return "Transaction{" + "transactionID=" + transactionID + ", clubID=" + clubID + ", termID=" + termID + ", type=" + type + ", amount=" + amount + ", transactionDate=" + transactionDate + ", description=" + description + ", attachment=" + attachment + ", status=" + status + '}';
+        return "Transaction{" + "transactionID=" + transactionID + ", clubID=" + clubID + ", termID=" + termID + ", type=" + type + ", amount=" + amount + ", transactionDate=" + transactionDate + ", description=" + description + ", attachment=" + attachment + ", status=" + status + ", category=" + category + '}';
     }
-    
+
 }

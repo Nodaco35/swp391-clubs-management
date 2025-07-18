@@ -182,4 +182,39 @@ public class FinancialDAO {
         return getPreviewIncomeMemberSrc.isEmpty() ? null : getPreviewIncomeMemberSrc;
     }
 
+    public static List<Transaction> getRecentTransactions(int clubID, String termID) {
+        List<Transaction> getRecentTransactions = new ArrayList<>();
+        String sql = """
+                    SELECT t.*, u.FullName FROM transactions t
+                                     join users u on t.CreatedBy = u.UserID
+                                          where t.Status = 'Approved' and ClubID = ? and  TermID = ? 
+                                          order by CreatedAt desc """;
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setObject(1, clubID);
+            ps.setObject(2, termID);
+            
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {                
+                Transaction t = new Transaction();
+                t.setTransactionID(rs.getInt("TransactionID"));
+                t.setClubID(rs.getInt("ClubID"));
+                t.setTermID(rs.getString("TermID"));
+                t.setType(rs.getString("Type"));
+                t.setAmount(rs.getBigDecimal("Amount"));
+                t.setTransactionDate(rs.getTimestamp("TransactionDate"));
+                t.setDescription(rs.getString("Description"));
+                t.setAttachment(rs.getString("Attachment"));
+                t.setStatus(rs.getString("Status"));
+                t.setReferenceID(rs.getInt("ReferenceID"));
+                t.setCreatedDate(rs.getTimestamp("CreatedAt"));
+                t.setCreateBy(rs.getString("FullName"));
+                getRecentTransactions.add(t);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return getRecentTransactions;   
+    }
+
 }

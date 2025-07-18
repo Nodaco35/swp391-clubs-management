@@ -173,7 +173,7 @@
                                     <i class="fas fa-history" style="color: #3b82f6;"></i>
                                     Giao dịch gần đây
                                 </h2>
-                                <a href="${pageContext.request.contextPath}/transaction" 
+                                <a href="${pageContext.request.contextPath}/department/financial/transaction" 
                                    class="btn btn-primary">
                                     Xem tất cả
                                 </a>
@@ -185,22 +185,22 @@
                                         <div class="transaction-item fade-in">
                                             <div class="transaction-info">
                                                 <div class="transaction-icon ${transaction.type}">
-                                                    <i class="fas ${transaction.type == 'income' ? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
+                                                    <i class="fas ${transaction.type == 'Income' ? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
                                                 </div>
                                                 <div class="transaction-details">
                                                     <h4>${transaction.description}</h4>
                                                     <div class="transaction-meta">
-                                                        ${transaction.category} • 
+                                                        Ngày nhận • 
                                                         <fmt:formatDate value="${transaction.createdDate}" pattern="dd/MM/yyyy"/>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="transaction-amount">
                                                 <div class="amount-value ${transaction.type}">
-                                                    ${transaction.type == 'income' ? '+' : '-'}
+                                                    ${transaction.type == 'Income' ? '+' : '-'}
                                                     <fmt:formatNumber value="${transaction.amount}" type="currency" currencySymbol="₫" groupingUsed="true"/>
                                                 </div>
-                                                <div class="amount-creator">${transaction.createdBy}</div>
+                                                <div class="amount-creator">Người gửi: ${transaction.createBy}</div>
                                             </div>
                                         </div>
                                     </c:forEach>
