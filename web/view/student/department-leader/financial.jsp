@@ -91,6 +91,11 @@
                                         </a>
                                     </li>
                                     <li class="breadcrumb-item active" aria-current="page">Tài chính</li>
+                                     <li class="breadcrumb-item">
+                                        <a href="${pageContext.request.contextPath}/department/financial/income.member" class="text-decoration-none">
+                                            Phí thành viên
+                                        </a>
+                                    </li>
                                 </ol>
                             </nav>
                         </div>
@@ -272,7 +277,7 @@
                                 <div class="member-stats">
                                     <div class="member-stat">
                                         <div class="member-stat-value total">${totalMember}</div>
-                                        <div class="member-stat-label">Tổng thành viên</div>
+                                        <div class="member-stat-label">Tổng bill</div>
                                     </div>
                                     <div class="member-stat">
                                         <div class="member-stat-value paid">${totalPaidMember}</div>

@@ -108,7 +108,7 @@ public class FinancialDAO {
         int getTotalAmount = 0;
         String sql = """
                      SELECT 
-                          COUNT(DISTINCT mic.UserID) AS UniquePendingMembers
+                          COUNT(mic.UserID) AS UniquePendingMembers
                          
                      FROM MemberIncomeContributions mic
                      WHERE mic.TermID = ?
@@ -117,7 +117,7 @@ public class FinancialDAO {
         if (type == "") {
             sql = """
                      SELECT 
-                          COUNT(DISTINCT mic.UserID) AS UniquePendingMembers
+                          COUNT( mic.UserID) AS UniquePendingMembers
                          
                      FROM MemberIncomeContributions mic
                      WHERE mic.TermID = ?
@@ -345,4 +345,113 @@ public class FinancialDAO {
         }
         return getIncomeMemberPendings;
     }
+    
+    
+
+    
+
+    
+
+    public static boolean markContributionPaid(int contributionID) {
+        String sql = """
+                     UPDATE memberincomecontributions 
+                     SET ContributionStatus = 'Paid', PaidDate = CURRENT_TIMESTAMP 
+                     WHERE ContributionID = ? AND ContributionStatus = 'Pending'""";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setInt(1, contributionID);
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean remindMember(int contributionID, String email) {
+        // Giả lập gửi email nhắc nhở (thay bằng logic thực tế nếu có hệ thống email)
+        System.out.println("Sending reminder to: " + email + " for ContributionID: " + contributionID);
+        // Ví dụ: Gửi email qua API hoặc thư viện như JavaMail
+        return true; // Trả về true giả lập thành công
+    }
+
+    public static boolean remindAllPending(int incomeID) {
+        String sql = """
+                     SELECT u.Email 
+                     FROM memberincomecontributions mic
+                     JOIN users u ON mic.UserID = u.UserID
+                     WHERE mic.IncomeID = ? AND mic.ContributionStatus = 'Pending' AND u.Status = 1""";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setInt(1, incomeID);
+            ResultSet rs = ps.executeQuery();
+            boolean allSuccess = true;
+            while (rs.next()) {
+                String email = rs.getString("Email");
+                // Giả lập gửi email nhắc nhở
+                System.out.println("Sending reminder to: " + email);
+                // Thay bằng logic gửi email thực tế
+                allSuccess = allSuccess && true; // Giả lập thành công
+            }
+            return allSuccess;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean completeIncome(int incomeID) {
+        String sql = """
+                     UPDATE income 
+                     SET status = 'Đã nhận' 
+                     WHERE IncomeID = ? AND status = 'Đang chờ'""";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setInt(1, incomeID);
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean areAllContributionsPaid(int incomeID) {
+        String sql = """
+                     SELECT COUNT(*) AS pendingCount 
+                     FROM memberincomecontributions 
+                     WHERE IncomeID = ? AND ContributionStatus = 'Pending'""";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setInt(1, incomeID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("pendingCount") == 0;
+            }
+            return false;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean hasPendingContributions(int incomeID) {
+        String sql = """
+                     SELECT COUNT(*) AS pendingCount 
+                     FROM memberincomecontributions 
+                     WHERE IncomeID = ? AND ContributionStatus = 'Pending'""";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setInt(1, incomeID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("pendingCount") > 0;
+            }
+            return false;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
+

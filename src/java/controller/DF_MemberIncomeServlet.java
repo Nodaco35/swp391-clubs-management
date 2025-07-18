@@ -35,11 +35,43 @@ public class DF_MemberIncomeServlet extends HttpServlet {
         if (incomeParam != null && !incomeParam.isEmpty()) {
             incomeID = Integer.parseInt(incomeParam);
         }
+        // Xử lý các hành động
+        String action = request.getParameter("action");
+        if (action != null) {
+            switch (action) {
+                case "markPaid":
+                    int contributionID = Integer.parseInt(request.getParameter("contributionID"));
+                    if (FinancialDAO.markContributionPaid(contributionID)) {
+                        request.setAttribute("message", "Đã cập nhật trạng thái đóng phí thành công!");
+                    } else {
+                        request.setAttribute("error", "Không thể cập nhật trạng thái đóng phí!");
+                    }
+                    break;
+
+                case "remindAll":
+                    if (FinancialDAO.remindAllPending(incomeID)) {
+                        request.setAttribute("message", "Đã gửi thông báo nhắc nhở tới tất cả thành viên chưa đóng phí!");
+                    } else {
+                        request.setAttribute("error", "Không thể gửi thông báo nhắc nhở!");
+                    }
+                    break;
+                case "complete":
+                    if (FinancialDAO.completeIncome(incomeID)) {
+                        request.setAttribute("message", "Đã hoàn thành thu phí thành viên!");
+                    } else {
+                        request.setAttribute("error", "Không thể hoàn thành thu phí thành viên!");
+                    }
+                    break;
+            }
+        }
 
         // Lấy tham số lọc
         String keyword = request.getParameter("keyword");
-        String status = request.getParameter("status");
-
+        String status_raw = request.getParameter("status");
+        String status = "all";
+        if (status_raw != null && !status_raw.isEmpty()) {
+            status = request.getParameter("status");
+        }
         // Phân trang
         int page = 1;
         int pageSize = 7;
@@ -57,6 +89,11 @@ public class DF_MemberIncomeServlet extends HttpServlet {
         int totalRecords = FinancialDAO.getTotalIncomeMemberRecords(incomeID, keyword, status);
         int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
         List<Income> incomeIDs = FinancialDAO.getIncomeMemberPendings(clubID, term.getTermID());
+
+        // Kiểm tra trạng thái nút
+        boolean allPaid = FinancialDAO.areAllContributionsPaid(incomeID);
+        boolean hasPending = FinancialDAO.hasPendingContributions(incomeID);
+
         // Truyền dữ liệu sang JSP
         request.setAttribute("IncomeMemberSrc", pagedList);
         request.setAttribute("currentPage", page);
@@ -65,6 +102,8 @@ public class DF_MemberIncomeServlet extends HttpServlet {
         request.setAttribute("keyword", keyword);
         request.setAttribute("status", status);
         request.setAttribute("incomeIDs", incomeIDs);
+        request.setAttribute("allPaid", allPaid);
+        request.setAttribute("hasPending", hasPending);
         request.getRequestDispatcher("/view/student/department-leader/financial-income-member.jsp").forward(request, response);
     }
 

@@ -14,7 +14,7 @@
         <!-- Custom CSS -->
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/financial.css">
         <style>
-             .filter-form {
+            .filter-form {
                 display: flex;
                 gap: 15px;
                 align-items: center;
@@ -171,24 +171,41 @@
                                 <i class="fas fa-users" style="color: #8b5cf6;"></i>
                                 Danh sách phí thành viên
                             </h2>
+                            <div class="action-buttons">
+                                <form action="${pageContext.request.contextPath}/department/financial/income.member" method="post" style="display: inline;">
+                                    <input type="hidden" name="action" value="remindAll"/>
+                                    <input type="hidden" name="incomeID" value="${incomeID}"/>
+                                    <input type="hidden" name="keyword" value="${param.keyword}"/>
+                                    <input type="hidden" name="status" value="${param.status}"/>
+                                    <input type="hidden" name="page" value="${currentPage}"/>
+                                    <button type="submit" class="btn btn-warning" onclick="return confirm('Gửi thông báo nhắc nhở tới tất cả thành viên chưa đóng phí?')" ${hasPending ? '' : 'disabled'}>Nhắc nhở tất cả</button>
+                                </form>
+                                <form action="${pageContext.request.contextPath}/department/financial/income.member" method="post" style="display: inline;">
+                                    <input type="hidden" name="action" value="complete"/>
+                                    <input type="hidden" name="incomeID" value="${incomeID}"/>
+                                    <input type="hidden" name="keyword" value="${param.keyword}"/>
+                                    <input type="hidden" name="status" value="${param.status}"/>
+                                    <input type="hidden" name="page" value="${currentPage}"/>
+                                    <button type="submit" class="btn btn-success" onclick="return confirm('Xác nhận hoàn thành thu phí thành viên này?')" ${allPaid ? '' : 'disabled'}>Hoàn thành</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="card-body">
                             <form class="filter-form" action="${pageContext.request.contextPath}/department/financial/income.member" method="get">
-                                
-                                <select name="incomeID" class="form-select">
-                                    <c:forEach var="id" items="${incomeIDs}">
-                                        <option value="${id.incomeID}" ${param.incomeID == id.incomeID ? 'selected' : ''}>${id.description}</option>
-                                    </c:forEach>
-                                </select>
+
                                 <input type="text" name="keyword" value="${param.keyword}" placeholder="Tìm theo tên hoặc email..." class="form-control"/>
                                 <select name="status" class="form-select">
                                     <option value="all" ${param.status == 'all' || empty param.status ? 'selected' : ''}>Tất cả</option>
                                     <option value="Paid" ${param.status == 'Paid' ? 'selected' : ''}>Đã nộp</option>
                                     <option value="Pending" ${param.status == 'Pending' ? 'selected' : ''}>Chưa nộp</option>
                                 </select>
-                                
+                                <select name="incomeID" class="form-select">
+                                    <c:forEach var="id" items="${incomeIDs}">
+                                        <option value="${id.incomeID}" ${param.incomeID == id.incomeID ? 'selected' : ''}>${id.description}</option>
+                                    </c:forEach>
+                                </select>
                                 <button type="submit" class="btn btn-primary">Lọc</button>
                             </form>
-                        </div>
-                        <div class="card-body">
                             <c:if test="${not empty IncomeMemberSrc}">
                                 <div class="member-list">
                                     <c:forEach var="memberIncome" items="${IncomeMemberSrc}">
@@ -217,18 +234,31 @@
                                                     </div>
                                                 </div>
                                                 <i class="fas ${memberIncome.contributionStatus == 'Paid' ? 'fa-check-circle payment-status paid' : 'fa-times-circle payment-status unpaid'}"></i>
+                                                <div class="member-actions">
+                                                    <c:if test="${memberIncome.contributionStatus == 'Pending'}">
+                                                        <form action="${pageContext.request.contextPath}/department/financial/income.member" method="post" style="display: inline;">
+                                                            <input type="hidden" name="action" value="markPaid"/>
+                                                            <input type="hidden" name="contributionID" value="${memberIncome.contributionID}"/>
+                                                            <input type="hidden" name="incomeID" value="${incomeID}"/>
+                                                            <input type="hidden" name="keyword" value="${param.keyword}"/>
+                                                            <input type="hidden" name="status" value="${param.status}"/>
+                                                            <input type="hidden" name="page" value="${currentPage}"/>
+                                                            <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Xác nhận đã nhận phí từ thành viên này?')">Đã nhận</button>
+                                                        </form>
+                                                    </c:if>
+                                                </div>
                                             </div>
                                         </div>
                                     </c:forEach>
                                     <div class="pagination">
                                         <c:if test="${currentPage > 1}">
-                                            <a href="?incomeID=${param.incomeID}&page=${currentPage - 1}&keyword=${param.keyword}&status=${param.status}">&laquo; Trước</a>
+                                            <a href="?incomeID=${param.incomeID}&page=${currentPage - 1}&keyword=${param.keyword}&status=${param.status}">« Trước</a>
                                         </c:if>
                                         <c:if test="${totalPages > 1}">
                                             <c:choose>
                                                 <c:when test="${totalPages <= 5}">
                                                     <c:forEach begin="1" end="${totalPages}" var="i">
-                                                        <a href="?incomeID=${param.incomeID}&page=${i}&keyword=${param.keyword}&status=${param.status}"
+                                                        <a href="?incomeID=${incomeID}&page=${i}&keyword=${param.keyword}&status=${param.status}"
                                                            class="${i == currentPage ? 'active' : ''}">${i}</a>
                                                     </c:forEach>
                                                 </c:when>
@@ -244,22 +274,22 @@
                                                         <c:set var="startPage" value="${totalPages - 4}"/>
                                                     </c:if>
                                                     <c:if test="${startPage > 1}">
-                                                        <a href="?incomeID=${param.incomeID}&page=1&keyword=${param.keyword}&status=${param.status}">1</a>
+                                                        <a href="?incomeID=${incomeID}&page=1&keyword=${param.keyword}&status=${param.status}">1</a>
                                                         <span class="ellipsis">...</span>
                                                     </c:if>
                                                     <c:forEach begin="${startPage}" end="${endPage}" var="i">
-                                                        <a href="?incomeID=${param.incomeID}&page=${i}&keyword=${param.keyword}&status=${param.status}"
+                                                        <a href="?incomeID=${incomeID}&page=${i}&keyword=${param.keyword}&status=${param.status}"
                                                            class="${i == currentPage ? 'active' : ''}">${i}</a>
                                                     </c:forEach>
                                                     <c:if test="${endPage < totalPages}">
                                                         <span class="ellipsis">...</span>
-                                                        <a href="?incomeID=${param.incomeID}&page=${totalPages}&keyword=${param.keyword}&status=${param.status}">${totalPages}</a>
+                                                        <a href="?incomeID=${incomeID}&page=${totalPages}&keyword=${param.keyword}&status=${param.status}">${totalPages}</a>
                                                     </c:if>
                                                 </c:otherwise>
                                             </c:choose>
                                         </c:if>
                                         <c:if test="${currentPage < totalPages}">
-                                            <a href="?incomeID=${param.incomeID}&page=${currentPage + 1}&keyword=${param.keyword}&status=${param.status}">Sau &raquo;</a>
+                                            <a href="?incomeID=${incomeID}&page=${currentPage + 1}&keyword=${param.keyword}&status=${param.status}">Sau »</a>
                                         </c:if>
                                     </div>
                                 </div>
@@ -270,19 +300,40 @@
                         </div>
                     </div>
                 </div>
-            </main>
         </div>
+    </main>
+</div>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script>
-            window.addEventListener('load', function () {
-                const cards = document.querySelectorAll('.enhanced-card');
-                cards.forEach((card, index) => {
-                    setTimeout(() => {
-                        card.classList.add('fade-in');
-                    }, index * 100);
-                });
-            });
-        </script>
-    </body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+                                                                window.addEventListener('load', function () {
+                                                                    const cards = document.querySelectorAll('.enhanced-card');
+                                                                    cards.forEach((card, index) => {
+                                                                        setTimeout(() => {
+                                                                            card.classList.add('fade-in');
+                                                                        }, index * 100);
+                                                                    });
+                                                                });
+
+                                                                function confirmMarkPaid(contributionID, incomeID) {
+                                                                    if (confirm('Xác nhận đã nhận phí từ thành viên này?')) {
+                                                                        window.location.href = '${pageContext.request.contextPath}/department/financial/income.member?action=markPaid&contributionID=' + contributionID + '&incomeID=' + incomeID;
+                                                                    }
+                                                                }
+
+
+
+                                                                function confirmRemindAll(incomeID) {
+                                                                    if (confirm('Gửi thông báo nhắc nhở tới tất cả thành viên chưa đóng phí?')) {
+                                                                        window.location.href = '${pageContext.request.contextPath}/department/financial/income.member?action=remindAll&incomeID=' + incomeID;
+                                                                    }
+                                                                }
+
+                                                                function confirmComplete(incomeID) {
+                                                                    if (confirm('Xác nhận hoàn thành thu phí thành viên này?')) {
+                                                                        window.location.href = '${pageContext.request.contextPath}/department/financial/income.member?action=complete&incomeID=' + incomeID;
+                                                                    }
+                                                                }
+</script>
+</body>
 </html>
