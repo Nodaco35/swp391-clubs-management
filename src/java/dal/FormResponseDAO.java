@@ -18,9 +18,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public class FormResponseDAO extends DBContext {
-    private static final Logger LOGGER = Logger.getLogger(FormResponseDAO.class.getName());    
+    private static final Logger LOGGER = Logger.getLogger(FormResponseDAO.class.getName());
+
     //Lấy tất cả phản hồi cho một biểu mẫu cụ thể
-   
     public List<ClubApplicationExtended> getApplicationsByFormId(int formId) {
         List<ClubApplicationExtended> applications = new ArrayList<>();
         String sql = """
@@ -47,19 +47,8 @@ public class FormResponseDAO extends DBContext {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     ClubApplicationExtended application = new ClubApplicationExtended();
-                    application.setApplicationId(rs.getInt("ApplicationId"));
-                    application.setUserId(rs.getString("UserId"));
-                    application.setClubId(rs.getInt("ClubId"));
-                    application.setEmail(rs.getString("Email"));
-                    application.setEventId(rs.getObject("EventId") != null ? rs.getInt("EventId") : null);
-                    application.setResponseId(rs.getInt("ResponseId"));
-                    application.setStatus(rs.getString("Status"));
-                    application.setSubmitDate(rs.getTimestamp("SubmitDate"));
-                    application.setFullName(rs.getString("FullName"));
-                    application.setResponses(rs.getString("Responses"));
-                    application.setResponseStatus(rs.getString("ResponseStatus"));
+                    populateApplicationFromResultSet(application, rs);
                     application.setFormId(formId);
-                    application.setFormType(rs.getString("FormType"));
                     applications.add(application);
                 }
             }
@@ -96,19 +85,8 @@ public class FormResponseDAO extends DBContext {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     ClubApplicationExtended application = new ClubApplicationExtended();
-                    application.setApplicationId(rs.getInt("ApplicationId"));
-                    application.setUserId(rs.getString("UserId"));
-                    application.setClubId(rs.getInt("ClubId"));
-                    application.setEmail(rs.getString("Email"));
-                    application.setEventId(rs.getObject("EventId") != null ? rs.getInt("EventId") : null);
-                    application.setResponseId(rs.getInt("ResponseId"));
-                    application.setStatus(rs.getString("Status"));
-                    application.setSubmitDate(rs.getTimestamp("SubmitDate"));
-                    application.setFullName(rs.getString("FullName"));
-                    application.setResponses(rs.getString("Responses"));
-                    application.setResponseStatus(rs.getString("ResponseStatus"));
-                    application.setFormId(rs.getInt("FormId"));
-                    application.setFormType(rs.getString("FormType"));
+                    populateApplicationFromResultSet(application, rs);
+                    application.setFormId(formId);
                     applications.add(application);
                 }
             }
@@ -147,19 +125,8 @@ public class FormResponseDAO extends DBContext {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     ClubApplicationExtended application = new ClubApplicationExtended();
-                    application.setApplicationId(rs.getInt("ApplicationId"));
-                    application.setUserId(rs.getString("UserId"));
-                    application.setClubId(rs.getInt("ClubId"));
-                    application.setEmail(rs.getString("Email"));
-                    application.setEventId(rs.getObject("EventId") != null ? rs.getInt("EventId") : null);
-                    application.setResponseId(rs.getInt("ResponseId"));
-                    application.setStatus(rs.getString("Status"));
-                    application.setSubmitDate(rs.getTimestamp("SubmitDate"));
-                    application.setFullName(rs.getString("FullName"));
-                    application.setResponses(rs.getString("Responses"));
-                    application.setResponseStatus(rs.getString("ResponseStatus"));
-                    application.setFormId(rs.getInt("FormId"));
-                    application.setFormType(rs.getString("FormType"));
+                    populateApplicationFromResultSet(application, rs);
+                    application.setFormId(formId);
                     applications.add(application);
                 }
             }
@@ -616,5 +583,98 @@ public class FormResponseDAO extends DBContext {
             LOGGER.log(Level.SEVERE, "Error counting applications for form in campaign", e);
         }
         return 0;
+    }
+    
+    /**
+     * Lưu đánh giá (review note) cho một ứng viên
+     * 
+     * @param responseId ID của phản hồi cần cập nhật đánh giá
+     * @param reviewNote Nội dung đánh giá
+     * @return true nếu cập nhật thành công, false nếu có lỗi
+     */
+    public boolean saveReviewNote(int responseId, String reviewNote) {
+        LOGGER.log(Level.INFO, "Saving review note for response ID {0}: {1}", 
+                  new Object[]{responseId, reviewNote});
+                  
+        // Kiểm tra xem đã có cột ReviewNote chưa, nếu chưa thì thêm vào
+        ensureReviewNoteColumnExists();
+        
+        String sql = "UPDATE ClubApplications SET ReviewNote = ? WHERE ResponseId = ?";
+
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, reviewNote);
+            ps.setInt(2, responseId);
+            int rowsAffected = ps.executeUpdate();
+            LOGGER.log(Level.INFO, "Update review note result: {0} rows affected", rowsAffected);
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error saving review note", e);
+            return false;
+        }
+    }
+    
+    /**
+     * Kiểm tra xem cột ReviewNote đã tồn tại trong bảng ClubApplications chưa.
+     * Nếu chưa, thì thêm cột này vào.
+     */
+    private void ensureReviewNoteColumnExists() {
+        LOGGER.log(Level.INFO, "Checking if ReviewNote column exists in ClubApplications table");
+        try (Connection conn = getConnection()) {
+            // Kiểm tra xem cột đã tồn tại chưa
+            boolean columnExists = false;
+            
+            try (ResultSet rs = conn.getMetaData().getColumns(null, null, "ClubApplications", "ReviewNote")) {
+                columnExists = rs.next();
+                LOGGER.log(Level.INFO, "ReviewNote column exists: {0}", columnExists);
+            }
+            
+            // Nếu cột chưa tồn tại, thêm vào
+            if (!columnExists) {
+                LOGGER.log(Level.INFO, "ReviewNote column does not exist, adding it now");
+                try (PreparedStatement ps = conn.prepareStatement(
+                        "ALTER TABLE ClubApplications ADD COLUMN ReviewNote TEXT")) {
+                    int result = ps.executeUpdate();
+                    LOGGER.log(Level.INFO, "Added ReviewNote column to ClubApplications table, result: {0}", result);
+                }
+            } else {
+                LOGGER.log(Level.INFO, "ReviewNote column already exists, no need to add it");
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error checking/creating ReviewNote column", e);
+        }
+    }
+    
+    /**
+     * Helper method to populate a ClubApplicationExtended object from ResultSet
+     * including the ReviewNote field if it exists
+     */
+    private void populateApplicationFromResultSet(ClubApplicationExtended application, ResultSet rs) throws SQLException {
+        application.setApplicationId(rs.getInt("ApplicationId"));
+        application.setUserId(rs.getString("UserId"));
+        application.setClubId(rs.getInt("ClubId"));
+        application.setEmail(rs.getString("Email"));
+        application.setEventId(rs.getObject("EventId") != null ? rs.getInt("EventId") : null);
+        application.setResponseId(rs.getInt("ResponseId"));
+        application.setStatus(rs.getString("Status"));
+        application.setSubmitDate(rs.getTimestamp("SubmitDate"));
+        application.setFullName(rs.getString("FullName"));
+        application.setResponses(rs.getString("Responses"));
+        application.setResponseStatus(rs.getString("ResponseStatus"));
+        application.setFormId(rs.getInt("FormId"));
+        application.setFormType(rs.getString("FormType"));
+        
+        // Set reviewNote if it exists in the result set
+        try {
+            String reviewNote = rs.getString("ReviewNote");
+            LOGGER.log(Level.INFO, "Retrieved ReviewNote for application {0}: {1}", 
+                      new Object[]{application.getApplicationID(), reviewNote});
+            application.setReviewNote(reviewNote);
+        } catch (SQLException ex) {
+            // Column might not exist yet, which is okay
+            LOGGER.log(Level.INFO, "ReviewNote column not found for application {0}", 
+                      application.getApplicationID());
+            application.setReviewNote(null);
+        }
     }
 }

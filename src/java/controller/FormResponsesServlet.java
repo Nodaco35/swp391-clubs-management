@@ -273,6 +273,22 @@ public class FormResponsesServlet extends HttpServlet {
                 success = formResponseDAO.rejectApplication(responseId);
                 message = success ? "Đã từ chối đơn đăng ký" : "Không thể từ chối đơn. Vui lòng thử lại sau.";
                 newStatus = "rejected";
+            } else if ("saveReview".equals(action)) {
+                // Lấy nội dung đánh giá từ request
+                String reviewNote = request.getParameter("reviewNote");
+                if (reviewNote == null) {
+                    reviewNote = "";
+                }
+                
+                // Lưu đánh giá vào database
+                try {
+                    success = formResponseDAO.saveReviewNote(responseId, reviewNote);
+                    message = success ? "Đã lưu đánh giá thành công" : "Không thể lưu đánh giá. Vui lòng thử lại sau.";
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Lỗi khi lưu đánh giá", e);
+                    success = false;
+                    message = "Đã xảy ra lỗi: " + e.getMessage();
+                }
             } else {
                 out.print(gson.toJson(new ApiResponse(false, "Hành động không hợp lệ.")));
                 return;

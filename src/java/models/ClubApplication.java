@@ -18,7 +18,8 @@ public class ClubApplication {
     private int clubID;
     private String userName;
     private String clubName;
-
+    private String reviewNote;
+    
     public String getClubName() {
         return clubName;
     }
@@ -26,10 +27,6 @@ public class ClubApplication {
     public void setClubName(String clubName) {
         this.clubName = clubName;
     }
-    
-    
-
-
     public ClubApplication() {
         // default constructor
     }
@@ -113,6 +110,12 @@ public class ClubApplication {
     public void setSubmitDate(Timestamp submitDate) {
         this.submitDate = submitDate;
     }
+    public String getReviewNote() {
+        return reviewNote;
+    }
+    public void setReviewNote(String reviewNote) {
+        this.reviewNote = reviewNote;
+    }
 
     @Override
     public String toString() {
@@ -126,6 +129,7 @@ public class ClubApplication {
                 ", responseId=" + responseId +
                 ", status='" + status + '\'' +
                 ", submitDate=" + submitDate +
+                ", reviewNote='" + reviewNote + '\'' +
                 '}';
     }
 
