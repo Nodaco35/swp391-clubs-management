@@ -344,53 +344,43 @@ public class ApplicationFormTemplateDAO {
      * thiết
      */
     public List<Map<String, Object>> getPublishedMemberForms(Integer specificClubId) {
-        connection = DBContext.getConnection();
-        List<Map<String, Object>> forms = new ArrayList<>();
+    Connection connection = DBContext.getConnection();
+    List<Map<String, Object>> forms = new ArrayList<>();
 
-        // Ưu tiên 1: Tìm form cho club hiện tại - sử dụng bảng ApplicationForms mới
-        String sql = "SELECT af.FormID, af.Title, af.FormType, af.ClubID, af.EventID, af.Published, "
-                + "MAX(aft.TemplateID) as TemplateID "
-                + "FROM ApplicationForms af "
-                + "JOIN ApplicationFormTemplates aft ON af.FormID = aft.FormID "
-                + "WHERE af.Published = TRUE AND af.FormType = 'Club' ";
+    String sql = "SELECT FormID, Title, FormType, ClubID, EventID, Published " +
+                 "FROM ApplicationForms " +
+                 "WHERE Published = TRUE AND FormType = 'Club'";
 
-        if (specificClubId != null) {
-            sql += "AND af.ClubID = ? ";
-        }
-
-        sql += "GROUP BY af.FormID, af.Title, af.FormType, af.ClubID, af.EventID, af.Published "
-                + "ORDER BY MAX(aft.TemplateID) DESC";
-
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            // Nếu có clubId cụ thể thì thêm vào điều kiện query
-            if (specificClubId != null) {
-                stmt.setInt(1, specificClubId);
-                System.out.println("DEBUG: Tìm form cho ClubID cụ thể: " + specificClubId);
-            }
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Map<String, Object> form = new HashMap<>();
-                    int templateId = rs.getInt("TemplateID");
-                    int formId = rs.getInt("FormID");
-                    String title = rs.getString("Title");
-                    int clubId = rs.getInt("ClubID");
-
-                    form.put("formId", formId);
-                    form.put("templateId", templateId);
-                    form.put("title", title);
-                    form.put("formType", rs.getString("FormType"));
-                    form.put("clubId", clubId);
-                    form.put("eventId", rs.getObject("EventID"));
-                    form.put("published", rs.getBoolean("Published"));
-                    forms.add(form);
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi lấy danh sách form đã xuất bản: " + e.getMessage());
-            e.printStackTrace(); // In stack trace để debug trong quá trình phát triển
-        }
-        return forms;
+    // Nếu có truyền clubId cụ thể thì thêm điều kiện
+    if (specificClubId != null) {
+        sql += " AND ClubID = ?";
     }
+
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        if (specificClubId != null) {
+            stmt.setInt(1, specificClubId);
+        }
+
+        try (ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                Map<String, Object> form = new HashMap<>();
+                form.put("formId", rs.getInt("FormID"));
+                form.put("title", rs.getString("Title"));
+                form.put("formType", rs.getString("FormType"));
+                form.put("clubId", rs.getInt("ClubID"));
+                form.put("eventId", rs.getObject("EventID")); // nullable
+                form.put("published", rs.getBoolean("Published"));
+                forms.add(form);
+            }
+        }
+    } catch (SQLException e) {
+        System.err.println("Lỗi khi lấy danh sách form đã xuất bản: " + e.getMessage());
+        e.printStackTrace();
+    }
+
+    return forms;
+}
+
 
     /**
      * Phương thức gốc để tương thích ngược với code hiện tại Lấy tất cả các

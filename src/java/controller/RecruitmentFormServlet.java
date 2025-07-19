@@ -206,22 +206,17 @@ public class RecruitmentFormServlet extends HttpServlet {
         }
 
         // Lấy danh sách form đăng ký đã publish của CLB
-        List<Map<String, Object>> publishedTemplates = formTemplateDAO.getPublishedMemberForms(clubId);
+        List<Map<String, Object>> publishedForms = formTemplateDAO.getPublishedMemberForms(clubId);
 
-        // Debug: Ghi log thông tin về templates đã tìm thấy
-        logger.log(Level.INFO, "Tìm thấy {0} templates cho CLB ID: {1}",
-                new Object[]{publishedTemplates.size(), clubId});
+        logger.log(Level.INFO, "Tìm thấy {0} forms cho CLB ID: {1}",
+                new Object[]{publishedForms.size(), clubId});
 
         // Nếu không tìm thấy form cho club này, lấy tất cả các form (hiển thị warning)
-        if (publishedTemplates.isEmpty()) {
+        if (publishedForms.isEmpty()) {
             logger.log(Level.WARNING, "Không tìm thấy form nào cho ClubID={0}, lấy tất cả các form", clubId);
-
-            // Lấy tất cả các form đã xuất bản từ tất cả các clubs
-            publishedTemplates = formTemplateDAO.getPublishedMemberForms(null);
-
             // Thêm cảnh báo để hiển thị cho người dùng
             request.setAttribute("formWarning",
-                    "Không tìm thấy form nào dành riêng cho CLB #" + clubId + ". Hiển thị tất cả form có sẵn.");
+                    "Không tìm thấy form nào dành riêng cho CLB #" + clubId);
         }
 
         // Lấy danh sách địa điểm
@@ -234,7 +229,7 @@ public class RecruitmentFormServlet extends HttpServlet {
         request.setAttribute("campaign", campaign);
         request.setAttribute("stages", null);
         request.setAttribute("stagesJson", stagesJson); // Thêm JSON string cho stages rỗng
-        request.setAttribute("publishedTemplates", publishedTemplates);
+        request.setAttribute("publishedForms", publishedForms);
         request.setAttribute("locations", locations);
         request.setAttribute("mode", "create");
         request.setAttribute("selectedClubId", clubId);
@@ -322,13 +317,11 @@ public class RecruitmentFormServlet extends HttpServlet {
         }
 
         // Lấy danh sách form đăng ký đã publish của CLB
-        List<Map<String, Object>> publishedTemplates = formTemplateDAO.getPublishedMemberForms(clubId);
+        List<Map<String, Object>> publishedForms = formTemplateDAO.getPublishedMemberForms(clubId);
 
-        // Nếu không tìm thấy form cho club này, lấy tất cả các form
-        if (publishedTemplates.isEmpty()) {
-            publishedTemplates = formTemplateDAO.getPublishedMemberForms(null);
+        if (publishedForms.isEmpty()) {
             request.setAttribute("formWarning",
-                    "Không tìm thấy form nào dành riêng cho CLB #" + clubId + ". Hiển thị tất cả form có sẵn.");
+                    "Không tìm thấy form nào dành riêng cho CLB #" + clubId);
         }
 
         // Lấy danh sách địa điểm
@@ -354,7 +347,7 @@ public class RecruitmentFormServlet extends HttpServlet {
         request.setAttribute("applicationCount", applicationCount);
         request.setAttribute("hasApplications", hasApplications);
         request.setAttribute("stagesJson", stagesJson); // Thêm JSON string cho stages
-        request.setAttribute("publishedTemplates", publishedTemplates);
+        request.setAttribute("publishedForms", publishedForms);
         request.setAttribute("locations", locations);
         request.setAttribute("mode", "edit");
         request.setAttribute("selectedClubId", clubId);
@@ -618,9 +611,9 @@ public class RecruitmentFormServlet extends HttpServlet {
         updatedCampaign.setRecruitmentID(recruitmentId); // Đảm bảo ID được set đúng
 
         // Log dữ liệu trước khi cập nhật để debug
-        logger.log(Level.INFO, "Dữ liệu cập nhật campaign: ID={0}, ClubID={1}, Title={2}, TemplateID={3}",
+        logger.log(Level.INFO, "Dữ liệu cập nhật campaign: ID={0}, ClubID={1}, Title={2}, FormID={3}",
                 new Object[]{updatedCampaign.getRecruitmentID(), updatedCampaign.getClubID(),
-                    updatedCampaign.getTitle(), updatedCampaign.getTemplateID()});
+                    updatedCampaign.getTitle(), updatedCampaign.getFormID()});
 
         try {
             // Gọi service để cập nhật chiến dịch
@@ -1258,13 +1251,12 @@ public class RecruitmentFormServlet extends HttpServlet {
             throw new IllegalArgumentException("Vui lòng nhập số thế hệ (Gen)");
         }
 
-        String templateId = request.getParameter("templateId");
-        logger.log(Level.INFO, "DEBUG - Parsing templateId: {0}", templateId);
-        if (templateId != null && !templateId.isEmpty()) {
+        String formId = request.getParameter("formId");
+        logger.log(Level.INFO, "DEBUG - Parsing formId: {0}", formId);
+        if (formId != null && !formId.isEmpty()) {
             try {
-                int templateIdInt = Integer.parseInt(templateId);
-                campaign.setTemplateID(templateIdInt);
-                logger.log(Level.INFO, "DEBUG - Đã set templateID: {0}", templateIdInt);
+                int formIdInt = Integer.parseInt(formId);
+                campaign.setFormID(formIdInt);
             } catch (NumberFormatException e) {
                 logger.log(Level.SEVERE, "DEBUG - Lỗi parse templateId: {0}", e.getMessage());
                 throw new IllegalArgumentException("Form đăng ký không hợp lệ");

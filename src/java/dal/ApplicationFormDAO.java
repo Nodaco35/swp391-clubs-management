@@ -162,6 +162,7 @@ public class ApplicationFormDAO {
         }
         return form;
     }
+    //Lấy form với formType là Club và trạng thái published
     public ApplicationForm findFormByTitleAndClubId(String title, int clubId) {
         connection = DBContext.getConnection();
         ApplicationForm form = null;

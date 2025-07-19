@@ -86,7 +86,7 @@ public class FormResponseDAO extends DBContext {
                 while (rs.next()) {
                     ClubApplicationExtended application = new ClubApplicationExtended();
                     populateApplicationFromResultSet(application, rs);
-                    application.setFormId(formId);
+                    application.setFormId(rs.getInt("FormId"));
                     applications.add(application);
                 }
             }

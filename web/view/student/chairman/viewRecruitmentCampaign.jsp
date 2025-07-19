@@ -464,14 +464,14 @@
     <script>
         console.log("JSP campaign data:", {
             recruitmentID: '${campaign.recruitmentID}',
-            templateID: '${campaign.templateID}',
+            formID: '${campaign.formID}',
             clubID: '${campaign.clubID}'
         });
         
         // Pass data to JavaScript
         window.campaignData = {
             campaignId: parseInt('${campaign.recruitmentID}') || 0,
-            templateId: parseInt('${campaign.templateID}') || 0,
+            formId: parseInt('${campaign.formID}') || 0,
             clubId: parseInt('${campaign.clubID}') || 0,  // Chỉ sử dụng tên biến nhất quán là "clubId"
             stages: []
         };

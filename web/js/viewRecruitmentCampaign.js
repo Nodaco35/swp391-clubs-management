@@ -636,11 +636,6 @@ function loadRecipientsForNotification(stageId, stageType) {
               ${statusText}
             </span>
           </div>
-          <div class="recipient-action">
-            <button class="btn btn-outline btn-sm" onclick="viewCandidateDetail(${candidate.applicationId || 0})">
-              <i class="fas fa-eye"></i> Xem
-            </button>
-          </div>
         </div>
         `;
         });
@@ -956,15 +951,15 @@ function viewNotificationDetail(notificationId) {
 
 function viewFormResponses(stageType) {
   const campaignId = window.campaignData?.campaignId;
-  const templateId = window.campaignData?.templateId;
+  const formId = window.campaignData?.formId;
   const clubId = window.campaignData && window.campaignData.clubId ? window.campaignData.clubId : 1;
   
-  if (!templateId || !clubId) {
+  if (!formId || !clubId) {
     showToast('Không tìm thấy thông tin form', 'error');
     return;
   }
   
-  const url = `${contextPath}/formResponses?templateId=${templateId}&clubId=${clubId}&formType=member&stageType=${stageType}`;
+  const url = `${contextPath}/formResponses?formId=${formId}&clubId=${clubId}&formType=member&stageType=${stageType}`;
   window.open(url, '_blank');
 }
 

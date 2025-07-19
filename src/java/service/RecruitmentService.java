@@ -53,8 +53,8 @@ public class RecruitmentService {
             throw new IllegalStateException("Không thể thay đổi ngày bắt đầu khi chiến dịch đang diễn ra");
         }
 
-        // Kiểm tra nếu templateId bị thay đổi khi đã có đơn đăng ký
-        if (existingCampaign.getTemplateID() != campaign.getTemplateID()) {
+        // Kiểm tra nếu formId bị thay đổi khi đã có đơn đăng ký
+        if (existingCampaign.getFormID() != campaign.getFormID()) {
             if (stageDAO.hasApplicationResponses(campaign.getRecruitmentID())) {
                 throw new IllegalStateException("Không thể thay đổi mẫu đơn khi đã có đơn đăng ký");
             }
