@@ -122,6 +122,46 @@ public class ApplicationFormDAO {
         }
         return form;
     }
+    //Lấy form theo Id và theo trạng thái published
+    public ApplicationForm findFormByIdAndPublished(int formId, int published) {
+        connection = DBContext.getConnection();
+        ApplicationForm form = null;
+        String sql = "SELECT * FROM ApplicationForms WHERE FormID = ? AND Published = ?";
+        
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, formId); 
+            stmt.setInt(2, published);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    System.out.println("DEBUG: Form found in database, extracting data");
+                    form = new ApplicationForm(
+                        rs.getInt("FormID"),
+                        rs.getInt("ClubID"),
+                        rs.getInt("EventID"),
+                        rs.getString("FormType"),
+                        rs.getString("Title"),
+                        rs.getBoolean("Published")
+                    );
+                    
+                    // Check if EventID was NULL in database
+                    if (rs.wasNull()) {
+                        form.setEventId(null);
+                    }
+                } else {
+                    System.out.println("DEBUG: No form found with ID " + formId);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (connection != null) connection.close();
+            } catch (SQLException e) {
+                System.err.println("Lỗi đóng kết nối: " + e.getMessage());
+            }
+        }
+        return form;
+    }
     public ApplicationForm findFormByTitleAndClubId(String title, int clubId) {
         connection = DBContext.getConnection();
         ApplicationForm form = null;

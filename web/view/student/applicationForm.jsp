@@ -69,7 +69,7 @@ System.out.println("ApplicationForm.jsp: Đang hiển thị " + questions.size()
 
         <div class="form-content">
             <form id="applicationForm" action="${pageContext.request.contextPath}/applicationForm" method="post">
-                <input type="hidden" name="templateId" value="${templateId}">
+                <input type="hidden" name="formId" value="${formId}">
                 <input type="hidden" name="clubId" value="${clubId}">
                 <input type="hidden" name="formType" value="${formType}">
                 <c:if test="${not empty eventId}">

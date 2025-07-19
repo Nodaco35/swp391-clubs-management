@@ -9,11 +9,11 @@ public class ApplicationResponseDAO {
     // Thêm response mới
     public int saveResponse(ApplicationResponse response) throws SQLException {
         connection = DBContext.getConnection();
-        String sql = "INSERT INTO ApplicationResponses (TemplateID, UserID, ClubID, EventID, Responses, Status) " +
+        String sql = "INSERT INTO ApplicationResponses (FormID, UserID, ClubID, EventID, Responses, Status) " +
                     "VALUES (?, ?, ?, ?, ?, ?)";
         
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setInt(1, response.getTemplateID());
+            ps.setInt(1, response.getFormID());
             ps.setString(2, response.getUserID());
             ps.setInt(3, response.getClubID());
             
@@ -69,7 +69,7 @@ public class ApplicationResponseDAO {
                 while (rs.next()) {
                     ApplicationResponse response = new ApplicationResponse();
                     response.setResponseID(rs.getInt("ResponseID"));
-                    response.setTemplateID(rs.getInt("TemplateID"));
+                    response.setFormID(rs.getInt("TemplateID"));
                     response.setUserID(rs.getString("UserID"));
                     response.setClubID(rs.getInt("ClubID"));
                     
@@ -103,7 +103,7 @@ public class ApplicationResponseDAO {
                 while (rs.next()) {
                     ApplicationResponse response = new ApplicationResponse();
                     response.setResponseID(rs.getInt("ResponseID"));
-                    response.setTemplateID(rs.getInt("TemplateID"));
+                    response.setFormID(rs.getInt("TemplateID"));
                     response.setUserID(rs.getString("UserID"));
                     response.setClubID(rs.getInt("ClubID"));
                     
@@ -137,7 +137,7 @@ public class ApplicationResponseDAO {
                 while (rs.next()) {
                     ApplicationResponse response = new ApplicationResponse();
                     response.setResponseID(rs.getInt("ResponseID"));
-                    response.setTemplateID(rs.getInt("TemplateID"));
+                    response.setFormID(rs.getInt("TemplateID"));
                     response.setUserID(rs.getString("UserID"));
                     response.setClubID(rs.getInt("ClubID"));
                     
@@ -170,7 +170,7 @@ public class ApplicationResponseDAO {
                 if (rs.next()) {
                     ApplicationResponse response = new ApplicationResponse();
                     response.setResponseID(rs.getInt("ResponseID"));
-                    response.setTemplateID(rs.getInt("TemplateID"));
+                    response.setFormID(rs.getInt("TemplateID"));
                     response.setUserID(rs.getString("UserID"));
                     response.setClubID(rs.getInt("ClubID"));
                     
@@ -259,7 +259,7 @@ public class ApplicationResponseDAO {
                 while (rs.next()) {
                     ApplicationResponse response = new ApplicationResponse();
                     response.setResponseID(rs.getInt("ResponseID"));
-                    response.setTemplateID(rs.getInt("TemplateID"));
+                    response.setFormID(rs.getInt("TemplateID"));
                     response.setUserID(rs.getString("UserID"));
                     response.setClubID(rs.getInt("ClubID"));
                     

@@ -5,13 +5,13 @@ import java.util.Date;
 
 /**
  * Extended model class for ClubApplications that includes additional fields from joins
- * Used to merge data from ClubApplications, ApplicationResponses, Users, and ApplicationFormTemplates
+ * Used to merge data from ClubApplications, ApplicationResponses, Users, and ApplicationForms
  */
 public class ClubApplicationExtended extends ClubApplication {
     private String fullName;  // Lấy từ Users dựa trên userId
     private String responses; // JSON từ ApplicationResponses
     private String responseStatus; // Trạng thái từ ApplicationResponses
-    private int templateId;   // ID của form template
+    private int formId;   // ID của form template
     private String formType;  // Loại form (member/event)
     
     public ClubApplicationExtended() {
@@ -71,12 +71,12 @@ public class ClubApplicationExtended extends ClubApplication {
         this.responseStatus = responseStatus;
     }
 
-    public int getTemplateId() {
-        return templateId;
+    public int getFormId() {
+        return formId;
     }
 
-    public void setTemplateId(int templateId) {
-        this.templateId = templateId;
+    public void setFormId(int formId) {
+        this.formId = formId;
     }
 
     public String getFormType() {
@@ -99,7 +99,7 @@ public class ClubApplicationExtended extends ClubApplication {
                 ", responseId=" + getResponseId() +
                 ", status='" + getStatus() + '\'' +
                 ", responseStatus='" + responseStatus + '\'' +
-                ", templateId=" + templateId +
+                ", formId=" + formId +
                 ", formType='" + formType + '\'' +
                 ", submitDate=" + getSubmitDate() +
                 '}';
