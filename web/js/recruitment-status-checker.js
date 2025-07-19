@@ -83,6 +83,14 @@ function refreshClubStatus() {
 }
 
 /**
+ * Biến global để lưu thông tin Hoạt động hiện tại
+ */
+let currentCampaignData = null;
+let currentStagesData = null;
+let applicationFormUrl = null;
+let isApplicationStageActive = false;
+
+/**
  * Khởi tạo nút Tham gia câu lạc bộ
  */
 function initializeJoinClubButton() {
@@ -125,6 +133,16 @@ function initializeJoinClubButton() {
     joinButton.classList.add('loading');
     joinButton.setAttribute('title', 'Đang tải thông tin tuyển quân...');
     
+    // Thêm sự kiện click để mở modal thay vì chuyển hướng
+    joinButton.addEventListener('click', function(e) {
+        e.preventDefault(); // Ngăn chặn hành vi mặc định (điều hướng)
+        
+        // Chỉ mở modal nếu nút không bị disabled và có thông tin Hoạt động
+        if (!joinButton.classList.contains('disabled') && currentCampaignData) {
+            showRecruitmentModal();
+        }
+    });
+    
     // Kiểm tra xem câu lạc bộ có hoạt động tuyển quân đang diễn ra không
     fetch(`${contextPath}/recruitment/club-campaigns?clubId=${clubId}`, {
         method: 'GET',
@@ -144,10 +162,10 @@ function initializeJoinClubButton() {
         const activeCampaigns = data.campaigns?.filter(c => c.status === 'ONGOING') || [];
         
         if (activeCampaigns.length > 0) {
-            // Lấy campaign đang diễn ra và các vòng tuyển của nó
-            const currentCampaign = activeCampaigns[0];
+            // Lưu thông tin Hoạt động hiện tại vào biến global
+            currentCampaignData = activeCampaigns[0];
             
-            fetch(`${contextPath}/recruitment/stages?recruitmentId=${currentCampaign.recruitmentId}`, {
+            fetch(`${contextPath}/recruitment/stages?recruitmentId=${currentCampaignData.recruitmentId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -159,6 +177,9 @@ function initializeJoinClubButton() {
                     console.warn('Không thể lấy thông tin các vòng tuyển:', stageData.message);
                     return;
                 }
+                
+                // Lưu thông tin các vòng tuyển
+                currentStagesData = stageData.stages;
                 
                 const now = new Date();
                 const applicationStage = stageData.stages.find(stage => stage.stageName === 'APPLICATION');
@@ -183,17 +204,6 @@ function initializeJoinClubButton() {
                     const endDateOnly = new Date(appEndDate.getFullYear(), appEndDate.getMonth(), appEndDate.getDate());
                     const nowDateOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
                     
-                    console.log('DEBUG DATE COMPARISON:', {
-                        nowDateOnly: nowDateOnly.toLocaleDateString(),
-                        startDateOnly: startDateOnly.toLocaleDateString(),
-                        endDateOnly: endDateOnly.toLocaleDateString(),
-                        isAfterOrEqualStart: nowDateOnly >= startDateOnly,
-                        isBeforeOrEqualEnd: nowDateOnly <= endDateOnly,
-                        nowTime: now.getTime(),
-                        startTime: startDateOnly.getTime(),
-                        endTime: endDateOnly.getTime()
-                    });
-                    
                     // Kiểm tra đúng ngày hiện tại so với ngày bắt đầu và ngày kết thúc bằng getTime()
                     const isToday = nowDateOnly.getTime() === startDateOnly.getTime();
                     const isAfterStartDay = nowDateOnly.getTime() > startDateOnly.getTime();
@@ -209,72 +219,47 @@ function initializeJoinClubButton() {
                         compareEndDay: nowDateOnly.getTime() - endDateOnly.getTime()
                     });
                     
-                    if (isToday || isAfterStartDay) {
-                        if (isBeforeEndDay || isEndDay) {
-                            // Vòng đơn đang diễn ra
-                            console.log('DEBUG: Vòng đơn đang diễn ra - Ngày nằm trong khoảng');
-                            joinButton.href = `${contextPath}/applicationForm?templateId=${currentCampaign.templateId}`;
-                            joinButton.innerHTML = '<i class="fas fa-user-plus"></i> Tham gia câu lạc bộ';
-                            joinButton.classList.remove('disabled', 'btn-secondary');
-                            joinButton.classList.add('btn-primary');
-                    } else if (nowDateOnly < startDateOnly) {
-                        // Vòng đơn chưa bắt đầu
-                        console.log('DEBUG: Vòng đơn chưa bắt đầu');
-                        joinButton.href = '#';
-                        joinButton.innerHTML = `<i class="fas fa-hourglass-start"></i> Vòng đơn bắt đầu vào ${formatDate(appStartDate)}`;
-                        joinButton.classList.add('disabled', 'btn-secondary');
-                        joinButton.classList.remove('btn-primary');
+                    // Kiểm tra nếu đang trong thời gian vòng đơn (để cập nhật biến global)
+                    if ((isToday || isAfterStartDay) && (isBeforeEndDay || isEndDay)) {
+                        // Vòng đơn đang diễn ra
+                        console.log('DEBUG: Vòng đơn đang diễn ra - Ngày nằm trong khoảng');
+                        applicationFormUrl = `${contextPath}/applicationForm?formId=${currentCampaignData.formId}`;
+                        isApplicationStageActive = true;
                     } else {
-                        // Vòng đơn đã kết thúc
-                        console.log('DEBUG: Vòng đơn đã kết thúc (đã qua ngày kết thúc)');
-                        // Tìm vòng tiếp theo
-                        const nextStage = getNextActiveStage(stageData.stages);
-                        if (nextStage) {
-                            joinButton.href = '#';
-                            joinButton.innerHTML = `<i class="fas fa-hourglass-half"></i> ${getStageDisplayName(nextStage.stageName)} bắt đầu vào ${formatDate(new Date(nextStage.startDate))}`;
-                            joinButton.classList.add('disabled', 'btn-secondary');
-                            joinButton.classList.remove('btn-primary');
-                        } else {
-                            // Không có vòng nào tiếp theo
-                            joinButton.href = '#';
-                            joinButton.innerHTML = '<i class="fas fa-hourglass-end"></i> Vòng tuyển quân đã kết thúc';
-                            joinButton.classList.add('disabled', 'btn-secondary');
-                            joinButton.classList.remove('btn-primary');
-                        }
+                        // Vòng đơn chưa bắt đầu hoặc đã kết thúc
+                        isApplicationStageActive = false;
                     }
-                    } else {
-                        // Vòng đơn đã kết thúc
-                        const nextStage = getNextActiveStage(stageData.stages);
-                        if (nextStage) {
-                            joinButton.href = '#';
-                            joinButton.innerHTML = `<i class="fas fa-hourglass-half"></i> ${getStageDisplayName(nextStage.stageName)} bắt đầu vào ${formatDate(new Date(nextStage.startDate))}`;
-                            joinButton.classList.add('disabled', 'btn-secondary');
-                            joinButton.classList.remove('btn-primary');
-                        } else {
-                            // Không có vòng nào tiếp theo
-                            joinButton.href = '#';
-                            joinButton.innerHTML = '<i class="fas fa-hourglass-end"></i> Vòng tuyển quân đã kết thúc';
-                            joinButton.classList.add('disabled', 'btn-secondary');
-                            joinButton.classList.remove('btn-primary');
-                        }
-                    }
+                    
+                    // Nút "Xem thông tin tuyển quân" luôn hiển thị và có thể nhấp vào
+                    joinButton.innerHTML = `<i class="fas fa-info-circle"></i> Xem thông tin tuyển quân`;
+                    joinButton.classList.remove('disabled');
+                    joinButton.classList.remove('btn-secondary');
+                    joinButton.classList.add('btn-info');
+                    
                 } else {
                     // Không có vòng APPLICATION
-                    joinButton.href = '#';
-                    joinButton.innerHTML = '<i class="fas fa-info-circle"></i> Không có thông tin vòng đơn';
-                    joinButton.classList.add('disabled', 'btn-secondary');
-                    joinButton.classList.remove('btn-primary');
+                    isApplicationStageActive = false;
+                    joinButton.innerHTML = `<i class="fas fa-info-circle"></i> Xem thông tin tuyển quân`;
+                    joinButton.classList.remove('disabled');
+                    joinButton.classList.remove('btn-secondary');
+                    joinButton.classList.add('btn-info');
                 }
+                
+                // Thiết lập modal cho Hoạt động
+                setupRecruitmentModal();
             })
             .catch(error => {
                 console.error('Lỗi khi lấy thông tin vòng tuyển:', error);
             });
         } else {
             // Không có hoạt động tuyển quân nào đang diễn ra
+            currentCampaignData = null;
+            currentStagesData = null;
+            isApplicationStageActive = false;
             joinButton.href = '#';
             joinButton.innerHTML = '<i class="fas fa-times-circle"></i> Câu lạc bộ không tuyển thành viên';
             joinButton.classList.add('disabled', 'btn-secondary');
-            joinButton.classList.remove('btn-primary');
+            joinButton.classList.remove('btn-primary', 'btn-info');
         }
         
         // Thêm hiệu ứng cập nhật
@@ -286,6 +271,261 @@ function initializeJoinClubButton() {
     .catch(error => {
         console.error('Lỗi khi lấy thông tin tuyển quân:', error);
     });
+}
+
+/**
+ * Thiết lập modal thông tin tuyển quân
+ */
+function setupRecruitmentModal() {
+    if (!currentCampaignData || !currentStagesData) {
+        console.warn('Không có dữ liệu Hoạt động để thiết lập modal');
+        return;
+    }
+    
+    // Thiết lập sự kiện cho nút đóng modal
+    const closeButton = document.querySelector('.modal-close');
+    const modalCloseButton = document.getElementById('modalCloseButton');
+    const modalApplyButton = document.getElementById('modalApplyButton');
+    const modal = document.getElementById('recruitmentInfoModal');
+    
+    if (!closeButton || !modalCloseButton || !modal) {
+        console.warn('Không tìm thấy các phần tử modal cần thiết');
+        return;
+    }
+    
+    // Thiết lập sự kiện đóng modal
+    const closeModal = () => {
+        modal.classList.remove('show');
+        document.body.style.overflow = '';
+    };
+    
+    closeButton.addEventListener('click', closeModal);
+    modalCloseButton.addEventListener('click', closeModal);
+    
+    // Thiết lập sự kiện cho nút nộp đơn
+    modalApplyButton.addEventListener('click', function() {
+        if (applicationFormUrl) {
+            window.location.href = applicationFormUrl;
+        }
+    });
+    
+    // Ẩn/hiện và cập nhật nội dung nút "Nộp đơn tham gia" dựa vào trạng thái vòng đơn
+    const applicationStage = currentStagesData.find(stage => stage.stageName === 'APPLICATION');
+    if (applicationStage) {
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const appStartDay = new Date(
+            new Date(applicationStage.startDate).getFullYear(), 
+            new Date(applicationStage.startDate).getMonth(), 
+            new Date(applicationStage.startDate).getDate()
+        );
+        const appEndDay = new Date(
+            new Date(applicationStage.endDate).getFullYear(), 
+            new Date(applicationStage.endDate).getMonth(), 
+            new Date(applicationStage.endDate).getDate()
+        );
+        
+        // Kiểm tra ngày hiện tại so với ngày bắt đầu và ngày kết thúc
+        if (today >= appStartDay && today <= appEndDay && applicationFormUrl) {
+            // Đang trong thời gian nộp đơn
+            modalApplyButton.innerHTML = '<i class="fas fa-user-plus"></i> Nộp đơn tham gia';
+            modalApplyButton.style.display = 'block';
+        } else if (today < appStartDay) {
+            // Chưa đến thời gian nộp đơn
+            modalApplyButton.style.display = 'none';
+        } else {
+            // Đã hết thời gian nộp đơn
+            modalApplyButton.style.display = 'none';
+        }
+    } else {
+        modalApplyButton.style.display = 'none';
+    }
+    
+    // Thiết lập đóng modal khi click bên ngoài
+    window.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
+}
+
+/**
+ * Hiển thị modal thông tin tuyển quân
+ */
+function showRecruitmentModal() {
+    if (!currentCampaignData || !currentStagesData) {
+        console.warn('Không có dữ liệu để hiển thị modal');
+        return;
+    }
+    
+    // Tìm các phần tử trong modal
+    const modal = document.getElementById('recruitmentInfoModal');
+    const campaignTitle = document.getElementById('modalCampaignTitle');
+    const campaignGen = document.getElementById('modalCampaignGen');
+    const campaignTime = document.getElementById('modalCampaignTime');
+    const campaignDesc = document.getElementById('modalCampaignDescription');
+    const stagesTimeline = document.getElementById('modalStagesTimeline');
+    const currentStatus = document.getElementById('modalCurrentStatus');
+    const modalApplyButton = document.getElementById('modalApplyButton');
+    
+    if (!modal || !campaignTitle || !campaignGen || !campaignTime || !campaignDesc || !stagesTimeline || !currentStatus) {
+        console.warn('Không tìm thấy các phần tử modal cần thiết');
+        return;
+    }
+    
+    // Cập nhật thông tin Hoạt động
+    campaignTitle.textContent = currentCampaignData.title || 'Không có tiêu đề';
+    campaignGen.textContent = 'Gen: ' + (currentCampaignData.gen || 'N/A');
+    
+    // Format thời gian
+    const startDate = new Date(currentCampaignData.startDate);
+    const endDate = new Date(currentCampaignData.endDate);
+    campaignTime.textContent = `${formatDate(startDate)} - ${formatDate(endDate)}`;
+    
+    // Cập nhật mô tả (nếu có)
+    campaignDesc.textContent = currentCampaignData.description || 'Không có mô tả';
+    
+    // Sắp xếp các vòng theo ngày bắt đầu
+    const sortedStages = [...currentStagesData].sort((a, b) => 
+        new Date(a.startDate) - new Date(b.startDate)
+    );
+    
+    // Cập nhật timeline các vòng tuyển
+    stagesTimeline.innerHTML = '';
+    const now = new Date();
+    
+    sortedStages.forEach(stage => {
+        const stageStart = new Date(stage.startDate);
+        const stageEnd = new Date(stage.endDate);
+        
+        // Xác định trạng thái của vòng
+        let stageStatus;
+        if (now < stageStart) {
+            stageStatus = 'future';
+        } else if (now > stageEnd) {
+            stageStatus = 'past';
+        } else {
+            stageStatus = 'active';
+        }
+        
+        // Tạo HTML cho vòng
+        const stageElement = document.createElement('div');
+        stageElement.className = `stage-item ${stageStatus}`;
+        stageElement.innerHTML = `
+            <div class="stage-dot"><i class="fas fa-${getStageIcon(stage.stageName)}"></i></div>
+            <div class="stage-content">
+                <div class="stage-name">${getStageDisplayName(stage.stageName)}</div>
+                <div class="stage-time">${formatDate(stageStart)} - ${formatDate(stageEnd)}</div>
+            </div>
+        `;
+        
+        stagesTimeline.appendChild(stageElement);
+    });
+    
+    // Cập nhật trạng thái hiện tại
+    updateCurrentStatus(currentStatus);
+    
+    // Ẩn/hiện nút "Nộp đơn tham gia" dựa vào trạng thái vòng đơn hiện tại
+    const applicationStage = currentStagesData.find(stage => stage.stageName === 'APPLICATION');
+    if (applicationStage) {
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const appStartDay = new Date(
+            new Date(applicationStage.startDate).getFullYear(), 
+            new Date(applicationStage.startDate).getMonth(), 
+            new Date(applicationStage.startDate).getDate()
+        );
+        const appEndDay = new Date(
+            new Date(applicationStage.endDate).getFullYear(), 
+            new Date(applicationStage.endDate).getMonth(), 
+            new Date(applicationStage.endDate).getDate()
+        );
+        
+        // Hiển thị nút nếu đang trong thời gian vòng đơn (kể cả ngày bắt đầu và kết thúc)
+        if ((today >= appStartDay && today <= appEndDay) && applicationFormUrl) {
+            modalApplyButton.style.display = 'inline-block';
+            modalApplyButton.disabled = false;
+        } else {
+            modalApplyButton.style.display = 'none';
+        }
+    } else {
+        modalApplyButton.style.display = 'none';
+    }
+    
+    // Hiển thị modal
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden'; // Ngăn scroll trang khi modal hiển thị
+}
+
+/**
+ * Cập nhật thông tin trạng thái hiện tại cho modal
+ */
+function updateCurrentStatus(statusElement) {
+    if (!currentStagesData || !statusElement) return;
+    
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()); // Chỉ lấy ngày không lấy giờ
+    const applicationStage = currentStagesData.find(stage => stage.stageName === 'APPLICATION');
+    
+    if (applicationStage) {
+        const appStartDate = new Date(applicationStage.startDate);
+        const appStartDay = new Date(appStartDate.getFullYear(), appStartDate.getMonth(), appStartDate.getDate());
+        const appEndDate = new Date(applicationStage.endDate);
+        const appEndDay = new Date(appEndDate.getFullYear(), appEndDate.getMonth(), appEndDate.getDate());
+        
+        if (today < appStartDay) {
+            statusElement.innerHTML = `
+                <i class="fas fa-hourglass-start"></i> Vòng nộp đơn sẽ bắt đầu vào ${formatDate(appStartDate)}.
+                <br>Vui lòng quay lại sau để đăng ký!
+            `;
+            statusElement.style.borderLeftColor = '#f39c12';
+        } else if (today <= appEndDay) {
+            statusElement.innerHTML = `
+                <i class="fas fa-check-circle"></i> Vòng nộp đơn đang diễn ra! 
+                <br>Bạn có thể nộp đơn đăng ký từ nay đến ${formatDate(appEndDate)}.
+            `;
+            statusElement.style.borderLeftColor = '#4caf50';
+        } else {
+            // Vòng đơn đã kết thúc, kiểm tra vòng tiếp theo
+            const nextStage = getNextActiveStage(currentStagesData);
+            if (nextStage) {
+                const nextStartDate = new Date(nextStage.startDate);
+                statusElement.innerHTML = `
+                    <i class="fas fa-hourglass-half"></i> Vòng nộp đơn đã kết thúc. 
+                    <br>${getStageDisplayName(nextStage.stageName)} sẽ bắt đầu vào ${formatDate(nextStartDate)}.
+                `;
+                statusElement.style.borderLeftColor = '#3498db';
+            } else {
+                statusElement.innerHTML = `
+                    <i class="fas fa-hourglass-end"></i> Hoạt động tuyển quân đã kết thúc.
+                    <br>Vui lòng theo dõi thông báo từ câu lạc bộ.
+                `;
+                statusElement.style.borderLeftColor = '#e74c3c';
+            }
+        }
+    } else {
+        statusElement.innerHTML = `
+            <i class="fas fa-exclamation-triangle"></i> Không tìm thấy thông tin vòng nộp đơn.
+            <br>Vui lòng liên hệ câu lạc bộ để biết thêm chi tiết.
+        `;
+        statusElement.style.borderLeftColor = '#e74c3c';
+    }
+}
+
+/**
+ * Lấy icon tương ứng cho từng loại vòng
+ */
+function getStageIcon(stageName) {
+    switch (stageName) {
+        case 'APPLICATION':
+            return 'file-alt';
+        case 'INTERVIEW':
+            return 'comments';
+        case 'CHALLENGE':
+            return 'tasks';
+        default:
+            return 'circle';
+    }
 }
 
 /**

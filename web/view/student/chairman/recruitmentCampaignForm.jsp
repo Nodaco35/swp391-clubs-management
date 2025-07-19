@@ -124,7 +124,7 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label for="templateId" class="form-label">Form đăng ký <span
+                                        <label for="formId" class="form-label">Form đăng ký <span
                                                 class="required">*</span></label>
                                         <c:if test="${not empty formWarning}">
                                             <div class="alert alert-warning"
@@ -132,15 +132,15 @@
                                                 ${formWarning}
                                             </div>
                                         </c:if>
-                                        <select id="templateId" name="templateId" class="form-control" required>
+                                        <select id="formId" name="formId" class="form-control" required>
                                             <option value="">-- Chọn form đăng ký --</option>
-                                            <c:forEach items="${publishedTemplates}" var="template">
-                                                <option value="${template.templateId}"
-                                                    ${template.templateId==campaign.templateID ? 'selected' : '' }>
-                                                    ${template.title}
+                                            <c:forEach items="${publishedForms}" var="form">
+                                                <option value="${form.formId}"
+                                                    ${form.formId == campaign.formID ? 'selected' : '' }>
+                                                    ${form.title}
                                                     <c:if
-                                                        test="${template.clubId != param.clubId && template.clubId != campaign.clubID}">
-                                                        (Form CLB #${template.clubId})
+                                                        test="${form.clubId != param.clubId && form.clubId != campaign.clubID}">
+                                                        (Form CLB #${form.clubId})
                                                     </c:if>
                                                 </option>
                                             </c:forEach>

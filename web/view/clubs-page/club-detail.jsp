@@ -193,6 +193,58 @@
 
         </section>
 
+        <!-- Modal Thông tin tuyển quân -->
+        <div id="recruitmentInfoModal" class="modal-container">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modalRecruitmentTitle">Thông tin hoạt động tuyển quân</h2>
+                    <span class="modal-close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <!-- Thông tin chiến dịch -->
+                    <div class="campaign-info">
+                        <h3 class="section-title">Thông tin chung</h3>
+                        <div class="info-row">
+                            <span class="label">Tên chiến dịch:</span>
+                            <span id="modalCampaignTitle" class="value">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Gen:</span>
+                            <span id="modalCampaignGen" class="value">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Thời gian:</span>
+                            <span id="modalCampaignTime" class="value">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Mô tả:</span>
+                            <div id="modalCampaignDescription" class="value description">-</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Thông tin các vòng tuyển -->
+                    <div class="stages-info">
+                        <h3 class="section-title">Các vòng tuyển</h3>
+                        <div class="stages-timeline" id="modalStagesTimeline">
+                            <!-- Stages will be dynamically added here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Trạng thái hiện tại -->
+                    <div class="current-status">
+                        <h3 class="section-title">Trạng thái hiện tại</h3>
+                        <div id="modalCurrentStatus" class="status-message">
+                            Đang tải thông tin...
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="modalCloseButton" class="btn btn-secondary">Đóng</button>
+                    <button id="modalApplyButton" class="btn btn-primary">Nộp đơn tham gia</button>
+                </div>
+            </div>
+        </div>
+
         <jsp:include page="../components/footer.jsp" />
         <script src="${pageContext.request.contextPath}/js/scripts.js"></script>
         <script src="${pageContext.request.contextPath}/js/recruitment-status-checker.js"></script>
@@ -241,6 +293,7 @@
             .button-updated {
                 animation: buttonUpdate 0.5s ease;
             }
+
         </style>
     </body>
 </html>
