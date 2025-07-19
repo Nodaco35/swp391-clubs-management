@@ -228,4 +228,28 @@ public class DepartmentDashboardDAO {    /**
         }
         return 0;
     }
+    
+    public int findClubDepartmentId(int clubId, String userId) {
+        String sql = """
+            SELECT uc.ClubDepartmentID
+            FROM UserClubs uc
+            JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
+            WHERE uc.UserID = ? AND cd.ClubID = ? AND uc.IsActive = 1
+            """;
+        
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setString(1, userId);
+            ps.setInt(2, clubId);
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getInt("ClubDepartmentID");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 }
