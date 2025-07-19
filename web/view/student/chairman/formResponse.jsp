@@ -20,8 +20,8 @@
         <!-- Hidden form type information -->
         <input type="hidden" id="formTypeInput" value="${formType}">
         <input type="hidden" id="clubIdInput" value="${clubId}">
-        <input type="hidden" id="templateIdInput" value="${templateId}">
-        
+        <input type="hidden" id="formIdInput" value="${formId}">
+
         <!-- Hidden server data -->
         <c:if test="${not empty applicationsJson}">
             <input type="hidden" id="applicationsData" value='${applicationsJson}'>

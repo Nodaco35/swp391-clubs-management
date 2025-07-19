@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     const urlParams = new URLSearchParams(window.location.search);
-    const templateId = urlParams.get('templateId');
+    const formId = urlParams.get('formId');
     const urlClubId = urlParams.get('clubId');
     const urlFormType = urlParams.get('formType');
     
@@ -28,17 +28,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const clubIdInput = document.getElementById('clubIdInput');
     const clubId = clubIdInput && clubIdInput.value ? clubIdInput.value : urlClubId;
     
-    console.log("DEBUG parameters:");
-    console.log("- URL formType parameter:", urlFormType);
-    console.log("- Hidden input formType value:", inputFormType);
-    console.log("- Final formType being used:", formType);
-    console.log("- clubId:", clubId);
-    console.log("- templateId:", templateId);
-    console.log("- URL parameters:", window.location.search);
-    console.log("- Complete URL:", window.location.href);
-    
-    if (!templateId || !clubId) {
-        console.error('Không tìm thấy templateId hoặc clubId');
+    if (!formId || !clubId) {
+        console.error('Không tìm thấy formId hoặc clubId');
         showToast('error', 'Lỗi', 'Không tìm thấy thông tin form');
         return;
     }
@@ -155,10 +146,6 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
           // Chỉ sử dụng một cách gán sự kiện để tránh trùng lặp
         searchInput.addEventListener('input', function(event) {
-
-            console.log("[DEBUG SEARCH] Element ID:", this.id);
-            console.log("[DEBUG SEARCH] Event type:", event.type);
-            
             const oldSearchTerm = searchTerm;
             searchTerm = this.value.toLowerCase().trim();
             
@@ -824,8 +811,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Hàm xử lý duyệt đơn
     function approveResponse(id) {
-        console.log('Duyệt đơn:', id, 'Form type:', formType, 'clubId:', clubId)
-        
         // Gửi AJAX request đến server
         fetch(`${contextPath}/formResponses`, {
             method: 'POST',
