@@ -83,10 +83,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Chuyển đổi dữ liệu từ server thành định dạng cho frontend
     let responses = [];
     if (serverData && Array.isArray(serverData)) {
+        console.log("[DEBUG - ReviewNote] Server data received:", serverData);
         responses = serverData.map(app => {
             // Parse responses JSON nếu chưa được parse
             let answers = [];
             console.log("Processing app response:", app.responseId, "Responses type:", typeof app.responses);
+            
+            // DEBUG: Kiểm tra xem có reviewNote hay không
+            console.log("[DEBUG - ReviewNote] App data:", app.responseId, "ReviewNote:", app.reviewNote);
             
             if (app.responses && typeof app.responses === 'string') {
                 try {
@@ -119,8 +123,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 userId: app.userId || '',
                 submittedAt: app.submitDate || new Date().toISOString(),
                 status: status,
-                answers: answers
+                answers: answers,
+                reviewNote: app.reviewNote || ''
             };
+            
+            console.log("[DEBUG - ReviewNote] Created response object:", responseObj.id, "with reviewNote:", responseObj.reviewNote);
             
             if (!responseObj.name || !responseObj.email || !responseObj.userId) {
                 console.log("Chú ý: Dữ liệu không đầy đủ cho response ID:", responseObj.id);
@@ -516,6 +523,30 @@ document.addEventListener('DOMContentLoaded', function() {
         
         document.getElementById('responseModalTitle').textContent = `Chi tiết đơn đăng ký - ${response.name}`;
         
+        // Thiết lập nút lưu đánh giá
+        const saveReviewBtn = document.getElementById('saveReviewBtn');
+        const reviewNoteInput = document.getElementById('reviewNoteInput');
+        
+        console.log("[DEBUG - ReviewNote] In showResponseDetails - response:", id, "reviewNote:", response.reviewNote);
+        
+        // Hiển thị đánh giá hiện tại (nếu có)
+        if (response.reviewNote) {
+            console.log("[DEBUG - ReviewNote] Setting reviewNote input value to:", response.reviewNote);
+            reviewNoteInput.value = response.reviewNote;
+        } else {
+            console.log("[DEBUG - ReviewNote] No reviewNote found, setting empty value");
+            reviewNoteInput.value = '';
+        }
+        
+        // Gỡ bỏ event listener cũ (nếu có)
+        const newSaveReviewBtn = saveReviewBtn.cloneNode(true);
+        saveReviewBtn.parentNode.replaceChild(newSaveReviewBtn, saveReviewBtn);
+        
+        // Thêm event listener mới
+        newSaveReviewBtn.addEventListener('click', function() {
+            saveReviewNote(id, reviewNoteInput.value);
+        });
+        
         // Tạo nội dung cho modal
         let modalContent = `
             <div class="modal-section">
@@ -545,6 +576,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
                 </div>
+                
+                ${response.reviewNote ? `
+                <div class="review-note-display">
+                    <h4><i class="fas fa-clipboard-check"></i> Đánh giá</h4>
+                    <p>${response.reviewNote}</p>
+                </div>
+                ` : ''}
             </div>
             
             <div class="modal-section">
@@ -941,6 +979,47 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 300);
             }
         }, 5000);
+    }
+    
+    // Hàm lưu đánh giá
+    function saveReviewNote(responseId, reviewNote) {
+        if (!responseId) {
+            showToast('error', 'Lỗi', 'Không tìm thấy ID phản hồi');
+            return;
+        }
+        
+        // Hiển thị thông báo đang xử lý
+        showToast('info', 'Đang xử lý', 'Đang lưu đánh giá...');
+        
+        // Gửi AJAX request đến server để lưu đánh giá
+        fetch(`${contextPath}/formResponses`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `action=saveReview&responseId=${responseId}&clubId=${clubId}&reviewNote=${encodeURIComponent(reviewNote)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Server response for saveReview:', data);
+            
+            if (data.success) {
+                // Cập nhật trạng thái local
+                const index = responses.findIndex(r => r.id === responseId);
+                if (index !== -1) {
+                    responses[index].reviewNote = reviewNote;
+                    showToast('success', 'Thành công', 'Đã lưu đánh giá');
+                } else {
+                    showToast('success', 'Thành công', 'Đã lưu đánh giá');
+                }
+            } else {
+                showToast('error', 'Lỗi', data.message || 'Không thể lưu đánh giá');
+            }
+        })
+        .catch(error => {
+            console.error('Error saving review note:', error);
+            showToast('error', 'Lỗi', 'Đã xảy ra lỗi khi lưu đánh giá');
+        });
     }
     
     // Hàm định dạng ngày tháng
