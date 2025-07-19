@@ -91,7 +91,7 @@
                                         </a>
                                     </li>
                                     <li class="breadcrumb-item active" aria-current="page">Tài chính</li>
-                                     <li class="breadcrumb-item">
+                                    <li class="breadcrumb-item">
                                         <a href="${pageContext.request.contextPath}/department/financial/income.member" class="text-decoration-none">
                                             Phí thành viên
                                         </a>
@@ -242,11 +242,11 @@
                                     </form>
 
                                     <!-- phuc day -->
-                                    <form action="${pageContext.request.contextPath}/department/#" >
-                                        <button type="submit"
-                                                class="action-button expense">
+                                    <form action="${pageContext.request.contextPath}/department/expense" method="get">
+                                        <input type="hidden" name="clubID" value="${clubID}">
+                                        <button type="submit" class="action-button expense">
                                             <i class="fas fa-credit-card"></i>
-                                            Quản lý chi tiêu                   
+                                            Quản lý chi tiêu
                                         </button>
                                     </form>
                                     <form>
@@ -271,7 +271,7 @@
                                         Quản lý
                                     </button>
                                 </form>
-                                
+
                             </div>
                             <div class="card-body">
                                 <div class="member-stats">

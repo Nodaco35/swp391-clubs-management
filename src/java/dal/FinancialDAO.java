@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 import models.*;
 import java.util.*;
 import java.sql.*;
-
 /**
  *
  * @author he181
@@ -532,4 +531,249 @@ public class FinancialDAO {
         return l.get(0);
     }
 
+    public static List<Expenses> getExpenses(int clubID, String termID, String keyword, String status, int page, int pageSize) {
+        List<Expenses> expensesList = new ArrayList<>();
+        String sql = """
+                     SELECT e.*, u.FullName AS CreatedByName
+                     FROM Expenses e
+                     LEFT JOIN Transactions t ON e.ExpenseID = t.ReferenceID AND t.Type = 'Expense'
+                     LEFT JOIN Users u ON t.CreatedBy = u.UserID
+                     WHERE e.ClubID = ? AND e.TermID = ?""";
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql += " AND (e.Purpose LIKE ? OR e.Description LIKE ?)";
+        }
+        if (status != null && !status.equals("all")) {
+            boolean approved = status.equals("Approved");
+            sql += " AND e.Approved = ?";
+        }
+        sql += " ORDER BY e.ExpenseDate DESC LIMIT ? OFFSET ?";
+
+        try (PreparedStatement ps = DBContext.getConnection().prepareStatement(sql)) {
+            int paramIndex = 1;
+            ps.setInt(paramIndex++, clubID);
+            ps.setString(paramIndex++, termID);
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String likePattern = "%" + keyword.trim() + "%";
+                ps.setString(paramIndex++, likePattern);
+                ps.setString(paramIndex++, likePattern);
+            }
+            if (status != null && !status.equals("all")) {
+                ps.setBoolean(paramIndex++, status.equals("Approved"));
+            }
+            ps.setInt(paramIndex++, pageSize);
+            ps.setInt(paramIndex, (page - 1) * pageSize);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Expenses expense = new Expenses();
+                expense.setExpenseID(rs.getInt("ExpenseID"));
+                expense.setClubID(rs.getInt("ClubID"));
+                expense.setTermID(rs.getString("TermID"));
+                expense.setPurpose(rs.getString("Purpose"));
+                expense.setAmount(rs.getBigDecimal("Amount"));
+                expense.setExpenseDate(rs.getDate("ExpenseDate"));
+                expense.setDescription(rs.getString("Description"));
+                expense.setAttachment(rs.getString("Attachment"));
+                expense.setApproved(rs.getBoolean("Approved"));
+                expensesList.add(expense);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return expensesList;
+    }
+
+    /**
+     * Retrieves the total number of expense records for pagination.
+     */
+    public static int getTotalExpenseRecords(int clubID, String termID, String keyword, String status) {
+        int totalRecords = 0;
+        String sql = """
+                     SELECT COUNT(*) AS total
+                     FROM Expenses e
+                     WHERE e.ClubID = ? AND e.TermID = ?""";
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql += " AND (e.Purpose LIKE ? OR e.Description LIKE ?)";
+        }
+        if (status != null && !status.equals("all")) {
+            boolean approved = status.equals("Approved");
+            sql += " AND e.Approved = ?";
+        }
+
+        try (PreparedStatement ps = DBContext.getConnection().prepareStatement(sql)) {
+            int paramIndex = 1;
+            ps.setInt(paramIndex++, clubID);
+            ps.setString(paramIndex++, termID);
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String likePattern = "%" + keyword.trim() + "%";
+                ps.setString(paramIndex++, likePattern);
+                ps.setString(paramIndex++, likePattern);
+            }
+            if (status != null && !status.equals("all")) {
+                ps.setBoolean(paramIndex++, status.equals("Approved"));
+            }
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                totalRecords = rs.getInt("total");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return totalRecords;
+    }
+
+    /**
+     * Adds a new expense and creates a corresponding transaction.
+     */
+    public static boolean addExpense(Expenses expense, String userID) {
+        String expenseSql = """
+                           INSERT INTO Expenses (ClubID, TermID, Purpose, Amount, ExpenseDate, Description, Attachment, Approved)
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""";
+        String transactionSql = """
+                              INSERT INTO Transactions (ClubID, TermID, Type, Amount, TransactionDate, Description, Attachment, Status, ReferenceID, CreatedBy, CreatedAt)
+                              VALUES (?, ?, 'Expense', ?, ?, ?, ?, ?, ?, ?, ?)""";
+        Connection conn = null;
+        PreparedStatement psExpense = null;
+        PreparedStatement psTransaction = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBContext.getConnection();
+            conn.setAutoCommit(false); // Start transaction
+
+            // Insert into Expenses
+            psExpense = conn.prepareStatement(expenseSql, Statement.RETURN_GENERATED_KEYS);
+            psExpense.setInt(1, expense.getClubID());
+            psExpense.setString(2, expense.getTermID());
+            psExpense.setString(3, expense.getPurpose());
+            psExpense.setBigDecimal(4, expense.getAmount());
+            psExpense.setDate(5, new java.sql.Date(expense.getExpenseDate().getTime()));// Changed to setDate
+            psExpense.setString(6, expense.getDescription());
+            psExpense.setString(7, expense.getAttachment());
+            psExpense.setBoolean(8, false); // Default: not approved
+            int rowsAffected = psExpense.executeUpdate();
+
+            // Get generated ExpenseID
+            rs = psExpense.getGeneratedKeys();
+            int expenseID = 0;
+            if (rs.next()) {
+                expenseID = rs.getInt(1);
+            }
+
+            // Insert into Transactions
+            psTransaction = conn.prepareStatement(transactionSql);
+            psTransaction.setInt(1, expense.getClubID());
+            psTransaction.setString(2, expense.getTermID());
+            psTransaction.setBigDecimal(3, expense.getAmount());
+            psTransaction.setDate(4, new java.sql.Date(expense.getExpenseDate().getTime())); // Changed to setDate for consistency
+            psTransaction.setString(5, expense.getDescription());
+            psTransaction.setString(6, expense.getAttachment());
+            psTransaction.setString(7, "Pending"); // Default status
+            psTransaction.setInt(8, expenseID);
+            psTransaction.setString(9, userID);
+            psTransaction.setTimestamp(10, new Timestamp(System.currentTimeMillis()));
+            psTransaction.executeUpdate();
+
+            conn.commit(); // Commit transaction
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback(); // Rollback on error
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (psExpense != null) psExpense.close();
+                if (psTransaction != null) psTransaction.close();
+                if (conn != null) conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Approves an expense and updates the corresponding transaction.
+     */
+    public static boolean approveExpense(int expenseID, String userID) {
+        String expenseSql = """
+                           UPDATE Expenses 
+                           SET Approved = TRUE 
+                           WHERE ExpenseID = ? AND Approved = FALSE""";
+        String transactionSql = """
+                              UPDATE Transactions 
+                              SET Status = 'Approved' 
+                              WHERE ReferenceID = ? AND Type = 'Expense' AND Status = 'Pending'""";
+        Connection conn = null;
+        PreparedStatement psExpense = null;
+        PreparedStatement psTransaction = null;
+
+        try {
+            conn = DBContext.getConnection();
+            conn.setAutoCommit(false); // Start transaction
+
+            // Update Expenses
+            psExpense = conn.prepareStatement(expenseSql);
+            psExpense.setInt(1, expenseID);
+            int rowsAffected = psExpense.executeUpdate();
+
+            // Update Transactions
+            psTransaction = conn.prepareStatement(transactionSql);
+            psTransaction.setInt(1, expenseID);
+            psTransaction.executeUpdate();
+
+            conn.commit(); // Commit transaction
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback(); // Rollback on error
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (psExpense != null) psExpense.close();
+                if (psTransaction != null) psTransaction.close();
+                if (conn != null) conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    public static Expenses getExpenseByID(int expenseID) {
+        String sql = "SELECT * FROM Expenses WHERE ExpenseID = ?";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setInt(1, expenseID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                Expenses e = new Expenses();
+                e.setExpenseID(rs.getInt("ExpenseID"));
+                e.setClubID(rs.getInt("ClubID"));
+                e.setTermID(rs.getString("TermID"));
+                e.setPurpose(rs.getString("Purpose"));
+                e.setAmount(rs.getBigDecimal("Amount"));
+                e.setExpenseDate(rs.getDate("ExpenseDate"));
+                e.setDescription(rs.getString("Description"));
+                e.setAttachment(rs.getString("Attachment"));
+                e.setApproved(rs.getBoolean("Approved"));
+                return e;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

@@ -442,45 +442,6 @@ public class ClubDAO {
         return count;
     }
 
-//    private String getCategoryForClub(int clubID) {
-//        String category = "Học Thuật";
-//        Connection conn = null;
-//        PreparedStatement stmt = null;
-//        ResultSet rs = null;
-//
-//        try {
-//            conn = DBContext.getConnection();
-//            String query = "SELECT ClubName, Description FROM Clubs WHERE ClubID = ?";
-//            stmt = conn.prepareStatement(query);
-//            stmt.setInt(1, clubID);
-//            rs = stmt.executeQuery();
-//
-//            if (rs.next()) {
-//                String name = rs.getString("ClubName").toLowerCase();
-//                String desc = rs.getString("Description") != null ? rs.getString("Description").toLowerCase() : "";
-//
-//                if (name.contains("thể thao") || name.contains("bóng") || name.contains("cầu lông")
-//                        || desc.contains("thể thao") || desc.contains("bóng") || desc.contains("cầu lông")) {
-//                    category = "Thể Thao";
-//                } else if (name.contains("tình nguyện") || name.contains("thanh niên") || name.contains("phong trào")
-//                        || desc.contains("tình nguyện") || desc.contains("thanh niên") || desc.contains("phong trào")) {
-//                    category = "Phong Trào";
-//                }
-//            }
-//        } catch (SQLException e) {
-//            System.out.println("Error getting category for club: " + e.getMessage());
-//        } finally {
-//            try {
-//                if (rs != null) rs.close();
-//                if (stmt != null) stmt.close();
-//                if (conn != null) DBContext.closeConnection(conn);
-//            } catch (SQLException e) {
-//                System.out.println("Error closing resources: " + e.getMessage());
-//            }
-//        }
-//        return category;
-//    }
-
     public List<Clubs> getActiveClubs() {
         return getClubsByStatus(true);
     }

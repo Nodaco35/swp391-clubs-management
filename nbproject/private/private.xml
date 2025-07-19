@@ -3,12 +3,17 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/src/java/dal/FeedbackDAO.java</file>
-            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/src/java/controller/ChairmanClubMeetingController.java</file>
-            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/src/java/dal/FinancialDAO.java</file>
-            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/src/java/controller/DF_MemberIncomeServlet.java</file>
-            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/src/java/dal/NotificationDAO.java</file>
-            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/web/view/student/department-leader/financial-income-member.jsp</file>
+            <file>file:/E:/Kì_5/SWP391/Transactions/swp391-clubs-management/src/java/controller/DepartmentFinancialServlet.java</file>
+            <file>file:/E:/Kì_5/SWP391/Transactions/swp391-clubs-management/web/view/student/department-leader/financial.jsp</file>
+            <file>file:/E:/Kì_5/SWP391/Transactions/swp391-clubs-management/src/java/dal/FinancialDAO.java</file>
+            <file>file:/E:/Kì_5/SWP391/Transactions/swp391-clubs-management/src/java/models/Expenses.java</file>
+            <file>file:/E:/Kì_5/SWP391/Transactions/swp391-clubs-management/web/view/student/department-leader/financial-income-member.jsp</file>
+            <file>file:/E:/Kì_5/SWP391/Transactions/swp391-clubs-management/src/java/controller/DepartmentDashboardServlet.java</file>
+            <file>file:/E:/Kì_5/SWP391/Transactions/swp391-clubs-management/web/view/student/department-leader/meetings.jsp</file>
+            <file>file:/E:/Kì_5/SWP391/Transactions/swp391-clubs-management/src/java/controller/DF_ExpenseServlet.java</file>
+            <file>file:/E:/Kì_5/SWP391/Transactions/swp391-clubs-management/web/css/financial.css</file>
+            <file>file:/E:/Kì_5/SWP391/Transactions/swp391-clubs-management/web/view/student/department-leader/financial-expense.jsp</file>
+            <file>file:/E:/Kì_5/SWP391/Transactions/swp391-clubs-management/src/java/controller/DF_MemberIncomeServlet.java</file>
         </group>
     </open-files>
 </project-private>

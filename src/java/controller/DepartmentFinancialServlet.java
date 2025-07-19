@@ -18,14 +18,14 @@ import java.util.List;
 import models.*;
 
 public class DepartmentFinancialServlet extends HttpServlet {
-    
+
     private DepartmentDashboardDAO dashboardDAO;
-    
+
     @Override
     public void init() throws ServletException {
         dashboardDAO = new DepartmentDashboardDAO();
     }
-    
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -41,12 +41,12 @@ public class DepartmentFinancialServlet extends HttpServlet {
             request.getRequestDispatcher("/myclub").forward(request, response);
             return;
         }
-        
+
         if (!dashboardDAO.isDepartmentLeaderIndoingoai(user.getUserID(), clubID)) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập trang này");
             return;
         }
-        
+
         String compIncomeWithPreTerm = "";
         String compExpensesWithPreTerm = "";
         String compBalanceWithPreTerm = "";
@@ -56,7 +56,7 @@ public class DepartmentFinancialServlet extends HttpServlet {
         BigDecimal totalExpenses = FinancialDAO.getTotalExpenseAmount(clubID, term.getTermID());
         BigDecimal balance = totalIncome.subtract(totalExpenses);
         BigDecimal balancePre = totalIncomePre.subtract(totalExpensesPre);
-        
+
         BigDecimal incomeMemberPending = FinancialDAO.getTotalIncomeMemberPending(clubID, term.getTermID());
         double comp = totalIncome.divide(totalIncomePre, 4, RoundingMode.HALF_UP).doubleValue();
         double comp2 = totalExpenses.divide(totalExpensesPre, 4, RoundingMode.HALF_UP).doubleValue();
@@ -66,7 +66,7 @@ public class DepartmentFinancialServlet extends HttpServlet {
         } else {
             compIncomeWithPreTerm = "-" + comp + "%";
         }
-        
+
         if (comp2 >= 1) {
             compIncomeWithPreTerm = "+" + comp2 + "%";
         } else {
@@ -77,11 +77,11 @@ public class DepartmentFinancialServlet extends HttpServlet {
         } else {
             compBalanceWithPreTerm = "-" + comp3 + "%";
         }
-        
+
         int memberPendingIncome = FinancialDAO.getTotalIncomePersonByType(clubID, term.getTermID(), "Pending");
         int totalMember = FinancialDAO.getTotalIncomePersonByType(clubID, term.getTermID(), "");
         int totalPaidMember = FinancialDAO.getTotalIncomePersonByType(clubID, term.getTermID(), "Paid");
-        
+
         List<MemberIncomeContributions> previewIncomeMemberSrc = FinancialDAO.getPreviewIncomeMemberSrc(clubID, term.getTermID());
         List<Transaction> recentTransactions = FinancialDAO.getRecentTransactions(clubID, term.getTermID());
         request.getSession().setAttribute("term", term);
@@ -97,27 +97,28 @@ public class DepartmentFinancialServlet extends HttpServlet {
         request.setAttribute("totalPaidMember", totalPaidMember);
         request.setAttribute("previewIncomeMemberSrc", previewIncomeMemberSrc);
         request.setAttribute("recentTransactions", recentTransactions);
-        
+        request.setAttribute("clubID", clubID);
+        request.getSession().setAttribute("clubID", clubID);
         request.getRequestDispatcher("/view/student/department-leader/financial.jsp").forward(request, response);
     }
-    
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getParameter("action");
         switch (action) {
             case "transaction-income":
-                
+
                 break;
         }
         doGet(request, response);
     }
-    
+
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-            
+
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
@@ -129,7 +130,7 @@ public class DepartmentFinancialServlet extends HttpServlet {
             out.println("</html>");
         }
     }
-    
+
     @Override
     public String getServletInfo() {
         return "Short description";

@@ -18,14 +18,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 public class DepartmentMeetingServlet extends HttpServlet {
-    
+
     private DepartmentMeetingDAO meetingDAO;
     private DepartmentDashboardDAO dashboardDAO;
     private UserClubDAO userClubDAO;
     private static final Pattern GOOGLE_MEET_PATTERN = Pattern.compile("^https://meet\\.google\\.com/[a-z]{3}-[a-z]{4}-[a-z]{3}$");
     private static final Pattern ZOOM_PATTERN = Pattern.compile("^https://([a-z0-9-]+\\.)?zoom\\.us/j/[0-9]{9,11}(\\?pwd=[a-zA-Z0-9]+)?$");
     private static final Pattern GOOGLE_DRIVE_PATTERN = Pattern.compile("^https://drive\\.google\\.com/.*$");
-    
+
     @Override
     public void init() throws ServletException {
         meetingDAO = new DepartmentMeetingDAO();
@@ -50,7 +50,8 @@ public class DepartmentMeetingServlet extends HttpServlet {
             return;
         }
 
-        int clubDepartmentId = dashboard.getClubDepartmentId();
+        //get sesion
+        int clubDepartmentId = (int) session.getAttribute("clubDepartmentId");
         session.setAttribute("clubDepartmentID", clubDepartmentId);
         session.setAttribute("departmentName", dashboard.getDepartmentName());
 
@@ -189,14 +190,14 @@ public class DepartmentMeetingServlet extends HttpServlet {
             }
 
             List<String> participants = new ArrayList<>();
-            if (selectAll) {
+            if (participantIds != null) {
+                for (String id : participantIds) {
+                    participants.add(id);
+                }
+            } else {
                 List<Users> members = meetingDAO.getDepartmentMembers(clubDepartmentId);
                 for (Users member : members) {
                     participants.add(member.getUserID());
-                }
-            } else if (participantIds != null) {
-                for (String id : participantIds) {
-                    participants.add(id);
                 }
             }
 
@@ -204,17 +205,24 @@ public class DepartmentMeetingServlet extends HttpServlet {
                 String formattedTime = startedTime.replace("T", " ") + ":00";
                 if ("add".equals(action)) {
                     meetingDAO.createMeeting(clubDepartmentId, title, urlMeeting, documentLink, formattedTime, participants);
-                    
+
                     List<UserClub> members = userClubDAO.findByCDID(clubDepartmentId);
+
+                    String content;
+                    if (documentLink == null || documentLink.isEmpty()) {
+                        content = "Ban: <strong>%s</strong><br/>Link tham gia: <a href=\"" + urlMeeting + "\">" + urlMeeting + "</a><br/>Thời gian bắt đầu: <strong>" + formattedTime + "</strong>";
+                    } else {
+                        content = "Ban: <strong>%s</strong><br/>Link tham gia: <a href=\"" + urlMeeting + "\">" + urlMeeting + "</a><br/>Tài liệu đi kèm: <a href=\"" + documentLink + "\">" + documentLink + "</a><br/>Thời gian bắt đầu: <strong>" + formattedTime + "</strong>";
+                    }
+
                     for (UserClub member : members) {
                         if (participants.contains(member.getUserID())) {
                             String notifTitle = "Thông báo cuộc họp mới: " + title;
-                            String content = String.format("Cuộc họp '%s' tại %s được tổ chức vào %s. Liên kết: %s%s",
-                                    title, member.getDepartmentName(), formattedTime, urlMeeting,
-                                    documentLink != null && !documentLink.isEmpty() ? "\nTài liệu: " + documentLink : "");
-                            NotificationDAO.sentToPerson(user.getUserID(), member.getUserID(), notifTitle, content);
+                            String formattedContent = String.format(content, member.getDepartmentName());
+                            NotificationDAO.sentToPerson1(user.getUserID(), member.getUserID(), notifTitle, formattedContent, "high");
                         }
                     }
+
                     request.setAttribute("message", "Tạo cuộc họp thành công và đã gửi thông báo đến các thành viên!");
                 } else {
                     int meetingId;
@@ -239,10 +247,29 @@ public class DepartmentMeetingServlet extends HttpServlet {
                         for (UserClub member : members) {
                             if (participants.contains(member.getUserID())) {
                                 String notifTitle = "Cập nhật cuộc họp: " + title;
-                                String content = String.format("Cuộc họp '%s' tại ban %s đã được cập nhật. Thời gian: %s, Liên kết: %s%s",
-                                        title, member.getDepartmentName(), formattedTime, urlMeeting,
-                                        documentLink != null && !documentLink.isEmpty() ? "\nTài liệu: " + documentLink : "");
-                                NotificationDAO.sentToPerson(user.getUserID(), member.getUserID(), notifTitle, content);
+
+                                String content;
+                                if (documentLink == null || documentLink.isEmpty()) {
+                                    content = String.format(
+                                            "Cuộc họp <strong>'%s'</strong> tại ban <strong>%s</strong> đã được cập nhật.<br/>"
+                                            + "Link tham gia: <a href=\"%s\">%s</a><br/>"
+                                            + "Thời gian bắt đầu: <strong>%s</strong>",
+                                            title, member.getDepartmentName(), urlMeeting, urlMeeting, formattedTime
+                                    );
+                                } else {
+                                    content = String.format(
+                                            "Cuộc họp <strong>'%s'</strong> tại ban <strong>%s</strong> đã được cập nhật.<br/>"
+                                            + "Link tham gia: <a href=\"%s\">%s</a><br/>"
+                                            + "Tài liệu đi kèm: <a href=\"%s\">%s</a><br/>"
+                                            + "Thời gian bắt đầu: <strong>%s</strong>",
+                                            title, member.getDepartmentName(),
+                                            urlMeeting, urlMeeting,
+                                            documentLink, documentLink,
+                                            formattedTime
+                                    );
+                                }
+
+                                NotificationDAO.sentToPerson1(user.getUserID(), member.getUserID(), notifTitle, content, "high");
                             }
                         }
                         request.setAttribute("message", "Cập nhật cuộc họp thành công và đã gửi thông báo đến các thành viên!");
@@ -250,6 +277,7 @@ public class DepartmentMeetingServlet extends HttpServlet {
                         request.setAttribute("error", "Cập nhật cuộc họp thất bại!");
                         request.setAttribute("editMeeting", meeting);
                     }
+
                 }
             } catch (Exception e) {
                 request.setAttribute("error", "Lỗi khi " + ("add".equals(action) ? "tạo" : "cập nhật") + " cuộc họp: " + e.getMessage());

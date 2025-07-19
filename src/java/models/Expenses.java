@@ -5,7 +5,7 @@
 package models;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  *
@@ -17,7 +17,7 @@ public class Expenses {
     private String termID;
     private String purpose;
     private BigDecimal amount;
-    private Timestamp expenseDate;
+    private Date expenseDate;
     private String description;
     private String attachment;
     private boolean approved;
@@ -65,11 +65,11 @@ public class Expenses {
         this.amount = amount;
     }
 
-    public Timestamp getExpenseDate() {
+    public Date getExpenseDate() {
         return expenseDate;
     }
 
-    public void setExpenseDate(Timestamp expenseDate) {
+    public void setExpenseDate(Date expenseDate) {
         this.expenseDate = expenseDate;
     }
 
