@@ -181,6 +181,11 @@
         <servlet-name>DF_MemberIncomeServlet</servlet-name>
         <servlet-class>controller.DF_MemberIncomeServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>InvoiceServlet</servlet-name>
+        <servlet-class>controller.InvoiceServlet</servlet-class>
+    </servlet>
+    
     <servlet-mapping>
         <servlet-name>ClubsServlet</servlet-name>
         <url-pattern>/clubs</url-pattern>
@@ -384,6 +389,11 @@
         <servlet-name>DF_MemberIncomeServlet</servlet-name>
         <url-pattern>/department/financial/income.member</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>InvoiceServlet</servlet-name>
+        <url-pattern>/financial/cart-member-contribution</url-pattern>
+    </servlet-mapping>
+    
     <session-config>
         <session-timeout>30</session-timeout>
     </session-config>

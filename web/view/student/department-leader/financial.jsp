@@ -281,11 +281,11 @@
                                     </div>
                                     <div class="member-stat">
                                         <div class="member-stat-value paid">${totalPaidMember}</div>
-                                        <div class="member-stat-label">Đã đóng</div>
+                                        <div class="member-stat-label">Đã chan</div>
                                     </div>
                                     <div class="member-stat">
                                         <div class="member-stat-value unpaid">${memberPendingIncome}</div>
-                                        <div class="member-stat-label">Chưa đóng</div>
+                                        <div class="member-stat-label">Chưa chan</div>
                                     </div>
                                 </div>
 

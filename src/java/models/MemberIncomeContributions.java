@@ -24,6 +24,17 @@ public class MemberIncomeContributions {
     private String userName;
     private String email;
     private String avtSrc;
+    private String clubName;
+
+    public String getClubName() {
+        return clubName;
+    }
+
+    public void setClubName(String clubName) {
+        this.clubName = clubName;
+    }
+    
+    
     public MemberIncomeContributions() {
     }
 

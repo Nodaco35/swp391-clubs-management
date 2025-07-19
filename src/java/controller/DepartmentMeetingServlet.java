@@ -18,14 +18,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 public class DepartmentMeetingServlet extends HttpServlet {
-    
+
     private DepartmentMeetingDAO meetingDAO;
     private DepartmentDashboardDAO dashboardDAO;
     private UserClubDAO userClubDAO;
     private static final Pattern GOOGLE_MEET_PATTERN = Pattern.compile("^https://meet\\.google\\.com/[a-z]{3}-[a-z]{4}-[a-z]{3}$");
     private static final Pattern ZOOM_PATTERN = Pattern.compile("^https://([a-z0-9-]+\\.)?zoom\\.us/j/[0-9]{9,11}(\\?pwd=[a-zA-Z0-9]+)?$");
     private static final Pattern GOOGLE_DRIVE_PATTERN = Pattern.compile("^https://drive\\.google\\.com/.*$");
-    
+
     @Override
     public void init() throws ServletException {
         meetingDAO = new DepartmentMeetingDAO();
@@ -189,14 +189,14 @@ public class DepartmentMeetingServlet extends HttpServlet {
             }
 
             List<String> participants = new ArrayList<>();
-            if (selectAll) {
+            if (participantIds != null) {
+                for (String id : participantIds) {
+                    participants.add(id);
+                }
+            } else {
                 List<Users> members = meetingDAO.getDepartmentMembers(clubDepartmentId);
                 for (Users member : members) {
                     participants.add(member.getUserID());
-                }
-            } else if (participantIds != null) {
-                for (String id : participantIds) {
-                    participants.add(id);
                 }
             }
 
@@ -204,7 +204,7 @@ public class DepartmentMeetingServlet extends HttpServlet {
                 String formattedTime = startedTime.replace("T", " ") + ":00";
                 if ("add".equals(action)) {
                     meetingDAO.createMeeting(clubDepartmentId, title, urlMeeting, documentLink, formattedTime, participants);
-                    
+
                     List<UserClub> members = userClubDAO.findByCDID(clubDepartmentId);
                     for (UserClub member : members) {
                         if (participants.contains(member.getUserID())) {

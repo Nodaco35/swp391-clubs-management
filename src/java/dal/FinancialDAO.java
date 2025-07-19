@@ -421,7 +421,7 @@ public class FinancialDAO {
             ps2.setObject(10, userID);
             int rowsAffected = ps.executeUpdate();
             int row = ps2.executeUpdate();
-            
+
             return (row > 0 && rowsAffected > 0);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -532,4 +532,117 @@ public class FinancialDAO {
         return l.get(0);
     }
 
+    public static List<MemberIncomeContributions> getInvoicesByUserID(String userID, String status, String termID, int page, int pageSize) {
+        List<MemberIncomeContributions> invoices = new ArrayList<>();
+        String sql = "SELECT mic.*, u.FullName, u.Email, u.AvatarSrc, c.ClubName "
+                + "FROM MemberIncomeContributions mic "
+                + "JOIN Users u ON mic.UserID = u.UserID "
+                + "JOIN Clubs c ON mic.ClubID = c.ClubID "
+                + "WHERE mic.UserID = ?";
+        if (status != null && !status.isEmpty()) {
+            sql += " AND mic.ContributionStatus = ?";
+        }
+        if (termID != null && !termID.isEmpty()) {
+            sql += " AND mic.TermID = ?";
+        }
+        sql += " ORDER BY mic.CreatedAt DESC LIMIT ? OFFSET ?";
+
+        try {
+            Connection conn = DBContext.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            int paramIndex = 1;
+            ps.setString(paramIndex++, userID);
+            if (status != null && !status.isEmpty()) {
+                ps.setString(paramIndex++, status);
+            }
+            if (termID != null && !termID.isEmpty()) {
+                ps.setString(paramIndex++, termID);
+            }
+            ps.setInt(paramIndex++, pageSize);
+            ps.setInt(paramIndex++, (page - 1) * pageSize);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                MemberIncomeContributions mic = new MemberIncomeContributions();
+                mic.setContributionID(rs.getInt("ContributionID"));
+                mic.setIncomeID(rs.getInt("IncomeID"));
+                mic.setUserID(rs.getString("UserID"));
+                mic.setClubID(rs.getInt("ClubID"));
+                mic.setTermID(rs.getString("TermID"));
+                mic.setAmount(rs.getBigDecimal("Amount"));
+                mic.setContributionStatus(rs.getString("ContributionStatus"));
+                mic.setPaidDate(rs.getTimestamp("PaidDate"));
+                mic.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                mic.setDueDate(rs.getTimestamp("DueDate"));
+
+                
+                mic.setUserName(rs.getString("FullName"));
+                mic.setEmail(rs.getString("Email"));
+                mic.setAvtSrc(rs.getString("AvatarSrc"));
+                mic.setClubName(rs.getString("ClubName"));
+
+                invoices.add(mic);
+            }
+            rs.close();
+            ps.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return invoices;
+    }
+
+    public static int getTotalInvoices(String userID, String status, String termID) {
+        int total = 0;
+        String sql = "SELECT COUNT(*) FROM MemberIncomeContributions mic "
+                + "WHERE mic.UserID = ?";
+        if (status != null && !status.isEmpty()) {
+            sql += " AND mic.ContributionStatus = ?";
+        }
+        if (termID != null && !termID.isEmpty()) {
+            sql += " AND mic.TermID = ?";
+        }
+
+        try {
+            Connection conn = DBContext.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            int paramIndex = 1;
+            ps.setString(paramIndex++, userID);
+            if (status != null && !status.isEmpty()) {
+                ps.setString(paramIndex++, status);
+            }
+            if (termID != null && !termID.isEmpty()) {
+                ps.setString(paramIndex++, termID);
+            }
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                total = rs.getInt(1);
+            }
+            rs.close();
+            ps.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return total;
+    }
+
+    public static List<String> getTermIDs() {
+        List<String> termIDs = new ArrayList<>();
+        String sql = "SELECT DISTINCT TermID FROM Semesters ORDER BY TermID";
+        try {
+            Connection conn = DBContext.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                termIDs.add(rs.getString("TermID"));
+            }
+            rs.close();
+            ps.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return termIDs;
+    }
 }
