@@ -10,8 +10,10 @@ import dal.ClubDAO;
 import dal.ClubMeetingDAO;
 import dal.DepartmentMeetingDAO;
 import dal.EventsDAO;
+import dal.FinancialDAO;
 import dal.NotificationDAO;
 import dal.TaskAssignmentDAO;
+import dal.TermDAO;
 import dal.UserClubDAO;
 import dal.UserDAO;
 import jakarta.servlet.ServletException;
@@ -30,6 +32,7 @@ import models.DepartmentMeeting;
 import models.Events;
 import models.Notification;
 import models.TaskAssignment;
+import models.Term;
 import models.UserClub;
 import models.Users;
 
@@ -71,14 +74,19 @@ public class MyClubController extends HttpServlet {
 
             List<ClubMeeting> clubmeetings = ClubMeetingDAO.findByUserID(user.getUserID());
 
-            //mới
+            //moiws
+            Term term = TermDAO.getActiveSemester();
+            int hasPendingInvoices = FinancialDAO.getTotalInvoices(user.getUserID(), "Pending", term.getTermID());
+            
+            request.setAttribute("hasPendingInvoices", hasPendingInvoices);
+            
             int countUpcomingDepartmentMeeting = DepartmentMeetingDAO.countByUID(user.getUserID());
             List<DepartmentMeeting> departmentmeetings = DepartmentMeetingDAO.findByUserID(user.getUserID());
             request.setAttribute("countUpcomingDepartmentMeeting", countUpcomingDepartmentMeeting);
             request.setAttribute("departmentmeetings", departmentmeetings);
             List<Clubs> listClubAsChairman = ClubDAO.findByUserIDAndChairman(user.getUserID());
             request.setAttribute("listClubAsChairman", listClubAsChairman);
-            //
+            
 
             request.setAttribute("userclubs", userclubs);
             request.setAttribute("recentNotifications", recentNotifications);

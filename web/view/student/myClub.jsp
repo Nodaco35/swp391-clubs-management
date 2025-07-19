@@ -14,7 +14,6 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/eventsPage.css">
         <script src="https://cdn.tailwindcss.com"></script>
     </head>
-    
     <body>
         <jsp:include page="/view/events-page/header.jsp" />
         <a href="${pageContext.request.contextPath}/" class="back-btn">
@@ -27,8 +26,19 @@
                 <ul class="space-y-3">
                     <li><a href="#club-summaries" class="text-blue-600 hover:text-white block py-3 px-4 rounded-lg"><i class="fas fa-users"></i> Câu Lạc Bộ Của Tôi</a></li>
                     <li><a href="#notifications" class="text-blue-600 hover:text-white block py-3 px-4 rounded-lg"><i class="fas fa-bell"></i> Thông Báo Gần Đây</a></li>
-                    <li><a href="${pageContext.request.contextPath}/financial/cart-member-contribution" class="text-blue-600 hover:text-white block py-3 px-4 rounded-lg"><i class="fas fa-chart-pie"></i>Thanh toán phí thành viên</a></li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/financial/cart-member-contribution"
+                           class="text-blue-600 hover:text-white block py-3 px-4 rounded-lg relative">
+                            <i class="fas fa-chart-pie"></i>
+                            Thanh toán phí thành viên
 
+                            <c:if test="${hasPendingInvoices > 0}">
+                                <span class="absolute top-1 right-1 bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse">
+                                    ${hasPendingInvoices}
+                                </span>
+                            </c:if>
+                        </a>
+                    </li>
                     <li><a href="#calendar" class="text-blue-600 hover:text-white block py-3 px-4 rounded-lg"><i class="fas fa-tasks"></i> Nhiệm Vụ Của Ban</a></li>
                     <li><a href="#upcoming-departmentmeeting" class="text-blue-600 hover:text-white block py-3 px-4 rounded-lg"><i class="fas fa-calendar-check"></i> Cuộc Họp Sắp Tới Của Ban</a></li>
                     <li><a href="#upcoming-events" class="text-blue-600 hover:text-white block py-3 px-4 rounded-lg"><i class="fas fa-calendar-alt"></i> Sự Kiện Sắp Tới</a></li>

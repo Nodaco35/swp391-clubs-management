@@ -534,11 +534,13 @@ public class FinancialDAO {
 
     public static List<MemberIncomeContributions> getInvoicesByUserID(String userID, String status, String termID, int page, int pageSize) {
         List<MemberIncomeContributions> invoices = new ArrayList<>();
-        String sql = "SELECT mic.*, u.FullName, u.Email, u.AvatarSrc, c.ClubName "
-                + "FROM MemberIncomeContributions mic "
-                + "JOIN Users u ON mic.UserID = u.UserID "
-                + "JOIN Clubs c ON mic.ClubID = c.ClubID "
-                + "WHERE mic.UserID = ?";
+        String sql = """
+                     SELECT mic.*, u.FullName, u.Email, u.AvatarSrc, c.ClubName , i.Source, i.Description
+                                     FROM MemberIncomeContributions mic 
+                                     JOIN Users u ON mic.UserID = u.UserID 
+                                     JOIN Clubs c ON mic.ClubID = c.ClubID 
+                                     Join income i on mic.IncomeID = i.IncomeID
+                                     WHERE mic.UserID = ?""";
         if (status != null && !status.isEmpty()) {
             sql += " AND mic.ContributionStatus = ?";
         }
@@ -580,7 +582,8 @@ public class FinancialDAO {
                 mic.setEmail(rs.getString("Email"));
                 mic.setAvtSrc(rs.getString("AvatarSrc"));
                 mic.setClubName(rs.getString("ClubName"));
-
+                mic.setSource(rs.getString("Source"));
+                mic.setDescription(rs.getString("Description"));
                 invoices.add(mic);
             }
             rs.close();

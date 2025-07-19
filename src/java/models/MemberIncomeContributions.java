@@ -25,7 +25,26 @@ public class MemberIncomeContributions {
     private String email;
     private String avtSrc;
     private String clubName;
+    private String source;
+    private String description;
 
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    
+    
     public String getClubName() {
         return clubName;
     }

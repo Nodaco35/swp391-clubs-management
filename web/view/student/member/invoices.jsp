@@ -178,16 +178,16 @@
                                     <c:forEach var="invoice" items="${invoices}">
                                         <div class="invoice-item">
                                             <div class="invoice-info">
-                                                <div class="user-avatar">
-                                                    <img src="${pageContext.request.contextPath}/${invoice.avtSrc != null ? invoice.avtSrc : 'img/Hinh-anh-dai-dien-mac-dinh-Facebook.jpg'}" alt="Avatar">
-                                                </div>
+                                                
                                                 <div class="invoice-details">
-                                                    <h4>Hóa đơn #${invoice.contributionID} - ${invoice.clubName}</h4>
+                                                    <h4>Hóa đơn #${invoice.contributionID} - ${invoice.clubName} - ${invoice.description}</h4>
                                                     <div class="invoice-meta">Kỳ: ${invoice.termID}</div>
+                                                    <div class="invoice-meta">Nguồn thu: ${invoice.source}</div>
                                                     <div class="invoice-meta">Ngày tạo: <fmt:formatDate value="${invoice.createdAt}" pattern="dd/MM/yyyy HH:mm"/></div>
                                                     <div class="invoice-meta">Hạn nộp:<strong><fmt:formatDate value="${invoice.dueDate}" pattern="dd/MM/yyyy HH:mm"/> </strong> </div>
                                                 </div>
                                             </div>
+                                                <div class="invoice-payment"></div>
                                             <div class="invoice-payment">
                                                 <div class="payment-info">
                                                     <div class="payment-amount">
@@ -202,16 +202,17 @@
                                                         </c:choose>
                                                     </div>
                                                 </div>
+                                                    
                                                 <i class="fas fa-${invoice.contributionStatus == 'Paid' ? 'check-circle payment-status paid' : 'times-circle payment-status unpaid'}"></i>
+                                                
+                                                
                                                 <div class="action-buttons">
                                                     <c:if test="${invoice.contributionStatus == 'Pending'}">
                                                         <a href="${pageContext.request.contextPath}/payment?contributionID=${invoice.contributionID}" class="btn btn-sm btn-primary">
                                                             <i class="fas fa-money-bill-wave"></i> Thanh toán
                                                         </a>
                                                     </c:if>
-                                                    <a href="${pageContext.request.contextPath}/invoice-details?id=${invoice.contributionID}" class="btn btn-sm btn-info">
-                                                        <i class="fas fa-eye"></i> Chi tiết
-                                                    </a>
+                                                   
                                                 </div>
                                             </div>
                                         </div>

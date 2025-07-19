@@ -26,7 +26,7 @@ public class InvoiceServlet extends HttpServlet {
         Users user = (Users) request.getSession().getAttribute("user");
 
         if (user == null) {
-            response.sendRedirect("/login");
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
