@@ -169,6 +169,10 @@
         <servlet-name>ApprovalAgendaServlet</servlet-name>
         <servlet-class>controller.ApprovalAgendaServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>AssignFormServlet</servlet-name>
+        <servlet-class>controller.AssignFormServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ClubsServlet</servlet-name>
         <url-pattern>/clubs</url-pattern>
@@ -359,6 +363,10 @@
     <servlet-mapping>
         <servlet-name>RecruitmentDetailServlet</servlet-name>
         <url-pattern>/recruitment/recruitmentDetail/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AssignFormServlet</servlet-name>
+        <url-pattern>/assign-form</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>

@@ -310,7 +310,7 @@
 						</div>
 					</c:if>
 					<c:choose>
-						<c:when test="${eventDetails.approvalStatus == 'APPROVED'}">
+						<c:when test="${eventDetails.approvalStatus == 'APPROVED' || eventDetails.approvalStatus == 'REJECTED'}">
 							<button type="submit" class="modal-btn approve" disabled
 							        style="background-color: #ccc; cursor: not-allowed;">
 								<i class="fas fa-check-circle"></i> Duyệt
@@ -324,9 +324,20 @@
 					</c:choose>
 
 				</form>
-				<button class="modal-btn reject" onclick="showRejectionSection()">
-					<i class="fas fa-times-circle"></i> Từ chối
-				</button>
+				<c:choose>
+					<c:when test="${eventDetails.approvalStatus == 'APPROVED'}">
+						<button class="modal-btn reject" onclick="showRejectionSection()" disabled
+						        style="background-color: #ccc; cursor: not-allowed;">
+							<i class="fas fa-times-circle"></i> Từ chối
+						</button>
+					</c:when>
+					<c:otherwise>
+						<button class="modal-btn reject" onclick="showRejectionSection()">
+							<i class="fas fa-times-circle"></i> Từ chối
+						</button>
+					</c:otherwise>
+				</c:choose>
+
 			</div>
 		</div>
 	</div>

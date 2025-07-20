@@ -341,7 +341,48 @@
 				</div>
 			</form>
 		</div>
+		<div class="form-grid-2">
+			<c:if test="${event.approvalStatus == 'REJECTED' && not empty event.rejectionReason}">
+				<div class="form-group full-width">
+					<label><i class="fas fa-exclamation-circle"></i> Lý do từ chối</label>
+					<div class="error-message-reject" style="color: red">${event.rejectionReason}</div>
+				</div>
+			</c:if>
+		</div>
+
+		<div class="form-grid-2">
+			<form id="assignForm" action="${pageContext.request.contextPath}/assign-form" method="post">
+				<input type="hidden" name="eventID" value="${event.eventID}"/>
+				<div class="form-group">
+					<label><i class="fas fa-file-alt"></i> Form đăng ký sự kiện</label>
+					<select id="formId" name="formId" class="form-control" required>
+						<option value="">-- Chọn form đăng ký sự kiện --</option>
+						<c:forEach items="${requestScope.applicationForms}" var="form">
+							<option value="${form.formId}" ${event.formID == form.formId ? 'selected' : ''}>
+									${form.title}
+							</option>
+						</c:forEach>
+					</select>
+				</div>
+				<div class="form-actions">
+					<c:choose>
+						<c:when test="${event.approvalStatus == 'APPROVED'}">
+							<button type="submit" class="btn-submit">
+								<i class="fas fa-save"></i> Gán form
+							</button>
+						</c:when>
+						<c:otherwise>
+							<button type="submit" class="btn-submit" disabled
+							        style="background-color: #ccc; cursor: not-allowed;">
+								<i class="fas fa-save"></i> Gán form
+							</button>
+						</c:otherwise>
+					</c:choose>
+				</div>
+			</form>
+		</div>
 	</div>
+
 
 </main>
 <script>
