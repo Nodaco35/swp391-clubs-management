@@ -197,6 +197,14 @@
         <servlet-name>TransactionController</servlet-name>
         <servlet-class>controller.TransactionController</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>DF_TransactionController</servlet-name>
+        <servlet-class>controller.DF_TransactionController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>DF_IncomeController</servlet-name>
+        <servlet-class>controller.DF_IncomeController</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ClubsServlet</servlet-name>
         <url-pattern>/clubs</url-pattern>
@@ -415,6 +423,14 @@
     <servlet-mapping>
         <servlet-name>TransactionController</servlet-name>
         <url-pattern>/financial/transaction-history</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DF_TransactionController</servlet-name>
+        <url-pattern>/department/financial/club-transaction</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DF_IncomeController</servlet-name>
+        <url-pattern>/department/financial/income</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>

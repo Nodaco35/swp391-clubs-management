@@ -354,11 +354,29 @@ public class FinancialDAO {
                      UPDATE memberincomecontributions 
                      SET ContributionStatus = 'Paid', PaidDate = CURRENT_TIMESTAMP 
                      WHERE ContributionID = ? AND ContributionStatus = 'Pending'""";
+        MemberIncomeContributions invoice = FinancialDAO.getInvoiceByID(contributionID);
+        String sql2 = """
+                     INSERT INTO Transactions (ClubID, TermID, Type, Amount, TransactionDate, Description, Status, ReferenceID, CreatedBy)
+                     VALUES
+                     (?, ?, ?, ?, ?, ?, ?, ?, ?)""";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            PreparedStatement ps2 = DBContext.getConnection().prepareStatement(sql2);
+            
             ps.setInt(1, contributionID);
+            ps2.setObject(1, invoice.getClubID());
+            ps2.setObject(2, invoice.getTermID());
+            ps2.setObject(3, "Income");
+            ps2.setObject(4, invoice.getAmount());
+            ps2.setObject(5, invoice.getPaidDate());
+            ps2.setObject(6, invoice.getDescription());
+            ps2.setObject(7, "Approved");
+            ps2.setObject(8, invoice.getIncomeID());
+            ps2.setObject(9, invoice.getUserID());
+            
             int rowsAffected = ps.executeUpdate();
-            return rowsAffected > 0;
+            int row = ps2.executeUpdate();
+            return rowsAffected > 0 && row > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -402,28 +420,16 @@ public class FinancialDAO {
                      UPDATE income 
                      SET status = 'Đã nhận' 
                      WHERE IncomeID = ? AND status = 'Đang chờ'""";
-        String sql2 = """
-                      INSERT INTO Transactions (ClubID, TermID, Type, Amount, TransactionDate, Description, Attachment, Status, ReferenceID, CreatedBy)
-                      VALUES
-                      (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""";
+        
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
-            PreparedStatement ps2 = DBContext.getConnection().prepareStatement(sql2);
+            
             ps.setInt(1, incomeID);
-            ps2.setObject(1, clubID);
-            ps2.setObject(2, termID);
-            ps2.setObject(3, "Income");
-            ps2.setObject(4, income.getAmount());
-            ps2.setObject(5, new Timestamp(System.currentTimeMillis()));
-            ps2.setObject(6, income.getDescription());
-            ps2.setObject(7, income.getAttachment());
-            ps2.setObject(8, "Approved");
-            ps2.setObject(9, incomeID);
-            ps2.setObject(10, userID);
+            
             int rowsAffected = ps.executeUpdate();
-            int row = ps2.executeUpdate();
+            
 
-            return (row > 0 && rowsAffected > 0);
+            return (rowsAffected > 0);
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

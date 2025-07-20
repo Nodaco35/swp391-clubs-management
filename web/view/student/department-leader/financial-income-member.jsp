@@ -158,6 +158,11 @@
                                         <a href="${pageContext.request.contextPath}/department/financial" class="text-decoration-none">Tài chính</a>
                                     </li>
                                     <li class="breadcrumb-item active" aria-current="page">Phí thành viên</li>
+                                    <li class="breadcrumb-item">
+                                        <a href="${pageContext.request.contextPath}/department/financial/income" class="text-decoration-none">
+                                            Nguồn thu
+                                        </a>
+                                    </li>
                                 </ol>
                             </nav>
                         </div>

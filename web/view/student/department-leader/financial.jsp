@@ -96,6 +96,11 @@
                                             Phí thành viên
                                         </a>
                                     </li>
+                                    <li class="breadcrumb-item">
+                                        <a href="${pageContext.request.contextPath}/department/financial/income" class="text-decoration-none">
+                                            Nguồn thu
+                                        </a>
+                                    </li>
                                 </ol>
                             </nav>
                         </div>
