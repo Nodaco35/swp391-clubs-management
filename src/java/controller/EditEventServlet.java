@@ -19,6 +19,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import dal.ApplicationFormDAO;
 import dal.ClubDAO;
 import dal.EventsDAO;
 import dal.LocationDAO;
@@ -79,10 +80,13 @@ public class EditEventServlet extends HttpServlet {
         ClubDAO clubDAO = new ClubDAO();
         EventsDAO eventDAO = new EventsDAO();
         LocationDAO locationDAO = new LocationDAO();
+        ApplicationFormDAO formDAO = new ApplicationFormDAO();
+
 
         if (user != null) {
             String userID = user.getUserID();
             ClubInfo club = clubDAO.getClubChairman(userID);
+            int clubID = clubDAO.getClubIDByUserID(userID);
             request.setAttribute("club", club);
 
             String eventIDParam = request.getParameter("eventID");
@@ -103,11 +107,15 @@ public class EditEventServlet extends HttpServlet {
                     }
 
                     List<Locations> locations = locationDAO.getLocationsByType(locationType);
+                    List<ApplicationForm> applicationForms = formDAO.getFormsByClubAndType(clubID, "Event");
+
 
                     request.setAttribute("event", event);
                     request.setAttribute("agendas", agendas);
                     request.setAttribute("locations", locations);
                     request.setAttribute("locationType", locationType);
+                    request.setAttribute("applicationForms", applicationForms);
+
 
                 } catch (NumberFormatException e) {
                     request.setAttribute("errorMessage", "ID sự kiện không hợp lệ.");
