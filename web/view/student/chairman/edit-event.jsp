@@ -278,9 +278,19 @@
 				        onclick="window.location.href='${pageContext.request.contextPath}/chairman-page/myclub-events'">
 					<i class="fas fa-times"></i> Đóng
 				</button>
-				<button type="submit" class="btn-submit">
-					<i class="fas fa-save"></i> Lưu sự kiện
-				</button>
+				<c:choose>
+					<c:when test="${event.approvalStatus == 'APPROVED'}">
+						<button type="submit" class="btn-submit" disabled
+						        style="background-color: #ccc; cursor: not-allowed;">
+							<i class="fas fa-save"></i> Lưu sự kiện
+						</button>
+					</c:when>
+					<c:otherwise>
+					<button type="submit" class="btn-submit">
+						<i class="fas fa-save"></i> Lưu sự kiện
+					</button>
+					</c:otherwise>
+				</c:choose>
 			</div>
 		</form>
 
@@ -313,10 +323,21 @@
 					</button>
 
 					<div class="form-actions">
-						<button type="submit" class="btn-submit">
-							<i class="fas fa-save"></i> Lưu chương trình sự kiện
-						</button>
+						<c:choose>
+							<c:when test="${event.approvalStatus == 'APPROVED'}">
+								<button type="submit" class="btn-submit" disabled
+								        style="background-color: #ccc; cursor: not-allowed;">
+									<i class="fas fa-save"></i> Lưu chương trình sự kiện
+								</button>
+							</c:when>
+							<c:otherwise>
+								<button type="submit" class="btn-submit">
+									<i class="fas fa-save"></i> Lưu chương trình sự kiện
+								</button>
+							</c:otherwise>
+						</c:choose>
 					</div>
+
 				</div>
 			</form>
 		</div>

@@ -1581,6 +1581,11 @@ body {
     color: #fd7e14;
 }
 
+.phase-task-status {
+    margin: 8px;
+
+}
+
 .badge {
     display: inline-block;
     padding: 4px 8px;

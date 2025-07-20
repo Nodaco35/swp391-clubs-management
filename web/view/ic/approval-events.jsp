@@ -309,10 +309,20 @@
 							</label>
 						</div>
 					</c:if>
+					<c:choose>
+						<c:when test="${eventDetails.approvalStatus == 'APPROVED'}">
+							<button type="submit" class="modal-btn approve" disabled
+							        style="background-color: #ccc; cursor: not-allowed;">
+								<i class="fas fa-check-circle"></i> Duyệt
+							</button>
+						</c:when>
+						<c:otherwise>
+							<button type="submit" class="modal-btn approve">
+								<i class="fas fa-check-circle"></i> Duyệt
+							</button>
+						</c:otherwise>
+					</c:choose>
 
-					<button type="submit" class="modal-btn approve">
-						<i class="fas fa-check-circle"></i> Duyệt
-					</button>
 				</form>
 				<button class="modal-btn reject" onclick="showRejectionSection()">
 					<i class="fas fa-times-circle"></i> Từ chối
