@@ -3,11 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/src/java/dal/FeedbackDAO.java</file>
-            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/src/java/controller/InvoiceServlet.java</file>
-            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/src/java/controller/ChairmanClubMeetingController.java</file>
-            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/src/java/dal/FinancialDAO.java</file>
-            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/web/view/student/department-leader/meetings.jsp</file>
+            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/src/java/com/vnpay/common/ajaxServlet.java</file>
+            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/src/java/com/vnpay/common/Config.java</file>
+            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/src/java/com/vnpay/common/VnpayReturn.java</file>
         </group>
     </open-files>
 </project-private>

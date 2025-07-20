@@ -18,29 +18,15 @@
 
 
         <style>
-            body {
-                padding-top: 0px; /* hoặc đúng chiều cao header */
-            }
-
-            /* Căn giữa phần nội dung chính */
             .main-container, main, #main-content {
                 max-width: 1200px;
                 margin: 0 auto;
                 padding: 1rem;
-                margin-top: 70px;
-            }
-
-
-
-
-            main {
-                max-width: 1200px;
-                margin: 0 auto;
 
             }
-            
 
-            
+
+
 
             .sidebar {
                 top: 70px; /* nếu header cao 70px */
@@ -118,7 +104,7 @@
                 justify-content: center;
                 margin-top: 20px;
             }
-            
+
         </style>
     </head>
     <body>
@@ -126,18 +112,19 @@
 
 
         <main>
-            <header class="header mb-4">
+            <header >
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h1 class="h3 mb-1">Hóa đơn phí thành viên của ${sessionScope.user.fullName}</h1>
                         <nav aria-label="breadcrumb">
                             <ol class="breadcrumb mb-0">
-                                <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/" class="text-decoration-none">Trang chủ</a></li>
+                                <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/myclub" class="text-decoration-none">Trang chủ</a></li>
                                 <li class="breadcrumb-item active" aria-current="page">Hóa đơn</li>
+                                <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/financial/transaction-history" class="text-decoration-none">Lịch sử giao dịch</a></li>
                             </ol>
                         </nav>
                     </div>
-                    
+
                 </div>
             </header>
 
@@ -150,6 +137,12 @@
                         </h2>
                     </div>
                     <div class="card-body">
+                        <c:if test="${not empty message}">
+                            <div class="alert alert-success">${message}</div>
+                        </c:if>
+                        <c:if test="${not empty error}">
+                            <div class="alert alert-danger">${error}</div>
+                        </c:if>
                         <form class="filter-form" action="${pageContext.request.contextPath}/financial/cart-member-contribution" method="get">
                             <input type="hidden" name="userID" value="${userID}">
                             <div class="form-group">
@@ -178,7 +171,7 @@
                                     <c:forEach var="invoice" items="${invoices}">
                                         <div class="invoice-item">
                                             <div class="invoice-info">
-                                                
+
                                                 <div class="invoice-details">
                                                     <h4>Hóa đơn #${invoice.contributionID} - ${invoice.clubName} - ${invoice.description}</h4>
                                                     <div class="invoice-meta">Kỳ: ${invoice.termID}</div>
@@ -187,7 +180,7 @@
                                                     <div class="invoice-meta">Hạn nộp:<strong><fmt:formatDate value="${invoice.dueDate}" pattern="dd/MM/yyyy HH:mm"/> </strong> </div>
                                                 </div>
                                             </div>
-                                                <div class="invoice-payment"></div>
+                                            <div class="invoice-payment"></div>
                                             <div class="invoice-payment">
                                                 <div class="payment-info">
                                                     <div class="payment-amount">
@@ -202,17 +195,25 @@
                                                         </c:choose>
                                                     </div>
                                                 </div>
-                                                    
+
                                                 <i class="fas fa-${invoice.contributionStatus == 'Paid' ? 'check-circle payment-status paid' : 'times-circle payment-status unpaid'}"></i>
-                                                
-                                                
+
+
                                                 <div class="action-buttons">
                                                     <c:if test="${invoice.contributionStatus == 'Pending'}">
-                                                        <a href="${pageContext.request.contextPath}/payment?contributionID=${invoice.contributionID}" class="btn btn-sm btn-primary">
-                                                            <i class="fas fa-money-bill-wave"></i> Thanh toán
-                                                        </a>
+                                                        <form action="payment" method="POST">
+                                                            <input type="hidden" value="${invoice.contributionID}" name="contributionID">
+                                                            <input type="hidden" name="type" value="income">
+                                                            <button type="submit" class="btn btn-primary">
+                                                                <i class="fas fa-money-bill-wave"></i> Thanh toán
+                                                            </button>
+
+                                                        </form>
+
+
+
                                                     </c:if>
-                                                   
+
                                                 </div>
                                             </div>
                                         </div>
@@ -248,14 +249,14 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-                        window.addEventListener('load', function () {
-                            const cards = document.querySelectorAll('.enhanced-card');
-                            cards.forEach((card, index) => {
-                                setTimeout(() => {
-                                    card.classList.add('fade-in');
-                                }, index * 100);
-                            });
-                        });
+        window.addEventListener('load', function () {
+            const cards = document.querySelectorAll('.enhanced-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('fade-in');
+                }, index * 100);
+            });
+        });
     </script>
 </body>
 </html>

@@ -577,13 +577,13 @@ public class FinancialDAO {
                 mic.setCreatedAt(rs.getTimestamp("CreatedAt"));
                 mic.setDueDate(rs.getTimestamp("DueDate"));
 
-                
                 mic.setUserName(rs.getString("FullName"));
                 mic.setEmail(rs.getString("Email"));
                 mic.setAvtSrc(rs.getString("AvatarSrc"));
                 mic.setClubName(rs.getString("ClubName"));
                 mic.setSource(rs.getString("Source"));
                 mic.setDescription(rs.getString("Description"));
+
                 invoices.add(mic);
             }
             rs.close();
@@ -647,5 +647,221 @@ public class FinancialDAO {
             e.printStackTrace();
         }
         return termIDs;
+    }
+
+    public static MemberIncomeContributions getInvoiceByID(int contributionID) {
+        MemberIncomeContributions mic = new MemberIncomeContributions();
+        String sql = """
+                     SELECT mic.*, u.FullName, u.Email, u.AvatarSrc, c.ClubName , i.Source, i.Description
+                                                          FROM MemberIncomeContributions mic 
+                                                          JOIN Users u ON mic.UserID = u.UserID 
+                                                          JOIN Clubs c ON mic.ClubID = c.ClubID 
+                                                          Join income i on mic.IncomeID = i.IncomeID
+                                                          WHERE mic.contributionID = ?""";
+
+        try {
+            Connection conn = DBContext.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setObject(1, contributionID);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+
+                mic.setContributionID(rs.getInt("ContributionID"));
+                mic.setIncomeID(rs.getInt("IncomeID"));
+                mic.setUserID(rs.getString("UserID"));
+                mic.setClubID(rs.getInt("ClubID"));
+                mic.setTermID(rs.getString("TermID"));
+                mic.setAmount(rs.getBigDecimal("Amount"));
+                mic.setContributionStatus(rs.getString("ContributionStatus"));
+                mic.setPaidDate(rs.getTimestamp("PaidDate"));
+                mic.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                mic.setDueDate(rs.getTimestamp("DueDate"));
+
+                mic.setUserName(rs.getString("FullName"));
+                mic.setEmail(rs.getString("Email"));
+                mic.setAvtSrc(rs.getString("AvatarSrc"));
+                mic.setClubName(rs.getString("ClubName"));
+                mic.setSource(rs.getString("Source"));
+                mic.setDescription(rs.getString("Description"));
+
+            }
+            rs.close();
+            ps.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return mic;
+
+    }
+
+    public static boolean addTransaction(MemberIncomeContributions invoice, String type, String userID) {
+        String sql = """
+                     INSERT INTO Transactions (ClubID, TermID, Type, Amount, Description, ReferenceID, CreatedBy)
+                     VALUES
+                     (?, ?, ?, ?, ?, ?, ?)""";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setObject(1, invoice.getClubID());
+            ps.setObject(2, invoice.getTermID());
+            ps.setObject(3, type);
+            ps.setObject(4, invoice.getAmount());
+            ps.setObject(5, invoice.getDescription());
+            ps.setObject(6, invoice.getIncomeID());
+            ps.setObject(7, userID);
+            int check = ps.executeUpdate();
+            return check > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static Transaction getTransactionByID(String type, String userID, int referenceID) {
+        String sql = """
+                     SELECT * FROM clubmanagementsystem.transactions
+                     where type = ? and createdBy = ? and referenceID = ?
+                     order by TransactionID desc
+                     limit 1""";
+        Transaction trans = new Transaction();
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setObject(1, type);
+            ps.setObject(2, userID);
+            ps.setObject(3, referenceID);
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()){
+                trans.setTransactionID(rs.getInt("TransactionID"));
+                trans.setClubID(rs.getInt("ClubID"));
+                trans.setTermID(rs.getString("TermID"));
+                trans.setType(rs.getString("Type"));
+                trans.setAmount(rs.getBigDecimal("Amount"));
+                trans.setTransactionDate(rs.getTimestamp("TransactionDate"));
+                trans.setDescription(rs.getString("Description"));
+                trans.setAttachment(rs.getString("Attachment"));
+                trans.setCreateBy(rs.getString("CreatedBy"));
+                trans.setStatus(rs.getString("Status"));
+                trans.setReferenceID(rs.getInt("ReferenceID"));
+                trans.setCreatedDate(rs.getTimestamp("CreatedAt"));
+            }
+            
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return trans;
+    }
+
+    public static List<Transaction> getTransactionsByUser(String userID, String transResult, int page) {
+        List<Transaction> transactions = new ArrayList<>();
+        int offset = (page - 1) * 10;
+
+        StringBuilder sql = new StringBuilder("""
+            SELECT * FROM clubmanagementsystem.transactions
+            WHERE createdBy = ?
+        """);
+        
+        if (transResult != null && !transResult.isEmpty()) {
+            sql.append(" AND Status = ?");
+        }
+        
+        sql.append(" ORDER BY TransactionID DESC");
+        sql.append(" LIMIT ? OFFSET ?");
+
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql.toString());
+            ps.setString(1, userID);
+            int paramIndex = 2;
+            
+            if (transResult != null && !transResult.isEmpty()) {
+                ps.setString(paramIndex++, transResult);
+            }
+            ps.setInt(paramIndex++, 10);
+            ps.setInt(paramIndex, offset);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Transaction trans = new Transaction();
+                trans.setTransactionID(rs.getInt("TransactionID"));
+                trans.setClubID(rs.getInt("ClubID"));
+                trans.setTermID(rs.getString("TermID"));
+                trans.setType(rs.getString("Type"));
+                trans.setAmount(rs.getBigDecimal("Amount"));
+                trans.setTransactionDate(rs.getTimestamp("TransactionDate"));
+                trans.setDescription(rs.getString("Description"));
+                trans.setAttachment(rs.getString("Attachment"));
+                trans.setCreateBy(rs.getString("CreatedBy"));
+                trans.setStatus(rs.getString("Status"));
+                trans.setReferenceID(rs.getInt("ReferenceID"));
+                trans.setCreatedDate(rs.getTimestamp("CreatedAt"));
+                transactions.add(trans);
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return transactions;
+    }
+
+    public static int getTotalTransactionCount(String userID, String transResult) {
+        int totalRecords = 0;
+        String countSql = "SELECT COUNT(*) as total FROM clubmanagementsystem.transactions WHERE createdBy = ?" 
+            + (transResult != null && !transResult.isEmpty() ? " AND Status = ?" : "");
+        
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(countSql);
+            ps.setString(1, userID);
+            if (transResult != null && !transResult.isEmpty()) {
+                ps.setString(2, transResult);
+            }
+            
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                totalRecords = rs.getInt("total");
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return totalRecords;
+    }
+    public static boolean updateMemberInvoices(MemberIncomeContributions invoice, Transaction trans) {
+        String sql1 = """
+                      UPDATE `clubmanagementsystem`.`memberincomecontributions`
+                      SET
+                      
+                      `ContributionStatus` = ?,
+                      `PaidDate` = ?
+                      
+                      WHERE `ContributionID` = ?;""";
+        String sql2 = """
+                      UPDATE `clubmanagementsystem`.`transactions`
+                      SET
+                      `TransactionDate` = ?,
+                      `Status` = ?
+                      WHERE `TransactionID` = ?;""";
+        try {
+            PreparedStatement ps1 = DBContext.getConnection().prepareStatement(sql1);
+            PreparedStatement ps2 = DBContext.getConnection().prepareStatement(sql2);
+            
+            ps1.setObject(1, invoice.getContributionStatus());
+            ps1.setObject(2, invoice.getPaidDate());
+            ps1.setObject(3, invoice.getContributionID());
+            
+            ps2.setObject(1, trans.getTransactionDate());
+            ps2.setObject(2, trans.getStatus());
+            ps2.setObject(3, trans.getTransactionID());
+            
+            int check1 = ps1.executeUpdate();
+            int check2 = ps2.executeUpdate();
+            return check1 > 0 && check2 > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        
     }
 }

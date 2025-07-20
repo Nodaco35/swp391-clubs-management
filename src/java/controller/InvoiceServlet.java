@@ -29,7 +29,12 @@ public class InvoiceServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-
+        
+        String error = "";
+        if (request.getAttribute("error") != null) {
+            error = (String) request.getAttribute("error");
+        }
+        
         String userID = user.getUserID();
         String status = request.getParameter("status") != null ? request.getParameter("status") : "Pending"; // Mặc định Pending
         String termID = request.getParameter("termID");
@@ -50,7 +55,7 @@ public class InvoiceServlet extends HttpServlet {
         // Lấy danh sách TermID để lọc
         List<String> termIDs = FinancialDAO.getTermIDs();
         request.setAttribute("termIDs", termIDs);
-
+        request.setAttribute("error", error);
         request.getRequestDispatcher("/view/student/member/invoices.jsp").forward(request, response);
     } 
 

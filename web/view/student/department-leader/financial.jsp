@@ -196,7 +196,7 @@
                                                     <h4>${transaction.description}</h4>
                                                     <div class="transaction-meta">
                                                         Ngày nhận • 
-                                                        <fmt:formatDate value="${transaction.transactionDate}" pattern="dd/MM/yyyy"/>
+                                                        "${transaction.transactionDate}"
                                                     </div>
                                                 </div>
                                             </div>
