@@ -58,9 +58,15 @@ public class DepartmentFinancialServlet extends HttpServlet {
         BigDecimal balancePre = totalIncomePre.subtract(totalExpensesPre);
         
         BigDecimal incomeMemberPending = FinancialDAO.getTotalIncomeMemberPending(clubID, term.getTermID());
-        double comp = totalIncome.divide(totalIncomePre, 4, RoundingMode.HALF_UP).doubleValue();
-        double comp2 = totalExpenses.divide(totalExpensesPre, 4, RoundingMode.HALF_UP).doubleValue();
-        double comp3 = balance.divide(balancePre, 4, RoundingMode.HALF_UP).doubleValue();
+        double comp = 0;
+        double comp2 = 0;
+        double comp3 = 0;
+        if (totalIncomePre != BigDecimal.ZERO && totalExpensesPre != BigDecimal.ZERO&& balancePre != BigDecimal.ZERO) {
+            comp = totalIncome.divide(totalIncomePre, 4, RoundingMode.HALF_UP).doubleValue();
+            comp2 = totalExpenses.divide(totalExpensesPre, 4, RoundingMode.HALF_UP).doubleValue();
+            comp3 = balance.divide(balancePre, 4, RoundingMode.HALF_UP).doubleValue();
+        }
+         
         if (comp >= 1) {
             compIncomeWithPreTerm = "+" + comp + "%";
         } else {

@@ -32,7 +32,7 @@ public class FinancialDAO {
         } catch (SQLException e) {
             return BigDecimal.ZERO;
         }
-        return getTotalAmount;
+        return getTotalAmount != null ? getTotalAmount : BigDecimal.ZERO;
     }
 
     public static String getPreviousTermID(String currentTermID) {
@@ -78,7 +78,7 @@ public class FinancialDAO {
         } catch (SQLException e) {
             return BigDecimal.ZERO;
         }
-        return getTotalAmount;
+        return getTotalAmount != null ? getTotalAmount : BigDecimal.ZERO;
     }
 
     public static BigDecimal getTotalIncomeMemberPending(int clubID, String termID) {
@@ -102,7 +102,7 @@ public class FinancialDAO {
         } catch (SQLException e) {
             return BigDecimal.ZERO;
         }
-        return getTotalAmount;
+        return getTotalAmount != null ? getTotalAmount : BigDecimal.ZERO;
     }
 
     public static int getTotalIncomePersonByType(int clubID, String termID, String type) {

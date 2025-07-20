@@ -231,9 +231,10 @@ public class DepartmentDashboardDAO {    /**
     
      public boolean isDepartmentLeaderIndoingoai(String userId, int clubID) {
         String sql = """
-                     SELECT  uc.ClubDepartmentID
+                     SELECT  *
                      FROM UserClubs uc
-                     WHERE uc.UserID = ? AND uc.RoleID = 3 AND uc.IsActive = 1 AND uc.ClubDepartmentID=6 and uc.ClubID = ?""";
+                     Join clubdepartments cd on uc.ClubDepartmentID = cd.ClubDepartmentID
+                     WHERE uc.UserID = ? AND uc.RoleID = 3 AND uc.IsActive = 1 AND cd.DepartmentID = 6 and uc.ClubID = ?""";
         
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
