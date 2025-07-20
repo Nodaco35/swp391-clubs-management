@@ -12,6 +12,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import models.Clubs;
+import models.Term;
 import models.Transaction;
 import models.Users;
 
@@ -21,6 +23,9 @@ public class TransactionController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String transResult = "";
+        String termID = request.getParameter("termID");
+        String clubID = request.getParameter("clubID");
+        
         Users user = (Users) request.getSession().getAttribute("user");
         if (user == null) {
             response.sendRedirect(request.getContextPath() + "/login");
@@ -44,14 +49,19 @@ public class TransactionController extends HttpServlet {
         }
 
 
-        List<Transaction>  transactions = FinancialDAO.getTransactionsByUser(user.getUserID(), transResult, page);
-        int totalRecords = FinancialDAO.getTotalTransactionCount(user.getUserID(), transResult);
+        List<Transaction>  transactions = FinancialDAO.getTransactionsByUser(user.getUserID(), transResult, termID, clubID, page);
+        int totalRecords = FinancialDAO.getTotalTransactionCount(user.getUserID(), transResult, termID, clubID);
         int totalPages = (int) Math.ceil((double) totalRecords / pagesize);
-
+        List<Term> terms = FinancialDAO.getAllTerms();
+        List<Clubs> clubs = FinancialDAO.getClubsByUser(user.getUserID());
         request.setAttribute("transactions", transactions);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("transResult", transResult);
+        request.setAttribute("termID", termID);
+        request.setAttribute("clubID", clubID);
+        request.setAttribute("terms", terms);
+        request.setAttribute("clubs", clubs);
 
         request.getRequestDispatcher("/view/student/member/transaction-history.jsp").forward(request, response);
     }

@@ -195,7 +195,7 @@
                                                 <div class="transaction-details">
                                                     <h4>${transaction.description}</h4>
                                                     <div class="transaction-meta">
-                                                        Ngày nhận • 
+                                                        Ngày giao dịch • 
                                                         "${transaction.transactionDate}"
                                                     </div>
                                                 </div>
@@ -226,11 +226,7 @@
                             </div>
                             <div class="card-body">
                                 <div class="quick-actions-grid">
-                                    <button onclick="openAddTransactionModal('income')" 
-                                            class="action-button income">
-                                        <i class="fas fa-plus"></i>
-                                        Tạo nguồn thu thủ công
-                                    </button>
+                                    
 
 
                                     <form action="${pageContext.request.contextPath}/department/#" >

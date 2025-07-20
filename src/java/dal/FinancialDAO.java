@@ -17,9 +17,10 @@ public class FinancialDAO {
 
     public static BigDecimal getTotalIncomeAmount(int clubID, String termID) {
         BigDecimal getTotalAmount = BigDecimal.ZERO;
-        String sql = "SELECT SUM(amount) AS total\n"
-                + "FROM income\n"
-                + "WHERE ClubID = ? AND TermID = ? and status = 'Đã nhận'";
+        String sql = """
+                     SELECT SUM(amount) AS total
+                                          FROM transactions
+                                          WHERE ClubID = ? AND TermID = ? and status = 'Approved' and type = 'income'""";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, clubID);
@@ -64,8 +65,8 @@ public class FinancialDAO {
         BigDecimal getTotalAmount = BigDecimal.ZERO;
         String sql = """
                      SELECT SUM(amount) AS total
-                                     FROM expenses
-                                     WHERE ClubID = ? AND TermID = ? and approved = 1;""";
+                                          FROM transactions
+                                          WHERE ClubID = ? AND TermID = ? and status = 'Approved' and type = 'expense'""";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, clubID);
@@ -186,7 +187,7 @@ public class FinancialDAO {
                                      join users u on t.CreatedBy = u.UserID
                                           where t.Status = 'Approved' and ClubID = ? and  TermID = ? 
                                           order by CreatedAt desc 
-                     limit 4;""";
+                     limit 8;""";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, clubID);
@@ -731,7 +732,7 @@ public class FinancialDAO {
             ps.setObject(2, userID);
             ps.setObject(3, referenceID);
             ResultSet rs = ps.executeQuery();
-            while(rs.next()){
+            while (rs.next()) {
                 trans.setTransactionID(rs.getInt("TransactionID"));
                 trans.setClubID(rs.getInt("ClubID"));
                 trans.setTermID(rs.getString("TermID"));
@@ -745,15 +746,14 @@ public class FinancialDAO {
                 trans.setReferenceID(rs.getInt("ReferenceID"));
                 trans.setCreatedDate(rs.getTimestamp("CreatedAt"));
             }
-            
-            
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return trans;
     }
 
-    public static List<Transaction> getTransactionsByUser(String userID, String transResult, int page) {
+    public static List<Transaction> getTransactionsByUser(String userID, String transResult, String termID, String clubID, int page) {
         List<Transaction> transactions = new ArrayList<>();
         int offset = (page - 1) * 10;
 
@@ -761,21 +761,33 @@ public class FinancialDAO {
             SELECT * FROM clubmanagementsystem.transactions
             WHERE createdBy = ?
         """);
-        
+
         if (transResult != null && !transResult.isEmpty()) {
             sql.append(" AND Status = ?");
         }
-        
+        if (termID != null && !termID.isEmpty()) {
+            sql.append(" AND TermID = ?");
+        }
+        if (clubID != null && !clubID.isEmpty()) {
+            sql.append(" AND ClubID = ?");
+        }
+
         sql.append(" ORDER BY TransactionID DESC");
         sql.append(" LIMIT ? OFFSET ?");
 
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql.toString());
-            ps.setString(1, userID);
-            int paramIndex = 2;
-            
+            int paramIndex = 1;
+            ps.setString(paramIndex++, userID);
+
             if (transResult != null && !transResult.isEmpty()) {
                 ps.setString(paramIndex++, transResult);
+            }
+            if (termID != null && !termID.isEmpty()) {
+                ps.setString(paramIndex++, termID);
+            }
+            if (clubID != null && !clubID.isEmpty()) {
+                ps.setString(paramIndex++, clubID);
             }
             ps.setInt(paramIndex++, 10);
             ps.setInt(paramIndex, offset);
@@ -805,18 +817,35 @@ public class FinancialDAO {
         return transactions;
     }
 
-    public static int getTotalTransactionCount(String userID, String transResult) {
+    public static int getTotalTransactionCount(String userID, String transResult, String termID, String clubID) {
         int totalRecords = 0;
-        String countSql = "SELECT COUNT(*) as total FROM clubmanagementsystem.transactions WHERE createdBy = ?" 
-            + (transResult != null && !transResult.isEmpty() ? " AND Status = ?" : "");
-        
+        StringBuilder countSql = new StringBuilder("SELECT COUNT(*) as total FROM clubmanagementsystem.transactions WHERE createdBy = ?");
+
+        if (transResult != null && !transResult.isEmpty()) {
+            countSql.append(" AND Status = ?");
+        }
+        if (termID != null && !termID.isEmpty()) {
+            countSql.append(" AND TermID = ?");
+        }
+        if (clubID != null && !clubID.isEmpty()) {
+            countSql.append(" AND ClubID = ?");
+        }
+
         try {
-            PreparedStatement ps = DBContext.getConnection().prepareStatement(countSql);
-            ps.setString(1, userID);
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(countSql.toString());
+            int paramIndex = 1;
+            ps.setString(paramIndex++, userID);
+
             if (transResult != null && !transResult.isEmpty()) {
-                ps.setString(2, transResult);
+                ps.setString(paramIndex++, transResult);
             }
-            
+            if (termID != null && !termID.isEmpty()) {
+                ps.setString(paramIndex++, termID);
+            }
+            if (clubID != null && !clubID.isEmpty()) {
+                ps.setString(paramIndex++, clubID);
+            }
+
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 totalRecords = rs.getInt("total");
@@ -828,6 +857,53 @@ public class FinancialDAO {
         }
         return totalRecords;
     }
+
+    public static List<Term> getAllTerms() {
+        List<Term> terms = new ArrayList<>();
+        String sql = "SELECT TermID, TermName FROM clubmanagementsystem.semesters ORDER BY TermName";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Term term = new Term();
+                term.setTermID(rs.getString("TermID"));
+                term.setTermName(rs.getString("TermName"));
+                terms.add(term);
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return terms;
+    }
+
+    public static List<Clubs> getClubsByUser(String userID) {
+        List<Clubs> clubs = new ArrayList<>();
+        String sql = """
+                     SELECT DISTINCT c.ClubID, c.ClubName 
+                                 FROM clubmanagementsystem.clubs c
+                                 join userclubs uc on c.ClubID = uc.ClubID
+                                 WHERE uc.UserID = ?
+                                 ORDER BY c.ClubName""";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setString(1, userID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Clubs club = new Clubs();
+                club.setClubID(rs.getInt("ClubID"));
+                club.setClubName(rs.getString("ClubName"));
+                clubs.add(club);
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return clubs;
+    }
+
     public static boolean updateMemberInvoices(MemberIncomeContributions invoice, Transaction trans) {
         String sql1 = """
                       UPDATE `clubmanagementsystem`.`memberincomecontributions`
@@ -846,15 +922,15 @@ public class FinancialDAO {
         try {
             PreparedStatement ps1 = DBContext.getConnection().prepareStatement(sql1);
             PreparedStatement ps2 = DBContext.getConnection().prepareStatement(sql2);
-            
+
             ps1.setObject(1, invoice.getContributionStatus());
             ps1.setObject(2, invoice.getPaidDate());
             ps1.setObject(3, invoice.getContributionID());
-            
+
             ps2.setObject(1, trans.getTransactionDate());
             ps2.setObject(2, trans.getStatus());
             ps2.setObject(3, trans.getTransactionID());
-            
+
             int check1 = ps1.executeUpdate();
             int check2 = ps2.executeUpdate();
             return check1 > 0 && check2 > 0;
@@ -862,6 +938,6 @@ public class FinancialDAO {
             e.printStackTrace();
             return false;
         }
-        
+
     }
 }
