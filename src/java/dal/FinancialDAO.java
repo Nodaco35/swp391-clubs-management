@@ -362,7 +362,7 @@ public class FinancialDAO {
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             PreparedStatement ps2 = DBContext.getConnection().prepareStatement(sql2);
-            
+
             ps.setInt(1, contributionID);
             ps2.setObject(1, invoice.getClubID());
             ps2.setObject(2, invoice.getTermID());
@@ -373,7 +373,7 @@ public class FinancialDAO {
             ps2.setObject(7, "Approved");
             ps2.setObject(8, invoice.getIncomeID());
             ps2.setObject(9, invoice.getUserID());
-            
+
             int rowsAffected = ps.executeUpdate();
             int row = ps2.executeUpdate();
             return rowsAffected > 0 && row > 0;
@@ -420,14 +420,13 @@ public class FinancialDAO {
                      UPDATE income 
                      SET status = 'Đã nhận' 
                      WHERE IncomeID = ? AND status = 'Đang chờ'""";
-        
+
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
-            
+
             ps.setInt(1, incomeID);
-            
+
             int rowsAffected = ps.executeUpdate();
-            
 
             return (rowsAffected > 0);
         } catch (SQLException e) {
@@ -940,6 +939,148 @@ public class FinancialDAO {
             int check1 = ps1.executeUpdate();
             int check2 = ps2.executeUpdate();
             return check1 > 0 && check2 > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+    }
+
+    public static List<Income> getIncomesByClubAndTerm(int clubID, String termID, String status, String source, int page, int pageSize) {
+        List<Income> incomes = new ArrayList<>();
+        String sql = "SELECT * FROM Income WHERE ClubID = ? AND TermID = ?";
+        if (status != null && !status.isEmpty()) {
+            sql += " AND Status = ?";
+        }
+        if (source != null && !source.isEmpty()) {
+            sql += " AND Source = ?";
+        }
+        sql += " ORDER BY IncomeDate DESC LIMIT ? OFFSET ?";
+
+        try {
+            Connection conn = DBContext.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            int paramIndex = 1;
+            ps.setInt(paramIndex++, clubID);
+            ps.setString(paramIndex++, termID);
+            if (status != null && !status.isEmpty()) {
+                ps.setString(paramIndex++, status);
+            }
+            if (source != null && !source.isEmpty()) {
+                ps.setString(paramIndex++, source);
+            }
+            ps.setInt(paramIndex++, pageSize);
+            ps.setInt(paramIndex++, (page - 1) * pageSize);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Income income = new Income();
+                income.setIncomeID(rs.getInt("IncomeID"));
+                income.setClubID(rs.getInt("ClubID"));
+                income.setTermID(rs.getString("TermID"));
+                income.setSource(rs.getString("Source"));
+                income.setAmount(rs.getBigDecimal("Amount"));
+                income.setIncomeDate(rs.getTimestamp("IncomeDate"));
+                income.setDescription(rs.getString("Description"));
+                income.setAttachment(rs.getString("Attachment"));
+                income.setStatus(rs.getString("Status"));
+                incomes.add(income);
+            }
+            rs.close();
+            ps.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return incomes;
+    }
+
+    public static int getTotalIncomes(int clubID, String termID, String status, String source) {
+        int total = 0;
+        String sql = "SELECT COUNT(*) FROM Income WHERE ClubID = ? AND TermID = ?";
+        if (status != null && !status.isEmpty()) {
+            sql += " AND Status = ?";
+        }
+        if (source != null && !source.isEmpty()) {
+            sql += " AND Source = ?";
+        }
+
+        try {
+            Connection conn = DBContext.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            int paramIndex = 1;
+            ps.setInt(paramIndex++, clubID);
+            ps.setString(paramIndex++, termID);
+            if (status != null && !status.isEmpty()) {
+                ps.setString(paramIndex++, status);
+            }
+            if (source != null && !source.isEmpty()) {
+                ps.setString(paramIndex++, source);
+            }
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                total = rs.getInt(1);
+            }
+            rs.close();
+            ps.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return total;
+    }
+
+    public static boolean updateIncomeStatus(int incomeID, String userID) {
+        String sql1 = """
+                      UPDATE `clubmanagementsystem`.`income`
+                      SET
+                      
+                      `Status` = "Đã nhận"
+                      WHERE `IncomeID` = ?;""";
+        Income income = FinancialDAO.findByIncomeID(incomeID);
+        String sql2 = """
+                      INSERT INTO `clubmanagementsystem`.`transactions`
+                      (
+                      `ClubID`,
+                      `TermID`,
+                      `Type`,
+                      `Amount`,
+                      `TransactionDate`,
+                      `Description`,
+                      `CreatedBy`,
+                      `Status`,
+                      `ReferenceID`)
+                      VALUES
+                      (
+                      ?,
+                      ?,
+                      ?,
+                      ?,
+                      CURRENT_TIMESTAMP,
+                      ?,
+                      ?,
+                      ?,
+                      ?);""";
+
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql1);
+            PreparedStatement ps2 = DBContext.getConnection().prepareStatement(sql2);
+            ps.setObject(1, incomeID);
+            ps2.setObject(1, income.getClubID());
+            ps2.setObject(2, income.getTermID());
+            ps2.setObject(3, "income");
+            ps2.setObject(4, income.getAmount());
+            ps2.setObject(5, income.getDescription());
+            ps2.setObject(6, userID);
+            ps2.setObject(7, "Approved");
+            ps2.setObject(8, income.getIncomeID());
+            int row = ps.executeUpdate();
+            int row2 = 0;
+            if (row > 0) {
+                row2 = ps2.executeUpdate();
+
+            }
+            return row2 > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

@@ -234,7 +234,7 @@
                                     
 
 
-                                    <form action="${pageContext.request.contextPath}/department/#" >
+                                    <form action="${pageContext.request.contextPath}/department/financial/income" >
                                         <button type="submit"
                                                 class="action-button income">
                                             <i class="fas fa-credit-card"></i>

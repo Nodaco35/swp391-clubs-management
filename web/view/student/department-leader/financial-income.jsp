@@ -158,7 +158,7 @@
                                     <li class="breadcrumb-item">
                                         <a href="${pageContext.request.contextPath}/department/financial" class="text-decoration-none">Tài chính</a>
                                     </li>
-                                     <li class="breadcrumb-item">
+                                    <li class="breadcrumb-item">
                                         <a href="${pageContext.request.contextPath}/department/financial/income.member" class="text-decoration-none">
                                             Phí thành viên
                                         </a>
@@ -235,6 +235,17 @@
                                                         </div>
                                                     </div>
                                                     <div class="income-status ${fn:toLowerCase(income.status)}">${income.status}</div>
+                                                    <c:if test="${income.status != 'Đã nhận' && income.source != 'Phí thành viên'}">
+                                                        <div class="action-buttons">
+                                                            <form action="${pageContext.request.contextPath}/department/financial/income?action=paid" method="post">
+                                                                <input type="hidden" name="incomeID" value="${income.incomeID}">
+          
+                                                                <button type="submit" class="btn btn-success btn-sm">
+                                                                    <i class="fas fa-check"></i> Đã nhận
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </c:if>
                                                 </div>
                                             </div>
                                         </c:forEach>
