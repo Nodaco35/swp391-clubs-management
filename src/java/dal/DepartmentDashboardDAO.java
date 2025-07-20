@@ -7,15 +7,20 @@ import java.sql.SQLException;
 import models.DepartmentDashboard;
 
 /**
- * Data Access Object for Department Dashboard
- * Handles all database operations for Department Leader dashboard statistics
+ * Data Access Object for Department Dashboard Handles all database operations
+ * for Department Leader dashboard statistics
+ *
  * @author Department Management Module
  */
-public class DepartmentDashboardDAO {    /**
+public class DepartmentDashboardDAO {
+
+    /**
      * Get department information for a department leader
+     *
      * @param userId ID of the department leader
      * @return DepartmentDashboard object with basic department info
-     */    public DepartmentDashboard getDepartmentInfo(String userId) {
+     */
+    public DepartmentDashboard getDepartmentInfo(String userId) {
         String sql = """
             SELECT cd.DepartmentID, d.DepartmentName, 
                    cd.ClubID, c.ClubName, cd.ClubDepartmentID
@@ -25,20 +30,19 @@ public class DepartmentDashboardDAO {    /**
             JOIN Clubs c ON cd.ClubID = c.ClubID
             WHERE uc.UserID = ? AND uc.RoleID = 3 AND uc.IsActive = 1
             """;
-        
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setString(1, userId);
             ResultSet rs = ps.executeQuery();
-            
+
             if (rs.next()) {
                 return new DepartmentDashboard(
-                    rs.getInt("ClubDepartmentID"),
-                    rs.getInt("DepartmentID"),
-                    rs.getString("DepartmentName"),
-                    rs.getInt("ClubID"),
-                    rs.getString("ClubName")
+                        rs.getInt("ClubDepartmentID"),
+                        rs.getInt("DepartmentID"),
+                        rs.getString("DepartmentName"),
+                        rs.getInt("ClubID"),
+                        rs.getString("ClubName")
                 );
             }
         } catch (SQLException e) {
@@ -49,9 +53,11 @@ public class DepartmentDashboardDAO {    /**
 
     /**
      * Get member statistics for a department
+     *
      * @param clubDepartmentId ID of the club department
      * @return DepartmentDashboard with member statistics filled
-     */    public void fillMemberStatistics(DepartmentDashboard dashboard, int clubDepartmentId) {
+     */
+    public void fillMemberStatistics(DepartmentDashboard dashboard, int clubDepartmentId) {
         String sql = """
             SELECT 
                 COUNT(DISTINCT uc.UserID) as totalMembers,
@@ -59,20 +65,19 @@ public class DepartmentDashboardDAO {    /**
             FROM UserClubs uc
             WHERE uc.ClubDepartmentID = ?
             """;
-        
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setInt(1, clubDepartmentId);
             ResultSet rs = ps.executeQuery();
-            
+
             if (rs.next()) {
                 int totalMembers = rs.getInt("totalMembers");
                 int activeMembers = rs.getInt("activeMembers");
-                
+
                 dashboard.setTotalMembers(totalMembers);
                 dashboard.setActiveMembers(activeMembers);
-                
+
                 // Calculate activity rate
                 if (totalMembers > 0) {
                     double activityRate = (double) activeMembers / totalMembers * 100;
@@ -82,8 +87,11 @@ public class DepartmentDashboardDAO {    /**
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }/**
+    }
+
+    /**
      * Get task statistics for a department (sửa để dùng clubDepartmentId)
+     *
      * @param clubDepartmentId ID của club department (khóa chính)
      * @return DepartmentDashboard with task statistics filled
      */
@@ -101,20 +109,19 @@ public class DepartmentDashboardDAO {    /**
             JOIN ClubDepartments cd ON ta.DepartmentID = cd.DepartmentID
             WHERE ta.AssigneeType = 'Department' AND cd.ClubDepartmentID = ?
             """;
-        
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setInt(1, clubDepartmentId);
             ResultSet rs = ps.executeQuery();
-            
+
             if (rs.next()) {
                 dashboard.setTotalTasks(rs.getInt("totalTasks"));
                 dashboard.setTodoTasks(rs.getInt("todoTasks"));
                 dashboard.setInProgressTasks(rs.getInt("inProgressTasks"));
                 dashboard.setReviewTasks(rs.getInt("reviewTasks"));
                 dashboard.setDoneTasks(rs.getInt("doneTasks"));
-                
+
                 // Handle null average (when no tasks exist)
                 double avgProgress = rs.getDouble("averageProgress");
                 if (!rs.wasNull()) {
@@ -126,8 +133,11 @@ public class DepartmentDashboardDAO {    /**
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }    /**
+    }
+
+    /**
      * Get event statistics for a department (sửa để dùng clubDepartmentId)
+     *
      * @param clubDepartmentId ID của club department (khóa chính)
      * @return DepartmentDashboard with event statistics filled
      */
@@ -143,13 +153,12 @@ public class DepartmentDashboardDAO {    /**
             JOIN ClubDepartments cd ON ta.DepartmentID = cd.DepartmentID
             WHERE ta.AssigneeType = 'Department' AND cd.ClubDepartmentID = ?
             """;
-        
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setInt(1, clubDepartmentId);
             ResultSet rs = ps.executeQuery();
-            
+
             if (rs.next()) {
                 dashboard.setTotalEvents(rs.getInt("totalEvents"));
                 dashboard.setUpcomingEvents(rs.getInt("upcomingEvents"));
@@ -158,53 +167,62 @@ public class DepartmentDashboardDAO {    /**
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }    /**
+    }
+
+    /**
      * Get complete dashboard statistics for a department leader
+     *
      * @param userId ID of the department leader
      * @return Complete DepartmentDashboard with all statistics
      */
     public DepartmentDashboard getCompleteDashboard(String userId) {
         // First get department info
         DepartmentDashboard dashboard = getDepartmentInfo(userId);
-        
+
         if (dashboard != null) {            // Fill member statistics
             fillMemberStatistics(dashboard, dashboard.getClubDepartmentId());
-            
+
             // Fill task và event statistics (đã sửa để dùng clubDepartmentId)
             fillTaskStatistics(dashboard, dashboard.getClubDepartmentId());
             fillEventStatistics(dashboard, dashboard.getClubDepartmentId());
-            
+
             // Set weekly meetings (placeholder)
             dashboard.setWeeklyMeetings(0);
         }
-        
+
         return dashboard;
-    }    /**
-     * Check if user is a department leader (sử dụng logic giống DepartmentMemberDAO)
+    }
+
+    /**
+     * Check if user is a department leader (sử dụng logic giống
+     * DepartmentMemberDAO)
+     *
      * @param userId ID of the user
      * @return true if user is department leader, false otherwise
-     */    
+     */
     public boolean isDepartmentLeader(String userId) {
         String sql = """
             SELECT uc.ClubDepartmentID
             FROM UserClubs uc
             WHERE uc.UserID = ? AND uc.RoleID = 3 AND uc.IsActive = 1
             """;
-        
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setString(1, userId);
             ResultSet rs = ps.executeQuery();
-            
+
             return rs.next(); // Trả về true nếu tìm thấy ít nhất 1 record
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return false;
     }
+
     /**
-     * Lấy Club Department ID của trưởng ban (tái sử dụng logic từ DepartmentMemberDAO)
+     * Lấy Club Department ID của trưởng ban (tái sử dụng logic từ
+     * DepartmentMemberDAO)
+     *
      * @param userId ID của user
      * @return clubDepartmentID nếu user là trưởng ban, 0 nếu không phải
      */
@@ -214,10 +232,9 @@ public class DepartmentDashboardDAO {    /**
             FROM UserClubs uc
             WHERE uc.UserID = ? AND uc.RoleID = 3 AND uc.IsActive = 1
             """;
-        
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setString(1, userId);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -228,25 +245,41 @@ public class DepartmentDashboardDAO {    /**
         }
         return 0;
     }
-    
-     public boolean isDepartmentLeaderIndoingoai(String userId, int clubID) {
+
+    public boolean isDepartmentLeaderIndoingoai(String userId, int clubID) {
         String sql = """
                      SELECT  *
                      FROM UserClubs uc
                      Join clubdepartments cd on uc.ClubDepartmentID = cd.ClubDepartmentID
                      WHERE uc.UserID = ? AND uc.RoleID = 3 AND uc.IsActive = 1 AND cd.DepartmentID = 6 and uc.ClubID = ?""";
-        
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setString(1, userId);
             ps.setObject(2, clubID);
             ResultSet rs = ps.executeQuery();
-            
+
             return rs.next(); // Trả về true nếu tìm thấy ít nhất 1 record
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return false;
     }
+
+    public int getClubMemberCount(int clubID) {
+        String sql = "SELECT COUNT(UserID) AS membercount FROM userclubs WHERE clubID = ?";
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, clubID);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("membercount");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
 }

@@ -228,7 +228,7 @@
                                 </div>
                                 <button type="submit" class="btn btn-primary">Lọc</button>
                             </form>
-                            <!-- Form tạo mới -->
+                            
                             <form class="create-form" id="create-income-form" action="${pageContext.request.contextPath}/department/financial/income?action=insert" method="post" style="display: hidden">
                                 <input type="hidden" name="clubID" value="${clubID}">
                                 <input type="hidden" name="termID" value="${termID}">
@@ -245,10 +245,7 @@
                                     <label for="amount">Số tiền:</label>
                                     <input type="number" name="amount" id="amount" class="form-control" step="0.01" required>
                                 </div>
-                                <div class="form-group">
-                                    <label for="incomeDate">Ngày thu:</label>
-                                    <input type="datetime-local" name="incomeDate" id="incomeDate" class="form-control">
-                                </div>
+                                
                                 <div class="form-group" id="dueDateGroup" style="display: none;">
                                     <label for="dueDate">Hạn chót nộp:</label>
                                     <input type="datetime-local" name="dueDate" id="dueDate" class="form-control">
@@ -265,8 +262,8 @@
                                                 <option value="Pending" selected>Pending</option>
                                             </c:when>
                                             <c:otherwise>
-                                                <option value="Pending">Pending</option>
-                                                <option value="Approved">Approved</option>
+                                                <option value="Đang chờ">Đang chờ</option>
+                                                <option value="Đã nhận">Đã nhận</option>
                                             </c:otherwise>
                                         </c:choose>
                                     </select>

@@ -1087,4 +1087,156 @@ public class FinancialDAO {
         }
 
     }
+
+    public static boolean insertIncome(Income income, String formattedStartedTime, String userID) {
+
+        String sql2 = """
+                      INSERT INTO `clubmanagementsystem`.`income`
+                                            (
+                                            `ClubID`,
+                                            `TermID`,
+                                            `Source`,
+                                            `Amount`,
+                                            `IncomeDate`,
+                                            `Description`, 
+                                            status)
+                                            VALUES
+                                            (
+                                            ?,
+                                            ?,
+                                            ?,
+                                            ?,
+                                            current_timestamp,
+                                            ?,
+                                            ?)""";
+
+        String sql3 = """
+                      INSERT INTO `clubmanagementsystem`.`transactions`
+                      (
+                      `ClubID`,
+                      `TermID`,
+                      `Type`,
+                      `Amount`, 
+                      `Description`,
+                      `CreatedBy`,
+                      `Status`,
+                      `ReferenceID`,
+                      TransactionDate
+                      )
+                      VALUES
+                      (
+                      ?,
+                      ?,
+                      ?,
+                      ?,
+                      ?,
+                      ?,
+                      ?,
+                      ?,
+                      current_timestamp);""";
+        String sql4 = """
+                      INSERT INTO `clubmanagementsystem`.`memberincomecontributions`
+                      (
+                      `IncomeID`,
+                      `UserID`,
+                      `ClubID`,
+                      `TermID`,
+                      `Amount`,
+                      `DueDate`)
+                      VALUES
+                      (
+                      ?,
+                      ?,
+                      ?,
+                      ?,
+                      ?,
+                      ?);""";
+        try {
+            Connection conn = DBContext.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql2);
+            ps.setObject(1, income.getClubID());
+            ps.setObject(2, income.getTermID());
+            ps.setObject(3, income.getSource());
+            ps.setObject(4, income.getAmount());
+            ps.setObject(5, income.getDescription());
+            ps.setObject(6, income.getStatus());
+            int row = ps.executeUpdate();
+            if (income.getStatus().equals("Đã nhận") && row > 0) {
+                int in = FinancialDAO.findByIncomeIDNew(income.getClubID());
+                PreparedStatement ps2 = DBContext.getConnection().prepareStatement(sql3);
+                ps2.setObject(1, income.getClubID());
+                ps2.setObject(2, income.getTermID());
+                ps2.setObject(3, "income");
+                ps2.setObject(4, income.getAmount());
+                ps2.setObject(5, income.getDescription());
+                ps2.setObject(6, userID);
+                ps2.setObject(7, "Approved");
+                ps2.setObject(8, in);
+                int row2 = ps2.executeUpdate();
+                return row2 > 0;
+            }
+            if (income.getSource().equals("Phí thành viên") && row > 0) {
+                int in = FinancialDAO.findByIncomeIDNew(income.getClubID());
+                PreparedStatement ps2 = DBContext.getConnection().prepareStatement(sql4);
+                List<UserClub> list = UserClubDAO.findByClubID(income.getClubID());
+
+       
+                int row2 = 0;
+                DepartmentDashboardDAO dao = new DepartmentDashboardDAO();
+                int membercount = dao.getClubMemberCount(income.getClubID());
+                
+                for (UserClub uc : list) {
+                    ps2.setObject(1, in);
+                    ps2.setObject(2, uc.getUserID());
+                    ps2.setObject(3, income.getClubID());
+                    ps2.setObject(4, income.getTermID());
+                    ps2.setObject(5, income.getAmount().divide(BigDecimal.valueOf(membercount)));
+                    ps2.setObject(6, formattedStartedTime);
+                    row2 += ps2.executeUpdate();
+                    
+                }
+                
+                return row2 == membercount;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+
+    }
+    public static void main(String[] args) {
+       
+              
+        List<UserClub> list = UserClubDAO.findByClubID(4);
+        int i = 0;
+        for (UserClub userClub : list) {
+            i++;
+        }
+        System.out.println(i);
+        
+    }
+
+    private static int findByIncomeIDNew(int clubID) {
+        String sql = """
+                     SELECT *
+                                                               FROM Income
+                                                               
+                                                               WHERE clubID = ?
+                                                               Order by incomeID desc limit 1""";
+        int id = 0;
+        try {
+
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setObject(1, clubID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                id = rs.getInt("IncomeID");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+        }
+        return id;
+    }
 }
