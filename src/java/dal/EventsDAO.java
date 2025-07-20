@@ -143,7 +143,7 @@ public class EventsDAO {
         String sql = """
                 SELECT * FROM Events 
                 WHERE ClubID = ? 
-                ORDER BY EventDate DESC
+                ORDER BY EventID DESC, EventDate DESC
             """;
 
         try {
