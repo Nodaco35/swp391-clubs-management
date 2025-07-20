@@ -63,12 +63,29 @@
                 gap: 10px;
                 align-items: center;
             }
+            .create-form {
+                display: none;
+                margin-bottom: 20px;
+                padding: 1rem;
+                border: 1px solid #e2e8f0;
+                border-radius: 12px;
+                background: #f8fafc;
+                transition: all 0.3s ease;
+            }
+            .create-form.active {
+                display: block;
+                opacity: 1;
+                transform: translateY(0);
+            }
             .pagination {
                 justify-content: center;
                 margin-top: 20px;
             }
+            html {
+                scroll-behavior: smooth;
+            }
             @media print {
-                .sidebar, .filter-form, .pagination {
+                .sidebar, .filter-form, .pagination, .create-form {
                     display: none !important;
                 }
                 .main-content {
@@ -178,6 +195,7 @@
                                 <i class="fas fa-dollar-sign" style="color: #8b5cf6;"></i>
                                 Danh sách nguồn thu
                             </h2>
+                            <button id="add-income-btn" class="btn btn-primary">Thêm mới</button>
                         </div>
                         <div class="card-body">
                             <c:if test="${not empty message}">
@@ -210,6 +228,52 @@
                                 </div>
                                 <button type="submit" class="btn btn-primary">Lọc</button>
                             </form>
+                            <!-- Form tạo mới -->
+                            <form class="create-form" id="create-income-form" action="${pageContext.request.contextPath}/department/financial/income?action=insert" method="post" style="display: hidden">
+                                <input type="hidden" name="clubID" value="${clubID}">
+                                <input type="hidden" name="termID" value="${termID}">
+                                <div class="form-group">
+                                    <label for="source">Nguồn:</label>
+                                    <select name="source" id="source-insert" class="form-select" required>
+                                        <option value="Phí thành viên">Phí thành viên</option>
+                                        <option value="Tài trợ">Tài trợ</option>
+                                        <option value="Doanh thu sự kiện">Doanh thu sự kiện</option>
+                                        <option value="Khác">Khác</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="amount">Số tiền:</label>
+                                    <input type="number" name="amount" id="amount" class="form-control" step="0.01" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="incomeDate">Ngày thu:</label>
+                                    <input type="datetime-local" name="incomeDate" id="incomeDate" class="form-control">
+                                </div>
+                                <div class="form-group" id="dueDateGroup" style="display: none;">
+                                    <label for="dueDate">Hạn chót nộp:</label>
+                                    <input type="datetime-local" name="dueDate" id="dueDate" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label for="description">Mô tả:</label>
+                                    <textarea name="description" id="description" class="form-control"></textarea>
+                                </div>
+                                <div class="form-group" id="statusGroup">
+                                    <label for="status">Trạng thái:</label>
+                                    <select name="status" id="status-insert" class="form-select" required>
+                                        <c:choose>
+                                            <c:when test="${param.source == 'Phí thành viên'}">
+                                                <option value="Pending" selected>Pending</option>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <option value="Pending">Pending</option>
+                                                <option value="Approved">Approved</option>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Thêm mới</button>
+                                <button type="button" id="cancel-form-btn" class="btn btn-secondary">Hủy</button>
+                            </form>
 
                             <c:choose>
                                 <c:when test="${not empty incomes}">
@@ -222,7 +286,6 @@
                                                         <div class="income-meta">Ngày: <fmt:formatDate value="${income.incomeDate}" pattern="dd/MM/yyyy HH:mm"/></div>
                                                         <c:if test="${not empty income.description}">
                                                             <div class="income-meta">Mô tả: ${income.description}</div></c:if>
-
                                                         <c:if test="${not empty income.attachment}">
                                                             <div class="income-meta">Tệp đính kèm: <a href="${pageContext.request.contextPath}/${income.attachment}" target="_blank">Xem</a></div>
                                                         </c:if>
@@ -239,7 +302,6 @@
                                                         <div class="action-buttons">
                                                             <form action="${pageContext.request.contextPath}/department/financial/income?action=paid" method="post">
                                                                 <input type="hidden" name="incomeID" value="${income.incomeID}">
-          
                                                                 <button type="submit" class="btn btn-success btn-sm">
                                                                     <i class="fas fa-check"></i> Đã nhận
                                                                 </button>
@@ -277,17 +339,43 @@
                 </div>
             </main>
         </div>
-
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script>
-                            window.addEventListener('load', function () {
-                                const cards = document.querySelectorAll('.enhanced-card');
-                                cards.forEach((card, index) => {
-                                    setTimeout(() => {
-                                        card.classList.add('fade-in');
-                                    }, index * 100);
-                                });
-                            });
+            $(document).ready(function () {
+                function toggleFields() {
+                    const sourceVal = $('#source-insert').val();
+                    if (sourceVal === 'Phí thành viên') {
+                        $('#statusGroup').hide();
+                        $('#dueDateGroup').show();
+                    } else {
+                        $('#statusGroup').show();
+                        $('#dueDateGroup').hide();
+                    }
+                }
+
+                $('#source-insert').on('change', toggleFields);
+                toggleFields(); // Initialize on page load
+
+                // Toggle form and smooth scroll when clicking "Thêm mới"
+                const addButton = $('#add-income-btn');
+                const createForm = $('.create-form');
+                const cancelButton = $('#cancel-form-btn');
+
+                addButton.on('click', function () {
+                    createForm.addClass('active');
+                    // Smooth scroll to the form
+                    $('html, body').animate({
+                        scrollTop: createForm.offset().top - 100 // Adjust offset for better visibility
+                    }, 500); // 500ms for smooth scrolling
+                });
+
+                cancelButton.on('click', function () {
+                    createForm.removeClass('active');
+                    createForm[0].reset(); // Reset form fields
+                    $('#source-insert').trigger('change'); // Reset status dropdown
+                });
+            });
         </script>
     </body>
 </html>
