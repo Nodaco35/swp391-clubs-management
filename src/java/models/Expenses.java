@@ -21,6 +21,7 @@ public class Expenses {
     private String description;
     private String attachment;
     private boolean approved;
+    private Integer itemID;
 
     public Expenses() {
     }
@@ -97,9 +98,29 @@ public class Expenses {
         this.approved = approved;
     }
 
+    public Integer getItemID() {
+        return itemID;
+    }
+
+    public void setItemID(Integer itemID) {
+        this.itemID = itemID;
+    }
+
+    // Update toString to include itemID
     @Override
     public String toString() {
-        return "Expenses{" + "expenseID=" + expenseID + ", clubID=" + clubID + ", termID=" + termID + ", purpose=" + purpose + ", amount=" + amount + ", expenseDate=" + expenseDate + ", description=" + description + ", attachment=" + attachment + ", approved=" + approved + '}';
+        return "Expenses{" +
+                "expenseID=" + expenseID +
+                ", clubID=" + clubID +
+                ", termID='" + termID + '\'' +
+                ", purpose='" + purpose + '\'' +
+                ", amount=" + amount +
+                ", expenseDate=" + expenseDate +
+                ", description='" + description + '\'' +
+                ", attachment='" + attachment + '\'' +
+                ", approved=" + approved +
+                ", itemID=" + itemID +
+                '}';
     }
     
 }

@@ -6,14 +6,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý chi tiêu - Kỳ ${term.termID} - ${club.ClubName}</title>
+    <title>Quản lý kế hoạch chi tiêu - Kỳ ${term.termID} - ${club.ClubName}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/department-leader.css">
 </head>
 <body>
     <div class="department-leader-container">
-        <!-- Sidebar -->
+        <!-- Sidebar (same as financial-expense.jsp) -->
         <nav class="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
@@ -47,14 +47,14 @@
                     </a>
                 </li>
                 <c:if test="${isAccess}">
-                    <li class="menu-item ${activeMenu == 'financial' ? 'active' : ''}">
+                    <li class="menu-item">
                         <a href="${pageContext.request.contextPath}/department/financial?clubID=${clubID}" class="menu-link">
                             <i class="fas fa-dollar-sign"></i>
                             <span>Tài chính</span>
                         </a>
                     </li>
                 </c:if>
-                    <c:if test="${isAccessSpending}">
+                <c:if test="${isAccessSpending}">
                     <li class="menu-item ${activeMenu == 'financial' ? 'active' : ''}">
                         <a href="${pageContext.request.contextPath}/department/spending-plan?clubID=${clubID}" class="menu-link">
                             <i class="fas fa-dollar-sign"></i>
@@ -82,7 +82,7 @@
             </div>
         </nav>
 
-        <!-- Mobile Menu Toggle -->
+        <!-- Mobile Menu Toggle (same) -->
         <button class="mobile-menu-toggle" onclick="toggleSidebar()">
             <i class="fas fa-bars"></i>
         </button>
@@ -92,7 +92,7 @@
             <header class="header mb-4">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h1 class="h3 mb-1">Quản lý chi tiêu - Kỳ ${term.termID}</h1>
+                        <h1 class="h3 mb-1">Quản lý kế hoạch chi tiêu - Kỳ ${term.termID}</h1>
                         <nav aria-label="breadcrumb">
                             <ol class="breadcrumb mb-0">
                                 <li class="breadcrumb-item">
@@ -101,7 +101,7 @@
                                 <li class="breadcrumb-item">
                                     <a href="${pageContext.request.contextPath}/department/financial" class="text-decoration-none">Tài chính</a>
                                 </li>
-                                <li class="breadcrumb-item active" aria-current="page">Chi tiêu</li>
+                                <li class="breadcrumb-item active" aria-current="page">Kế hoạch chi tiêu</li>
                             </ol>
                         </nav>
                     </div>
@@ -139,26 +139,27 @@
                         <div class="card-body">
                             <div class="row align-items-center">
                                 <div class="col-md-6">
-                                    <form action="${pageContext.request.contextPath}/department/expense?clubID=${clubID}" method="get">
+                                    <form action="${pageContext.request.contextPath}/department/spending-plan?clubID=${clubID}" method="get">
                                         <div class="input-group">
                                             <span class="input-group-text">
                                                 <i class="fas fa-search"></i>
                                             </span>
                                             <input type="text" name="keyword" class="form-control" 
-                                                   placeholder="Tìm kiếm theo mục đích hoặc mô tả..." 
+                                                   placeholder="Tìm kiếm theo tên kế hoạch hoặc sự kiện..." 
                                                    value="${keyword}">
                                             <select name="status" class="form-select">
                                                 <option value="all" ${status == 'all' ? 'selected' : ''}>Tất cả</option>
-                                                <option value="Approved" ${status == 'Approved' ? 'selected' : ''}>Đã phê duyệt</option>
-                                                <option value="Pending" ${status == 'Pending' ? 'selected' : ''}>Chưa phê duyệt</option>
+                                                <option value="Chưa bắt đầu" ${status == 'Chưa bắt đầu' ? 'selected' : ''}>Chưa bắt đầu</option>
+                                                <option value="Đang thực hiện" ${status == 'Đang thực hiện' ? 'selected' : ''}>Đang thực hiện</option>
+                                                <option value="Hoàn thành" ${status == 'Hoàn thành' ? 'selected' : ''}>Hoàn thành</option>
                                             </select>
                                             <button class="btn btn-outline-primary" type="submit">Lọc</button>
                                         </div>
                                     </form>
                                 </div>
                                 <div class="col-md-6 text-end">
-                                    <button class="btn btn-primary" onclick="toggleAddExpenseForm()">
-                                        <i class="fas fa-plus me-2"></i>Tạo chi tiêu
+                                    <button class="btn btn-primary" onclick="toggleAddPlanForm()">
+                                        <i class="fas fa-plus me-2"></i>Tạo kế hoạch
                                     </button>
                                 </div>
                             </div>
@@ -167,45 +168,50 @@
                 </div>
             </div>
 
-            <div class="row mb-4 ${showAddForm ? 'd-block' : 'd-none'}" id="addExpenseForm">
+            <div class="row mb-4 ${showAddForm ? 'd-block' : 'd-none'}" id="addPlanForm">
                 <div class="col-12">
                     <div class="card shadow-sm">
                         <div class="card-header bg-white">
                             <h5 class="mb-0">
                                 <i class="fas fa-plus me-2"></i>
-                                Tạo chi tiêu mới
+                                Tạo kế hoạch chi tiêu mới
                             </h5>
                         </div>
                         <div class="card-body">
-                            <form action="${pageContext.request.contextPath}/department/expense?clubID=${clubID}" method="post" id="formData">
-                                <input type="hidden" name="action" value="addExpense">
+                            <form action="${pageContext.request.contextPath}/department/spending-plan?clubID=${clubID}" method="post" id="formData">
+                                <input type="hidden" name="action" value="addPlan">
                                 <div class="mb-3">
-                                    <label for="purpose" class="form-label">Mục đích</label>
-                                    <select name="purpose" id="purpose" class="form-select" required>
-                                        <option value="Sự kiện">Sự kiện</option>
-                                        <option value="Vật tư">Vật tư</option>
-                                        <option value="Thuê địa điểm">Thuê địa điểm</option>
-                                        <option value="Khác">Khác</option>
+                                    <label for="planName" class="form-label">Tên kế hoạch</label>
+                                    <input type="text" name="planName" id="planName" class="form-control" required>
+                                </div>
+                     
+
+                                <div class="mb-3">
+                                    <label for="eventID" class="form-label">Sự kiện liên quan (tùy chọn)</label>
+                                    <select name="eventID" id="eventID" class="form-select">
+                                        <option value="">Không liên kết</option>
+                                        <c:forEach var="event" items="${eventsList}">
+                                            <option value="${event.eventID}">${event.eventName}</option>
+                                        </c:forEach>
                                     </select>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="amount" class="form-label">Số tiền</label>
-                                    <input type="number" name="amount" id="amount" step="0.01" class="form-control" required>
+                                    <label for="totalPlannedBudget" class="form-label">Tổng ngân sách kế hoạch</label>
+                                    <input type="number" name="totalPlannedBudget" id="totalPlannedBudget" step="0.01" class="form-control" required>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="expenseDate" class="form-label">Ngày chi</label>
-                                    <input type="date" name="expenseDate" id="expenseDate" class="form-control" required>
+                                <div id="itemsContainer">
+                                    <div class="mb-3">
+                                        <label class="form-label">Hạng mục chi tiêu</label>
+                                        <div class="input-group mb-2">
+                                            <input type="text" name="category[]" class="form-control" placeholder="Tên hạng mục" required>
+                                            <input type="number" name="plannedAmount[]" class="form-control" placeholder="Số tiền dự kiến" step="0.01" required>
+                                            <textarea name="description[]" class="form-control" placeholder="Mô tả"></textarea>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="description" class="form-label">Mô tả</label>
-                                    <textarea name="description" id="description" class="form-control"></textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="attachment" class="form-label">Tệp đính kèm (URL)</label>
-                                    <input type="text" name="attachment" id="attachment" class="form-control">
-                                </div>
+                                <button type="button" class="btn btn-secondary mb-3" onclick="addItemField()">Thêm hạng mục</button>
                                 <div class="d-flex justify-content-end">
-                                    <button type="button" class="btn btn-secondary me-2" onclick="toggleAddExpenseForm()">Hủy</button>
+                                    <button type="button" class="btn btn-secondary me-2" onclick="toggleAddPlanForm()">Hủy</button>
                                     <button type="submit" class="btn btn-primary">
                                         <i class="fas fa-save me-2"></i>
                                         Thêm
@@ -223,61 +229,45 @@
                         <div class="card-header bg-white">
                             <div class="d-flex justify-content-between align-items-center">
                                 <h5 class="mb-0">
-                                    <i class="fas fa-list me-2"></i>Danh sách chi tiêu
+                                    <i class="fas fa-list me-2"></i>Danh sách kế hoạch chi tiêu
                                 </h5>
-                                <span class="badge bg-primary">${totalRecords} chi tiêu</span>
+                                <span class="badge bg-primary">${totalRecords} kế hoạch</span>
                             </div>
                         </div>
                         <div class="card-body p-0">
-                            <c:if test="${not empty expensesList}">
+                            <c:if test="${not empty plansList}">
                                 <div class="table-responsive">
                                     <table class="table table-hover mb-0">
                                         <thead class="table-light">
                                             <tr>
                                                 <th scope="col" class="ps-4">ID</th>
-                                                <th scope="col">Mục đích</th>
-                                                <th scope="col">Số tiền</th>
-                                                <th scope="col">Ngày chi</th>
-                                                <th scope="col">Mô tả</th>
-                                                <th scope="col">Tệp đính kèm</th>
+                                                <th scope="col">Tên kế hoạch</th>
+                                                <th scope="col">Sự kiện</th>
+                                                <th scope="col">Tổng kế hoạch</th>
+                                                <th scope="col">Tổng thực tế</th>
                                                 <th scope="col">Trạng thái</th>
                                                 <th scope="col" class="text-center">Hành động</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <c:forEach var="expense" items="${expensesList}">
+                                            <c:forEach var="plan" items="${plansList}">
                                                 <tr>
-                                                    <td class="ps-4">${expense.expenseID}</td>
-                                                    <td>${expense.purpose}</td>
-                                                    <td><fmt:formatNumber value="${expense.amount}" type="currency" currencySymbol="₫" groupingUsed="true"/></td>
-                                                    <td><fmt:formatDate value="${expense.expenseDate}" pattern="dd/MM/yyyy"/></td>
-                                                    <td>${expense.description}</td>
+                                                    <td class="ps-4">${plan.planID}</td>
+                                                    <td>${plan.planName}</td>
+                                                    <td>${plan.eventID != null ? 'Event ' + plan.eventID : 'Không liên kết'}</td>
+                                                    <td><fmt:formatNumber value="${plan.totalPlannedBudget}" type="currency" currencySymbol="₫" groupingUsed="true"/></td>
+                                                    <td><fmt:formatNumber value="${plan.totalActual}" type="currency" currencySymbol="₫" groupingUsed="true"/></td> <!-- Assume totalActual from query -->
                                                     <td>
-                                                        <c:if test="${not empty expense.attachment}">
-                                                            <a href="${expense.attachment}" target="_blank" class="text-decoration-none">
-                                                                <i class="fas fa-file-alt me-1"></i>Xem
-                                                            </a>
-                                                        </c:if>
-                                                        <c:if test="${empty expense.attachment}">
-                                                            <span class="text-muted">Không có</span>
-                                                        </c:if>
-                                                    </td>
-                                                    <td>
-                                                        <span class="badge ${expense.approved ? 'bg-success' : 'bg-secondary'}">
-                                                            ${expense.approved ? 'Đã phê duyệt' : 'Chưa phê duyệt'}
+                                                        <span class="badge ${plan.status == 'Hoàn thành' ? 'bg-success' : (plan.status == 'Đang thực hiện' ? 'bg-warning' : 'bg-secondary')}">
+                                                            ${plan.status}
                                                         </span>
                                                     </td>
                                                     <td class="text-center">
                                                         <div class="btn-group" role="group">
-                                                            <c:if test="${not expense.approved}">
-                                                                <form action="${pageContext.request.contextPath}/department/expense?clubID=${clubID}" method="post" style="display:inline;">
-                                                                    <input type="hidden" name="action" value="approveExpense">
-                                                                    <input type="hidden" name="expenseID" value="${expense.expenseID}">
-                                                                    <button type="submit" class="btn btn-sm btn-outline-primary" title="Phê duyệt">
-                                                                        <i class="fas fa-check"></i>
-                                                                    </button>
-                                                                </form>
-                                                            </c:if>
+                                                            <button class="btn btn-sm btn-outline-primary" onclick="viewItems(${plan.planID})" title="Xem hạng mục">
+                                                                <i class="fas fa-eye"></i>
+                                                            </button>
+                                                            <!-- Additional actions: edit, delete, update status -->
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -286,15 +276,15 @@
                                     </table>
                                 </div>
                             </c:if>
-                            <c:if test="${empty expensesList}">
+                            <c:if test="${empty plansList}">
                                 <div class="text-center py-5">
                                     <div class="mb-3">
                                         <i class="fas fa-box-open fa-3x text-muted"></i>
                                     </div>
-                                    <h5 class="text-muted">Không có chi tiêu nào</h5>
-                                    <p class="text-muted">Chưa có chi tiêu nào được tạo hoặc không tìm thấy kết quả phù hợp.</p>
-                                    <button class="btn btn-primary" onclick="toggleAddExpenseForm()">
-                                        <i class="fas fa-plus me-2"></i>Tạo chi tiêu đầu tiên
+                                    <h5 class="text-muted">Không có kế hoạch nào</h5>
+                                    <p class="text-muted">Chưa có kế hoạch nào được tạo hoặc không tìm thấy kết quả phù hợp.</p>
+                                    <button class="btn btn-primary" onclick="toggleAddPlanForm()">
+                                        <i class="fas fa-plus me-2"></i>Tạo kế hoạch đầu tiên
                                     </button>
                                 </div>
                             </c:if>
@@ -375,14 +365,35 @@
             document.querySelector('.sidebar').classList.toggle('active');
         }
 
-        function toggleAddExpenseForm() {
-            const form = document.getElementById('addExpenseForm');
+        function toggleAddPlanForm() {
+            const form = document.getElementById('addPlanForm');
             form.classList.toggle('d-none');
             form.classList.toggle('d-block');
         }
 
+        function addItemField() {
+            const container = document.getElementById('itemsContainer');
+            const newItem = document.createElement('div');
+            newItem.classList.add('mb-3');
+            newItem.innerHTML = `
+                <div class="input-group mb-2">
+                    <input type="text" name="category[]" class="form-control" placeholder="Tên hạng mục" required>
+                    <input type="number" name="plannedAmount[]" class="form-control" placeholder="Số tiền dự kiến" step="0.01" required>
+                    <textarea name="description[]" class="form-control" placeholder="Mô tả"></textarea>
+                    <button type="button" class="btn btn-danger" onclick="this.parentElement.parentElement.remove()">Xóa</button>
+                </div>
+            `;
+            container.appendChild(newItem);
+        }
+
         function closeErrorModal() {
             document.getElementById('errorModal').style.display = 'none';
+        }
+
+        // Function to view plan items (could be a modal fetch via AJAX)
+        function viewItems(planID) {
+            // Implement AJAX to fetch and display items
+            console.log('View items for plan ' + planID);
         }
 
         document.addEventListener('DOMContentLoaded', function () {

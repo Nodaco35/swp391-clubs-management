@@ -55,7 +55,12 @@ public class DepartmentDashboardServlet extends HttpServlet {
             request.setAttribute("currentUser", currentUser);
             request.setAttribute("departmentName", dashboard.getDepartmentName());
             
-           
+           // mới Phúc
+            boolean accessSpending = false;
+            if (dashboardDAO.isDepartmentLeaderHauCan(currentUser.getUserID(), clubID)) {
+                accessSpending = true;
+            }
+            session.setAttribute("isAccessSpending", accessSpending);
             //mới đức
             boolean accessFinancial = false;
             if (dashboardDAO.isDepartmentLeaderIndoingoai(currentUser.getUserID(), clubID)) {

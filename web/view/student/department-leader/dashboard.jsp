@@ -58,9 +58,17 @@
 
                     <c:if test="${isAccess}">
                         <li class="menu-item">
-                            <a href="${pageContext.request.contextPath}/department/financial" class="menu-link">
+                            <a href="${pageContext.request.contextPath}/department/financial?clubID=${clubID}" class="menu-link">
                                 <i class="fa-dollar-sign"></i>
                                 <span>Tài chính</span>
+                            </a>
+                        </li>
+                    </c:if>
+                    <c:if test="${isAccessSpending}">
+                        <li class="menu-item ${activeMenu == 'financial' ? 'active' : ''}">
+                            <a href="${pageContext.request.contextPath}/department/spending-plan?clubID=${clubID}" class="menu-link">
+                                <i class="fas fa-dollar-sign"></i>
+                                <span>Chi tiêu chi tiết</span>
                             </a>
                         </li>
                     </c:if>

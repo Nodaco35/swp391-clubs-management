@@ -249,6 +249,27 @@ public class DepartmentDashboardDAO {    /**
         return false;
     }
      
+     public boolean isDepartmentLeaderHauCan(String userId, int clubID) {
+        String sql = """
+                     SELECT uc.ClubDepartmentID
+                     FROM UserClubs uc
+                     JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
+                     WHERE uc.UserID = ? AND uc.RoleID = 3 AND uc.IsActive = 1 AND cd.DepartmentID=5 AND cd.ClubID = ?""";
+        
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setString(1, userId);
+            ps.setInt(2, clubID);
+            ResultSet rs = ps.executeQuery();
+            
+            return rs.next(); // Trả về true nếu tìm thấy ít nhất 1 record
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+     
      public int findClubDepartmentId(int clubId, String userId) {
         String sql = """
             SELECT uc.ClubDepartmentID

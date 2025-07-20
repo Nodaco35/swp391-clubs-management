@@ -531,6 +531,411 @@ public class FinancialDAO {
         return l.get(0);
     }
 
+    
+
+    /**
+     * Retrieves the total number of expense records for pagination.
+     */
+    public static int getTotalExpenseRecords(int clubID, String termID, String keyword, String status) {
+        int totalRecords = 0;
+        String sql = """
+                     SELECT COUNT(*) AS total
+                     FROM Expenses e
+                     WHERE e.ClubID = ? AND e.TermID = ?""";
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql += " AND (e.Purpose LIKE ? OR e.Description LIKE ?)";
+        }
+        if (status != null && !status.equals("all")) {
+            boolean approved = status.equals("Approved");
+            sql += " AND e.Approved = ?";
+        }
+
+        try (PreparedStatement ps = DBContext.getConnection().prepareStatement(sql)) {
+            int paramIndex = 1;
+            ps.setInt(paramIndex++, clubID);
+            ps.setString(paramIndex++, termID);
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String likePattern = "%" + keyword.trim() + "%";
+                ps.setString(paramIndex++, likePattern);
+                ps.setString(paramIndex++, likePattern);
+            }
+            if (status != null && !status.equals("all")) {
+                ps.setBoolean(paramIndex++, status.equals("Approved"));
+            }
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                totalRecords = rs.getInt("total");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return totalRecords;
+    }
+
+    
+    
+    
+    // Update FinancialDAO.java with new methods for SpendingPlans and SpendingPlanItems
+// Add these methods to the existing FinancialDAO class
+
+    /**
+     * Adds a new spending plan.
+     */
+    public static boolean addSpendingPlan(SpendingPlan plan) {
+        String sql = """
+                     INSERT INTO SpendingPlans (ClubID, EventID, PlanName, TotalPlannedBudget, Status)
+                     VALUES (?, ?, ?, ?, ?)""";
+        try (PreparedStatement ps = DBContext.getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, plan.getClubID());
+            if (plan.getEventID() != null) {
+                ps.setInt(2, plan.getEventID());
+            } else {
+                ps.setNull(2, java.sql.Types.INTEGER);
+            }
+            ps.setString(3, plan.getPlanName());
+            ps.setBigDecimal(4, plan.getTotalPlannedBudget());
+            ps.setString(5, plan.getStatus());
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected > 0) {
+                ResultSet rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    plan.setPlanID(rs.getInt(1));
+                }
+                return true;
+            }
+            return false;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Adds a new spending plan item.
+     */
+    public static boolean addSpendingPlanItem(SpendingPlanItem item) {
+        String sql = """
+                     INSERT INTO SpendingPlanItems (PlanID, Category, PlannedAmount, Description)
+                     VALUES (?, ?, ?, ?)""";
+        try (PreparedStatement ps = DBContext.getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, item.getPlanID());
+            ps.setString(2, item.getCategory());
+            ps.setBigDecimal(3, item.getPlannedAmount());
+            ps.setString(4, item.getDescription());
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected > 0) {
+                ResultSet rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    item.setItemID(rs.getInt(1));
+                }
+                return true;
+            }
+            return false;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Retrieves spending plans for a club.
+     */
+    // Update FinancialDAO.getSpendingPlans: set eventName and totalActual
+
+    public static List<SpendingPlan> getSpendingPlans(int clubID, String keyword, String status, int page, int pageSize) {
+        List<SpendingPlan> plans = new ArrayList<>();
+        String sql = """
+                     SELECT sp.*, e.EventName, SUM(spi.ActualAmount) AS TotalActual
+                     FROM SpendingPlans sp
+                     LEFT JOIN Events e ON sp.EventID = e.EventID
+                     LEFT JOIN SpendingPlanItems spi ON sp.PlanID = spi.PlanID
+                     WHERE sp.ClubID = ?""";
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql += " AND (sp.PlanName LIKE ? OR e.EventName LIKE ?)";
+        }
+        if (status != null && !status.equals("all")) {
+            sql += " AND sp.Status = ?";
+        }
+        sql += " GROUP BY sp.PlanID ORDER BY sp.CreatedDate DESC LIMIT ? OFFSET ?";
+
+        try (PreparedStatement ps = DBContext.getConnection().prepareStatement(sql)) {
+            int paramIndex = 1;
+            ps.setInt(paramIndex++, clubID);
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String likePattern = "%" + keyword.trim() + "%";
+                ps.setString(paramIndex++, likePattern);
+                ps.setString(paramIndex++, likePattern);
+            }
+            if (status != null && !status.equals("all")) {
+                ps.setString(paramIndex++, status);
+            }
+            ps.setInt(paramIndex++, pageSize);
+            ps.setInt(paramIndex, (page - 1) * pageSize);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                SpendingPlan plan = new SpendingPlan();
+                plan.setPlanID(rs.getInt("PlanID"));
+                plan.setClubID(rs.getInt("ClubID"));
+                plan.setEventID(rs.getObject("EventID") != null ? rs.getInt("EventID") : null);
+                plan.setPlanName(rs.getString("PlanName"));
+                plan.setTotalPlannedBudget(rs.getBigDecimal("TotalPlannedBudget"));
+                plan.setStatus(rs.getString("Status"));
+                plan.setCreatedDate(rs.getTimestamp("CreatedDate"));
+                plan.setEventName(rs.getString("EventName"));
+                plan.setTotalActual(rs.getBigDecimal("TotalActual") != null ? rs.getBigDecimal("TotalActual") : BigDecimal.ZERO);
+                plans.add(plan);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return plans;
+    }
+
+    /**
+     * Retrieves total spending plan records for pagination.
+     */
+    public static int getTotalSpendingPlanRecords(int clubID, String keyword, String status) {
+        int total = 0;
+        String sql = """
+                     SELECT COUNT(*) AS total
+                     FROM SpendingPlans sp
+                     LEFT JOIN Events e ON sp.EventID = e.EventID
+                     WHERE sp.ClubID = ?""";
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql += " AND (sp.PlanName LIKE ? OR e.EventName LIKE ?)";
+        }
+        if (status != null && !status.equals("all")) {
+            sql += " AND sp.Status = ?";
+        }
+
+        try (PreparedStatement ps = DBContext.getConnection().prepareStatement(sql)) {
+            int paramIndex = 1;
+            ps.setInt(paramIndex++, clubID);
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String likePattern = "%" + keyword.trim() + "%";
+                ps.setString(paramIndex++, likePattern);
+                ps.setString(paramIndex++, likePattern);
+            }
+            if (status != null && !status.equals("all")) {
+                ps.setString(paramIndex++, status);
+            }
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                total = rs.getInt("total");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return total;
+    }
+
+    /**
+     * Retrieves items for a spending plan.
+     */
+    public static List<SpendingPlanItem> getSpendingPlanItems(int planID) {
+        List<SpendingPlanItem> items = new ArrayList<>();
+        String sql = """
+                     SELECT * FROM SpendingPlanItems WHERE PlanID = ?""";
+        try (PreparedStatement ps = DBContext.getConnection().prepareStatement(sql)) {
+            ps.setInt(1, planID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                SpendingPlanItem item = new SpendingPlanItem();
+                item.setItemID(rs.getInt("ItemID"));
+                item.setPlanID(rs.getInt("PlanID"));
+                item.setCategory(rs.getString("Category"));
+                item.setPlannedAmount(rs.getBigDecimal("PlannedAmount"));
+                item.setActualAmount(rs.getBigDecimal("ActualAmount"));
+                item.setDescription(rs.getString("Description"));
+                items.add(item);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return items;
+    }
+
+    /**
+     * Updates actual amount in spending plan item based on linked expenses.
+     */
+    public static void updateActualAmount(int itemID) {
+        String sql = """
+                     UPDATE SpendingPlanItems spi
+                     SET spi.ActualAmount = (
+                         SELECT SUM(e.Amount) FROM Expenses e WHERE e.ItemID = ? AND e.Approved = TRUE
+                     )
+                     WHERE spi.ItemID = ?""";
+        try (PreparedStatement ps = DBContext.getConnection().prepareStatement(sql)) {
+            ps.setInt(1, itemID);
+            ps.setInt(2, itemID);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Updates spending plan status.
+     */
+    public static boolean updateSpendingPlanStatus(int planID, String newStatus) {
+        String sql = "UPDATE SpendingPlans SET Status = ? WHERE PlanID = ?";
+        try (PreparedStatement ps = DBContext.getConnection().prepareStatement(sql)) {
+            ps.setString(1, newStatus);
+            ps.setInt(2, planID);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Override existing addExpense to support ItemID and update actual amount
+    // Replace the existing addExpense method with this updated version
+    public static boolean addExpense(Expenses expense, String userID) {
+        String expenseSql = """
+                           INSERT INTO Expenses (ClubID, TermID, Purpose, Amount, ExpenseDate, Description, Attachment, Approved, ItemID)
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""";
+        String transactionSql = """
+                              INSERT INTO Transactions (ClubID, TermID, Type, Amount, TransactionDate, Description, Attachment, Status, ReferenceID, CreatedBy, CreatedAt)
+                              VALUES (?, ?, 'Expense', ?, ?, ?, ?, ?, ?, ?, ?)""";
+        Connection conn = null;
+        PreparedStatement psExpense = null;
+        PreparedStatement psTransaction = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBContext.getConnection();
+            conn.setAutoCommit(false); // Start transaction
+
+            // Insert into Expenses
+            psExpense = conn.prepareStatement(expenseSql, Statement.RETURN_GENERATED_KEYS);
+            psExpense.setInt(1, expense.getClubID());
+            psExpense.setString(2, expense.getTermID());
+            psExpense.setString(3, expense.getPurpose());
+            psExpense.setBigDecimal(4, expense.getAmount());
+            psExpense.setDate(5, new java.sql.Date(expense.getExpenseDate().getTime()));
+            psExpense.setString(6, expense.getDescription());
+            psExpense.setString(7, expense.getAttachment());
+            psExpense.setBoolean(8, false); // Default: not approved
+            if (expense.getItemID() != null) {
+                psExpense.setInt(9, expense.getItemID());
+            } else {
+                psExpense.setNull(9, java.sql.Types.INTEGER);
+            }
+            int rowsAffected = psExpense.executeUpdate();
+
+            // Get generated ExpenseID
+            rs = psExpense.getGeneratedKeys();
+            int expenseID = 0;
+            if (rs.next()) {
+                expenseID = rs.getInt(1);
+            }
+
+            // Insert into Transactions
+            psTransaction = conn.prepareStatement(transactionSql);
+            psTransaction.setInt(1, expense.getClubID());
+            psTransaction.setString(2, expense.getTermID());
+            psTransaction.setBigDecimal(3, expense.getAmount());
+            psTransaction.setDate(4, new java.sql.Date(expense.getExpenseDate().getTime()));
+            psTransaction.setString(5, expense.getDescription());
+            psTransaction.setString(6, expense.getAttachment());
+            psTransaction.setString(7, "Pending"); // Default status
+            psTransaction.setInt(8, expenseID);
+            psTransaction.setString(9, userID);
+            psTransaction.setTimestamp(10, new Timestamp(System.currentTimeMillis()));
+            psTransaction.executeUpdate();
+
+            conn.commit(); // Commit transaction
+
+            // If linked to item, update actual amount (but since not approved yet, actual won't update until approval)
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            // Close resources
+            try {
+                if (rs != null) rs.close();
+                if (psExpense != null) psExpense.close();
+                if (psTransaction != null) psTransaction.close();
+                if (conn != null) conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // Override existing approveExpense to update actual amount if linked
+    // Replace the existing approveExpense method with this updated version
+    public static boolean approveExpense(int expenseID, String userID) {
+        String expenseSql = """
+                           UPDATE Expenses 
+                           SET Approved = TRUE 
+                           WHERE ExpenseID = ? AND Approved = FALSE""";
+        String transactionSql = """
+                              UPDATE Transactions 
+                              SET Status = 'Approved' 
+                              WHERE ReferenceID = ? AND Type = 'Expense' AND Status = 'Pending'""";
+        Connection conn = null;
+        PreparedStatement psExpense = null;
+        PreparedStatement psTransaction = null;
+
+        try {
+            conn = DBContext.getConnection();
+            conn.setAutoCommit(false); // Start transaction
+
+            // Update Expenses
+            psExpense = conn.prepareStatement(expenseSql);
+            psExpense.setInt(1, expenseID);
+            int rowsAffected = psExpense.executeUpdate();
+
+            // Update Transactions
+            psTransaction = conn.prepareStatement(transactionSql);
+            psTransaction.setInt(1, expenseID);
+            psTransaction.executeUpdate();
+
+            conn.commit(); // Commit transaction
+
+            // If approved and linked to item, update actual amount
+            Expenses expense = getExpenseByID(expenseID);
+            if (expense != null && expense.getItemID() != null) {
+                updateActualAmount(expense.getItemID());
+            }
+
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (psExpense != null) psExpense.close();
+                if (psTransaction != null) psTransaction.close();
+                if (conn != null) conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // Update getExpenses to include ItemID in result
+    // Replace existing getExpenses method
     public static List<Expenses> getExpenses(int clubID, String termID, String keyword, String status, int page, int pageSize) {
         List<Expenses> expensesList = new ArrayList<>();
         String sql = """
@@ -575,6 +980,7 @@ public class FinancialDAO {
                 expense.setDescription(rs.getString("Description"));
                 expense.setAttachment(rs.getString("Attachment"));
                 expense.setApproved(rs.getBoolean("Approved"));
+                expense.setItemID(rs.getObject("ItemID") != null ? rs.getInt("ItemID") : null);
                 expensesList.add(expense);
             }
         } catch (SQLException e) {
@@ -583,175 +989,8 @@ public class FinancialDAO {
         return expensesList;
     }
 
-    /**
-     * Retrieves the total number of expense records for pagination.
-     */
-    public static int getTotalExpenseRecords(int clubID, String termID, String keyword, String status) {
-        int totalRecords = 0;
-        String sql = """
-                     SELECT COUNT(*) AS total
-                     FROM Expenses e
-                     WHERE e.ClubID = ? AND e.TermID = ?""";
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            sql += " AND (e.Purpose LIKE ? OR e.Description LIKE ?)";
-        }
-        if (status != null && !status.equals("all")) {
-            boolean approved = status.equals("Approved");
-            sql += " AND e.Approved = ?";
-        }
-
-        try (PreparedStatement ps = DBContext.getConnection().prepareStatement(sql)) {
-            int paramIndex = 1;
-            ps.setInt(paramIndex++, clubID);
-            ps.setString(paramIndex++, termID);
-            if (keyword != null && !keyword.trim().isEmpty()) {
-                String likePattern = "%" + keyword.trim() + "%";
-                ps.setString(paramIndex++, likePattern);
-                ps.setString(paramIndex++, likePattern);
-            }
-            if (status != null && !status.equals("all")) {
-                ps.setBoolean(paramIndex++, status.equals("Approved"));
-            }
-
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                totalRecords = rs.getInt("total");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return totalRecords;
-    }
-
-    /**
-     * Adds a new expense and creates a corresponding transaction.
-     */
-    public static boolean addExpense(Expenses expense, String userID) {
-        String expenseSql = """
-                           INSERT INTO Expenses (ClubID, TermID, Purpose, Amount, ExpenseDate, Description, Attachment, Approved)
-                           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""";
-        String transactionSql = """
-                              INSERT INTO Transactions (ClubID, TermID, Type, Amount, TransactionDate, Description, Attachment, Status, ReferenceID, CreatedBy, CreatedAt)
-                              VALUES (?, ?, 'Expense', ?, ?, ?, ?, ?, ?, ?, ?)""";
-        Connection conn = null;
-        PreparedStatement psExpense = null;
-        PreparedStatement psTransaction = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DBContext.getConnection();
-            conn.setAutoCommit(false); // Start transaction
-
-            // Insert into Expenses
-            psExpense = conn.prepareStatement(expenseSql, Statement.RETURN_GENERATED_KEYS);
-            psExpense.setInt(1, expense.getClubID());
-            psExpense.setString(2, expense.getTermID());
-            psExpense.setString(3, expense.getPurpose());
-            psExpense.setBigDecimal(4, expense.getAmount());
-            psExpense.setDate(5, new java.sql.Date(expense.getExpenseDate().getTime()));// Changed to setDate
-            psExpense.setString(6, expense.getDescription());
-            psExpense.setString(7, expense.getAttachment());
-            psExpense.setBoolean(8, false); // Default: not approved
-            int rowsAffected = psExpense.executeUpdate();
-
-            // Get generated ExpenseID
-            rs = psExpense.getGeneratedKeys();
-            int expenseID = 0;
-            if (rs.next()) {
-                expenseID = rs.getInt(1);
-            }
-
-            // Insert into Transactions
-            psTransaction = conn.prepareStatement(transactionSql);
-            psTransaction.setInt(1, expense.getClubID());
-            psTransaction.setString(2, expense.getTermID());
-            psTransaction.setBigDecimal(3, expense.getAmount());
-            psTransaction.setDate(4, new java.sql.Date(expense.getExpenseDate().getTime())); // Changed to setDate for consistency
-            psTransaction.setString(5, expense.getDescription());
-            psTransaction.setString(6, expense.getAttachment());
-            psTransaction.setString(7, "Pending"); // Default status
-            psTransaction.setInt(8, expenseID);
-            psTransaction.setString(9, userID);
-            psTransaction.setTimestamp(10, new Timestamp(System.currentTimeMillis()));
-            psTransaction.executeUpdate();
-
-            conn.commit(); // Commit transaction
-            return rowsAffected > 0;
-        } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback(); // Rollback on error
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
-            }
-            e.printStackTrace();
-            return false;
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (psExpense != null) psExpense.close();
-                if (psTransaction != null) psTransaction.close();
-                if (conn != null) conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     * Approves an expense and updates the corresponding transaction.
-     */
-    public static boolean approveExpense(int expenseID, String userID) {
-        String expenseSql = """
-                           UPDATE Expenses 
-                           SET Approved = TRUE 
-                           WHERE ExpenseID = ? AND Approved = FALSE""";
-        String transactionSql = """
-                              UPDATE Transactions 
-                              SET Status = 'Approved' 
-                              WHERE ReferenceID = ? AND Type = 'Expense' AND Status = 'Pending'""";
-        Connection conn = null;
-        PreparedStatement psExpense = null;
-        PreparedStatement psTransaction = null;
-
-        try {
-            conn = DBContext.getConnection();
-            conn.setAutoCommit(false); // Start transaction
-
-            // Update Expenses
-            psExpense = conn.prepareStatement(expenseSql);
-            psExpense.setInt(1, expenseID);
-            int rowsAffected = psExpense.executeUpdate();
-
-            // Update Transactions
-            psTransaction = conn.prepareStatement(transactionSql);
-            psTransaction.setInt(1, expenseID);
-            psTransaction.executeUpdate();
-
-            conn.commit(); // Commit transaction
-            return rowsAffected > 0;
-        } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback(); // Rollback on error
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
-            }
-            e.printStackTrace();
-            return false;
-        } finally {
-            try {
-                if (psExpense != null) psExpense.close();
-                if (psTransaction != null) psTransaction.close();
-                if (conn != null) conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-    
+    // Update getExpenseByID to include ItemID
+    // Replace existing getExpenseByID
     public static Expenses getExpenseByID(int expenseID) {
         String sql = "SELECT * FROM Expenses WHERE ExpenseID = ?";
         try {
@@ -769,11 +1008,34 @@ public class FinancialDAO {
                 e.setDescription(rs.getString("Description"));
                 e.setAttachment(rs.getString("Attachment"));
                 e.setApproved(rs.getBoolean("Approved"));
+                e.setItemID(rs.getObject("ItemID") != null ? rs.getInt("ItemID") : null);
                 return e;
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
+    }
+    
+    // Add this method to FinancialDAO.java
+
+    public static List<Events> getEventsByClubId(int clubID, String termID) {
+        List<Events> events = new ArrayList<>();
+        String sql = """
+                     SELECT EventID, EventName FROM Events WHERE ClubID = ? AND SemesterID = ? ORDER BY EventDate DESC""";
+        try (PreparedStatement ps = DBContext.getConnection().prepareStatement(sql)) {
+            ps.setInt(1, clubID);
+            ps.setString(2, termID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Events event = new Events();
+                event.setEventID(rs.getInt("EventID"));
+                event.setEventName(rs.getString("EventName"));
+                events.add(event);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return events;
     }
 }
