@@ -14,7 +14,7 @@ public class Events {
 
     private int clubID;
     private boolean isPublic;
-    private int formID;
+    private Integer formID;
 
     private int capacity;
     private String status;
@@ -183,11 +183,11 @@ public class Events {
         isPublic = aPublic;
     }
 
-    public int getFormID() {
+    public Integer getFormID() {
         return formID;
     }
 
-    public void setFormID(int formID) {
+    public void setFormID(Integer formID) {
         this.formID = formID;
     }
 

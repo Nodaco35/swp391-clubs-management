@@ -406,7 +406,6 @@ public class ApplicationFormDAO {
     }
 
     public void assignFormToEvent(int formId, int eventId) {
-        // Gỡ bỏ EventID khỏi form hiện tại (nếu có) để đảm bảo chỉ một form được gán
         String clearSql = "UPDATE ApplicationForms SET EventID = NULL WHERE EventID = ?";
         String updateSql = "UPDATE ApplicationForms SET EventID = ? WHERE FormID = ?";
         try {
@@ -414,12 +413,10 @@ public class ApplicationFormDAO {
             // Bắt đầu transaction để đảm bảo tính toàn vẹn
             connection.setAutoCommit(false);
             try {
-                // Gỡ bỏ EventID khỏi form hiện tại
                 PreparedStatement clearPs = connection.prepareStatement(clearSql);
                 clearPs.setInt(1, eventId);
                 clearPs.executeUpdate();
 
-                // Gán EventID cho form mới
                 PreparedStatement updatePs = connection.prepareStatement(updateSql);
                 updatePs.setInt(1, eventId);
                 updatePs.setInt(2, formId);
