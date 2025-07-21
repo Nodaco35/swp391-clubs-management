@@ -37,9 +37,9 @@ public class DepartmentDashboardServlet extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập trang này");
                 return;
             }
-            
+      
             int clubID = Integer.parseInt(request.getParameter("clubID"));
-            request.setAttribute("clubID",clubID);
+            session.setAttribute("clubID",clubID);
             
             //Fhuc: Lay ClubDepartmentID -> Set session
             int clubdepartmentId = dashboardDAO.findClubDepartmentId(clubID, currentUser.getUserID());
@@ -55,6 +55,14 @@ public class DepartmentDashboardServlet extends HttpServlet {
             request.setAttribute("dashboard", dashboard);
             request.setAttribute("currentUser", currentUser);
             request.setAttribute("departmentName", dashboard.getDepartmentName());
+            
+           
+            //mới đức
+            boolean accessFinancial = false;
+            if (dashboardDAO.isDepartmentLeaderIndoingoai(currentUser.getUserID(), clubID)) {
+                accessFinancial = true;
+            }
+            session.setAttribute("isAccess", accessFinancial);
             // Forward đến JSP
             request.getRequestDispatcher("view/student/department-leader/dashboard.jsp").forward(request, response);
             

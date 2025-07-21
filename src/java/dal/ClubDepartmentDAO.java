@@ -14,6 +14,32 @@ import models.ClubDepartment;
  */
 public class ClubDepartmentDAO {
 
+    public static List<ClubDepartment> findByClubId(int clubID) {
+        List<ClubDepartment> departments = new ArrayList<>();
+        String sql = "SELECT * FROM clubmanagementsystem.clubdepartments cd\n"
+                + "Join departments d on cd.DepartmentID = d.DepartmentID\n"
+                + "\n"
+                + "where ClubID = ?";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setObject(1, clubID);
+            ResultSet rs  = ps.executeQuery();
+            while (rs.next()) {                
+                 ClubDepartment department = new ClubDepartment();
+                department.setClubDepartmentId(rs.getInt("ClubDepartmentID"));
+                department.setDepartmentId(rs.getInt("DepartmentID"));
+                department.setDepartmentName(rs.getString("DepartmentName"));
+                department.setDepartmentStatus(rs.getBoolean("DepartmentStatus"));
+                department.setDescription(rs.getString("Description"));
+                department.setClubId(rs.getInt("ClubID"));
+                departments.add(department);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return departments;
+    }
+
     /**
      * Get all active departments for a specific club
      *
@@ -279,7 +305,8 @@ public class ClubDepartmentDAO {
     }
 
     /**
-     * Get all active departments for a specific club except for department of director
+     * Get all active departments for a specific club except for department of
+     * director
      *
      * @param clubId The ID of the club
      * @return List of active ClubDepartment objects

@@ -36,7 +36,7 @@ public class PermissionDAO {
         String sql = """
                      SELECT PermissionID,
                          PermissionName,
-                         escription
+                         Description
                      FROM Permissions;""";
         
         try {
