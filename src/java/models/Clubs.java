@@ -17,6 +17,15 @@ public class Clubs {
     private String categoryName;
     private int memberCount;
     private boolean isFavorite;
+    
+    //Dùng cho xin cấp phép tạo/sửa
+    private String clubRequestStatus;
+    private String currentRequestType;
+    private int parentClubID;
+    private String lastRejectReason;
+    private String updateRequestNote;
+    private String chairmanID;
+    private String chairmanFullName;
 
     public Clubs() {
     }
@@ -119,7 +128,7 @@ public class Clubs {
     public void setClubStatus(boolean clubStatus) {
         this.clubStatus = clubStatus;
     }
-
+    
     public int getCategoryID() {
         return categoryID;
     }
@@ -151,4 +160,70 @@ public class Clubs {
     public void setFavorite(boolean isFavorite) {
         this.isFavorite = isFavorite;
     }
+
+    public boolean isIsFavorite() {
+        return isFavorite;
+    }
+
+    public void setIsFavorite(boolean isFavorite) {
+        this.isFavorite = isFavorite;
+    }
+
+    public String getClubRequestStatus() {
+        return clubRequestStatus;
+    }
+
+    public void setClubRequestStatus(String ClubRequestStatus) {
+        this.clubRequestStatus = ClubRequestStatus;
+    }
+
+    public String getCurrentRequestType() {
+        return currentRequestType;
+    }
+
+    public void setCurrentRequestType(String CurrentRequestType) {
+        this.currentRequestType = CurrentRequestType;
+    }
+
+    public int getParentClubID() {
+        return parentClubID;
+    }
+
+    public void setParentClubID(int ParentClubID) {
+        this.parentClubID = ParentClubID;
+    }
+
+    public String getLastRejectReason() {
+        return lastRejectReason;
+    }
+
+    public void setLastRejectReason(String LastRejectReason) {
+        this.lastRejectReason = LastRejectReason;
+    }
+
+    public String getUpdateRequestNote() {
+        return updateRequestNote;
+    }
+
+    public void setUpdateRequestNote(String UpdateRequestNote) {
+        this.updateRequestNote = UpdateRequestNote;
+    }
+
+    public String getChairmanID() {
+        return chairmanID;
+    }
+
+    public void setChairmanID(String ChairmanID) {
+        this.chairmanID = ChairmanID;
+    }
+
+    public String getChairmanFullName() {
+        return chairmanFullName;
+    }
+
+    public void setChairmanFullName(String chairmanFullName) {
+        this.chairmanFullName = chairmanFullName;
+    }
+    
+    
 }

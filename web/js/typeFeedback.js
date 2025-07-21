@@ -25,7 +25,7 @@ function showToast(message, type, duration) {
     toast.appendChild(closeBtn);
     toastContainer.appendChild(toast);
     
-    // Hiệu ứng hiện toast
+
     setTimeout(function() {
         toast.style.opacity = '1';
     }, 10);
@@ -40,7 +40,7 @@ function showToast(message, type, duration) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Kiểm tra thông báo từ server
+
     if (typeof success !== 'undefined' && success) {
         const toast = showToast(success, "success", 3000);
         
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const ratingInputs = document.querySelectorAll('input[name="rating"]');
     const detailedRatingGroups = document.querySelectorAll('.rating-options');
     
-    // Kích hoạt hiệu ứng hover cho đánh giá sao
+
     const stars = document.querySelectorAll('.rating-group label');
     stars.forEach(star => {
         star.addEventListener('mouseenter', () => {
@@ -94,11 +94,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Xử lý kiểm tra hợp lệ khi gửi form
     const form = document.querySelector('form');
-    
-    // Kiểm tra xem đã có container lỗi chưa
+
     let errorContainer = document.querySelector('.feedback-error');
     if (!errorContainer) {
-        // Tạo container cho thông báo lỗi
         errorContainer = document.createElement('div');
         errorContainer.className = 'feedback-error';
         errorContainer.style.display = 'none';
@@ -116,12 +114,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Xử lý sự kiện khi form được submit
     form.addEventListener('submit', function(e) {
-        e.preventDefault(); // Ngăn chặn hành vi submit mặc định
+        e.preventDefault();
         
-        // Xóa thông báo lỗi cũ
         errorContainer.textContent = '';
         errorContainer.style.display = 'none';
-        
         
         const errors = [];
         
@@ -149,11 +145,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Nếu có lỗi
         if (errors.length > 0) {
-            // Hiển thị thông báo lỗi
             errorContainer.textContent = errors.join('. ');
             errorContainer.style.display = 'block';
-            
-            // Cuộn lên trên để người dùng thấy lỗi
             errorContainer.scrollIntoView({ behavior: 'smooth' });
             
             

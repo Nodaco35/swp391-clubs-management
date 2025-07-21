@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -54,7 +53,7 @@ public class ApplicationFormServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-        // Lấy formId từ query parameter
+
         String formIdStr = request.getParameter("formId");
         if (formIdStr == null || formIdStr.isEmpty()) {
             response.sendRedirect(request.getContextPath() + "/formManagement?error=access_denied&message=" + URLEncoder.encode("Link form không hợp lệ", StandardCharsets.UTF_8.name()));

@@ -55,6 +55,12 @@
 						Sự Kiện
 					</a>
 				</li>
+                                <li>
+				<a href="${pageContext.request.contextPath}/chairman-page/clubmeeting"
+				   class="nav-item ${currentPath == '/chairman-page/clubmeeting' ? 'active' : ''}">
+					<i class="fas fa-clock"></i> Cuộc họp
+				</a>
+			</li>
 			</ul>
 		</nav>
 

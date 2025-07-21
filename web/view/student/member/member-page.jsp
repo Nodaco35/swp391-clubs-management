@@ -21,8 +21,8 @@
 <%--tham khảo thêm ở /view/student/chairman/myclub-event.jsp nếu cần nhé--%>
 <%--setup xong header nhé, cần làm chức năng gì thì anh em làm vào ở main--%>
 <main class="dashboard-content">
-	<%--setup xong header nhé, cần làm chức năng gì thì anh em làm vào ở main--%>
-
+	<%--trang cho member là myclub.jsp rồi nhé--%>
+        
 </main>
 </body>
 </html>
