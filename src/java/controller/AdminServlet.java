@@ -62,19 +62,10 @@ public class AdminServlet extends HttpServlet {
 
             int upcomingEventsCount = eventDAO.countUpcomingEvents();
 
-            List<Clubs> activeClubs = clubDAO.getActiveClubs();
-            List<Clubs> inactiveClubs = clubDAO.getInactiveClubs();
-
-            PrintWriter out = response.getWriter();
-//            out.print("recentlyApprovedClubs size = " + (recentlyApprovedClubs != null ? recentlyApprovedClubs.size() : "null"));
-//            out.print("pendingClubRequests size = " + (pendingClubRequests != null ? pendingClubRequests.size() : "null"));
-
             request.setAttribute("totalClubs", totalClubs);
             request.setAttribute("totalMembers", totalMembers);
             request.setAttribute("pendingRequests", pendingRequests);
             request.setAttribute("upcomingEventsCount", upcomingEventsCount);
-            request.setAttribute("activeClubs", activeClubs);
-            request.setAttribute("inactiveClubs", inactiveClubs);
 
             request.getRequestDispatcher("/view/admin/dashboard.jsp").forward(request, response);
         } else if (action.equals("manageAccounts")) {

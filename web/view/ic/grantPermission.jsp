@@ -2,6 +2,8 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@page import="models.Users" %>
+<%@page import="models.Clubs" %>
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -13,6 +15,13 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/ic-dashboard.css">
+        <!-- Bootstrap 5 CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Bootstrap 5 JS (ở cuối body) -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
     </head>
     <body>
         <div class="dashboard">
@@ -39,11 +48,11 @@
                                 <label class="filter-label">Lọc theo trạng thái</label>
                                 <select id="statusFilter" class="filter-select" onchange="filterRequests()">
                                     <option value="all">Tất cả</option>
-                                    <option value="PENDING">Chờ duyệt</option>
-                                    <option value="APPROVED">Đã duyệt</option>
-                                    <option value="REJECTED">Từ chối</option>
-                                    <option value="USED">Đã dùng</option>
+                                    <option value="Pending">Chờ duyệt</option>
+                                    <option value="Approved">Đã duyệt</option>
+                                    <option value="Rejected">Từ chối</option>
                                 </select>
+
                             </div>
 
                             <div class="search-box">
@@ -54,7 +63,6 @@
                     </div>
 
                     <div class="card-body">
-                        <h4>Có ${numberRequest} đơn đang chờ duyệt</h4>
                         <c:if test="${not empty successMessage}">
                             <div class="alert alert-success" id="successMessage">
                                 <i class="fas fa-check-circle"></i> ${successMessage}
@@ -115,8 +123,7 @@
                             <table id="requestsTable">
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Người dùng</th>
+                                        <th>Người gửi</th>
                                         <th>Tên CLB</th>
                                         <th>Danh mục</th>
                                         <th>Ngày gửi</th>
@@ -127,64 +134,37 @@
                                 <tbody>
                                     <!-- Đơn chờ duyệt -->
                                     <c:forEach var="request" items="${requests}" varStatus="loop">
-                                        <c:if test="${request.status == 'PENDING'}">
+                                        <c:if test="${request.clubRequestStatus == 'Pending'}">
                                             <tr request-status="PENDING">
-                                                <td>#${request.id}</td>
                                                 <td>
                                                     <div class="user-info">
-                                                        <div class="user-avatar">${fn:substring(request.userName, 0, 1)}</div>
+                                                        <div class="user-avatar">${fn:substring(request.chairmanFullName, 0, 1)}</div>
                                                         <div class="user-details">
-                                                            <div class="user-name">${fn:escapeXml(request.userName)}</div>
-                                                            <div class="user-email">${request.userID}</div>
+                                                            <div class="user-name">${fn:escapeXml(request.chairmanFullName)}</div>
+                                                            <div class="user-email">${request.chairmanID}</div>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td>${fn:escapeXml(request.clubName)}</td>
                                                 <td>${request.categoryName}</td>
-                                                <td><c:out value="${request.requestDate}"></c:out></td>
-                                                    <td><span class="badge badge-pending"><i class="fas fa-clock"></i> Chờ duyệt</span></td>
+                                                <td><c:out value="${request.establishedDate}"></c:out></td>
+                                                    <td><span class="badge bg-primary text-white"><i class="fas fa-clock"></i> Chờ duyệt</span>
+                                                    </td>
                                                     <td class="table-actions">
-
-                                                        <button class="btn btn-icon btn-success" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=approvePermissionRequest&id=${request.id}&userID=${request.userID}'">
-                                                        <i class="fas fa-check"></i>
+                                                        <button class="btn btn-outline-secondary btn-sm" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=viewClubRequest&id=${request.clubID}'">
+                                                        <i class="fas fa-eye"></i> Xem chi tiết
                                                     </button>
-                                                    <button class="btn btn-icon btn-error" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=rejectPermissionRequest&id=${request.id}&userID=${request.userID}'">
-                                                        <i class="fas fa-times"></i>
+                                                    <button class="btn btn-icon btn-success" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=approvePermissionRequest&id=${request.clubID}&userID=${request.chairmanID}'">
+                                                        <i class="fas fa-check"></i> Đồng ý
                                                     </button>
-                                                    <button class="btn btn-icon btn-error" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=deletePermissionRequest&id=${request.id}&userID=${request.userID}'">
-                                                        <i class="fa-solid fa-trash"></i>
+                                                    <button type="button"
+                                                            class="btn btn-danger btn-sm"
+                                                            onclick="showRejectModal('${request.clubID}', '${request.chairmanID}')">
+                                                        <i class="fas fa-times"></i> Từ chối
                                                     </button>
 
-                                                </td>
-                                            </tr>
-                                        </c:if>
-                                    </c:forEach>
-
-                                    <!-- Đơn đã duyệt -->
-                                    <c:forEach var="request" items="${requests}" varStatus="loop">
-                                        <c:if test="${request.status == 'APPROVED'}">
-                                            <tr request-status="APPROVED">
-                                                <td>#${request.id}</td>
-                                                <td>
-                                                    <div class="user-info">
-                                                        <div class="user-avatar">${fn:substring(request.userName, 0, 1)}</div>
-                                                        <div class="user-details">
-                                                            <div class="user-name">${fn:escapeXml(request.userName)}</div>
-                                                            <div class="user-email">${request.userID}</div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>${fn:escapeXml(request.clubName)}</td>
-                                                <td>${request.category}</td>
-                                                <td><c:out value="${request.requestDate}"></c:out></td>
-                                                    <td><span class="badge badge-approved"><i class="fas fa-check"></i> Đã duyệt</span></td>
-
-                                                    <td class="table-actions">
-                                                        <button class="btn btn-icon btn-error" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=rejectPermissionRequest&id=${request.id}&userID=${request.userID}'">
-                                                        <i class="fas fa-times"></i>
-                                                    </button>
-                                                    <button class="btn btn-icon btn-error" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=deletePermissionRequest&id=${request.id}&userID=${request.userID}'">
-                                                        <i class="fa-solid fa-trash"></i>
+                                                    <button class="btn btn-danger btn-sm" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=deletePermissionRequest&id=${request.clubID}&userID=${request.chairmanID}'">
+                                                        <i class="fa-solid fa-trash"></i> Xoá
                                                     </button>
 
                                                 </td>
@@ -194,59 +174,69 @@
 
                                     <!-- Đơn bị từ chối -->
                                     <c:forEach var="request" items="${requests}" varStatus="loop">
-                                        <c:if test="${request.status == 'REJECTED'}">
-                                            <tr request-status="REJECTED">
-                                                <td>#${request.id}</td>
+                                        <c:if test="${request.clubRequestStatus == 'Rejected'}">
+                                            <tr request-status="Rejected">
                                                 <td>
                                                     <div class="user-info">
-                                                        <div class="user-avatar">${fn:substring(request.userName, 0, 1)}</div>
+                                                        <div class="user-avatar">${fn:substring(request.chairmanFullName, 0, 1)}</div>
                                                         <div class="user-details">
-                                                            <div class="user-name">${fn:escapeXml(request.userName)}</div>
-                                                            <div class="user-email">${request.userID}</div>
+                                                            <div class="user-name">${fn:escapeXml(request.chairmanFullName)}</div>
+                                                            <div class="user-email">${request.chairmanID}</div>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td>${fn:escapeXml(request.clubName)}</td>
-                                                <td>${request.category}</td>
-                                                <td><c:out value="${request.requestDate}"></c:out></td>
-                                                    <td><span class="badge badge-rejected"><i class="fas fa-times"></i> Từ chối</span></td>
+                                                <td>${request.categoryName}</td>
+                                                <td><c:out value="${request.establishedDate}"></c:out></td>
+                                                    <td><span class="badge bg-danger"><i class="fas fa-times"></i> Từ chối</span></td>
                                                     <td class="table-actions">
-
-                                                        <button class="btn btn-icon btn-success" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=approvePermissionRequest&id=${request.id}&userID=${request.userID}'">
-                                                        <i class="fas fa-check"></i>
+                                                        <button class="btn btn-outline-secondary btn-sm" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=viewClubRequest&id=${request.clubID}'">
+                                                        <i class="fas fa-eye"></i> Xem chi tiết
                                                     </button>
-                                                    <button class="btn btn-icon btn-error" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=deletePermissionRequest&id=${request.id}&userID=${request.userID}'">
-                                                        <i class="fa-solid fa-trash"></i>
+                                                    <button class="btn btn-sm btn-success" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=approvePermissionRequest&id=${request.clubID}&userID=${request.chairmanID}'">
+                                                        <i class="fas fa-check"></i> Đồng ý
+                                                    </button>
+                                                    <button class="btn btn-danger btn-sm" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=deletePermissionRequest&id=${request.clubID}&userID=${request.chairmanID}'">
+                                                        <i class="fa-solid fa-trash"></i> Xoá
                                                     </button>
                                                 </td>
                                             </tr>
                                         </c:if>
                                     </c:forEach>
 
-                                    <!-- Đơn đã dùng -->
-                                    <c:forEach var="request" items="${requests}" varStatus="loop">
-                                        <c:if test="${request.status == 'USED'}">
-                                            <tr request-status="USED">
-                                                <td>#${request.id}</td>
+                                    <!-- Đơn đã xong -->
+                                    <c:forEach var="request" items="${approvedRequests}" varStatus="loop">
+                                        <c:if test="${request.clubRequestStatus == 'Approved'}">
+                                            <tr request-status="Approved">
                                                 <td>
                                                     <div class="user-info">
-                                                        <div class="user-avatar">${fn:substring(request.userName, 0, 1)}</div>
+                                                        <div class="user-avatar">${fn:substring(request.chairmanFullName, 0, 1)}</div>
                                                         <div class="user-details">
-                                                            <div class="user-name">${fn:escapeXml(request.userName)}</div>
-                                                            <div class="user-email">${request.userID}</div>
+                                                            <div class="user-name">${fn:escapeXml(request.chairmanFullName)}</div>
+                                                            <div class="user-email">${request.chairmanID}</div>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td>${fn:escapeXml(request.clubName)}</td>
-                                                <td>${request.category}</td>
-                                                <td><c:out value="${request.requestDate}"></c:out></td>
-                                                    <td><span class="badge badge-info"><i class="fas fa-check-circle"></i> Đã dùng</span></td>
-                                                    <td class="table-actions"></td>
-                                                </tr>
+                                                <td>${request.categoryName}</td>
+                                                <td><c:out value="${request.establishedDate}"></c:out></td>
+                                                    <td><span class="badge bg-success"><i class="fas fa-check"></i> Đã đồng ý</span></td>
+                                                    <td class="table-actions">
+                                                        <!-- Nút Xem chi tiết -->
+                                                        <button class="btn btn-outline-secondary btn-sm" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=viewClubRequest&id=${request.clubID}'">
+                                                        <i class="fas fa-eye"></i> Xem chi tiết
+                                                    </button>
+                                                    <button type="button"
+                                                            class="btn btn-danger btn-sm"
+                                                            onclick="showRejectModal('${request.clubID}', '${request.chairmanID}')">
+                                                        <i class="fas fa-times"></i> Từ chối
+                                                    </button>
+                                                </td>
+                                            </tr>
                                         </c:if>
                                     </c:forEach>
 
-                                    <c:if test="${empty requests}">
+                                    <c:if test="${empty requests and empty approvedRequests}">
                                         <tr class="original-empty-state">
                                             <td colspan="7" class="empty-state">
                                                 <i class="fas fa-folder-open empty-icon"></i>
@@ -282,6 +272,33 @@
                         </div>
                     </div>
                 </div>
+                <!-- Modal Bootstrap: Nhập lý do từ chối -->
+                <div class="modal fade" id="rejectReasonModal" tabindex="-1" aria-labelledby="rejectReasonModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <form action="${pageContext.request.contextPath}/ic" method="get" class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="rejectReasonModalLabel">Lý do từ chối</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                            </div>
+                            <div class="modal-body">
+                                <input type="hidden" name="action" value="rejectPermissionRequest">
+                                <input type="hidden" name="id" id="rejectClubID">
+                                <input type="hidden" name="userID" id="rejectUserID">
+
+                                <div class="mb-3">
+                                    <label for="reason" class="form-label">Nhập lý do từ chối:</label>
+                                    <textarea class="form-control" name="reason" id="reason" rows="4" required></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-danger">Từ chối</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+
             </main>
         </div>
 
@@ -370,5 +387,17 @@
                 hideNotificationAfterTimeout('errorMessage');    // Ẩn error message sau 10 giây
             };
         </script>
+        <script>
+            function showRejectModal(clubID, userID) {
+                // Gán dữ liệu vào các hidden input
+                document.getElementById("rejectClubID").value = clubID;
+                document.getElementById("rejectUserID").value = userID;
+
+                // Hiện modal Bootstrap
+                const modal = new bootstrap.Modal(document.getElementById('rejectReasonModal'));
+                modal.show();
+            }
+        </script>
+
     </body>
 </html>
