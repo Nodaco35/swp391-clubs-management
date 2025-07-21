@@ -5,6 +5,7 @@
 package dal;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import models.*;
 import java.util.*;
 import java.sql.*;
@@ -1180,22 +1181,25 @@ public class FinancialDAO {
                 PreparedStatement ps2 = DBContext.getConnection().prepareStatement(sql4);
                 List<UserClub> list = UserClubDAO.findByClubID(income.getClubID());
 
-       
                 int row2 = 0;
                 DepartmentDashboardDAO dao = new DepartmentDashboardDAO();
                 int membercount = dao.getClubMemberCount(income.getClubID());
-                
+
                 for (UserClub uc : list) {
                     ps2.setObject(1, in);
                     ps2.setObject(2, uc.getUserID());
                     ps2.setObject(3, income.getClubID());
                     ps2.setObject(4, income.getTermID());
-                    ps2.setObject(5, income.getAmount().divide(BigDecimal.valueOf(membercount)));
+                    ps2.setObject(5, income.getAmount().divide(
+                            BigDecimal.valueOf(membercount),
+                            2, // scale: 2 chữ số thập phân (tương ứng DECIMAL(15,2))
+                            RoundingMode.HALF_UP // cách làm tròn phổ biến: 0.005 → 0.01
+                    ));
                     ps2.setObject(6, formattedStartedTime);
                     row2 += ps2.executeUpdate();
-                    
+
                 }
-                
+
                 return row2 == membercount;
             }
         } catch (SQLException e) {
@@ -1205,16 +1209,16 @@ public class FinancialDAO {
         return true;
 
     }
+
     public static void main(String[] args) {
-       
-              
+
         List<UserClub> list = UserClubDAO.findByClubID(4);
         int i = 0;
         for (UserClub userClub : list) {
             i++;
         }
         System.out.println(i);
-        
+
     }
 
     private static int findByIncomeIDNew(int clubID) {
@@ -1239,6 +1243,7 @@ public class FinancialDAO {
         }
         return id;
     }
+
     public static List<Transaction> getTransactionsByClubAndTerm(int clubID, String termID, String type, String status, int page, int pageSize) {
         List<Transaction> transactions = new ArrayList<>();
         String sql = "SELECT * FROM Transactions WHERE ClubID = ? AND TermID = ?";
