@@ -42,7 +42,7 @@ public class RecruitmentCampaignDAO {
             
             // Use CASE statement in SQL to determine status based on start date
             String sql = "INSERT INTO RecruitmentCampaigns "
-                    + "(ClubID, Gen, TemplateID, Title, Description, StartDate, EndDate, Status, CreatedBy, CreatedAt) "
+                    + "(ClubID, Gen, FormID, Title, Description, StartDate, EndDate, Status, CreatedBy, CreatedAt) "
                     + "VALUES (?, ?, ?, ?, ?, ?, ?, "
                     + "CASE "
                     + "  WHEN ? = CURRENT_DATE THEN 'ONGOING' "
@@ -52,7 +52,7 @@ public class RecruitmentCampaignDAO {
             ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setInt(1, campaign.getClubID());
             ps.setInt(2, campaign.getGen());
-            ps.setInt(3, campaign.getTemplateID());
+            ps.setInt(3, campaign.getFormID());
             ps.setString(4, campaign.getTitle());
             ps.setString(5, campaign.getDescription());
             ps.setTimestamp(6, campaign.getStartDate() != null ? new Timestamp(campaign.getStartDate().getTime()) : null);
@@ -112,7 +112,7 @@ public class RecruitmentCampaignDAO {
             String sql;
             if (isNewCampaign) {
                 sql = "UPDATE RecruitmentCampaigns SET "
-                      + "Gen = ?, TemplateID = ?, Title = ?, Description = ?, "
+                      + "Gen = ?, FormID = ?, Title = ?, Description = ?, "
                       + "StartDate = ?, EndDate = ?, "
                       + "Status = CASE "
                       + "  WHEN ? = CURRENT_DATE THEN 'ONGOING' "
@@ -122,14 +122,14 @@ public class RecruitmentCampaignDAO {
                       + "WHERE RecruitmentID = ? AND ClubID = ?";
             } else {
                 sql = "UPDATE RecruitmentCampaigns SET "
-                      + "Gen = ?, TemplateID = ?, Title = ?, Description = ?, "
+                      + "Gen = ?, FormID = ?, Title = ?, Description = ?, "
                       + "StartDate = ?, EndDate = ?, Status = ? "
                       + "WHERE RecruitmentID = ? AND ClubID = ?";
             }
             
             ps = conn.prepareStatement(sql);
             ps.setInt(1, campaign.getGen());
-            ps.setInt(2, campaign.getTemplateID());
+            ps.setInt(2, campaign.getFormID());
             ps.setString(3, campaign.getTitle());
             ps.setString(4, campaign.getDescription());
             ps.setTimestamp(5, campaign.getStartDate() != null ? new Timestamp(campaign.getStartDate().getTime()) : null);
@@ -181,10 +181,10 @@ public class RecruitmentCampaignDAO {
         RecruitmentCampaign campaign = null;
         try {
             conn = DBContext.getConnection();
-            String sql = "SELECT rc.*, c.ClubName, ft.Title as TemplateName, u.FullName as CreatedByName "
+            String sql = "SELECT rc.*, c.ClubName, ft.Title as FormName, u.FullName as CreatedByName "
                     + "FROM RecruitmentCampaigns rc "
                     + "JOIN Clubs c ON rc.ClubID = c.ClubID "
-                    + "JOIN ApplicationFormTemplates ft ON rc.TemplateID = ft.TemplateID "
+                    + "JOIN ApplicationForms ft ON rc.FormID = ft.FormID "
                     + "JOIN Users u ON rc.CreatedBy = u.UserID "
                     + "WHERE rc.RecruitmentID = ?";
             ps = conn.prepareStatement(sql);
@@ -196,7 +196,7 @@ public class RecruitmentCampaignDAO {
                         rs.getInt("RecruitmentID"),
                         rs.getInt("ClubID"),
                         rs.getInt("Gen"),
-                        rs.getInt("TemplateID"),
+                        rs.getInt("FormID"),
                         rs.getString("Title"),
                         rs.getString("Description"),
                         rs.getTimestamp("StartDate"),
@@ -205,7 +205,7 @@ public class RecruitmentCampaignDAO {
                         rs.getString("CreatedBy"),
                         rs.getTimestamp("CreatedAt"),
                         rs.getString("ClubName"),
-                        rs.getString("TemplateName"),
+                        rs.getString("FormName"),
                         rs.getString("CreatedByName")
                 );
             }
@@ -222,10 +222,10 @@ public class RecruitmentCampaignDAO {
         List<RecruitmentCampaign> campaigns = new ArrayList<>();
         try {
             conn = DBContext.getConnection();
-            String sql = "SELECT rc.*, c.ClubName, ft.Title as TemplateName, u.FullName as CreatedByName "
+            String sql = "SELECT rc.*, c.ClubName, ft.Title as FormName, u.FullName as CreatedByName "
                     + "FROM RecruitmentCampaigns rc "
                     + "JOIN Clubs c ON rc.ClubID = c.ClubID "
-                    + "JOIN ApplicationFormTemplates ft ON rc.TemplateID = ft.TemplateID "
+                    + "JOIN ApplicationForms ft ON rc.FormID = ft.FormID "
                     + "JOIN Users u ON rc.CreatedBy = u.UserID "
                     + "WHERE rc.ClubID = ? "
                     + "ORDER BY rc.CreatedAt DESC";
@@ -238,7 +238,7 @@ public class RecruitmentCampaignDAO {
                         rs.getInt("RecruitmentID"),
                         rs.getInt("ClubID"),
                         rs.getInt("Gen"),
-                        rs.getInt("TemplateID"),
+                        rs.getInt("FormID"),
                         rs.getString("Title"),
                         rs.getString("Description"),
                         rs.getTimestamp("StartDate"),
@@ -247,7 +247,7 @@ public class RecruitmentCampaignDAO {
                         rs.getString("CreatedBy"),
                         rs.getTimestamp("CreatedAt"),
                         rs.getString("ClubName"),
-                        rs.getString("TemplateName"),
+                        rs.getString("FormName"),
                         rs.getString("CreatedByName")
                 );
                 campaigns.add(campaign);
@@ -265,10 +265,10 @@ public class RecruitmentCampaignDAO {
         List<RecruitmentCampaign> campaigns = new ArrayList<>();
         try {
             conn = DBContext.getConnection();
-            String sql = "SELECT rc.*, c.ClubName, ft.Title as TemplateName, u.FullName as CreatedByName "
+            String sql = "SELECT rc.*, c.ClubName, ft.Title as FormName, u.FullName as CreatedByName "
                     + "FROM RecruitmentCampaigns rc "
                     + "JOIN Clubs c ON rc.ClubID = c.ClubID "
-                    + "JOIN ApplicationFormTemplates ft ON rc.TemplateID = ft.TemplateID "
+                    + "JOIN ApplicationForms ft ON rc.FormID = ft.FormID "
                     + "JOIN Users u ON rc.CreatedBy = u.UserID "
                     + "WHERE rc.Status = 'ONGOING' AND rc.EndDate >= CURRENT_TIMESTAMP "
                     + "ORDER BY rc.StartDate ASC";
@@ -280,7 +280,7 @@ public class RecruitmentCampaignDAO {
                         rs.getInt("RecruitmentID"),
                         rs.getInt("ClubID"),
                         rs.getInt("Gen"),
-                        rs.getInt("TemplateID"),
+                        rs.getInt("FormID"),
                         rs.getString("Title"),
                         rs.getString("Description"),
                         rs.getTimestamp("StartDate"),
@@ -289,7 +289,7 @@ public class RecruitmentCampaignDAO {
                         rs.getString("CreatedBy"),
                         rs.getTimestamp("CreatedAt"),
                         rs.getString("ClubName"),
-                        rs.getString("TemplateName"),
+                        rs.getString("FormName"),
                         rs.getString("CreatedByName")
                 );
                 campaigns.add(campaign);
@@ -426,7 +426,7 @@ public class RecruitmentCampaignDAO {
                 campaign.setRecruitmentID(rs.getInt("RecruitmentID"));
                 campaign.setClubID(rs.getInt("ClubID"));
                 campaign.setGen(rs.getInt("Gen"));
-                campaign.setTemplateID(rs.getInt("TemplateID"));
+                campaign.setFormID(rs.getInt("FormID"));
                 campaign.setTitle(rs.getString("Title"));
                 campaign.setDescription(rs.getString("Description"));
                 campaign.setStartDate(rs.getTimestamp("StartDate"));

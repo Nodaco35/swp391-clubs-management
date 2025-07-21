@@ -27,9 +27,9 @@ document.addEventListener("DOMContentLoaded", () => {
   function filterForms() {
     if (!formTypeFilter) return; // Kiểm tra tồn tại của formTypeFilter
     
-    const selectedType = formTypeFilter.value
-    const formCards = document.querySelectorAll(".form-card")
-    const formsGrids = document.querySelectorAll(".forms-grid")
+    const selectedType = formTypeFilter.value;
+    const formCards = document.querySelectorAll(".form-card");
+    const formsGrids = document.querySelectorAll(".forms-grid");
     
     console.log("Filtering forms by type:", selectedType);
 
@@ -93,19 +93,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const editButtons = document.querySelectorAll(".edit-form")
   editButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      const templateId = button.getAttribute("data-template-id")
+      const formId = button.getAttribute("data-form-id")
       // Get clubId from URL parameters
       const urlParams = new URLSearchParams(window.location.search)
       const clubId = urlParams.get('clubId')
-      window.location.href = `${contextPath}/formBuilder?templateId=${templateId}&clubId=${clubId}`
+      window.location.href = `${contextPath}/formBuilder?formId=${formId}&clubId=${clubId}`
     })
   })
   // Publish form
   const publishButtons = document.querySelectorAll(".publish-form")
   publishButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      const templateId = button.getAttribute("data-template-id")
-      performAction("publish", templateId, "Đang xuất bản form...")
+      const formId = button.getAttribute("data-form-id")
+      performAction("publish", formId, "Đang xuất bản form...")
     })
   })
 
@@ -113,12 +113,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const unpublishButtons = document.querySelectorAll(".unpublish-form")
   const unpublishModal = document.getElementById("unpublishModal")
   const unpublishFormTitle = document.getElementById("unpublishFormTitle")
-  let currentTemplateId = null
+  let currentFormId = null
   let currentFormTitle = ""
 
   unpublishButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      currentTemplateId = button.getAttribute("data-template-id")
+      currentFormId = button.getAttribute("data-form-id")
       currentFormTitle = button.getAttribute("data-form-title")
       unpublishFormTitle.textContent = currentFormTitle
       unpublishModal.style.display = "block"
@@ -132,7 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   deleteButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      currentTemplateId = button.getAttribute("data-template-id")
+      currentFormId = button.getAttribute("data-form-id")
       currentFormTitle = button.getAttribute("data-form-title")
       deleteFormTitle.textContent = currentFormTitle
       deleteModal.style.display = "block"
@@ -142,10 +142,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const viewResponsesButtons = document.querySelectorAll(".view-responses")
   viewResponsesButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      const templateId = button.getAttribute("data-template-id")
+      const formId = button.getAttribute("data-form-id")
       const clubId = button.getAttribute("data-club-id")
       const formType = button.getAttribute("data-form-type")
-      window.location.href = `${contextPath}/formResponses?templateId=${templateId}&clubId=${clubId}&formType=${formType}`
+      window.location.href = `${contextPath}/formResponses?formId=${formId}&clubId=${clubId}&formType=${formType}`
     })
   })
 
@@ -153,8 +153,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const copyLinkButtons = document.querySelectorAll(".copy-link")
   copyLinkButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      const templateId = button.getAttribute("data-template-id")
-      const publicLink = `${window.location.origin}${contextPath}/applicationForm?templateId=${templateId}`
+      const formId = button.getAttribute("data-form-id")
+      const publicLink = `${window.location.origin}${contextPath}/applicationForm?formId=${formId}`
 
       navigator.clipboard
           .writeText(publicLink)
@@ -175,8 +175,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (confirmDelete) {
       confirmDelete.addEventListener("click", () => {
-        if (currentTemplateId) {
-          performAction("delete", currentTemplateId, "Đang xóa form...")
+        if (currentFormId) {
+          performAction("delete", currentFormId, "Đang xóa form...")
           deleteModal.style.display = "none"
         }
       })
@@ -194,8 +194,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (confirmUnpublish) {
       confirmUnpublish.addEventListener("click", () => {
-        if (currentTemplateId) {
-          performAction("unpublish", currentTemplateId, "Đang hủy xuất bản form...")
+        if (currentFormId) {
+          performAction("unpublish", currentFormId, "Đang hủy xuất bản form...")
           unpublishModal.style.display = "none"
         }
       })
@@ -224,8 +224,8 @@ document.addEventListener("DOMContentLoaded", () => {
   setupModalHandlers()
 
   // Helper function to perform actions
-  function performAction(action, templateId, loadingMessage) {
-    console.log(`Performing action: ${action} for templateId: ${templateId}`)
+  function performAction(action, formId, loadingMessage) {
+    console.log(`Performing action: ${action} for formId: ${formId}`)
     showLoading(loadingMessage)
 
     const url = `${contextPath}/formManagement`
@@ -236,7 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: `action=${action}&templateId=${templateId}`,
+      body: `action=${action}&formId=${formId}`,
     })
         .then((response) => {
           console.log(`Response status: ${response.status}`)
@@ -271,12 +271,16 @@ document.addEventListener("DOMContentLoaded", () => {
           hideLoading()
           console.error("Error details:", error)
 
+          // Hiển thị thông báo chung
           if (error.message.includes("HTTP error! status: 404")) {
-            showToast("Không tìm thấy servlet. Kiểm tra URL mapping.", "error")
+            console.error("404 Error: Servlet not found - URL mapping issue")
+            showToast("Có lỗi xảy ra. Vui lòng thử lại sau.", "error")
           } else if (error.message.includes("Response is not JSON")) {
-            showToast("Server trả về HTML thay vì JSON. Kiểm tra servlet.", "error")
+            console.error("Response format error: Server returned HTML instead of JSON")
+            showToast("Có lỗi xảy ra. Vui lòng thử lại sau.", "error")
           } else {
-            showToast("Có lỗi xảy ra khi thực hiện hành động: " + error.message, "error")
+            console.error("General error:", error.message)
+            showToast("Có lỗi xảy ra. Vui lòng thử lại sau.", "error")
           }
         })
   }

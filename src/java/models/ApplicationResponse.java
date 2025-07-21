@@ -4,10 +4,10 @@ import java.util.Date;
 
 public class ApplicationResponse {
     private int responseID;
-    private int templateID;
+    private int formID;
     private String userID;
     private int clubID;
-    private Integer eventID; // Có thể null
+    private Integer eventID;
     private String responses; // JSON format
     private String status;
     private Date submitDate;
@@ -15,16 +15,16 @@ public class ApplicationResponse {
     // Constructors
     public ApplicationResponse() {
     }
-    
-    public ApplicationResponse(int templateID, String userID, int clubID, 
-                              Integer eventID, String responses, String status) {
-        this.templateID = templateID;
+
+    public ApplicationResponse(int responseID, int formID, String userID, int clubID, Integer eventID, String responses, String status, Date submitDate) {
+        this.responseID = responseID;
+        this.formID = formID;
         this.userID = userID;
         this.clubID = clubID;
         this.eventID = eventID;
         this.responses = responses;
         this.status = status;
-        this.submitDate = new Date(); // Thời gian hiện tại
+        this.submitDate = submitDate;
     }
     
     // Getters and Setters
@@ -36,12 +36,12 @@ public class ApplicationResponse {
         this.responseID = responseID;
     }
 
-    public int getTemplateID() {
-        return templateID;
+    public int getFormID() {
+        return formID;
     }
 
-    public void setTemplateID(int templateID) {
-        this.templateID = templateID;
+    public void setFormID(int formID) {
+        this.formID = formID;
     }
 
     public String getUserID() {

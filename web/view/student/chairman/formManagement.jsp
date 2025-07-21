@@ -10,18 +10,19 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/formManagement.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/formManagement.css">
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 </head>
 <body>
     <jsp:include page="/view/events-page/header.jsp" />
     
-    <div class="container">
+    <div class="form-management-container">
         <!-- Page Header -->
         <div class="page-header">
             <h1><i class="fas fa-clipboard-list"></i>Quản lý Form</h1>
-            <div class="header-actions">            <a href="${pageContext.request.contextPath}/formBuilder?clubId=${param.clubId}" class="btn btn-primary">
+            <div class="header-actions">            
+                <a href="${pageContext.request.contextPath}/formBuilder?clubId=${param.clubId}" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Tạo Form Mới
                 </a>
             </div>
@@ -59,7 +60,8 @@
                         <div class="empty-state">
                             <i class="fas fa-inbox"></i>
                             <h3>Chưa có form nào được lưu</h3>
-                            <p>Tạo form mới để bắt đầu thu thập đăng ký từ thành viên.</p>                            <a href="${pageContext.request.contextPath}/formBuilder?clubId=${param.clubId}" class="btn btn-primary">
+                            <p>Tạo form mới để bắt đầu thu thập đăng ký từ thành viên.</p>                            
+                            <a href="${pageContext.request.contextPath}/formBuilder?clubId=${param.clubId}" class="btn btn-primary">
                                 <i class="fas fa-plus"></i> Tạo Form Đầu Tiên
                             </a>
                         </div>
@@ -78,17 +80,20 @@
                                             <i class="fas fa-eye-slash"></i>
                                             <span>Chưa công khai</span>
                                         </div>
+                                        <div class="meta-item">
+                                            <span>ID: ${form.formId}</span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="form-actions">
-                                    <button class="btn btn-outline btn-sm edit-form" data-template-id="${form.templateId}">
+                                    <button class="btn btn-outline btn-sm edit-form" data-form-id="${form.formId}">
                                         <i class="fas fa-edit"></i> Chỉnh sửa
                                     </button>
-                                    <button class="btn btn-success btn-sm publish-form" data-template-id="${form.templateId}">
+                                    <button class="btn btn-success btn-sm publish-form" data-form-id="${form.formId}">
                                         <i class="fas fa-globe"></i> Xuất bản
                                     </button>
                                     <button class="btn btn-danger btn-sm delete-form" 
-                                            data-template-id="${form.templateId}" 
+                                            data-form-id="${form.formId}" 
                                             data-form-title="${form.title}">
                                         <i class="fas fa-trash"></i> Xóa
                                     </button>
@@ -122,22 +127,22 @@
                                     <h3 class="form-title">${form.title}</h3>
                                     <div class="form-link">
                                         <input type="text" class="public-link" readonly 
-                                               value="${pageContext.request.scheme}://${pageContext.request.serverName}:${pageContext.request.serverPort}${pageContext.request.contextPath}/applicationForm?templateId=${form.templateId}">
+                                               value="${pageContext.request.scheme}://${pageContext.request.serverName}:${pageContext.request.serverPort}${pageContext.request.contextPath}/applicationForm?formId=${form.formId}">
                                     </div>
                                 </div>                                <div class="form-actions">
-                                    <button class="btn btn-info btn-sm view-responses" data-template-id="${form.templateId}" data-club-id="${param.clubId}" data-form-type="${form.formType eq 'Event' ? 'event' : 'member'}">
+                                    <button class="btn btn-info btn-sm view-responses" data-form-id="${form.formId}" data-club-id="${param.clubId}" data-form-type="${form.formType eq 'Event' ? 'event' : 'member'}">
                                         <i class="fas fa-chart-bar"></i> Xem phản hồi
                                     </button>
-                                    <button class="btn btn-outline btn-sm copy-link" data-template-id="${form.templateId}">
+                                    <button class="btn btn-outline btn-sm copy-link" data-form-id="${form.formId}">
                                         <i class="fas fa-copy"></i> Sao chép link
                                     </button>
                                     <button class="btn btn-secondary btn-sm unpublish-form" 
-                                            data-template-id="${form.templateId}" 
+                                            data-form-id="${form.formId}" 
                                             data-form-title="${form.title}">
                                         <i class="fas fa-eye-slash"></i> Hủy xuất bản
                                     </button>
                                         <a class="btn btn-sm btn-primary"
-                                           href="${pageContext.request.contextPath}/applicationForm?templateId=${form.templateId}">
+                                           href="${pageContext.request.contextPath}/applicationForm?formId=${form.formId}">
                                             Xem form
                                         </a>
                                 </div>

@@ -5,7 +5,7 @@
 
 <div class="event-card">
     <div class="event-image">
-        <i class="fas fa-calendar-day"></i>
+        <img src="${pageContext.request.contextPath}/${event.eventImg}" alt="${event.eventName}" />
     </div>
     <div class="event-content">
         <h3 class="event-title">${event.eventName}</h3>

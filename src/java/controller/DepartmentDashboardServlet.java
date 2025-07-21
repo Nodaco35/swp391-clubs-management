@@ -41,6 +41,10 @@ public class DepartmentDashboardServlet extends HttpServlet {
             int clubID = Integer.parseInt(request.getParameter("clubID"));
             session.setAttribute("clubID",clubID);
             
+            //Fhuc: Lay ClubDepartmentID -> Set session
+            int clubdepartmentId = dashboardDAO.findClubDepartmentId(clubID, currentUser.getUserID());
+            session.setAttribute("clubDepartmentId", clubdepartmentId);
+            
             // Lấy dữ liệu dashboard
             DepartmentDashboard dashboard = dashboardDAO.getCompleteDashboard(currentUser.getUserID());
               if (dashboard == null) {

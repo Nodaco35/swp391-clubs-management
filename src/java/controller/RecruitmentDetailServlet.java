@@ -160,8 +160,6 @@ public class RecruitmentDetailServlet extends HttpServlet {
         }
     }
 
-    // Phương thức doPost đã được xóa vì chức năng API đã chuyển sang RecruitmentApiServlet
-
     // Helper methods cho trang chi tiết hoạt động tuyển quân
     private String getUserName(String userId) {
         try {

@@ -29,13 +29,6 @@ public class StringEscapeUtils {
                 case '\n':
                     sb.append("\\n");   // Replace newline with \n
                     break;
-                // Bạn có thể thêm các trường hợp escape khác nếu cần, ví dụ:
-                // case '"':
-                //     sb.append("\\\""); // Replace " with \"
-                //     break;
-                // case '/':
-                //     sb.append("\\/");  // Replace / with \/ (useful for </script> in JSON)
-                //     break;
                 default:
                     sb.append(c);
                     break;

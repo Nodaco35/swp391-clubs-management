@@ -1112,6 +1112,16 @@ body {
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
+.error-message-reject {
+    padding: 12px 16px;
+    margin: 10px 0;
+    border-radius: 6px;
+    font-weight: 500;
+    background-color: #f0f4f8;
+    border-left: 4px solid #ff0000;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
 .modal-header {
     padding: 20px;
     border-bottom: 1px solid #eee;
@@ -1580,6 +1590,27 @@ body {
 .phase-task-deadline.due-soon {
     color: #fd7e14;
 }
+
+.phase-task-status {
+    margin: 8px;
+
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    color: #fff;
+    margin: 8px;
+}
+.badge-secondary { background-color: #6c757d; }
+.badge-warning { background-color: #ffc107; color: #212529; }
+.badge-info { background-color: #17a2b8; }
+.badge-danger { background-color: #dc3545; }
+.badge-success { background-color: #28a745; }
+.badge-dark { background-color: #343a40; }
+
 
 .phase-task-actions {
     display: flex;

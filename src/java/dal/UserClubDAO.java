@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-
 import java.util.ArrayList;
 import java.util.List;
 import models.Department;
@@ -141,7 +140,7 @@ public class UserClubDAO {
 
             if (rs.next()) {
                 int roleID = rs.getInt("RoleID");
-                return roleID == 1 || roleID == 2;
+                return roleID == 1 || roleID == 3;
             }
         } catch (SQLException e) {
             System.out.println("Error checking club president: " + e.getMessage());
@@ -949,21 +948,6 @@ public class UserClubDAO {
                 stmt = conn.prepareStatement(query);
                 stmt.setString(1, userID);
                 stmt.setInt(2, clubId);
-            } else {
-                query = """
-                    SELECT uc.UserClubID, uc.UserID, uc.ClubID, uc.ClubDepartmentID, uc.RoleID, 
-                           uc.JoinDate, uc.IsActive, u.FullName, r.RoleName, d.DepartmentName
-                    FROM UserClubs uc
-                    JOIN Users u ON uc.UserID = u.UserID
-                    JOIN Roles r ON uc.RoleID = r.RoleID
-                    JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
-                    JOIN Departments d ON cd.DepartmentID = d.DepartmentID
-                    WHERE uc.UserID = ? AND uc.RoleID BETWEEN 1 AND 3 AND uc.IsActive = 1
-                    ORDER BY uc.RoleID ASC
-                    LIMIT 1
-                """;
-                stmt = conn.prepareStatement(query);
-                stmt.setString(1, userID);
             }
             rs = stmt.executeQuery();
 

@@ -5,11 +5,8 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -25,23 +22,18 @@ import models.RecruitmentCampaign;
 import models.RecruitmentStage;
 import models.ApplicationStage;
 import models.StageNotification;
-import models.NotificationTemplate;
 import models.Users;
 import models.UserClub;
 import service.RecruitmentService;
-import service.NotificationService;
-import dal.LocationDAO;
+import service.StageNotificationService;
 import dal.UserClubDAO;
-import dal.ApplicationFormTemplateDAO;
 
 @WebServlet(name = "RecruitmentCampaignServlet", urlPatterns = {"/recruitment/*"})
 public class RecruitmentCampaignServlet extends HttpServlet {
 
     private static final Logger logger = Logger.getLogger(RecruitmentCampaignServlet.class.getName());
     private final RecruitmentService recruitmentService = new RecruitmentService();
-    private final NotificationService notificationService = new NotificationService();
-    private final LocationDAO locationDAO = new LocationDAO();
-    private final ApplicationFormTemplateDAO formTemplateDAO = new ApplicationFormTemplateDAO();
+    private final StageNotificationService notificationService = new StageNotificationService();
     private final UserClubDAO userClubDAO = new UserClubDAO();
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private final Gson gson = new Gson();
@@ -131,32 +123,6 @@ public class RecruitmentCampaignServlet extends HttpServlet {
                         URLEncoder.encode("Lỗi hệ thống: " + e.getMessage(), StandardCharsets.UTF_8.name()));
                     return;
                 }
-            } else if ("/create".equals(pathInfo)) {
-                // Chuyển hướng sang servlet mới để xử lý việc tạo hoạt động tuyển quân
-                String clubIdParam = request.getParameter("clubId");
-                
-                // Nếu không có clubId trong request, thử tìm từ session
-                if ((clubIdParam == null || clubIdParam.isEmpty()) && session.getAttribute("userManagementRole") != null) {
-                    try {
-                        UserClub userRole = (UserClub) session.getAttribute("userManagementRole");
-                        clubIdParam = String.valueOf(userRole.getClubID());
-                    } catch (Exception e) {
-                        logger.log(Level.WARNING, "Không thể lấy clubId từ session: {0}", e.getMessage());
-                    }
-                }
-                
-                String redirectUrl = request.getContextPath() + "/recruitmentForm/new";
-                
-                if (clubIdParam != null && !clubIdParam.isEmpty()) {
-                    redirectUrl += "?clubId=" + clubIdParam;
-                }
-                
-                // Log để debug
-                logger.log(Level.INFO, "Chuyển hướng tạo mới từ /recruitment/create sang {0} với clubId={1}", 
-                          new Object[]{redirectUrl, clubIdParam});
-                
-                response.sendRedirect(redirectUrl);
-                return;
             } else if ("/view".equals(pathInfo)) {
                 // Chuyển hướng đến servlet mới để xử lý việc xem chi tiết hoạt động tuyển quân
                 String idParam = request.getParameter("id");
@@ -175,7 +141,6 @@ public class RecruitmentCampaignServlet extends HttpServlet {
                         new Object[]{idParam, redirectUrl});
                 
                 response.sendRedirect(redirectUrl);
-                return;
             } else if ("/form".equals(pathInfo)) {
                 // Chuyển hướng sang servlet mới để xử lý việc tạo/chỉnh sửa hoạt động tuyển quân
                 String redirectUrl = request.getContextPath() + "/recruitmentForm";
@@ -226,42 +191,8 @@ public class RecruitmentCampaignServlet extends HttpServlet {
                 
                 response.sendRedirect(redirectUrl);
                 return;
-            } else if ("/edit".equals(pathInfo)) {
-                // Chuyển hướng sang endpoint form với id
-                String id = request.getParameter("id");
-                String clubIdParam = request.getParameter("clubId");
-                
-                if (id != null && !id.isEmpty()) {
-                    // Nếu không có clubId, cần lấy nó từ bản ghi chiến dịch
-                    if (clubIdParam == null || clubIdParam.isEmpty()) {
-                        try {
-                            RecruitmentCampaign campaign = recruitmentService.getCampaignById(Integer.parseInt(id));
-                            if (campaign != null) {
-                                clubIdParam = String.valueOf(campaign.getClubID());
-                                logger.log(Level.INFO, "[DEBUG] Đã lấy clubId={0} từ campaign ID={1}", 
-                                          new Object[]{clubIdParam, id});
-                            }
-                        } catch (Exception e) {
-                            logger.log(Level.WARNING, "[DEBUG] Không thể lấy clubId từ campaign: {0}", e.getMessage());
-                        }
-                    }
-                    
-                    String redirectUrl = request.getContextPath() + "/recruitment/form/edit?recruitmentId=" + id;
-                    if (clubIdParam != null && !clubIdParam.isEmpty()) {
-                        redirectUrl += "&clubId=" + clubIdParam;
-                    }
-                    
-                    // Log để debug luồng chuyển hướng
-                    logger.log(Level.INFO, "[DEBUG] LUỒNG CHUYỂN HƯỚNG: /recruitment/edit?id={0} -> {1} -> /recruitmentForm/edit?recruitmentId={0}&clubId={2}", 
-                              new Object[]{id, redirectUrl, clubIdParam != null ? clubIdParam : "null"});
-                    
-                    response.sendRedirect(redirectUrl);
-                } else {
-                    logger.log(Level.WARNING, "[DEBUG] LUỒNG CHUYỂN HƯỚNG: /recruitment/edit -> /recruitment (thiếu ID)");
-                    response.sendRedirect(request.getContextPath() + "/recruitment");
-                }
-                return;
-            } else if (pathInfo.startsWith("/stage/")) {
+            }
+             else if (pathInfo.startsWith("/stage/")) {
                 // Hiển thị chi tiết giai đoạn tuyển quân với danh sách ứng viên
                 String[] parts = pathInfo.split("/");
                 if (parts.length >= 3) {
@@ -321,49 +252,44 @@ public class RecruitmentCampaignServlet extends HttpServlet {
                     response.sendRedirect(request.getContextPath() + "/myclub?error=invalid_request&message=" + 
                         URLEncoder.encode("Yêu cầu không hợp lệ", StandardCharsets.UTF_8.name()));
                 }
-            } else if ("/templates".equals(pathInfo)) {
-                // Lấy clubId từ request parameter
-                String clubIdParam = request.getParameter("clubId");
-                
-                // Kiểm tra và chuyển đổi clubId
-                if (clubIdParam == null || clubIdParam.trim().isEmpty()) {
-                    // Nếu không có clubId, chuyển hướng về myclub với thông báo lỗi
-                    response.sendRedirect(request.getContextPath() + "/myclub?error=access_denied&message=" + 
-                        URLEncoder.encode("Thiếu thông tin câu lạc bộ", StandardCharsets.UTF_8.name()));
-                    return;
-                }
+            } 
+             else if ("/active-campaigns".equals(pathInfo)) {
+                // API trả về danh sách các hoạt động đang diễn ra
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                PrintWriter out = response.getWriter();
                 
                 try {
-                    int clubId = Integer.parseInt(clubIdParam);
+                    List<RecruitmentCampaign> activeCampaigns = recruitmentService.getActiveCampaigns();
                     
-                    // Kiểm tra quyền truy cập - chỉ cho phép chủ nhiệm CLB (roleId = 1)
-                    UserClub userClub = userClubDAO.getUserClubManagementRole(currentUser.getUserID(), clubId);
+                    JsonObject jsonResponse = new JsonObject();
+                    jsonResponse.addProperty("success", true);
                     
-                    if (userClub == null || userClub.getRoleID() != 1) {
-                        // Không có quyền, chuyển hướng về myclub với thông báo lỗi
-                        response.sendRedirect(request.getContextPath() + "/myclub?error=access_denied&message=" + 
-                            URLEncoder.encode("Bạn không có quyền quản lý mẫu thông báo trong câu lạc bộ này", StandardCharsets.UTF_8.name()));
-                        return;
+                    com.google.gson.JsonArray campaignsArray = new com.google.gson.JsonArray();
+                    for (RecruitmentCampaign campaign : activeCampaigns) {
+                        JsonObject campaignJson = new JsonObject();
+                        campaignJson.addProperty("recruitmentId", campaign.getRecruitmentID());
+                        campaignJson.addProperty("clubId", campaign.getClubID());
+                        campaignJson.addProperty("title", campaign.getTitle());
+                        campaignJson.addProperty("description", campaign.getDescription());
+                        campaignJson.addProperty("gen", campaign.getGen());
+                        campaignJson.addProperty("status", campaign.getStatus());
+                        campaignJson.addProperty("startDate", campaign.getStartDate().toString());
+                        campaignJson.addProperty("endDate", campaign.getEndDate().toString());
+                        campaignJson.addProperty("formId", campaign.getFormID());
+                        campaignsArray.add(campaignJson);
                     }
                     
-                    // Có quyền, lấy dữ liệu và hiển thị
-                    List<NotificationTemplate> templates = notificationService.getTemplatesByClub(clubId);
-                    
-                    request.setAttribute("templates", templates);
-                    request.setAttribute("clubId", clubId);
-                    request.getRequestDispatcher("/view/student/chairman/notificationTemplates.jsp").forward(request, response);
-                } catch (NumberFormatException e) {
-                    // Xử lý lỗi clubId không hợp lệ
-                    response.sendRedirect(request.getContextPath() + "/myclub?error=invalid_parameter&message=" + 
-                        URLEncoder.encode("ID câu lạc bộ không hợp lệ", StandardCharsets.UTF_8.name()));
-                    return;
+                    jsonResponse.add("campaigns", campaignsArray);
+                    out.print(jsonResponse.toString());
                 } catch (Exception e) {
-                    // Xử lý các lỗi khác
-                    logger.log(Level.SEVERE, "Lỗi khi hiển thị quản lý mẫu thông báo: ", e);
-                    response.sendRedirect(request.getContextPath() + "/myclub?error=system_error&message=" + 
-                        URLEncoder.encode("Lỗi hệ thống: " + e.getMessage(), StandardCharsets.UTF_8.name()));
-                    return;
+                    JsonObject errorResponse = new JsonObject();
+                    errorResponse.addProperty("success", false);
+                    errorResponse.addProperty("message", "Lỗi khi lấy danh sách hoạt động tuyển quân: " + e.getMessage());
+                    out.print(errorResponse.toString());
+                    logger.log(Level.SEVERE, "Lỗi khi lấy danh sách hoạt động tuyển quân", e);
                 }
+                return;
             } else if ("/stages".equals(pathInfo)) {
                 // API endpoint để lấy danh sách các vòng tuyển theo recruitmentId
                 String recruitmentIdParam = request.getParameter("recruitmentId");
@@ -438,42 +364,6 @@ public class RecruitmentCampaignServlet extends HttpServlet {
                     response.getWriter().write("{\"success\":false,\"message\":\"Lỗi hệ thống: " + e.getMessage() + "\"}");
                 }
                 return;
-            } else if ("/active-campaigns".equals(pathInfo)) {
-                // API trả về danh sách các hoạt động đang diễn ra
-                response.setContentType("application/json");
-                response.setCharacterEncoding("UTF-8");
-                PrintWriter out = response.getWriter();
-                
-                try {
-                    List<RecruitmentCampaign> activeCampaigns = recruitmentService.getActiveCampaigns();
-                    
-                    JsonObject jsonResponse = new JsonObject();
-                    jsonResponse.addProperty("success", true);
-                    
-                    com.google.gson.JsonArray campaignsArray = new com.google.gson.JsonArray();
-                    for (RecruitmentCampaign campaign : activeCampaigns) {
-                        JsonObject campaignJson = new JsonObject();
-                        campaignJson.addProperty("recruitmentId", campaign.getRecruitmentID());
-                        campaignJson.addProperty("clubId", campaign.getClubID());
-                        campaignJson.addProperty("title", campaign.getTitle());
-                        campaignJson.addProperty("description", campaign.getDescription());
-                        campaignJson.addProperty("status", campaign.getStatus());
-                        campaignJson.addProperty("startDate", campaign.getStartDate().toString());
-                        campaignJson.addProperty("endDate", campaign.getEndDate().toString());
-                        campaignJson.addProperty("templateId", campaign.getTemplateID());
-                        campaignsArray.add(campaignJson);
-                    }
-                    
-                    jsonResponse.add("campaigns", campaignsArray);
-                    out.print(jsonResponse.toString());
-                } catch (Exception e) {
-                    JsonObject errorResponse = new JsonObject();
-                    errorResponse.addProperty("success", false);
-                    errorResponse.addProperty("message", "Lỗi khi lấy danh sách hoạt động tuyển quân: " + e.getMessage());
-                    out.print(errorResponse.toString());
-                    logger.log(Level.SEVERE, "Lỗi khi lấy danh sách hoạt động tuyển quân", e);
-                }
-                return;
             } else if ("/club-campaigns".equals(pathInfo)) {
                 // API trả về danh sách hoạt động tuyển quân của một câu lạc bộ
                 response.setContentType("application/json");
@@ -503,10 +393,11 @@ public class RecruitmentCampaignServlet extends HttpServlet {
                         campaignJson.addProperty("clubId", campaign.getClubID());
                         campaignJson.addProperty("title", campaign.getTitle());
                         campaignJson.addProperty("description", campaign.getDescription());
+                        campaignJson.addProperty("gen", campaign.getGen());
                         campaignJson.addProperty("status", campaign.getStatus());
                         campaignJson.addProperty("startDate", campaign.getStartDate().toString());
                         campaignJson.addProperty("endDate", campaign.getEndDate().toString());
-                        campaignJson.addProperty("templateId", campaign.getTemplateID());
+                        campaignJson.addProperty("formId", campaign.getFormID());
                         campaignsArray.add(campaignJson);
                     }
                     
@@ -598,7 +489,7 @@ public class RecruitmentCampaignServlet extends HttpServlet {
             // Xử lý các ngoại lệ từ phương thức parse
             logger.log(Level.WARNING, "Dữ liệu không hợp lệ: {0}", e.getMessage());
             
-            // Tạo thông báo lỗi rõ ràng bằng tiếng Việt cho người dùng
+            // Tạo thông báo lỗi
             String errorMessage = e.getMessage() != null ? encodeMessage(e.getMessage()) : "Dữ liệu không hợp lệ";
             
             // Chuyển hướng với thông báo lỗi đã được mã hóa UTF-8
@@ -669,19 +560,7 @@ public class RecruitmentCampaignServlet extends HttpServlet {
         // Kiểm tra quyền chủ nhiệm khi gửi dữ liệu POST
         Integer clubId = null;
         
-        // Lấy clubId từ các tham số khác nhau tùy thuộc vào endpoint
-        if ("/create".equals(pathInfo)) {
-            String clubIdParam = request.getParameter("clubId");
-            if (clubIdParam != null && !clubIdParam.isEmpty()) {
-                clubId = Integer.parseInt(clubIdParam);
-            }
-        } else if ("/update".equals(pathInfo)) {
-            // Lấy clubId trực tiếp từ tham số request
-            String clubIdParam = request.getParameter("clubId");
-            if (clubIdParam != null && !clubIdParam.isEmpty()) {
-                clubId = Integer.parseInt(clubIdParam);
-            }
-        } else if ("/delete".equals(pathInfo)) {
+        if ("/delete".equals(pathInfo)) {
             // Khi xóa, cần lấy clubId từ recruitmentId
             try {
                 int recruitmentId = Integer.parseInt(request.getParameter("recruitmentId"));
@@ -717,136 +596,7 @@ public class RecruitmentCampaignServlet extends HttpServlet {
         }
         
         try {
-            if ("/create".equals(pathInfo)) {
-                // Chuyển hướng POST request cho việc tạo hoạt động tuyển quân sang servlet mới
-                String redirectUrl = request.getContextPath() + "/recruitmentForm/create";
-                
-                // Log để debug
-                logger.log(Level.INFO, "Chuyển hướng request tạo mới từ /recruitment/create sang {0}", redirectUrl);
-                
-                response.setContentType("application/json");
-                jsonResponse.addProperty("success", false);
-                jsonResponse.addProperty("redirect", redirectUrl);
-                jsonResponse.addProperty("message", "API đã chuyển sang đường dẫn mới. Vui lòng sử dụng " + redirectUrl);
-                out.print(jsonResponse.toString());
-                return;
-            } else if ("/update".equals(pathInfo)) {
-                // Chuyển hướng POST request cho việc cập nhật hoạt động tuyển quân sang servlet mới
-                String redirectUrl = request.getContextPath() + "/recruitmentForm/update";
-                
-                // Log để debug
-                logger.log(Level.INFO, "Chuyển hướng request cập nhật từ /recruitment/update sang {0}", redirectUrl);
-                
-                response.setContentType("application/json");
-                jsonResponse.addProperty("success", false);
-                jsonResponse.addProperty("redirect", redirectUrl);
-                jsonResponse.addProperty("message", "API đã chuyển sang đường dẫn mới. Vui lòng sử dụng " + redirectUrl);
-                out.print(jsonResponse.toString());
-                return;
-            } else if ("/stage/create".equals(pathInfo)) {
-                // Tạo giai đoạn tuyển quân mới
-                RecruitmentStage stage = parseRecruitmentStage(request, true);
-                
-                int result = recruitmentService.createStage(stage);
-                if (result > 0) {
-                    jsonResponse.addProperty("success", true);
-                    jsonResponse.addProperty("stageId", result);
-                } else if (result == -1) {
-                    jsonResponse.addProperty("success", false);
-                    jsonResponse.addProperty("message", "Thời gian bị trùng với giai đoạn khác");
-                } else if (result == -2) {
-                    jsonResponse.addProperty("success", false);
-                    jsonResponse.addProperty("message", "Thời gian giai đoạn phải nằm trong thời gian của hoạt động");
-                } else {
-                    jsonResponse.addProperty("success", false);
-                    jsonResponse.addProperty("message", "Không thể tạo giai đoạn");
-                }
-            } else if ("/stage/update".equals(pathInfo)) {
-                // Cập nhật giai đoạn tuyển quân
-                RecruitmentStage stage = parseRecruitmentStage(request, false);
-                
-                boolean result = recruitmentService.updateStage(stage);
-                if (result) {
-                    jsonResponse.addProperty("success", true);
-                } else {
-                    jsonResponse.addProperty("success", false);
-                    jsonResponse.addProperty("message", "Không thể cập nhật giai đoạn. Vui lòng kiểm tra trùng lịch hoặc thời gian nằm ngoài hoạt động.");
-                }
-            } else if ("/application/update".equals(pathInfo)) {
-                // Cập nhật trạng thái ứng viên
-                int applicationStageId = Integer.parseInt(request.getParameter("applicationStageId"));
-                String status = request.getParameter("status");
-                
-                boolean result = recruitmentService.updateApplicationStatus(applicationStageId, status, currentUser.getUserID());
-                if (result) {
-                    jsonResponse.addProperty("success", true);
-                } else {
-                    jsonResponse.addProperty("success", false);
-                    jsonResponse.addProperty("message", "Không thể cập nhật trạng thái ứng viên");
-                }
-            } else if ("/notification/create".equals(pathInfo)) {
-                // Tạo thông báo cho giai đoạn
-                StageNotification notification = parseStageNotification(request);
-                notification.setCreatedBy(currentUser.getUserID());
-                
-                int result = notificationService.createStageNotification(notification);
-                if (result > 0) {
-                    jsonResponse.addProperty("success", true);
-                    jsonResponse.addProperty("notificationId", result);
-                } else {
-                    jsonResponse.addProperty("success", false);
-                    jsonResponse.addProperty("message", "Không thể tạo thông báo");
-                }
-            } else if ("/notification/fromTemplate".equals(pathInfo)) {
-                // Tạo thông báo từ mẫu
-                int stageId = Integer.parseInt(request.getParameter("stageId"));
-                int templateId = Integer.parseInt(request.getParameter("templateId"));
-                
-                // Phân tích dữ liệu động từ request
-                Map<String, String> dynamicData = new HashMap<>();
-                String[] dataKeys = {"candidate_name", "stage_name", "club_name", "interview_date"};
-                for (String key : dataKeys) {
-                    String value = request.getParameter(key);
-                    if (value != null && !value.trim().isEmpty()) {
-                        dynamicData.put(key, value);
-                    }
-                }
-                
-                StageNotification notification = notificationService.createNotificationFromTemplate(
-                        stageId, templateId, dynamicData, currentUser.getUserID());
-                
-                if (notification != null) {
-                    jsonResponse.addProperty("success", true);
-                    jsonResponse.addProperty("notificationId", notification.getNotificationID());
-                } else {
-                    jsonResponse.addProperty("success", false);
-                    jsonResponse.addProperty("message", "Không thể tạo thông báo từ mẫu");
-                }
-            } else if ("/template/create".equals(pathInfo)) {
-                // Tạo mẫu thông báo mới
-                NotificationTemplate template = parseNotificationTemplate(request);
-                template.setCreatedBy(currentUser.getUserID());
-                
-                int result = notificationService.createTemplate(template);
-                if (result > 0) {
-                    jsonResponse.addProperty("success", true);
-                    jsonResponse.addProperty("templateId", result);
-                } else {
-                    jsonResponse.addProperty("success", false);
-                    jsonResponse.addProperty("message", "Không thể tạo mẫu thông báo");
-                }
-            } else if ("/template/update".equals(pathInfo)) {
-                // Cập nhật mẫu thông báo
-                NotificationTemplate template = parseNotificationTemplate(request);
-                
-                boolean result = notificationService.updateTemplate(template);
-                if (result) {
-                    jsonResponse.addProperty("success", true);
-                } else {
-                    jsonResponse.addProperty("success", false);
-                    jsonResponse.addProperty("message", "Không thể cập nhật mẫu thông báo");
-                }
-            } else if ("/delete".equals(pathInfo)) {
+            if ("/delete".equals(pathInfo)) {
                 // Xóa hoạt động tuyển quân
                 int recruitmentId = Integer.parseInt(request.getParameter("recruitmentId"));
                 
@@ -931,72 +681,6 @@ public class RecruitmentCampaignServlet extends HttpServlet {
         }
         
         out.print(jsonResponse.toString());
-    }
-    
-    // Các phương thức hỗ trợ để chuyển đổi tham số request thành các đối tượng model
-    
-    private RecruitmentStage parseRecruitmentStage(HttpServletRequest request, boolean isNew) throws ParseException {
-        RecruitmentStage stage = new RecruitmentStage();
-        
-        if (!isNew) {
-            stage.setStageID(Integer.parseInt(request.getParameter("stageId")));
-        }
-        
-        stage.setRecruitmentID(Integer.parseInt(request.getParameter("recruitmentId")));
-        stage.setStageName(request.getParameter("stageName"));
-        stage.setDescription(request.getParameter("description"));
-        stage.setStartDate(dateFormat.parse(request.getParameter("startDate")));
-        stage.setEndDate(dateFormat.parse(request.getParameter("endDate")));
-        
-        if (isNew) {
-            stage.setStatus("UPCOMING");
-        } else {
-            stage.setStatus(request.getParameter("status"));
-        }
-        
-        String locationIdParam = request.getParameter("locationId");
-        if (locationIdParam != null && !locationIdParam.trim().isEmpty()) {
-            stage.setLocationID(Integer.parseInt(locationIdParam));
-        }
-        
-        return stage;
-    }
-    
-    private StageNotification parseStageNotification(HttpServletRequest request) {
-        StageNotification notification = new StageNotification();
-        
-        String notificationIdParam = request.getParameter("notificationId");
-        if (notificationIdParam != null && !notificationIdParam.trim().isEmpty()) {
-            notification.setNotificationID(Integer.parseInt(notificationIdParam));
-        }
-        
-        notification.setStageID(Integer.parseInt(request.getParameter("stageId")));
-        notification.setTitle(request.getParameter("title"));
-        notification.setContent(request.getParameter("content"));
-        
-        String templateIdParam = request.getParameter("templateId");
-        if (templateIdParam != null && !templateIdParam.trim().isEmpty()) {
-            notification.setTemplateID(Integer.parseInt(templateIdParam));
-        }
-        
-        return notification;
-    }
-    
-    private NotificationTemplate parseNotificationTemplate(HttpServletRequest request) {
-        NotificationTemplate template = new NotificationTemplate();
-        
-        String templateIdParam = request.getParameter("templateId");
-        if (templateIdParam != null && !templateIdParam.trim().isEmpty()) {
-            template.setTemplateID(Integer.parseInt(templateIdParam));
-        }
-        
-        template.setClubID(Integer.parseInt(request.getParameter("clubId")));
-        template.setTemplateName(request.getParameter("templateName"));
-        template.setTitle(request.getParameter("title"));
-        template.setContent(request.getParameter("content"));
-        template.setReusable(Boolean.parseBoolean(request.getParameter("isReusable")));
-        
-        return template;
     }
     
     /**

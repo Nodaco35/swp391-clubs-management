@@ -162,7 +162,7 @@
 	<div class="modal-content">
 		<c:if test="${not empty sessionScope.errorMessage}">
 			<div class="error-message" style="color: red">${sessionScope.errorMessage}</div>
-			<c:remove var="successMsg" scope="session" />
+			<c:remove var="successMsg" scope="session"/>
 
 		</c:if>
 		<c:if test="${not empty requestScope.errorMessage}">
@@ -171,7 +171,7 @@
 		</c:if>
 		<c:if test="${not empty sessionScope.successMsg}">
 			<div class="error-message" style="color: green">${sessionScope.successMsg}</div>
-			<c:remove var="successMsg" scope="session" />
+			<c:remove var="successMsg" scope="session"/>
 		</c:if>
 		<div class="modal-header">
 			<h3 id="modalTitle">Chi tiết sự kiện</h3>
@@ -192,8 +192,22 @@
 
 		<form id="editEventForm" action="edit-event" method="post" enctype="multipart/form-data">
 			<input type="hidden" id="eventID" name="eventID" value="${event.eventID}"/>
-
+			<div class="form-grid-2">
+				<div class="form-group">
+					<label for="eventLocation"><i class="fas fa-building"></i> Địa điểm *</label>
+					<select id="eventLocation" name="eventLocation" required>
+						<option value="">Chọn địa điểm...</option>
+						<c:forEach var="location" items="${locations}">
+							<option value="${location.locationID}"
+								${event.location != null && event.location.locationID == location.locationID ? 'selected' : ''}>
+									${location.locationName}
+							</option>
+						</c:forEach>
+					</select>
+				</div>
+			</div>
 			<div class="form-grid">
+
 				<div class="form-group">
 					<label for="eventName"><i class="fas fa-calendar-alt"></i> Tên sự kiện *</label>
 					<input type="text" id="eventName" name="eventName" required value="${event.eventName}"/>
@@ -224,25 +238,19 @@
 				</div>
 
 				<div class="form-group">
-					<label for="eventType"><i class="fas fa-eye"></i> Loại sự kiện</label>
-					<select id="eventType" name="eventType">
-						<option value="public" ${event.isPublic() ? 'selected' : ''}>Công khai</option>
-						<option value="private" ${!event.isPublic() ? 'selected' : ''}>Riêng tư (CLB)</option>
-					</select>
+					<label><i class="fas fa-eye"></i> Loại sự kiện</label>
+					<div>
+						<label for="publicEvent" style="margin-right: 20px">
+							<input type="radio" id="publicEvent" name="eventType"
+							       value="public" ${event.isPublic() ? 'checked' : ''}> Công khai
+						</label>
+						<label for="privateEvent">
+							<input type="radio" id="privateEvent" name="eventType"
+							       value="private" ${!event.isPublic() ? 'checked' : ''}> Riêng tư (CLB)
+						</label>
+					</div>
 				</div>
 
-				<div class="form-group">
-					<label for="eventLocation"><i class="fas fa-building"></i> Địa điểm *</label>
-					<select id="eventLocation" name="eventLocation" required>
-						<option value="">Chọn địa điểm...</option>
-						<c:forEach var="location" items="${locations}">
-							<option value="${location.locationID}"
-								${event.location != null && event.location.locationID == location.locationID ? 'selected' : ''}>
-									${location.locationName}
-							</option>
-						</c:forEach>
-					</select>
-				</div>
 
 				<!-- Thêm phần upload ảnh -->
 				<div class="form-group full-width">
@@ -276,9 +284,19 @@
 				        onclick="window.location.href='${pageContext.request.contextPath}/chairman-page/myclub-events'">
 					<i class="fas fa-times"></i> Đóng
 				</button>
-				<button type="submit" class="btn-submit">
-					<i class="fas fa-save"></i> Lưu sự kiện
-				</button>
+				<c:choose>
+					<c:when test="${event.approvalStatus == 'APPROVED'}">
+						<button type="submit" class="btn-submit" disabled
+						        style="background-color: #ccc; cursor: not-allowed;">
+							<i class="fas fa-save"></i> Lưu sự kiện
+						</button>
+					</c:when>
+					<c:otherwise>
+					<button type="submit" class="btn-submit">
+						<i class="fas fa-save"></i> Lưu sự kiện
+					</button>
+					</c:otherwise>
+				</c:choose>
 			</div>
 		</form>
 
@@ -311,14 +329,66 @@
 					</button>
 
 					<div class="form-actions">
-						<button type="submit" class="btn-submit">
-							<i class="fas fa-save"></i> Lưu chương trình sự kiện
-						</button>
+						<c:choose>
+							<c:when test="${event.approvalStatus == 'APPROVED'}">
+								<button type="submit" class="btn-submit" disabled
+								        style="background-color: #ccc; cursor: not-allowed;">
+									<i class="fas fa-save"></i> Lưu chương trình sự kiện
+								</button>
+							</c:when>
+							<c:otherwise>
+								<button type="submit" class="btn-submit">
+									<i class="fas fa-save"></i> Lưu chương trình sự kiện
+								</button>
+							</c:otherwise>
+						</c:choose>
 					</div>
+
+				</div>
+			</form>
+		</div>
+		<div class="form-grid-2">
+			<c:if test="${event.approvalStatus == 'REJECTED' && not empty event.rejectionReason}">
+				<div class="form-group full-width">
+					<label><i class="fas fa-exclamation-circle"></i> Lý do từ chối</label>
+					<div class="error-message-reject" style="color: red">${event.rejectionReason}</div>
+				</div>
+			</c:if>
+		</div>
+
+		<div class="form-grid-2">
+			<form id="assignForm" action="${pageContext.request.contextPath}/assign-form" method="post">
+				<input type="hidden" name="eventID" value="${event.eventID}"/>
+				<div class="form-group">
+					<label><i class="fas fa-file-alt"></i> Form đăng ký sự kiện</label>
+					<select id="formId" name="formId" class="form-control" required>
+						<option value="">-- Chọn form đăng ký sự kiện --</option>
+						<c:forEach items="${requestScope.applicationForms}" var="form">
+							<option value="${form.formId}" ${event.formID == form.formId ? 'selected' : ''}>
+									${form.title}
+							</option>
+						</c:forEach>
+					</select>
+				</div>
+				<div class="form-actions">
+					<c:choose>
+						<c:when test="${event.approvalStatus == 'APPROVED'}">
+							<button type="submit" class="btn-submit">
+								<i class="fas fa-save"></i> Gán form
+							</button>
+						</c:when>
+						<c:otherwise>
+							<button type="submit" class="btn-submit" disabled
+							        style="background-color: #ccc; cursor: not-allowed;">
+								<i class="fas fa-save"></i> Gán form
+							</button>
+						</c:otherwise>
+					</c:choose>
 				</div>
 			</form>
 		</div>
 	</div>
+
 
 </main>
 <script>

@@ -18,23 +18,23 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public class FormResponseDAO extends DBContext {
-    private static final Logger LOGGER = Logger.getLogger(FormResponseDAO.class.getName());    
+    private static final Logger LOGGER = Logger.getLogger(FormResponseDAO.class.getName());
+
     //Lấy tất cả phản hồi cho một biểu mẫu cụ thể
-   
-    public List<ClubApplicationExtended> getApplicationsByTemplateId(int templateId) {
+    public List<ClubApplicationExtended> getApplicationsByFormId(int formId) {
         List<ClubApplicationExtended> applications = new ArrayList<>();
         String sql = """
                      SELECT ca.*, u.FullName, ar.Responses, ar.Status as ResponseStatus, 
-                            ar.TemplateID, aft.FormType, ar.SubmitDate as ResponseSubmitDate
+                            ar.FormID, aft.FormType, ar.SubmitDate as ResponseSubmitDate
                      FROM ClubApplications ca
                      JOIN ApplicationResponses ar ON ca.ResponseId = ar.ResponseID
-                     JOIN ApplicationFormTemplates aft ON ar.TemplateID = aft.TemplateID
+                     JOIN ApplicationForms aft ON ar.FormID = aft.FormID
                      JOIN Users u ON ca.UserId = u.UserID
-                     WHERE ar.TemplateID = ?
+                     WHERE ar.FormID = ?
                      AND ar.ResponseID IN (
                         SELECT MAX(ar2.ResponseID) 
                         FROM ApplicationResponses ar2 
-                        WHERE ar2.TemplateID = ? 
+                        WHERE ar2.FormID = ? 
                         GROUP BY ar2.UserID
                      )
                      ORDER BY ar.SubmitDate DESC
@@ -42,29 +42,18 @@ public class FormResponseDAO extends DBContext {
 
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, templateId);
-            ps.setInt(2, templateId);
+            ps.setInt(1, formId);
+            ps.setInt(2, formId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     ClubApplicationExtended application = new ClubApplicationExtended();
-                    application.setApplicationId(rs.getInt("ApplicationId"));
-                    application.setUserId(rs.getString("UserId"));
-                    application.setClubId(rs.getInt("ClubId"));
-                    application.setEmail(rs.getString("Email"));
-                    application.setEventId(rs.getObject("EventId") != null ? rs.getInt("EventId") : null);
-                    application.setResponseId(rs.getInt("ResponseId"));
-                    application.setStatus(rs.getString("Status"));
-                    application.setSubmitDate(rs.getTimestamp("SubmitDate"));
-                    application.setFullName(rs.getString("FullName"));
-                    application.setResponses(rs.getString("Responses"));
-                    application.setResponseStatus(rs.getString("ResponseStatus"));
-                    application.setTemplateId(rs.getInt("TemplateID"));
-                    application.setFormType(rs.getString("FormType"));
+                    populateApplicationFromResultSet(application, rs);
+                    application.setFormId(formId);
                     applications.add(application);
                 }
             }
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Error getting applications by template ID", e);
+            LOGGER.log(Level.SEVERE, "Error getting applications by form ID", e);
         }
         return applications;
     }    
@@ -73,10 +62,10 @@ public class FormResponseDAO extends DBContext {
         List<ClubApplicationExtended> applications = new ArrayList<>();
         String sql = """
                      SELECT ca.*, u.FullName, ar.Responses, ar.Status as ResponseStatus, 
-                            ar.TemplateID, aft.FormType, ar.SubmitDate as ResponseSubmitDate
+                            ar.FormID, aft.FormType, ar.SubmitDate as ResponseSubmitDate
                      FROM ClubApplications ca
                      JOIN ApplicationResponses ar ON ca.ResponseId = ar.ResponseID
-                     JOIN ApplicationFormTemplates aft ON ar.TemplateID = aft.TemplateID
+                     JOIN ApplicationForms aft ON ar.FormID = aft.FormID
                      JOIN Users u ON ca.UserId = u.UserID
                      WHERE ca.ClubId = ?
                      AND ar.ResponseID IN (
@@ -96,19 +85,8 @@ public class FormResponseDAO extends DBContext {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     ClubApplicationExtended application = new ClubApplicationExtended();
-                    application.setApplicationId(rs.getInt("ApplicationId"));
-                    application.setUserId(rs.getString("UserId"));
-                    application.setClubId(rs.getInt("ClubId"));
-                    application.setEmail(rs.getString("Email"));
-                    application.setEventId(rs.getObject("EventId") != null ? rs.getInt("EventId") : null);
-                    application.setResponseId(rs.getInt("ResponseId"));
-                    application.setStatus(rs.getString("Status"));
-                    application.setSubmitDate(rs.getTimestamp("SubmitDate"));
-                    application.setFullName(rs.getString("FullName"));
-                    application.setResponses(rs.getString("Responses"));
-                    application.setResponseStatus(rs.getString("ResponseStatus"));
-                    application.setTemplateId(rs.getInt("TemplateID"));
-                    application.setFormType(rs.getString("FormType"));
+                    populateApplicationFromResultSet(application, rs);
+                    application.setFormId(rs.getInt("FormId"));
                     applications.add(application);
                 }
             }
@@ -118,21 +96,21 @@ public class FormResponseDAO extends DBContext {
         return applications;
     }
      // Lấy tất cả phản hồi cho một biểu mẫu và câu lạc bộ cụ thể
-    public List<ClubApplicationExtended> getApplicationsByTemplateAndClub(int templateId, int clubId) {
+    public List<ClubApplicationExtended> getApplicationsByFormAndClub(int formId, int clubId) {
         List<ClubApplicationExtended> applications = new ArrayList<>();
         String sql = """
                      SELECT ca.*, u.FullName, ar.Responses, ar.Status as ResponseStatus, 
-                            ar.TemplateID, aft.FormType, ar.SubmitDate as ResponseSubmitDate
+                            ar.FormID, aft.FormType, ar.SubmitDate as ResponseSubmitDate
                      FROM ClubApplications ca
                      JOIN ApplicationResponses ar ON ca.ResponseId = ar.ResponseID
-                     JOIN ApplicationFormTemplates aft ON ar.TemplateID = aft.TemplateID
+                     JOIN ApplicationForms aft ON ar.FormID = aft.FormID
                      JOIN Users u ON ca.UserId = u.UserID
-                     WHERE ar.TemplateID = ? AND ca.ClubId = ? 
+                     WHERE ar.FormID = ? AND ca.ClubId = ? 
                      AND ar.ResponseID IN (
                         SELECT MAX(ar2.ResponseID) 
                         FROM ApplicationResponses ar2 
                         JOIN ClubApplications ca2 ON ar2.ResponseID = ca2.ResponseId 
-                        WHERE ar2.TemplateID = ? AND ca2.ClubId = ? 
+                        WHERE ar2.FormID = ? AND ca2.ClubId = ? 
                         GROUP BY ar2.UserID
                      )
                      ORDER BY ar.SubmitDate DESC
@@ -140,31 +118,20 @@ public class FormResponseDAO extends DBContext {
 
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, templateId);
+            ps.setInt(1, formId);
             ps.setInt(2, clubId);
-            ps.setInt(3, templateId);
+            ps.setInt(3, formId);
             ps.setInt(4, clubId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     ClubApplicationExtended application = new ClubApplicationExtended();
-                    application.setApplicationId(rs.getInt("ApplicationId"));
-                    application.setUserId(rs.getString("UserId"));
-                    application.setClubId(rs.getInt("ClubId"));
-                    application.setEmail(rs.getString("Email"));
-                    application.setEventId(rs.getObject("EventId") != null ? rs.getInt("EventId") : null);
-                    application.setResponseId(rs.getInt("ResponseId"));
-                    application.setStatus(rs.getString("Status"));
-                    application.setSubmitDate(rs.getTimestamp("SubmitDate"));
-                    application.setFullName(rs.getString("FullName"));
-                    application.setResponses(rs.getString("Responses"));
-                    application.setResponseStatus(rs.getString("ResponseStatus"));
-                    application.setTemplateId(rs.getInt("TemplateID"));
-                    application.setFormType(rs.getString("FormType"));
+                    populateApplicationFromResultSet(application, rs);
+                    application.setFormId(formId);
                     applications.add(application);
                 }
             }
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Error getting applications by template and club ID", e);
+            LOGGER.log(Level.SEVERE, "Error getting applications by form and club ID", e);
         }
         return applications;
     }    
@@ -282,11 +249,11 @@ public class FormResponseDAO extends DBContext {
         LOGGER.info("Getting application by responseId: " + responseId);
         
         String sql = """
-                     SELECT ca.*, u.FullName, ar.Responses, ar.Status as ResponseStatus, ar.TemplateID,
+                     SELECT ca.*, u.FullName, ar.Responses, ar.Status as ResponseStatus, ar.FormID,
                      aft.FormType, ar.SubmitDate as ResponseSubmitDate
                      FROM ClubApplications ca
                      JOIN ApplicationResponses ar ON ca.ResponseId = ar.ResponseID
-                     JOIN ApplicationFormTemplates aft ON ar.TemplateID = aft.TemplateID
+                     JOIN ApplicationForms aft ON ar.FormID = aft.FormID
                      JOIN Users u ON ca.UserId = u.UserID
                      WHERE ar.ResponseID = ?
                      """;
@@ -316,7 +283,7 @@ public class FormResponseDAO extends DBContext {
                     
                     application.setResponses(responses);
                     application.setResponseStatus(rs.getString("ResponseStatus"));
-                    application.setTemplateId(rs.getInt("TemplateID"));
+                    application.setFormId(rs.getInt("FormID"));
                     application.setFormType(rs.getString("FormType"));
                     
                     LOGGER.info("Found application: " + application);
@@ -521,11 +488,11 @@ public class FormResponseDAO extends DBContext {
     }
 
     // Phương thức để kiểm tra xem một form có bất kỳ phản hồi nào hay không
-    public boolean hasResponses(int templateId) {
-        String sql = "SELECT COUNT(*) FROM ApplicationResponses WHERE TemplateID = ?";
+    public boolean hasResponses(int formId) {
+        String sql = "SELECT COUNT(*) FROM ApplicationResponses WHERE FormID = ?";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, templateId);
+            ps.setInt(1, formId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     int count = rs.getInt(1);
@@ -533,17 +500,17 @@ public class FormResponseDAO extends DBContext {
                 }
             }
         } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, "Error checking if template has responses", ex);
+            LOGGER.log(Level.SEVERE, "Error checking if form has responses", ex);
         }
         return false;
     }
     
-    // Phương thức lấy danh sách templateId có phản hồi
-    public List<Integer> getTemplateIdsWithResponses(int clubId) {
-        List<Integer> templateIdsWithResponses = new ArrayList<>();
-        String sql = "SELECT DISTINCT ar.TemplateID " +
+    // Phương thức lấy danh sách formId có phản hồi
+    public List<Integer> getFormIdsWithResponses(int clubId) {
+        List<Integer> formIdsWithResponses = new ArrayList<>();
+        String sql = "SELECT DISTINCT ar.formId " +
                      "FROM ApplicationResponses ar " +
-                     "JOIN ApplicationFormTemplates aft ON ar.TemplateID = aft.TemplateID " +
+                     "JOIN ApplicationForms aft ON ar.FormID = aft.FormID " +
                      "WHERE aft.ClubID = ?";
         
         try (Connection conn = getConnection();
@@ -551,13 +518,13 @@ public class FormResponseDAO extends DBContext {
             ps.setInt(1, clubId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    templateIdsWithResponses.add(rs.getInt("TemplateID"));
+                    formIdsWithResponses.add(rs.getInt("FormID"));
                 }
             }
         } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, "Error getting template IDs with responses", ex);
+            LOGGER.log(Level.SEVERE, "Error getting form IDs with responses", ex);
         }
-        return templateIdsWithResponses;
+        return formIdsWithResponses;
     }
     
     /**
@@ -590,22 +557,22 @@ public class FormResponseDAO extends DBContext {
     
     /**
      * Kiểm tra số lượng đơn đã nộp cho một mẫu đơn cụ thể trong một chiến dịch
-     * @param templateId ID của mẫu đơn
+     * @param formId ID của mẫu đơn
      * @param campaignId ID của chiến dịch tuyển quân
      * @return Số lượng đơn đã nộp
      */
-    public int countApplicationsForTemplate(int templateId, int campaignId) {
+    public int countApplicationsForForm(int formId, int campaignId) {
         String sql = """
                      SELECT COUNT(*) as count
                      FROM ClubApplications ca
                      JOIN ApplicationResponses ar ON ca.ResponseId = ar.ResponseID
                      JOIN RecruitmentCampaigns rc ON ca.ClubId = rc.ClubID
-                     WHERE ar.TemplateID = ? AND rc.RecruitmentID = ?
+                     WHERE ar.FormID = ? AND rc.RecruitmentID = ?
                      """;
                      
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, templateId);
+            ps.setInt(1, formId);
             ps.setInt(2, campaignId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -613,8 +580,101 @@ public class FormResponseDAO extends DBContext {
                 }
             }
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Error counting applications for template in campaign", e);
+            LOGGER.log(Level.SEVERE, "Error counting applications for form in campaign", e);
         }
         return 0;
+    }
+    
+    /**
+     * Lưu đánh giá (review note) cho một ứng viên
+     * 
+     * @param responseId ID của phản hồi cần cập nhật đánh giá
+     * @param reviewNote Nội dung đánh giá
+     * @return true nếu cập nhật thành công, false nếu có lỗi
+     */
+    public boolean saveReviewNote(int responseId, String reviewNote) {
+        LOGGER.log(Level.INFO, "Saving review note for response ID {0}: {1}", 
+                  new Object[]{responseId, reviewNote});
+                  
+        // Kiểm tra xem đã có cột ReviewNote chưa, nếu chưa thì thêm vào
+        ensureReviewNoteColumnExists();
+        
+        String sql = "UPDATE ClubApplications SET ReviewNote = ? WHERE ResponseId = ?";
+
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, reviewNote);
+            ps.setInt(2, responseId);
+            int rowsAffected = ps.executeUpdate();
+            LOGGER.log(Level.INFO, "Update review note result: {0} rows affected", rowsAffected);
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error saving review note", e);
+            return false;
+        }
+    }
+    
+    /**
+     * Kiểm tra xem cột ReviewNote đã tồn tại trong bảng ClubApplications chưa.
+     * Nếu chưa, thì thêm cột này vào.
+     */
+    private void ensureReviewNoteColumnExists() {
+        LOGGER.log(Level.INFO, "Checking if ReviewNote column exists in ClubApplications table");
+        try (Connection conn = getConnection()) {
+            // Kiểm tra xem cột đã tồn tại chưa
+            boolean columnExists = false;
+            
+            try (ResultSet rs = conn.getMetaData().getColumns(null, null, "ClubApplications", "ReviewNote")) {
+                columnExists = rs.next();
+                LOGGER.log(Level.INFO, "ReviewNote column exists: {0}", columnExists);
+            }
+            
+            // Nếu cột chưa tồn tại, thêm vào
+            if (!columnExists) {
+                LOGGER.log(Level.INFO, "ReviewNote column does not exist, adding it now");
+                try (PreparedStatement ps = conn.prepareStatement(
+                        "ALTER TABLE ClubApplications ADD COLUMN ReviewNote TEXT")) {
+                    int result = ps.executeUpdate();
+                    LOGGER.log(Level.INFO, "Added ReviewNote column to ClubApplications table, result: {0}", result);
+                }
+            } else {
+                LOGGER.log(Level.INFO, "ReviewNote column already exists, no need to add it");
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error checking/creating ReviewNote column", e);
+        }
+    }
+    
+    /**
+     * Helper method to populate a ClubApplicationExtended object from ResultSet
+     * including the ReviewNote field if it exists
+     */
+    private void populateApplicationFromResultSet(ClubApplicationExtended application, ResultSet rs) throws SQLException {
+        application.setApplicationId(rs.getInt("ApplicationId"));
+        application.setUserId(rs.getString("UserId"));
+        application.setClubId(rs.getInt("ClubId"));
+        application.setEmail(rs.getString("Email"));
+        application.setEventId(rs.getObject("EventId") != null ? rs.getInt("EventId") : null);
+        application.setResponseId(rs.getInt("ResponseId"));
+        application.setStatus(rs.getString("Status"));
+        application.setSubmitDate(rs.getTimestamp("SubmitDate"));
+        application.setFullName(rs.getString("FullName"));
+        application.setResponses(rs.getString("Responses"));
+        application.setResponseStatus(rs.getString("ResponseStatus"));
+        application.setFormId(rs.getInt("FormId"));
+        application.setFormType(rs.getString("FormType"));
+        
+        // Set reviewNote if it exists in the result set
+        try {
+            String reviewNote = rs.getString("ReviewNote");
+            LOGGER.log(Level.INFO, "Retrieved ReviewNote for application {0}: {1}", 
+                      new Object[]{application.getApplicationID(), reviewNote});
+            application.setReviewNote(reviewNote);
+        } catch (SQLException ex) {
+            // Column might not exist yet, which is okay
+            LOGGER.log(Level.INFO, "ReviewNote column not found for application {0}", 
+                      application.getApplicationID());
+            application.setReviewNote(null);
+        }
     }
 }

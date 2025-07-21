@@ -10,9 +10,9 @@
         
         <div class="filter-options">
             <a href="#" class="filter-option active" data-category="all">Tất Cả</a>
-            <a href="#" class="filter-option" data-category="Thể Thao">Thể Thao</a>
-            <a href="#" class="filter-option" data-category="Học Thuật">Học Thuật</a>
-            <a href="#" class="filter-option" data-category="Phong Trào">Phong Trào</a>
+            <a href="#" class="filter-option" data-category="3">Thể Thao</a>
+            <a href="#" class="filter-option" data-category="1">Học Thuật</a>
+            <a href="#" class="filter-option" data-category="2">Phong Trào</a>
         </div>
         
         <div class="clubs-grid">

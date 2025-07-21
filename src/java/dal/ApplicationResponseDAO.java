@@ -9,11 +9,11 @@ public class ApplicationResponseDAO {
     // Thêm response mới
     public int saveResponse(ApplicationResponse response) throws SQLException {
         connection = DBContext.getConnection();
-        String sql = "INSERT INTO ApplicationResponses (TemplateID, UserID, ClubID, EventID, Responses, Status) " +
+        String sql = "INSERT INTO ApplicationResponses (FormID, UserID, ClubID, EventID, Responses, Status) " +
                     "VALUES (?, ?, ?, ?, ?, ?)";
         
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setInt(1, response.getTemplateID());
+            ps.setInt(1, response.getFormID());
             ps.setString(2, response.getUserID());
             ps.setInt(3, response.getClubID());
             
@@ -69,7 +69,7 @@ public class ApplicationResponseDAO {
                 while (rs.next()) {
                     ApplicationResponse response = new ApplicationResponse();
                     response.setResponseID(rs.getInt("ResponseID"));
-                    response.setTemplateID(rs.getInt("TemplateID"));
+                    response.setFormID(rs.getInt("TemplateID"));
                     response.setUserID(rs.getString("UserID"));
                     response.setClubID(rs.getInt("ClubID"));
                     
@@ -103,7 +103,7 @@ public class ApplicationResponseDAO {
                 while (rs.next()) {
                     ApplicationResponse response = new ApplicationResponse();
                     response.setResponseID(rs.getInt("ResponseID"));
-                    response.setTemplateID(rs.getInt("TemplateID"));
+                    response.setFormID(rs.getInt("TemplateID"));
                     response.setUserID(rs.getString("UserID"));
                     response.setClubID(rs.getInt("ClubID"));
                     
@@ -137,7 +137,7 @@ public class ApplicationResponseDAO {
                 while (rs.next()) {
                     ApplicationResponse response = new ApplicationResponse();
                     response.setResponseID(rs.getInt("ResponseID"));
-                    response.setTemplateID(rs.getInt("TemplateID"));
+                    response.setFormID(rs.getInt("TemplateID"));
                     response.setUserID(rs.getString("UserID"));
                     response.setClubID(rs.getInt("ClubID"));
                     
@@ -170,7 +170,7 @@ public class ApplicationResponseDAO {
                 if (rs.next()) {
                     ApplicationResponse response = new ApplicationResponse();
                     response.setResponseID(rs.getInt("ResponseID"));
-                    response.setTemplateID(rs.getInt("TemplateID"));
+                    response.setFormID(rs.getInt("TemplateID"));
                     response.setUserID(rs.getString("UserID"));
                     response.setClubID(rs.getInt("ClubID"));
                     
@@ -259,7 +259,7 @@ public class ApplicationResponseDAO {
                 while (rs.next()) {
                     ApplicationResponse response = new ApplicationResponse();
                     response.setResponseID(rs.getInt("ResponseID"));
-                    response.setTemplateID(rs.getInt("TemplateID"));
+                    response.setFormID(rs.getInt("TemplateID"));
                     response.setUserID(rs.getString("UserID"));
                     response.setClubID(rs.getInt("ClubID"));
                     
@@ -299,6 +299,35 @@ public class ApplicationResponseDAO {
     }
     
     /**
+     * Kiểm tra xem form có phản hồi nào không theo form ID
+     * 
+     * @param formId ID của form cần kiểm tra
+     * @return true nếu form có ít nhất một phản hồi, ngược lại là false
+     * @throws SQLException 
+     */
+    public boolean hasResponsesByFormId(int formId) throws SQLException {
+        connection = DBContext.getConnection();
+        String sql = "SELECT COUNT(*) FROM ApplicationResponses ar " +
+                "JOIN ApplicationForms aft ON ar.formID = aft.formID " +
+                "WHERE aft.FormID = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, formId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int count = rs.getInt(1);
+                    return count > 0;
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("DEBUG hasResponsesByFormId SQL Error: " + e.getMessage());
+            throw e;
+        }
+        
+        return false;
+    }
+    
+    /**
      * Kiểm tra xem một form có phản hồi nào từ người dùng hay không
      * @param formTitle Tên của form
      * @param clubId ID của câu lạc bộ
@@ -309,7 +338,8 @@ public class ApplicationResponseDAO {
         connection = DBContext.getConnection();
         String sql = "SELECT COUNT(*) FROM ApplicationResponses r " +
                      "INNER JOIN ApplicationFormTemplates t ON r.TemplateID = t.TemplateID " +
-                     "WHERE t.Title = ? AND t.ClubID = ?";
+                     "INNER JOIN ApplicationForms f ON t.FormID = f.FormID " +
+                     "WHERE f.Title = ? AND f.ClubID = ?";
         
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, formTitle);
@@ -323,4 +353,8 @@ public class ApplicationResponseDAO {
         }
         return false;
     }
+
+
+
+
 }

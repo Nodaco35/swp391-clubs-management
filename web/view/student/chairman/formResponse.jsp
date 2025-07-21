@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/formResponse.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/formResponseSearch.css">
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     </head>
     <body>
         <jsp:include page="/view/events-page/header.jsp" />
@@ -20,8 +19,8 @@
         <!-- Hidden form type information -->
         <input type="hidden" id="formTypeInput" value="${formType}">
         <input type="hidden" id="clubIdInput" value="${clubId}">
-        <input type="hidden" id="templateIdInput" value="${templateId}">
-        
+        <input type="hidden" id="formIdInput" value="${formId}">
+
         <!-- Hidden server data -->
         <c:if test="${not empty applicationsJson}">
             <input type="hidden" id="applicationsData" value='${applicationsJson}'>
@@ -114,6 +113,13 @@
                     </div>
                     <div id="responseModalContent">
                         <!-- Nội dung chi tiết sẽ được render từ JavaScript -->
+                    </div>
+                    <div class="review-section">
+                        <h3>Đánh giá ứng viên</h3>
+                        <textarea id="reviewNoteInput" class="review-note-input" placeholder="Nhập đánh giá hoặc lý do duyệt/từ chối..."></textarea>
+                        <div class="review-actions">
+                            <button id="saveReviewBtn" class="btn btn-primary">Lưu đánh giá</button>
+                        </div>
                     </div>
                 </div>
             </div>

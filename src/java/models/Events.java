@@ -14,7 +14,7 @@ public class Events {
 
     private int clubID;
     private boolean isPublic;
-    private int formTemplateID;
+    private Integer formID;
 
     private int capacity;
     private String status;
@@ -41,7 +41,7 @@ public class Events {
     public Events() {
     }
 
-    public Events(int eventID, Locations location, int spotsLeft, int registered, String clubImg, String clubName, String semesterID, String status, int capacity, boolean isPublic, int formTemplateID, int clubID, Date endTime, String description, Date eventDate, String eventImg, String eventName) {
+    public Events(int eventID, Locations location, int spotsLeft, int registered, String clubImg, String clubName, String semesterID, String status, int capacity, boolean isPublic, int formID, int clubID, Date endTime, String description, Date eventDate, String eventImg, String eventName) {
         this.eventID = eventID;
         this.location = location;
         this.spotsLeft = spotsLeft;
@@ -52,7 +52,7 @@ public class Events {
         this.status = status;
         this.capacity = capacity;
         this.isPublic = isPublic;
-        this.formTemplateID = formTemplateID;
+        this.formID = formID;
         this.clubID = clubID;
         this.endTime = endTime;
         this.description = description;
@@ -73,7 +73,7 @@ public class Events {
         this.approvalStatus = approvalStatus;
         this.status = status;
         this.capacity = capacity;
-        this.formTemplateID = formTemplateID;
+        this.formID = formTemplateID;
         this.isPublic = isPublic;
         this.clubID = clubID;
         this.endTime = endTime;
@@ -183,12 +183,12 @@ public class Events {
         isPublic = aPublic;
     }
 
-    public int getFormTemplateID() {
-        return formTemplateID;
+    public Integer getFormID() {
+        return formID;
     }
 
-    public void setFormTemplateID(int formTemplateID) {
-        this.formTemplateID = formTemplateID;
+    public void setFormID(Integer formID) {
+        this.formID = formID;
     }
 
     public String getStatus() {

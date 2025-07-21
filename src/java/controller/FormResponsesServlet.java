@@ -44,21 +44,21 @@ public class FormResponsesServlet extends HttpServlet {
                 return;
             }
 
-        // Lấy templateId từ request parameter
-        String templateIdParam = request.getParameter("templateId");
-        Integer templateId = null;
+        // Lấy formId từ request parameter
+        String formIdParam = request.getParameter("formId");
+        Integer formId = null;
 
-        if (templateIdParam != null && !templateIdParam.isEmpty()) {
+        if (formIdParam != null && !formIdParam.isEmpty()) {
             try {
-                templateId = Integer.parseInt(templateIdParam);
+                formId = Integer.parseInt(formIdParam);
             } catch (NumberFormatException e) {
                 response.sendRedirect(request.getContextPath() + "/myclub?error=access_denied&message=" + URLEncoder.encode("ID Form không hợp lệ.", StandardCharsets.UTF_8.name()));
                 return;
             }
         }
 
-        // Kiểm tra nếu templateId là null
-        if (templateId == null) {
+        // Kiểm tra nếu formId là null
+        if (formId == null) {
             response.sendRedirect(request.getContextPath() + "/myclub?error=invalid_form&message=" +
                     URLEncoder.encode("Vui lòng chọn form để xem phản hồi.", StandardCharsets.UTF_8.name()));
             return;
@@ -104,7 +104,7 @@ public class FormResponsesServlet extends HttpServlet {
 
         // Lấy danh sách đơn đăng ký cho form template và club này
         try {
-            List<ClubApplicationExtended> applications = formResponseDAO.getApplicationsByTemplateAndClub(templateId, clubId);
+            List<ClubApplicationExtended> applications = formResponseDAO.getApplicationsByFormAndClub(formId, clubId);
             // Chuyển đổi dữ liệu thành JSON để JavaScript có thể sử dụng
             Gson gson = new Gson();
             String applicationsJson = gson.toJson(applications);
@@ -118,8 +118,8 @@ public class FormResponsesServlet extends HttpServlet {
             request.setAttribute("applicationsJson", "[]");
         }
 
-        // Thêm thông tin templateId, clubId và formType để sử dụng trong trang formResponse.jsp
-        request.setAttribute("templateId", templateId);
+        // Thêm thông tin formId, clubId và formType để sử dụng trong trang formResponse.jsp
+        request.setAttribute("formId", formId);
         request.setAttribute("clubId", clubId);
         request.setAttribute("formType", formType);
         request.getRequestDispatcher("/view/student/chairman/formResponse.jsp")
@@ -180,11 +180,11 @@ public class FormResponsesServlet extends HttpServlet {
                 }
                 
                 try {
-                    // Lấy danh sách templateId có phản hồi
-                    List<Integer> templateIdsWithResponses = formResponseDAO.getTemplateIdsWithResponses(clubId);
-                    
+                    // Lấy danh sách formId có phản hồi
+                    List<Integer> formIdsWithResponses = formResponseDAO.getFormIdsWithResponses(clubId);
+
                     // Gửi kết quả về client
-                    out.print(gson.toJson(templateIdsWithResponses));
+                    out.print(gson.toJson(formIdsWithResponses));
                 } catch (Exception e) {
                     LOGGER.log(Level.SEVERE, "Lỗi khi kiểm tra phản hồi form", e);
                     out.print(gson.toJson(new ApiResponse(false, "Đã xảy ra lỗi khi kiểm tra phản hồi form: " + e.getMessage())));
@@ -273,6 +273,22 @@ public class FormResponsesServlet extends HttpServlet {
                 success = formResponseDAO.rejectApplication(responseId);
                 message = success ? "Đã từ chối đơn đăng ký" : "Không thể từ chối đơn. Vui lòng thử lại sau.";
                 newStatus = "rejected";
+            } else if ("saveReview".equals(action)) {
+                // Lấy nội dung đánh giá từ request
+                String reviewNote = request.getParameter("reviewNote");
+                if (reviewNote == null) {
+                    reviewNote = "";
+                }
+                
+                // Lưu đánh giá vào database
+                try {
+                    success = formResponseDAO.saveReviewNote(responseId, reviewNote);
+                    message = success ? "Đã lưu đánh giá thành công" : "Không thể lưu đánh giá. Vui lòng thử lại sau.";
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Lỗi khi lưu đánh giá", e);
+                    success = false;
+                    message = "Đã xảy ra lỗi: " + e.getMessage();
+                }
             } else {
                 out.print(gson.toJson(new ApiResponse(false, "Hành động không hợp lệ.")));
                 return;

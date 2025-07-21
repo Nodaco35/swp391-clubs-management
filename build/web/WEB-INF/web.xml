@@ -204,6 +204,9 @@
     <servlet>
         <servlet-name>DF_IncomeController</servlet-name>
         <servlet-class>controller.DF_IncomeController</servlet-class>
+<servlet>
+        <servlet-name>AssignFormServlet</servlet-name>
+        <servlet-class>controller.AssignFormServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>ClubsServlet</servlet-name>
@@ -431,6 +434,9 @@
     <servlet-mapping>
         <servlet-name>DF_IncomeController</servlet-name>
         <url-pattern>/department/financial/income</url-pattern>
+      <servlet-mapping>
+        <servlet-name>AssignFormServlet</servlet-name>
+        <url-pattern>/assign-form</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>

@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     const urlParams = new URLSearchParams(window.location.search);
-    const templateId = urlParams.get('templateId');
+    const formId = urlParams.get('formId');
     const urlClubId = urlParams.get('clubId');
     const urlFormType = urlParams.get('formType');
     
@@ -28,17 +28,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const clubIdInput = document.getElementById('clubIdInput');
     const clubId = clubIdInput && clubIdInput.value ? clubIdInput.value : urlClubId;
     
-    console.log("DEBUG parameters:");
-    console.log("- URL formType parameter:", urlFormType);
-    console.log("- Hidden input formType value:", inputFormType);
-    console.log("- Final formType being used:", formType);
-    console.log("- clubId:", clubId);
-    console.log("- templateId:", templateId);
-    console.log("- URL parameters:", window.location.search);
-    console.log("- Complete URL:", window.location.href);
-    
-    if (!templateId || !clubId) {
-        console.error('Không tìm thấy templateId hoặc clubId');
+    if (!formId || !clubId) {
+        console.error('Không tìm thấy formId hoặc clubId');
         showToast('error', 'Lỗi', 'Không tìm thấy thông tin form');
         return;
     }
@@ -92,10 +83,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Chuyển đổi dữ liệu từ server thành định dạng cho frontend
     let responses = [];
     if (serverData && Array.isArray(serverData)) {
+        console.log("[DEBUG - ReviewNote] Server data received:", serverData);
         responses = serverData.map(app => {
             // Parse responses JSON nếu chưa được parse
             let answers = [];
             console.log("Processing app response:", app.responseId, "Responses type:", typeof app.responses);
+            
+            // DEBUG: Kiểm tra xem có reviewNote hay không
+            console.log("[DEBUG - ReviewNote] App data:", app.responseId, "ReviewNote:", app.reviewNote);
             
             if (app.responses && typeof app.responses === 'string') {
                 try {
@@ -128,8 +123,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 userId: app.userId || '',
                 submittedAt: app.submitDate || new Date().toISOString(),
                 status: status,
-                answers: answers
+                answers: answers,
+                reviewNote: app.reviewNote || ''
             };
+            
+            console.log("[DEBUG - ReviewNote] Created response object:", responseObj.id, "with reviewNote:", responseObj.reviewNote);
             
             if (!responseObj.name || !responseObj.email || !responseObj.userId) {
                 console.log("Chú ý: Dữ liệu không đầy đủ cho response ID:", responseObj.id);
@@ -155,10 +153,6 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
           // Chỉ sử dụng một cách gán sự kiện để tránh trùng lặp
         searchInput.addEventListener('input', function(event) {
-
-            console.log("[DEBUG SEARCH] Element ID:", this.id);
-            console.log("[DEBUG SEARCH] Event type:", event.type);
-            
             const oldSearchTerm = searchTerm;
             searchTerm = this.value.toLowerCase().trim();
             
@@ -529,6 +523,30 @@ document.addEventListener('DOMContentLoaded', function() {
         
         document.getElementById('responseModalTitle').textContent = `Chi tiết đơn đăng ký - ${response.name}`;
         
+        // Thiết lập nút lưu đánh giá
+        const saveReviewBtn = document.getElementById('saveReviewBtn');
+        const reviewNoteInput = document.getElementById('reviewNoteInput');
+        
+        console.log("[DEBUG - ReviewNote] In showResponseDetails - response:", id, "reviewNote:", response.reviewNote);
+        
+        // Hiển thị đánh giá hiện tại (nếu có)
+        if (response.reviewNote) {
+            console.log("[DEBUG - ReviewNote] Setting reviewNote input value to:", response.reviewNote);
+            reviewNoteInput.value = response.reviewNote;
+        } else {
+            console.log("[DEBUG - ReviewNote] No reviewNote found, setting empty value");
+            reviewNoteInput.value = '';
+        }
+        
+        // Gỡ bỏ event listener cũ (nếu có)
+        const newSaveReviewBtn = saveReviewBtn.cloneNode(true);
+        saveReviewBtn.parentNode.replaceChild(newSaveReviewBtn, saveReviewBtn);
+        
+        // Thêm event listener mới
+        newSaveReviewBtn.addEventListener('click', function() {
+            saveReviewNote(id, reviewNoteInput.value);
+        });
+        
         // Tạo nội dung cho modal
         let modalContent = `
             <div class="modal-section">
@@ -558,6 +576,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
                 </div>
+                
+                ${response.reviewNote ? `
+                <div class="review-note-display">
+                    <h4><i class="fas fa-clipboard-check"></i> Đánh giá</h4>
+                    <p>${response.reviewNote}</p>
+                </div>
+                ` : ''}
             </div>
             
             <div class="modal-section">
@@ -824,8 +849,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Hàm xử lý duyệt đơn
     function approveResponse(id) {
-        console.log('Duyệt đơn:', id, 'Form type:', formType, 'clubId:', clubId)
-        
         // Gửi AJAX request đến server
         fetch(`${contextPath}/formResponses`, {
             method: 'POST',
@@ -956,6 +979,47 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 300);
             }
         }, 5000);
+    }
+    
+    // Hàm lưu đánh giá
+    function saveReviewNote(responseId, reviewNote) {
+        if (!responseId) {
+            showToast('error', 'Lỗi', 'Không tìm thấy ID phản hồi');
+            return;
+        }
+        
+        // Hiển thị thông báo đang xử lý
+        showToast('info', 'Đang xử lý', 'Đang lưu đánh giá...');
+        
+        // Gửi AJAX request đến server để lưu đánh giá
+        fetch(`${contextPath}/formResponses`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `action=saveReview&responseId=${responseId}&clubId=${clubId}&reviewNote=${encodeURIComponent(reviewNote)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Server response for saveReview:', data);
+            
+            if (data.success) {
+                // Cập nhật trạng thái local
+                const index = responses.findIndex(r => r.id === responseId);
+                if (index !== -1) {
+                    responses[index].reviewNote = reviewNote;
+                    showToast('success', 'Thành công', 'Đã lưu đánh giá');
+                } else {
+                    showToast('success', 'Thành công', 'Đã lưu đánh giá');
+                }
+            } else {
+                showToast('error', 'Lỗi', data.message || 'Không thể lưu đánh giá');
+            }
+        })
+        .catch(error => {
+            console.error('Error saving review note:', error);
+            showToast('error', 'Lỗi', 'Đã xảy ra lỗi khi lưu đánh giá');
+        });
     }
     
     // Hàm định dạng ngày tháng

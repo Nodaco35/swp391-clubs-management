@@ -6,7 +6,7 @@ public class RecruitmentCampaign {
     private int recruitmentID;
     private int clubID;
     private int gen;
-    private int templateID;
+    private int formID;
     private String title;
     private String description;
     private Date startDate;
@@ -17,19 +17,19 @@ public class RecruitmentCampaign {
     
     // Additional fields for UI display (not in database)
     private String clubName;
-    private String templateName;
+    private String formName;
     private String createdByName;
     
     public RecruitmentCampaign() {
     }
 
-    public RecruitmentCampaign(int recruitmentID, int clubID, int gen, int templateID, String title, 
+    public RecruitmentCampaign(int recruitmentID, int clubID, int gen, int formID, String title, 
                               String description, Date startDate, Date endDate, String status, 
                               String createdBy, Date createdAt) {
         this.recruitmentID = recruitmentID;
         this.clubID = clubID;
         this.gen = gen;
-        this.templateID = templateID;
+        this.formID = formID;
         this.title = title;
         this.description = description;
         this.startDate = startDate;
@@ -40,14 +40,14 @@ public class RecruitmentCampaign {
     }
 
     // Constructor with additional display fields
-    public RecruitmentCampaign(int recruitmentID, int clubID, int gen, int templateID, String title, 
+    public RecruitmentCampaign(int recruitmentID, int clubID, int gen, int formID, String title, 
                               String description, Date startDate, Date endDate, String status, 
-                              String createdBy, Date createdAt, String clubName, String templateName, 
+                              String createdBy, Date createdAt, String clubName, String formName, 
                               String createdByName) {
         this.recruitmentID = recruitmentID;
         this.clubID = clubID;
         this.gen = gen;
-        this.templateID = templateID;
+        this.formID = formID;
         this.title = title;
         this.description = description;
         this.startDate = startDate;
@@ -56,7 +56,7 @@ public class RecruitmentCampaign {
         this.createdBy = createdBy;
         this.createdAt = createdAt;
         this.clubName = clubName;
-        this.templateName = templateName;
+        this.formName = formName;
         this.createdByName = createdByName;
     }
 
@@ -84,12 +84,12 @@ public class RecruitmentCampaign {
         this.gen = gen;
     }
 
-    public int getTemplateID() {
-        return templateID;
+    public int getFormID() {
+        return formID;
     }
 
-    public void setTemplateID(int templateID) {
-        this.templateID = templateID;
+    public void setFormID(int formID) {
+        this.formID = formID;
     }
 
     public String getTitle() {
@@ -156,12 +156,12 @@ public class RecruitmentCampaign {
         this.clubName = clubName;
     }
 
-    public String getTemplateName() {
-        return templateName;
+    public String getFormName() {
+        return formName;
     }
 
-    public void setTemplateName(String templateName) {
-        this.templateName = templateName;
+    public void setFormName(String formName) {
+        this.formName = formName;
     }
 
     public String getCreatedByName() {
@@ -178,7 +178,7 @@ public class RecruitmentCampaign {
                 "recruitmentID=" + recruitmentID +
                 ", clubID=" + clubID +
                 ", gen=" + gen +
-                ", templateID=" + templateID +
+                ", formID=" + formID +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", startDate=" + startDate +
@@ -187,7 +187,7 @@ public class RecruitmentCampaign {
                 ", createdBy='" + createdBy + '\'' +
                 ", createdAt=" + createdAt +
                 ", clubName='" + clubName + '\'' +
-                ", templateName='" + templateName + '\'' +
+                ", formName='" + formName + '\'' +
                 ", createdByName='" + createdByName + '\'' +
                 '}';
     }

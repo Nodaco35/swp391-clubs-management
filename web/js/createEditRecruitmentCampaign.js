@@ -8,7 +8,7 @@ let contextPath = '';
 
 // Define critical fields that must be included in form submission even if disabled
 const criticalFields = [
-    'templateId', 
+    'formId', 
     'applicationStageStart', 'applicationStageEnd',
     'interviewStageStart', 'interviewStageEnd',
     'challengeStageStart', 'challengeStageEnd',
@@ -82,28 +82,25 @@ document.addEventListener('DOMContentLoaded', function() {
     // Thiết lập form submission
     setupFormSubmission();
     
-    // Tự động chọn form đăng ký nếu chỉ có một lựa chọn
-    autoSelectSingleTemplate();
-    
     // Thiết lập các trường không thể chỉnh sửa nếu cần thiết
     setupFieldRestrictions();
     
-    // Debug templateId selection sau khi setup restrictions
+    // Debug formId selection sau khi setup restrictions
     if (isEdit) {
         setTimeout(() => {
-            const templateSelect = document.getElementById('templateId');
-            if (templateSelect) {
-                console.log(`[DEBUG] TemplateId sau setup: value="${templateSelect.value}", selectedIndex=${templateSelect.selectedIndex}, disabled=${templateSelect.disabled}`);
-                if (templateSelect.selectedIndex >= 0 && templateSelect.options[templateSelect.selectedIndex]) {
-                    console.log(`[DEBUG] Selected option text: "${templateSelect.options[templateSelect.selectedIndex].text}"`);
+            const formSelect = document.getElementById('formId');
+            if (formSelect) {
+                console.log(`[DEBUG] FormId sau setup: value="${formSelect.value}", selectedIndex=${formSelect.selectedIndex}, disabled=${formSelect.disabled}`);
+                if (formSelect.selectedIndex >= 0 && formSelect.options[formSelect.selectedIndex]) {
+                    console.log(`[DEBUG] Selected option text: "${formSelect.options[formSelect.selectedIndex].text}"`);
                 }
                 
                 // Kiểm tra hidden input
-                const hiddenTemplateInput = templateSelect.parentNode.querySelector('input[type="hidden"][name="templateId"]');
-                if (hiddenTemplateInput) {
-                    console.log(`[DEBUG] Hidden templateId input: value="${hiddenTemplateInput.value}"`);
+                const hiddenFormInput = formSelect.parentNode.querySelector('input[type="hidden"][name="formId"]');
+                if (hiddenFormInput) {
+                    console.log(`[DEBUG] Hidden formId input: value="${hiddenFormInput.value}"`);
                 } else {
-                    console.log(`[DEBUG] Không có hidden templateId input`);
+                    console.log(`[DEBUG] Không có hidden formId input`);
                 }
             }
         }, 100);
@@ -232,11 +229,11 @@ function validateStep1() {
         }
     });
     
-    // Kiểm tra cụ thể trường templateId (form đăng ký)
-    const templateIdField = document.getElementById('templateId');
-    if (!templateIdField.value || templateIdField.value.trim() === '') {
+    // Kiểm tra cụ thể trường formId (form đăng ký)
+    const formIdField = document.getElementById('formId');
+    if (!formIdField.value || formIdField.value.trim() === '') {
         isValid = false;
-        markFieldInvalid(templateIdField, 'Vui lòng chọn form đăng ký');
+        markFieldInvalid(formIdField, 'Vui lòng chọn form đăng ký');
     }
     
     // Kiểm tra ngày bắt đầu < ngày kết thúc
@@ -727,13 +724,13 @@ function populateConfirmationStep() {
             setConfirmText('confirmTime', 'Không có thông tin');
         }
         
-        const templateSelect = document.getElementById('templateId');
-        if (templateSelect && templateSelect.selectedIndex >= 0 && 
-            templateSelect.options && templateSelect.selectedIndex < templateSelect.options.length) {
-            const selectedTemplate = templateSelect.options[templateSelect.selectedIndex].text;
-            setConfirmText('confirmForm', selectedTemplate);
+        const formSelect = document.getElementById('formId');
+        if (formSelect && formSelect.selectedIndex >= 0 && 
+            formSelect.options && formSelect.selectedIndex < formSelect.options.length) {
+            const selectedForm = formSelect.options[formSelect.selectedIndex].text;
+            setConfirmText('confirmForm', selectedForm);
         } else {
-            console.error("Không tìm thấy phần tử 'templateId' hoặc chưa chọn mẫu đơn");
+            console.error("Không tìm thấy phần tử 'formId' hoặc chưa chọn mẫu đơn");
             setConfirmText('confirmForm', 'Không có thông tin');
         }
         
@@ -899,7 +896,7 @@ function setupFormSubmission() {
         }
     
         // Kiểm tra các field quan trọng
-        const requiredParams = ['clubId', 'gen', 'templateId', 'startDate', 'endDate', 'title', 
+        const requiredParams = ['clubId', 'gen', 'formId', 'startDate', 'endDate', 'title', 
                                'applicationStageStart', 'applicationStageEnd', 
                                'interviewStageStart', 'interviewStageEnd',
                                'challengeStageStart', 'challengeStageEnd'];
@@ -949,48 +946,48 @@ function setupFormSubmission() {
             requestParams.append(pair[0], pair[1]);
         }
         
-        // Xử lý đặc biệt cho templateId để tránh trùng lặp
-        const templateSelect = document.getElementById('templateId');
-        if (templateSelect) {
+        // Xử lý đặc biệt cho formId để tránh trùng lặp
+        const formSelect = document.getElementById('formId');
+        if (formSelect) {
             // Đảm bảo trạng thái nhất quán trước khi lấy giá trị
-            manageTemplateIdConsistency();
+            manageFormIdConsistency();
             
-            // Xóa tất cả entry templateId hiện có trong requestParams trước
-            requestParams.delete('templateId');
+            // Xóa tất cả entry formId hiện có trong requestParams trước
+            requestParams.delete('formId');
             
-            if (templateSelect.disabled) {
+            if (formSelect.disabled) {
                 // Nếu disabled, lấy từ hidden input
-                const hiddenTemplateInput = templateSelect.parentNode.querySelector('input[type="hidden"][name="templateId"]');
-                if (hiddenTemplateInput && hiddenTemplateInput.value) {
-                    requestParams.set('templateId', hiddenTemplateInput.value);
-                    console.log(`[DEBUG] Sử dụng templateId từ hidden input: ${hiddenTemplateInput.value}`);
-                } else if (templateSelect.value) {
+                const hiddenFormInput = formSelect.parentNode.querySelector('input[type="hidden"][name="formId"]');
+                if (hiddenFormInput && hiddenFormInput.value) {
+                    requestParams.set('formId', hiddenFormInput.value);
+                    console.log(`[DEBUG] Sử dụng formId từ hidden input: ${hiddenFormInput.value}`);
+                } else if (formSelect.value) {
                     // Fallback nếu không có hidden input
-                    requestParams.set('templateId', templateSelect.value);
-                    console.log(`[DEBUG] Fallback - sử dụng templateId từ disabled select: ${templateSelect.value}`);
+                    requestParams.set('formId', formSelect.value);
+                    console.log(`[DEBUG] Fallback - sử dụng formId từ disabled select: ${formSelect.value}`);
                 }
             } else {
                 // Nếu enabled, lấy từ select element
-                if (templateSelect.value) {
-                    requestParams.set('templateId', templateSelect.value);
-                    console.log(`[DEBUG] Sử dụng templateId từ select element: ${templateSelect.value}`);
+                if (formSelect.value) {
+                    requestParams.set('formId', formSelect.value);
+                    console.log(`[DEBUG] Sử dụng formId từ select element: ${formSelect.value}`);
                 }
             }
         }
         
-        // Thu thập tất cả các hidden inputs để đảm bảo chúng được đưa vào request (trừ templateId đã xử lý)
+        // Thu thập tất cả các hidden inputs để đảm bảo chúng được đưa vào request (trừ formId đã xử lý)
         const hiddenInputs = document.querySelectorAll('input[type="hidden"]');
         hiddenInputs.forEach(input => {
-            if (input.name && input.value && input.name !== 'templateId') {
+            if (input.name && input.value && input.name !== 'formId') {
                 console.log(`[DEBUG] Thêm giá trị từ hidden input: ${input.name}=${input.value}`);
                 requestParams.set(input.name, input.value);
             }
         });
         
-        // Đảm bảo các trường bị disabled vẫn được thêm vào trong requestParams (trừ templateId đã xử lý)
+        // Đảm bảo các trường bị disabled vẫn được thêm vào trong requestParams (trừ formId đã xử lý)
         criticalFields.forEach(fieldId => {
             const field = document.getElementById(fieldId);
-            if (field && field.disabled && field.value && fieldId !== 'templateId') {
+            if (field && field.disabled && field.value && fieldId !== 'formId') {
                 requestParams.set(fieldId, field.value);
             }
         });
@@ -1021,13 +1018,13 @@ function setupFormSubmission() {
             console.log(pair[0] + ": " + pair[1]);
         }
         
-        // Kiểm tra cuối cùng templateId
-        if (!requestParams.has('templateId') || !requestParams.get('templateId')) {
-            console.error('[ERROR] TemplateId bị thiếu trong requestParams!');
+        // Kiểm tra cuối cùng formId
+        if (!requestParams.has('formId') || !requestParams.get('formId')) {
+            console.error('[ERROR] formId bị thiếu trong requestParams!');
             showToast('Thiếu thông tin mẫu đơn đăng ký', 'error');
             return;
         } else {
-            console.log(`[DEBUG] TemplateId cuối cùng sẽ gửi: ${requestParams.get('templateId')}`);
+            console.log(`[DEBUG] formId cuối cùng sẽ gửi: ${requestParams.get('formId')}`);
         }
         
         // Nếu đang chỉnh sửa, kiểm tra ID
@@ -1358,11 +1355,11 @@ function setupFieldRestrictions() {
         templateSelect.addEventListener('change', function() {
             console.log(`[DEBUG] Template đã thay đổi thành: ${this.value}`);
             // Sử dụng hàm helper để quản lý nhất quán
-            manageTemplateIdConsistency();
+            manageFormIdConsistency();
         });
         
         // Gọi hàm helper để đảm bảo trạng thái ban đầu nhất quán
-        manageTemplateIdConsistency();
+        manageFormIdConsistency();
     }
     
     // 2. Nếu vòng tuyển đã bắt đầu, vô hiệu hóa trường ngày bắt đầu
@@ -1491,7 +1488,7 @@ function debugDisabledFields() {
  * Helper function để quản lý templateId một cách nhất quán
  * Đảm bảo không có xung đột giữa select element và hidden input
  */
-function manageTemplateIdConsistency() {
+function manageFormIdConsistency() {
     const templateSelect = document.getElementById('templateId');
     if (!templateSelect) return;
     

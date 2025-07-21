@@ -35,7 +35,6 @@
             
             <!-- Thông tin sự kiện -->
             <div class="event-info">
-                <img src="${pageContext.request.contextPath}/images/events/${event.eventImg}" alt="${event.eventName}" class="event-image">
                 <div class="event-details">
                     <h3>${event.eventName}</h3>
                     <div class="event-date">
@@ -43,7 +42,7 @@
                         <fmt:formatDate value="${event.eventDate}" pattern="dd/MM/yyyy HH:mm"/>
                     </div>
                     <div class="event-location">
-                        <i class="fas fa-map-marker-alt"></i> ${event.location}
+                        <i class="fas fa-map-marker-alt"></i> ${event.location.locationName}
                     </div>
                 </div>
             </div>
