@@ -190,7 +190,7 @@
                                 </ol>
                             </nav>
                         </div>
-                        <button class="btn btn-primary" onclick="window.print()">In danh sách</button>
+                        
                     </div>
                 </header>
 

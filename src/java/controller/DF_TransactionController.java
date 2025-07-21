@@ -36,7 +36,7 @@ public class DF_TransactionController extends HttpServlet {
         String type = request.getParameter("type");
         String status = request.getParameter("status");
         int page = request.getParameter("page") != null ? Integer.parseInt(request.getParameter("page")) : 1;
-        int pageSize = 10;
+        int pageSize = 7;
 
         List<Transaction> transactions = FinancialDAO.getTransactionsByClubAndTerm(clubID, term.getTermID(), type, status, page, pageSize);
         int totalTransactions = FinancialDAO.getTotalTransactions(clubID, term.getTermID(), type, status);

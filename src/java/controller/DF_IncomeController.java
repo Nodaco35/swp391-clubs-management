@@ -55,7 +55,7 @@ public class DF_IncomeController extends HttpServlet {
         String status = request.getParameter("status");
         String source = request.getParameter("source");
         int page = request.getParameter("page") != null ? Integer.parseInt(request.getParameter("page")) : 1;
-        int pageSize = 10;
+        int pageSize = 7;
 
         List<Income> incomes = FinancialDAO.getIncomesByClubAndTerm(clubID, term.getTermID(), status, source, page, pageSize);
         int totalIncomes = FinancialDAO.getTotalIncomes(clubID, term.getTermID(), status, source);
