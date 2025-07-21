@@ -23,6 +23,22 @@ public class LocationDAO {
         return false;
     }
 
+    public boolean isLocationExists(int locationId) {
+        String sql = "SELECT COUNT(*) FROM Locations WHERE LocationID = ?";
+        try (Connection connection = DBContext.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, locationId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi khi kiểm tra LocationID: " + e.getMessage(), e);
+        }
+        return false;
+    }
+
     public List<Locations> getLocationsByType(String typeLocation) {
         List<Locations> locations = new ArrayList<>();
         String sql = "SELECT LocationID, LocationName FROM Locations WHERE TypeLocation = ? ORDER BY LocationName";

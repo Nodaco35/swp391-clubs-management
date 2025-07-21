@@ -53,7 +53,7 @@ public class MyClubController extends HttpServlet {
                 return;
             }
 
-            int countTodoLists = TaskAssignmentDAO.countByUserID(user.getUserID());
+//            int countTodoLists = TaskAssignmentDAO.countByUserID(user.getUserID());
 
             int countPendingApplication = ClubApplicationDAO.countpendingApplicationsFindByClub(user.getUserID());
 
@@ -67,7 +67,7 @@ public class MyClubController extends HttpServlet {
 
             List<ClubApplication> pendingApplications = ClubApplicationDAO.pendingApplicationsFindByClub(user.getUserID());
 
-            List<TaskAssignment> todoLists = TaskAssignmentDAO.findByUserID(user.getUserID());
+//            List<TaskAssignment> todoLists = TaskAssignmentDAO.findByUserID(user.getUserID());
 
             List<ClubMeeting> clubmeetings = ClubMeetingDAO.findByUserID(user.getUserID());
 
@@ -86,8 +86,8 @@ public class MyClubController extends HttpServlet {
 
             request.setAttribute("countUpcomingMeeting", countUpcomingMeeting);
             request.setAttribute("pendingApplications", pendingApplications);
-            request.setAttribute("departmentTasks", todoLists);
-            request.setAttribute("countTodoLists", countTodoLists);
+//            request.setAttribute("departmentTasks", todoLists);
+//            request.setAttribute("countTodoLists", countTodoLists);
             request.setAttribute("countPendingApplication", countPendingApplication);
 
             request.setAttribute("clubmeetings", clubmeetings);

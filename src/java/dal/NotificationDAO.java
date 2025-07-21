@@ -64,12 +64,10 @@ public class NotificationDAO {
     public static void markAsRead(Integer id) {
         
         String sql = """
-                     UPDATE `clubmanagementsystem`.`notifications`
+                     UPDATE Notifications
                      SET
-                     
-                     `Status` = ?
-                     
-                     WHERE `NotificationID` = ?;""";
+                     Status = ?
+                     WHERE NotificationID = ?;""";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, "READ");
@@ -83,16 +81,10 @@ public class NotificationDAO {
     public static Notification findByNotificationID(Integer id) {
         
         String sql = """
-                     SELECT `notifications`.`NotificationID`,
-                         `notifications`.`Title`,
-                         `notifications`.`Content`,
-                         `notifications`.`CreatedDate`,
-                         `notifications`.`ReceiverID`,
-                         `notifications`.`Priority`,
-                         `notifications`.`Status`,
-                         `notifications`.`SenderID`
-                     FROM `clubmanagementsystem`.`notifications`
-                     where `notifications`.`NotificationID` = ?;""";
+                SELECT n.NotificationID, n.Title, n.Content, n.CreatedDate,
+                            n.ReceiverID, n.Priority, n.Status, n.SenderID
+                     FROM Notifications n
+                     WHERE n.NotificationID = ?;""";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, id);

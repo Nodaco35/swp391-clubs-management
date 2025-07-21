@@ -11,6 +11,7 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/myClub.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/eventsPage.css">
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
         <script src="https://cdn.tailwindcss.com"></script>
     </head>
     <body>
@@ -280,7 +281,7 @@
                                     <input type="datetime-local" id="meetingTime" name="startedTime" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
                                 </div>
                                 <div class="mb-4">
-                                    <label for="URLMeeting" class="block text-sm font-medium text-gray-700">Link họp</label>
+                                    <%--@declare id="urlmeeting"--%><label for="URLMeeting" class="block text-sm font-medium text-gray-700">Link họp</label>
                                     <input type="url" id="meetingLink" name="URLMeeting" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
                                 </div>
                                 <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Tạo</button>
@@ -328,6 +329,7 @@
                         </section>
 
                         <!-- Upcoming Events -->
+                        <!-- Upcoming Events -->
                         <section id="upcoming-events" class="mb-10">
                             <h2 class="text-2xl font-bold text-gray-800 mb-4">Sự Kiện Sắp Tới</h2>
                             <c:choose>
@@ -345,8 +347,40 @@
                                                     <img src="${pageContext.request.contextPath}/${event.eventImg}" alt="${event.eventName}" class="w-36 h-24 rounded-lg object-cover border-2 border-blue-100">
                                                     <div>
                                                         <h3 class="text-xl font-medium text-gray-800">${event.eventName}</h3>
-                                                        <p class="text-sm text-gray-600"><i class="fas fa-calendar-alt"></i> ${event.eventDate}</p>
-                                                        <p class="text-sm text-gray-600"><i class="fas fa-map-marker-alt"></i> ${event.location.locationName}</p>
+                                                        <p class="text-sm text-gray-600">
+                                                            <i class="fas fa-calendar-alt"></i>
+                                                            <c:choose>
+                                                                <c:when test="${not empty event.schedules}">
+                                                                    <fmt:formatDate value="${event.schedules[0].eventDate}" pattern="dd/MM/yyyy"/>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    Chưa có lịch trình
+                                                                </c:otherwise>
+                                                            </c:choose>
+                                                        </p>
+                                                        <p class="text-sm text-gray-600">
+                                                            <i class="fas fa-clock"></i>
+                                                            <c:choose>
+                                                                <c:when test="${not empty event.schedules}">
+                                                                    <fmt:formatDate value="${event.schedules[0].startTime}" pattern="HH:mm"/> -
+                                                                    <fmt:formatDate value="${event.schedules[0].endTime}" pattern="HH:mm"/>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    Không xác định
+                                                                </c:otherwise>
+                                                            </c:choose>
+                                                        </p>
+                                                        <p class="text-sm text-gray-600">
+                                                            <i class="fas fa-map-marker-alt"></i>
+                                                            <c:choose>
+                                                                <c:when test="${not empty event.schedules}">
+                                                                    ${event.schedules[0].location.locationName}
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    Không xác định
+                                                                </c:otherwise>
+                                                            </c:choose>
+                                                        </p>
                                                     </div>
                                                 </div>
                                                 <a href="${pageContext.request.contextPath}/event-detail?id=${event.eventID}" class="mt-4 inline-block text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-full transition">Đăng kí ngay</a>

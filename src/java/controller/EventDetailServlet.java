@@ -79,7 +79,7 @@ public class EventDetailServlet extends HttpServlet {
                 List<Events> relatedEvents = eventDAO.getEventsByClubID(e.getClubID(), id);
                 EventStats stats = eventDAO.getSpotsLeftEvent(id);
                 EventOwnerInfo ownerInfo = eventDAO.getEventOwnerInfo(id);
-                List<Agenda> agendaDetails = eventDAO.getAgendaByEventID(id);
+                List<Agenda> agendaDetails = eventDAO.  getAgendaByEventID(id);
                 request.setAttribute("agendaDetails", agendaDetails);
                 request.setAttribute("ownerInfo", ownerInfo);
                 request.setAttribute("relatedEvents", relatedEvents);

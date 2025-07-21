@@ -53,5 +53,6 @@
     <orderEntry type="library" name="lib2" level="project" />
     <orderEntry type="library" name="lib1" level="project" />
     <orderEntry type="library" name="SWP_LIB" level="application" />
+    <orderEntry type="library" name="@tailwindcss" level="application" />
   </component>
 </module>

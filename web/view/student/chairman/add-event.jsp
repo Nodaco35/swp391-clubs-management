@@ -1,3 +1,4 @@
+
 <%--
     Document   : add-event
     Created on : Jun 16, 2025, 12:19:52 AM
@@ -13,7 +14,6 @@
 	<title>Thêm Sự Kiện Mới</title>
 	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/chairmanPage.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
 </head>
 <body>
 <header class="header">
@@ -23,13 +23,11 @@
 			<span>UniClub</span>
 		</div>
 
-		<!-- Search Bar -->
 		<div class="search-container">
 			<div class="search-box">
 				<form action="${pageContext.request.contextPath}/events-page" method="get">
 					<i class="fas fa-search search-icon"></i>
-					<input type="text" id="searchInput" name="key" placeholder="Tìm kiếm sự kiện..."
-					       class="search-input">
+					<input type="text" id="searchInput" name="key" placeholder="Tìm kiếm sự kiện..." class="search-input">
 					<button type="submit" class="search-btn">
 						<i class="fas fa-search"></i>
 					</button>
@@ -89,7 +87,6 @@
 		</div>
 	</div>
 
-	<!-- Mobile Menu -->
 	<div class="mobile-menu" id="mobileMenu">
 		<nav class="mobile-nav">
 			<ul>
@@ -116,7 +113,6 @@
 				</div>
 			</div>
 		</c:if>
-
 	</div>
 
 	<nav class="dashboard-nav">
@@ -141,7 +137,6 @@
 			</li>
 		</ul>
 	</nav>
-
 </header>
 
 <main class="dashboard-content">
@@ -158,10 +153,10 @@
 	</div>
 	<div class="form-container">
 		<c:if test="${not empty errorMessage}">
-		<div class="error-message" style="color: red">${errorMessage}</div>
+			<div class="error-message" style="color: red">${errorMessage}</div>
 		</c:if>
 		<c:if test="${not empty sessionScope.successMsg}">
-		<div class="error-message" style="color: green">${sessionScope.successMsg}</div>
+			<div class="error-message" style="color: green">${sessionScope.successMsg}</div>
 			<c:remove var="successMsg" scope="session"/>
 		</c:if>
 
@@ -190,25 +185,8 @@
 					<div class="form-group">
 						<label for="locationType">Loại địa điểm (Trong hay ngoài trường) *</label>
 						<select id="locationType" name="locationType" onchange="this.form.submit()" required>
-							<option value="OnCampus" ${param.locationType == 'OnCampus' ? 'selected' : ''}>Trong
-								trường
-							</option>
-							<option value="OffCampus" ${param.locationType == 'OffCampus' ? 'selected' : ''}>Ngoài
-								trường
-							</option>
-						</select>
-					</div>
-				</div>
-				<div class="form-grid-2">
-					<div class="form-group">
-						<label for="eventLocation">Địa điểm *</label>
-						<select id="eventLocation" name="eventLocation" required>
-							<option value="">Chọn địa điểm...</option>
-							<c:forEach var="location" items="${locations}">
-								<option value="${location.locationID}" ${param.eventLocation == location.locationID ? 'selected' : ''}>
-										${location.locationName}
-								</option>
-							</c:forEach>
+							<option value="OnCampus" ${param.locationType == 'OnCampus' ? 'selected' : ''}>Trong trường</option>
+							<option value="OffCampus" ${param.locationType == 'OffCampus' ? 'selected' : ''}>Ngoài trường</option>
 						</select>
 					</div>
 				</div>
@@ -220,63 +198,107 @@
 					<div class="form-group">
 						<label>Loại sự kiện *</label>
 						<div>
-							<input type="radio" id="public" name="eventType"
-							       value="public" ${param.eventType == 'public' ? 'checked' : ''}>
+							<input type="radio" id="public" name="eventType" value="public" ${param.eventType == 'public' ? 'checked' : ''}>
 							<label for="public" style="margin-right: 20px">Công khai</label>
-
-							<input type="radio" id="private" name="eventType"
-							       value="private" ${param.eventType == 'private' ? 'checked' : ''}>
+							<input type="radio" id="private" name="eventType" value="private" ${param.eventType == 'private' ? 'checked' : ''}>
 							<label for="private">Riêng tư</label>
 						</div>
 					</div>
-
-					<!-- THÊM PHẦN UPLOAD ẢNH -->
 					<div class="form-group">
 						<label for="eventImg">Ảnh sự kiện</label>
 						<input type="file" id="eventImg" name="eventImg" accept="image/*" onchange="previewImage(this)">
 						<div id="imagePreview" class="image-preview" style="display: none; margin-top: 10px;">
-							<img id="previewImg" src="" alt="Preview"
-							     style="max-width: 200px; max-height: 200px; border-radius: 8px;">
+							<img id="previewImg" src="" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px;">
 						</div>
 					</div>
-
+					<div class="form-group">
+						<label for="maxParticipants">Số người tham gia tối đa *</label>
+						<input type="number" id="maxParticipants" name="maxParticipants" value="${param.maxParticipants}" required>
+					</div>
 					<div class="form-group full-width">
 						<label for="eventDescription">Mô tả</label>
-						<textarea id="eventDescription" name="eventDescription"
-						          rows="4">${param.eventDescription}</textarea>
+						<textarea id="eventDescription" name="eventDescription" rows="4">${param.eventDescription}</textarea>
 					</div>
 				</div>
 			</div>
 
 			<div class="form-section">
-				<h3>Thời gian và địa điểm</h3>
-				<div class="form-grid">
-					<div class="form-group">
-						<label for="eventDate">Ngày tổ chức *</label>
-						<input type="date" id="eventDate" name="eventDate" value="${param.eventDate}" required>
-					</div>
-					<div class="form-group">
-						<label for="maxParticipants">Số người tham gia tối đa *</label>
-						<input type="number" id="maxParticipants" name="maxParticipants"
-						       value="${param.maxParticipants}" required>
-					</div>
+				<h3>Lịch trình sự kiện</h3>
+				<div id="scheduleContainer">
+					<c:choose>
+						<c:when test="${not empty eventDates}">
+							<c:forEach var="i" begin="0" end="${fn:length(eventDates)-1}">
+								<div class="schedule-item">
+									<div class="form-grid">
+										<div class="form-group">
+											<%--@declare id="eventdate[]"--%><label for="eventDate[]">Ngày tổ chức *</label>
+											<input type="date" name="eventDate[]" value="${eventDates[i]}" required>
+										</div>
+										<div class="form-group">
+											<%--@declare id="eventlocation[]"--%><label for="eventLocation[]">Địa điểm *</label>
+											<select name="eventLocation[]" required>
+												<option value="">Chọn địa điểm...</option>
+												<c:forEach var="location" items="${locations}">
+													<option value="${location.locationID}" ${location.locationID == eventLocationIDs[i] ? 'selected' : ''}>
+															${location.locationName}
+													</option>
+												</c:forEach>
+											</select>
+										</div>
+										<div class="form-group">
+											<%--@declare id="eventtime[]"--%><label for="eventTime[]">Giờ bắt đầu *</label>
+											<input type="time" name="eventTime[]" value="${eventStartTimes[i]}" required>
+										</div>
+										<div class="form-group">
+											<%--@declare id="eventendtime[]"--%><label for="eventEndTime[]">Giờ kết thúc *</label>
+											<input type="time" name="eventEndTime[]" value="${eventEndTimes[i]}" required>
+											<button type="button" class="btn-remove-schedule" onclick="removeScheduleItem(this)" style="margin-left: 10px;">
+												<i class="fas fa-times"></i>
+											</button>
+										</div>
+									</div>
+								</div>
+							</c:forEach>
+						</c:when>
+						<c:otherwise>
+							<div class="schedule-item">
+								<div class="form-grid">
+									<div class="form-group">
+										<label for="eventDate[]">Ngày tổ chức *</label>
+										<input type="date" name="eventDate[]" required>
+									</div>
+									<div class="form-group">
+										<label for="eventLocation[]">Địa điểm *</label>
+										<select name="eventLocation[]" required>
+											<option value="">Chọn địa điểm...</option>
+											<c:forEach var="location" items="${locations}">
+												<option value="${location.locationID}">${location.locationName}</option>
+											</c:forEach>
+										</select>
+									</div>
+									<div class="form-group">
+										<label for="eventTime[]">Giờ bắt đầu *</label>
+										<input type="time" name="eventTime[]" required>
+									</div>
+									<div class="form-group">
+										<label for="eventEndTime[]">Giờ kết thúc *</label>
+										<input type="time" name="eventEndTime[]" required>
+										<button type="button" class="btn-remove-schedule" onclick="removeScheduleItem(this)" style="margin-left: 10px;">
+											<i class="fas fa-times"></i>
+										</button>
+									</div>
+								</div>
+							</div>
+						</c:otherwise>
+					</c:choose>
 				</div>
-				<div class="form-grid">
-					<div class="form-group">
-						<label for="eventTime">Giờ bắt đầu *</label>
-						<input type="time" id="eventTime" name="eventTime" value="${param.eventTime}" required>
-					</div>
-					<div class="form-group">
-						<label for="eventEndTime">Giờ kết thúc *</label>
-						<input type="time" id="eventEndTime" name="eventEndTime" value="${param.eventEndTime}" required>
-					</div>
-				</div>
-
+				<button type="button" class="btn-add-schedule" onclick="addScheduleItem()">
+					<i class="fas fa-plus"></i> Thêm lịch trình
+				</button>
 			</div>
 
 			<div class="form-actions">
-				<button type="button" class="btn-cancel"
-				        onclick="window.location.href='${pageContext.request.contextPath}/chairman-page/myclub-events'">
+				<button type="button" class="btn-cancel" onclick="window.location.href='${pageContext.request.contextPath}/chairman-page/myclub-events'">
 					<i class="fas fa-times"></i> Hủy
 				</button>
 				<button type="submit" class="btn-submit">
@@ -284,8 +306,8 @@
 				</button>
 			</div>
 		</form>
-		<div class="form-grid-2" id="agendaSection"
-		     style="display: ${not empty sessionScope.newEventID ? 'block' : 'none'};">
+
+		<div class="form-grid-2" id="agendaSection" style="display: ${not empty sessionScope.newEventID ? 'block' : 'none'};">
 			<form id="agendaForm" action="${pageContext.request.contextPath}/agenda" method="post">
 				<input type="hidden" name="eventID" value="${sessionScope.newEventID}"/>
 				<input type="hidden" name="sourcePage" value="add-event"/>
@@ -294,14 +316,18 @@
 					<div id="agendaContainer">
 						<c:forEach var="agenda" items="${agendas}">
 							<div class="agenda-item">
-								<input type="time" name="agendaStartTime[]"
-								       value="<fmt:formatDate value='${agenda.startTime}' pattern='HH:mm' />"
-								       required/>
-								<input type="time" name="agendaEndTime[]"
-								       value="<fmt:formatDate value='${agenda.endTime}' pattern='HH:mm' />"
-								       required/>
-								<input type="text" name="agendaActivity[]" value="${agenda.title}"
-								       placeholder="Hoạt động" required/>
+								<select name="scheduleID[]" required>
+									<option value="">Chọn lịch trình...</option>
+									<c:forEach var="schedule" items="${event.schedules}">
+										<option value="${schedule.scheduleID}">
+											<fmt:formatDate value="${schedule.eventDate}" pattern="yyyy-MM-dd"/> - ${schedule.location.locationName}
+										</option>
+									</c:forEach>
+								</select>
+								<input type="time" name="agendaStartTime[]" value="<fmt:formatDate value='${agenda.startTime}' pattern='HH:mm' />" required/>
+								<input type="time" name="agendaEndTime[]" value="<fmt:formatDate value='${agenda.endTime}' pattern='HH:mm' />" required/>
+								<input type="text" name="agendaActivity[]" value="${agenda.title}" placeholder="Hoạt động" required/>
+								<input type="text" name="agendaDescription[]" value="${agenda.description}" placeholder="Mô tả ngắn gọn hoạt động" required/>
 								<button type="button" class="btn-remove-agenda" onclick="removeAgendaItem(this)">
 									<i class="fas fa-times"></i>
 								</button>
@@ -319,92 +345,112 @@
 				</div>
 			</form>
 		</div>
-
-		<%--agenda khi tạo xong cùng sự kiện thì đẩy sang cho IC duyệt--%>
-		<%--			(trong trang duyệt đó thì sẽ có 2 nút để duyệt, đầu tiên là duyện sự kiện, tiếp theo là duyệt agenda)--%>
+	</div>
 </main>
 <script>
+    const schedules = [
+        <c:forEach var="schedule" items="${event.schedules}" varStatus="status">
+        {
+            scheduleID: "${schedule.scheduleID}",
+            startTime: "<fmt:formatDate value='${schedule.startTime}' pattern='HH:mm'/>",
+            endTime: "<fmt:formatDate value='${schedule.endTime}' pattern='HH:mm'/>"
+        }${status.last ? '' : ','}
+        </c:forEach>
+    ];
+
     window.addEventListener('DOMContentLoaded', function () {
-        const eventDateInput = document.getElementById('eventDate');
+        const scheduleContainer = document.getElementById('scheduleContainer');
         const today = new Date();
         today.setDate(today.getDate() + 7);
-
         const year = today.getFullYear();
         const month = String(today.getMonth() + 1).padStart(2, '0');
         const day = String(today.getDate()).padStart(2, '0');
-
         const minDate = `${year}-${month}-${day}`;
-        eventDateInput.min = minDate;
+        scheduleContainer.querySelectorAll('input[type="date"]').forEach(input => input.min = minDate);
+
+        <c:if test="${showAgendaSection}">
+        document.getElementById('agendaContainer').style.display = 'block';
+        </c:if>
     });
 
-    document.getElementById("eventForm").addEventListener("submit", function (e) {
-        const eventDate = new Date(document.getElementById("eventDate").value);
-        const now = new Date();
-        now.setHours(0, 0, 0, 0);
-        now.setDate(now.getDate() + 7);
-
-        if (eventDate < now) {
-            alert("Ngày tổ chức phải sau ngày hiện tại ít nhất 7 ngày.");
-            e.preventDefault();
-        }
-
-        const startTime = document.getElementById("eventTime").value;
-        const endTime = document.getElementById("eventEndTime").value;
-
-        if (!startTime || !endTime) return;
-
-        const [startHour, startMin] = startTime.split(':').map(Number);
-        const [endHour, endMin] = endTime.split(':').map(Number);
-
-        const startTotalMin = startHour * 60 + startMin;
-        const endTotalMin = endHour * 60 + endMin;
-
-        if (endTotalMin - startTotalMin < 30) {
-            alert("Giờ kết thúc phải cách giờ bắt đầu ít nhất 30 phút.");
-            e.preventDefault();
-            return;
-        }
-    });
-
-    document.getElementById("agendaForm")?.addEventListener("submit", function (e) {
-        const eventTimeInput = document.getElementById("eventTime");
-        const eventEndTimeInput = document.getElementById("eventEndTime");
-
-        if (!eventTimeInput.value || !eventEndTimeInput.value) {
-            alert("Vui lòng điền giờ bắt đầu và kết thúc của sự kiện trước.");
-            e.preventDefault();
-            return;
-        }
-
-        const [startHour, startMin] = eventTimeInput.value.split(':').map(Number);
-        const [endHour, endMin] = eventEndTimeInput.value.split(':').map(Number);
-
-        const startTotalMin = startHour * 60 + startMin;
-        const endTotalMin = endHour * 60 + endMin;
-
-        const agendaStartTimes = document.getElementsByName("agendaStartTime[]");
-        const agendaEndTimes = document.getElementsByName("agendaEndTime[]");
-
-        for (let i = 0; i < agendaStartTimes.length; i++) {
-            const startValue = agendaStartTimes[i].value;
-            const endValue = agendaEndTimes[i].value;
-
-            if (!startValue || !endValue) continue;
-
-            const [aStartHour, aStartMin] = startValue.split(':').map(Number);
-            const [aEndHour, aEndMin] = endValue.split(':').map(Number);
-
-            const aStartTotalMin = aStartHour * 60 + aStartMin;
-            const aEndTotalMin = aEndHour * 60 + aEndMin;
-
-            if (aEndTotalMin <= aStartTotalMin) {
-                alert(`Thời gian kết thúc phải sau thời gian bắt đầu.`);
+    document.getElementById("eventForm")?.addEventListener("submit", function (e) {
+        const scheduleItems = document.getElementsByClassName('schedule-item');
+        for (let i = 0; i < scheduleItems.length; i++) {
+            const eventDate = new Date(scheduleItems[i].querySelector('input[name="eventDate[]"]').value);
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+            now.setDate(now.getDate() + 7);
+            if (eventDate < now) {
+                alert(`Ngày tổ chức của lịch trình ${i + 1} phải sau ngày hiện tại ít nhất 7 ngày.`);
                 e.preventDefault();
                 return;
             }
 
-            if (aStartTotalMin < startTotalMin || aEndTotalMin > endTotalMin) {
-                alert(`Thời gian phải nằm trong khung giờ sự kiện.`);
+            const startTime = scheduleItems[i].querySelector('input[name="eventTime[]"]').value;
+            const endTime = scheduleItems[i].querySelector('input[name="eventEndTime[]"]').value;
+            if (!startTime || !endTime) continue;
+
+            const [startHour, startMin] = startTime.split(':').map(Number);
+            const [endHour, endMin] = endTime.split(':').map(Number);
+            const startTotalMin = startHour * 60 + startMin;
+            const endTotalMin = endHour * 60 + endMin;
+
+            if (endTotalMin - startTotalMin < 30) {
+                alert(`Giờ kết thúc của lịch trình ${i + 1} phải cách giờ bắt đầu ít nhất 30 phút.`);
+                e.preventDefault();
+                return;
+            }
+        }
+    });
+
+    document.getElementById("agendaForm").addEventListener("submit", function (e) {
+        const agendaItems = document.getElementsByClassName('agenda-item');
+        for (let i = 0; i < agendaItems.length; i++) {
+            const scheduleID = agendaItems[i].querySelector('select[name="scheduleID[]"]').value;
+            const startTime = agendaItems[i].querySelector('input[name="agendaStartTime[]"]').value;
+            const endTime = agendaItems[i].querySelector('input[name="agendaEndTime[]"]').value;
+
+            if (!scheduleID) {
+                alert(`Vui lòng chọn lịch trình cho hoạt động ${i + 1}.`);
+                e.preventDefault();
+                return;
+            }
+
+            if (!startTime || !endTime) continue;
+
+            const [startHour, startMin] = startTime.split(':').map(Number);
+            const [endHour, endMin] = endTime.split(':').map(Number);
+            const startTotalMin = startHour * 60 + startMin;
+            const endTotalMin = endHour * 60 + endMin;
+
+            if (endTotalMin <= startTotalMin) {
+                alert(`Thời gian kết thúc của hoạt động ${i + 1} phải sau thời gian bắt đầu.`);
+                e.preventDefault();
+                return;
+            }
+
+            // Validate agenda time within schedule time
+            const schedule = schedules.find(s => s.scheduleID === scheduleID);
+            if (schedule) {
+                console.log('Found schedule:', schedule); // Debug log
+
+                const [schedStartHour, schedStartMin] = schedule.startTime.split(':').map(Number);
+                const [schedEndHour, schedEndMin] = schedule.endTime.split(':').map(Number);
+                const schedStartTotalMin = schedStartHour * 60 + schedStartMin;
+                const schedEndTotalMin = schedEndHour * 60 + schedEndMin;
+
+                console.log('Agenda time:', startTotalMin, '-', endTotalMin); // Debug log
+                console.log('Schedule time:', schedStartTotalMin, '-', schedEndTotalMin); // Debug log
+
+                if (startTotalMin < schedStartTotalMin || endTotalMin > schedEndTotalMin) {
+                    alert(`Thời gian của hoạt động ${i + 1} phải nằm trong khoảng thời gian của lịch trình (${schedule.startTime} - ${schedule.endTime}).`);
+                    e.preventDefault();
+                    return;
+                }
+            } else {
+                console.log('Schedule not found for ID:', scheduleID); // Debug log
+                console.log('Available schedules:', schedules);
+                alert(`Không tìm thấy thông tin lịch trình cho hoạt động ${i + 1}.`);
                 e.preventDefault();
                 return;
             }
@@ -414,15 +460,12 @@
     function previewImage(input) {
         const preview = document.getElementById('imagePreview');
         const previewImg = document.getElementById('previewImg');
-
         if (input.files && input.files[0]) {
             const reader = new FileReader();
-
             reader.onload = function (e) {
                 previewImg.src = e.target.result;
                 preview.style.display = 'block';
-            }
-
+            };
             reader.readAsDataURL(input.files[0]);
         } else {
             preview.style.display = 'none';
@@ -430,19 +473,79 @@
     }
 
     function toggleNewLocation() {
-        var locationType = document.getElementById('locationType').value;
-        var newLocationGroup = document.getElementById('newLocationGroup');
+        const locationType = document.getElementById('locationType').value;
+        const newLocationGroup = document.getElementById('newLocationGroup');
         newLocationGroup.style.display = locationType === 'OffCampus' ? 'block' : 'none';
     }
+
+    function addScheduleItem() {
+        const container = document.getElementById('scheduleContainer');
+        const item = document.createElement('div');
+        item.classList.add('schedule-item');
+        item.innerHTML = `
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="eventDate[]">Ngày tổ chức *</label>
+                    <input type="date" name="eventDate[]" required>
+                </div>
+                <div class="form-group">
+                    <label for="eventLocation[]">Địa điểm *</label>
+                    <select name="eventLocation[]" required>
+                        <option value="">Chọn địa điểm...</option>
+                        <c:forEach var="location" items="${locations}">
+                            <option value="${location.locationID}">${location.locationName}</option>
+                        </c:forEach>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="eventTime[]">Giờ bắt đầu *</label>
+                    <input type="time" name="eventTime[]" required>
+                </div>
+                <div class="form-group">
+                    <label for="eventEndTime[]">Giờ kết thúc *</label>
+                    <input type="time" name="eventEndTime[]" required>
+                    <button type="button" class="btn-remove-schedule" onclick="removeScheduleItem(this)" style="margin-left: 10px;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        container.appendChild(item);
+        const today = new Date();
+        today.setDate(today.getDate() + 7);
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        item.querySelector('input[type="date"]').min = `${year}-${month}-${day}`;
+    }
+
+    function removeScheduleItem(button) {
+        const scheduleItems = document.getElementsByClassName('schedule-item');
+        if (scheduleItems.length > 1) {
+            button.parentElement.parentElement.parentElement.remove();
+        } else {
+            alert('Phải có ít nhất một lịch trình.');
+        }
+    }
+
 
     function addAgendaItem() {
         const container = document.getElementById('agendaContainer');
         const item = document.createElement('div');
         item.classList.add('agenda-item');
         item.innerHTML = `
+            <select name="scheduleID[]" required>
+                <option value="">Chọn lịch trình...</option>
+                <c:forEach var="schedule" items="${event.schedules}">
+                    <option value="${schedule.scheduleID}">
+                        <fmt:formatDate value="${schedule.eventDate}" pattern="yyyy-MM-dd"/> - ${schedule.location.locationName}
+                    </option>
+                </c:forEach>
+            </select>
             <input type="time" name="agendaStartTime[]" required />
             <input type="time" name="agendaEndTime[]" required />
             <input type="text" name="agendaActivity[]" placeholder="Hoạt động" required />
+            <input type="text" name="agendaDescription[]" placeholder="Mô tả ngắn gọn hoạt động" required />
             <button type="button" class="btn-remove-agenda" onclick="removeAgendaItem(this)">
                 <i class="fas fa-times"></i>
             </button>
@@ -456,7 +559,6 @@
 
     window.onload = function () {
         toggleNewLocation();
-    }
-</script>
-</body>
+    };
+</script></body>
 </html>

@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class ApplicationResponse {
     private int responseID;
-    private int formID;
+    private Integer formID;
     private String userID;
     private int clubID;
     private Integer eventID;
@@ -36,11 +36,11 @@ public class ApplicationResponse {
         this.responseID = responseID;
     }
 
-    public int getFormID() {
+    public Integer getFormID() {
         return formID;
     }
 
-    public void setFormID(int formID) {
+    public void setFormID(Integer formID) {
         this.formID = formID;
     }
 
