@@ -17,56 +17,10 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/viewFeedback.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Thêm event ID làm meta tag để giúp debug JS -->
     <meta name="eventId" content="${param.eventId}">
-
-    <!--debug cho ratingDistribution -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // In chi tiết về object ratingDistribution
-            const ratingDebug = {
-                isEmpty: "${empty ratingDistribution}",
-                isNull: "${ratingDistribution == null}",
-                size: "${not empty ratingDistribution ? ratingDistribution.size() : 'N/A'}",
-                keys: "${not empty ratingDistribution ? ratingDistribution.keySet() : 'N/A'}",
-                values: "${not empty ratingDistribution ? ratingDistribution.values() : 'N/A'}"
-            };
-            console.log("Chi tiết ratingDistribution:", ratingDebug);
-        });
-    </script>
-
-
 </head>
 <body>
     <jsp:include page="/view/events-page/header.jsp" />
-    
-    <%-- Tạo Map để lưu thông tin người dùng từ UserID --%>
-    <%
-        // Tạo map lưu trữ thông tin user từ userID để không cần truy vấn database nhiều lần
-        Map<String, String> userNames = new HashMap<>();
-        UserDAO userDAO = new UserDAO();
-        
-        // Kiểm tra danh sách feedback từ request attribute
-        List<models.Feedback> feedbackList = (List<models.Feedback>)request.getAttribute("feedbacks");
-        if (feedbackList != null) {
-            for (models.Feedback fb : feedbackList) {
-                String userId = fb.getUserID();
-                if (!fb.isAnonymous() && userId != null && !userId.isEmpty() && !userNames.containsKey(userId)) {
-                    try {
-                        Users userInfo = userDAO.getUserByID(userId);
-                        if (userInfo != null && userInfo.getFullName() != null) {
-                            userNames.put(userId, userInfo.getFullName());
-                        } else {
-                            userNames.put(userId, userId); // Fallback to ID if user not found
-                        }
-                    } catch (Exception e) {
-                        userNames.put(userId, userId); // Fallback to ID if exception
-                    }
-                }
-            }
-        }
-        request.setAttribute("userNames", userNames);
-    %>
     
     <div class="container">
         <div class="feedback-container">
@@ -77,7 +31,6 @@
 
             <!-- Thông tin sự kiện -->
             <div class="event-info">
-                <img src="${pageContext.request.contextPath}/images/events/${event.eventImg}" alt="${event.eventName}" class="event-image">
                 <div class="event-details">
                     <h3>${event.eventName}</h3>
                     <div class="event-date">
@@ -85,7 +38,7 @@
                         <fmt:formatDate value="${event.eventDate}" pattern="dd/MM/yyyy HH:mm"/>
                     </div>
                     <div class="event-location">
-                        <i class="fas fa-map-marker-alt"></i> ${event.location}
+                        <i class="fas fa-map-marker-alt"></i> ${event.location.locationName}
                     </div>
                 </div>
             </div>
@@ -156,7 +109,8 @@
                                 <span class="legend-color" style="background-color: #2e7d32;"></span>
                                 <span class="legend-text">5 sao - Rất hài lòng</span>
                             </div>
-                        </div>                          <!-- Hiển thị trạng thái loading -->
+                        </div>                          
+                        <!-- Hiển thị trạng thái loading -->
                         <div id="chartLoadingState" class="chart-loading-state">
                             <div class="loading-spinner">
                                 <i class="fas fa-spinner fa-spin"></i>
@@ -177,44 +131,6 @@
                         <div id="chartContainer" style="display: none;">
                             <canvas id="ratingDistributionChart"></canvas>
                         </div>
-                        
-                        <!-- Debug Panel -->
-                        <div class="debug-panel" style="margin-top: 10px; display: none;">
-                            <details>
-                                <summary style="cursor: pointer;">Debug Info</summary>
-                                <div id="debugOutput" class="debug-output" style="background: #f5f5f5; padding: 10px; border: 1px solid #ddd; margin-top: 5px; font-family: monospace; white-space: pre-wrap;"></div>
-                            </details>
-                        </div>
-
-                        
-                        <script>
-                              // Mặc định là true, sẽ được cập nhật trong JS dựa trên dữ liệu thực tế
-                            window.shouldDisplayCharts = true;
-                            
-                            // Thêm debug type của ratingDistribution
-                            console.log("Kiểu dữ liệu ratingDistribution: ${ratingDistribution.getClass().getName()}");
-                            
-                            // Debug thông tin tổng hợp
-                            console.log("Thông tin tổng hợp:", {
-                                feedbackCount: "${feedbackCount}",
-                                hasData: "${feedbackCount > 0}",
-                                hasRatingDistribution: "${not empty ratingDistribution}",
-                                statisticsNotNull: "${statistics != null}"
-                            });
-                            
-                            // Debug biến toàn cục
-                            document.addEventListener('DOMContentLoaded', function() {
-                                console.log("Dữ liệu từ biến window.ratingDistributionData (DOMContentLoaded):", window.ratingDistributionData);
-                                
-                                // Kiểm tra xem JSON có đúng định dạng không
-                                const jsonElement = document.getElementById('ratingDataJson');
-                                if (jsonElement) {
-                                    console.log("Nội dung JSON script raw:", jsonElement.textContent.trim());
-                                } else {
-                                    console.error("Không tìm thấy phần tử JSON script");
-                                }
-                            });
-                        </script>
                     </div>
                 </div>
 
@@ -243,7 +159,8 @@
                                 <span class="legend-color" style="background-color: #2e7d32;"></span>
                                 <span class="legend-text">Rất hài lòng</span>
                             </div>
-                        </div>                        <!-- Sử dụng script type="application/json" cho dữ liệu chi tiết -->
+                        </div>                        
+                        <!-- Sử dụng script type="application/json" cho dữ liệu chi tiết -->
                         <script type="application/json" id="detailedRatingData">
                         {
                             "q1Organization": ${statistics.q1Organization != null ? statistics.q1Organization : 0},
@@ -265,10 +182,9 @@
                             try {
                                 const detailedJsonData = document.getElementById('detailedRatingData').textContent.trim();
                                 window.detailedRatingData = JSON.parse(detailedJsonData);
-                                console.log("Dữ liệu chi tiết từ JSON script:", window.detailedRatingData);
                             } catch (error) {
                                 console.error("Lỗi khi đọc dữ liệu chi tiết từ script JSON:", error);
-                                window.detailedRatingData = {}; // Fallback to empty object
+                                window.detailedRatingData = {}; 
                             }
                         </script>
                     </div>
@@ -433,92 +349,11 @@
       <!-- Footer -->
     <jsp:include page="/view/events-page/footer.jsp" />
 
-    <!-- Biểu đồ vẫn sử dụng JS cũ cho các tính năng khác -->
     <script src="${pageContext.request.contextPath}/js/viewFeedback.js?v=<%= System.currentTimeMillis() %>"></script>
-    
-    <!-- API JSON mới cho biểu đồ đánh giá -->
-    <script src="${pageContext.request.contextPath}/js/feedbackChartAPI.js?v=<%= System.currentTimeMillis() %>"></script>
-
-    <!-- CSS cho loading state và error state -->
-    <style>
-        .chart-loading-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 300px;
-            background-color: #f9f9f9;
-            border-radius: 8px;
-        }
-        
-        .loading-spinner {
-            font-size: 32px;
-            color: #4caf50;
-            margin-bottom: 10px;
-        }
-        
-        .loading-text {
-            font-size: 14px;
-            color: #666;
-        }
-        
-        .chart-error-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 300px;
-            background-color: #fff8f8;
-            border-radius: 8px;
-            border: 1px solid #ffebee;
-        }
-        
-        .error-icon {
-            font-size: 32px;
-            color: #f44336;
-            margin-bottom: 10px;
-        }
-        
-        .error-message {
-            font-size: 14px;
-            color: #d32f2f;
-            margin-bottom: 15px;
-        }
-        
-        .retry-button {
-            background-color: #f44336;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.3s;
-        }
-        
-        .retry-button:hover {
-            background-color: #d32f2f;
-        }
-        
-        #chartContainer {
-            height: 300px;
-            width: 100%;
-            position: relative;
-        }
-        
-        .no-data-message {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            opacity: 0.7;
-        }
-    </style>
+    <script src="${pageContext.request.contextPath}/js/feedbackRatingDistributionChart.js?v=<%= System.currentTimeMillis() %>"></script>
 
     <!-- Khởi tạo phương pháp JSON API theo tham số URL -->
     <script>
-        // Nếu URL có tham số useJsonApi=true, kích hoạt phương pháp mới
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('useJsonApi')) {
             const useJsonApi = urlParams.get('useJsonApi') === 'true';

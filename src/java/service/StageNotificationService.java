@@ -1,14 +1,14 @@
 package service;
 
+import dal.NotificationTemplateDAO;
+import dal.StageNotificationDAO;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import dal.NotificationTemplateDAO;
-import dal.StageNotificationDAO;
 import models.NotificationTemplate;
 import models.StageNotification;
 
-public class NotificationService {
+public class StageNotificationService {
     
     private final NotificationTemplateDAO templateDAO = new NotificationTemplateDAO();
     private final StageNotificationDAO notificationDAO = new StageNotificationDAO();
