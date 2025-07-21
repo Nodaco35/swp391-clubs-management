@@ -170,6 +170,41 @@
         <servlet-class>controller.ApprovalAgendaServlet</servlet-class>
     </servlet>
     <servlet>
+        <servlet-name>ChairmanClubMeetingController</servlet-name>
+        <servlet-class>controller.ChairmanClubMeetingController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>DepartmentFinancialServlet</servlet-name>
+        <servlet-class>controller.DepartmentFinancialServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>DF_MemberIncomeServlet</servlet-name>
+        <servlet-class>controller.DF_MemberIncomeServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>InvoiceServlet</servlet-name>
+        <servlet-class>controller.InvoiceServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ajaxServlet</servlet-name>
+        <servlet-class>com.vnpay.common.ajaxServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>VnpayReturn</servlet-name>
+        <servlet-class>com.vnpay.common.VnpayReturn</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>TransactionController</servlet-name>
+        <servlet-class>controller.TransactionController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>DF_TransactionController</servlet-name>
+        <servlet-class>controller.DF_TransactionController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>DF_IncomeController</servlet-name>
+        <servlet-class>controller.DF_IncomeController</servlet-class>
+    <servlet>
         <servlet-name>AssignFormServlet</servlet-name>
         <servlet-class>controller.AssignFormServlet</servlet-class>
     </servlet>
@@ -365,6 +400,41 @@
         <url-pattern>/recruitment/recruitmentDetail/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
+        <servlet-name>ChairmanClubMeetingController</servlet-name>
+        <url-pattern>/chairman-page/clubmeeting</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DepartmentFinancialServlet</servlet-name>
+        <url-pattern>/department/financial</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DF_MemberIncomeServlet</servlet-name>
+        <url-pattern>/department/financial/income.member</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>InvoiceServlet</servlet-name>
+        <url-pattern>/financial/cart-member-contribution</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ajaxServlet</servlet-name>
+        <url-pattern>/financial/payment</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>VnpayReturn</servlet-name>
+        <url-pattern>/vn_pay/vnpayReturn</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>TransactionController</servlet-name>
+        <url-pattern>/financial/transaction-history</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DF_TransactionController</servlet-name>
+        <url-pattern>/department/financial/club-transaction</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DF_IncomeController</servlet-name>
+        <url-pattern>/department/financial/income</url-pattern>
+      <servlet-mapping>
         <servlet-name>AssignFormServlet</servlet-name>
         <url-pattern>/assign-form</url-pattern>
     </servlet-mapping>

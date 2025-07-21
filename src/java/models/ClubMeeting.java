@@ -4,17 +4,28 @@
  */
 package models;
 import java.sql.Timestamp;
+import java.util.List;
 /**
  *
  * @author he181
  */
 public class ClubMeeting {
+
+   
     private int clubMeetingID;
     private int clubID;
     private String URLMeeting;
     private Timestamp startedTime;
     private String clubName;
     private String clubImg;
+    
+    private Timestamp endTime;
+    private String meetingTitle;
+    private String description;
+    private String document;
+    
+    List<String> participantClubDepartmentIds;
+    
 
     public ClubMeeting() {
     }
@@ -66,9 +77,56 @@ public class ClubMeeting {
     public void setClubImg(String clubImg) {
         this.clubImg = clubImg;
     }
+
+    public Timestamp getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Timestamp endTime) {
+        this.endTime = endTime;
+    }
+
+    public String getMeetingTitle() {
+        return meetingTitle;
+    }
+
+    public void setMeetingTitle(String meetingTitle) {
+        this.meetingTitle = meetingTitle;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getDocument() {
+        return document;
+    }
+
+    public void setDocument(String document) {
+        this.document = document;
+    }
+
+    public List<String> getParticipantClubDepartmentIds() {
+        return participantClubDepartmentIds;
+    }
+
+    public void setParticipantClubDepartmentIds(List<String> participantClubDepartmentIds) {
+        this.participantClubDepartmentIds = participantClubDepartmentIds;
+    }
     
+    
+
     @Override
     public String toString() {
-        return "ClubMeeting{" + "clubMeetingID=" + clubMeetingID + ", clubID=" + clubID + ", URLMeeting=" + URLMeeting + ", startedTime=" + startedTime + ", clubName=" + clubName + '}';
+        return "ClubMeeting{" + "clubMeetingID=" + clubMeetingID + ", clubID=" + clubID + ", URLMeeting=" + URLMeeting + ", startedTime=" + startedTime + ", clubName=" + clubName + ", clubImg=" + clubImg + ", endTime=" + endTime + ", meetingTitle=" + meetingTitle + ", description=" + description + ", document=" + document + '}';
     }
+    
+    
+    
+    
+    
 }
