@@ -67,7 +67,7 @@ public class FormBuilderServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/myclub?error=access_denied&message=" + URLEncoder.encode("ID CLB không hợp lệ.", StandardCharsets.UTF_8.name()));
             return;
         }
-        // Kiểm tra quyền truy cập (chỉ cho roleId 1-3) trong CLB cụ thể
+        // Kiểm tra quyền truy cập trong CLB cụ thể
         UserClub userClub = userClubDAO.getUserClubManagementRole(userId, clubId);
 
         if (userClub == null || userClub.getRoleID() < 1 || userClub.getRoleID() > 3) {
@@ -90,41 +90,31 @@ public class FormBuilderServlet extends HttpServlet {
                 int formId = Integer.parseInt(formIdStr);
                 ApplicationForm form = formDAO.getFormById(formId);
                 if (form != null && form.getClubId() == userClub.getClubID()) {
-                    // Kiểm tra xem form đã có phản hồi nào chưa
                     boolean formHasResponses = false;
                     formHasResponses = responseDAO.hasResponsesByFormId(formId);
                     if (formHasResponses) {
                         // Nếu form đã có phản hồi, không cho phép chỉnh sửa và chuyển hướng về trang quản lý với thông báo
-                        LOGGER.log(Level.INFO, "DEBUG: Form has responses, redirecting to formManagement");
                         response.sendRedirect(request.getContextPath() + "/formManagement?clubId=" + form.getClubId() + "&error=edit_denied&message="
                                 + URLEncoder.encode("Không thể chỉnh sửa form đã có người điền. Vui lòng tạo form mới.", StandardCharsets.UTF_8.name()));
                         return;
                     }
                     
                     List<ApplicationFormTemplate> formQuestions = formTemplateDAO.getTemplatesByFormId(formId);
-                    if (formQuestions != null && !formQuestions.isEmpty()) {
-                        LOGGER.log(Level.INFO, "DEBUG: First question: FieldName={0}, FieldType={1}", 
-                                  new Object[]{formQuestions.get(0).getFieldName(), formQuestions.get(0).getFieldType()});
-                    }
-                    
                     request.setAttribute("formTitleToEdit", form.getTitle());
                     request.setAttribute("formTypeToEdit", form.getFormType());
                     request.setAttribute("formQuestions", formQuestions);
                     request.setAttribute("editingFormId", formId);
-                } // Chỉ cho phép chỉnh sửa form của club hiện tại
+                }
                 else {
                     response.sendRedirect(request.getContextPath() + "/myclub?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền chỉnh sửa form này.", StandardCharsets.UTF_8.name()));
                     return;
                 }
             } catch (NumberFormatException e) {
                 LOGGER.log(Level.SEVERE, "Invalid formId format: " + formIdStr, e);
-                request.setAttribute("errorMessage", "ID form không hợp lệ.");
             } catch (SQLException e) {
                 LOGGER.log(Level.SEVERE, "Error loading form data", e);
-                request.setAttribute("errorMessage", "Không thể tải dữ liệu form: " + e.getMessage());
             }
         }
-        // Forward đến trang JSP dù có formId hay không (tạo mới hoặc chỉnh sửa)
         request.getRequestDispatcher("/view/student/chairman/formBuilder.jsp").forward(request, response);
     }
 
@@ -148,14 +138,12 @@ public class FormBuilderServlet extends HttpServlet {
             return;
         }
         
-        // Kiểm tra quyền truy cập trong club cụ thể (chỉ cho roleId 1-3)
         UserClub userClub = userClubDAO.getUserClubManagementRole(userId, clubId);
         if (userClub == null || userClub.getRoleID() < 1 || userClub.getRoleID() > 3) {
             response.sendRedirect(request.getContextPath() + "/myclub?error=access_denied&message="
                     + URLEncoder.encode("Bạn không có quyền quản lý form trong câu lạc bộ này.", StandardCharsets.UTF_8.name()));
             return;
         }
-        // Lưu userClub vào session để sử dụng sau này
         session.setAttribute("userClub", userClub);
         String action = request.getParameter("action");
         if ("save".equals(action) || "publish".equals(action)) {
@@ -192,33 +180,24 @@ public class FormBuilderServlet extends HttpServlet {
 
     private int saveForm(HttpServletRequest request, int clubId, boolean publish) throws Exception {
         String formTitle = request.getParameter("formTitle");
-        String formTypeClient = request.getParameter("formType"); // "member" hoặc "event"
+        String formTypeClient = request.getParameter("formType");
         String questionsJson = request.getParameter("questions");
         String editingFormIdStr = request.getParameter("editingFormId"); // ID của form đang sửa, hoặc null/empty nếu tạo mới
 
-        LOGGER.log(Level.INFO, "DEBUG SAVE: Starting saveForm. clubId={0}, publish={1}", new Object[]{clubId, publish});
-        LOGGER.log(Level.INFO, "DEBUG SAVE: FormTitle={0}, FormType={1}", new Object[]{formTitle, formTypeClient});
-        LOGGER.log(Level.INFO, "DEBUG SAVE: EditingFormId raw value={0}", editingFormIdStr);
-        LOGGER.log(Level.INFO, "DEBUG SAVE: EditingFormId is null? {0}", editingFormIdStr == null);
-        LOGGER.log(Level.INFO, "DEBUG SAVE: EditingFormId is empty? {0}", editingFormIdStr != null && editingFormIdStr.isEmpty());
-        LOGGER.log(Level.INFO, "DEBUG SAVE: QuestionsJson length={0}", questionsJson != null ? questionsJson.length() : 0);
         if (formTitle == null || formTitle.trim().isEmpty()) {
-            LOGGER.log(Level.WARNING, "DEBUG SAVE: Empty form title");
             throw new SQLException("Tiêu đề form không được để trống.");
         }
         if (formTypeClient == null || formTypeClient.trim().isEmpty()) {
-            LOGGER.log(Level.WARNING, "DEBUG SAVE: Empty form type");
             throw new SQLException("Loại form không được để trống.");
         }
         if (questionsJson == null || questionsJson.trim().isEmpty()) {
-            LOGGER.log(Level.WARNING, "DEBUG SAVE: Empty questions JSON");
             throw new SQLException("Dữ liệu câu hỏi không hợp lệ.");
         }
         String dbFormType = "member".equalsIgnoreCase(formTypeClient) ? "Club" : "Event";
         JSONArray questionsArray = new JSONArray(questionsJson);
         // Xử lý trường hợp đang chỉnh sửa form
         int formId;
-        // Kiểm tra câu hỏi "Chọn ban" cho form loại "member"
+
         boolean hasDepartmentQuestion = false;
         if ("member".equalsIgnoreCase(formTypeClient)) {
             for (int i = 0; i < questionsArray.length(); i++) {
@@ -236,7 +215,6 @@ public class FormBuilderServlet extends HttpServlet {
         }
 
         if (editingFormIdStr != null && !editingFormIdStr.isEmpty()) {
-            LOGGER.log(Level.INFO, "DEBUG SAVE: Editing existing form with ID={0}", editingFormIdStr);
             
             formId = Integer.parseInt(editingFormIdStr);
             ApplicationForm form = formDAO.getFormById(formId);      
@@ -260,13 +238,8 @@ public class FormBuilderServlet extends HttpServlet {
             List<Integer> existingDbQuestionIds = new ArrayList<>();
             List<ApplicationFormTemplate> existingTemplates = formTemplateDAO.getTemplatesByFormId(formId);
             
-            LOGGER.log(Level.INFO, "DEBUG SAVE: Retrieved {0} existing templates for form", 
-                       existingTemplates != null ? existingTemplates.size() : 0);
-            
             for (ApplicationFormTemplate template : existingTemplates) {
                 existingDbQuestionIds.add(template.getTemplateId());
-                LOGGER.log(Level.INFO, "DEBUG SAVE: Existing template: ID={0}, FieldName={1}, FieldType={2}", 
-                          new Object[]{template.getTemplateId(), template.getFieldName(), template.getFieldType()});
             }
             // Duyệt qua các câu hỏi từ client và cập nhật/thêm mới
         Set<Integer> processedQuestionIds = new HashSet<>();
@@ -297,27 +270,21 @@ public class FormBuilderServlet extends HttpServlet {
 
             // Kiểm tra xem câu hỏi đã tồn tại trong DB chưa
             String clientId = q.getString("id");
-            LOGGER.log(Level.INFO, "DEBUG SAVE: Processing question with client ID={0}, label={1}, type={2}",
-                      new Object[]{clientId, q.getString("label"), q.getString("type")});
             
             int currentQuestionDbId = -1;
             try {
                 currentQuestionDbId = Integer.parseInt(clientId);
-                LOGGER.log(Level.INFO, "DEBUG SAVE: Client ID is numeric: {0}", currentQuestionDbId);
             } catch (NumberFormatException e) {
-                LOGGER.log(Level.INFO, "DEBUG SAVE: Client ID is not numeric, treating as new question");
             }
 
             if (currentQuestionDbId != -1 && existingDbQuestionIds.contains(currentQuestionDbId)) {
                 // Cập nhật câu hỏi hiện có
-                LOGGER.log(Level.INFO, "DEBUG SAVE: Updating existing question with ID={0}", currentQuestionDbId);
                 template.setTemplateId(currentQuestionDbId);
                 formTemplateDAO.updateTemplate(template);
                 processedQuestionIds.add(currentQuestionDbId);
             } else {
                 // Thêm câu hỏi mới
                 formTemplateDAO.saveFormTemplate(template);
-                LOGGER.log(Level.INFO, "DEBUG SAVE: New question saved successfully");
             }
         }
         // Xóa các câu hỏi không được gửi lại từ client
@@ -328,9 +295,6 @@ public class FormBuilderServlet extends HttpServlet {
         }
         //Tao form moi
         } else {
-            LOGGER.log(Level.INFO, "DEBUG SAVE: Creating new form with title={0}, type={1}, clubId={2}, publish={3}", 
-                       new Object[]{formTitle, dbFormType, clubId, publish});
-                       
             ApplicationForm newForm = new ApplicationForm();
             newForm.setClubId(clubId);
             newForm.setFormType(dbFormType);
@@ -338,7 +302,6 @@ public class FormBuilderServlet extends HttpServlet {
             newForm.setPublished(publish);
             
             formId = formDAO.createForm(newForm);
-            LOGGER.log(Level.INFO, "DEBUG SAVE: New form created with ID={0}", formId);
         // Thêm các câu hỏi mới
         for (int i = 0; i < questionsArray.length(); i++) {
             JSONObject q = questionsArray.getJSONObject(i);

@@ -319,7 +319,7 @@
                                                                             items="${clubDepartments}"
                                                                             varStatus="status">
                                                                             <div class="option-item"
-                                                                                data-id="opt-dept-${department.departmentId}">
+                                                                                data-id="opt-dept-${department.clubDepartmentId}">
                                                                                 <div class="option-header">
                                                                                     <span
                                                                                         class="option-number">${status.count}.</span>
@@ -624,31 +624,26 @@
                                 <script>
                                     window.clubDepartments = [
                                         <c:forEach var="department" items="${clubDepartments}" varStatus="status">
-                                            {id: "${department.departmentId}", name: "${fn:escapeXml(department.departmentName)}" }<c:if test="${not status.last}">,</c:if>
+                                            {id: "${department.clubDepartmentId}", name: "${fn:escapeXml(department.departmentName)}" }<c:if test="${not status.last}">,</c:if>
                                         </c:forEach>
                                     ];
                                 </script>
                                 <script>
-                                    // Đảm bảo toggleEventField được gọi sau khi DOM sẵn sàng và formType đã có giá trị (nếu có)
                                     document.addEventListener('DOMContentLoaded', function () {
                                         const formTypeSelect = document.getElementById('formType');
                                         if (formTypeSelect && formTypeSelect.value) {
                                             toggleEventField(formTypeSelect);
                                         }
-                                        // Cập nhật lại preview nếu đang ở tab preview khi tải trang
                                         if (document.querySelector('.tab-item[data-tab="preview"].active')) {
-                                            const updatePreviewFunc = window.updatePreview; // Giả sử updatePreview được expose global hoặc có cách gọi khác
+                                            const updatePreviewFunc = window.updatePreview;
                                             if (typeof updatePreviewFunc === 'function') {
                                                 updatePreviewFunc();
                                             }
                                         }
 
-                                        // Back to top button functionality
                                         const backToTopBtn = document.getElementById('backToTop');
 
                                         if (backToTopBtn) {
-                                            console.log('Back to top button found, setting up event listeners');
-
                                             // Show/hide button based on scroll position
                                             window.addEventListener('scroll', function () {
                                                 if (window.pageYOffset > 300) {
@@ -660,7 +655,6 @@
 
                                             // Smooth scroll to top when clicked
                                             backToTopBtn.addEventListener('click', function () {
-                                                console.log('Back to top button clicked');
                                                 window.scrollTo({
                                                     top: 0,
                                                     behavior: 'smooth'

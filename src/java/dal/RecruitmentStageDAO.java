@@ -267,40 +267,6 @@ public class RecruitmentStageDAO {
         }
     }
     
-    // Cập nhật trạng thái của tất cả các vòng tuyển dựa trên ngày hiện tại
-    public int syncAllStagesStatus() {
-        int updatedCount = 0;
-        try {
-            conn = DBContext.getConnection();
-            
-            // Cập nhật vòng đã kết thúc
-            String sqlClosed = "UPDATE RecruitmentStages SET Status = 'CLOSED' WHERE EndDate < CURRENT_DATE";
-            ps = conn.prepareStatement(sqlClosed);
-            updatedCount += ps.executeUpdate();
-            
-            // Cập nhật vòng đang diễn ra
-            String sqlOngoing = "UPDATE RecruitmentStages SET Status = 'ONGOING' " +
-                               "WHERE StartDate <= CURRENT_DATE AND EndDate >= CURRENT_DATE";
-            ps = conn.prepareStatement(sqlOngoing);
-            updatedCount += ps.executeUpdate();
-            
-            // Cập nhật vòng sắp tới
-            String sqlUpcoming = "UPDATE RecruitmentStages SET Status = 'UPCOMING' " +
-                                "WHERE StartDate > CURRENT_DATE";
-            ps = conn.prepareStatement(sqlUpcoming);
-            updatedCount += ps.executeUpdate();
-            
-            System.out.println("DEBUG - RecruitmentStageDAO: Đã đồng bộ " + updatedCount + " trạng thái vòng tuyển");
-            
-        } catch (SQLException e) {
-            System.out.println("DEBUG - RecruitmentStageDAO: Lỗi đồng bộ status: " + e.getMessage());
-            e.printStackTrace();
-        } finally {
-            closeResources();
-        }
-        return updatedCount;
-    }
-    
     // Phương thức hỗ trợ xác định trạng thái vòng dựa trên ngày
     public String determineStageStatus(Date startDate, Date endDate) {
         if (startDate == null || endDate == null) {

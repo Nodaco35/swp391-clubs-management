@@ -3,6 +3,7 @@ package controller;
 import dal.EventParticipantDAO;
 import dal.EventsDAO;
 import dal.FeedbackDAO;
+import java.net.URLEncoder;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,7 +13,6 @@ import models.Events;
 import models.Feedback;
 import models.Users;
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 
