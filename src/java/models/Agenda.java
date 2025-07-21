@@ -3,38 +3,66 @@ package models;
 import java.sql.Timestamp;
 
 public class Agenda {
-
     private int agendaID;
-    private int eventID;
+    private int scheduleID; // Thay eventID bằng scheduleID
     private String title;
     private String description;
     private String status;
     private String reason;
     private Timestamp startTime;
     private Timestamp endTime;
-    private Events event;
+    private EventSchedule eventSchedule; // Thay Events bằng EventSchedule
+
+    // Constructor mặc định
     public Agenda() {
     }
 
-    public Agenda(int agendaID, Timestamp endTime, Timestamp startTime, String title, String description, int eventID) {
+    // Constructor đầy đủ
+    public Agenda(int agendaID, int scheduleID, String title, String description,
+                  String status, String reason, Timestamp startTime, Timestamp endTime,
+                  EventSchedule eventSchedule) {
         this.agendaID = agendaID;
-        this.endTime = endTime;
-        this.startTime = startTime;
+        this.scheduleID = scheduleID;
         this.title = title;
         this.description = description;
-        this.eventID = eventID;
+        this.status = status;
+        this.reason = reason;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.eventSchedule = eventSchedule;
     }
 
-    public Agenda(Events event, Timestamp endTime, Timestamp startTime, String reason, String status, String description, String title, int eventID, int agendaID) {
-        this.event = event;
-        this.endTime = endTime;
-        this.startTime = startTime;
-        this.reason = reason;
-        this.status = status;
-        this.description = description;
-        this.title = title;
-        this.eventID = eventID;
+    // Getters và Setters
+    public int getAgendaID() {
+        return agendaID;
+    }
+
+    public void setAgendaID(int agendaID) {
         this.agendaID = agendaID;
+    }
+
+    public int getScheduleID() {
+        return scheduleID;
+    }
+
+    public void setScheduleID(int scheduleID) {
+        this.scheduleID = scheduleID;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getStatus() {
@@ -53,20 +81,12 @@ public class Agenda {
         this.reason = reason;
     }
 
-    public Events getEvent() {
-        return event;
+    public Timestamp getStartTime() {
+        return startTime;
     }
 
-    public void setEvent(Events event) {
-        this.event = event;
-    }
-
-    public int getAgendaID() {
-        return agendaID;
-    }
-
-    public void setAgendaID(int agendaID) {
-        this.agendaID = agendaID;
+    public void setStartTime(Timestamp startTime) {
+        this.startTime = startTime;
     }
 
     public Timestamp getEndTime() {
@@ -77,35 +97,11 @@ public class Agenda {
         this.endTime = endTime;
     }
 
-    public Timestamp getStartTime() {
-        return startTime;
+    public EventSchedule getEventSchedule() {
+        return eventSchedule;
     }
 
-    public void setStartTime(Timestamp startTime) {
-        this.startTime = startTime;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public int getEventID() {
-        return eventID;
-    }
-
-    public void setEventID(int eventID) {
-        this.eventID = eventID;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
+    public void setEventSchedule(EventSchedule eventSchedule) {
+        this.eventSchedule = eventSchedule;
     }
 }

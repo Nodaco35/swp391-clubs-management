@@ -1,8 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
-
 package controller;
 
 import java.io.IOException;
@@ -11,10 +6,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.sql.Date;
+import java.sql.Time;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import dal.ClubDAO;
@@ -23,9 +19,7 @@ import dal.LocationDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.*;
-import models.ClubInfo;
-import models.Locations;
-import models.Users;
+import models.*;
 
 /**
  * @author LE VAN THUAN
@@ -37,19 +31,13 @@ import models.Users;
 )
 public class AddEventServlet extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
-     *
-     * @param request  servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException      if an I/O error occurs
-     */
+    private static final String UPLOAD_DIR = "images/events";
+    private static final String[] ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif"};
+
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
@@ -61,20 +49,6 @@ public class AddEventServlet extends HttpServlet {
             out.println("</html>");
         }
     }
-
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request  servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException      if an I/O error occurs
-     */
-
-    private static final String UPLOAD_DIR = "images/events";
-    private static final String[] ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif"};
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -96,23 +70,13 @@ public class AddEventServlet extends HttpServlet {
             request.setAttribute("club", club);
             String currentPath = request.getServletPath();
             request.setAttribute("currentPath", currentPath);
-
             request.setAttribute("locations", locationDAO.getLocationsByType("OnCampus"));
-
             request.getRequestDispatcher("/view/student/chairman/add-event.jsp").forward(request, response);
         } else {
             response.sendRedirect(request.getContextPath() + "/login");
         }
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request  servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException      if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -134,14 +98,14 @@ public class AddEventServlet extends HttpServlet {
         }
 
         String eventName = request.getParameter("eventName");
-        String eventLocationIDStr = request.getParameter("eventLocation");
         String maxParticipantsStr = request.getParameter("maxParticipants");
-        String eventDate = request.getParameter("eventDate");
-        String eventTime = request.getParameter("eventTime");
-        String eventEndTime = request.getParameter("eventEndTime");
         String eventType = request.getParameter("eventType");
         String eventDescription = request.getParameter("eventDescription");
         String locationType = request.getParameter("locationType");
+        String[] eventDates = request.getParameterValues("eventDate[]");
+        String[] eventLocationIDs = request.getParameterValues("eventLocation[]");
+        String[] eventStartTimes = request.getParameterValues("eventTime[]");
+        String[] eventEndTimes = request.getParameterValues("eventEndTime[]");
 
         String eventImgPath = null;
         Part imagePart = request.getPart("eventImg");
@@ -171,7 +135,6 @@ public class AddEventServlet extends HttpServlet {
                     eventImgPath = UPLOAD_DIR + "/" + uniqueFileName;
 
                     String buildUploadPath = getServletContext().getRealPath("/") + UPLOAD_DIR;
-                    System.err.println("Build Upload Path: " + buildUploadPath);
                     Path buildUploadDir = Paths.get(buildUploadPath);
                     if (!Files.exists(buildUploadDir)) {
                         Files.createDirectories(buildUploadDir);
@@ -182,19 +145,12 @@ public class AddEventServlet extends HttpServlet {
                     String contextPath = getServletContext().getRealPath("/");
                     String projectRoot = Paths.get(contextPath).getParent().getParent().toString();
                     String sourceUploadPath = Paths.get(projectRoot, "web", UPLOAD_DIR).toString();
-                    System.err.println("Source Upload Path: " + sourceUploadPath);
-
                     Path sourceUploadDir = Paths.get(sourceUploadPath);
                     if (!Files.exists(sourceUploadDir)) {
-                        System.err.println("Thư mục source không tồn tại, đang tạo: " + sourceUploadDir);
                         Files.createDirectories(sourceUploadDir);
                     }
-
                     Path sourceFilePath = sourceUploadDir.resolve(uniqueFileName);
-                    System.err.println("Source File Path: " + sourceFilePath);
-
                     Files.copy(buildFilePath, sourceFilePath, StandardCopyOption.REPLACE_EXISTING);
-                    System.err.println("File copied to: " + sourceFilePath);
 
                 } catch (IOException e) {
                     request.setAttribute("errorMessage", "Lỗi khi upload ảnh: " + e.getMessage());
@@ -207,23 +163,20 @@ public class AddEventServlet extends HttpServlet {
         }
 
         if (eventName == null || eventName.trim().isEmpty() ||
-                eventLocationIDStr == null || eventLocationIDStr.trim().isEmpty() ||
                 maxParticipantsStr == null || maxParticipantsStr.trim().isEmpty() ||
-                eventDate == null || eventDate.trim().isEmpty() ||
-                eventTime == null || eventTime.trim().isEmpty() ||
-                eventEndTime == null || eventEndTime.trim().isEmpty()) {
-
+                eventDates == null || eventDates.length == 0 ||
+                eventLocationIDs == null || eventLocationIDs.length == 0 ||
+                eventStartTimes == null || eventStartTimes.length == 0 ||
+                eventEndTimes == null || eventEndTimes.length == 0) {
             LocationDAO locationDAO = new LocationDAO();
             request.setAttribute("locations", locationDAO.getLocationsByType(locationType != null ? locationType : "OnCampus"));
             request.setAttribute("locationType", locationType);
-            request.setAttribute("errorMessage", "Bạn có thể thêm địa điểm nếu chưa có sẵn!.");
-
+            request.setAttribute("errorMessage", "Vui lòng điền đầy đủ thông tin sự kiện và ít nhất một lịch trình.");
             if (user != null) {
                 String userID = user.getUserID();
                 ClubInfo club = clubDAO.getClubChairman(userID);
                 request.setAttribute("club", club);
             }
-
             request.getRequestDispatcher("/view/student/chairman/add-event.jsp").forward(request, response);
             return;
         }
@@ -238,38 +191,54 @@ public class AddEventServlet extends HttpServlet {
 
         try {
             int maxParticipants = Integer.parseInt(maxParticipantsStr);
-            int locationId = Integer.parseInt(eventLocationIDStr);
-
             if (maxParticipants <= 0 || maxParticipants > 10000) {
-                request.setAttribute("errorMessage", "Số lượng tối đa phải lớn hơn 0 hoặc nhỏ hơn 10000 người");
+                request.setAttribute("errorMessage", "Số lượng tối đa phải lớn hơn 0 và nhỏ hơn 10000 người.");
                 request.setAttribute("locations", locationDAO.getLocationsByType(locationType != null ? locationType : "OnCampus"));
                 request.getRequestDispatcher("/view/student/chairman/add-event.jsp").forward(request, response);
                 return;
             }
 
-            if (locationId <= 0) {
-                request.setAttribute("errorMessage", "Vui lòng chọn một địa điểm hợp lệ.");
-                request.setAttribute("locations", locationDAO.getLocationsByType(locationType != null ? locationType : "OnCampus"));
-                request.getRequestDispatcher("/view/student/chairman/add-event.jsp").forward(request, response);
-                return;
-            }
-
-            Timestamp startDateTime = Timestamp.valueOf(eventDate + " " + eventTime + ":00");
-            Timestamp endDateTime = Timestamp.valueOf(eventDate + " " + eventEndTime + ":00");
-
+            List<EventSchedule> schedules = new ArrayList<>();
             EventsDAO dao = new EventsDAO();
+            for (int i = 0; i < eventDates.length; i++) {
+                int locationId = Integer.parseInt(eventLocationIDs[i]);
+                if (locationId <= 0) {
+                    request.setAttribute("errorMessage", "Vui lòng chọn địa điểm hợp lệ cho lịch trình thứ " + (i + 1) + ".");
+                    request.setAttribute("locations", locationDAO.getLocationsByType(locationType != null ? locationType : "OnCampus"));
+                    request.getRequestDispatcher("/view/student/chairman/add-event.jsp").forward(request, response);
+                    return;
+                }
 
-            if (dao.isLocationConflict(locationId, startDateTime, endDateTime)) {
-                request.setAttribute("errorMessage", "Địa điểm đã được sử dụng trong khoảng thời gian này.");
-                request.setAttribute("locations", locationDAO.getLocationsByType(locationType != null ? locationType : "OnCampus"));
-                request.getRequestDispatcher("/view/student/chairman/add-event.jsp").forward(request, response);
-                return;
+                Timestamp startDateTime = Timestamp.valueOf(eventDates[i] + " " + eventStartTimes[i] + ":00");
+                Timestamp endDateTime = Timestamp.valueOf(eventDates[i] + " " + eventEndTimes[i] + ":00");
+
+                if (dao.isLocationConflictAdd(locationId, startDateTime, endDateTime)) {
+                    request.setAttribute("errorMessage", "Địa điểm đã được sử dụng trong khoảng thời gian của lịch trình thứ " + (i + 1) + ".");
+                    request.setAttribute("locations", locationDAO.getLocationsByType(locationType != null ? locationType : "OnCampus"));
+                    request.getRequestDispatcher("/view/student/chairman/add-event.jsp").forward(request, response);
+                    return;
+                }
+
+                EventSchedule schedule = new EventSchedule();
+                schedule.setEventDate(Date.valueOf(eventDates[i]));
+                schedule.setLocationID(locationId);
+                schedule.setStartTime(Time.valueOf(eventStartTimes[i] + ":00"));
+                schedule.setEndTime(Time.valueOf(eventEndTimes[i] + ":00"));
+                schedules.add(schedule);
             }
 
             boolean isPublic = "public".equalsIgnoreCase(eventType);
+            int newEventID = dao.addEvent(eventName, eventDescription, myClubID, isPublic, maxParticipants, eventImgPath, schedules);
 
-            // Insert event and get the generated event ID
-            int newEventID = dao.addEvent(eventName, eventDescription, startDateTime, endDateTime, locationId, myClubID, isPublic, maxParticipants, eventImgPath);
+            // Lấy thông tin sự kiện mới để hiển thị lịch trình và agenda
+            Events newEvent = dao.getEventByID(newEventID);
+            request.setAttribute("event", newEvent);
+
+            // Lưu thông tin lịch trình đã nhập để hiển thị lại trong form
+            request.setAttribute("eventDates", eventDates);
+            request.setAttribute("eventLocationIDs", eventLocationIDs);
+            request.setAttribute("eventStartTimes", eventStartTimes);
+            request.setAttribute("eventEndTimes", eventEndTimes);
 
             session.setAttribute("successMsg", "Thêm sự kiện thành công! Vui lòng thêm Agenda cho sự kiện ở bên dưới.");
             session.setAttribute("newEventID", newEventID);
@@ -291,14 +260,8 @@ public class AddEventServlet extends HttpServlet {
         }
     }
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
     @Override
     public String getServletInfo() {
         return "Short description";
-    }// </editor-fold>
-
+    }
 }

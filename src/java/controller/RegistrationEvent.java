@@ -190,7 +190,15 @@ public class RegistrationEvent extends HttpServlet {
 
             // Save to ApplicationResponses
             ApplicationResponse appResponse = new ApplicationResponse();
-            appResponse.setFormID(event.getFormID());
+            Integer formID = event.getFormID();
+            if (formID == null) {
+                request.setAttribute("message", "❌ Sự kiện này chưa có đơn đăng ký, vui lòng liên hệ chủ nhiệm để thêm form câu hỏi.");
+                request.setAttribute("messageType", "error");
+                reloadEventAndUserDetails(request, response, eventIDRaw);
+                return;
+            }
+
+            appResponse.setFormID(formID);
             appResponse.setUserID(user.getUserID());
             appResponse.setClubID(event.getClubID()); // Assuming Events has a getClubID method
             appResponse.setEventID(eventID);

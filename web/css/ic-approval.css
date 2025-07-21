@@ -815,6 +815,29 @@ a.close {
     color: #721c24;
 }
 
+#locationFilter {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 15px;
+    color: #374151;
+    background-color: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none; /* Ẩn mũi tên mặc định (để tùy chỉnh nếu muốn) */
+    background-image: url('data:image/svg+xml;charset=UTF-8,<svg fill="gray" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M5.23 7.21a.75.75 0 011.06.02L10 11.186l3.71-3.954a.75.75 0 111.08 1.04l-4.25 4.528a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 1em;
+}
+
+#locationFilter:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+
 .no-agenda-message {
     text-align: center;
     padding: 30px;

@@ -1,116 +1,61 @@
 package models;
-
-import java.util.Date;
+import java.util.List;
 
 public class Events {
-
     private int eventID;
     private String eventName;
     private String eventImg;
     private String description;
-
-    private Date eventDate;
-    private Date endTime;
-
     private int clubID;
     private boolean isPublic;
     private Integer formID;
-
     private int capacity;
     private String status;
-
     private String approvalStatus;
     private String rejectionReason;
-
     private String semesterID;
 
-    // Thêm các trường bổ sung cho hiển thị
+    // Thêm danh sách lịch trình
+    private List<EventSchedule> schedules; // Danh sách các lịch trình của sự kiện
+
+    // Các trường bổ sung cho hiển thị
     private String clubName;
     private String clubImg;
-
-    //Them de tinh so nguoi da tham gia su kien
     private int registered;
     private int spotsLeft;
-
-    private Locations location;
-
     private int agendaCount;
 
-
-
+    // Constructor mặc định
     public Events() {
     }
 
-    public Events(int eventID, Locations location, int spotsLeft, int registered, String clubImg, String clubName, String semesterID, String status, int capacity, boolean isPublic, int formID, int clubID, Date endTime, String description, Date eventDate, String eventImg, String eventName) {
+    // Constructor đầy đủ
+    public Events(int eventID, String eventName, String eventImg, String description, int clubID,
+                  boolean isPublic, Integer formID, int capacity, String status,
+                  String approvalStatus, String rejectionReason, String semesterID,
+                  List<EventSchedule> schedules, String clubName, String clubImg,
+                  int registered, int spotsLeft, int agendaCount) {
         this.eventID = eventID;
-        this.location = location;
-        this.spotsLeft = spotsLeft;
-        this.registered = registered;
-        this.clubImg = clubImg;
-        this.clubName = clubName;
-        this.semesterID = semesterID;
-        this.status = status;
-        this.capacity = capacity;
+        this.eventName = eventName;
+        this.eventImg = eventImg;
+        this.description = description;
+        this.clubID = clubID;
         this.isPublic = isPublic;
         this.formID = formID;
-        this.clubID = clubID;
-        this.endTime = endTime;
-        this.description = description;
-        this.eventDate = eventDate;
-        this.eventImg = eventImg;
-        this.eventName = eventName;
-    }
-
-    public Events(int eventID, Locations location, int spotsLeft, int registered, String clubImg, String clubName, String semesterID, String rejectionReason, String approvalStatus, String status, int capacity, int formTemplateID, boolean isPublic, int clubID, Date endTime, Date eventDate, String eventImg, String description, String eventName) {
-        this.eventID = eventID;
-        this.location = location;
-        this.spotsLeft = spotsLeft;
-        this.registered = registered;
-        this.clubImg = clubImg;
-        this.clubName = clubName;
-        this.semesterID = semesterID;
-        this.rejectionReason = rejectionReason;
-        this.approvalStatus = approvalStatus;
+        this.capacity = capacity;
         this.status = status;
-        this.capacity = capacity;
-        this.formID = formTemplateID;
-        this.isPublic = isPublic;
-        this.clubID = clubID;
-        this.endTime = endTime;
-        this.eventDate = eventDate;
-        this.eventImg = eventImg;
-        this.description = description;
-        this.eventName = eventName;
-    }
-
-
-    public int getAgendaCount() { return agendaCount; }
-    public void setAgendaCount(int agendaCount) { this.agendaCount = agendaCount; }
-
-    public String getRejectionReason() {
-        return rejectionReason;
-    }
-
-    public void setRejectionReason(String rejectionReason) {
-        this.rejectionReason = rejectionReason;
-    }
-
-    public String getApprovalStatus() {
-        return approvalStatus;
-    }
-
-    public void setApprovalStatus(String approvalStatus) {
         this.approvalStatus = approvalStatus;
+        this.rejectionReason = rejectionReason;
+        this.semesterID = semesterID;
+        this.schedules = schedules;
+        this.clubName = clubName;
+        this.clubImg = clubImg;
+        this.registered = registered;
+        this.spotsLeft = spotsLeft;
+        this.agendaCount = agendaCount;
     }
 
-    public int getCapacity() {
-        return capacity;
-    }
-
-    public void setCapacity(int capacity) {
-        this.capacity = capacity;
-    }
-
+    // Getters và Setters
     public int getEventID() {
         return eventID;
     }
@@ -143,30 +88,6 @@ public class Events {
         this.description = description;
     }
 
-    public Date getEventDate() {
-        return eventDate;
-    }
-
-    public void setEventDate(Date eventDate) {
-        this.eventDate = eventDate;
-    }
-
-    public Date getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(Date endTime) {
-        this.endTime = endTime;
-    }
-
-    public Locations getLocation() {
-        return location;
-    }
-
-    public void setLocation(Locations location) {
-        this.location = location;
-    }
-
     public int getClubID() {
         return clubID;
     }
@@ -179,8 +100,8 @@ public class Events {
         return isPublic;
     }
 
-    public void setPublic(boolean aPublic) {
-        isPublic = aPublic;
+    public void setPublic(boolean isPublic) {
+        this.isPublic = isPublic;
     }
 
     public Integer getFormID() {
@@ -191,12 +112,52 @@ public class Events {
         this.formID = formID;
     }
 
+    public int getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
+    }
+
     public String getStatus() {
         return status;
     }
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getApprovalStatus() {
+        return approvalStatus;
+    }
+
+    public void setApprovalStatus(String approvalStatus) {
+        this.approvalStatus = approvalStatus;
+    }
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
+    }
+
+    public String getSemesterID() {
+        return semesterID;
+    }
+
+    public void setSemesterID(String semesterID) {
+        this.semesterID = semesterID;
+    }
+
+    public List<EventSchedule> getSchedules() {
+        return schedules;
+    }
+
+    public void setSchedules(List<EventSchedule> schedules) {
+        this.schedules = schedules;
     }
 
     public String getClubName() {
@@ -231,11 +192,11 @@ public class Events {
         this.spotsLeft = spotsLeft;
     }
 
-    public String getSemesterID() {
-        return semesterID;
+    public int getAgendaCount() {
+        return agendaCount;
     }
 
-    public void setSemesterID(String semesterID) {
-        this.semesterID = semesterID;
+    public void setAgendaCount(int agendaCount) {
+        this.agendaCount = agendaCount;
     }
 }

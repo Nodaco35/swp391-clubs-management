@@ -478,6 +478,55 @@ body {
     font-size: 1.1rem;
 }
 
+.form-group {
+    margin-bottom: 20px;
+}
+
+label[for="locationFilter"] {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+#locationFilter {
+    padding: 8px 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #fff;
+    transition: border-color 0.3s ease;
+}
+
+#locationFilter:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+label[for="dateFilter"] {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+#dateFilter {
+    padding: 8px 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #fff;
+    transition: border-color 0.3s ease;
+    margin-top: 10px; 
+}
+
+#dateFilter:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+
+
 .agenda-timeline {
     background: white;
     border-radius: 12px;
@@ -500,6 +549,28 @@ body {
     color: #2563eb;
 }
 
+.agenda-group {
+    margin-bottom: 25px;
+    padding: 10px;
+    border-left: 4px solid #007BFF;
+    background-color: #f9f9f9;
+    border-radius: 6px;
+}
+.location-header {
+    margin-bottom: 10px;
+    color: #007BFF;
+    font-weight: bold;
+}
+.agenda-item {
+    padding: 10px 0;
+    border-bottom: 1px dashed #ccc;
+}
+.agenda-time {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+
 .agenda-item {
     display: flex;
     gap: 1.5rem;
@@ -507,7 +578,6 @@ body {
     padding: 1.5rem;
     background: #f8fafc;
     border-radius: 12px;
-    border-left: 4px solid var(--primary);
     position: relative;
     transition: all 0.2s ease;
 }
