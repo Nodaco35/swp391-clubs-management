@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import models.*;
-import service.NotificationService;
+import service.StageNotificationService;
 import service.RecruitmentService;
 
 import java.io.IOException;
@@ -28,7 +28,7 @@ public class RecruitmentApiServlet extends HttpServlet {
     private static final Logger logger = Logger.getLogger(RecruitmentApiServlet.class.getName());
     
     // Các service đã có sẵn
-    private final NotificationService notificationService = new NotificationService();
+    private final StageNotificationService notificationService = new StageNotificationService();
     private final RecruitmentService recruitmentService = new RecruitmentService();
     
     // Các DAO để lấy dữ liệu chi tiết

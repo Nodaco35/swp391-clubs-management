@@ -25,7 +25,7 @@ import models.StageNotification;
 import models.Users;
 import models.UserClub;
 import service.RecruitmentService;
-import service.NotificationService;
+import service.StageNotificationService;
 import dal.UserClubDAO;
 
 @WebServlet(name = "RecruitmentCampaignServlet", urlPatterns = {"/recruitment/*"})
@@ -33,7 +33,7 @@ public class RecruitmentCampaignServlet extends HttpServlet {
 
     private static final Logger logger = Logger.getLogger(RecruitmentCampaignServlet.class.getName());
     private final RecruitmentService recruitmentService = new RecruitmentService();
-    private final NotificationService notificationService = new NotificationService();
+    private final StageNotificationService notificationService = new StageNotificationService();
     private final UserClubDAO userClubDAO = new UserClubDAO();
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private final Gson gson = new Gson();
@@ -364,45 +364,7 @@ public class RecruitmentCampaignServlet extends HttpServlet {
                     response.getWriter().write("{\"success\":false,\"message\":\"Lỗi hệ thống: " + e.getMessage() + "\"}");
                 }
                 return;
-            } else if ("/active-campaigns".equals(pathInfo)) {
-                // API trả về danh sách các hoạt động đang diễn ra
-                response.setContentType("application/json");
-                response.setCharacterEncoding("UTF-8");
-                PrintWriter out = response.getWriter();
-                
-                try {
-                    List<RecruitmentCampaign> activeCampaigns = recruitmentService.getActiveCampaigns();
-                    
-                    JsonObject jsonResponse = new JsonObject();
-                    jsonResponse.addProperty("success", true);
-                    
-                    com.google.gson.JsonArray campaignsArray = new com.google.gson.JsonArray();
-                    for (RecruitmentCampaign campaign : activeCampaigns) {
-                        JsonObject campaignJson = new JsonObject();
-                        campaignJson.addProperty("recruitmentId", campaign.getRecruitmentID());
-                        campaignJson.addProperty("clubId", campaign.getClubID());
-                        campaignJson.addProperty("title", campaign.getTitle());
-                        campaignJson.addProperty("gen", campaign.getGen());
-                        campaignJson.addProperty("description", campaign.getDescription());
-                        campaignJson.addProperty("status", campaign.getStatus());
-                        campaignJson.addProperty("startDate", campaign.getStartDate().toString());
-                        campaignJson.addProperty("endDate", campaign.getEndDate().toString());
-                        campaignJson.addProperty("formId", campaign.getFormID());
-                        campaignsArray.add(campaignJson);
-                    }
-                    
-                    jsonResponse.add("campaigns", campaignsArray);
-                    out.print(jsonResponse.toString());
-                } catch (Exception e) {
-                    JsonObject errorResponse = new JsonObject();
-                    errorResponse.addProperty("success", false);
-                    errorResponse.addProperty("message", "Lỗi khi lấy danh sách hoạt động tuyển quân: " + e.getMessage());
-                    out.print(errorResponse.toString());
-                    logger.log(Level.SEVERE, "Lỗi khi lấy danh sách hoạt động tuyển quân", e);
-                }
-                return;
-            }
-            else if ("/club-campaigns".equals(pathInfo)) {
+            } else if ("/club-campaigns".equals(pathInfo)) {
                 // API trả về danh sách hoạt động tuyển quân của một câu lạc bộ
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
@@ -431,6 +393,7 @@ public class RecruitmentCampaignServlet extends HttpServlet {
                         campaignJson.addProperty("clubId", campaign.getClubID());
                         campaignJson.addProperty("title", campaign.getTitle());
                         campaignJson.addProperty("description", campaign.getDescription());
+                        campaignJson.addProperty("gen", campaign.getGen());
                         campaignJson.addProperty("status", campaign.getStatus());
                         campaignJson.addProperty("startDate", campaign.getStartDate().toString());
                         campaignJson.addProperty("endDate", campaign.getEndDate().toString());
