@@ -163,6 +163,11 @@
                                             Nguồn thu
                                         </a>
                                     </li>
+                                     <li class="breadcrumb-item">
+                                        <a href="${pageContext.request.contextPath}/department/financial/club-transaction?type=&status=" class="text-decoration-none">
+                                           Lịch sử giao dịch của clb
+                                        </a>
+                                    </li>
                                 </ol>
                             </nav>
                         </div>

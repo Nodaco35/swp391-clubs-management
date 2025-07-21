@@ -101,6 +101,11 @@
                                             Nguồn thu
                                         </a>
                                     </li>
+                                    <li class="breadcrumb-item">
+                                        <a href="${pageContext.request.contextPath}/department/financial/club-transaction?type=&status" class="text-decoration-none">
+                                           Lịch sử giao dịch của clb
+                                        </a>
+                                    </li>
                                 </ol>
                             </nav>
                         </div>
@@ -183,7 +188,7 @@
                                     <i class="fas fa-history" style="color: #3b82f6;"></i>
                                     Giao dịch gần đây
                                 </h2>
-                                <a href="${pageContext.request.contextPath}/department/financial/transaction" 
+                                <a href="${pageContext.request.contextPath}/department/financial/club-transaction?type=&status=" 
                                    class="btn btn-primary">
                                     Xem tất cả
                                 </a>

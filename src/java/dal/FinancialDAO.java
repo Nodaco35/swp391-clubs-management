@@ -1239,4 +1239,90 @@ public class FinancialDAO {
         }
         return id;
     }
+    public static List<Transaction> getTransactionsByClubAndTerm(int clubID, String termID, String type, String status, int page, int pageSize) {
+        List<Transaction> transactions = new ArrayList<>();
+        String sql = "SELECT * FROM Transactions WHERE ClubID = ? AND TermID = ?";
+        if (type != null && !type.isEmpty()) {
+            sql += " AND Type = ?";
+        }
+        if (status != null && !status.isEmpty()) {
+            sql += " AND Status = ?";
+        }
+        sql += " ORDER BY TransactionDate DESC LIMIT ? OFFSET ?";
+
+        try {
+            Connection conn = DBContext.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            int paramIndex = 1;
+            ps.setInt(paramIndex++, clubID);
+            ps.setString(paramIndex++, termID);
+            if (type != null && !type.isEmpty()) {
+                ps.setString(paramIndex++, type);
+            }
+            if (status != null && !status.isEmpty()) {
+                ps.setString(paramIndex++, status);
+            }
+            ps.setInt(paramIndex++, pageSize);
+            ps.setInt(paramIndex++, (page - 1) * pageSize);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Transaction transaction = new Transaction();
+                transaction.setTransactionID(rs.getInt("TransactionID"));
+                transaction.setClubID(rs.getInt("ClubID"));
+                transaction.setTermID(rs.getString("TermID"));
+                transaction.setType(rs.getString("Type"));
+                transaction.setAmount(rs.getBigDecimal("Amount"));
+                transaction.setTransactionDate(rs.getTimestamp("TransactionDate"));
+                transaction.setDescription(rs.getString("Description"));
+                transaction.setAttachment(rs.getString("Attachment"));
+                transaction.setCreateBy(rs.getString("CreatedBy"));
+                transaction.setStatus(rs.getString("Status"));
+                transaction.setReferenceID(rs.getInt("ReferenceID"));
+                transaction.setCreatedDate(rs.getTimestamp("CreatedAt"));
+                transactions.add(transaction);
+            }
+            rs.close();
+            ps.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return transactions;
+    }
+
+    public static int getTotalTransactions(int clubID, String termID, String type, String status) {
+        int total = 0;
+        String sql = "SELECT COUNT(*) FROM Transactions WHERE ClubID = ? AND TermID = ?";
+        if (type != null && !type.isEmpty()) {
+            sql += " AND Type = ?";
+        }
+        if (status != null && !status.isEmpty()) {
+            sql += " AND Status = ?";
+        }
+
+        try {
+            Connection conn = DBContext.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            int paramIndex = 1;
+            ps.setInt(paramIndex++, clubID);
+            ps.setString(paramIndex++, termID);
+            if (type != null && !type.isEmpty()) {
+                ps.setString(paramIndex++, type);
+            }
+            if (status != null && !status.isEmpty()) {
+                ps.setString(paramIndex++, status);
+            }
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                total = rs.getInt(1);
+            }
+            rs.close();
+            ps.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return total;
+    }
 }
