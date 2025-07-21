@@ -11,7 +11,7 @@ public class ClubApplication {
     private String userId;
     private int clubId;
     private String email;
-    private Integer eventId;        // nullable
+    private Integer eventId;
     private int responseId;
     private String status;
     private Timestamp submitDate;

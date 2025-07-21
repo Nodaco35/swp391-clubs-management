@@ -181,11 +181,9 @@ public class EditEventServlet extends HttpServlet {
             Part imagePart = request.getPart("eventImage");
 
             if (imagePart != null && imagePart.getSize() > 0) {
-                // Có ảnh mới được upload
                 String originalFileName = imagePart.getSubmittedFileName();
                 String fileExtension = originalFileName.substring(originalFileName.lastIndexOf(".")).toLowerCase();
 
-                // Kiểm tra định dạng file
                 boolean isValidExtension = false;
                 for (String ext : ALLOWED_EXTENSIONS) {
                     if (ext.equals(fileExtension)) {
@@ -200,9 +198,8 @@ public class EditEventServlet extends HttpServlet {
                     return;
                 }
 
-                // Tạo tên file unique
                 String fileName = "event_" + eventID + "_" + System.currentTimeMillis() + fileExtension;
-                imageName = UPLOAD_DIR + "/" + fileName; // Lưu đường dẫn đầy đủ vào DB
+                imageName = UPLOAD_DIR + "/" + fileName;
 
                 // 1. Đường dẫn thư mục build (để hiển thị ngay lập tức)
                 String buildUploadPath = getServletContext().getRealPath("/") + UPLOAD_DIR;

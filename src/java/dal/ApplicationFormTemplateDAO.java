@@ -418,4 +418,38 @@ public class ApplicationFormTemplateDAO {
 
         return templates;
     }
+
+
+
+
+
+
+
+
+    public List<ApplicationFormTemplate> getTemplatesByFormID(int formId) {
+        List<ApplicationFormTemplate> templates = new ArrayList<>();
+        String sql = "SELECT * FROM ApplicationFormTemplates WHERE FormID = ? ORDER BY DisplayOrder";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, formId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                ApplicationFormTemplate template = new ApplicationFormTemplate();
+                template.setTemplateId(rs.getInt("TemplateID"));
+                template.setFormId(rs.getInt("FormID"));
+                template.setFieldName(rs.getString("FieldName"));
+                template.setFieldType(rs.getString("FieldType"));
+                template.setRequired(rs.getBoolean("IsRequired"));
+                template.setOptions(rs.getString("Options"));
+                template.setDisplayOrder(rs.getInt("DisplayOrder"));
+                templates.add(template);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi khi lấy templates: " + e.getMessage());
+        }
+        return templates;
+    }
+
+
 }

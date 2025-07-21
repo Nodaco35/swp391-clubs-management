@@ -7,7 +7,7 @@ public class ApplicationResponse {
     private int formID;
     private String userID;
     private int clubID;
-    private Integer eventID; // Có thể null
+    private Integer eventID;
     private String responses; // JSON format
     private String status;
     private Date submitDate;
