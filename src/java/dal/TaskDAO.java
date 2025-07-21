@@ -37,7 +37,7 @@ public class TaskDAO {
 
     public List<EventTerms> getTermsByEventID(int eventID) {
         List<EventTerms> terms = new ArrayList<>();
-        String sql = "SELECT * FROM EventTerms WHERE EventID = ? ORDER BY TermStart ASC";
+        String sql = "SELECT * FROM EventTerms WHERE EventID = ? ORDER BY EventID DESC, TermStart ASC";
         EventsDAO ed = new EventsDAO();
 
         try {

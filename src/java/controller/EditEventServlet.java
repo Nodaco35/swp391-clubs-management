@@ -19,6 +19,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import dal.ApplicationFormDAO;
 import dal.ClubDAO;
 import dal.EventsDAO;
 import dal.LocationDAO;
@@ -79,10 +80,13 @@ public class EditEventServlet extends HttpServlet {
         ClubDAO clubDAO = new ClubDAO();
         EventsDAO eventDAO = new EventsDAO();
         LocationDAO locationDAO = new LocationDAO();
+        ApplicationFormDAO formDAO = new ApplicationFormDAO();
+
 
         if (user != null) {
             String userID = user.getUserID();
             ClubInfo club = clubDAO.getClubChairman(userID);
+            int clubID = clubDAO.getClubIDByUserID(userID);
             request.setAttribute("club", club);
 
             String eventIDParam = request.getParameter("eventID");
@@ -103,11 +107,15 @@ public class EditEventServlet extends HttpServlet {
                     }
 
                     List<Locations> locations = locationDAO.getLocationsByType(locationType);
+                    List<ApplicationForm> applicationForms = formDAO.getFormsByClubAndType(clubID, "Event");
+
 
                     request.setAttribute("event", event);
                     request.setAttribute("agendas", agendas);
                     request.setAttribute("locations", locations);
                     request.setAttribute("locationType", locationType);
+                    request.setAttribute("applicationForms", applicationForms);
+
 
                 } catch (NumberFormatException e) {
                     request.setAttribute("errorMessage", "ID sự kiện không hợp lệ.");
@@ -173,11 +181,9 @@ public class EditEventServlet extends HttpServlet {
             Part imagePart = request.getPart("eventImage");
 
             if (imagePart != null && imagePart.getSize() > 0) {
-                // Có ảnh mới được upload
                 String originalFileName = imagePart.getSubmittedFileName();
                 String fileExtension = originalFileName.substring(originalFileName.lastIndexOf(".")).toLowerCase();
 
-                // Kiểm tra định dạng file
                 boolean isValidExtension = false;
                 for (String ext : ALLOWED_EXTENSIONS) {
                     if (ext.equals(fileExtension)) {
@@ -192,9 +198,8 @@ public class EditEventServlet extends HttpServlet {
                     return;
                 }
 
-                // Tạo tên file unique
                 String fileName = "event_" + eventID + "_" + System.currentTimeMillis() + fileExtension;
-                imageName = UPLOAD_DIR + "/" + fileName; // Lưu đường dẫn đầy đủ vào DB
+                imageName = UPLOAD_DIR + "/" + fileName;
 
                 // 1. Đường dẫn thư mục build (để hiển thị ngay lập tức)
                 String buildUploadPath = getServletContext().getRealPath("/") + UPLOAD_DIR;

@@ -126,6 +126,7 @@ public class EventsDAO {
                 event.setPublic(rs.getBoolean("IsPublic"));
                 event.setCapacity(rs.getInt("Capacity"));
                 event.setStatus(rs.getString("Status"));
+                event.setFormID(rs.getInt("FormID"));
                 event.setApprovalStatus(rs.getString("ApprovalStatus"));
                 event.setRejectionReason(rs.getString("RejectionReason"));
                 Locations l = getLocationByID(rs.getInt("LocationID"));
@@ -143,7 +144,7 @@ public class EventsDAO {
         String sql = """
                 SELECT * FROM Events 
                 WHERE ClubID = ? 
-                ORDER BY EventDate DESC
+                ORDER BY EventID DESC, EventDate DESC
             """;
 
         try {
@@ -161,7 +162,7 @@ public class EventsDAO {
                 event.setEndTime(rs.getTimestamp("EndTime"));
                 event.setClubID(rs.getInt("ClubID"));
                 event.setPublic(rs.getBoolean("IsPublic"));
-                event.setFormTemplateID(rs.getInt("FormTemplateID"));
+                event.setFormID(rs.getInt("FormID"));
                 event.setCapacity(rs.getInt("Capacity"));
                 event.setStatus(rs.getString("Status"));
                 Locations l = getLocationByID(rs.getInt("LocationID"));
@@ -188,7 +189,7 @@ public class EventsDAO {
                     WHERE e.ClubID = ?
                     GROUP BY e.EventID, e.EventName, e.EventImg, e.Description, 
                              e.EventDate, e.LocationID, e.ClubID, e.IsPublic, 
-                             e.FormTemplateID, e.Capacity, e.Status, e.ApprovalStatus, e.RejectionReason
+                             e.FormID, e.Capacity, e.Status, e.ApprovalStatus, e.RejectionReason
                     ORDER BY e.EventDate DESC
                 """;
 
@@ -207,7 +208,7 @@ public class EventsDAO {
                 event.setEndTime(rs.getTimestamp("EndTime"));
                 event.setClubID(rs.getInt("ClubID"));
                 event.setPublic(rs.getBoolean("IsPublic"));
-                event.setFormTemplateID(rs.getInt("FormTemplateID"));
+                event.setFormID(rs.getInt("FormID"));
                 event.setCapacity(rs.getInt("Capacity"));
                 event.setStatus(rs.getString("Status"));
                 event.setApprovalStatus(rs.getString("ApprovalStatus"));
@@ -669,7 +670,7 @@ public class EventsDAO {
                 event.setClubID(rs.getInt("ClubID"));
                 event.setClubName(rs.getString("ClubName"));
                 event.setPublic(rs.getBoolean("IsPublic"));
-                event.setFormTemplateID(rs.getInt("FormTemplateID"));
+                event.setFormID(rs.getInt("FormID"));
                 event.setCapacity(rs.getInt("Capacity"));
                 event.setStatus(rs.getString("Status"));
                 event.setApprovalStatus(rs.getString("ApprovalStatus"));
@@ -1062,6 +1063,22 @@ public class EventsDAO {
             e.printStackTrace();
         }
     }
+
+    public void updateEventFormID(int eventId, int formId) {
+        String sql = "UPDATE Events SET FormID = ? WHERE EventID = ?";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, formId);
+            ps.setInt(2, eventId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi khi cập nhật FormID cho sự kiện: " + e.getMessage());
+        }
+    }
+
+
+
     
     public List<Events> getUpcomingEvents(int limit) {
         List<Events> events = new ArrayList<>();

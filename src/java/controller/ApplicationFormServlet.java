@@ -31,7 +31,7 @@ public class ApplicationFormServlet extends HttpServlet {
     private ApplicationFormTemplateDAO formTemplateDAO;
     private ApplicationFormDAO applicationFormDAO;
     private ApplicationResponseDAO responseDAO;
-    private ClubApplicationDAO clubDAO;
+    private ClubApplicationDAO clubApplicationDAO;
     private UserDAO userDAO;
     private ApplicationStageDAO applicationStageDAO;
 
@@ -40,7 +40,7 @@ public class ApplicationFormServlet extends HttpServlet {
         formTemplateDAO = new ApplicationFormTemplateDAO();
         applicationFormDAO = new ApplicationFormDAO();
         responseDAO = new ApplicationResponseDAO();
-        clubDAO = new ClubApplicationDAO();
+        clubApplicationDAO = new ClubApplicationDAO();
         userDAO = new UserDAO();
         applicationStageDAO = new ApplicationStageDAO();
     }
@@ -278,7 +278,7 @@ public class ApplicationFormServlet extends HttpServlet {
             }
 
             // Lưu đơn đăng ký và lấy ApplicationID được tạo ra
-            int applicationId = clubDAO.saveClubApplication(clubApp);
+            int applicationId = clubApplicationDAO.saveClubApplication(clubApp);
 
             // Tìm vòng tuyển đầu tiên (APPLICATION) của chiến dịch tuyển quân hiện tại
             try {

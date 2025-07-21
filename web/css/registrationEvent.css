@@ -568,8 +568,8 @@ body {
     border-top: 1px solid var(--border);
 }
 
-.btn-primary,
-.btn-secondary {
+.btn-primary-regis,
+.btn-secondary-regis {
     padding: 0.75rem 2rem;
     border: none;
     border-radius: 8px;
@@ -582,28 +582,28 @@ body {
     gap: 0.5rem;
 }
 
-.btn-primary {
+.btn-primary-regis {
     background: var(--primary);
     color: var(--primary-foreground);
 }
 
-.btn-primary:hover {
+.btn-primary-regis:hover {
     background: #0089a0;
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(0, 166, 192, 0.3);
 }
 
-.btn-secondary {
+.btn-secondary-regis {
     background: var(--secondary);
     color: var(--secondary-foreground);
 }
 
-.btn-secondary a {
+.btn-secondary-regis a {
     color: var(--secondary-foreground);
     text-decoration: none;
 }
 
-.btn-secondary:hover {
+.btn-secondary-regis:hover {
     background: #1e2a35;
 }
 
@@ -672,6 +672,103 @@ body {
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-left: 0.5rem;
+}
+
+/* Radio and Checkbox Inputs */
+.form-group .radio-item,
+.form-group .checkbox-item {
+    display: flex;
+    align-items: center;
+    margin: 0.5rem 0;
+    gap: 0.5rem;
+}
+
+.form-group .radio-item input[type="radio"],
+.form-group .checkbox-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    cursor: pointer;
+}
+
+.form-group .radio-item label,
+.form-group .checkbox-item label {
+    font-size: 1rem;
+    color: var(--foreground);
+    cursor: pointer;
+}
+
+/* Info Content */
+.form-group .info-content {
+    background: var(--background);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    color: var(--text-light);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+/* Ensure consistent spacing for dynamic fields */
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="date"],
+.form-group input[type="email"],
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+    color: var(--foreground);
+    background: var(--card-bg);
+    transition: all 0.3s ease;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="number"]:focus,
+.form-group input[type="date"]:focus,
+.form-group input[type="email"]:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 166, 192, 0.1);
+}
+
+/* Adjust textarea for better appearance */
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+    max-height: 300px;
+}
+
+/* Validation for dynamic fields */
+.form-group.error input[type="text"],
+.form-group.error input[type="number"],
+.form-group.error input[type="date"],
+.form-group.error input[type="email"],
+.form-group.error textarea,
+.form-group.error select {
+    border-color: #e74c3c;
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .registration-container {
+        grid-template-columns: 1fr;
+        max-width: 95%;
+    }
+
+    .event-summary {
+        position: static;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
 }
 
 @keyframes spin {

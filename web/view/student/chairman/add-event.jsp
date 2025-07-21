@@ -57,6 +57,12 @@
 						Sự Kiện
 					</a>
 				</li>
+                                <li>
+				<a href="${pageContext.request.contextPath}/chairman-page/clubmeeting"
+				   class="nav-item ${currentPath == '/chairman-page/clubmeeting' ? 'active' : ''}">
+					<i class="fas fa-clock"></i> Cuộc họp
+				</a>
+			</li>
 			</ul>
 		</nav>
 
@@ -102,8 +108,9 @@
 			</ul>
 		</nav>
 	</div>
-	<c:if test="${not empty club}">
-		<div class="club-header">
+
+	<div class="club-header">
+		<c:if test="${not empty club}">
 			<div class="club-info">
 				<div class="club-avatar">
 					<img src="${pageContext.request.contextPath}${club.clubImg}" alt="${club.clubName}"
@@ -114,8 +121,9 @@
 					<p>Chủ nhiệm: ${club.clubChairmanName}</p>
 				</div>
 			</div>
-		</div>
-	</c:if>
+		</c:if>
+
+	</div>
 
 	<nav class="dashboard-nav">
 		<ul>
@@ -218,10 +226,12 @@
 					<div class="form-group">
 						<label>Loại sự kiện *</label>
 						<div>
-							<input type="radio" id="public" name="eventType" value="public" ${param.eventType == 'public' ? 'checked' : ''}>
+							<input type="radio" id="public" name="eventType"
+							       value="public" ${param.eventType == 'public' ? 'checked' : ''}>
 							<label for="public" style="margin-right: 20px">Công khai</label>
 
-							<input type="radio" id="private" name="eventType" value="private" ${param.eventType == 'private' ? 'checked' : ''}>
+							<input type="radio" id="private" name="eventType"
+							       value="private" ${param.eventType == 'private' ? 'checked' : ''}>
 							<label for="private">Riêng tư</label>
 						</div>
 					</div>
@@ -414,7 +424,7 @@
         if (input.files && input.files[0]) {
             const reader = new FileReader();
 
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 previewImg.src = e.target.result;
                 preview.style.display = 'block';
             }

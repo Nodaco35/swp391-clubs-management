@@ -5,7 +5,7 @@ public class ApplicationFormTemplate {
     private int formId;
     private String fieldName;
     private String fieldType; // 'Text', 'Textarea', 'Dropdown', etc.
-    private boolean Required;
+    private boolean required;
     private String options; // JSON hoặc text
     private int displayOrder; // Thứ tự hiển thị của câu hỏi trong form
 
@@ -18,7 +18,7 @@ public class ApplicationFormTemplate {
         this.formId = formId;
         this.fieldName = fieldName;
         this.fieldType = fieldType;
-        this.Required = isRequired;
+        this.required = isRequired;
         this.options = options;
         this.displayOrder = displayOrder;
     }
@@ -56,11 +56,11 @@ public class ApplicationFormTemplate {
     }
 
     public boolean isRequired() {
-        return Required;
+        return required;
     }
 
-    public void setRequired(boolean Required) {
-        this.Required = Required;
+    public void setRequired(boolean required) {
+        this.required = required;
     }
 
     public String getOptions() {

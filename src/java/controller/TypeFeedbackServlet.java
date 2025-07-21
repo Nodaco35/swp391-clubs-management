@@ -12,6 +12,8 @@ import models.Events;
 import models.Feedback;
 import models.Users;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 
 public class TypeFeedbackServlet extends HttpServlet {
@@ -23,7 +25,6 @@ public class TypeFeedbackServlet extends HttpServlet {
         HttpSession session = request.getSession();
         Users currentUser = (Users) session.getAttribute("user");
         
-        // Kiểm tra xem người dùng đã đăng nhập chưa
         if (currentUser == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
@@ -31,7 +32,8 @@ public class TypeFeedbackServlet extends HttpServlet {
         
         String eventIdParam = request.getParameter("eventId");
         if (eventIdParam == null || eventIdParam.isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/events-page");
+            response.sendRedirect(request.getContextPath() + "/events-page?error=missing_event_id&message=" + 
+                URLEncoder.encode("Thiếu thông tin sự kiện", StandardCharsets.UTF_8.name()));
             return;
         }
         
@@ -43,7 +45,8 @@ public class TypeFeedbackServlet extends HttpServlet {
             Events event = eventsDAO.getEventByID(eventId);
             
             if (event == null) {
-                response.sendRedirect(request.getContextPath() + "/events-page");
+                response.sendRedirect(request.getContextPath() + "/events-page?error=event_not_found&message=" + 
+                    URLEncoder.encode("Sự kiện không tồn tại", StandardCharsets.UTF_8.name()));
                 return;
             }
             
@@ -91,7 +94,8 @@ public class TypeFeedbackServlet extends HttpServlet {
         
         String eventIdParam = request.getParameter("eventId");
         if (eventIdParam == null || eventIdParam.isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/events-page");
+            response.sendRedirect(request.getContextPath() + "/events-page?error=missing_event_id&message=" + 
+                URLEncoder.encode("Thiếu thông tin sự kiện", StandardCharsets.UTF_8.name()));
             return;
         }
         
@@ -103,7 +107,8 @@ public class TypeFeedbackServlet extends HttpServlet {
             Events event = eventsDAO.getEventByID(eventId);
             
             if (event == null) {
-                response.sendRedirect(request.getContextPath() + "/events-page");
+                response.sendRedirect(request.getContextPath() + "/events-page?error=event_not_found&message=" + 
+                    URLEncoder.encode("Sự kiện không tồn tại", StandardCharsets.UTF_8.name()));
                 return;
             }
             
@@ -111,16 +116,12 @@ public class TypeFeedbackServlet extends HttpServlet {
             EventParticipantDAO participantDAO = new EventParticipantDAO();
             if (!participantDAO.hasUserParticipatedInEvent(currentUser.getUserID(), eventId)) {
                 // Người dùng chưa tham gia sự kiện này
-                request.setAttribute("message", "Chỉ người đã tham gia sự kiện mới có thể gửi phản hồi.");
                 response.sendRedirect(request.getContextPath() + "/clubs");
                 return;
             }
-            
-            // Lấy thông số từ form
             boolean isAnonymous = "true".equals(request.getParameter("isAnonymous"));
             
             try {
-                // Kiểm tra và xử lý các trường bắt buộc
                 String ratingStr = request.getParameter("rating");
                 if (ratingStr == null || ratingStr.isEmpty()) {
                     request.setAttribute("error", "Vui lòng chọn đánh giá tổng quan.");

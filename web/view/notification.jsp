@@ -24,6 +24,9 @@
                 <p id="errorMessage"><c:out value="${error}" /></p>
                 <button class="ok-btn" onclick="hideError()">OK</button>
             </div>
+
+
+
             <script>
                 document.addEventListener("DOMContentLoaded", function () {
                     document.getElementById("errorPopup").style.display = "block";
@@ -36,6 +39,53 @@
                 }
             </script>
         </c:if>
+        <c:if test="${not empty msg}">
+            <div class="success-popup" id="msgPopup">
+                <p><c:out value="${msg}" /></p>
+            </div>
+
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const popup = document.getElementById("msgPopup");
+                    if (popup) {
+                        popup.style.display = "block";
+                        setTimeout(() => {
+                            popup.style.display = "none";
+                        }, 3000); // 3 giây
+                    }
+                });
+            </script>
+
+            <style>
+                .success-popup {
+                    display: none;
+                    position: fixed;
+                    top: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    z-index: 9999;
+                    background-color: #d4edda;
+                    color: #155724;
+                    padding: 12px 20px;
+                    border: 1px solid #c3e6cb;
+                    border-radius: 6px;
+                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+                    animation: fadeSlideDown 0.3s ease-out;
+                    font-size: 15px;
+                }
+
+                @keyframes fadeSlideDown {
+                    from {
+                        opacity: 0;
+                        transform: translate(-50%, 0);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translate(-50%, 20px);
+                    }
+                }
+            </style>
+        </c:if>
 
         <main>
 
@@ -46,7 +96,7 @@
                         <form action="notification?action=search" method="POST">
                             <i class="fas fa-search search-icon"></i>
                             <input type="text" id="searchInput" name="key" placeholder="Tìm kiếm thông báo..."
-                                    class="search-input" value="${param.key != null ? param.key : ''}">
+                                   class="search-input" value="${param.key != null ? param.key : ''}">
                             <button type="submit" class="search-btn">
                                 <i class="fas fa-search"></i>
                             </button>

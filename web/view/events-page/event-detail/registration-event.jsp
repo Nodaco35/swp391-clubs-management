@@ -1,12 +1,12 @@
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%--
     Document   : registration-event
     Created on : May 31, 2025, 10:04:24 AM
     Author     : LE VAN THUAN
 --%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@page contentType="text/html" pageEncoding="UTF-8" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -127,7 +127,7 @@
 					<div class="event-summary-header">
 						<c:set var="e" value="${requestScope.event}"/>
 						<div class="event-image">
-							<img src="${pageContext.request.contextPath}/${e.eventImg}" alt="${e.eventName}" />
+							<img src="${pageContext.request.contextPath}/${e.eventImg}" alt="${e.eventName}"/>
 						</div>
 						<div class="event-info">
 							<h2 id="eventTitle">${e.eventName}</h2>
@@ -192,58 +192,86 @@
 									<input type="email" id="email" name="email" required
 									       placeholder="example@student.edu.vn" value="${userDetails.email}" readonly>
 								</div>
-								<%--								<div class="form-group">--%>
-								<%--									<label for="phone">Số điện thoại <span class="required">*</span></label>--%>
-								<%--									<input type="tel" id="phone" name="phone" required placeholder="0123456789">--%>
-								<%--								</div>--%>
+
 							</div>
 						</div>
 
-						<div class="form-section">
-							<h4 class="section-title">
-								<i class="fas fa-info-circle"></i>
-								Một số câu hỏi
-							</h4>
-							<div class="form-group">
-								<label for="faculty">Bạn biết đến sự kiện này qua đâu <span
-										class="required">*</span></label>
-								<select id="faculty" name="faculty" required>
-									<option value="mxh">Mạng xã hội</option>
-									<option value="fr">Bạn bè</option>
-									<option value="web">Truyền thông</option>
-									<option value="other">Khác</option>
-								</select>
+						<c:if test="${not empty formTemplates}">
+							<div class="form-section">
+								<h4 class="section-title">
+									<i class="fas fa-info-circle"></i>
+									Một số câu hỏi
+								</h4>
+								<c:forEach var="template" items="${formTemplates}">
+									<div class="form-group">
+										<label for="template_${template.templateId}">
+												${fn:escapeXml(template.fieldName)}
+											<c:if test="${template.required}">
+												<span class="required">*</span>
+											</c:if>
+										</label>
+										<c:choose>
+											<c:when test="${template.fieldType == 'Text'}">
+												<input type="text" id="template_${template.templateId}"
+												       name="template_${template.templateId}"
+													${template.required ? 'required' : ''}>
+											</c:when>
+											<c:when test="${template.fieldType == 'Textarea'}">
+                                                <textarea id="template_${template.templateId}"
+                                                          name="template_${template.templateId}" rows="4"
+	                                                ${template.required ? 'required' : ''}></textarea>
+											</c:when>
+											<c:when test="${template.fieldType == 'Number'}">
+												<input type="number" id="template_${template.templateId}"
+												       name="template_${template.templateId}"
+													${template.required ? 'required' : ''}>
+											</c:when>
+											<c:when test="${template.fieldType == 'Date'}">
+												<input type="date" id="template_${template.templateId}"
+												       name="template_${template.templateId}"
+													${template.required ? 'required' : ''}>
+											</c:when>
+											<c:when test="${template.fieldType == 'Email'}">
+												<input type="email" id="template_${template.templateId}"
+												       name="template_${template.templateId}"
+													${template.required ? 'required' : ''}>
+											</c:when>
+											<c:when test="${template.fieldType == 'Radio'}">
+												<c:forEach var="option" items="${fn:split(template.options, ';;')}">
+													<label class="radio-item">
+														<input type="radio" name="template_${template.templateId}"
+														       value="${fn:escapeXml(option)}"
+															${template.required ? 'required' : ''}>
+															${fn:escapeXml(option)}
+													</label>
+												</c:forEach>
+											</c:when>
+											<c:when test="${template.fieldType == 'Checkbox'}">
+												<c:forEach var="option" items="${fn:split(template.options, ';;')}">
+													<label class="checkbox-item">
+														<input type="checkbox" name="template_${template.templateId}[]"
+														       value="${fn:escapeXml(option)}">
+															${fn:escapeXml(option)}
+													</label>
+												</c:forEach>
+											</c:when>
+											<c:when test="${template.fieldType == 'Info'}">
+												<div class="info-content">
+													<c:choose>
+														<c:when test="${not empty template.options}">
+															${fn:escapeXml(fn:replace(fn:replace(template.options, '{"content":"', ''), '"}', ''))}
+														</c:when>
+														<c:otherwise>
+															Không có nội dung
+														</c:otherwise>
+													</c:choose>
+												</div>
+											</c:when>
+										</c:choose>
+									</div>
+								</c:forEach>
 							</div>
-							<div class="form-group">
-								<label for="reasonJoin">Lý do bạn muốn tham gia sự kiện này là gì?</label>
-								<textarea id="reasonJoin" name="reasonJoin" rows="3"
-								          placeholder="Chia sẻ lý do bạn quan tâm đến sự kiện này..."></textarea>
-							</div>
-
-							<div class="form-group">
-								<label for="experienceLevel">Bạn đã có kinh nghiệm gì liên quan đến chủ đề sự kiện
-									chưa?</label>
-								<select id="experienceLevel" name="experienceLevel">
-									<option value="none">Chưa có</option>
-									<option value="basic">Có biết sơ qua</option>
-									<option value="intermediate">Có một chút kinh nghiệm</option>
-									<option value="advanced">Đã có nhiều kinh nghiệm</option>
-								</select>
-							</div>
-
-							<div class="form-group">
-								<label for="suggestions">Bạn có đề xuất hoặc mong muốn nào cho các sự kiện trong tương
-									lai không?</label>
-								<textarea id="suggestions" name="suggestions" rows="3"
-								          placeholder="Ý tưởng, chủ đề, diễn giả bạn muốn..."></textarea>
-							</div>
-
-							<div class="form-group">
-								<label for="expectations">Bạn mong muốn học được gì từ sự kiện này?</label>
-								<textarea id="expectations" name="expectations" rows="4"
-								          placeholder="Chia sẻ mong muốn và mục tiêu của bạn..."></textarea>
-							</div>
-						</div>
+						</c:if>
 
 						<!-- Terms and Conditions -->
 						<div class="form-section">
@@ -296,11 +324,11 @@
 
 						<!-- Submit Buttons -->
 						<div class="form-actions">
-							<button type="button" class="btn-secondary">
+							<button type="button" class="btn-secondary-regis">
 								<a href="${pageContext.request.contextPath}/event-detail?id=${e.eventID}"><i
 										class="fas fa-arrow-left"></i> Quay lại</a>
 							</button>
-							<button type="submit" class="btn-primary">
+							<button type="submit" class="btn-primary-regis">
 								<i class="fas fa-check"></i>
 								Hoàn tất đăng ký
 							</button>

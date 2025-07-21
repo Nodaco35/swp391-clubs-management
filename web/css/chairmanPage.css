@@ -1112,6 +1112,16 @@ body {
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
+.error-message-reject {
+    padding: 12px 16px;
+    margin: 10px 0;
+    border-radius: 6px;
+    font-weight: 500;
+    background-color: #f0f4f8;
+    border-left: 4px solid #ff0000;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
 .modal-header {
     padding: 20px;
     border-bottom: 1px solid #eee;
@@ -1579,6 +1589,11 @@ body {
 
 .phase-task-deadline.due-soon {
     color: #fd7e14;
+}
+
+.phase-task-status {
+    margin: 8px;
+
 }
 
 .badge {

@@ -55,6 +55,15 @@
                             <span>Quản lý cuộc họp</span>
                         </a>
                     </li>
+
+                    <c:if test="${isAccess}">
+                        <li class="menu-item">
+                            <a href="${pageContext.request.contextPath}/department/financial" class="menu-link">
+                                <i class="fa-dollar-sign"></i>
+                                <span>Tài chính</span>
+                            </a>
+                        </li>
+                    </c:if>
                     <li class="menu-item">
                         <a href="${pageContext.request.contextPath}/" class="menu-link">
                             <i class="fas fa-home"></i>
@@ -73,9 +82,10 @@
                     </div>
                 </div>
             </nav>
-
+           
             <!-- Main Content -->
             <main class="main-content">
+
                 <!-- Header -->
                 <header class="header">
                     <div class="header-left">
@@ -299,14 +309,14 @@
 
         <!-- Dashboard data for JavaScript -->
         <script>
-            // Pass dashboard data to JavaScript
-            window.dashboardData = {
-                doneTasks: ${dashboard.doneTasks},
-                inProgressTasks: ${dashboard.inProgressTasks},
-                todoTasks: ${dashboard.todoTasks},
-                activeMembers: ${dashboard.activeMembers},
-                totalMembers: ${dashboard.totalMembers}
-            };
+                                        // Pass dashboard data to JavaScript
+                                        window.dashboardData = {
+                                            doneTasks: ${dashboard.doneTasks},
+                                            inProgressTasks: ${dashboard.inProgressTasks},
+                                            todoTasks: ${dashboard.todoTasks},
+                                            activeMembers: ${dashboard.activeMembers},
+                                            totalMembers: ${dashboard.totalMembers}
+                                        };
         </script>    <!-- Custom Dashboard JS -->
         <script src="${pageContext.request.contextPath}/js/department-dashboard.js"></script>
     </body>
