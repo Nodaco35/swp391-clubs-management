@@ -14,7 +14,7 @@ public class TermDAO {
 
     public static Term getActiveSemester() {
         Term t = new Term();
-        String sql = "SELECT * FROM clubmanagementsystem.semesters\n"
+        String sql = "SELECT * FROM Semesters\n"
                 + "WHere Status = 'ACTIVE'";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
