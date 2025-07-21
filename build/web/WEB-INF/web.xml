@@ -204,7 +204,7 @@
     <servlet>
         <servlet-name>DF_IncomeController</servlet-name>
         <servlet-class>controller.DF_IncomeController</servlet-class>
-<servlet>
+    <servlet>
         <servlet-name>AssignFormServlet</servlet-name>
         <servlet-class>controller.AssignFormServlet</servlet-class>
     </servlet>

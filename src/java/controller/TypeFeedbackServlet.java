@@ -12,6 +12,8 @@ import models.Events;
 import models.Feedback;
 import models.Users;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 
 public class TypeFeedbackServlet extends HttpServlet {
