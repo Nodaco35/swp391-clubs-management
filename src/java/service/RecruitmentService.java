@@ -197,11 +197,6 @@ public class RecruitmentService {
                 && !currentDate.after(stage.getEndDate());
     }
 
-    // Đồng bộ tất cả trạng thái vòng tuyển dựa trên ngày hiện tại
-    public int syncAllStageStatus() {
-        return stageDAO.syncAllStagesStatus();
-    }
-
     //Đếm số lượng đơn đăng ký ứng viên
     public int countApplicationResponses(int recruitmentID) {
         return stageDAO.countApplicationResponses(recruitmentID);
