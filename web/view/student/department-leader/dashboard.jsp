@@ -64,6 +64,14 @@
                             </a>
                         </li>
                     </c:if>
+                        <c:if test="${isHauCan}">
+                        <li class="menu-item">
+                            <a href="${pageContext.request.contextPath}/department/submit-expense" class="menu-link">
+                                <i class="fa-dollar-sign"></i>
+                                <span>Báo cáo chi tiêu</span>
+                            </a>
+                        </li>
+                    </c:if>
                     <li class="menu-item">
                         <a href="${pageContext.request.contextPath}/" class="menu-link">
                             <i class="fas fa-home"></i>
