@@ -104,7 +104,19 @@
                     </ul>
                 </nav>
             </div>
-
+            <div class="club-header">
+                <c:if test="${not empty club}">
+                    <div class="club-info">
+                        <div class="club-avatar">
+                            <img src="${pageContext.request.contextPath}${club.clubImg}" alt="${club.clubName}" style="width: 60px; height: 60px; border-radius: 50%;">
+                        </div>
+                        <div class="club-details">
+                            <h1>${club.clubName}</h1>
+                            <p>Chủ nhiệm: ${club.clubChairmanName}</p>
+                        </div>
+                    </div>
+                </c:if>
+            </div>
 
             <nav class="dashboard-nav">
                 <ul>

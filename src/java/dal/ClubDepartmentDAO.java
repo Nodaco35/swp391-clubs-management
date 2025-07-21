@@ -16,8 +16,8 @@ public class ClubDepartmentDAO {
 
     public static List<ClubDepartment> findByClubId(int clubID) {
         List<ClubDepartment> departments = new ArrayList<>();
-        String sql = "SELECT * FROM clubmanagementsystem.clubdepartments cd\n"
-                + "Join departments d on cd.DepartmentID = d.DepartmentID\n"
+        String sql = "SELECT * FROM ClubDepartments cd\n"
+                + "Join Departments d on cd.DepartmentID = d.DepartmentID\n"
                 + "\n"
                 + "where ClubID = ?";
         try {

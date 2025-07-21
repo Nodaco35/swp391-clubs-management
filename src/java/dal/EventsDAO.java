@@ -261,7 +261,7 @@ public class EventsDAO {
                     SELECT e.*, c.ClubName, c.ClubImg
                     FROM Events e
                     JOIN Clubs c ON e.ClubID = c.ClubID
-                    WHERE e.ClubID = ? AND e.EventID <> ?
+                    WHERE e.ClubID = ? AND e.EventID <> ? AND e.ApprovalStatus = 'APPROVED'
                     ORDER BY e.EventID DESC LIMIT 3""";
         try {
             Connection connection = DBContext.getConnection();

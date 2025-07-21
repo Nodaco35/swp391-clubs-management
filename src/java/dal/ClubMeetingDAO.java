@@ -19,7 +19,7 @@ public class ClubMeetingDAO {
         String sql = """
                      SELECT distinct  cm.*, cmp.*, c.ClubName, c.ClubImg
                                           FROM ClubMeeting cm
-                                           Join clubmeetingparticipants cmp on cm.ClubMeetingID = cmp.ClubMeetingID
+                                           Join ClubmeetingParticipants cmp on cm.ClubMeetingID = cmp.ClubMeetingID
                                           JOIN Clubs c ON cm.ClubID = c.ClubID
                                           JOIN UserClubs uc ON c.ClubID = uc.ClubID
                                           WHERE uc.UserID = ? and uc.ClubDepartmentID = cmp.ClubDepartmentID
@@ -51,9 +51,9 @@ public class ClubMeetingDAO {
  
     public static int countByUserID(String userID) {
         String sql = """
-                     SELECT count(distinct cm.clubmeetingID) as total
+                     SELECT count(distinct cm.ClubMeetingID) as total
                                                                FROM ClubMeeting cm 
-                                                               Join clubmeetingparticipants cmp on cm.ClubMeetingID = cmp.ClubMeetingID
+                                                               Join ClubmeetingParticipants cmp on cm.ClubMeetingID = cmp.ClubMeetingID
                                                                 JOIN UserClubs uc ON cm.ClubID = uc.ClubID
                                                                WHERE uc.UserID = ?  and uc.ClubDepartmentID = cmp.ClubDepartmentID
                                                                AND cm.StartedTime >= NOW() - INTERVAL 1 HOUR;""";

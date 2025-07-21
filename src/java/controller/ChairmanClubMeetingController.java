@@ -28,7 +28,9 @@ public class ChairmanClubMeetingController extends HttpServlet {
 
         HttpSession session = request.getSession();
         Users user = (Users) session.getAttribute("user");
-        ClubInfo club = (ClubInfo) session.getAttribute("club");
+        String userID = user.getUserID();
+        ClubDAO clubDAO = new ClubDAO();
+        ClubInfo club = clubDAO.getClubChairman(userID);
         if (user == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
@@ -100,6 +102,10 @@ public class ChairmanClubMeetingController extends HttpServlet {
             totalPages = (int) Math.ceil((double) totalRecords / pageSize);
         }
         List<ClubDepartment> departmentMembers = ClubDepartmentDAO.findByClubId(club.getClubID());
+
+
+
+        session.setAttribute("club", club);
         request.setAttribute("departmentMembers", departmentMembers);
         request.setAttribute("meetings", meetings);
         request.setAttribute("currentPage", page);
