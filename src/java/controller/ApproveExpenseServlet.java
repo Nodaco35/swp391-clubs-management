@@ -96,7 +96,6 @@ public class ApproveExpenseServlet extends HttpServlet {
             return;
         }
 
-        // Fetch active term
         Term term = termDAO.getActiveSemester();
         if (term == null || term.getTermID() == null) {
             request.setAttribute("error", "Không tìm thấy kỳ học đang hoạt động. Vui lòng liên hệ quản trị viên.");
@@ -107,14 +106,12 @@ public class ApproveExpenseServlet extends HttpServlet {
         try {
             String action = request.getParameter("action");
             if ("submit".equals(action)) {
-                // Handle expense creation
                 String purpose = request.getParameter("purpose");
                 String amountStr = request.getParameter("amount");
                 String expenseDateStr = request.getParameter("expenseDate");
                 String description = request.getParameter("description");
                 String attachment = request.getParameter("attachment");
 
-                // Validate required fields
                 if (purpose == null || purpose.trim().isEmpty()) {
                     request.setAttribute("error", "Mục đích không được để trống.");
                     doGet(request, response);
@@ -131,7 +128,6 @@ public class ApproveExpenseServlet extends HttpServlet {
                     return;
                 }
 
-                // Validate purpose
                 String[] validPurposes = {"Sự kiện", "Vật tư", "Thuê địa điểm", "Khác"};
                 boolean isValidPurpose = false;
                 for (String validPurpose : validPurposes) {
@@ -146,7 +142,6 @@ public class ApproveExpenseServlet extends HttpServlet {
                     return;
                 }
 
-                // Validate Google Docs link
                 if (attachment != null && !attachment.trim().isEmpty()) {
                     if (!attachment.matches("^https://docs\\.google\\.com/.*")) {
                         request.setAttribute("error", "Link Google Docs không hợp lệ. Vui lòng nhập link bắt đầu bằng https://docs.google.com/");
@@ -155,7 +150,6 @@ public class ApproveExpenseServlet extends HttpServlet {
                     }
                 }
 
-                // Parse amount
                 BigDecimal amount;
                 try {
                     amount = new BigDecimal(amountStr);
@@ -170,7 +164,6 @@ public class ApproveExpenseServlet extends HttpServlet {
                     return;
                 }
 
-                // Parse date
                 Timestamp expenseDate;
                 try {
                     expenseDate = new Timestamp(new SimpleDateFormat("yyyy-MM-dd").parse(expenseDateStr).getTime());
@@ -180,7 +173,6 @@ public class ApproveExpenseServlet extends HttpServlet {
                     return;
                 }
 
-                // Create expense object
                 Expenses expense = new Expenses();
                 expense.setClubID(clubID);
                 expense.setTermID(term.getTermID());
@@ -190,7 +182,6 @@ public class ApproveExpenseServlet extends HttpServlet {
                 expense.setDescription(description != null ? description : "");
                 expense.setAttachment(attachment != null && !attachment.trim().isEmpty() ? attachment : null);
 
-                // Submit expense
                 boolean success = expenseDAO.submitExpense(expense, user.getUserID());
                 if (success) {
                     request.setAttribute("message", "Báo cáo chi phí đã được gửi thành công!");
@@ -198,7 +189,6 @@ public class ApproveExpenseServlet extends HttpServlet {
                     request.setAttribute("error", "Không thể gửi báo cáo chi phí. Vui lòng thử lại.");
                 }
             } else {
-                // Handle expense approval/rejection
                 int expenseID;
                 try {
                     expenseID = Integer.parseInt(request.getParameter("expenseID"));
@@ -208,7 +198,6 @@ public class ApproveExpenseServlet extends HttpServlet {
                     return;
                 }
 
-                // Fetch expense by ID
                 Expenses expense = expenseDAO.getExpenseById(expenseID);
                 if (expense == null || expense.getClubID() != clubID) {
                     request.setAttribute("error", "Báo cáo chi phí không hợp lệ hoặc không thuộc CLB này.");
@@ -218,7 +207,6 @@ public class ApproveExpenseServlet extends HttpServlet {
 
                 String status = action.equals("approve") ? "Approved" : "Rejected";
                 if (status.equals("Approved")) {
-                    // Check club balance
                     BigDecimal balance = expenseDAO.getClubBalance(clubID, term.getTermID());
                     if (balance.compareTo(expense.getAmount()) < 0) {
                         request.setAttribute("error", "Quỹ không đủ để duyệt báo cáo chi phí này.");
