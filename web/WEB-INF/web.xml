@@ -220,6 +220,11 @@
     <servlet>
         <servlet-name>FinancialManagementServlet</servlet-name>
         <servlet-class>controller.FinancialManagementServlet</servlet-class>
+      </servlet>
+
+<servlet>
+        <servlet-name>ChairmanClubReportServlet</servlet-name>
+        <servlet-class>controller.ChairmanClubReportServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>ClubsServlet</servlet-name>
@@ -461,6 +466,11 @@
     <servlet-mapping>
         <servlet-name>FinancialManagementServlet</servlet-name>
         <url-pattern>/chairman-page/financial-management</url-pattern>
+      </servlet-mapping>
+
+<servlet-mapping>
+        <servlet-name>ChairmanClubReportServlet</servlet-name>
+        <url-pattern>/chairman-page/reports</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>
