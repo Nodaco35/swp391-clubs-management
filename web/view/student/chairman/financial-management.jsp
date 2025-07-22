@@ -15,6 +15,39 @@
         <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/chairmanPage.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     </head>
+    <style>
+        /* Add or modify this in the chairmanPage.css */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .pagination .btn {
+            padding: 8px 15px; /* Reduce padding to make buttons more compact */
+            width: auto; /* Allow buttons to size naturally */
+            min-width: 100px; /* Set a minimum width if needed */
+            text-align: center;
+            border-radius: 6px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--primary);
+            color: var(--primary-foreground);
+        }
+
+        .pagination .btn:hover {
+            background: #0089a0;
+        }
+
+        .pagination .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
     <body>
         <header class="header">
             <div class="container header-container">
@@ -237,7 +270,7 @@
                                     <option value="Expense" ${type == 'Expense' ? 'selected' : ''}>Chi phí</option>
                                 </select>
                                 <select class="filter-select" name="termID" onchange="this.form.submit()">
-                                    
+
                                     <c:forEach var="term" items="${termIDs}">
                                         <option value="${term}" ${termID == term ? 'selected' : ''}>${term}</option>
                                     </c:forEach>
