@@ -37,13 +37,6 @@
             <div class="event-info">
                 <div class="event-details">
                     <h3>${event.eventName}</h3>
-                    <div class="event-date">
-                        <i class="fas fa-calendar-alt"></i> 
-                        <fmt:formatDate value="${event.eventDate}" pattern="dd/MM/yyyy HH:mm"/>
-                    </div>
-                    <div class="event-location">
-                        <i class="fas fa-map-marker-alt"></i> ${event.location.locationName}
-                    </div>
                 </div>
             </div>
             

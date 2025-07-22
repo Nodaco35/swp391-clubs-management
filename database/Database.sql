@@ -847,11 +847,11 @@ INSERT INTO EventParticipants (EventID, UserID, Status) VALUES
 (3, 'U003', 'REGISTERED'),
 (4, 'U002', 'REGISTERED'),
 (4, 'U004', 'REGISTERED'),
-(13,'U002','REGISTERED'),
-(13,'U005','REGISTERED'),
-(13,'U006','REGISTERED'),
-(13,'U007','REGISTERED'),
-(13,'U008','REGISTERED');
+(15,'U002','REGISTERED'),
+(15,'U005','REGISTERED'),
+(15,'U006','REGISTERED'),
+(15,'U007','REGISTERED'),
+(15,'U008','REGISTERED');
 
 update EventParticipants set Status = 'ATTENDED' where UserID = 'U002';
 
@@ -1301,10 +1301,10 @@ CREATE TABLE Feedbacks (
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 INSERT INTO Feedbacks VALUES 
-(1,13,'U005',0,4,'Sự kiện khá vui và thú vị',5,3,4,5,4,3,5,3,4,'2025-06-20 22:48:28'),
-(2,13,'U006',1,2,'Tôi không thích sự kiện lắm, trải nghiệm của tôi khá tệ',2,1,3,2,1,3,2,4,3,'2025-06-21 00:58:14'),
-(3,13,'U007',0,1,'Sự kiện không vui như tôi nghĩ',2,3,4,3,1,2,3,1,2,'2025-06-21 00:58:54'),
-(4,13,'U008',0,3,'SỰ kiện ok',5,3,4,3,3,4,3,5,3,'2025-06-21 01:00:14');
+(1,15,'U005',0,4,'Sự kiện khá vui và thú vị',5,3,4,5,4,3,5,3,4,'2025-06-20 22:48:28'),
+(2,15,'U006',1,2,'Tôi không thích sự kiện lắm, trải nghiệm của tôi khá tệ',2,1,3,2,1,3,2,4,3,'2025-06-21 00:58:14'),
+(3,15,'U007',0,1,'Sự kiện không vui như tôi nghĩ',2,3,4,3,1,2,3,1,2,'2025-06-21 00:58:54'),
+(4,15,'U008',0,3,'SỰ kiện ok',5,3,4,3,3,4,3,5,3,'2025-06-21 01:00:14');
 
 
 INSERT INTO Notifications (Title, Content, CreatedDate, ReceiverID, Priority, Status) VALUES
@@ -1658,7 +1658,26 @@ BEGIN
 END;
 //
 DELIMITER ;
-
+-- ======================================== 
+-- Event Scheduler: Cập nhật trạng thái vòng 
+DROP EVENT IF EXISTS update_campaign_and_stage_status; 
+DELIMITER $$ 
+CREATE EVENT update_campaign_and_stage_status ON SCHEDULE 
+EVERY 5 MINUTE 
+STARTS CURRENT_TIMESTAMP DO BEGIN 
+-- Cập nhật vòng đã kết thúc 
+UPDATE RecruitmentStages SET Status = 'CLOSED' WHERE EndDate < CURRENT_DATE(); 
+-- Cập nhật vòng đang diễn ra (hôm nay nằm trong khoảng Start → End) 
+UPDATE RecruitmentStages SET Status = 'ONGOING' WHERE StartDate <= CURRENT_DATE() AND EndDate >= CURRENT_DATE(); 
+-- Cập nhật vòng sắp tới 
+UPDATE RecruitmentStages SET Status = 'UPCOMING' WHERE StartDate > CURRENT_DATE(); 
+-- Cập nhật trạng thái CHIẾN DỊCH (RecruitmentCampaigns) 
+UPDATE RecruitmentCampaigns SET Status = 'CLOSED' 
+WHERE EndDate < CURRENT_DATE(); 
+UPDATE RecruitmentCampaigns SET Status = 'ONGOING' WHERE StartDate <= CURRENT_DATE() AND EndDate >= CURRENT_DATE(); 
+UPDATE RecruitmentCampaigns SET Status = 'UPCOMING' WHERE StartDate > CURRENT_DATE(); 
+END$$ 
+DELIMITER ; 
 
 -- ========================================
 -- Event Scheduler: Tự move ứng viên pass sang vòng tiếp theo
