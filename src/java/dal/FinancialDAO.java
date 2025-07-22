@@ -4,6 +4,7 @@
  */
 package dal;
 
+import static dal.DBContext.getConnection;
 import java.math.BigDecimal;
 import models.*;
 import java.util.*;
@@ -1238,5 +1239,191 @@ public class FinancialDAO {
 
         }
         return id;
+    }
+    
+    // Get completed income transactions with search, termID, and pagination
+    public List<Transaction> getCompletedTransactions(int clubID, String search, String termID, int page, int pageSize) {
+        List<Transaction> transactions = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+            "SELECT incomeID, clubID, termID, source, amount, incomeDate, description, attachment, status, createdBy, createdByName " +
+            "FROM Income " +
+            "WHERE clubID = ? AND status = 'APPROVED'"
+        );
+
+        // Add search condition
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append(" AND description LIKE ?");
+        }
+
+        // Add termID condition
+        if (termID != null && !termID.equals("all")) {
+            sql.append(" AND termID = ?");
+        }
+
+        // Add pagination
+        sql.append(" ORDER BY incomeDate DESC");
+        sql.append(" OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+            stmt.setInt(paramIndex++, clubID);
+
+            if (search != null && !search.trim().isEmpty()) {
+                stmt.setString(paramIndex++, "%" + search + "%");
+            }
+
+            if (termID != null && !termID.equals("all")) {
+                stmt.setString(paramIndex++, termID);
+            }
+
+            stmt.setInt(paramIndex++, (page - 1) * pageSize);
+            stmt.setInt(paramIndex, pageSize);
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Transaction transaction = new Transaction();
+                transaction.setTransactionID(rs.getInt("incomeID"));
+                transaction.setClubID(rs.getInt("clubID"));
+                transaction.setTermID(rs.getString("termID"));
+                transaction.setType("Income");
+                transaction.setAmount(rs.getBigDecimal("amount"));
+                transaction.setTransactionDate(rs.getTimestamp("incomeDate"));
+                transaction.setDescription(rs.getString("description"));
+                transaction.setAttachment(rs.getString("attachment"));
+                transaction.setStatus(rs.getString("status"));
+                transaction.setCategory(rs.getString("source")); // Map source to category
+                transaction.setCreateBy(rs.getString("createdBy"));
+                transaction.setCreatedName(rs.getString("createdByName"));
+                transactions.add(transaction);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error retrieving completed income transactions: " + e.getMessage());
+        }
+        return transactions;
+    }
+
+    // Count completed income transactions for pagination
+    public int countCompletedTransactions(int clubID, String search, String termID) {
+        StringBuilder sql = new StringBuilder(
+            "SELECT COUNT(*) " +
+            "FROM Income " +
+            "WHERE clubID = ? AND status = 'APPROVED'"
+        );
+
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append(" AND description LIKE ?");
+        }
+
+        if (termID != null && !termID.equals("all")) {
+            sql.append(" AND termID = ?");
+        }
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+            stmt.setInt(paramIndex++, clubID);
+
+            if (search != null && !search.trim().isEmpty()) {
+                stmt.setString(paramIndex++, "%" + search + "%");
+            }
+
+            if (termID != null && !termID.equals("all")) {
+                stmt.setString(paramIndex, termID);
+            }
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error counting completed income transactions: " + e.getMessage());
+        }
+        return 0;
+    }
+
+    // Get total income for a club (optionally filtered by termID)
+    public double getTotalIncome(int clubID, String termID) {
+        StringBuilder sql = new StringBuilder(
+            "SELECT SUM(amount) " +
+            "FROM Income " +
+            "WHERE clubID = ? AND status = 'APPROVED'"
+        );
+
+        if (termID != null && !termID.equals("all")) {
+            sql.append(" AND termID = ?");
+        }
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            stmt.setInt(1, clubID);
+            if (termID != null && !termID.equals("all")) {
+                stmt.setString(2, termID);
+            }
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error calculating total income: " + e.getMessage());
+        }
+        return 0.0;
+    }
+
+    // Get total pending income for a club (optionally filtered by termID)
+    public double getTotalPendingIncome(int clubID, String termID) {
+        StringBuilder sql = new StringBuilder(
+            "SELECT SUM(amount) " +
+            "FROM Income " +
+            "WHERE clubID = ? AND status = 'Pending'"
+        );
+
+        if (termID != null && !termID.equals("all")) {
+            sql.append(" AND termID = ?");
+        }
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            stmt.setInt(1, clubID);
+            if (termID != null && !termID.equals("all")) {
+                stmt.setString(2, termID);
+            }
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error calculating total pending income: " + e.getMessage());
+        }
+        return 0.0;
+    }
+
+    // Get all term IDs for a club
+    public List<String> getAllTermIDs(int clubID) {
+        List<String> termIDs = new ArrayList<>();
+        String sql = "SELECT DISTINCT termID FROM Income WHERE clubID = ? AND termID IS NOT NULL " +
+                     "UNION " +
+                     "SELECT DISTINCT termID FROM Expenses WHERE clubID = ? AND termID IS NOT NULL " +
+                     "ORDER BY termID";
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, clubID);
+            stmt.setInt(2, clubID);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                termIDs.add(rs.getString("termID"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error retrieving term IDs: " + e.getMessage());
+        }
+        return termIDs;
     }
 }

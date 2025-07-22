@@ -213,6 +213,10 @@
         <servlet-name>ApproveExpenseServlet</servlet-name>
         <servlet-class>controller.ApproveExpenseServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>FinancialManagementServlet</servlet-name>
+        <servlet-class>controller.FinancialManagementServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ClubsServlet</servlet-name>
         <url-pattern>/clubs</url-pattern>
@@ -447,6 +451,10 @@
     <servlet-mapping>
         <servlet-name>ApproveExpenseServlet</servlet-name>
         <url-pattern>/department/financial/approve-expense</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>FinancialManagementServlet</servlet-name>
+        <url-pattern>/chairman-page/financial-management</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>

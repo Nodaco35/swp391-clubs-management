@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -51,12 +52,40 @@ public class SubmitExpenseServlet extends HttpServlet {
             request.getRequestDispatcher("/view/student/department-leader/submit-expense.jsp").forward(request, response);
             return;
         }
+        String message = "";
+        String error = "";
+        
+        if (request.getAttribute("message") != null ) {
+            message = (String) request.getAttribute("message");
+        }
+        if (request.getAttribute("error") != null) {
+            error = (String) request.getAttribute("error");
+        }
+        // Handle pagination, search, and filter
+        int page = 1;
+        int pageSize = 5; // Adjust as needed
+        String search = request.getParameter("search");
+        String status = request.getParameter("status");
+        String sortBy = request.getParameter("sortBy");
+        try {
+            if (request.getParameter("page") != null) {
+                page = Integer.parseInt(request.getParameter("page"));
+            }
+        } catch (NumberFormatException e) {
+            page = 1;
+        }
 
         // Fetch submitted expenses for the user
-        List<Expenses> submittedExpenses = expenseDAO.getUserSubmittedExpenses(user.getUserID(), clubID, term.getTermID());
+        List<Expenses> submittedExpenses = expenseDAO.getUserSubmittedExpenses(user.getUserID(), clubID, term.getTermID(), (page - 1) * pageSize, pageSize, search, status, sortBy);
+        int totalExpenses = expenseDAO.getUserSubmittedExpensesCount(user.getUserID(), clubID, term.getTermID(), search, status);
+        int totalPages = (int) Math.ceil((double) totalExpenses / pageSize);
+
         request.setAttribute("term", term);
         request.setAttribute("submittedExpenses", submittedExpenses);
-
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("message", message);
+        
         request.getRequestDispatcher("/view/student/department-leader/submit-expense.jsp").forward(request, response);
     }
 
@@ -165,7 +194,7 @@ public class SubmitExpenseServlet extends HttpServlet {
             // Create expense object
             Expenses expense = new Expenses();
             expense.setClubID(clubID);
-            expense.setTermID(term.getTermID()); // Use active term
+            expense.setTermID(term.getTermID());
             expense.setPurpose(purpose);
             expense.setAmount(amount);
             expense.setExpenseDate(expenseDate);
@@ -194,6 +223,6 @@ public class SubmitExpenseServlet extends HttpServlet {
             e.printStackTrace();
             request.setAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
         }
-        doGet(request, response); // Refresh the page to show updated list
+        doGet(request, response);
     }
 }

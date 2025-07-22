@@ -2,15 +2,6 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group>
-            <file>file:/E:/Kì_5/SWP391/Lamlaituddau/swp391-clubs-management/web/view/student/department-leader/financial.jsp</file>
-            <file>file:/E:/Kì_5/SWP391/Lamlaituddau/swp391-clubs-management/web/view/student/department-leader/dashboard.jsp</file>
-            <file>file:/E:/Kì_5/SWP391/Lamlaituddau/swp391-clubs-management/web/view/student/department-leader/approve-expense.jsp</file>
-            <file>file:/E:/Kì_5/SWP391/Lamlaituddau/swp391-clubs-management/web/view/student/department-leader/financial-income.jsp</file>
-            <file>file:/E:/Kì_5/SWP391/Lamlaituddau/swp391-clubs-management/src/java/models/Expenses.java</file>
-            <file>file:/E:/Kì_5/SWP391/Lamlaituddau/swp391-clubs-management/src/java/dal/DepartmentDashboardDAO.java</file>
-            <file>file:/E:/Kì_5/SWP391/Lamlaituddau/swp391-clubs-management/src/java/dal/ExpenseDAO.java</file>
-            <file>file:/E:/Kì_5/SWP391/Lamlaituddau/swp391-clubs-management/web/view/student/department-leader/submit-expense.jsp</file>
-        </group>
+        <group/>
     </open-files>
 </project-private>
