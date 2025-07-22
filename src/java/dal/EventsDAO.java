@@ -20,7 +20,7 @@ public class EventsDAO {
                      FROM Events e
                      JOIN UserClubs uc ON e.ClubID = uc.ClubID
                      JOIN Clubs c ON e.ClubID = c.ClubID
-                     WHERE uc.UserID = ? AND EXISTS (
+                     WHERE e.ApprovalStatus = 'APPROVED' AND uc.UserID = ? AND EXISTS (
                          SELECT 1 FROM EventSchedules es WHERE es.EventID = e.EventID AND es.EventDate >= NOW()
                      )
                      ORDER BY e.EventID ASC""";
@@ -682,6 +682,30 @@ public class EventsDAO {
             return eventId;
         } catch (SQLException e) {
             throw new RuntimeException("Lỗi khi thêm sự kiện: " + e.getMessage(), e);
+        }
+    }
+
+    public boolean addEventTerm(EventTerms term) throws SQLException{
+        String sql = "INSERT INTO EventTerms (EventID, TermName, TermStart, TermEnd) VALUES (?, ?, ?, ?)";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, term.getEvent().getEventID());
+            ps.setString(2, term.getTermName());
+            ps.setDate(3, new java.sql.Date(term.getTermStart().getTime()));
+            ps.setDate(4, new java.sql.Date(term.getTermEnd().getTime()));
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            String errorMessage = e.getMessage();
+            if (errorMessage.contains("Mỗi sự kiện chỉ được có tối đa 3 giai đoạn")) {
+                // Có thể hiển thị lỗi rõ cho người dùng
+                System.err.println("Không thể tạo thêm giai đoạn: Đã đủ 3 giai đoạn (Trước, Trong, Sau)");
+            } else if (errorMessage.contains("Giai đoạn này đã tồn tại")) {
+                System.err.println("Giai đoạn này đã tồn tại cho sự kiện.");
+            } else {
+                e.printStackTrace(); // In lỗi chung
+            }
+            return false;
         }
     }
 
