@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 import models.Users;
 
 public class UserDAO {
-
+    private static final Logger LOGGER = Logger.getLogger(UserDAO.class.getName());
 
     public List<Integer> getEventIDsOfChairman(String userID) {
         List<Integer> eventIDs = new ArrayList<>();
@@ -58,7 +58,6 @@ public class UserDAO {
         return false;
     }
 
-
     public int getClubIdIfChairman(String userID) {
         String sql = "SELECT ClubID " +
                 "FROM UserClubs " +
@@ -77,10 +76,6 @@ public class UserDAO {
         }
         return 0;
     }
-
-
-
-
 
     // Lấy danh sách người dùng theo phân trang
     public static List<Users> findUsersByPage(int offset, int noOfRecords) {
@@ -165,7 +160,15 @@ public class UserDAO {
                 status_raw = 0;
             }
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
-            String userID = generateNextUserId();
+            
+            // Sử dụng cùng logic như register() - ưu tiên mã sinh viên cho email FPT
+            String userID;
+            if (email != null && email.endsWith("@fpt.edu.vn")) {
+                userID = generateUserIdForGoogleUser(email);
+            } else {
+                userID = generateNextUserId();
+            }
+            
             ps.setObject(1, userID);
             ps.setObject(2, fullName);
             ps.setObject(3, email);
@@ -345,79 +348,33 @@ public class UserDAO {
         return 0;
     }
 
-    public Users getUserByID(String userID) {
-        String sql = "SELECT * FROM Users WHERE UserID = ?";
-        try {
-            Connection connection = DBContext.getConnection();
-            PreparedStatement ps = connection.prepareStatement(sql);
-            ps.setString(1, userID);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                Users user = new Users();
-                user.setUserID(rs.getString("UserID"));
-                user.setFullName(rs.getString("FullName"));
-                user.setEmail(rs.getString("Email"));
-                user.setPassword(rs.getString("Password"));
-                user.setDateOfBirth(rs.getDate("DateOfBirth"));
-                user.setPermissionID(rs.getInt("PermissionID"));
-                user.setStatus(rs.getBoolean("Status"));
-                user.setResetToken(rs.getString("ResetToken"));
-                user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
-                return user;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private static final Logger LOGGER = Logger.getLogger(UserDAO.class.getName());
-
     public static Users getUserByEmail(String email) {
-        Users user = null;
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DBContext.getConnection();
-            String query = "SELECT * FROM Users WHERE Email = ?";
-            stmt = conn.prepareStatement(query);
-            stmt.setString(1, email);
-            rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                user = new Users();
-                user.setUserID(rs.getString("UserID"));
-                user.setFullName(rs.getString("FullName"));
-                user.setEmail(rs.getString("Email"));
-                user.setPassword(rs.getString("Password"));
-                user.setDateOfBirth(rs.getDate("DateOfBirth"));
-                user.setPermissionID(rs.getInt("PermissionID"));
-                user.setStatus(rs.getBoolean("Status"));
-                user.setResetToken(rs.getString("ResetToken"));
-                user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
-                user.setAvatar(rs.getString("AvatarSrc"));
+        String sql = "SELECT * FROM Users WHERE Email = ?";
+        
+        try (Connection conn = DBContext.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Users user = new Users();
+                    user.setUserID(rs.getString("UserID"));
+                    user.setFullName(rs.getString("FullName"));
+                    user.setEmail(rs.getString("Email"));
+                    user.setPassword(rs.getString("Password"));
+                    user.setDateOfBirth(rs.getDate("DateOfBirth"));
+                    user.setPermissionID(rs.getInt("PermissionID"));
+                    user.setStatus(rs.getBoolean("Status"));
+                    user.setResetToken(rs.getString("ResetToken"));
+                    user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
+                    user.setAvatar(rs.getString("AvatarSrc"));
+                    return user;
+                }
             }
         } catch (SQLException e) {
-            System.out.println("Error getting user by email: " + e.getMessage());
-        } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (conn != null) {
-                    DBContext.closeConnection(conn);
-                }
-            } catch (SQLException e) {
-                System.out.println("Error closing resources: " + e.getMessage());
-            }
+            LOGGER.log(Level.SEVERE, "Error getting user by email: " + email, e);
         }
-
-        return user;
+        
+        return null;
     }
 
     public static void update(String newName, String avatarPath, String dob, String id) {
@@ -442,161 +399,61 @@ public class UserDAO {
     }
 
     public static Users getUserById(String id) {
-        String sql = "SELECT * FROM users WHERE UserID = ?";
-
-        // Thử kết nối với DBContext_Duc
-        try {
-            
-
-            // Kiểm tra kết nối không null
-            if (DBContext.getConnection() != null) {
-                try (PreparedStatement ps = DBContext.getConnection().prepareStatement(sql)) {
-                    ps.setString(1, id);
-                    try (ResultSet rs = ps.executeQuery()) {
-                        if (rs.next()) {
-                            Users user = new Users();
-                            user.setUserID(rs.getString("UserID"));
-                            user.setFullName(rs.getString("FullName"));
-                            user.setEmail(rs.getString("Email"));
-                            user.setPassword(rs.getString("Password"));
-                            user.setPermissionID(rs.getInt("PermissionID"));
-                            user.setStatus(rs.getBoolean("Status"));
-                            user.setResetToken(rs.getString("ResetToken"));
-                            user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
-                            user.setDateOfBirth(rs.getDate("DateOfBirth"));
-                            user.setAvatar(rs.getString("AvatarSrc"));
-                            return user;
-                        }
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                // Nếu kết nối từ DBContext_Duc null, thử dùng DBContext thay thế
-                try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-                    ps.setString(1, id);
-                    try (ResultSet rs = ps.executeQuery()) {
-                        if (rs.next()) {
-                            Users user = new Users();
-                            user.setUserID(rs.getString("UserID"));
-                            user.setFullName(rs.getString("FullName"));
-                            user.setEmail(rs.getString("Email"));
-                            user.setPassword(rs.getString("Password"));
-                            user.setPermissionID(rs.getInt("PermissionID"));
-                            user.setStatus(rs.getBoolean("Status"));
-                            user.setResetToken(rs.getString("ResetToken"));
-                            user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
-                            user.setDateOfBirth(rs.getDate("DateOfBirth"));
-                            user.setAvatar(rs.getString("AvatarSrc"));
-                            return user;
-                        }
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
+        String sql = "SELECT * FROM Users WHERE UserID = ?";
+        
+        try (Connection conn = DBContext.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Users user = new Users();
+                    user.setUserID(rs.getString("UserID"));
+                    user.setFullName(rs.getString("FullName"));
+                    user.setEmail(rs.getString("Email"));
+                    user.setPassword(rs.getString("Password"));
+                    user.setPermissionID(rs.getInt("PermissionID"));
+                    user.setStatus(rs.getBoolean("Status"));
+                    user.setResetToken(rs.getString("ResetToken"));
+                    user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
+                    user.setDateOfBirth(rs.getDate("DateOfBirth"));
+                    user.setAvatar(rs.getString("AvatarSrc"));
+                    return user;
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error getting user by ID: " + id, e);
         }
-
+        
         return null;
     }
 
     public static void updateEmail(String otpEmail, String id) {
-        String sql = """
-                         UPDATE `clubmanagementsystem`.`users`
-                         SET
-                         
-                         `Email` = ?
-                         
-                         WHERE `UserID` = ?;""";
+        String sql = "UPDATE Users SET Email = ? WHERE UserID = ?";
         
-
-        try {
-
-            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
-            ps.setObject(1, otpEmail);
-            ps.setObject(2, id);
+        try (Connection conn = DBContext.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, otpEmail);
+            ps.setString(2, id);
             ps.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public boolean validateUser(String email, String password) {
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        boolean isValid = false;
-
-        try {
-            conn = DBContext.getConnection();
-            String query = "SELECT * FROM Users WHERE Email = ?";
-            stmt = conn.prepareStatement(query);
-            stmt.setString(1, email);
-            rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                String storedPassword = rs.getString("Password");
-                // Trong thực tế, bạn nên sử dụng thư viện mã hóa như BCrypt để kiểm tra mật khẩu
-                // Ví dụ: isValid = BCrypt.checkpw(password, storedPassword);
-                isValid = password.equals(storedPassword);
-            }
         } catch (SQLException e) {
-            System.out.println("Error validating user: " + e.getMessage());
-        } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (conn != null) {
-                    DBContext.closeConnection(conn);
-                }
-            } catch (SQLException e) {
-                System.out.println("Error closing resources: " + e.getMessage());
-            }
+            LOGGER.log(Level.SEVERE, "Error updating email for user: " + id, e);
         }
-
-        return isValid;
     }
 
     public int getTotalActiveUsers() {
-        int count = 0;
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DBContext.getConnection();
-            String query = "SELECT COUNT(*) FROM Users WHERE Status = 1";
-            stmt = conn.prepareStatement(query);
-            rs = stmt.executeQuery();
-
+        String sql = "SELECT COUNT(*) FROM Users WHERE Status = 1";
+        
+        try (Connection conn = DBContext.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
-                count = rs.getInt(1);
+                return rs.getInt(1);
             }
         } catch (SQLException e) {
-            System.out.println("Error getting total active users: " + e.getMessage());
-        } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (conn != null) {
-                    DBContext.closeConnection(conn);
-                }
-            } catch (SQLException e) {
-                System.out.println("Error closing resources: " + e.getMessage());
-            }
+            LOGGER.log(Level.SEVERE, "Error getting total active users", e);
         }
-
-        return count;
+        
+        return 0;
     }
 
     public List<Users> getAllUsers() {
@@ -632,57 +489,110 @@ public class UserDAO {
         return userList;
     }
 
+    /**
+     * Extract mã sinh viên từ email FPT 
+     * Ví dụ: huycvhe180308@fpt.edu.vn -> HE180308
+     * @param email Email FPT của sinh viên
+     * @return Mã sinh viên (VD: HE180308) hoặc null nếu không hợp lệ
+     */
+    private static String extractStudentCodeFromEmail(String email) {
+        if (email == null || !email.endsWith("@fpt.edu.vn")) {
+            return null;
+        }
+        
+        String localPart = email.substring(0, email.indexOf("@"));
+        
+        // Pattern: tên + mã sinh viên (VD: huycv + he180308)
+        // Tìm phần có pattern: 2 chữ cái + 6 số ở cuối
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("([a-zA-Z]{2}\\d{6})$", java.util.regex.Pattern.CASE_INSENSITIVE);
+        java.util.regex.Matcher matcher = pattern.matcher(localPart);
+        
+        if (matcher.find()) {
+            return matcher.group(1).toUpperCase(); // Trả về HE180308
+        }
+        
+        return null;
+    }
+
+    /**
+     * Generate UserID cho Google user dựa trên email FPT
+     * Ví dụ: huycvhe180308@fpt.edu.vn -> HE180308
+     * @param email Email FPT của user
+     * @return Mã sinh viên nếu email hợp lệ, hoặc fallback về U### nếu không extract được
+     */
+    public static String generateUserIdForGoogleUser(String email) {
+        // Thử extract mã sinh viên từ email FPT
+        String studentCode = extractStudentCodeFromEmail(email);
+        if (studentCode != null && !isUserIdExists(studentCode)) {
+            return studentCode;
+        }
+        
+        // Fallback về method generate cũ
+        return generateNextUserId();
+    }
+
+    /**
+     * Kiểm tra UserID đã tồn tại chưa
+     */
+    private static boolean isUserIdExists(String userID) {
+        String sql = "SELECT 1 FROM Users WHERE UserID = ? LIMIT 1";
+        try (Connection conn = DBContext.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, userID);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            return true; // Safe side: assume exists nếu có lỗi
+        }
+    }
+
     private static String generateNextUserId() {
         String sql = "SELECT UserID FROM Users ORDER BY UserID DESC LIMIT 1";
 
-        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-
+        try (Connection conn = DBContext.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql); 
+             ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 String lastId = rs.getString("UserID"); // Ví dụ: "U005"
                 int numericPart = Integer.parseInt(lastId.substring(1)); // Cắt bỏ chữ 'U'
                 return String.format("U%03d", numericPart + 1); // Tăng và định dạng lại
             }
-
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error generating next user ID", e);
         }
 
         return "U001"; // Nếu chưa có ai trong DB
     }
 
     public boolean register(Users user) {
-        String sql = "INSERT INTO Users (UserID, FullName, Email, Password, DateOfBirth, PermissionID, Status) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Users (UserID, FullName, Email, Password, AvatarSrc, DateOfBirth, PermissionID, Status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            LOGGER.log(Level.INFO, "Bắt đầu đăng ký cho người dùng: {0}", user.getEmail());
-
-            // Tạo UserID
-            String userID = generateNextUserId();
+            // Tạo UserID - ưu tiên mã sinh viên cho email FPT
+            String userID;
+            if (user.getEmail() != null && user.getEmail().endsWith("@fpt.edu.vn")) {
+                userID = generateUserIdForGoogleUser(user.getEmail());
+            } else {
+                userID = generateNextUserId();
+            }
+            
             ps.setString(1, userID);
             ps.setString(2, user.getFullName());
             ps.setString(3, user.getEmail());
             ps.setString(4, user.getPassword());
-            // Convert java.util.Date to java.sql.Date
+            ps.setString(5, user.getAvatar() != null ? user.getAvatar() : "img/Hinh-anh-dai-dien-mac-dinh-Facebook.jpg");
+            
             if (user.getDateOfBirth() != null) {
-                ps.setDate(5, new Date(user.getDateOfBirth().getTime()));
-                LOGGER.log(Level.INFO, "Ngày sinh được đặt: {0}", user.getDateOfBirth());
+                ps.setDate(6, new Date(user.getDateOfBirth().getTime()));
             } else {
-                ps.setNull(5, java.sql.Types.DATE);
-                LOGGER.log(Level.WARNING, "Ngày sinh là null");
+                ps.setNull(6, java.sql.Types.DATE);
             }
-            ps.setInt(6, user.getPermissionID());
-            ps.setBoolean(7, user.isStatus());
-            LOGGER.log(Level.INFO, "SQL Statement: {0} với UserID={1}", new Object[]{sql, userID});
+            ps.setInt(7, user.getPermissionID());
+            ps.setBoolean(8, user.isStatus());
 
-            int rowsAffected = ps.executeUpdate();
-            LOGGER.log(Level.INFO, "Kết quả đăng ký: {0} dòng bị ảnh hưởng", rowsAffected);
-            return rowsAffected > 0;
+            return ps.executeUpdate() > 0;
         } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, "Lỗi SQL khi đăng ký người dùng: {0}", ex.getMessage());
-            ex.printStackTrace();
-            return false;
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Lỗi không xác định khi đăng ký người dùng: {0}", e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error registering user: " + user.getEmail(), ex);
             return false;
         }
     }
@@ -690,8 +600,8 @@ public class UserDAO {
     public Users getUserByEmailAndPassword(String email, String password) {
         String sql = "SELECT * FROM Users WHERE Email = ? AND Password = ?";
 
-        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
+        try (Connection conn = DBContext.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, email);
             ps.setString(2, password);
 
@@ -711,9 +621,8 @@ public class UserDAO {
                     return user;
                 }
             }
-
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error getting user by email and password", e);
         }
 
         return null;
@@ -730,20 +639,13 @@ public class UserDAO {
     public static boolean updateVerificationToken(String email, String token, java.util.Date expiryDate) {
         String sql = "UPDATE Users SET ResetToken = ?, TokenExpiry = ?, Status = ? WHERE Email = ?";
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            if (conn == null) {
-                return false;
-            }
-
             ps.setString(1, token);
             ps.setTimestamp(2, new Timestamp(expiryDate.getTime()));
             ps.setBoolean(3, false); // Tài khoản chưa kích hoạt
             ps.setString(4, email);
-
             return ps.executeUpdate() > 0;
-
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error updating verification token for: " + email, e);
         }
         return false;
     }
@@ -770,18 +672,11 @@ public class UserDAO {
         // Nếu token hợp lệ, kích hoạt tài khoản
         String sql = "UPDATE Users SET Status = ?, ResetToken = NULL, TokenExpiry = NULL WHERE ResetToken = ?";
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            if (conn == null) {
-                return false;
-            }
-
             ps.setBoolean(1, true); // Kích hoạt tài khoản
             ps.setString(2, token);
-
             return ps.executeUpdate() > 0;
-
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error verifying account with token: " + token, e);
         }
         return false;
     }
@@ -793,49 +688,31 @@ public class UserDAO {
      * @return Đối tượng User nếu tìm thấy, null nếu không tìm thấy
      */
     public Users getUserByToken(String token) {
-        Users user = null;
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DBContext.getConnection();
-            String query = "SELECT * FROM Users WHERE ResetToken = ?";
-            stmt = conn.prepareStatement(query);
-            stmt.setString(1, token);
-            rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                user = new Users();
-                user.setUserID(rs.getString("UserID"));
-                user.setFullName(rs.getString("FullName"));
-                user.setEmail(rs.getString("Email"));
-                user.setPassword(rs.getString("Password"));
-                user.setDateOfBirth(rs.getDate("DateOfBirth"));
-                user.setPermissionID(rs.getInt("PermissionID"));
-                user.setStatus(rs.getBoolean("Status"));
-                user.setResetToken(rs.getString("ResetToken"));
-                user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
+        String sql = "SELECT * FROM Users WHERE ResetToken = ?";
+        
+        try (Connection conn = DBContext.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, token);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Users user = new Users();
+                    user.setUserID(rs.getString("UserID"));
+                    user.setFullName(rs.getString("FullName"));
+                    user.setEmail(rs.getString("Email"));
+                    user.setPassword(rs.getString("Password"));
+                    user.setDateOfBirth(rs.getDate("DateOfBirth"));
+                    user.setPermissionID(rs.getInt("PermissionID"));
+                    user.setStatus(rs.getBoolean("Status"));
+                    user.setResetToken(rs.getString("ResetToken"));
+                    user.setTokenExpiry(rs.getTimestamp("TokenExpiry"));
+                    return user;
+                }
             }
         } catch (SQLException e) {
-            System.out.println("Error getting user by token: " + e.getMessage());
-        } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (conn != null) {
-                    DBContext.closeConnection(conn);
-                }
-            } catch (SQLException e) {
-                System.out.println("Error closing resources: " + e.getMessage());
-            }
+            LOGGER.log(Level.SEVERE, "Error getting user by token: " + token, e);
         }
-
-        return user;
+        
+        return null;
     }
 
     /**
@@ -854,23 +731,7 @@ public class UserDAO {
             return false; // Mật khẩu hiện tại không đúng
         }
 
-        // Sử dụng phương thức changePassword đã được cải tiến để cập nhật mật khẩu
         return changePassword(userID, newPassword);
-    }
-
-    /**
-     * Kiểm tra mật khẩu hiện tại của người dùng
-     *
-     * @param userID ID người dùng
-     * @param password Mật khẩu cần kiểm tra
-     * @return true nếu mật khẩu đúng, false nếu mật khẩu sai
-     */
-    public static boolean checkPassword(String userID, String password) {
-        Users user = getUserById(userID);
-        if (user == null) {
-            return false;
-        }
-        return user.getPassword().equals(password);
     }
 
     /**
@@ -881,39 +742,17 @@ public class UserDAO {
      * @return true nếu thay đổi thành công, false nếu thất bại
      */
     public static boolean changePassword(String userID, String newPassword) {
-        String sql = "UPDATE users SET Password = ? WHERE UserID = ?";
-
-        // Thử với DBContext_Duc
+        String sql = "UPDATE Users SET Password = ? WHERE UserID = ?";
         
-        if (DBContext.getConnection()!=null) {
-            try {
-                PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
-                ps.setString(1, newPassword);
-                ps.setString(2, userID);
-                int rowsAffected = ps.executeUpdate();
-                return rowsAffected > 0;
-            } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "Lỗi khi cập nhật mật khẩu với DBContext_Duc: {0}", e.getMessage());
-                e.printStackTrace();
-            }
-        }
-
-        // Nếu kết nối DBContext_Duc thất bại, thử với DBContext
-        try (Connection conn = DBContext.getConnection()) {
-            if (conn != null) {
-                try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                    ps.setString(1, newPassword);
-                    ps.setString(2, userID);
-                    int rowsAffected = ps.executeUpdate();
-                    return rowsAffected > 0;
-                }
-            }
+        try (Connection conn = DBContext.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, newPassword);
+            ps.setString(2, userID);
+            return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Lỗi khi cập nhật mật khẩu với DBContext: {0}", e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error updating password for user: " + userID, e);
+            return false;
         }
-
-        return false;
     }
 
     /**

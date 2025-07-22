@@ -74,17 +74,11 @@ public class ChangePasswordServlet extends HttpServlet {
             return;
         }
         
-        // Kiểm tra mật khẩu hiện tại có đúng không
-        if (!UserDAO.checkPassword(userID, currentPassword)) {
-            request.setAttribute("msg", "Mật khẩu hiện tại không đúng");
-            request.setAttribute("msgType", "error");
-            request.getRequestDispatcher("view/auth/change-password.jsp").forward(request, response);
-            return;
-        }        // Cập nhật mật khẩu mới
-        boolean success = UserDAO.changePassword(userID, newPassword);
+        // Thử cập nhật mật khẩu - nếu mật khẩu hiện tại sai sẽ return false
+        boolean success = UserDAO.updatePassword(userID, currentPassword, newPassword);
         
         if (!success) {
-            request.setAttribute("msg", "Có lỗi xảy ra khi đổi mật khẩu");
+            request.setAttribute("msg", "Mật khẩu hiện tại không đúng");
             request.setAttribute("msgType", "error");
             request.getRequestDispatcher("view/auth/change-password.jsp").forward(request, response);
             return;
