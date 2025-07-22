@@ -145,6 +145,12 @@
                             <i class="fas fa-clock"></i> Cuộc họp
                         </a>
                     </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/chairman-page/tasks"
+                           class="nav-item ${currentPath == '/chairman-page/tasks' ? 'active' : ''}">
+                            <i class="fas fa-file-alt"></i> Báo cáo
+                        </a>
+                    </li>
                 </ul>
             </nav>
 
@@ -245,7 +251,7 @@
                                            value="${editMeeting != null ? editMeeting.startedTime : ''}" required>
                                 </div>
 
-                                
+
 
                                 <div class="mb-3">
                                     <label class="form-label">Các ban tham gia</label>
@@ -303,7 +309,7 @@
                                             <tr>
                                                 <th scope="col" class="ps-4">Cuộc họp</th>
                                                 <th scope="col">Thời gian bắt đầu</th>
-                                               
+
                                                 <th scope="col">Liên kết</th>
                                                 <th scope="col">Tài liệu</th>
                                                 <th scope="col">Trạng thái</th>
@@ -330,7 +336,7 @@
                                                         <fmt:formatDate value="${meeting.startedTime}" pattern="dd/MM/yyyy HH:mm" />
                                                     </td>
 
-                                                    
+
                                                     <td>
                                                         <a href="${meeting.URLMeeting}" target="_blank" class="text-decoration-none">
                                                             <i class="fas fa-link me-1"></i>Tham gia
