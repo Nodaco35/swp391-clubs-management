@@ -57,7 +57,6 @@
 					</a>
 				</li>
 
-
 			</ul>
 		</nav>
 
@@ -89,7 +88,6 @@
 			</button>
 		</div>
 	</div>
-
 
 	<div class="mobile-menu" id="mobileMenu">
 		<nav class="mobile-nav">
@@ -175,7 +173,6 @@
 					<c:set var="termMap" value="${entry.value}"/>
 
 
-
 					<div class="timeline-item">
 						<div class="timeline-header">
 							<h3><i class="fas fa-calendar-alt"></i> ${event.eventName}</h3>
@@ -247,9 +244,7 @@
 													</c:forEach>
 														${deptSet}
 
-
-                                                        </div>
-
+												</div>
 
 											</div>
 										</c:if>
@@ -261,82 +256,81 @@
 												</button>
 											</div>
 
+											<div class="phase-task-list">
+												<c:choose>
+													<c:when test="${not empty tasks}">
+														<c:forEach var="task" items="${tasks}">
+															<div class="phase-task-item">
+																<div class="phase-task-info">
+																	<div class="phase-task-title">${task.title}</div>
+																	<div class="phase-task-meta">
+																		<div class="phase-task-department">
+																			<i class="fas fa-user"></i>
+																				${task.departmentAssignee.departmentName}
+																		</div>
+																		<div class="phase-task-deadline">
+																			<i class="fas fa-calendar-alt"></i>
+																			<fmt:formatDate value="${task.startDate}"
+																			                pattern="dd/MM/yyyy"/> -
+																			<fmt:formatDate value="${task.endDate}"
+																			                pattern="dd/MM/yyyy"/>
+																		</div>
+																	</div>
+																</div>
+																<div class="phase-task-status">
+																	<c:choose>
+																		<c:when test="${task.status == 'ToDo'}">
+																			<span class="badge badge-secondary">Chưa bắt đầu</span>
+																		</c:when>
+																		<c:when test="${task.status == 'InProgress'}">
+																			<span class="badge badge-warning">Đang thực hiện</span>
+																		</c:when>
+																		<c:when test="${task.status == 'Review'}">
+																			<span class="badge badge-info">Chờ duyệt</span>
+																		</c:when>
+																		<c:when test="${task.status == 'Rejected'}">
+																			<span class="badge badge-danger">Bị từ chối</span>
+																		</c:when>
+																		<c:when test="${task.status == 'Done'}">
+																			<span class="badge badge-success">Hoàn thành</span>
+																		</c:when>
+																		<c:otherwise>
+																			<span class="badge badge-dark">Không xác định</span>
+																		</c:otherwise>
+																	</c:choose>
+																</div>
 
-                                                    <div class="phase-task-list">
-                                                        <c:choose>
-                                                            <c:when test="${not empty tasks}">
-                                                                <c:forEach var="task" items="${tasks}">
-                                                                    <div class="phase-task-item">
-                                                                        <div class="phase-task-info">
-                                                                            <div class="phase-task-title">${task.title}</div>
-                                                                            <div class="phase-task-meta">
-                                                                                <div class="phase-task-department">
-                                                                                    <i class="fas fa-user"></i>
-                                                                                    ${task.departmentAssignee.departmentName}
-                                                                                </div>
-                                                                                <div class="phase-task-deadline">
-                                                                                    <i class="fas fa-calendar-alt"></i>
-                                                                                    <fmt:formatDate value="${task.startDate}"
-                                                                                                    pattern="dd/MM/yyyy"/> -
-                                                                                    <fmt:formatDate value="${task.endDate}"
-                                                                                                    pattern="dd/MM/yyyy"/>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="phase-task-status">
-                                                                            <c:choose>
-                                                                                <c:when test="${task.status == 'ToDo'}">
-                                                                                    <span class="badge badge-secondary">Chưa bắt đầu</span>
-                                                                                </c:when>
-                                                                                <c:when test="${task.status == 'InProgress'}">
-                                                                                    <span class="badge badge-warning">Đang thực hiện</span>
-                                                                                </c:when>
-                                                                                <c:when test="${task.status == 'Review'}">
-                                                                                    <span class="badge badge-info">Chờ duyệt</span>
-                                                                                </c:when>
-                                                                                <c:when test="${task.status == 'Rejected'}">
-                                                                                    <span class="badge badge-danger">Bị từ chối</span>
-                                                                                </c:when>
-                                                                                <c:when test="${task.status == 'Done'}">
-                                                                                    <span class="badge badge-success">Hoàn thành</span>
-                                                                                </c:when>
-                                                                                <c:otherwise>
-                                                                                    <span class="badge badge-dark">Không xác định</span>
-                                                                                </c:otherwise>
-                                                                            </c:choose>
-                                                                        </div>
-
-                                                                        <div class="phase-task-actions">
-                                                                            <button class="btn-task-action-small"
-                                                                                    title="Xem chi tiết">
-                                                                                <i class="fas fa-eye"></i>
-                                                                            </button>
-                                                                            <button class="btn-task-action-small"
-                                                                                    title="Xóa công việc">
-                                                                                <i class="fas fa-trash"></i>
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
-                                                                </c:forEach>
-                                                            </c:when>
-                                                            <c:otherwise>
-                                                                <div class="phase-task-empty">
-                                                                    <p style="color: #666; font-style: italic; text-align: center; padding: 20px;">
-                                                                        Chưa có công việc nào được giao trong giai đoạn này
-                                                                    </p>
-                                                                </div>
-                                                            </c:otherwise>
-                                                        </c:choose>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </c:forEach>
-                                </div>
-                            </div>
-                        </c:forEach>
-                    </c:if>
-                </div>
+																<div class="phase-task-actions">
+																	<button class="btn-task-action-small"
+																	        title="Xem chi tiết">
+																		<i class="fas fa-eye"></i>
+																	</button>
+																	<button class="btn-task-action-small"
+																	        title="Xóa công việc">
+																		<i class="fas fa-trash"></i>
+																	</button>
+																</div>
+															</div>
+														</c:forEach>
+													</c:when>
+													<c:otherwise>
+														<div class="phase-task-empty">
+															<p style="color: #666; font-style: italic; text-align: center; padding: 20px;">
+																Chưa có công việc nào được giao trong giai đoạn này
+															</p>
+														</div>
+													</c:otherwise>
+												</c:choose>
+											</div>
+										</div>
+									</div>
+								</div>
+							</c:forEach>
+						</div>
+					</div>
+				</c:forEach>
+			</c:if>
+		</div>
 
 		<!-- Empty State -->
 		<c:if test="${empty timelineMap}">
