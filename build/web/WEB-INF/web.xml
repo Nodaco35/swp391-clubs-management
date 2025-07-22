@@ -228,6 +228,10 @@
     <servlet>
         <servlet-name>SemesterServlet</servlet-name>
         <servlet-class>controller.SemesterServlet</servlet-class>
+      </servlet>
+    <servlet>
+        <servlet-name>ChairmanEditTasksServlet</servlet-name>
+        <servlet-class>controller.ChairmanEditTasksServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>ClubsServlet</servlet-name>
@@ -475,8 +479,13 @@
         <url-pattern>/chairman-page/reports</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
+
         <servlet-name>SemesterServlet</servlet-name>
         <url-pattern>/ic/semester</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ChairmanEditTasksServlet</servlet-name>
+        <url-pattern>/chairman-page/tasks/edit-tasks</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>

@@ -3,7 +3,6 @@
     Created on : Jun 15, 2025, 11:27:00 AM
     Author     : LE VAN THUAN
 --%>
-
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -13,6 +12,80 @@
 	<title>MyClub Dashboard</title>
 	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/chairmanPage.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+	<style>
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            overflow: auto;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            width: 80%;
+            max-width: 1000px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+            margin: 5% auto;
+        }
+        .modal-content h2 {
+            background-color: #fff;
+            padding: 10px 0;
+            margin: 0;
+            z-index: 1; /* Đảm bảo tiêu đề ở trên cùng */
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: #000;
+        }
+        .form-group {
+            margin-bottom: 10px; /* Giảm khoảng cách giữa các trường */
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .btn-primary {
+            background-color: #00a6c0;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-primary:hover {
+            background-color:  #0089a0;
+        }
+        .error-message {
+            color: red;
+            margin-bottom: 10px;
+        }
+        #newDocumentFields {
+            display: none;
+        }
+	</style>
 </head>
 <body>
 <header class="header">
@@ -21,8 +94,6 @@
 			<i class="fas fa-users"></i>
 			<span>UniClub</span>
 		</div>
-
-		<!-- Search Bar -->
 		<div class="search-container">
 			<div class="search-box">
 				<form action="${pageContext.request.contextPath}/events-page" method="get">
@@ -35,7 +106,6 @@
 				</form>
 			</div>
 		</div>
-
 		<nav class="main-nav">
 			<ul>
 				<li>
@@ -56,10 +126,8 @@
 						Sự Kiện
 					</a>
 				</li>
-
 			</ul>
 		</nav>
-
 		<div class="auth-buttons">
 			<c:choose>
 				<c:when test="${sessionScope.user != null}">
@@ -88,16 +156,12 @@
 			</button>
 		</div>
 	</div>
-
 	<div class="mobile-menu" id="mobileMenu">
 		<nav class="mobile-nav">
 			<ul>
-				<li><a href="${pageContext.request.contextPath}/"
-				       class="${pageContext.request.servletPath == '/' ? 'active' : ''}">Trang Chủ</a></li>
-				<li><a href="${pageContext.request.contextPath}/clubs"
-				       class="${pageContext.request.servletPath == '/clubs' ? 'active' : ''}">Câu Lạc Bộ</a></li>
-				<li><a href="${pageContext.request.contextPath}/events-page"
-				       class="${pageContext.request.servletPath == '/events-page' ? 'active' : ''}">Sự Kiện</a></li>
+				<li><a href="${pageContext.request.contextPath}/" class="${pageContext.request.servletPath == '/' ? 'active' : ''}">Trang Chủ</a></li>
+				<li><a href="${pageContext.request.contextPath}/clubs" class="${pageContext.request.servletPath == '/clubs' ? 'active' : ''}">Câu Lạc Bộ</a></li>
+				<li><a href="${pageContext.request.contextPath}/events-page" class="${pageContext.request.servletPath == '/events-page' ? 'active' : ''}">Sự Kiện</a></li>
 			</ul>
 		</nav>
 	</div>
@@ -115,55 +179,55 @@
 			</div>
 		</div>
 	</c:if>
-
-            <nav class="dashboard-nav">
-                <ul>
-                    <li>
-                        <a href="${pageContext.request.contextPath}/chairman-page/overview"
-                           class="nav-item ${currentPath == '/chairman-page/overview' ? 'active' : ''}">
-                            <i class="fas fa-tachometer-alt"></i> Tổng quan
-                        </a>
-                    </li>
-                    <li>
-                        <a href="${pageContext.request.contextPath}/chairman-page/myclub-events"
-                           class="nav-item ${currentPath == '/chairman-page/myclub-events' ? 'active' : ''}">
-                            <i class="fas fa-calendar-alt"></i> Sự kiện
-                        </a>
-                    </li>
-                    <li>
-                        <a href="${pageContext.request.contextPath}/chairman-page/tasks"
-                           class="nav-item ${currentPath == '/chairman-page/tasks' ? 'active' : ''}">
-                            <i class="fas fa-clock"></i> Timeline & Công việc
-                        </a>
-                    </li>
-                    <li>
-                        <a href="${pageContext.request.contextPath}/chairman-page/clubmeeting"
-                           class="nav-item ${currentPath == '/chairman-page/clubmeeting' ? 'active' : ''}">
-                            <i class="fas fa-clock"></i> Cuộc họp
-                        </a>
-                    </li>
-                    <li>
-                        <a href="${pageContext.request.contextPath}/chairman-page/reports"
-                           class="nav-item ${currentPath == '/chairman-page/tasks' ? 'active' : ''}">
-                            <i class="fas fa-file-alt"></i> Báo cáo
-                        </a>
-                    </li>
-                    <li>
-                        <a href="${pageContext.request.contextPath}/chairman-page/financial-management"
-                           class="nav-item ${currentPath == '/chairman-page/financial-management' ? 'active' : ''}">
-                            <i class="fas fa-money-bill-wave"></i> Quản lý dòng tiền
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-
-
+	<nav class="dashboard-nav">
+		<ul>
+			<li>
+				<a href="${pageContext.request.contextPath}/chairman-page/overview"
+				   class="nav-item ${currentPath == '/chairman-page/overview' ? 'active' : ''}">
+					<i class="fas fa-tachometer-alt"></i> Tổng quan
+				</a>
+			</li>
+			<li>
+				<a href="${pageContext.request.contextPath}/chairman-page/myclub-events"
+				   class="nav-item ${currentPath == '/chairman-page/myclub-events' ? 'active' : ''}">
+					<i class="fas fa-calendar-alt"></i> Sự kiện
+				</a>
+			</li>
+			<li>
+				<a href="${pageContext.request.contextPath}/chairman-page/tasks"
+				   class="nav-item ${currentPath == '/chairman-page/tasks' ? 'active' : ''}">
+					<i class="fas fa-clock"></i> Timeline & Công việc
+				</a>
+			</li>
+			<li>
+				<a href="${pageContext.request.contextPath}/chairman-page/clubmeeting"
+				   class="nav-item ${currentPath == '/chairman-page/clubmeeting' ? 'active' : ''}">
+					<i class="fas fa-clock"></i> Cuộc họp
+				</a>
+			</li>
+			<li>
+				<a href="${pageContext.request.contextPath}/chairman-page/reports"
+				   class="nav-item ${currentPath == '/chairman-page/reports' ? 'active' : ''}">
+					<i class="fas fa-file-alt"></i> Báo cáo
+				</a>
+			</li>
+			<li>
+				<a href="${pageContext.request.contextPath}/chairman-page/financial-management"
+				   class="nav-item ${currentPath == '/chairman-page/financial-management' ? 'active' : ''}">
+					<i class="fas fa-money-bill-wave"></i> Quản lý dòng tiền
+				</a>
+			</li>
+		</ul>
+	</nav>
 </header>
 <main class="dashboard-content">
+	<c:if test="${not empty errorMessage}">
+	<div class="error-message">${errorMessage}</div>
+	</c:if>
 	<section class="timeline-management">
 		<div class="section-header">
 			<div class="section-title">
-				<h2>Timeline quản lý sự kiện</h2>
+				<h2>Các giai đoạn công việc</h2>
 			</div>
 			<div class="section-actions">
 				<form method="get" action="${pageContext.request.contextPath}/chairman-page/tasks">
@@ -178,28 +242,19 @@
 				</form>
 			</div>
 		</div>
-
 		<div class="timeline-container" id="timelineContainer">
 			<c:if test="${not empty timelineMap}">
 				<c:forEach var="entry" items="${timelineMap}">
 					<c:set var="event" value="${entry.key}"/>
 					<c:set var="termMap" value="${entry.value}"/>
-
-
 					<div class="timeline-item">
 						<div class="timeline-header">
 							<h3><i class="fas fa-calendar-alt"></i> ${event.eventName}</h3>
-								<%--							<div class="timeline-actions">--%>
-								<%--								<button class="btn-edit-timeline"><i class="fas fa-edit"></i> Chỉnh sửa</button>--%>
-								<%--																	        <button class="btn-delete-timeline"><i class="fas fa-trash"></i> Xóa</button>--%>
-								<%--							</div>--%>
 						</div>
-
 						<div class="timeline-phases">
 							<c:forEach var="termEntry" items="${termMap}">
 								<c:set var="term" value="${termEntry.key}"/>
 								<c:set var="tasks" value="${termEntry.value}"/>
-
 								<div class="phase-item">
 									<div class="phase-connector"></div>
 									<div class="phase-content">
@@ -207,8 +262,6 @@
 											<h4>${term}</h4>
 											<span class="phase-status">Tổng số công việc: ${fn:length(tasks)}</span>
 										</div>
-
-										<!-- Hiển thị thời gian term -->
 										<c:set var="termInfo"
 										       value="${requestScope['termInfoMap_'.concat(event.eventID)][term]}"/>
 										<c:choose>
@@ -232,9 +285,6 @@
 												<p class="phase-description">Chưa có thông tin thời gian</p>
 											</c:otherwise>
 										</c:choose>
-
-
-										<!-- Departments info -->
 										<c:if test="${not empty tasks}">
 											<div class="phase-info">
 												<div class="phase-departments">
@@ -256,19 +306,17 @@
 														</c:if>
 													</c:forEach>
 														${deptSet}
-
 												</div>
-
 											</div>
 										</c:if>
 										<div class="phase-tasks">
 											<div class="phase-tasks-header">
 												<h5><i class="fas fa-tasks"></i> Công việc</h5>
-												<button class="btn-add-task-to-phase">
+												<button class="btn-add-task-to-phase" data-term-id="${termInfo.termID}"
+												        data-event-id="${event.eventID}">
 													<i class="fas fa-plus"></i> Giao công việc
 												</button>
 											</div>
-
 											<div class="phase-task-list">
 												<c:choose>
 													<c:when test="${not empty tasks}">
@@ -288,6 +336,12 @@
 																			<fmt:formatDate value="${task.endDate}"
 																			                pattern="dd/MM/yyyy"/>
 																		</div>
+																		<c:if test="${not empty task.document}">
+																			<div class="phase-task-document">
+																				<i class="fas fa-file-alt"></i>
+																				<a href="${task.document.documentURL}" target="_blank">${task.document.documentName}</a>
+																			</div>
+																		</c:if>
 																	</div>
 																</div>
 																<div class="phase-task-status">
@@ -312,16 +366,11 @@
 																		</c:otherwise>
 																	</c:choose>
 																</div>
-
 																<div class="phase-task-actions">
-																	<button class="btn-task-action-small"
-																	        title="Xem chi tiết">
+																	<a href="${pageContext.request.contextPath}/chairman-page/tasks/edit-tasks?taskID=${task.taskID}"
+																	   class="btn-task-action-small" title="Xem chi tiết">
 																		<i class="fas fa-eye"></i>
-																	</button>
-																	<button class="btn-task-action-small"
-																	        title="Xóa công việc">
-																		<i class="fas fa-trash"></i>
-																	</button>
+																	</a>
 																</div>
 															</div>
 														</c:forEach>
@@ -344,8 +393,6 @@
 				</c:forEach>
 			</c:if>
 		</div>
-
-		<!-- Empty State -->
 		<c:if test="${empty timelineMap}">
 			<div style="text-align: center; padding: 40px; color: #666;">
 				<i class="fas fa-clock" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
@@ -353,7 +400,127 @@
 			</div>
 		</c:if>
 	</section>
-</main>
 
+	<!-- Modal Form for Adding Task -->
+	<div class="modal" id="addTaskModal">
+		<div class="modal-content">
+			<span class="close">×</span>
+			<h2>Giao Công Việc</h2>
+			<form action="${pageContext.request.contextPath}/chairman-page/tasks" method="post" id="addTaskForm">
+				<input type="hidden" name="action" value="addTask">
+				<input type="hidden" name="termID" id="termID">
+				<input type="hidden" name="eventID" id="eventID">
+				<input type="hidden" name="clubID" value="${club.clubID}">
+				<input type="hidden" name="assigneeType" value="Department">
+				<input type="hidden" name="createdBy" value="${sessionScope.user.userID}">
+				<div class="form-group">
+					<label for="title">Tiêu đề công việc:</label>
+					<input type="text" name="title" id="title" required maxlength="100">
+				</div>
+				<div class="form-group">
+					<label for="description">Mô tả:</label>
+					<textarea name="description" id="description" rows="4"></textarea>
+				</div>
+				<div class="form-group">
+					<label for="departmentID">Phòng ban:</label>
+					<select name="departmentID" id="departmentID" required>
+						<option value="">Chọn phòng ban</option>
+						<c:forEach var="dept" items="${departmentList}">
+							<option value="${dept.departmentID}">${dept.departmentName}</option>
+						</c:forEach>
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="documentSelect">Tài liệu:</label>
+					<select name="existingDocumentID" id="documentSelect" onchange="toggleDocumentFields()">
+						<option value="">Không có tài liệu</option>
+						<option value="new">Tạo tài liệu mới</option>
+						<c:forEach var="doc" items="${documentsList}">
+							<option value="${doc.documentID}">${doc.documentName} (${doc.department.departmentName})</option>
+						</c:forEach>
+					</select>
+				</div>
+				<div id="newDocumentFields">
+					<div class="form-group">
+						<label for="documentName">Tên tài liệu:</label>
+						<input type="text" name="documentName" id="documentName" maxlength="100">
+					</div>
+					<div class="form-group">
+						<label for="documentURL">Liên kết tài liệu:</label>
+						<input type="url" name="documentURL" id="documentURL" maxlength="255">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="startDate">Ngày bắt đầu:</label>
+					<input type="date" name="startDate" id="startDate" required>
+				</div>
+				<div class="form-group">
+					<label for="endDate">Ngày kết thúc:</label>
+					<input type="date" name="endDate" id="endDate" required>
+				</div>
+				<button type="submit" class="btn btn-primary">Giao Công Việc</button>
+			</form>
+		</div>
+	</div>
+
+	<script>
+        // Xử lý hiển thị modal khi nhấn nút "Giao công việc"
+        document.querySelectorAll(".btn-add-task-to-phase").forEach(button => {
+            button.addEventListener("click", function (e) {
+                e.preventDefault();
+                const termID = this.getAttribute("data-term-id");
+                const eventID = this.getAttribute("data-event-id");
+                const modal = document.getElementById("addTaskModal");
+                const termIDInput = document.getElementById("termID");
+                const eventIDInput = document.getElementById("eventID");
+                termIDInput.value = termID;
+                eventIDInput.value = eventID;
+                modal.style.display = "flex";
+                // Reset form
+                document.getElementById("addTaskForm").reset();
+                termIDInput.value = termID;
+                eventIDInput.value = eventID;
+                document.getElementById("documentSelect").value = "";
+                toggleDocumentFields();
+            });
+        });
+
+        // Xử lý đóng modal
+        document.querySelector(".close").addEventListener("click", function () {
+            document.getElementById("addTaskModal").style.display = "none";
+        });
+
+        // Đóng modal khi nhấn ra ngoài
+        window.addEventListener("click", function (event) {
+            const modal = document.getElementById("addTaskModal");
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        });
+
+        // Hiển thị/ẩn các trường nhập tài liệu mới
+        function toggleDocumentFields() {
+            const documentSelect = document.getElementById("documentSelect");
+            const newDocumentFields = document.getElementById("newDocumentFields");
+            if (documentSelect.value === "new") {
+                newDocumentFields.style.display = "block";
+            } else {
+                newDocumentFields.style.display = "none";
+                document.getElementById("documentName").value = "";
+                document.getElementById("documentURL").value = "";
+            }
+        }
+
+        // Client-side validation cho DocumentName và DocumentURL
+        document.getElementById("addTaskForm").addEventListener("submit", function (e) {
+            const documentSelect = document.getElementById("documentSelect").value;
+            const documentName = document.getElementById("documentName").value;
+            const documentURL = document.getElementById("documentURL").value;
+            if (documentSelect === "new" && documentURL && !documentName) {
+                e.preventDefault();
+                alert("Vui lòng nhập tên tài liệu khi cung cấp liên kết tài liệu.");
+            }
+        });
+	</script>
 </body>
 </html>

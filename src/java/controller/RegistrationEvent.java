@@ -69,7 +69,7 @@ public class RegistrationEvent extends HttpServlet {
 
         if (loggedInUser != null) {
             UserDAO usersDAO = new UserDAO();
-            Users userDetails = usersDAO.getUserByID(loggedInUser.getUserID());
+            Users userDetails = usersDAO.getUserById(loggedInUser.getUserID());
             request.setAttribute("userDetails", userDetails);
         }
 
@@ -268,7 +268,7 @@ public class RegistrationEvent extends HttpServlet {
                     : new ArrayList<>();
 
             UserDAO userDAO = new UserDAO();
-            Users userDetails = userDAO.getUserByID(((Users) request.getSession().getAttribute("user")).getUserID());
+            Users userDetails = userDAO.getUserById(((Users) request.getSession().getAttribute("user")).getUserID());
 
             request.setAttribute("event", event);
             request.setAttribute("registeredCount", stats.getRegisteredCount());
