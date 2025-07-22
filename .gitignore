@@ -6,6 +6,13 @@
 /dist/
 
 # =========================
+# Sensitive Configuration Files
+# =========================
+src/conf/oauth.properties
+*.properties.local
+config/oauth.properties
+
+# =========================
 # Java build files
 # =========================
 *.class

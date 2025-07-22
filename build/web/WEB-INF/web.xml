@@ -5,7 +5,26 @@
         <filter-class>filters.AuthFilter</filter-class>
     </filter>
     <filter-mapping>
-        <filter-name>AuthFilter</filter-name>
+        <filter-name>AuthFi    <servlet-mapping>
+        <servlet-name>ChairmanClubReportServlet</servlet-name>
+        <url-pattern>/chairman-page/reports</url-pattern>
+    </servlet-mapping>
+
+    <!-- Google OAuth Servlet Mappings -->
+    <servlet-mapping>
+        <servlet-name>GoogleOAuthServlet</servlet-name>
+        <url-pattern>/auth/google</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>GoogleOAuthServlet</servlet-name>
+        <url-pattern>/oauth2callback</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>GoogleRegistrationServlet</servlet-name>
+        <url-pattern>/google-register</url-pattern>
+    </servlet-mapping>
+
+    <session-config>/filter-name>
         <url-pattern>/admin/*</url-pattern>
         <url-pattern>/ic/*</url-pattern>
     </filter-mapping>
@@ -221,6 +240,16 @@
         <servlet-name>FinancialManagementServlet</servlet-name>
         <servlet-class>controller.FinancialManagementServlet</servlet-class>
       </servlet>
+
+    <!-- Google OAuth Servlets -->
+    <servlet>
+        <servlet-name>GoogleOAuthServlet</servlet-name>
+        <servlet-class>controller.GoogleOAuthServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>GoogleRegistrationServlet</servlet-name>
+        <servlet-class>controller.GoogleRegistrationServlet</servlet-class>
+    </servlet>
 
 <servlet>
         <servlet-name>ChairmanClubReportServlet</servlet-name>
