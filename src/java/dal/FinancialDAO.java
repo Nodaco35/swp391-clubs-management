@@ -355,7 +355,7 @@ public class FinancialDAO {
                      UPDATE memberincomecontributions 
                      SET ContributionStatus = 'Paid', PaidDate = CURRENT_TIMESTAMP 
                      WHERE ContributionID = ? AND ContributionStatus = 'Pending'""";
-        MemberIncomeContributions invoice = FinancialDAO.getInvoiceByID(contributionID);
+
         String sql2 = """
                      INSERT INTO Transactions (ClubID, TermID, Type, Amount, TransactionDate, Description, Status, ReferenceID, CreatedBy)
                      VALUES
@@ -365,19 +365,25 @@ public class FinancialDAO {
             PreparedStatement ps2 = DBContext.getConnection().prepareStatement(sql2);
 
             ps.setInt(1, contributionID);
-            ps2.setObject(1, invoice.getClubID());
-            ps2.setObject(2, invoice.getTermID());
-            ps2.setObject(3, "Income");
-            ps2.setObject(4, invoice.getAmount());
-            ps2.setObject(5, invoice.getPaidDate());
-            ps2.setObject(6, invoice.getDescription());
-            ps2.setObject(7, "Approved");
-            ps2.setObject(8, invoice.getIncomeID());
-            ps2.setObject(9, invoice.getUserID());
 
             int rowsAffected = ps.executeUpdate();
-            int row = ps2.executeUpdate();
-            return rowsAffected > 0 && row > 0;
+            int row = 0;
+            if (rowsAffected > 0) {
+                MemberIncomeContributions invoice = FinancialDAO.getInvoiceByID(contributionID);
+                ps2.setObject(1, invoice.getClubID());
+                ps2.setObject(2, invoice.getTermID());
+                ps2.setObject(3, "Income");
+                ps2.setObject(4, invoice.getAmount());
+                ps2.setObject(5, invoice.getPaidDate());
+                ps2.setObject(6, invoice.getDescription());
+                ps2.setObject(7, "Approved");
+                ps2.setObject(8, invoice.getIncomeID());
+                ps2.setObject(9, invoice.getUserID());
+                row = ps2.executeUpdate();
+                
+            }
+            return row > 0;
+           
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
