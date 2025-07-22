@@ -209,6 +209,10 @@
         <servlet-name>AssignFormServlet</servlet-name>
         <servlet-class>controller.AssignFormServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>ChairmanClubReportServlet</servlet-name>
+        <servlet-class>controller.ChairmanClubReportServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ClubsServlet</servlet-name>
         <url-pattern>/clubs</url-pattern>
@@ -437,6 +441,10 @@
     <servlet-mapping>
         <servlet-name>AssignFormServlet</servlet-name>
         <url-pattern>/assign-form</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ChairmanClubReportServlet</servlet-name>
+        <url-pattern>/chairman-page/reports</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>
