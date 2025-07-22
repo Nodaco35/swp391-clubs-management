@@ -27,6 +27,7 @@ public class MyClubController extends HttpServlet {
         String error;
         Users user = (Users) request.getSession().getAttribute("user");
         DocumentsDAO documentsDAO = new DocumentsDAO();
+
         DepartmentDAO departmentDAO = new DepartmentDAO();
         if (user == null) {
             request.getRequestDispatcher("index.jsp").forward(request, response);
@@ -82,7 +83,7 @@ public class MyClubController extends HttpServlet {
                     documentsDAO.deleteDocument(documentID);
                     request.setAttribute("message", "Xóa tài liệu thành công!");
                 } catch (SQLException e) {
-                    request.setAttribute("error", "Lỗi khi xóa tài liệu: " + e.getMessage());
+                    request.setAttribute("error", "Tài liệu này đang được sử dụng, không thể xóa! ");
                 }
             }
             List<Documents> documents = documentsDAO.findByClubID(clubID);
@@ -102,6 +103,7 @@ public class MyClubController extends HttpServlet {
             throws ServletException, IOException {
         Users user = (Users) request.getSession().getAttribute("user");
         DocumentsDAO documentsDAO = new DocumentsDAO();
+
         DepartmentDAO departmentDAO = new DepartmentDAO();
         if (user == null) {
             request.getRequestDispatcher("index.jsp").forward(request, response);
@@ -112,15 +114,15 @@ public class MyClubController extends HttpServlet {
 
         if ("loadDocuments".equals(action)) {
             int clubID = Integer.parseInt(request.getParameter("clubID"));
-            boolean hasPermission = false;
+            boolean isMember = false;
             for (UserClub uc : userclubs) {
-                if (uc.getClubID() == clubID && (uc.getRoleID() == 1 || uc.getRoleID() == 3)) {
-                    hasPermission = true;
+                if (uc.getClubID() == clubID) {
+                    isMember = true;
                     break;
                 }
             }
-            if (!hasPermission) {
-                request.setAttribute("error", "Bạn không có quyền xem tài liệu của câu lạc bộ này.");
+            if (!isMember) {
+                request.setAttribute("error", "Bạn không phải là thành viên của câu lạc bộ này.");
             } else {
                 List<Documents> documents = documentsDAO.findByClubID(clubID);
                 List<Department> departments = departmentDAO.findByClubID(clubID);
@@ -144,8 +146,8 @@ public class MyClubController extends HttpServlet {
                     break;
                 }
             }
-            if (!hasPermission) {
-                request.setAttribute("error", "Bạn không có quyền truy cập danh sách ban của câu lạc bộ này.");
+            if (!hasPermission && documentID != null && !documentID.isEmpty()) {
+                request.setAttribute("error", "Bạn không có quyền chỉnh sửa tài liệu này.");
             } else {
                 List<Documents> documents = documentsDAO.findByClubID(clubID);
                 List<Department> departments = departmentDAO.findByClubID(clubID);
@@ -182,6 +184,17 @@ public class MyClubController extends HttpServlet {
                     break;
                 }
             }
+            if (!hasPermission) {
+                request.setAttribute("error", "Bạn không có quyền thực hiện hành động này.");
+                List<Documents> documents = documentsDAO.findByClubID(clubID);
+                List<Department> departments = departmentDAO.findByClubID(clubID);
+                request.setAttribute("documents", documents);
+                request.setAttribute("departments", departments);
+                request.setAttribute("selectedClubID", clubID);
+                request.setAttribute("userclubs", userclubs);
+                request.getRequestDispatcher("view/student/myClub.jsp").forward(request, response);
+                return;
+            }
             Documents document = new Documents();
             document.setDocumentName(request.getParameter("documentName"));
             document.setDescription(request.getParameter("description"));
@@ -196,21 +209,13 @@ public class MyClubController extends HttpServlet {
 
             try {
                 if ("createDocument".equals(action)) {
-                    if (!hasPermission) {
-                        request.setAttribute("error", "Bạn không có quyền thêm tài liệu.");
-                    } else {
-                        documentsDAO.insertDocument(document);
-                        request.setAttribute("message", "Thêm tài liệu thành công!");
-                    }
+                    documentsDAO.insertDocument(document);
+                    request.setAttribute("message", "Thêm tài liệu thành công!");
                 } else {
                     int documentID = Integer.parseInt(request.getParameter("documentID"));
                     document.setDocumentID(documentID);
-                    if (!hasPermission) {
-                        request.setAttribute("error", "Bạn không có quyền sửa tài liệu này.");
-                    } else {
-                        documentsDAO.updateDocument(document);
-                        request.setAttribute("message", "Cập nhật tài liệu thành công!");
-                    }
+                    documentsDAO.updateDocument(document);
+                    request.setAttribute("message", "Cập nhật tài liệu thành công!");
                 }
             } catch (SQLException e) {
                 request.setAttribute("error", "Lỗi khi lưu tài liệu: " + e.getMessage());
@@ -236,6 +241,7 @@ public class MyClubController extends HttpServlet {
             return;
         }
 
+        // Handle other existing POST actions (e.g., create/update meeting)
         request.getRequestDispatcher("view/student/myClub.jsp").forward(request, response);
     }
 
