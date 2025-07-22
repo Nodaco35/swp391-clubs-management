@@ -140,6 +140,18 @@
                                 <i class="fas fa-clock"></i> Cuộc họp
                             </a>
                         </li>
+            <li>
+                <a href="${pageContext.request.contextPath}/chairman-page/reports"
+                   class="nav-item ${currentPath == '/chairman-page/tasks' ? 'active' : ''}">
+                    <i class="fas fa-file-alt"></i> Báo cáo
+                </a>
+            </li>
+            <li>
+                <a href="${pageContext.request.contextPath}/chairman-page/financial-management"
+                   class="nav-item ${currentPath == '/chairman-page/financial-management' ? 'active' : ''}">
+                    <i class="fas fa-money-bill-wave"></i> Quản lý dòng tiền
+                </a>
+            </li>
 		</ul>
 	</nav>
 
@@ -385,7 +397,7 @@
     });
 
     // Xử lý đóng modal
-    document.querySelector(".close").addEventListener("click", function () {
+    document.querySelector(".close-term").addEventListener("click", function () {
         document.getElementById("eventTermModal").style.display = "none";
     });
 
