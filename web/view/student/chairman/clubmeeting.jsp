@@ -9,353 +9,354 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <html>
-<head>
-	<title>Cuộc họp của câu lạc bộ</title>
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/chairmanPage.css">
+    <head>
+        <title>Cuộc họp của câu lạc bộ</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-
-</head>
-<body>
-<header class="header">
-	<div class="container header-container">
-		<div class="logo">
-			<i class="fas fa-users"></i>
-			<span>UniClub</span>
-		</div>
-
-		<!-- Search Bar -->
-		<div class="search-container">
-			<div class="search-box">
-				<form action="${pageContext.request.contextPath}/events-page" method="get">
-					<i class="fas fa-search search-icon"></i>
-					<input type="text" id="searchInput" name="key" placeholder="Tìm kiếm sự kiện..."
-					       class="search-input">
-					<button type="submit" class="search-btn">
-						<i class="fas fa-search"></i>
-					</button>
-				</form>
-			</div>
-		</div>
+        <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/chairmanPage.css">
 
 
-		<nav class="main-nav">
-			<ul>
-				<li>
-					<a href="${pageContext.request.contextPath}/"
-					   class="${pageContext.request.servletPath == '/' ? 'active' : ''}">
-						Trang Chủ
-					</a>
-				</li>
-				<li>
-					<a href="${pageContext.request.contextPath}/clubs"
-					   class="${fn:contains(pageContext.request.servletPath, '/clubs') ? 'active' : ''}">
-						Câu Lạc Bộ
-					</a>
-				</li>
-				<li>
-					<a href="${pageContext.request.contextPath}/events-page"
-					   class="${fn:contains(pageContext.request.servletPath, '/events-page') ? 'active' : ''}">
-						Sự Kiện
-					</a>
-				</li>
-			</ul>
-		</nav>
+    </head>
+    <body>
+        <header class="header">
+            <div class="container header-container">
+                <div class="logo">
+                    <i class="fas fa-users"></i>
+                    <span>UniClub</span>
+                </div>
 
-		<div class="auth-buttons">
-			<c:choose>
-				<c:when test="${sessionScope.user != null}">
-					<div class="user-menu" id="userMenu">
-						<a href="${pageContext.request.contextPath}/notification" class="btn btn-outline">
-							<i class="fa-solid fa-bell"></i>
-						</a>
-						<a href="${pageContext.request.contextPath}/profile?action=myProfile" class="btn btn-outline">
-							<i class="fa-solid fa-user"></i>
-						</a>
-						<form action="${pageContext.request.contextPath}/logout" method="post">
-							<input class="btn btn-primary" type="submit" value="Logout">
-						</form>
-						<a href="${pageContext.request.contextPath}/myclub" class="btn btn-primary">MyClub</a>
-					</div>
-				</c:when>
-				<c:otherwise>
-					<div class="guest-menu" id="guestMenu">
-						<a href="${pageContext.request.contextPath}/login" class="btn btn-outline">Đăng Nhập</a>
-						<a href="${pageContext.request.contextPath}/register" class="btn btn-primary">Đăng Ký</a>
-					</div>
-				</c:otherwise>
-			</c:choose>
-			<button class="mobile-menu-btn" onclick="toggleMobileMenu()">
-				<i class="fas fa-bars"></i>
-			</button>
-		</div>
-	</div>
+                <div class="search-container">
+                    <div class="search-box">
+                        <form action="${pageContext.request.contextPath}/events-page" method="get">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="searchInput" name="key" placeholder="Tìm kiếm sự kiện..."
+                                   class="search-input">
+                            <button type="submit" class="search-btn">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
 
-	<!-- Mobile Menu -->
-	<div class="mobile-menu" id="mobileMenu">
-		<nav class="mobile-nav">
-			<ul>
-				<li><a href="${pageContext.request.contextPath}/" class="${pageContext.request.servletPath == '/' ? 'active' : ''}">Trang Chủ</a></li>
-				<li><a href="${pageContext.request.contextPath}/clubs" class="${pageContext.request.servletPath == '/clubs' ? 'active' : ''}">Câu Lạc Bộ</a></li>
-				<li><a href="${pageContext.request.contextPath}/events-page" class="${pageContext.request.servletPath == '/events-page' ? 'active' : ''}">Sự Kiện</a></li>
-			</ul>
-		</nav>
-	</div>
-	<div class="club-header">
-		<c:if test="${not empty club}">
-			<div class="club-info">
-				<div class="club-avatar">
-					<img src="${pageContext.request.contextPath}${club.clubImg}" alt="${club.clubName}" style="width: 60px; height: 60px; border-radius: 50%;">
-				</div>
-				<div class="club-details">
-					<h1>${club.clubName}</h1>
-					<p>Chủ nhiệm: ${club.clubChairmanName}</p>
-				</div>
-			</div>
-		</c:if>
-	</div>
+                <nav class="main-nav">
+                    <ul>
+                        <li>
+                            <a href="${pageContext.request.contextPath}/"
+                               class="${pageContext.request.servletPath == '/' ? 'active' : ''}">
+                                Trang Chủ
+                            </a>
+                        </li>
+                        <li>
+                            <a href="${pageContext.request.contextPath}/clubs"
+                               class="${fn:contains(pageContext.request.servletPath, '/clubs') ? 'active' : ''}">
+                                Câu Lạc Bộ
+                            </a>
+                        </li>
+                        <li>
+                            <a href="${pageContext.request.contextPath}/events-page"
+                               class="${fn:contains(pageContext.request.servletPath, '/events-page') ? 'active' : ''}">
+                                Sự Kiện
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
 
-	<nav class="dashboard-nav">
-		<ul>
-			<li>
-				<a href="${pageContext.request.contextPath}/chairman-page/overview"
-				   class="nav-item ${currentPath == '/chairman-page/overview' ? 'active' : ''}">
-					<i class="fas fa-tachometer-alt"></i> Tổng quan
-				</a>
-			</li>
-			<li>
-				<a href="${pageContext.request.contextPath}/chairman-page/myclub-events"
-				   class="nav-item ${currentPath == '/chairman-page/myclub-events' ? 'active' : ''}">
-					<i class="fas fa-calendar-alt"></i> Sự kiện
-				</a>
-			</li>
-			<li>
-				<a href="${pageContext.request.contextPath}/chairman-page/tasks"
-				   class="nav-item ${currentPath == '/chairman-page/tasks' ? 'active' : ''}">
-					<i class="fas fa-clock"></i> Timeline & Công việc
-				</a>
-			</li>
+                <div class="auth-buttons">
+                    <c:choose>
+                        <c:when test="${sessionScope.user != null}">
+                            <div class="user-menu" id="userMenu">
+                                <a href="${pageContext.request.contextPath}/notification" class="btn btn-outline">
+                                    <i class="fa-solid fa-bell"></i>
+                                </a>
+                                <a href="${pageContext.request.contextPath}/profile?action=myProfile" class="btn btn-outline">
+                                    <i class="fa-solid fa-user"></i>
+                                </a>
+                                <form action="${pageContext.request.contextPath}/logout" method="post">
+                                    <input class="btn btn-primary" type="submit" value="Logout">
+                                </form>
+                                <a href="${pageContext.request.contextPath}/myclub" class="btn btn-primary">MyClub</a>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="guest-menu" id="guestMenu">
+                                <a href="${pageContext.request.contextPath}/login" class="btn btn-outline">Đăng Nhập</a>
+                                <a href="${pageContext.request.contextPath}/register" class="btn btn-primary">Đăng Ký</a>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                    <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
 
-			<li>
-				<a href="${pageContext.request.contextPath}/chairman-page/clubmeeting"
-				   class="nav-item active">
-					<i class="fas fa-clock"></i> Cuộc họp
-				</a>
-			</li>
-		</ul>
-	</nav>
+            <!-- Mobile Menu -->
+            <div class="mobile-menu" id="mobileMenu">
+                <nav class="mobile-nav">
+                    <ul>
+                        <li><a href="${pageContext.request.contextPath}/"
+                               class="${pageContext.request.servletPath == '/' ? 'active' : ''}">Trang Chủ</a></li>
+                        <li><a href="${pageContext.request.contextPath}/clubs"
+                               class="${pageContext.request.servletPath == '/clubs' ? 'active' : ''}">Câu Lạc Bộ</a></li>
+                        <li><a href="${pageContext.request.contextPath}/events-page"
+                               class="${pageContext.request.servletPath == '/events-page' ? 'active' : ''}">Sự Kiện</a></li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="club-header">
+                <c:if test="${not empty club}">
+                    <div class="club-info">
+                        <div class="club-avatar">
+                            <img src="${pageContext.request.contextPath}${club.clubImg}" alt="${club.clubName}" style="width: 60px; height: 60px; border-radius: 50%;">
+                        </div>
+                        <div class="club-details">
+                            <h1>${club.clubName}</h1>
+                            <p>Chủ nhiệm: ${club.clubChairmanName}</p>
+                        </div>
+                    </div>
+                </c:if>
+            </div>
 
-</header>
-<main class="dashboard-content">
+            <nav class="dashboard-nav">
+                <ul>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/chairman-page/overview"
+                           class="nav-item ${currentPath == '/chairman-page/overview' ? 'active' : ''}">
+                            <i class="fas fa-tachometer-alt"></i> Tổng quan
+                        </a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/chairman-page/myclub-events"
+                           class="nav-item ${currentPath == '/chairman-page/myclub-events' ? 'active' : ''}">
+                            <i class="fas fa-calendar-alt"></i> Sự kiện
+                        </a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/chairman-page/tasks"
+                           class="nav-item ${currentPath == '/chairman-page/tasks' ? 'active' : ''}">
+                            <i class="fas fa-clock"></i> Timeline & Công việc
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="${pageContext.request.contextPath}/chairman-page/clubmeeting"
+                           class="nav-item active">
+                            <i class="fas fa-clock"></i> Cuộc họp
+                        </a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/chairman-page/tasks"
+                           class="nav-item ${currentPath == '/chairman-page/reports' ? 'active' : ''}">
+                            <i class="fas fa-file-alt"></i> Báo cáo
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+        </header>
+        <main class="dashboard-content">
 
 
-	<c:if test="${not empty message}">
-		<div class="alert alert-success alert-dismissible fade show" role="alert">
-				${message}
-			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-		</div>
-	</c:if>
-	<c:if test="${not empty error}">
-		<div class="modal fade show" id="errorModal" tabindex="-1" style="display: block;"
-		     aria-labelledby="errorModalLabel" aria-modal="true" role="dialog">
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<div class="modal-header bg-danger text-white">
-						<h5 class="modal-title" id="errorModalLabel">Lỗi</h5>
-						<button type="button" class="btn-close btn-close-white" onclick="closeErrorModal()"
-						        aria-label="Close"></button>
-					</div>
-					<div class="modal-body">
-							${error}
-					</div>
-					<div class="modal-footer">
-						<button type="button" class="btn btn-danger" onclick="closeErrorModal()">Đóng</button>
-					</div>
-				</div>
-			</div>
-		</div>
-	</c:if>
+            <c:if test="${not empty message}">
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </c:if>
+            <c:if test="${not empty error}">
+                <div class="modal fade show" id="errorModal" tabindex="-1" style="display: block;" aria-labelledby="errorModalLabel" aria-modal="true" role="dialog">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title" id="errorModalLabel">Lỗi</h5>
+                                <button type="button" class="btn-close btn-close-white" onclick="closeErrorModal()" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                ${error}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger" onclick="closeErrorModal()">Đóng</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </c:if>
 
-	<div class="row mb-4">
-		<div class="col-12">
-			<div class="card shadow-sm">
-				<div class="card-body">
-					<div class="row align-items-center">
-						<div class="col-md-6">
-							<form action="${pageContext.request.contextPath}/chairman-page/clubmeeting" method="get">
-								<input type="hidden" name="action" value="search">
-								<div class="input-group">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <form action="${pageContext.request.contextPath}/chairman-page/clubmeeting" method="get">
+                                        <input type="hidden" name="action" value="search">
+                                        <div class="input-group">
                                             <span class="input-group-text">
                                                 <i class="fas fa-search"></i>
                                             </span>
-									<input type="text" name="search" class="form-control"
-									       placeholder="Tìm kiếm theo tiêu đề, liên kết hoặc thời gian..."
-									       value="${search}">
-									<button class="btn btn-outline-primary" type="submit">Tìm kiếm</button>
-								</div>
-							</form>
-						</div>
-						<div class="col-md-6 text-end">
-							<button class="btn btn-primary" onclick="toggleAddForm()">
-								<i class="fas fa-plus me-2"></i>Tạo cuộc họp
-							</button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+                                            <input type="text" name="search" class="form-control" 
+                                                   placeholder="Tìm kiếm theo tiêu đề, liên kết hoặc thời gian..." 
+                                                   value="${search}">
+                                            <button class="btn btn-outline-primary" type="submit">Tìm kiếm</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <button class="btn btn-primary" onclick="toggleAddForm()">
+                                        <i class="fas fa-plus me-2"></i>Tạo cuộc họp
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-	<div class="row mb-4 ${editMeeting != null || showAddForm ? 'd-block' : 'd-none'}" id="meetingForm">
-		<div class="col-12">
-			<div class="card shadow-sm">
-				<div class="card-header bg-white">
-					<h5 class="mb-0">
-						<i class="fas fa-calendar-plus me-2"></i>
-						${editMeeting != null ? 'Sửa cuộc họp' : 'Tạo cuộc họp mới'}
-					</h5>
-				</div>
-				<div class="card-body">
-					<form action="${pageContext.request.contextPath}/chairman-page/clubmeeting" method="post"
-					      id="formData">
-						<input type="hidden" name="action" id="formAction"
-						       value="${editMeeting != null ? 'update' : 'add'}">
-						<input type="hidden" name="meetingId" id="meetingId"
-						       value="${editMeeting != null ? editMeeting.clubMeetingID : ''}">
+            <div class="row mb-4 ${editMeeting != null || showAddForm ? 'd-block' : 'd-none'}" id="meetingForm">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-calendar-plus me-2"></i>
+                                ${editMeeting != null ? 'Sửa cuộc họp' : 'Tạo cuộc họp mới'}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form action="${pageContext.request.contextPath}/chairman-page/clubmeeting" method="post" id="formData">
+                                <input type="hidden" name="action" id="formAction" value="${editMeeting != null ? 'update' : 'add'}">
+                                <input type="hidden" name="meetingId" id="meetingId" value="${editMeeting != null ? editMeeting.clubMeetingID : ''}">
 
-						<div class="mb-3">
-							<label for="title" class="form-label">Tiêu đề cuộc họp</label>
-							<input type="text" name="title" id="title" class="form-control"
-							       placeholder="Nhập tiêu đề cuộc họp"
-							       value="${editMeeting != null ? editMeeting.meetingTitle : ''}" required>
-						</div>
-						<div class="mb-3">
-							<label for="urlMeeting" class="form-label">Liên kết cuộc họp</label>
-							<input type="url" name="urlMeeting" id="urlMeeting" class="form-control"
-							       placeholder="Nhập URL Google Meet hoặc Zoom (VD: https://meet.google.com/abc-defg-hij)"
-							       value="${editMeeting != null ? editMeeting.URLMeeting : ''}" required>
-						</div>
-						<div class="mb-3">
-							<label for="documentLink" class="form-label">Liên kết tài liệu (Google Drive)</label>
-							<input type="url" name="documentLink" id="documentLink" class="form-control"
-							       placeholder="Nhập URL Google Drive (nếu có)"
-							       value="${editMeeting != null ? editMeeting.document : ''}">
-						</div>
-						<div class="mb-3">
-							<label for="startedTime" class="form-label">Thời gian bắt đầu</label>
-							<input type="datetime-local" name="startedTime" id="startedTime" class="form-control"
-							       value="${editMeeting != null ? editMeeting.startedTime : ''}" required>
-						</div>
+                                <div class="mb-3">
+                                    <label for="title" class="form-label">Tiêu đề cuộc họp</label>
+                                    <input type="text" name="title" id="title" class="form-control" 
+                                           placeholder="Nhập tiêu đề cuộc họp" 
+                                           value="${editMeeting != null ? editMeeting.meetingTitle : ''}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="urlMeeting" class="form-label">Liên kết cuộc họp</label>
+                                    <input type="url" name="urlMeeting" id="urlMeeting" class="form-control" 
+                                           placeholder="Nhập URL Google Meet hoặc Zoom (VD: https://meet.google.com/abc-defg-hij)" 
+                                           value="${editMeeting != null ? editMeeting.URLMeeting : ''}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="documentLink" class="form-label">Liên kết tài liệu (Google Drive)</label>
+                                    <input type="url" name="documentLink" id="documentLink" class="form-control" 
+                                           placeholder="Nhập URL Google Drive (nếu có)" 
+                                           value="${editMeeting != null ? editMeeting.document : ''}">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="startedTime" class="form-label">Thời gian bắt đầu</label>
+                                    <input type="datetime-local" name="startedTime" id="startedTime" class="form-control" 
+                                           value="${editMeeting != null ? editMeeting.startedTime : ''}" required>
+                                </div>
 
 
-						<div class="mb-3">
-							<label class="form-label">Các ban tham gia</label>
-							<div class="form-check">
-								<input class="form-check-input" type="checkbox" name="selectAll" id="selectAll"
-								       onchange="toggleParticipants(this)" ${editMeeting != null && editMeeting.participantClubDepartmentIds.size() == departmentMembers.size() ? 'checked' : ''}>
-								<label class="form-check-label" for="selectAll">Tất cả các ban</label>
-							</div>
-							<div id="participantsList"
-							     class="${editMeeting != null && editMeeting.participantClubDepartmentIds.size() == departmentMembers.size() ? 'd-none' : 'd-block'}">
-								<c:forEach var="member" items="${departmentMembers}">
-									<div class="form-check">
-										<input class="form-check-input"
-										       type="checkbox"
-										       name="participants"
-										       value="${member.clubDepartmentId}"
-										       id="participant_${member.clubDepartmentId}"
-										       <c:if test="${editMeeting != null && editMeeting.participantClubDepartmentIds.contains(member.clubDepartmentId.toString())}">checked</c:if>>
-										<label class="form-check-label" for="participant_${member.clubDepartmentId}">
-												${member.departmentName}
-										</label>
-									</div>
-								</c:forEach>
 
-							</div>
-						</div>
-						<div class="d-flex justify-content-end">
-							<button type="button" class="btn btn-secondary me-2" onclick="hideForm()">Hủy</button>
-							<button type="submit" id="submitButton" class="btn btn-primary">
-								<i class="fas fa-save me-2"></i>
-								${editMeeting != null ? 'Cập nhật' : 'Tạo'}
-							</button>
-						</div>
-					</form>
-				</div>
-			</div>
-		</div>
-	</div>
+                                <div class="mb-3">
+                                    <label class="form-label">Các ban tham gia</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="selectAll" id="selectAll" 
+                                               onchange="toggleParticipants(this)" ${editMeeting != null && editMeeting.participantClubDepartmentIds.size() == departmentMembers.size() ? 'checked' : ''}>
+                                        <label class="form-check-label" for="selectAll">Tất cả các ban</label>
+                                    </div>
+                                    <div id="participantsList" class="${editMeeting != null && editMeeting.participantClubDepartmentIds.size() == departmentMembers.size() ? 'd-none' : 'd-block'}">
+                                        <c:forEach var="member" items="${departmentMembers}">
+                                            <div class="form-check">
+                                                <input class="form-check-input"
+                                                       type="checkbox"
+                                                       name="participants"
+                                                       value="${member.clubDepartmentId}"
+                                                       id="participant_${member.clubDepartmentId}"
+                                                       <c:if test="${editMeeting != null && editMeeting.participantClubDepartmentIds.contains(member.clubDepartmentId.toString())}">checked</c:if>>
+                                                <label class="form-check-label" for="participant_${member.clubDepartmentId}">
+                                                    ${member.departmentName}
+                                                </label>
+                                            </div>
+                                        </c:forEach>
 
-	<div class="row">
-		<div class="col-12">
-			<div class="card shadow-sm">
-				<div class="card-header bg-white">
-					<div class="d-flex justify-content-between align-items-center">
-						<h5 class="mb-0">
-							<i class="fas fa-calendar-alt me-2"></i>Danh sách cuộc họp
-						</h5>
-						<span class="badge bg-primary">${totalRecords} cuộc họp</span>
-					</div>
-				</div>
-				<div class="card-body p-0">
-					<c:if test="${not empty meetings}">
-						<div class="table-responsive">
-							<table class="table table-hover mb-0">
-								<thead class="table-light">
-								<tr>
-									<th scope="col" class="ps-4">Cuộc họp</th>
-									<th scope="col">Thời gian bắt đầu</th>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-end">
+                                    <button type="button" class="btn btn-secondary me-2" onclick="hideForm()">Hủy</button>
+                                    <button type="submit" id="submitButton" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>
+                                        ${editMeeting != null ? 'Cập nhật' : 'Tạo'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-									<th scope="col">Liên kết</th>
-									<th scope="col">Tài liệu</th>
-									<th scope="col">Trạng thái</th>
-									<th scope="col" class="text-center">Hành động</th>
-								</tr>
-								</thead>
-								<tbody>
-								<c:forEach var="meeting" items="${meetings}">
-									<tr>
-										<td class="ps-4">
-											<div class="d-flex align-items-center">
-												<div class="avatar-container me-3">
-													<img src="${pageContext.request.contextPath}/${meeting.clubImg}"
-													     alt="Club Logo" class="rounded-circle"
-													     style="width: 45px; height: 45px; object-fit: cover;">
-												</div>
-												<div>
-													<h6 class="mb-1 fw-semibold">${meeting.meetingTitle}</h6>
-													<small class="text-muted">${meeting.clubName}</small>
-													<small class="text-muted d-block">ID: ${meeting.clubMeetingID}</small>
-												</div>
-											</div>
-										</td>
-										<td>
-											<fmt:formatDate value="${meeting.startedTime}" pattern="dd/MM/yyyy HH:mm"/>
-										</td>
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-calendar-alt me-2"></i>Danh sách cuộc họp
+                                </h5>
+                                <span class="badge bg-primary">${totalRecords} cuộc họp</span>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <c:if test="${not empty meetings}">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th scope="col" class="ps-4">Cuộc họp</th>
+                                                <th scope="col">Thời gian bắt đầu</th>
+
+                                                <th scope="col">Liên kết</th>
+                                                <th scope="col">Tài liệu</th>
+                                                <th scope="col">Trạng thái</th>
+                                                <th scope="col" class="text-center">Hành động</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <c:forEach var="meeting" items="${meetings}">
+                                                <tr>
+                                                    <td class="ps-4">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar-container me-3">
+                                                                <img src="${pageContext.request.contextPath}/${meeting.clubImg}" 
+                                                                     alt="Club Logo" class="rounded-circle" style="width: 45px; height: 45px; object-fit: cover;">
+                                                            </div>
+                                                            <div>
+                                                                <h6 class="mb-1 fw-semibold">${meeting.meetingTitle}</h6>
+                                                                <small class="text-muted">${meeting.clubName}</small>
+                                                                <small class="text-muted d-block">ID: ${meeting.clubMeetingID}</small>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <fmt:formatDate value="${meeting.startedTime}" pattern="dd/MM/yyyy HH:mm" />
+                                                    </td>
 
 
-										<td>
-											<a href="${meeting.URLMeeting}" target="_blank"
-											   class="text-decoration-none">
-												<i class="fas fa-link me-1"></i>Tham gia
-											</a>
-										</td>
-										<td>
-											<c:choose>
-												<c:when test="${not empty meeting.document}">
-													<a href="${meeting.document}" target="_blank"
-													   class="text-decoration-none">
-														<i class="fas fa-file-alt me-1"></i>Xem tài liệu
-													</a>
-												</c:when>
-												<c:otherwise>
-													<span class="text-muted">Không có</span>
-												</c:otherwise>
-											</c:choose>
-										</td>
-										<td>
+                                                    <td>
+                                                        <a href="${meeting.URLMeeting}" target="_blank" class="text-decoration-none">
+                                                            <i class="fas fa-link me-1"></i>Tham gia
+                                                        </a>
+                                                    </td>
+                                                    <td>
+                                                        <c:choose>
+                                                            <c:when test="${not empty meeting.document}">
+                                                                <a href="${meeting.document}" target="_blank" class="text-decoration-none">
+                                                                    <i class="fas fa-file-alt me-1"></i>Xem tài liệu
+                                                                </a>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <span class="text-muted">Không có</span>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </td>
+                                                    <td>
+
                                                         <span class="badge ${meeting.startedTime > now ? 'bg-info' : 'bg-secondary'}">
 		                                                        ${meeting.startedTime > now ? 'Sắp tới' : 'Đã qua'}
                                                         </span>
