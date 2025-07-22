@@ -89,12 +89,7 @@
                                 Sự Kiện
                             </a>
                         </li>
-                        <li>
-                            <a href="${pageContext.request.contextPath}/chairman-page/clubmeeting"
-                               class="${currentPath == '/chairman-page/clubmeeting' ? 'active' : ''}">
-                                <i class="fas fa-clock"></i> Cuộc họp
-                            </a>
-                        </li>
+
                     </ul>
                 </nav>
 
@@ -171,7 +166,7 @@
                     <li>
                         <a href="${pageContext.request.contextPath}/chairman-page/tasks"
                            class="nav-item ${currentPath == '/chairman-page/tasks' ? 'active' : ''}">
-                            <i class="fas fa-clock"></i> Timeline & Công việc
+                            <i class="fas fa-clock"></i> Giai đoạn công việc
                         </a>
                     </li>
                     <li>

@@ -5,46 +5,90 @@ import java.util.List;
 
 public class Tasks {
     private int taskID;
-    private Integer parentTaskID; // NULL nếu là task dành cho ban
+    private Integer parentTaskID;
 
-    private EventTerms term;      // foreign key: TermID
-    private Events event;         // foreign key: EventID
-    private Clubs club;           // foreign key: ClubID
+    private EventTerms term;      // TermID
+    private Events event;         // EventID
+    private Clubs club;           // ClubID
+    private Documents document;   // DocumentID
 
     private String assigneeType;  // ENUM('User', 'Department')
-    private Users userAssignee;         // nếu AssigneeType = 'User'
-    private Department departmentAssignee; // nếu AssigneeType = 'Department'
+    private Users userAssignee;   // UserID (nếu assigneeType = 'User')
+    private Department departmentAssignee; // DepartmentID (nếu assigneeType = 'Department')
 
     private String title;
     private String description;
+    private String content;
+
     private String status;        // ENUM('ToDo', 'InProgress', 'Review', 'Rejected', 'Done')
+    private String rating;        // ENUM('Positive', 'Neutral', 'Negative')
+    private String lastRejectReason;
+
     private String reviewComment;
 
     private Date startDate;
     private Date endDate;
 
-    private Users createdBy;      // foreign key: CreatedBy
+    private Users createdBy;      // CreatedBy
     private Date createdAt;
+
 
     public Tasks() {}
 
-    public Tasks(int taskID, Date createdAt, Users createdBy, Date endDate, Date startDate, String reviewComment, String status, String description, String title, Department departmentAssignee, Users userAssignee, String assigneeType, Clubs club, Events event, EventTerms term, Integer parentTaskID) {
+
+    public Tasks(int taskID, Integer parentTaskID, EventTerms term, Events event, Clubs club, Documents document, String assigneeType, Users userAssignee, Department departmentAssignee, String title, String description, String content, String status, String rating, String lastRejectReason, String reviewComment, Date startDate, Date endDate, Users createdBy, Date createdAt) {
         this.taskID = taskID;
-        this.createdAt = createdAt;
-        this.createdBy = createdBy;
-        this.endDate = endDate;
-        this.startDate = startDate;
-        this.reviewComment = reviewComment;
-        this.status = status;
-        this.description = description;
-        this.title = title;
-        this.departmentAssignee = departmentAssignee;
-        this.userAssignee = userAssignee;
-        this.assigneeType = assigneeType;
-        this.club = club;
-        this.event = event;
-        this.term = term;
         this.parentTaskID = parentTaskID;
+        this.term = term;
+        this.event = event;
+        this.club = club;
+        this.document = document;
+        this.assigneeType = assigneeType;
+        this.userAssignee = userAssignee;
+        this.departmentAssignee = departmentAssignee;
+        this.title = title;
+        this.description = description;
+        this.content = content;
+        this.status = status;
+        this.rating = rating;
+        this.lastRejectReason = lastRejectReason;
+        this.reviewComment = reviewComment;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.createdBy = createdBy;
+        this.createdAt = createdAt;
+    }
+
+    public Documents getDocument() {
+        return document;
+    }
+
+    public void setDocument(Documents document) {
+        this.document = document;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getRating() {
+        return rating;
+    }
+
+    public void setRating(String rating) {
+        this.rating = rating;
+    }
+
+    public String getLastRejectReason() {
+        return lastRejectReason;
+    }
+
+    public void setLastRejectReason(String lastRejectReason) {
+        this.lastRejectReason = lastRejectReason;
     }
 
     public int getTaskID() {

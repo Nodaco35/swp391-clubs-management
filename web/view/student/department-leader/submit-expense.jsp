@@ -231,10 +231,10 @@
                                     <table class="table table-hover expense-table">
                                         <thead>
                                             <tr>
-                                                <th class="sortable" data-sort="description"><i class="fas fa-sort"></i> Mô tả</th>
-                                                <th class="sortable" data-sort="amount"><i class="fas fa-sort"></i> Số tiền</th>
-                                                <th class="sortable" data-sort="expenseDate"><i class="fas fa-sort"></i> Ngày chi tiêu</th>
-                                                <th class="sortable" data-sort="purpose"><i class="fas fa-sort"></i> Mục đích</th>
+                                                <th>Mô tả</th>
+                                                <th>Số tiền</th>
+                                                <th>Ngày chi tiêu</th>
+                                                <th>Mục đích</th>
                                                 <th>Google Docs</th>
                                                 <th>Trạng thái</th>
                                             </tr>
@@ -335,21 +335,7 @@
                 statusFilter.addEventListener('change', applyFilters);
                 sortBy.addEventListener('change', applyFilters);
 
-                // Handle sortable columns
-                const sortableHeaders = document.querySelectorAll('.sortable');
-                sortableHeaders.forEach(header => {
-                    header.addEventListener('click', () => {
-                        const sortField = header.getAttribute('data-sort');
-                        const currentSort = new URLSearchParams(window.location.search).get('sortBy') || 'createdAt-desc';
-                        const [field, direction] = currentSort.split('-');
-                        const newDirection = field === sortField && direction === 'desc' ? 'asc' : 'desc';
-                        const newSortBy = `${sortField}-${newDirection}`;
-                                        const url = new URL(window.location);
-                                        url.searchParams.set('sortBy', newSortBy);
-                                        url.searchParams.set('page', '1');
-                                        window.location = url;
-                                    });
-                                });
+                
                             });
         </script>
     </body>
