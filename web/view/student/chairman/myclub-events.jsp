@@ -130,7 +130,7 @@
 			<li>
 				<a href="${pageContext.request.contextPath}/chairman-page/tasks"
 				   class="nav-item ${currentPath == '/chairman-page/tasks' ? 'active' : ''}">
-					<i class="fas fa-clock"></i> Timeline & Công việc
+					<i class="fas fa-clock"></i> Giai đoạn công việc
 				</a>
 			</li>
 
