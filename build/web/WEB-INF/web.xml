@@ -210,6 +210,18 @@
         <servlet-class>controller.AssignFormServlet</servlet-class>
     </servlet>
     <servlet>
+        <servlet-name>SubmitExpenseServlet</servlet-name>
+        <servlet-class>controller.SubmitExpenseServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ApproveExpenseServlet</servlet-name>
+        <servlet-class>controller.ApproveExpenseServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>FinancialManagementServlet</servlet-name>
+        <servlet-class>controller.FinancialManagementServlet</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>ChairmanClubReportServlet</servlet-name>
         <servlet-class>controller.ChairmanClubReportServlet</servlet-class>
     </servlet>
@@ -443,6 +455,18 @@
         <url-pattern>/assign-form</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
+        <servlet-name>SubmitExpenseServlet</servlet-name>
+        <url-pattern>/department/submit-expense</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ApproveExpenseServlet</servlet-name>
+        <url-pattern>/department/financial/approve-expense</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>FinancialManagementServlet</servlet-name>
+        <url-pattern>/chairman-page/financial-management</url-pattern>
+       </servlet-mapping>
+      <servlet-mapping>
         <servlet-name>ChairmanClubReportServlet</servlet-name>
         <url-pattern>/chairman-page/reports</url-pattern>
     </servlet-mapping>

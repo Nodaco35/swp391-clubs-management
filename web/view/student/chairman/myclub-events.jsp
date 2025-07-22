@@ -235,7 +235,6 @@
                                 <c:set var="statusKey" value="unknown"/>
                             </c:otherwise>
                         </c:choose>
-
                         <tr data-status="${statusKey}">
                             <td>
                                 <div class="event-info">

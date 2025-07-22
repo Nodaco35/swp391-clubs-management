@@ -116,34 +116,47 @@
 		</div>
 	</c:if>
 
-	<nav class="dashboard-nav">
-		<ul>
-			<li>
-				<a href="${pageContext.request.contextPath}/chairman-page/overview"
-				   class="nav-item ${currentPath == '/chairman-page/overview' ? 'active' : ''}">
-					<i class="fas fa-tachometer-alt"></i> Tổng quan
-				</a>
-			</li>
-			<li>
-				<a href="${pageContext.request.contextPath}/chairman-page/myclub-events"
-				   class="nav-item ${currentPath == '/chairman-page/myclub-events' ? 'active' : ''}">
-					<i class="fas fa-calendar-alt"></i> Sự kiện
-				</a>
-			</li>
-			<li>
-				<a href="${pageContext.request.contextPath}/chairman-page/tasks"
-				   class="nav-item ${currentPath == '/chairman-page/tasks' ? 'active' : ''}">
-					<i class="fas fa-clock"></i> Timeline & Công việc
-				</a>
-			</li>
-			<li>
-				<a href="${pageContext.request.contextPath}/chairman-page/clubmeeting"
-				   class="nav-item ${currentPath == '/chairman-page/clubmeeting' ? 'active' : ''}">
-					<i class="fas fa-clock"></i> Cuộc họp
-				</a>
-			</li>
-		</ul>
-	</nav>
+            <nav class="dashboard-nav">
+                <ul>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/chairman-page/overview"
+                           class="nav-item ${currentPath == '/chairman-page/overview' ? 'active' : ''}">
+                            <i class="fas fa-tachometer-alt"></i> Tổng quan
+                        </a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/chairman-page/myclub-events"
+                           class="nav-item ${currentPath == '/chairman-page/myclub-events' ? 'active' : ''}">
+                            <i class="fas fa-calendar-alt"></i> Sự kiện
+                        </a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/chairman-page/tasks"
+                           class="nav-item ${currentPath == '/chairman-page/tasks' ? 'active' : ''}">
+                            <i class="fas fa-clock"></i> Timeline & Công việc
+                        </a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/chairman-page/clubmeeting"
+                           class="nav-item ${currentPath == '/chairman-page/clubmeeting' ? 'active' : ''}">
+                            <i class="fas fa-clock"></i> Cuộc họp
+                        </a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/chairman-page/reports"
+                           class="nav-item ${currentPath == '/chairman-page/tasks' ? 'active' : ''}">
+                            <i class="fas fa-file-alt"></i> Báo cáo
+                        </a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/chairman-page/financial-management"
+                           class="nav-item ${currentPath == '/chairman-page/financial-management' ? 'active' : ''}">
+                            <i class="fas fa-money-bill-wave"></i> Quản lý dòng tiền
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
 
 </header>
 <main class="dashboard-content">
