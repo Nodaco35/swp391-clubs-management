@@ -27,17 +27,16 @@
         <ul class="space-y-3">
             <li><a href="#club-summaries" class="text-blue-600 hover:text-white block py-3 px-4 rounded-lg"><i class="fas fa-users"></i> Câu Lạc Bộ Của Tôi</a></li>
             <c:set var="isLeader" value="false" />
+            <c:set var="isMember" value="false" />
             <c:forEach items="${userclubs}" var="uc">
                 <c:if test="${not empty uc and uc.roleID == 1}">
                     <c:set var="isLeader" value="true" />
                 </c:if>
-            </c:forEach>
-            <c:forEach items="${userclubs}" var="uc">
-                <c:if test="${not empty uc and (uc.roleID == 1 || uc.roleID == 3)}">
-                    <c:set var="isDepartment" value="true" />
+                <c:if test="${not empty uc and (uc.roleID == 1 || uc.roleID == 3 || uc.roleID == 4)}">
+                    <c:set var="isMember" value="true" />
                 </c:if>
             </c:forEach>
-            <c:if test="${isDepartment}">
+            <c:if test="${isMember}">
                 <li><a href="#documents" class="text-blue-600 hover:text-white block py-3 px-4 rounded-lg"><i class="fas fa-file-alt"></i> Quản Lý Tài Liệu Chung</a></li>
             </c:if>
             <li><a href="#notifications" class="text-blue-600 hover:text-white block py-3 px-4 rounded-lg"><i class="fas fa-bell"></i> Thông Báo Gần Đây</a></li>
@@ -56,7 +55,7 @@
             <li><a href="#calendar" class="text-blue-600 hover:text-white block py-3 px-4 rounded-lg"><i class="fas fa-tasks"></i> Nhiệm Vụ Của Ban</a></li>
             <li><a href="#upcoming-departmentmeeting" class="text-blue-600 hover:text-white block py-3 px-4 rounded-lg"><i class="fas fa-calendar-check"></i> Cuộc Họp Sắp Tới Của Ban</a></li>
             <li><a href="#upcoming-events" class="text-blue-600 hover:text-white block py-3 px-4 rounded-lg"><i class="fas fa-calendar-alt"></i> Sự Kiện Sắp Tới</a></li>
-            <c:if test="${isDepartment}">
+            <c:if test="${isLeader || isDepartment}">
                 <li><a href="#upcoming-clubmeeting" class="text-blue-600 hover:text-white block py-3 px-4 rounded-lg"><i class="fas fa-users-cog"></i> Cuộc Họp Sắp Tới Của CLB</a></li>
             </c:if>
             <li><a href="#actions" class="text-blue-600 hover:text-white block py-3 px-4 rounded-lg"><i class="fas fa-file-alt"></i> Quản Lý Form Và Hoạt Động Tuyển Quân</a></li>
@@ -98,7 +97,7 @@
                             <p class="text-xl font-bold text-gray-900">${countTodoLists} <a href="#calendar" class="text-blue-600 hover:text-blue-800"><i class="fa-solid fa-eye"></i></a></p>
                         </div>
                     </div>
-                    <c:if test="${isDepartment}">
+                    <c:if test="${isLeader || isDepartment}">
                         <div class="card flex items-center p-6">
                             <i class="fas fa-users text-blue-600 text-2xl mr-3"></i>
                             <div>
@@ -161,19 +160,17 @@
             </section>
 
             <!-- Document Management -->
-            <c:if test="${isDepartment}">
+            <c:if test="${isMember}">
                 <section id="documents" class="mb-12">
                     <h2 class="text-3xl font-bold text-gray-900 mb-6">Quản Lý Tài Liệu Chung</h2>
                     <div class="card p-6">
                         <h3 class="text-lg font-semibold text-gray-900 mb-3">Chọn Câu Lạc Bộ</h3>
-                        <p class="text-sm text-gray-500 mb-4">Vui lòng chọn câu lạc bộ để quản lý tài liệu:</p>
+                        <p class="text-sm text-gray-500 mb-4">Vui lòng chọn câu lạc bộ để xem hoặc quản lý tài liệu:</p>
                         <div class="relative inline-block w-full md:w-80 mb-6">
                             <select id="documentClubSelector" class="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                 <option value="">-- Chọn câu lạc bộ --</option>
                                 <c:forEach items="${userclubs}" var="club">
-                                    <c:if test="${club.roleID == 1 || club.roleID == 3}">
-                                        <option value="${club.clubID}" ${club.clubID == selectedClubID ? 'selected' : ''}>${club.clubName}</option>
-                                    </c:if>
+                                    <option value="${club.clubID}" ${club.clubID == selectedClubID ? 'selected' : ''}>${club.clubName}</option>
                                 </c:forEach>
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-600">
@@ -181,9 +178,11 @@
                             </div>
                         </div>
                         <div id="documentManagementSection" style="display: ${not empty selectedClubID ? 'block' : 'none'};">
-                            <a href="#" id="addDocumentBtn" class="inline-block text-white bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg transition flex items-center gap-2 mb-4">
-                                <i class="fas fa-plus"></i> Thêm Tài Liệu Mới
-                            </a>
+                            <c:if test="${isLeader || isDepartment}">
+                                <a href="#" id="addDocumentBtn" class="inline-block text-white bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg transition flex items-center gap-2 mb-4">
+                                    <i class="fas fa-plus"></i> Thêm Tài Liệu Mới
+                                </a>
+                            </c:if>
                             <div id="documentForm" class="mb-6" style="display: ${not empty showDocumentForm && showDocumentForm ? 'block' : 'none'};">
                                 <form action="${pageContext.request.contextPath}/myclub" method="post">
                                     <input type="hidden" name="action" id="documentAction" value="createDocument">
@@ -230,19 +229,21 @@
                                         <p class="text-gray-500 text-center py-8 text-lg">Không có tài liệu nào.</p>
                                     </c:when>
                                     <c:otherwise>
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div class="grid">
                                             <c:forEach items="${documents}" var="doc">
-                                                <div class="p-5 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-                                                    <h4 class="text-base font-semibold text-gray-900">${doc.documentName}</h4>
-                                                    <p class="text-sm text-gray-600">${doc.description}</p>
-                                                    <p class="text-sm text-gray-600"><strong>Loại:</strong> ${doc.documentType}</p>
-                                                    <p class="text-sm text-gray-600"><strong>Ban:</strong> ${doc.department.departmentName}</p>
-                                                    <p class="text-sm text-gray-600"><strong>CLB:</strong> ${doc.club.clubName}</p>
-                                                    <p class="text-sm text-gray-600"><strong>Link:</strong> <a href="${doc.documentURL}" target="_blank" class="text-blue-600 hover:underline">${doc.documentURL}</a></p>
-                                                    <div class="flex gap-2 mt-2">
-                                                        <a href="#" class="edit-document-btn text-blue-600 hover:text-blue-800" data-id="${doc.documentID}" data-name="${fn:escapeXml(doc.documentName)}" data-description="${fn:escapeXml(doc.description)}" data-url="${doc.documentURL}" data-type="${doc.documentType}" data-department="${doc.department.departmentID}" data-club="${doc.club.clubID}"><i class="fas fa-edit"></i> Sửa</a>
-                                                        <a href="${pageContext.request.contextPath}/myclub?action=deleteDocument&documentID=${doc.documentID}&clubID=${doc.club.clubID}" class="text-red-600 hover:text-red-800" onclick="return confirm('Bạn có chắc muốn xóa tài liệu này?');"><i class="fas fa-trash"></i> Xóa</a>
-                                                    </div>
+                                                <div class="document-card">
+                                                    <span class="document-type-badge ${fn:toLowerCase(doc.documentType)}">${doc.documentType}</span>
+                                                    <h4>${doc.documentName}</h4>
+                                                    <p>${doc.description}</p>
+                                                    <p><strong>Ban:</strong> ${doc.department.departmentName}</p>
+                                                    <p><strong>CLB:</strong> ${doc.club.clubName}</p>
+                                                    <p><strong>Link:</strong> <a href="${doc.documentURL}" target="_blank" class="document-link">${doc.documentURL}</a></p>
+                                                    <c:if test="${isLeader || isDepartment}">
+                                                        <div class="action-buttons">
+                                                            <a href="#" class="edit-document-btn" data-id="${doc.documentID}" data-name="${fn:escapeXml(doc.documentName)}" data-description="${fn:escapeXml(doc.description)}" data-url="${doc.documentURL}" data-type="${doc.documentType}" data-department="${doc.department.departmentID}" data-club="${doc.club.clubID}"><i class="fas fa-edit"></i> Sửa</a>
+                                                            <a href="${pageContext.request.contextPath}/myclub?action=deleteDocument&documentID=${doc.documentID}&clubID=${doc.club.clubID}" onclick="return confirm('Bạn có chắc muốn xóa tài liệu này?');"><i class="fas fa-trash"></i> Xóa</a>
+                                                        </div>
+                                                    </c:if>
                                                 </div>
                                             </c:forEach>
                                         </div>
@@ -253,6 +254,7 @@
                     </div>
                 </section>
             </c:if>
+
 
             <!-- Recent Notifications -->
             <section id="notifications" class="mb-12">
@@ -310,7 +312,7 @@
                 </div>
             </section>
 
-            <c:if test="${isDepartment}">
+            <c:if test="${isLeader || isDepartment}">
                 <section id="upcoming-clubmeeting" class="mb-12">
                     <h2 class="text-3xl font-bold text-gray-900 mb-6">Cuộc Họp Sắp Tới Của CLB</h2>
                     <div class="card p-6">
