@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -61,9 +60,9 @@ public class SubmitExpenseServlet extends HttpServlet {
         if (request.getAttribute("error") != null) {
             error = (String) request.getAttribute("error");
         }
-        // Handle pagination, search, and filter
+        
         int page = 1;
-        int pageSize = 5; // Adjust as needed
+        int pageSize = 5; 
         String search = request.getParameter("search");
         String status = request.getParameter("status");
         String sortBy = request.getParameter("sortBy");
@@ -103,7 +102,6 @@ public class SubmitExpenseServlet extends HttpServlet {
             return;
         }
 
-        // Fetch active term
         Term term = termDAO.getActiveSemester();
         if (term == null || term.getTermID() == null) {
             request.setAttribute("error", "Không tìm thấy kỳ học đang hoạt động. Vui lòng liên hệ quản trị viên.");
@@ -112,20 +110,12 @@ public class SubmitExpenseServlet extends HttpServlet {
         }
 
         try {
-            // Validate form parameters
             String purpose = request.getParameter("purpose");
             String amountStr = request.getParameter("amount");
             String expenseDateStr = request.getParameter("expenseDate");
             String description = request.getParameter("description");
             String attachment = request.getParameter("attachment");
 
-            // Debug logging
-            LOGGER.info("Received purpose: " + (purpose != null ? purpose : "null"));
-            LOGGER.info("Received amount: " + (amountStr != null ? amountStr : "null"));
-            LOGGER.info("Received expenseDate: " + (expenseDateStr != null ? expenseDateStr : "null"));
-            LOGGER.info("Received attachment: " + (attachment != null ? attachment : "null"));
-
-            // Check for null or empty required fields
             if (purpose == null || purpose.trim().isEmpty()) {
                 request.setAttribute("error", "Mục đích không được để trống.");
                 doGet(request, response);
@@ -141,8 +131,7 @@ public class SubmitExpenseServlet extends HttpServlet {
                 doGet(request, response);
                 return;
             }
-
-            // Validate purpose against allowed values
+            
             String[] validPurposes = {"Sự kiện", "Vật tư", "Thuê địa điểm", "Khác"};
             boolean isValidPurpose = false;
             for (String validPurpose : validPurposes) {
@@ -156,8 +145,7 @@ public class SubmitExpenseServlet extends HttpServlet {
                 doGet(request, response);
                 return;
             }
-
-            // Validate Google Docs link (optional)
+            
             if (attachment != null && !attachment.trim().isEmpty()) {
                 if (!attachment.matches("^https://docs\\.google\\.com/.*")) {
                     request.setAttribute("error", "Link Google Docs không hợp lệ. Vui lòng nhập link bắt đầu bằng https://docs.google.com/");
@@ -165,8 +153,7 @@ public class SubmitExpenseServlet extends HttpServlet {
                     return;
                 }
             }
-
-            // Parse amount
+            
             BigDecimal amount;
             try {
                 amount = new BigDecimal(amountStr);
@@ -180,8 +167,7 @@ public class SubmitExpenseServlet extends HttpServlet {
                 doGet(request, response);
                 return;
             }
-
-            // Parse date
+            
             Timestamp expenseDate;
             try {
                 expenseDate = new Timestamp(new SimpleDateFormat("yyyy-MM-dd").parse(expenseDateStr).getTime());
@@ -190,8 +176,7 @@ public class SubmitExpenseServlet extends HttpServlet {
                 doGet(request, response);
                 return;
             }
-
-            // Create expense object
+           
             Expenses expense = new Expenses();
             expense.setClubID(clubID);
             expense.setTermID(term.getTermID());
@@ -200,11 +185,9 @@ public class SubmitExpenseServlet extends HttpServlet {
             expense.setExpenseDate(expenseDate);
             expense.setDescription(description != null ? description : "");
             expense.setAttachment(attachment != null && !attachment.trim().isEmpty() ? attachment : null);
-
-            // Submit expense
+            
             boolean success = expenseDAO.submitExpense(expense, user.getUserID());
             if (success) {
-                // Send notification to External Affairs Leader
                 String externalLeaderID = dashboardDAO.getExternalLeaderID(clubID);
                 if (externalLeaderID != null) {
                     NotificationDAO.sentToPerson1(
