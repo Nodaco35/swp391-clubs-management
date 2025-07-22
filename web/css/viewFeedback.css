@@ -1,0 +1,588 @@
+/* 
+    Created on : Jun 20, 2025, 9:48:43 PM
+    Updated on : Jun 22, 2025
+    Author     : Vinh
+    Description: CSS cho trang xem feedback
+*/
+
+/* Thiết lập chung */
+.feedback-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+/* Phần tiêu đề */
+.feedback-container .feedback-header {
+  padding: 20px;
+  margin-bottom: 20px;
+  background-color: #6610f2;
+  border-radius: 6px;
+  color: white;
+  text-align: center;
+}
+
+.feedback-header h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.feedback-header p {
+  margin-top: 10px;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* Thông tin sự kiện */
+.event-info {
+  display: flex;
+  margin-bottom: 30px;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.event-details {
+  padding: 15px;
+  flex-grow: 1;
+}
+
+.event-details h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.event-date,
+.event-location {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  color: #666;
+}
+
+.event-date i,
+.event-location i {
+  margin-right: 10px;
+  color: #6610f2;
+}
+
+/* Tổng quan đánh giá */
+.rating-overview {
+  display: flex;
+  margin-bottom: 30px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  justify-content: center;
+}
+
+.average-rating {
+  text-align: center;
+}
+
+.rating-stars {
+  font-size: 24px;
+  color: #ffc107;
+  margin-bottom: 10px;
+}
+
+.rating-value {
+  font-size: 32px;
+  font-weight: bold;
+  color: #333;
+}
+
+.rating-count {
+  color: #666;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+/* Biểu đồ */
+.rating-stats,
+.detailed-stats {
+  margin-bottom: 30px;
+}
+
+.rating-stats h2,
+.detailed-stats h2,
+.feedback-list h2 {
+  font-size: 20px;
+  color: #333;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.chart-container {
+  height: 350px; /* Tăng chiều cao để có thêm không gian cho legend */
+  position: relative;
+  margin-bottom: 20px;
+}
+
+/* Style cho chart canvas */
+.chart-container canvas {
+  margin-top: 10px;
+}
+
+/* Kiểu dáng chú thích biểu đồ */
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  gap: 15px;
+  padding: 10px;
+}
+
+/* Mục chú thích */
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-right: 15px;
+  font-size: 13px;
+}
+
+.legend-color {
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  border-radius: 3px;
+  margin-right: 6px;
+  height: 14px;
+  margin-right: 6px;
+  border-radius: 2px;
+}
+
+/* Tùy chỉnh kiểu dáng tooltip */
+.chartjs-tooltip {
+  pointer-events: none;
+  position: absolute;
+  z-index: 100;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 12px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+}
+
+/* Bộ lọc */
+.feedback-filter {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 6px;
+}
+
+.filter-label {
+  margin-right: 15px;
+  font-weight: 500;
+}
+
+.filter-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filter-btn {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  background-color: #eee;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.filter-btn.active {
+  background-color: #6610f2;
+  color: white;
+}
+
+/* Danh sách feedback */
+.feedback-items {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.feedback-item {
+  padding: 20px;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.feedback-item-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.feedback-item-header .feedback-user {
+  font-weight: 500;
+}
+
+.feedback-item-header .feedback-date {
+  color: #666;
+  font-size: 14px;
+}
+
+.feedback-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.feedback-user {
+  font-weight: 500;
+}
+
+.feedback-date {
+  color: #666;
+  font-size: 14px;
+}
+
+.feedback-rating {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.rating-label {
+  margin-right: 10px;
+  font-weight: 500;
+}
+
+.rating-good {
+  color: #4caf50;
+}
+
+.rating-neutral {
+  color: #ffc107;
+}
+
+.rating-bad {
+  color: #f44336;
+}
+
+.feedback-content {
+  margin-bottom: 15px;
+  padding: 15px;
+  background-color: white;
+  border-radius: 4px;
+  border-left: 4px solid #6610f2;
+}
+
+.feedback-detailed-ratings {
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 6px;
+  margin-top: 10px;
+  border-left: 3px solid #6610f2;
+}
+
+.detailed-rating-title {
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.detailed-rating-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.detailed-rating-item:last-child {
+  border-bottom: none;
+}
+
+.item-label {
+  color: #666;
+}
+
+/* Màu cho các mức đánh giá chi tiết */
+.item-rating.rating-5,
+.item-rating.rating-4 {
+  color: #4caf50; /* Màu xanh lá - Hài lòng */
+  font-weight: 500;
+}
+
+.item-rating.rating-3 {
+  color: #ffc107; /* Màu vàng - Trung lập */
+  font-weight: 500;
+}
+
+.item-rating.rating-2,
+.item-rating.rating-1 {
+  color: #f44336; /* Màu đỏ - Không hài lòng */
+  font-weight: 500;
+}
+
+/* Thông báo không có feedback */
+.no-feedback-section {
+  padding: 40px 20px;
+  text-align: center;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  margin-bottom: 30px;
+}
+
+.no-feedback-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #666;
+}
+
+.no-feedback-message i {
+  font-size: 48px;
+  color: #6610f2;
+  margin-bottom: 15px;
+  opacity: 0.7;
+}
+
+.no-feedback-message p {
+  margin: 5px 0;
+  font-size: 16px;
+}
+
+.no-feedback-message .small-text {
+  font-size: 14px;
+  color: #888;
+  margin-top: 10px;
+}
+
+.no-ratings {
+  font-size: 24px;
+  color: #e0e0e0;
+  margin-bottom: 10px;
+}
+
+/* Thông báo khi không có feedback khớp với bộ lọc */
+.no-matching-filters {
+  text-align: center;
+  padding: 30px;
+  margin: 20px 0;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  color: #666;
+}
+
+.no-matching-filters i {
+  font-size: 32px;
+  color: #6610f2;
+  opacity: 0.5;
+  margin-bottom: 10px;
+}
+
+.no-matching-filters p {
+  margin: 5px 0;
+  font-size: 16px;
+  color: #666;
+}
+
+/* Phần chân */
+.feedback-footer {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.back-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #6610f2;
+  color: white;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+.back-btn:hover {
+  background-color: #5a0cdd;
+}
+
+/* Nút "Xem feedback" */
+.view-feedback-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background-color: #6610f2; /* Màu tím đồng bộ với header */
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.view-feedback-btn:hover {
+  background-color: #5a0cdd; /* Màu tím đậm hơn khi hover */
+  text-decoration: none;
+  color: #fff;
+}
+
+.view-feedback-btn i {
+  font-size: 16px;
+}
+
+/* Nút "Xem chi tiết" */
+.view-detail-btn {
+  background: none;
+  border: none;
+  color: #6610f2;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+}
+
+.view-detail-btn:hover {
+  background-color: #f0e5ff;
+  text-decoration: underline;
+}
+
+.view-detail-btn i {
+  margin-right: 5px;
+  font-size: 12px;
+  transition: transform 0.2s ease;
+}
+
+/* Hành động feedback */
+.feedback-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+.chart-loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+}
+
+.loading-spinner {
+  font-size: 32px;
+  color: #4caf50;
+  margin-bottom: 10px;
+}
+
+.loading-text {
+  font-size: 14px;
+  color: #666;
+}
+
+.chart-error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  background-color: #fff8f8;
+  border-radius: 8px;
+  border: 1px solid #ffebee;
+}
+
+.error-icon {
+  font-size: 32px;
+  color: #f44336;
+  margin-bottom: 10px;
+}
+
+.error-message {
+  font-size: 14px;
+  color: #d32f2f;
+  margin-bottom: 15px;
+}
+
+.retry-button {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.retry-button:hover {
+  background-color: #d32f2f;
+}
+
+#chartContainer {
+  height: 300px;
+  width: 100%;
+  position: relative;
+}
+
+.no-data-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  opacity: 0.7;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .feedback-header {
+    padding: 15px;
+  }
+
+  .event-info {
+    flex-direction: column;
+  }
+
+  .event-image {
+    width: 100%;
+    height: auto;
+  }
+
+  .feedback-filter {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .filter-label {
+    margin-bottom: 10px;
+  }
+
+  .chart-container {
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%; /* Tỷ lệ 1:1 */
+}
+#ratingDistributionChart {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+}
