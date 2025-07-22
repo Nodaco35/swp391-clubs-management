@@ -15,8 +15,7 @@ public class ExpenseDAO {
                      INSERT INTO Expenses (ClubID, TermID, Purpose, Amount, ExpenseDate, Description, Attachment, CreatedBy, Status)
                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                      """;
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, expense.getClubID());
             ps.setString(2, expense.getTermID());
             ps.setString(3, expense.getPurpose());
@@ -43,7 +42,7 @@ public class ExpenseDAO {
                 WHERE e.CreatedBy = ? AND e.ClubID = ? AND e.TermID = ?
                 """);
         if (search != null && !search.trim().isEmpty()) {
-            sql.append(" AND (e.Description LIKE ? OR e.Purpose LIKE ? OR CAST(e.Amount AS VARCHAR) LIKE ?)");
+            sql.append(" AND (e.Description LIKE ? OR e.Purpose LIKE ?)");
         }
         if (status != null && !status.trim().isEmpty()) {
             sql.append(" AND e.Status = ?");
@@ -75,14 +74,12 @@ public class ExpenseDAO {
         }
         sql.append(" Limit ? OFFSET ? ");
 
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             int paramIndex = 1;
             ps.setString(paramIndex++, userID);
             ps.setInt(paramIndex++, clubID);
             ps.setString(paramIndex++, termID);
             if (search != null && !search.trim().isEmpty()) {
-                ps.setString(paramIndex++, "%" + search + "%");
                 ps.setString(paramIndex++, "%" + search + "%");
                 ps.setString(paramIndex++, "%" + search + "%");
             }
@@ -124,20 +121,18 @@ public class ExpenseDAO {
                 WHERE e.CreatedBy = ? AND e.ClubID = ? AND e.TermID = ?
                 """);
         if (search != null && !search.trim().isEmpty()) {
-            sql.append(" AND (e.Description LIKE ? OR e.Purpose LIKE ? OR CAST(e.Amount AS VARCHAR) LIKE ?)");
+            sql.append(" AND (e.Description LIKE ? OR e.Purpose LIKE ? OR)");
         }
         if (status != null && !status.trim().isEmpty()) {
             sql.append(" AND e.Status = ?");
         }
 
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             int paramIndex = 1;
             ps.setString(paramIndex++, userID);
             ps.setInt(paramIndex++, clubID);
             ps.setString(paramIndex++, termID);
             if (search != null && !search.trim().isEmpty()) {
-                ps.setString(paramIndex++, "%" + search + "%");
                 ps.setString(paramIndex++, "%" + search + "%");
                 ps.setString(paramIndex++, "%" + search + "%");
             }
@@ -163,7 +158,7 @@ public class ExpenseDAO {
                 WHERE e.ClubID = ? AND e.TermID = ?
                 """);
         if (search != null && !search.trim().isEmpty()) {
-            sql.append(" AND (e.Description LIKE ? OR e.Purpose LIKE ? OR CAST(e.Amount AS VARCHAR) LIKE ? OR u.FullName LIKE ?)");
+            sql.append(" AND (e.Description LIKE ? OR e.Purpose LIKE ? OR u.FullName LIKE ?)");
         }
         if (status != null && !status.trim().isEmpty()) {
             sql.append(" AND e.Status = ?");
@@ -194,8 +189,7 @@ public class ExpenseDAO {
         }
         sql.append(" OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
 
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             int paramIndex = 1;
             ps.setInt(paramIndex++, clubID);
             ps.setString(paramIndex++, termID);
@@ -244,19 +238,17 @@ public class ExpenseDAO {
                 WHERE e.ClubID = ? AND e.TermID = ?
                 """);
         if (search != null && !search.trim().isEmpty()) {
-            sql.append(" AND (e.Description LIKE ? OR e.Purpose LIKE ? OR CAST(e.Amount AS VARCHAR) LIKE ? OR u.FullName LIKE ?)");
+            sql.append(" AND (e.Description LIKE ? OR e.Purpose LIKE ? OR u.FullName LIKE ?)");
         }
         if (status != null && !status.trim().isEmpty()) {
             sql.append(" AND e.Status = ?");
         }
 
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             int paramIndex = 1;
             ps.setInt(paramIndex++, clubID);
             ps.setString(paramIndex++, termID);
             if (search != null && !search.trim().isEmpty()) {
-                ps.setString(paramIndex++, "%" + search + "%");
                 ps.setString(paramIndex++, "%" + search + "%");
                 ps.setString(paramIndex++, "%" + search + "%");
                 ps.setString(paramIndex++, "%" + search + "%");
@@ -283,8 +275,7 @@ public class ExpenseDAO {
                      WHERE e.ClubID = ? AND e.TermID = ? AND e.Status = 'Pending'
                      ORDER BY e.CreatedAt DESC
                      """;
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, clubID);
             ps.setString(2, termID);
             ResultSet rs = ps.executeQuery();
@@ -321,8 +312,7 @@ public class ExpenseDAO {
                      WHERE e.CreatedBy = ? AND e.ClubID = ? AND e.TermID = ?
                      ORDER BY e.CreatedAt DESC
                      """;
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, userID);
             ps.setInt(2, clubID);
             ps.setString(3, termID);
@@ -351,21 +341,17 @@ public class ExpenseDAO {
         return expenses;
     }
 
-    
-    
-    
     //approve
-    
     public List<Expenses> getAllExpenses(int clubID, String termID, int page, int pageSize, String search, String status, String sortBy) {
         List<Expenses> expenses = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
-                SELECT e.*, u.FullName AS CreatedByName 
-                FROM Expenses e
-                JOIN Users u ON e.CreatedBy = u.UserID
-                WHERE e.ClubID = ? AND e.TermID = ?
-                """);
+            SELECT e.*, u.FullName AS CreatedByName 
+            FROM Expenses e
+            JOIN Users u ON e.CreatedBy = u.UserID
+            WHERE e.ClubID = ? AND e.TermID = ?
+            """);
         if (search != null && !search.trim().isEmpty()) {
-            sql.append(" AND (e.Description LIKE ? OR e.Purpose LIKE ? OR CAST(e.Amount AS VARCHAR) LIKE ? OR u.FullName LIKE ?)");
+            sql.append(" AND (e.Description LIKE ? OR e.Purpose LIKE ? OR u.FullName LIKE ?)");
         }
         if (status != null && !status.trim().isEmpty()) {
             sql.append(" AND e.Status = ?");
@@ -394,18 +380,16 @@ public class ExpenseDAO {
         } else {
             sql.append(" ORDER BY e.CreatedAt DESC");
         }
-        sql.append(" Limit ? OFFSET ?");
+        sql.append(" LIMIT ? OFFSET ?");
 
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             int paramIndex = 1;
             ps.setInt(paramIndex++, clubID);
             ps.setString(paramIndex++, termID);
             if (search != null && !search.trim().isEmpty()) {
-                ps.setString(paramIndex++, "%" + search + "%");
-                ps.setString(paramIndex++, "%" + search + "%");
-                ps.setString(paramIndex++, "%" + search + "%");
-                ps.setString(paramIndex++, "%" + search + "%");
+                ps.setString(paramIndex++, "%" + search + "%"); // For Description
+                ps.setString(paramIndex++, "%" + search + "%"); // For Purpose
+                ps.setString(paramIndex++, "%" + search + "%"); // For FullName
             }
             if (status != null && !status.trim().isEmpty()) {
                 ps.setString(paramIndex++, status);
@@ -446,19 +430,17 @@ public class ExpenseDAO {
                 WHERE e.ClubID = ? AND e.TermID = ?
                 """);
         if (search != null && !search.trim().isEmpty()) {
-            sql.append(" AND (e.Description LIKE ? OR e.Purpose LIKE ? OR CAST(e.Amount AS VARCHAR) LIKE ? OR u.FullName LIKE ?)");
+            sql.append(" AND (e.Description LIKE ? OR e.Purpose LIKE ? OR u.FullName LIKE ?)");
         }
         if (status != null && !status.trim().isEmpty()) {
             sql.append(" AND e.Status = ?");
         }
 
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             int paramIndex = 1;
             ps.setInt(paramIndex++, clubID);
             ps.setString(paramIndex++, termID);
             if (search != null && !search.trim().isEmpty()) {
-                ps.setString(paramIndex++, "%" + search + "%");
                 ps.setString(paramIndex++, "%" + search + "%");
                 ps.setString(paramIndex++, "%" + search + "%");
                 ps.setString(paramIndex++, "%" + search + "%");
@@ -475,7 +457,7 @@ public class ExpenseDAO {
         }
         return 0;
     }
-    
+
     public Expenses getExpenseById(int expenseID) {
         String sql = """
                      SELECT e.*, u.FullName AS CreatedByName 
@@ -483,8 +465,7 @@ public class ExpenseDAO {
                      LEFT JOIN Users u ON e.CreatedBy = u.UserID
                      WHERE e.ExpenseID = ?
                      """;
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, expenseID);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -511,15 +492,13 @@ public class ExpenseDAO {
         return null;
     }
 
-    
     public boolean updateExpenseStatus(int expenseID, String status, String approvedBy) {
         String sql = """
                      UPDATE Expenses 
                      SET Status = ?, ApprovedBy = ?, ApprovedAt = CURRENT_TIMESTAMP
                      WHERE ExpenseID = ? AND Status = 'Pending'
                      """;
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);
             ps.setString(2, approvedBy);
             ps.setInt(3, expenseID);
@@ -536,8 +515,7 @@ public class ExpenseDAO {
                      INSERT INTO Transactions (ClubID, TermID, Type, Amount, TransactionDate, Description, Attachment, CreatedBy, Status, ReferenceID)
                      VALUES (?, ?, 'Expense', ?, ?, ?, ?, ?, 'Approved', ?)
                      """;
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, expense.getClubID());
             ps.setString(2, expense.getTermID());
             ps.setBigDecimal(3, expense.getAmount());
@@ -553,10 +531,7 @@ public class ExpenseDAO {
             return false;
         }
     }
-    
-    
-    
-    
+
     public BigDecimal getClubBalance(int clubID, String termID) {
         String sql = """
                      SELECT 
@@ -565,8 +540,7 @@ public class ExpenseDAO {
                      FROM Transactions
                      WHERE ClubID = ? AND TermID = ?
                      """;
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, clubID);
             ps.setString(2, termID);
             ResultSet rs = ps.executeQuery();
@@ -578,21 +552,15 @@ public class ExpenseDAO {
         }
         return BigDecimal.ZERO;
     }
-    
-    
-    
-    
-    
-    
+
     // chairman
-    
     // Get completed expense transactions with search, termID, and pagination
     public List<Transaction> getCompletedTransactions(int clubID, String search, String termID, int page, int pageSize) {
         List<Transaction> transactions = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
-            "SELECT expenseID, clubID, termID, purpose, amount, expenseDate, description, attachment, status, createdBy, createdByName " +
-            "FROM Expenses " +
-            "WHERE clubID = ? AND status = 'APPROVED'"
+                "SELECT expenseID, clubID, termID, purpose, amount, expenseDate, description, attachment, status, createdBy, createdByName "
+                + "FROM Expenses "
+                + "WHERE clubID = ? AND status = 'APPROVED'"
         );
 
         // Add search condition
@@ -609,8 +577,7 @@ public class ExpenseDAO {
         sql.append(" ORDER BY expenseDate DESC");
         sql.append(" OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
 
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
             int paramIndex = 1;
             stmt.setInt(paramIndex++, clubID);
 
@@ -652,9 +619,9 @@ public class ExpenseDAO {
     // Count completed expense transactions for pagination
     public int countCompletedTransactions(int clubID, String search, String termID) {
         StringBuilder sql = new StringBuilder(
-            "SELECT COUNT(*) " +
-            "FROM Expenses " +
-            "WHERE clubID = ? AND status = 'APPROVED'"
+                "SELECT COUNT(*) "
+                + "FROM Expenses "
+                + "WHERE clubID = ? AND status = 'APPROVED'"
         );
 
         if (search != null && !search.trim().isEmpty()) {
@@ -665,8 +632,7 @@ public class ExpenseDAO {
             sql.append(" AND termID = ?");
         }
 
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
             int paramIndex = 1;
             stmt.setInt(paramIndex++, clubID);
 
@@ -692,17 +658,16 @@ public class ExpenseDAO {
     // Get total expenses for a club (optionally filtered by termID)
     public double getTotalExpense(int clubID, String termID) {
         StringBuilder sql = new StringBuilder(
-            "SELECT SUM(amount) " +
-            "FROM Expenses " +
-            "WHERE clubID = ? AND status = 'APPROVED'"
+                "SELECT SUM(amount) "
+                + "FROM Expenses "
+                + "WHERE clubID = ? AND status = 'APPROVED'"
         );
 
         if (termID != null && !termID.equals("all")) {
             sql.append(" AND termID = ?");
         }
 
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
             stmt.setInt(1, clubID);
             if (termID != null && !termID.equals("all")) {
                 stmt.setString(2, termID);
