@@ -242,87 +242,75 @@
                                         </c:otherwise>
                                     </c:choose>
 
-                                    <tr data-status="${statusKey}">
-                                        <td>
-                                            <div class="event-info">
-                                                <strong>${event.eventName}</strong>
-                                                <small>
-                                                    ${event.isPublic() ? 'Công khai' : 'Riêng tư'}
-                                                </small>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <c:choose>
-                                                <c:when test="${not empty event.schedules}">
-                                                    <fmt:formatDate value="${event.schedules[0].eventDate}" pattern="dd/MM/yyyy"/>
-                                                    <fmt:formatDate value="${event.schedules[0].startTime}" pattern="HH:mm"/>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    Chưa có lịch trình
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </td>
-                                        <td class="location-cell">
-                                            <c:choose>
-                                                <c:when test="${not empty event.schedules}">
-                                                    ${event.schedules[0].location.locationName}
-                                                </c:when>
-                                                <c:otherwise>
-                                                    Không xác định
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </td>
-                                        <td>
-                                            <div class="event-info">
-                                                <strong>${event.registered}/${event.capacity}</strong>
-                                                <small>
-                                                    (Còn ${event.spotsLeft} chỗ trống)
-                                                </small>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="status ${event.status}">
-                                                <c:choose>
-                                                    <c:when test="${event.status == 'PENDING' || event.status == 'Pending'}">Sắp diễn ra</c:when>
-                                                    <c:when test="${event.status == 'PROCESSING' || event.status == 'Processing'}">Đang diễn ra</c:when>
-                                                    <c:when test="${event.status == 'COMPLETED' || event.status == 'Completed'}">Đã kết thúc</c:when>
-                                                    <c:otherwise>Không xác định</c:otherwise>
-                                                </c:choose>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="status ${event.approvalStatus}">
-                                                <c:if test="${event.isPublic() == true}">
-                                                    <c:choose>
-                                                        <c:when test="${event.approvalStatus == 'PENDING'}">Chờ duyệt</c:when>
-                                                        <c:when test="${event.approvalStatus == 'APPROVED'}">Đã duyệt</c:when>
-                                                        <c:when test="${event.approvalStatus == 'REJECTED'}">Từ chối</c:when>
-                                                        <c:otherwise>Không xác định</c:otherwise>
-                                                    </c:choose>
-                                                </c:if>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <a href="${pageContext.request.contextPath}/event-detail?id=${event.eventID}" class="btn-action form" title="Xem chi tiết">
-                                                <i class="fa-regular fa-rectangle-list"></i>
-                                            </a>
-                                            <a href="${pageContext.request.contextPath}/chairman-page/myclub-events/edit-event?eventID=${event.eventID}" class="btn-action edit" title="Sửa">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <c:if test="${event.status == 'PENDING' || event.status == 'Pending'}">
-                                                <a href="${pageContext.request.contextPath}/chairman-page/myclub-events?eventID=${event.eventID}" class="btn-action assign" title="Giao việc">
-                                                    <i class="fas fa-tasks"></i>
-                                                </a>
-                                            </c:if>
-                                        </td>
-                                    </tr>
-                                </c:forEach>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
+                                </span>
+                            </td>
+                            <td>
+                                <span class="status ${event.approvalStatus}">
+                                    <c:if test="${event.isPublic() == true}">
+                                        <c:choose>
+                                            <c:when test="${event.approvalStatus == 'PENDING'}">Chờ duyệt</c:when>
+                                            <c:when test="${event.approvalStatus == 'APPROVED'}">Đã duyệt</c:when>
+                                            <c:when test="${event.approvalStatus == 'REJECTED'}">Từ chối</c:when>
+                                            <c:otherwise>Không xác định</c:otherwise>
+                                        </c:choose>
+                                    </c:if>
+                                </span>
+                            </td>
+                            <td>
+                                <a href="${pageContext.request.contextPath}/event-detail?id=${event.eventID}" class="btn-action form" title="Xem chi tiết">
+                                    <i class="fa-regular fa-rectangle-list"></i>
+                                </a>
+                                <a href="${pageContext.request.contextPath}/chairman-page/myclub-events/edit-event?eventID=${event.eventID}" class="btn-action edit" title="Sửa">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <c:if test="${(event.status == 'PENDING' || event.status == 'Pending' ) && event.approvalStatus == 'APPROVED'}">
+                                    <a href="#" class="btn-action assign" data-event-id="${event.eventID}" title="Giao việc">
+                                        <i class="fas fa-tasks"></i>
+                                    </a>
+                                </c:if>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                    </tbody>
+                </table>
             </div>
-        </main>
+        </section>
+    </div>
+
+    <div class="modal" id="eventTermModal">
+        <div class="modal-content">
+            <span class="close">×</span>
+            <h2>Thêm Giai Đoạn Sự Kiện</h2>
+            <c:if test="${not empty termError}">
+                <div class="error-message" style="color: red; margin-bottom: 10px;">
+                        ${termError}
+                </div>
+            </c:if>
+
+            <form action="${pageContext.request.contextPath}/chairman-page/myclub-events" method="post" id="addEventTermForm">
+                <input type="hidden" name="action" value="addTerm">
+                <input type="hidden" name="eventID" id="eventID">
+                <div class="form-group">
+                    <label for="termName">Tên Giai Đoạn:</label>
+                    <select name="termName" id="termName" required>
+                        <option value="Trước sự kiện">Trước sự kiện</option>
+                        <option value="Trong sự kiện">Trong sự kiện</option>
+                        <option value="Sau sự kiện">Sau sự kiện</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="termStart">Ngày Bắt Đầu:</label>
+                    <input type="date" name="termStart" id="termStart" required>
+                </div>
+                <div class="form-group">
+                    <label for="termEnd">Ngày Kết Thúc:</label>
+                    <input type="date" name="termEnd" id="termEnd" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Thêm Giai Đoạn</button>
+            </form>
+        </div>
+    </div>
+</main>
 
         <script>
             // Lọc theo status
@@ -335,15 +323,46 @@
                 const selectedStatus = this.value;
                 const rows = document.querySelectorAll("#clubEventsTableBody tr");
 
-                rows.forEach(row => {
-                    const status = row.getAttribute("data-status").toLowerCase();
-                    if (selectedStatus === "" || status.includes(selectedStatus.toLowerCase())) {
-                        row.style.display = "";
-                    } else {
-                        row.style.display = "none";
-                    }
-                });
-            });
-        </script>
-    </body>
+        rows.forEach(row => {
+            const status = row.getAttribute("data-status").toLowerCase();
+            if (selectedStatus === "" || status.includes(selectedStatus.toLowerCase())) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    });
+
+    // Xử lý hiển thị modal khi nhấn nút "Giao việc"
+    document.querySelectorAll(".btn-action.assign").forEach(button => {
+        button.addEventListener("click", function (e) {
+            e.preventDefault();
+            const eventID = this.getAttribute("data-event-id");
+            const modal = document.getElementById("eventTermModal");
+            const eventIDInput = document.getElementById("eventID");
+            eventIDInput.value = eventID;
+            modal.style.display = "flex";
+        });
+    });
+
+    // Xử lý đóng modal
+    document.querySelector(".close").addEventListener("click", function () {
+        document.getElementById("eventTermModal").style.display = "none";
+    });
+
+    // Đóng modal khi nhấn ra ngoài
+    window.addEventListener("click", function (event) {
+        const modal = document.getElementById("eventTermModal");
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+    <% if (request.getAttribute("showTermModal") != null) { %>
+    window.addEventListener("load", function () {
+        document.getElementById("eventTermModal").style.display = "flex";
+    });
+    <% } %>
+</script>
+</body>
+
 </html>

@@ -14,8 +14,13 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import models.ClubInfo;
+import models.EventTerms;
 import models.Events;
 import models.Users;
 
@@ -99,9 +104,63 @@ public class ChairmanMyClubEventsServlet extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-        processRequest(request, response);
+            throws ServletException, IOException {
+        String action = request.getParameter("action");
+        if ("addTerm".equals(action)) {
+            try {
+                // Lấy dữ liệu từ form
+                int eventID = Integer.parseInt(request.getParameter("eventID"));
+                String termName = request.getParameter("termName");
+                String termStartStr = request.getParameter("termStart");
+                String termEndStr = request.getParameter("termEnd");
+
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                Date termStart = new Date(sdf.parse(termStartStr).getTime());
+                Date termEnd = new Date(sdf.parse(termEndStr).getTime());
+
+                // Tạo đối tượng EventTerms
+                EventTerms term = new EventTerms();
+                Events e = new Events();
+                e.setEventID(eventID);
+                term.setEvent(e);
+                term.setTermName(termName);
+                term.setTermStart(termStart);
+                term.setTermEnd(termEnd);
+
+                // Lưu vào database
+                EventsDAO termsDAO = new EventsDAO();
+                boolean success = termsDAO.addEventTerm(term);
+
+                if (success) {
+                    response.sendRedirect(request.getContextPath() + "/chairman-page/tasks");
+                } else {
+                    // Có thể xảy ra do lỗi SQL hoặc trigger
+                    request.setAttribute("termError", "Không thể thêm giai đoạn: Giai đoạn đã tồn tại hoặc đã đủ 3 giai đoạn.");
+                    request.setAttribute("showTermModal", true); // để mở lại modal
+                    doGet(request, response);
+                }
+
+            } catch (SQLException e) {
+                String message = e.getMessage();
+                if (message.contains("Giai đoạn này đã tồn tại")) {
+                    request.setAttribute("termError", "Giai đoạn này đã tồn tại cho sự kiện.");
+                } else if (message.contains("Mỗi sự kiện chỉ được có tối đa 3 giai đoạn")) {
+                    request.setAttribute("termError", "Không thể thêm giai đoạn: Đã đủ 3 giai đoạn (Trước, Trong, Sau).");
+                } else {
+                    request.setAttribute("termError", "Lỗi không xác định: " + message);
+                }
+                request.setAttribute("showTermModal", true); // mở lại modal
+                doGet(request, response);
+            } catch (Exception e) {
+                request.setAttribute("termError", "Lỗi hệ thống: " + e.getMessage());
+                request.setAttribute("showTermModal", true); // mở lại modal
+                doGet(request, response);
+            }
+        } else {
+            processRequest(request, response);
+        }
     }
+
 
     /** 
      * Returns a short description of the servlet.

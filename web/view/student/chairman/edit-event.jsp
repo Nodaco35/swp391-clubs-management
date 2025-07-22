@@ -35,34 +35,30 @@
                     </div>
                 </div>
 
-                <nav class="main-nav">
-                    <ul>
-                        <li>
-                            <a href="${pageContext.request.contextPath}/"
-                               class="${pageContext.request.servletPath == '/' ? 'active' : ''}">
-                                Trang Chủ
-                            </a>
-                        </li>
-                        <li>
-                            <a href="${pageContext.request.contextPath}/clubs"
-                               class="${fn:contains(pageContext.request.servletPath, '/clubs') ? 'active' : ''}">
-                                Câu Lạc Bộ
-                            </a>
-                        </li>
-                        <li>
-                            <a href="${pageContext.request.contextPath}/events-page"
-                               class="${fn:contains(pageContext.request.servletPath, '/events-page') ? 'active' : ''}">
-                                Sự Kiện
-                            </a>
-                        </li>
-                        <li>
-                            <a href="${pageContext.request.contextPath}/chairman-page/clubmeeting"
-                               class="nav-item ${currentPath == '/chairman-page/clubmeeting' ? 'active' : ''}">
-                                <i class="fas fa-clock"></i> Cuộc họp
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
+		<nav class="main-nav">
+			<ul>
+				<li>
+					<a href="${pageContext.request.contextPath}/"
+					   class="${pageContext.request.servletPath == '/' ? 'active' : ''}">
+						Trang Chủ
+					</a>
+				</li>
+				<li>
+					<a href="${pageContext.request.contextPath}/clubs"
+					   class="${fn:contains(pageContext.request.servletPath, '/clubs') ? 'active' : ''}">
+						Câu Lạc Bộ
+					</a>
+				</li>
+				<li>
+					<a href="${pageContext.request.contextPath}/events-page"
+					   class="${fn:contains(pageContext.request.servletPath, '/events-page') ? 'active' : ''}">
+						Sự Kiện
+					</a>
+				</li>
+
+			</ul>
+		</nav>
+
 
                 <div class="auth-buttons">
                     <c:choose>
