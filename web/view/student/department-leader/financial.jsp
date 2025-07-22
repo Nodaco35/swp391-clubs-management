@@ -248,7 +248,7 @@
                                     </form>
 
                                     <!-- phuc day -->
-                                    <form action="${pageContext.request.contextPath}/department/#" >
+                                    <form action="${pageContext.request.contextPath}/department/financial/approve-expense" >
                                         <button type="submit"
                                                 class="action-button expense">
                                             <i class="fas fa-credit-card"></i>

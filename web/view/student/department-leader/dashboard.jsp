@@ -64,6 +64,14 @@
                             </a>
                         </li>
                     </c:if>
+                    <c:if test="${isHauCan}">
+                        <li class="menu-item">
+                            <a href="${pageContext.request.contextPath}/department/submit-expense" class="menu-link">
+                                <i class="fa-dollar-sign"></i>
+                                <span>Báo cáo chi tiêu</span>
+                            </a>
+                        </li>
+                    </c:if>
                     <li class="menu-item">
                         <a href="${pageContext.request.contextPath}/" class="menu-link">
                             <i class="fas fa-home"></i>
@@ -82,7 +90,7 @@
                     </div>
                 </div>
             </nav>
-           
+
             <!-- Main Content -->
             <main class="main-content">
 
@@ -309,14 +317,14 @@
 
         <!-- Dashboard data for JavaScript -->
         <script>
-                                        // Pass dashboard data to JavaScript
-                                        window.dashboardData = {
-                                            doneTasks: ${dashboard.doneTasks},
-                                            inProgressTasks: ${dashboard.inProgressTasks},
-                                            todoTasks: ${dashboard.todoTasks},
-                                            activeMembers: ${dashboard.activeMembers},
-                                            totalMembers: ${dashboard.totalMembers}
-                                        };
+            // Pass dashboard data to JavaScript
+            window.dashboardData = {
+                doneTasks: ${dashboard.doneTasks},
+                inProgressTasks: ${dashboard.inProgressTasks},
+                todoTasks: ${dashboard.todoTasks},
+                activeMembers: ${dashboard.activeMembers},
+                totalMembers: ${dashboard.totalMembers}
+            };
         </script>    <!-- Custom Dashboard JS -->
         <script src="${pageContext.request.contextPath}/js/department-dashboard.js"></script>
     </body>

@@ -4,6 +4,7 @@
  */
 package dal;
 
+import static dal.DBContext.getConnection;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import models.*;
@@ -1330,4 +1331,243 @@ public class FinancialDAO {
         }
         return total;
     }
+    
+    //chairman
+    // Calculate club balance (Approved Income - Approved Expense)
+    public BigDecimal getClubBalance(int clubID, String termID) {
+        String sql = """
+                     SELECT 
+                         COALESCE(SUM(CASE WHEN Type = 'Income' AND Status = 'Approved' THEN Amount ELSE 0 END), 0) -
+                         COALESCE(SUM(CASE WHEN Type = 'Expense' AND Status = 'Approved' THEN Amount ELSE 0 END), 0) AS Balance
+                     FROM Transactions
+                     WHERE ClubID = ? AND TermID = ?
+                     """;
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, clubID);
+            ps.setString(2, termID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getBigDecimal("Balance");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return BigDecimal.ZERO;
+    }
+
+    // Get completed transactions (Income and Expense) with search, termID, and pagination
+    public List<Transaction> getCompletedTransactions(int clubID, String search, String termID, String type, int page, int pageSize) {
+        List<Transaction> transactions = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+            "SELECT t.*, u.FullName AS createdName FROM Transactions t " +
+            "JOIN Users u ON t.CreatedBy = u.UserID WHERE t.ClubID = ? AND t.Status = 'Approved'"
+        );
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append(" AND (t.Description LIKE ? OR u.FullName LIKE ?)");
+        }
+        if (termID != null && !termID.equals("all")) {
+            sql.append(" AND t.TermID = ?");
+        }
+        if (type != null && !type.equals("all")) {
+            sql.append(" AND t.Type = ?");
+        }
+        sql.append(" ORDER BY t.TransactionDate DESC LIMIT ? OFFSET ?");
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+            stmt.setInt(paramIndex++, clubID);
+            if (search != null && !search.trim().isEmpty()) {
+                String likePattern = "%" + search.trim() + "%";
+                stmt.setString(paramIndex++, likePattern);
+                stmt.setString(paramIndex++, likePattern);
+            }
+            if (termID != null && !termID.equals("all")) {
+                stmt.setString(paramIndex++, termID);
+            }
+            if (type != null && !type.equals("all")) {
+                stmt.setString(paramIndex++, type);
+            }
+            stmt.setInt(paramIndex++, pageSize);
+            stmt.setInt(paramIndex++, (page - 1) * pageSize);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Transaction transaction = new Transaction();
+                transaction.setTransactionID(rs.getInt("TransactionID"));
+                transaction.setClubID(rs.getInt("ClubID"));
+                transaction.setTermID(rs.getString("TermID"));
+                transaction.setType(rs.getString("Type"));
+                transaction.setAmount(rs.getBigDecimal("Amount"));
+                transaction.setTransactionDate(rs.getTimestamp("TransactionDate"));
+                transaction.setDescription(rs.getString("Description"));
+                transaction.setAttachment(rs.getString("Attachment"));
+                transaction.setStatus(rs.getString("Status"));
+                transaction.setCreateBy(rs.getString("CreatedBy"));
+                transaction.setCreatedName(rs.getString("createdName"));
+                transactions.add(transaction);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error retrieving completed transactions: " + e.getMessage());
+        }
+        return transactions;
+    }
+
+    // Count completed transactions for pagination
+    public int countCompletedTransactions(int clubID, String search, String termID, String type) {
+        StringBuilder sql = new StringBuilder(
+            "SELECT COUNT(*) FROM Transactions t JOIN Users u ON t.CreatedBy = u.UserID " +
+            "WHERE t.ClubID = ? AND t.Status = 'Approved'"
+        );
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append(" AND (t.Description LIKE ? OR u.FullName LIKE ?)");
+        }
+        if (termID != null && !termID.equals("all")) {
+            sql.append(" AND t.TermID = ?");
+        }
+        if (type != null && !type.equals("all")) {
+            sql.append(" AND t.Type = ?");
+        }
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+            stmt.setInt(paramIndex++, clubID);
+            if (search != null && !search.trim().isEmpty()) {
+                String likePattern = "%" + search.trim() + "%";
+                stmt.setString(paramIndex++, likePattern);
+                stmt.setString(paramIndex++, likePattern);
+            }
+            if (termID != null && !termID.equals("all")) {
+                stmt.setString(paramIndex++, termID);
+            }
+            if (type != null && !type.equals("all")) {
+                stmt.setString(paramIndex++, type);
+            }
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error counting completed transactions: " + e.getMessage());
+        }
+        return 0;
+    }
+
+    // Get total income for a club (optionally filtered by termID)
+    public double getTotalIncome(int clubID, String termID) {
+        StringBuilder sql = new StringBuilder(
+            "SELECT SUM(Amount) " +
+            "FROM Transactions " +
+            "WHERE ClubID = ? AND Status = 'Approved' AND Type = 'Income'"
+        );
+
+        if (termID != null && !termID.equals("all")) {
+            sql.append(" AND TermID = ?");
+        }
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            stmt.setInt(1, clubID);
+            if (termID != null && !termID.equals("all")) {
+                stmt.setString(2, termID);
+            }
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error calculating total income: " + e.getMessage());
+        }
+        return 0.0;
+    }
+
+    // Get total expense for a club (optionally filtered by termID)
+    public double getTotalExpense(int clubID, String termID) {
+        StringBuilder sql = new StringBuilder(
+            "SELECT SUM(Amount) " +
+            "FROM Transactions " +
+            "WHERE ClubID = ? AND Status = 'Approved' AND Type = 'Expense'"
+        );
+
+        if (termID != null && !termID.equals("all")) {
+            sql.append(" AND TermID = ?");
+        }
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            stmt.setInt(1, clubID);
+            if (termID != null && !termID.equals("all")) {
+                stmt.setString(2, termID);
+            }
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error calculating total expense: " + e.getMessage());
+        }
+        return 0.0;
+    }
+
+    
+
+    // Get all term IDs for a club
+    public List<String> getAllTermIDs(int clubID) {
+        List<String> termIDs = new ArrayList<>();
+        String sql = """
+                     SELECT DISTINCT TermID 
+                     FROM Transactions 
+                     WHERE ClubID = ? AND TermID IS NOT NULL 
+                     ORDER BY TermID
+                     """;
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, clubID);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                termIDs.add(rs.getString("TermID"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error retrieving term IDs: " + e.getMessage());
+        }
+        return termIDs;
+    }
+    
+    // Get total pending income for a club (optionally filtered by termID)
+    public double getTotalPendingIncome(int clubID, String termID) {
+        StringBuilder sql = new StringBuilder(
+            "SELECT SUM(amount) " +
+            "FROM Income " +
+            "WHERE clubID = ? AND status = 'Pending'"
+        );
+
+        if (termID != null && !termID.equals("all")) {
+            sql.append(" AND termID = ?");
+        }
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            stmt.setInt(1, clubID);
+            if (termID != null && !termID.equals("all")) {
+                stmt.setString(2, termID);
+            }
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error calculating total pending income: " + e.getMessage());
+        }
+        return 0.0;
+    }
+
+    
 }

@@ -3,20 +3,13 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/13_07/swp391-clubs-management/src/java/controller/EventsPageServlet.java</file>
-            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/13_07/swp391-clubs-management/web/view/student/chairman/myclub-events.jsp</file>
-            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/13_07/swp391-clubs-management/web/view/events-page/events-page.jsp</file>
-            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/13_07/swp391-clubs-management/web/view/ic/approval-events.jsp</file>
-            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/13_07/swp391-clubs-management/web/view/events-page/event-detail/registration-event.jsp</file>
-            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/13_07/swp391-clubs-management/src/java/dal/EventsDAO.java</file>
-            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/13_07/swp391-clubs-management/web/view/events-page/event-detail/event-detail.jsp</file>
-            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/13_07/swp391-clubs-management/src/java/controller/ApprovalEventsServlet.java</file>
-            <file>file:/D:/FULearning/Summer2025/SWP391/PROJECT/13_07/swp391-clubs-management/web/css/ic-approval.css</file>
-
-            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/src/java/models/Transaction.java</file>
-            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/web/view/student/department-leader/financial-transaction-club-history.jsp</file>
-            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/src/java/controller/DF_MemberIncomeServlet.java</file>
-            <file>file:/D:/FULearning/SU25/SWP/main/V7/swp391-clubs-management/web/view/student/department-leader/financial-income-member.jsp</file>
+            <file>file:/E:/Kì_5/SWP391/FixApproveExpense/swp391-clubs-management/src/java/dal/ExpenseDAO.java</file>
+            <file>file:/E:/Kì_5/SWP391/FixApproveExpense/swp391-clubs-management/src/java/controller/ApproveExpenseServlet.java</file>
+            <file>file:/E:/Kì_5/SWP391/FixApproveExpense/swp391-clubs-management/web/view/student/department-leader/approve-expense.jsp</file>
+            <file>file:/E:/Kì_5/SWP391/FixApproveExpense/swp391-clubs-management/src/java/controller/ChairmanClubMeetingController.java</file>
+            <file>file:/E:/Kì_5/SWP391/FixApproveExpense/swp391-clubs-management/web/WEB-INF/web.xml</file>
+            <file>file:/E:/Kì_5/SWP391/FixApproveExpense/swp391-clubs-management/src/java/controller/SubmitExpenseServlet.java</file>
+            <file>file:/E:/Kì_5/SWP391/FixApproveExpense/swp391-clubs-management/src/java/controller/ChairmanOverviewServlet.java</file>
         </group>
     </open-files>
 </project-private>
