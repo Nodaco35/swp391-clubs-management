@@ -163,7 +163,7 @@
 	<section class="timeline-management">
 		<div class="section-header">
 			<div class="section-title">
-				<h2>Timeline quản lý sự kiện</h2>
+				<h2>Các giai đoạn công việc</h2>
 			</div>
 			<div class="section-actions">
 				<form method="get" action="${pageContext.request.contextPath}/chairman-page/tasks">
