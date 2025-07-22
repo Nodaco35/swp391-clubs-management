@@ -15,4 +15,4 @@ google.oauth.userinfo.url=https://www.googleapis.com/oauth2/v2/userinfo
 google.oauth.scope=email profile
 
 # Redirect URI (adjust based on your domain)
-google.oauth.redirect.uri=http://localhost:8080/swp391-clubs-management/oauth2callback
+google.oauth.redirect.uri=http://localhost:8080/clubs/oauth2callback
