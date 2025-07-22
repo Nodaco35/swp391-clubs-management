@@ -86,7 +86,7 @@ public class TaskDAO {
                 EventTerms et = getEventTermsByID(rs.getInt("TermID"));
                 Events event = ed.getEventByID(rs.getInt("EventID"));
                 Clubs club = cd.getCLubByID(rs.getInt("ClubID"));
-                Users creator = ud.getUserByID(rs.getString("CreatedBy"));
+                Users creator = ud.getUserById(rs.getString("CreatedBy"));
 
                 t.setTerm(et);
                 t.setEvent(event);
@@ -104,7 +104,7 @@ public class TaskDAO {
                 String assigneeType = rs.getString("AssigneeType");
                 t.setAssigneeType(assigneeType);
                 if ("User".equals(assigneeType)) {
-                    Users userAssignee = ud.getUserByID(rs.getString("UserID"));
+                    Users userAssignee = ud.getUserById(rs.getString("UserID"));
                     t.setUserAssignee(userAssignee);
                 } else if ("Department".equals(assigneeType)) {
                     Department dept = dd.getDepartmentByID(rs.getInt("DepartmentID"));
@@ -143,7 +143,7 @@ public class TaskDAO {
                 EventTerms et = getEventTermsByID(rs.getInt("TermID"));
                 Events event = ed.getEventByID(rs.getInt("EventID"));
                 Clubs club = cd.getCLubByID(rs.getInt("ClubID"));
-                Users creator = ud.getUserByID(rs.getString("CreatedBy"));
+                Users creator = ud.getUserById(rs.getString("CreatedBy"));
 
                 t.setTerm(et);
                 t.setEvent(event);
@@ -161,7 +161,7 @@ public class TaskDAO {
                 String assigneeType = rs.getString("AssigneeType");
                 t.setAssigneeType(assigneeType);
                 if ("User".equals(assigneeType)) {
-                    Users userAssignee = ud.getUserByID(rs.getString("UserID"));
+                    Users userAssignee = ud.getUserById(rs.getString("UserID"));
                     t.setUserAssignee(userAssignee);
                 } else if ("Department".equals(assigneeType)) {
                     Department dept = dd.getDepartmentByID(rs.getInt("DepartmentID"));
@@ -196,7 +196,7 @@ public class TaskDAO {
                 ta.setAssigneeType(rs.getString("AssigneeType"));
 
                 if ("User".equalsIgnoreCase(rs.getString("AssigneeType"))) {
-                    Users u = ud.getUserByID(rs.getString("UserID"));
+                    Users u = ud.getUserById(rs.getString("UserID"));
                     ta.setUser(u);
                 } else if ("Department".equalsIgnoreCase(rs.getString("AssigneeType"))) {
                     Department d = dd.getDepartmentByID(rs.getInt("DepartmentID"));
