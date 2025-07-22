@@ -4,6 +4,8 @@ import models.PeriodicReport;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import models.PeriodicReportEvents;
+import models.PeriodicReport_MemberAchievements;
 
 public class PeriodicReportDAO extends DBContext {
 
@@ -82,6 +84,97 @@ public class PeriodicReportDAO extends DBContext {
             ex.printStackTrace();
         }
         return list;
+    }
+
+    public List<PeriodicReport_MemberAchievements> getMemberAchievementsByReportID(int reportID) {
+        List<PeriodicReport_MemberAchievements> list = new ArrayList<>();
+
+        String sql = """
+                SELECT r.AchievementID, m.ReportID, r.MemberID, u.FullName, u.UserID, r.Role, r.ProgressPoint
+                FROM PeriodicReport_MemberAchievements r
+                JOIN Users u ON r.MemberID = u.UserID
+                JOIN PeriodicClubReport m ON m.ReportID = r.ReportID
+                WHERE r.ReportID = ?
+    """;
+
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, reportID);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    PeriodicReport_MemberAchievements a = new PeriodicReport_MemberAchievements();
+                    a.setAchievementID(rs.getInt("AchievementID"));
+                    a.setReportID(rs.getInt("ReportID"));
+                    a.setMemberID(rs.getString("MemberID"));
+                    a.setFullName(rs.getString("FullName"));       // cần có trong model
+                    a.setStudentCode(rs.getString("UserID")); // cần có trong model
+                    a.setRole(rs.getString("Role"));
+                    a.setProgressPoint(rs.getInt("ProgressPoint"));
+                    list.add(a);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public List<PeriodicReportEvents> getEventReportsByReportID(int reportID) {
+        List<PeriodicReportEvents> list = new ArrayList<>();
+
+        String sql = """
+        SELECT ReportEventID, ReportID, EventName, EventDate, EventType, ParticipantCount, ProofLink
+        FROM PeriodicReportEvents
+        WHERE ReportID = ?
+    """;
+
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, reportID);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    PeriodicReportEvents e = new PeriodicReportEvents();
+                    e.setReportEventID(rs.getInt("ReportEventID"));
+                    e.setReportID(rs.getInt("ReportID"));
+                    e.setEventName(rs.getString("EventName"));
+                    e.setEventDate(rs.getDate("EventDate"));
+                    e.setEventType(rs.getString("EventType"));
+                    e.setParticipantCount(rs.getInt("ParticipantCount"));
+                    e.setProofLink(rs.getString("ProofLink"));
+                    list.add(e);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public String getTermNameByReportID(int reportID) {
+        String termName = null;
+
+        String sql = """
+        SELECT s.TermName
+        FROM PeriodicClubReport p
+        JOIN Semesters s ON p.Term = s.TermID
+        WHERE p.ReportID = ?
+    """;
+
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, reportID);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    termName = rs.getString("TermName");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return termName;
     }
 
 }
