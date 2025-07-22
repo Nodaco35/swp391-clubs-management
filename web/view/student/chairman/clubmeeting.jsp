@@ -147,7 +147,7 @@
                     </li>
                     <li>
                         <a href="${pageContext.request.contextPath}/chairman-page/tasks"
-                           class="nav-item ${currentPath == '/chairman-page/tasks' ? 'active' : ''}">
+                           class="nav-item ${currentPath == '/chairman-page/reports' ? 'active' : ''}">
                             <i class="fas fa-file-alt"></i> Báo cáo
                         </a>
                     </li>
