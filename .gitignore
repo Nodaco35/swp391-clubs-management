@@ -6,6 +6,12 @@
 /dist/
 
 # =========================
+# OAuth Configuration (NEVER commit credentials!)
+# =========================
+src/conf/oauth.properties
+oauth.properties
+
+# =========================
 # Java build files
 # =========================
 *.class
@@ -44,6 +50,20 @@ Thumbs.db
 # VS Code (nếu ai đó mở bằng VS Code)
 # =========================
 .vscode/
+
+# =========================
+# Sensitive configuration files - DO NOT COMMIT!
+# =========================
+src/conf/oauth.properties
+oauth.properties
+config.properties
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Database credentials
 src/java/dal/DBContext.java
 src/java/dal/DBContext.java
 nbproject/private/private.properties

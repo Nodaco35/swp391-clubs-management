@@ -31,7 +31,6 @@ public class ApplicationFormServlet extends HttpServlet {
     private ApplicationFormDAO applicationFormDAO;
     private ApplicationResponseDAO responseDAO;
     private ClubApplicationDAO clubApplicationDAO;
-    private UserDAO userDAO;
     private ApplicationStageDAO applicationStageDAO;
 
     @Override
@@ -40,7 +39,6 @@ public class ApplicationFormServlet extends HttpServlet {
         applicationFormDAO = new ApplicationFormDAO();
         responseDAO = new ApplicationResponseDAO();
         clubApplicationDAO = new ClubApplicationDAO();
-        userDAO = new UserDAO();
         applicationStageDAO = new ApplicationStageDAO();
     }
 
@@ -250,7 +248,7 @@ public class ApplicationFormServlet extends HttpServlet {
             clubApp.setSubmitDate(currentTimestamp);
 
             // Lấy thông tin người dùng từ cơ sở dữ liệu
-            Users user = userDAO.getUserByID(userId);
+            Users user = UserDAO.getUserById(userId);
             String email = "";
 
             if (user != null) {

@@ -104,7 +104,7 @@
                 <div class="sidebar-footer">
                     <div class="user-info">
                         <div class="user-avatar">
-                            <img src="${pageContext.request.contextPath}/${sessionScope.user.avatar != null ? sessionScope.user.avatar : 'img/Hinh-anh-dai-dien-mac-dinh-Facebook.jpg'}" alt="Avatar">
+                            <img src="${pageContext.request.contextPath}/img/Hinh-anh-dai-dien-mac-dinh-Facebook.jpg" alt="Avatar">
                         </div>
                         <div class="user-details">
                             <div class="user-name">${sessionScope.user.fullName}</div>

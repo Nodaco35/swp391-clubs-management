@@ -100,7 +100,7 @@ public class ViewFeedbackServlet extends HttpServlet {
                     for (Feedback fb : feedbacks) {
                         String userId = fb.getUserID();
                         if (!fb.isAnonymous() && userId != null && !userId.isEmpty() && !userNames.containsKey(userId)) {
-                            Users userInfo = userDAO.getUserByID(userId);
+                            Users userInfo = userDAO.getUserById(userId);
                             if (userInfo != null && userInfo.getFullName() != null) {
                                 userNames.put(userId, userInfo.getFullName());
                             } else {
