@@ -1675,7 +1675,7 @@ body {
 
 
 /*Timeline event*/
-.modal {
+.modal-term {
     display: none;
     position: fixed;
     top: 0;
@@ -1688,7 +1688,7 @@ body {
     justify-content: center;
     align-items: center;
 }
-.modal-content {
+.modal-content-term {
     background-color: #fff;
     padding: 20px;
     border-radius: 5px;
@@ -1698,31 +1698,31 @@ body {
     position: relative;
     margin: 10% auto; /* Căn giữa theo chiều dọc và ngang */
 }
-.close {
+.close-term {
     color: #aaa;
     float: right;
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
 }
-.close:hover {
+.close-term:hover {
     color: #000;
 }
-.form-group {
+.form-group-term {
     margin-bottom: 15px;
 }
-.form-group label {
+.form-group-term label {
     display: block;
     margin-bottom: 5px;
 }
-.form-group input, .form-group select {
+.form-group-term input, .form-group-term select {
     width: 100%;
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
 }
 
-.error-message {
+.error-message-term {
     color: red;
     margin-bottom: 20px;
 }
