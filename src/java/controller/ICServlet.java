@@ -51,6 +51,12 @@ public class ICServlet extends HttpServlet {
 
             // Lấy tất cả báo cáo của tất cả CLB, sắp xếp theo ngày nộp giảm dần
             List<ClubPeriodicReport> allReports = reportDAO.getAllReportsSortedByDate();
+            List<Clubs> requests = clubDAO.getRequestClubs();
+
+            List<Clubs> approvedRequests = clubDAO.getApproveRequestClubs();
+
+            request.setAttribute("requests", requests);
+            
             for (ClubPeriodicReport report : allReports) {
                 int clubId = report.getClubID();
                 String termId = report.getTerm();
@@ -62,6 +68,9 @@ public class ICServlet extends HttpServlet {
                 report.setMemberCount(memberCount);
             }
             List<ClubPeriodicReport> latest3 = allReports.stream().limit(3).toList();
+            List<Clubs> latest3_clubs = requests.stream().limit(3).toList();
+            
+            request.setAttribute("requests", latest3_clubs);
             request.setAttribute("reportList",latest3);
 
             int totalActiveClubs = clubDAO.getTotalActiveClubs();
