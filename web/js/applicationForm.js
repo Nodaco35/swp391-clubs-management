@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Xác minh biểu mẫu trước khi gửi
     const form = document.getElementById('applicationForm');
     if (form) {
-        console.log('ApplicationForm: Đã tìm thấy biểu mẫu, thiết lập xử lý gửi');
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             validateForm();
@@ -21,7 +20,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Thêm kiểu dáng xác nhận cho trường bắt buộc
     setupRequiredFields();
     
-    console.log('ApplicationForm: Khởi tạo hoàn tất');
+    // Thiết lập bộ đếm ký tự cho trường text và textarea
+    setupCharacterCounter();
+    
 });
 
 /**
@@ -39,8 +40,6 @@ function setupFileInputPreviews() {
             
             if (this.files && this.files[0]) {
                 const file = this.files[0];
-                console.log(`Debug: File đã chọn - ${file.name}, loại: ${file.type}, kích thước: ${file.size} bytes`);
-
                 // Kiểm tra xem đó có phải là tệp hình ảnh không
                 if (file.type.match('image.*')) {
                     const img = document.createElement('img');
@@ -67,9 +66,6 @@ function setupFileInputPreviews() {
 function setupRequiredFields() {
     // Thêm đánh dấu trường bắt buộc
     const requiredInputs = document.querySelectorAll('[required]');
-    console.log(`Debug: Đã tìm thấy ${requiredInputs.length} trường bắt buộc`);
-
-    // Clear any existing error messages on page load
     document.querySelectorAll('.error-message').forEach(msg => msg.remove());
 
     requiredInputs.forEach(input => {
@@ -173,7 +169,6 @@ function setupCheckboxGroupValidation() {
                 }
             });
             
-            console.log(`Debug: Nhóm checkbox '${this.name}' - có tùy chọn được chọn: ${isAnyChecked}`);
         });
     });
     
@@ -191,14 +186,12 @@ function setupCheckboxGroupValidation() {
         }
     });
     
-    console.log(`Debug: Đã thiết lập xác thực cho ${Object.keys(checkboxGroups).length} nhóm checkbox bắt buộc`);
 }
 
 /**
  * Kiểm tra hợp lệ biểu mẫu trước khi gửi
  */
 function validateForm() {
-    console.log('Debug: Đang xác minh biểu mẫu...');
     const form = document.getElementById('applicationForm');
     if (!form) return;
     
@@ -248,7 +241,6 @@ function validateForm() {
             const container = input.closest('.file-input-container') || input.parentElement;
             container.appendChild(errorMsg);
             allFilesValid = false;
-            console.log(`Debug: Lỗi trường tệp bắt buộc '${input.name}'`);
         }
     });
     
@@ -276,7 +268,6 @@ function validateForm() {
                 errorMsg.textContent = 'Vui lòng chọn một tùy chọn';
                 radioContainer.appendChild(errorMsg);
                 allFilesValid = false;
-                console.log(`Debug: Lỗi trường radio bắt buộc '${groupName}'`);
             }
         }
     });      // Xác minh cho các nhóm checkbox cần ít nhất một lựa chọn khi nhóm đó là required
@@ -344,7 +335,6 @@ function validateForm() {
                 }
                 
                 allFilesValid = false;
-                console.log(`Debug: Lỗi nhóm checkbox bắt buộc '${groupName}' - cần chọn ít nhất một tùy chọn`);
             }
         }
     });
@@ -352,12 +342,10 @@ function validateForm() {
     // Kiểm tra xác minh HTML5
     if (!form.checkValidity() || !allFilesValid) {
         form.reportValidity();
-        console.log('Debug: Biểu mẫu không hợp lệ, không được gửi');
         return;
     }
     
     // Nếu tất cả kiểm tra đều thành công, gửi biểu mẫu
-    console.log('Debug: Biểu mẫu đã qua xác minh, bắt đầu gửi dữ liệu');
     submitApplication();
 }
 
@@ -370,7 +358,6 @@ function submitApplication() {
     let hasFileInputs = false;
     let pendingFileUploads = 0;
 
-    console.log('Debug: Đang thu thập dữ liệu từ biểu mẫu...');
 
     // Kiểm tra loại form
     const formType = document.querySelector('input[name="formType"]')?.value || 
@@ -395,7 +382,6 @@ function submitApplication() {
         
         // Bỏ qua câu hỏi chọn ban nếu đây là form sự kiện
         if (isEventForm && isSelectDepartment) {
-            console.log(`Debug: Bỏ qua câu hỏi chọn ban '${key}' vì đây là form sự kiện`);
             return;
         }
 
@@ -413,7 +399,6 @@ function submitApplication() {
                 // Thêm giá trị đã chọn
                 if (el.checked) {
                     data[key].values.push(el.value);
-                    console.log(`Debug: Checkbox '${key}' đã chọn giá trị: ${el.value}`);
                 }
                 break;
 
@@ -425,7 +410,6 @@ function submitApplication() {
                         value: el.value,
                         fieldId: key
                     };
-                    console.log(`Debug: Radio '${key}' đã chọn: ${el.value}`);
                 }
                 break;
 
@@ -435,7 +419,6 @@ function submitApplication() {
                 if (file) {
                     pendingFileUploads++;
                     hasFileInputs = true;
-                    console.log(`Debug: Đang đọc tệp '${file.name}' cho trường '${key}'`);
                     const reader = new FileReader();
                     reader.onload = () => {
                         data[key] = {
@@ -444,10 +427,8 @@ function submitApplication() {
                             fileType: file.type,
                             content: reader.result
                         };
-                        console.log(`Debug: Đã đọc tệp cho trường '${key}', kích thước dữ liệu Base64: ${reader.result.length}`);
                         pendingFileUploads--;
                         // Sau khi đọc tệp, kiểm tra xem tất cả các tệp đã được xử lý chưa
-                        console.log(`Debug: Còn ${pendingFileUploads} tệp đang chờ xử lý`);
                         if (pendingFileUploads === 0) {
                             finalizeFormSubmission(form, data);
                         }
@@ -475,15 +456,13 @@ function submitApplication() {
                     if (minDate) dateObj.constraints.minDate = minDate;
                     if (maxDate) dateObj.constraints.maxDate = maxDate;
                     
-                    // Store the structured date object
                     data[key] = dateObj;
-                    console.log(`Debug: Trường ngày '${key}', giá trị: ${el.value}, min: ${minDate || 'không có'}, max: ${maxDate || 'không có'}`);
+                
                 }
                 break;
 
             default:
                 data[key] = el.value;
-                console.log(`Debug: Trường '${key}', loại: ${el.type}, giá trị: ${el.value}`);
                 break;
         }
     });
@@ -500,7 +479,6 @@ function submitApplication() {
                     values: [],
                     fieldId: key
                 };
-                console.log(`Debug: Nhóm checkbox '${key}' không có tùy chọn nào được chọn`);
             }
         }
     });
@@ -513,8 +491,6 @@ function submitApplication() {
         
         const key = hiddenInput.name.substring(4); // Bỏ tiền tố 'ans_'
         
-        // Ghi log nhưng không lưu trữ dữ liệu info field
-        console.log(`Debug: Bỏ qua trường thông tin chỉ đọc ${key}`);
         
         // Đảm bảo trường info không được thêm vào data
         if (data[key]) {
@@ -522,8 +498,6 @@ function submitApplication() {
         }
     });
 
-    // In toàn bộ dữ liệu thu được để debug
-    console.log('Debug: Tổng quan dữ liệu thu thập được:', Object.keys(data).map(key => `${key}: ${data[key] instanceof Array ? `[${data[key].join(', ')}]` : (typeof data[key] === 'string' ? (data[key].length > 100 ? `${data[key].substring(0, 100)}... (${data[key].length} ký tự)` : data[key]) : typeof data[key])}`));
 
     // Nếu không có đầu vào tệp cần xử lý không đồng bộ, gửi ngay
     if (!hasFileInputs) {
@@ -539,7 +513,38 @@ function finalizeFormSubmission(form, data) {
     console.log('Debug: Đang hoàn thiện gửi biểu mẫu...');
     const jsonData = JSON.stringify(data);
     document.getElementById('responsesJson').value = jsonData;
-    console.log(`Debug: Dữ liệu JSON đã sẵn sàng, kích thước: ${jsonData.length} ký tự`);
-    console.log('Debug: Đang gửi biểu mẫu...');
     form.submit();
+}
+
+/**
+ * Thiết lập bộ đếm ký tự cho các trường văn bản và văn bản nhiều dòng
+ */
+function setupCharacterCounter() {
+    // Lấy tất cả các trường input và textarea có bộ đếm ký tự
+    const textInputs = document.querySelectorAll('input[type="text"][maxlength], textarea[maxlength]');
+    
+    // Thêm sự kiện lắng nghe cho mỗi trường
+    textInputs.forEach(input => {
+        const counterId = 'counter_' + input.id.split('_')[1];
+        const counter = document.getElementById(counterId);
+        const maxLength = input.getAttribute('maxlength');
+        
+        // Cập nhật bộ đếm ban đầu
+        if (counter) {
+            counter.textContent = '0/' + maxLength;
+            
+            // Thêm sự kiện input để cập nhật bộ đếm khi người dùng nhập liệu
+            input.addEventListener('input', function() {
+                const currentLength = this.value.length;
+                counter.textContent = currentLength + '/' + maxLength;
+                
+                // Hiển thị cảnh báo nếu gần đạt đến giới hạn
+                if (currentLength > maxLength * 0.9) {
+                    counter.classList.add('char-counter-warning');
+                } else {
+                    counter.classList.remove('char-counter-warning');
+                }
+            });
+        }
+    });
 }

@@ -171,7 +171,7 @@ public class FormBuilderServlet extends HttpServlet {
                     errorRedirectPath += "&formId=" + editingFormIdStr;
                 }
                 
-                errorRedirectPath += "&message=" + URLEncoder.encode("Lỗi khi lưu form: " + ex.getMessage(), StandardCharsets.UTF_8.name());
+                errorRedirectPath += "&message=" + URLEncoder.encode("Lỗi khi lưu form", StandardCharsets.UTF_8.name());
                 
                 response.sendRedirect(errorRedirectPath);
             }

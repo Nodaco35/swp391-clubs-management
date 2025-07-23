@@ -72,7 +72,6 @@ public class FormManagementServlet extends HttpServlet {
                 return;
             }
 
-            // Kiểm tra quyền truy cập trong club cụ thể (chỉ cho roleId 1-3)
             UserClub userClub = userClubDAO.getUserClubManagementRole(userId, clubId);
             LOGGER.log(Level.INFO, "Kiểm tra quyền truy cập cho user {0} trong club {1}: {2}", 
                       new Object[]{userId, clubId, userClub != null ? "Có quyền" : "Không có quyền"});

@@ -3,6 +3,7 @@ let questionTemplateHtml;
 document.addEventListener("DOMContentLoaded", () => {
   let questionCount = 0;
   const MAX_QUESTIONS = 20;
+  const MAX_TITLE_LENGTH = 20;
   let activeTab = "edit";
 
   const formTitleInput = document.getElementById("formTitle");
@@ -95,7 +96,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Check if updatePreview is defined
     window.updatePreview();
   }
-
   if (
     saveSuccessAlert &&
     new URLSearchParams(window.location.search).has("success")
@@ -141,12 +141,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  if (formTitleInput)
-    formTitleInput.addEventListener("input", () => {
-      if (previewTitle)
-        previewTitle.textContent = formTitleInput.value || "Đơn đăng ký";
-    });
-  if (formTypeSelect) {
+    if (formTitleInput) {
+        formTitleInput.addEventListener("input", () => {
+            if (formTitleInput.value.length > MAX_TITLE_LENGTH) {
+                formTitleInput.value = formTitleInput.value.substring(0, MAX_TITLE_LENGTH);
+                alert("Tiêu đề form không được vượt quá " + MAX_TITLE_LENGTH + " kí tự");
+            }
+            if (previewTitle) {
+                previewTitle.textContent = formTitleInput.value || "Đơn đăng ký";
+            };
+        });
+    }
+    if (formTypeSelect) {
     formTypeSelect.addEventListener("change", function () {
       const type = this.value;
       if (
@@ -272,7 +278,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function submitForm(actionType) {
-    console.log("formBuilder.js: Bắt đầu submitForm, actionType:", actionType);
     if (
       !formBuilderForm ||
       !formTitleInput ||
@@ -286,18 +291,19 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     if (formTitleInput.value.trim() === "") {
-      alert("Tiêu đề form không được để trống!");
-      formTitleInput.focus();
-      return;
-    }
-    const formTypeVal = formTypeSelect.value;
-    if (formTypeVal === "") {
-      const formTypeError = document.getElementById("formTypeError");
-      if (formTypeError) formTypeError.style.display = "block";
-      alert("Vui lòng chọn loại form!");
-      formTypeSelect.focus();
-      return;
-    } else {
+            alert("Tiêu đề form không được để trống!");
+            formTitleInput.focus();
+            return;
+        }
+        const formTypeVal = formTypeSelect.value;
+        if (formTypeVal === "") {
+            const formTypeError = document.getElementById("formTypeError");
+            if (formTypeError)
+                formTypeError.style.display = "block";
+            alert("Vui lòng chọn loại form!");
+            formTypeSelect.focus();
+            return;
+        } else {
       const formTypeError = document.getElementById("formTypeError");
       if (formTypeError) formTypeError.style.display = "none";
     }

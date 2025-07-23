@@ -63,7 +63,7 @@ public class ApplicationFormServlet extends HttpServlet {
             ApplicationForm rep = applicationFormDAO.findFormByIdAndPublished(repFormId, 1);
             if (rep == null || !rep.isPublished()) {
                 // Chuyển hướng về trang chủ với thông báo lỗi
-                response.sendRedirect(request.getContextPath() + "/home?error=form_not_found&message="
+                response.sendRedirect(request.getContextPath() + "/?error=form_not_found&message="
                         + URLEncoder.encode("Không tìm thấy biểu mẫu hoặc biểu mẫu chưa được xuất bản", StandardCharsets.UTF_8.name()));
                 return;
             }
@@ -76,7 +76,7 @@ public class ApplicationFormServlet extends HttpServlet {
             List<ApplicationFormTemplate> formQuestions = formTemplateDAO.getTemplatesByFormId(rep.getFormId());
             if (formQuestions.isEmpty()) {
                 // Chuyển hướng về trang chủ với thông báo lỗi
-                response.sendRedirect(request.getContextPath() + "/home?error=form_not_found&message="
+                response.sendRedirect(request.getContextPath() + "/?error=form_not_found&message="
                         + URLEncoder.encode("Biểu mẫu không có câu hỏi nào", StandardCharsets.UTF_8.name()));
                 return;
             }
@@ -117,7 +117,7 @@ public class ApplicationFormServlet extends HttpServlet {
         // Lấy formId từ form data
         String formIdStr = request.getParameter("formId");
         if (formIdStr == null || formIdStr.isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/home?error=form_not_found&message="
+            response.sendRedirect(request.getContextPath() + "/?error=form_not_found&message="
                     + URLEncoder.encode("Mã biểu mẫu không hợp lệ", StandardCharsets.UTF_8.name()));
             return;
         }
@@ -128,7 +128,7 @@ public class ApplicationFormServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             LOGGER.log(Level.WARNING, "Invalid form ID format: {0}", formIdStr);
             LOGGER.log(Level.WARNING, "NumberFormatException details:", e);
-            response.sendRedirect(request.getContextPath() + "/home?error=form_not_found&message="
+            response.sendRedirect(request.getContextPath() + "/?error=form_not_found&message="
                     + URLEncoder.encode("Mã biểu mẫu không hợp lệ, phải là một số", StandardCharsets.UTF_8.name()));
             return;
         }
@@ -192,7 +192,7 @@ public class ApplicationFormServlet extends HttpServlet {
                             responsesJson.append("\"").append(fieldName).append("\":\"\",");
                         }
                     } else if ("Info".equalsIgnoreCase(fieldType)) {
-                        continue; // Chuyển sang câu hỏi tiếp theo
+                        continue;
                     } else {
                         // Xử lý các loại trường thông thường khác
                         String value = request.getParameter(fieldName);
