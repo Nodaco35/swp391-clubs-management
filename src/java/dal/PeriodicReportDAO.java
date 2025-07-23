@@ -4,8 +4,12 @@ import models.PeriodicReport;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import models.ActivedMemberClubs;
+import models.ClubEvent;
+import models.EventScheduleDetail;
 import models.PeriodicReportEvents;
 import models.PeriodicReport_MemberAchievements;
+import models.Semesters;
 
 public class PeriodicReportDAO extends DBContext {
 
@@ -152,11 +156,11 @@ public class PeriodicReportDAO extends DBContext {
         return list;
     }
 
-    public String getTermNameByReportID(int reportID) {
+    public String getTermIDByReportID(int reportID) {
         String termName = null;
 
         String sql = """
-        SELECT s.TermName
+        SELECT s.TermID
         FROM PeriodicClubReport p
         JOIN Semesters s ON p.Term = s.TermID
         WHERE p.ReportID = ?
@@ -167,7 +171,7 @@ public class PeriodicReportDAO extends DBContext {
             ps.setInt(1, reportID);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    termName = rs.getString("TermName");
+                    termName = rs.getString("TermID");
                 }
             }
         } catch (Exception e) {
@@ -176,5 +180,243 @@ public class PeriodicReportDAO extends DBContext {
 
         return termName;
     }
+
+    public String getActiveTermID() {
+        String termName = null;
+
+        String sql = """
+        SELECT TermID FROM Semesters where Status = 'ACTIVE';
+    """;
+
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    termName = rs.getString("TermID");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return termName;
+    }
+
+    public Semesters getCurrentTerm() {
+        String sql = "SELECT * FROM Semesters WHERE Status = 'ACTIVE'";
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return new Semesters(
+                        rs.getString("TermID"),
+                        rs.getString("TermName"),
+                        rs.getDate("StartDate"),
+                        rs.getDate("EndDate"),
+                        rs.getString("Status")
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public List<ActivedMemberClubs> getActiveMembersForReport(String termID, int clubID) {
+        List<ActivedMemberClubs> list = new ArrayList<>();
+        String sql = """
+        SELECT a.ActiveID, a.UserID, u.FullName, u.UserID, a.ProgressPoint, r.RoleName, d.DepartmentName
+                FROM ActivedMemberClubs a
+                JOIN Users u ON a.UserID = u.UserID
+                join userclubs uc on u.UserID = uc.UserID
+                join clubdepartments cd on uc.ClubDepartmentID = cd.ClubDepartmentID
+                join departments d on d.DepartmentID = cd.DepartmentID
+                join roles r on r.RoleID = uc.RoleID
+                WHERE a.ClubID = ? AND a.TermID = ? AND a.IsActive = TRUE
+                order by RoleName desc, d.DepartmentName asc;
+    """;
+
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, clubID);
+            ps.setString(2, termID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                ActivedMemberClubs am = new ActivedMemberClubs();
+                am.setActiveID(rs.getInt("ActiveID"));
+                am.setUserID(rs.getString("UserID"));
+                am.setFullName(rs.getString("FullName"));
+                am.setStudentCode(rs.getString("UserID"));
+                am.setProgressPoint(rs.getInt("ProgressPoint"));
+                am.setRole(rs.getString("RoleName"));
+                am.setDepartment(rs.getString("DepartmentName"));
+                list.add(am);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public int getClubIdByChairmanId(String chairmanId) {
+        Integer clubId = null;
+        String sql = "SELECT ClubID FROM UserClubs WHERE UserID = ? AND RoleID = 1";
+
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, chairmanId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                clubId = rs.getInt("ClubID");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return clubId;
+    }
+
+    public List<ClubEvent> getPublicEventsWithSchedules(String semesterId, int clubID) {
+        List<ClubEvent> events = new ArrayList<>();
+        String eventQuery = """
+        SELECT e.EventID, e.EventName, COUNT(ep.UserID) AS ParticipantCount
+        FROM Events e
+        LEFT JOIN EventParticipants ep ON e.EventID = ep.EventID 
+        WHERE e.SemesterID = ? AND e.IsPublic = 1 AND e.Status = 'COMPLETED' and e.ClubID = ?
+        GROUP BY e.EventID, e.EventName
+    """;
+
+        String scheduleQuery = """
+        SELECT EventID, EventDate, StartTime, EndTime, l.LocationName
+        FROM EventSchedules es
+        JOIN Locations l ON es.LocationID = l.LocationID
+        WHERE EventID = ?
+        ORDER BY EventDate, StartTime
+    """;
+
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(eventQuery)) {
+
+            ps.setString(1, semesterId);
+            ps.setInt(2, clubID);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                ClubEvent event = new ClubEvent();
+                event.setEventID(rs.getInt("EventID"));
+                event.setEventName(rs.getString("EventName"));
+                event.setParticipantCount(rs.getInt("ParticipantCount"));
+
+                // Lấy danh sách lịch
+                try (PreparedStatement psSchedule = conn.prepareStatement(scheduleQuery)) {
+                    psSchedule.setInt(1, event.getEventID());
+                    ResultSet rsSchedule = psSchedule.executeQuery();
+                    List<EventScheduleDetail> scheduleList = new ArrayList<>();
+
+                    while (rsSchedule.next()) {
+                        EventScheduleDetail detail = new EventScheduleDetail();
+                        detail.setEventDate(rsSchedule.getDate("EventDate"));
+                        detail.setStartTime(rsSchedule.getString("StartTime"));
+                        detail.setEndTime(rsSchedule.getString("EndTime"));
+                        detail.setLocationName(rsSchedule.getString("LocationName"));
+                        scheduleList.add(detail);
+                    }
+                    event.setScheduleList(scheduleList);
+                }
+
+                events.add(event);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return events;
+    }
+
+    public void updateProgressPoint(String userId, int clubId, String termId, int point) {
+        String sql = "UPDATE ActivedMemberClubs SET ProgressPoint = ? "
+                + "WHERE UserID = ? AND ClubID = ? AND TermID = ?";
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, point);
+            ps.setString(2, userId);
+            ps.setInt(3, clubId);
+            ps.setString(4, termId);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public int insertClubReport(int clubID, String termID) {
+        int generatedID = -1;
+        String sql = "INSERT INTO PeriodicClubReport (ClubID, Term) VALUES (?, ?)";
+
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            ps.setInt(1, clubID);
+            ps.setString(2, termID);
+            ps.executeUpdate();
+
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    generatedID = rs.getInt(1); // Lấy ReportID vừa tạo
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return generatedID;
+    }
+
+    public Integer getReportIdByClubAndTerm(int clubId, String termId) {
+        String sql = "SELECT ReportID FROM PeriodicClubReport WHERE ClubID = ? AND Term = ?";
+
+        try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, clubId);
+            stmt.setString(2, termId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("ReportID");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return -1; // Không tìm thấy hoặc lỗi
+    }
+
+    public boolean updateProgressPointFromReport(String userID, String termID, int point) {
+        String sql = "UPDATE ActivedMemberClubs "
+                + "SET ProgressPoint = ? "
+                + "WHERE UserID = ? AND TermID = ?";
+        try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, point);
+            stmt.setString(2, userID);
+            stmt.setString(3, termID);
+            return stmt.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    public boolean updateReportLastUpdatedByClubAndTerm(int clubID, String termID) {
+    String sql = "UPDATE PeriodicClubReport SET LastUpdated = CURRENT_DATE WHERE ClubID = ? AND Term = ?";
+    try (Connection conn = DBContext.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, clubID);
+        ps.setString(2, termID);
+        int rows = ps.executeUpdate();
+        return rows > 0;
+    } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+
 
 }

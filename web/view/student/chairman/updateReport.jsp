@@ -153,7 +153,7 @@
     </div>
 
     <form method="get" action="${pageContext.request.contextPath}/chairman-page/reports?action=submitReport">
-        <!-- Báo cáo thành viên (Xem chi tiết) -->
+        <!-- Báo cáo thành viên -->
         <div class="mb-5">
             <h5 class="mb-3">Báo cáo thành viên</h5>
             <div class="table-responsive">
@@ -165,22 +165,42 @@
                             <th>Vai trò</th>
                             <th>Ban</th>
                             <th>Điểm rèn luyện</th>
+                            <th>Hành động</th> <!-- Thêm cột nút Lưu -->
                         </tr>
                     </thead>
                     <tbody>
-                        <c:forEach var="m" items="${members}">
+                        <c:forEach var="m" items="${members}" varStatus="i">
                             <tr>
-                                <td>${m.fullName}</td>
-                                <td>${m.studentCode}</td>
-                                <td>${m.role}</td>
-                                <td>${m.department}</td>
-                                <td>${m.progressPoint}</td>
-                            </tr>
-                        </c:forEach>
+                        <form action="${pageContext.request.contextPath}/chairman-page/reports" method="get">
+                            <input type="hidden" name="action" value="updatePointFromReport" />
+                            <input type="hidden" name="userID" value="${m.userID}" />
+                            <input type="hidden" name="termID" value="${semesterID}" />
+                            <td>${m.fullName}</td>
+                            <td>${m.studentCode}</td>
+                            <td>${m.role}</td>
+                            <td>${m.department}</td>
+                            <td>
+                                <input type="number"
+                                       name="points"
+                                       min="0"
+                                       max="100"
+                                       pattern="[0-9]*"
+                                       class="form-control"
+                                       value="${m.progressPoint}" required>
+                            </td>
+                            <td>
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    <i class="fas fa-check"></i> Lưu
+                                </button>
+                            </td>
+                        </form>
+                        </tr>
+                    </c:forEach>
                     </tbody>
                 </table>
             </div>
         </div>
+
 
         <!-- Báo cáo sự kiện -->
         <div>
@@ -230,11 +250,16 @@
 
         </div>
 
-        <!-- Nút quay lại -->
-        <div style="margin-bottom: 30px">
-            <a href="${pageContext.request.contextPath}/chairman-page/reports" class="btn btn-secondary">
+        <!-- Nút hành động -->
+        <div class="mt-4 mb-5">
+            <a href="${pageContext.request.contextPath}/chairman-page/reports" class="btn btn-secondary me-2">
                 <i class="fas fa-arrow-left me-1"></i> Quay lại
             </a>
+
+            <a href="${pageContext.request.contextPath}/chairman-page/reports?action=resubmitReport" 
+               class="btn btn-success"><i class="fas fa-paper-plane me-1"></i> Nộp lại báo cáo
+            </a>
+
         </div>
     </form>
 </div>

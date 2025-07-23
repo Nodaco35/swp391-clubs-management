@@ -195,16 +195,34 @@
                                         <i class="fas fa-eye me-1"></i>Xem chi tiết
                                     </a>
                                 </div>
+                                    <c:if test="${report.reportID == reportNowID}">
+                                    <div class="d-flex justify-content-end">
+                                        <a href="${pageContext.request.contextPath}/chairman-page/reports?action=fixDetailReport" 
+                                           class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-wrench me-1"></i>Sửa
+                                        </a>
+                                    </div>
+                                </c:if>
                             </div>
                         </div>
                     </div>
                 </c:forEach>
             </div>
-            <div style="margin-bottom: 30px">
-                <a href="${pageContext.request.contextPath}/chairman-page/reports?action=createReports" class="btn btn-success">
-                    <i class="fas fa-file-text"></i> Tạo báo cáo
-                </a>
-            </div>
+            <c:if test="${!createReportNow}">
+                <div style="margin-bottom: 30px">
+                    <a href="${pageContext.request.contextPath}/chairman-page/reports?action=createReports" class="btn btn-success">
+                        <i class="fas fa-file-text"></i> Tạo báo cáo kỳ ${termNow}
+                    </a>
+                </div>
+            </c:if>
+            <c:if test="${createReportNow}">
+                <div style="margin-bottom: 30px">
+                    <h6 style="color: green">Đã nộp báo cáo</h6>
+                    <a href="${pageContext.request.contextPath}/chairman-page/reports?action=viewDetail&reportId=${reportNowID}" class="btn btn-primary">
+                        <i class="fas fa-file-text"></i> Xem báo cáo đã nộp
+                    </a>
+                </div>
+            </c:if>
         </div>
     </body>
 </html>
