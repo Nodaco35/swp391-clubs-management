@@ -128,12 +128,11 @@ public class DF_IncomeController extends HttpServlet {
                     }
 
                     formattedStartedTime = dueDateStr.replace("T", " ") + ":00"; // ← Dòng này cần được chạy!
-                    
-                    int memberCount = dashboardDAO.getClubMemberCount(clubID);
-                    BigDecimal minimumAmount = BigDecimal.valueOf(memberCount * 10000);
-                    
+
+                    BigDecimal minimumAmount = BigDecimal.valueOf(10000);
+
                     if (amount.compareTo(minimumAmount) < 0) {
-                        request.setAttribute("error", "Số tiền phí thành viên phải lớn hơn hoặc bằng " + minimumAmount + " (" + memberCount + " x 10)");
+                        request.setAttribute("error", "Số tiền không hợp lệ! ít nhất là" + minimumAmount);
                         doGet(request, response);
                         return;
                     }
@@ -141,19 +140,14 @@ public class DF_IncomeController extends HttpServlet {
                 } else {
                     status = request.getParameter("status");
                 }
-                BigDecimal minimumAmount = BigDecimal.valueOf(100000);
-
-                if (amount.compareTo(minimumAmount) < 0) {
-                    request.setAttribute("error", "Số tiền không hợp lệ! ít nhất là" + minimumAmount);
-                    doGet(request, response);
-                    return;
-                }
+                int memberCount = dashboardDAO.getClubMemberCount(clubID);
+                BigDecimal minimumAmount = BigDecimal.valueOf(memberCount * amount.intValue());
 
                 Income income = new Income();
                 income.setClubID(clubID);
                 income.setTermID(term.getTermID());
                 income.setSource(source);
-                income.setAmount(amount);
+                income.setAmount(minimumAmount);
                 income.setDescription(description != null ? description.trim() : "");
                 income.setStatus(status);
 
