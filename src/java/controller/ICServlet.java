@@ -19,11 +19,15 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.stream.Collectors;
+import models.ActivedMemberClubs;
 import models.ClubApprovalHistory;
 import models.ClubCreationPermissions;
+import models.ClubEvent;
 import models.ClubPeriodicReport;
 import models.Clubs;
 import models.CreatedClubApplications;
+import models.EventScheduleDetail;
+import models.Semesters;
 
 public class ICServlet extends HttpServlet {
 
@@ -56,27 +60,25 @@ public class ICServlet extends HttpServlet {
             List<Clubs> approvedRequests = clubDAO.getApproveRequestClubs();
 
             request.setAttribute("requests", requests);
-            
+
             for (ClubPeriodicReport report : allReports) {
                 int clubId = report.getClubID();
                 String termId = report.getTerm();
 
                 int memberCount = reportDAO.countMembersByClubAndTerm(clubId, termId);
                 int eventCount = reportDAO.countEventsByClubAndTerm(clubId, termId);
-                
-                
+
                 report.setMemberCount(memberCount);
             }
             List<ClubPeriodicReport> latest3 = allReports.stream().limit(3).toList();
             List<Clubs> latest3_clubs = requests.stream().limit(3).toList();
-            
+
             request.setAttribute("requests", latest3_clubs);
-            request.setAttribute("reportList",latest3);
+            request.setAttribute("reportList", latest3);
 
             int totalActiveClubs = clubDAO.getTotalActiveClubs();
 
             request.setAttribute("totalActiveClubs", totalActiveClubs);
-
 
             request.getRequestDispatcher("/view/ic/dashboard.jsp").forward(request, response);
         } else if (action.equals("grantPermission")) {
@@ -173,13 +175,55 @@ public class ICServlet extends HttpServlet {
 
                 int memberCount = reportDAO.countMembersByClubAndTerm(clubId, termId);
                 int eventCount = reportDAO.countEventsByClubAndTerm(clubId, termId);
-                
+
                 report.setEventCount(eventCount);
                 report.setMemberCount(memberCount);
             }
             // Truyền sang JSP
             request.setAttribute("reportList", allReports);
             request.getRequestDispatcher("view/ic/report-overview.jsp").forward(request, response);
+
+        } else if ("showReport".equals(action)) {
+            PeriodicReportDAO reportDAO = new PeriodicReportDAO();
+            int reportID = Integer.parseInt(request.getParameter("id"));
+
+            String termID = reportDAO.getTermIDByReportID(reportID);
+            PeriodicReportDAO pr = new PeriodicReportDAO();
+            int clubID = reportDAO.getclubIDByReportID(reportID);
+
+            ClubPeriodicReport report = reportDAO.getReportById(reportID);
+            request.setAttribute("report", report);
+            Clubs club = new ClubDAO().getClubById(clubID);
+            request.setAttribute("club", club);
+
+            // Lấy kỳ đang ACTIVE
+            Semesters currentTerm = pr.getCurrentTerm();
+            if (currentTerm == null) {
+                PrintWriter out = response.getWriter();
+                out.print("Semester Error");
+                return;
+            }
+
+            // Lấy danh sách thành viên hoạt động trong kỳ và CLB này
+            List<ActivedMemberClubs> members = pr.getActiveMembersForReport(termID, clubID);
+
+            List<ClubEvent> events = pr.getPublicEventsWithSchedules(termID, clubID);
+
+            request.setAttribute("publicEvents", events);
+
+            // Gửi dữ liệu sang JSP
+            request.setAttribute("semesterID", termID);
+            request.setAttribute("members", members);
+            PrintWriter out = response.getWriter();
+
+            for (ClubEvent event : events) {
+                out.print(event.getEventName() + " - ");
+                for (EventScheduleDetail s : event.getScheduleList()) {
+                    out.print(s.getLocationName() + " + " + s.getEventDate());
+                }
+            }
+
+            request.getRequestDispatcher("/view/ic/reportDetail.jsp").forward(request, response);
 
         }
     }
