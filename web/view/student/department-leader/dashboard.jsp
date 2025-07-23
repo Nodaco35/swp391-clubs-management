@@ -55,6 +55,12 @@
                             <span>Quản lý cuộc họp</span>
                         </a>
                     </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/department-plan-events?clubID=${clubID}" class="menu-link">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>Xem kế hoạch & sự kiện</span>
+                        </a>
+                    </li>
 
                     <c:if test="${isAccess}">
                         <li class="menu-item">
