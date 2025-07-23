@@ -45,132 +45,14 @@
                     </div>
                 </c:if>
 
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-title">Báo cáo chưa đọc</div>
-                            <div class="stat-icon yellow">
-                                <i class="fas fa-clock"></i>
-                            </div>
-                        </div>
-                        <div class="stat-value">${pendingReports}</div>
-                        <div class="stat-description">Cần xem xét trong tuần này</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-title">Báo cáo đã đọc</div>
-                            <div class="stat-icon green">
-                                <i class="fas fa-check-circle"></i>
-                            </div>
-                        </div>
-                        <div class="stat-value">${approvedReports}</div>
-                        <div class="stat-description">Trong học kỳ này</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-title">CLB quá hạn</div>
-                            <div class="stat-icon red">
-                                <i class="fas fa-exclamation-triangle"></i>
-                            </div>
-                        </div>
-                        <div class="stat-value">${overdueClubs}</div>
-                        <div class="stat-description">Chưa nộp báo cáo</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-title">Tổng số CLB</div>
-                            <div class="stat-icon blue">
-                                <i class="fas fa-users"></i>
-                            </div>
-                        </div>
-                        <div class="stat-value">${totalActiveClubs}</div>
-                        <div class="stat-description">Đang hoạt động</div>
-                    </div>
-                    <!-- Card cho quản lý đơn xin quyền -->
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-title">Đơn xin quyền tạo CLB</div>
-                            <div class="stat-icon purple">
-                                <i class="fas fa-file-alt"></i>
-                            </div>
-                        </div>
-                        <div class="stat-value">
-                            <a href="${pageContext.request.contextPath}/ic?action=grantPermission">${pendingRequests != null ? fn:length(pendingRequests) : 0}</a>
-                        </div>
-                        <div class="stat-description">Đơn đang chờ duyệt</div>
-                    </div>
-                </div>
-
                 <div class="card">
                     <div class="card-header">
-                        <h2 class="card-title">Danh sách báo cáo hàng kỳ</h2>
-                        <div class="card-actions">
-                            <button class="btn btn-outline">
-                                <i class="fas fa-download"></i> Xuất báo cáo
-                            </button>
-                            <button class="btn btn-primary">
-                                <i class="fas fa-plus"></i> Tạo nhắc nhở
-                            </button>
-                        </div>
+                        <h2 class="card-title">Danh sách báo cáo</h2>
                     </div>
-                    <div class="reports-grid" id="reportsGrid">
-                        <div class="filters" style="padding: 5px 20px">
-                            <div class="filter-group">
-                                <label class="filter-label">Trạng thái</label>
-                                <select class="filter-select" onchange="filterReports(this.value)">
-                                    <option value="all">Tất cả</option>
-                                    <option value="pending">Chưa xem</option>
-                                    <option value="approved">Đã xem</option>
-                                </select>
-                            </div>
-                        </div>
-                        <!-- PENDING -->
-                        <c:forEach items="${pendingReportsList}" var="report">
-                            <div class="report-card" data-status="pending">
-                                <div class="report-header">
-                                    <div class="report-meta">
-                                        <div>
-                                            <div class="report-title">${report.term}</div>
-                                            <div class="report-club">${report.clubName}</div>
-                                            <div class="report-date">Nộp ngày: ${report.submissionDate}</div>
-                                        </div>
-                                        <div class="report-status">
-                                            <span class="badge badge-pending"><i class="fas fa-clock"></i> Chờ duyệt</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="report-body">
-                                    <div class="report-summary">
-                                        <h4>Tóm tắt báo cáo</h4>
-                                        <p>${report.overview}</p>
-                                    </div>
-                                    <div class="report-metrics">
-                                        <div class="metric">
-                                            <div class="metric-value">${report.memberCount}</div>
-                                            <div class="metric-label">Thành viên</div>
-                                        </div>
-                                        <div class="metric">
-                                            <div class="metric-value">${report.eventCount}</div>
-                                            <div class="metric-label">Sự kiện</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="report-footer">
-                                    <div class="report-actions">
-                                        <a class="btn btn-outline btn-sm" href="ic?action=showReport&id=${report.reportId}">
-                                            <i class="fas fa-eye"></i> Xem chi tiết
-                                        </a>
-                                        <a class="btn btn-success btn-sm" href="ic?action=markAsRead&id=${report.reportId}">
-                                            <i class="fas fa-check"></i> Đánh dấu là đã đọc
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </c:forEach>
 
-                        <!-- APPROVED: Đã đọc -->
-                        <c:forEach items="${approvedReportsList}" var="report">
-                            <div class="report-card" data-status="approved">
+                    <div class="reports-grid" id="reportsGrid">
+                        <c:forEach items="${reportList}" var="report">
+                            <div class="report-card">
                                 <div class="report-header">
                                     <div class="report-meta">
                                         <div>
@@ -178,16 +60,10 @@
                                             <div class="report-club">${report.clubName}</div>
                                             <div class="report-date">Nộp ngày: ${report.submissionDate}</div>
                                         </div>
-                                        <div class="report-status">
-                                            <span class="badge badge-approved"><i class="fas fa-check"></i> Đã xem</span>
-                                        </div>
                                     </div>
                                 </div>
+
                                 <div class="report-body">
-                                    <div class="report-summary">
-                                        <h4>Tóm tắt báo cáo</h4>
-                                        <p>${report.overview}</p>
-                                    </div>
                                     <div class="report-metrics">
                                         <div class="metric">
                                             <div class="metric-value">${report.memberCount}</div>
@@ -199,17 +75,23 @@
                                         </div>
                                     </div>
                                 </div>
+
                                 <div class="report-footer">
                                     <div class="report-actions">
-                                        <a class="btn btn-outline btn-sm" href="ic?action=showReport&id=${report.reportId}">
+                                        <a class="btn btn-outline btn-sm" href="ic?action=showReport&id=${report.reportID}">
                                             <i class="fas fa-eye"></i> Xem chi tiết
                                         </a>
                                     </div>
-                                </div>          
+                                </div>
                             </div>
                         </c:forEach>
+                        <div class="text-center mt-3">
+                            <a href="ic?action=periodicReport" class="btn btn-primary">Xem tất cả báo cáo</a>
+                        </div>
+
                     </div>
                 </div>
+
             </main>
         </div>
 

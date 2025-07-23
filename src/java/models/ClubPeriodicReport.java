@@ -10,8 +10,27 @@ public class ClubPeriodicReport {
     private String clubName; //clubName
     private String term;
     private Date submissionDate;
+    
+    private int memberCount;
+    private int eventCount;
 
     public ClubPeriodicReport() {
+    }
+
+    public int getMemberCount() {
+        return memberCount;
+    }
+
+    public void setMemberCount(int memberCount) {
+        this.memberCount = memberCount;
+    }
+
+    public int getEventCount() {
+        return eventCount;
+    }
+
+    public void setEventCount(int eventCount) {
+        this.eventCount = eventCount;
     }
 
     public int getReportID() {
