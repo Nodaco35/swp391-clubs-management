@@ -1072,4 +1072,125 @@ public class UserClubDAO {
     }
     return null;
 }
+
+/**
+ * Lấy UserClub của user theo Role cụ thể
+ */
+public UserClub getUserClubByUserIdAndRole(String userID, String roleName) {
+    Connection conn = null;
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+    
+    try {
+        conn = DBContext.getConnection();
+        String query = """
+            SELECT uc.UserClubID, uc.UserID, uc.ClubID, uc.ClubDepartmentID, uc.RoleID, 
+                   uc.JoinDate, uc.IsActive, r.RoleName, d.DepartmentName
+            FROM UserClubs uc
+            JOIN Roles r ON uc.RoleID = r.RoleID
+            JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
+            JOIN Departments d ON cd.DepartmentID = d.DepartmentID
+            WHERE uc.UserID = ? AND r.RoleName = ? AND uc.IsActive = 1
+            LIMIT 1
+        """;
+        
+        stmt = conn.prepareStatement(query);
+        stmt.setString(1, userID);
+        stmt.setString(2, roleName);
+        rs = stmt.executeQuery();
+        
+        if (rs.next()) {
+            UserClub userClub = new UserClub();
+            userClub.setUserClubID(rs.getInt("UserClubID"));
+            userClub.setUserID(rs.getString("UserID"));
+            userClub.setClubID(rs.getInt("ClubID"));
+            userClub.setClubDepartmentID(rs.getInt("ClubDepartmentID"));
+            userClub.setRoleID(rs.getInt("RoleID"));
+            userClub.setJoinDate(rs.getDate("JoinDate"));
+            userClub.setIsActive(rs.getBoolean("IsActive"));
+            userClub.setRoleName(rs.getString("RoleName"));
+            userClub.setDepartmentName(rs.getString("DepartmentName"));
+            return userClub;
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    } finally {
+        try {
+            if (rs != null) rs.close();
+            if (stmt != null) stmt.close();
+            if (conn != null) conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    return null;
+}
+
+/**
+ * Lấy danh sách Users trong department theo role
+ */
+public List<Users> getUsersByDepartmentAndRole(int clubDepartmentID, String roleName) {
+    List<Users> users = new ArrayList<>();
+    Connection conn = null;
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+    
+    try {
+        conn = DBContext.getConnection();
+        String query;
+        
+        if (roleName == null || roleName.trim().isEmpty()) {
+            // Get all users in department regardless of role
+            query = """
+                SELECT DISTINCT u.UserID, u.FullName, u.Email
+                FROM Users u
+                JOIN UserClubs uc ON u.UserID = uc.UserID
+                WHERE uc.ClubDepartmentID = ? AND uc.IsActive = 1
+                ORDER BY u.FullName
+            """;
+            stmt = conn.prepareStatement(query);
+            stmt.setInt(1, clubDepartmentID);
+        } else {
+            // Get users by specific role
+            query = """
+                SELECT DISTINCT u.UserID, u.FullName, u.Email
+                FROM Users u
+                JOIN UserClubs uc ON u.UserID = uc.UserID
+                JOIN Roles r ON uc.RoleID = r.RoleID
+                WHERE uc.ClubDepartmentID = ? AND r.RoleName = ? AND uc.IsActive = 1
+                ORDER BY u.FullName
+            """;
+            stmt = conn.prepareStatement(query);
+            stmt.setInt(1, clubDepartmentID);
+            stmt.setString(2, roleName);
+        }
+        
+        rs = stmt.executeQuery();
+        
+        while (rs.next()) {
+            Users user = new Users();
+            user.setUserID(rs.getString("UserID"));
+            user.setFullName(rs.getString("FullName"));
+            user.setEmail(rs.getString("Email"));
+            // Set default avatar if column doesn't exist
+            user.setAvatar("Hinh-anh-dai-dien-mac-dinh-Facebook.jpg");
+            users.add(user);
+        }
+        
+        System.out.println("DEBUG DAO: Found " + users.size() + " users for clubDepartmentID=" + clubDepartmentID + ", roleName='" + roleName + "'");
+        
+    } catch (SQLException e) {
+        System.err.println("Error in getUsersByDepartmentAndRole: " + e.getMessage());
+        e.printStackTrace();
+    } finally {
+        try {
+            if (rs != null) rs.close();
+            if (stmt != null) stmt.close();
+            if (conn != null) conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    return users;
+}
 }

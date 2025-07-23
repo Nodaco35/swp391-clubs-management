@@ -12,6 +12,8 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <!-- Font Awesome -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <!-- Select2 CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
         <!-- Custom CSS -->
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/department-leader.css">
         <style>
@@ -41,6 +43,60 @@
             .card-header .badge {
                 font-size: 0.7em;
             }
+            .select2-container .select2-selection--single {
+                height: 38px;
+                border: 1px solid #ced4da;
+                border-radius: 0.375rem;
+            }
+            .select2-container--default .select2-selection--single .select2-selection__rendered {
+                line-height: 36px;
+                padding-left: 12px;
+            }
+            .select2-container--default .select2-selection--single .select2-selection__arrow {
+                height: 36px;
+            }
+            .member-item {
+                display: flex;
+                align-items: center;
+                padding: 8px 0;
+            }
+            .member-avatar {
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                margin-right: 10px;
+                object-fit: cover;
+            }
+            
+            /* Autocomplete dropdown styling */
+            #memberDropdown {
+                border: 1px solid #ced4da;
+                border-radius: 0.375rem;
+                box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+                background: white;
+            }
+            
+            #memberDropdown .dropdown-item {
+                padding: 8px 12px;
+                border-bottom: 1px solid #f8f9fa;
+            }
+            
+            #memberDropdown .dropdown-item:hover {
+                background-color: #f8f9fa;
+            }
+            
+            #memberDropdown .dropdown-item:last-child {
+                border-bottom: none;
+            }
+            
+            #selectedMemberDisplay {
+                animation: fadeIn 0.3s ease-in-out;
+            }
+            
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(-5px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
         </style>
     </head>
     <body>
@@ -66,7 +122,7 @@
                     </div>
                     <div class="header-right">
                         <button class="btn btn-primary" onclick="showCreateTaskModal()">
-                            <i class="fas fa-plus"></i> Tạo công việc mới
+                            <i class="fas fa-plus"></i> Tạo nhiệm vụ mới
                         </button>
                     </div>
                 </header>
@@ -321,67 +377,83 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Tạo công việc mới</h5>
+                        <h5 class="modal-title">
+                            <i class="fas fa-tasks me-2"></i>Tạo nhiệm vụ mới
+                        </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <form id="createTaskForm">
                         <div class="modal-body">
-                            <input type="hidden" name="clubID" value="${clubID}">
-                            <input type="hidden" name="createdBy" value="${currentUser.userID}">
+                            <input type="hidden" name="action" value="createTask">
+                            <input type="hidden" name="clubID" value="${param.clubID}">
+                            <input type="hidden" name="assigneeType" value="User">
                             
                             <div class="row">
                                 <div class="col-md-12 mb-3">
-                                    <label for="taskTitle" class="form-label">Tên công việc <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="taskTitle" name="title" required>
+                                    <label for="taskTitle" class="form-label">Tiêu đề nhiệm vụ <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="taskTitle" name="title" required maxlength="200" 
+                                           placeholder="Nhập tiêu đề nhiệm vụ...">
                                 </div>
                                 
                                 <div class="col-md-12 mb-3">
-                                    <label for="taskDescription" class="form-label">Mô tả công việc</label>
-                                    <textarea class="form-control" id="taskDescription" name="description" rows="3"></textarea>
+                                    <label for="taskDescription" class="form-label">Mô tả nhiệm vụ <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" id="taskDescription" name="description" rows="4" required 
+                                              maxlength="1000" placeholder="Mô tả chi tiết nhiệm vụ cần thực hiện..."></textarea>
+                                    <div class="form-text">Tối đa 1000 ký tự</div>
                                 </div>
                                 
                                 <div class="col-md-6 mb-3">
-                                    <label for="assigneeType" class="form-label">Giao việc cho <span class="text-danger">*</span></label>
-                                    <select class="form-select" id="assigneeType" name="assigneeType" required onchange="toggleAssigneeFields()">
-                                        <option value="">Chọn...</option>
-                                        <option value="Department">Ban</option>
-                                        <option value="User">Cá nhân</option>
-                                    </select>
+                                    <label for="startDate" class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="startDate" name="startDate" required>
                                 </div>
                                 
-                                <div class="col-md-6 mb-3" id="departmentField" style="display: none;">
-                                    <label for="departmentID" class="form-label">Chọn ban</label>
-                                    <select class="form-select" id="departmentID" name="departmentID">
-                                        <option value="">Chọn ban...</option>
-                                        <c:forEach var="dept" items="${clubDepartments}">
-                                            <option value="${dept.departmentID}">${dept.departmentName}</option>
+                                <div class="col-md-6 mb-3">
+                                    <label for="endDate" class="form-label">Ngày kết thúc <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="endDate" name="endDate" required>
+                                </div>
+
+                                <div class="col-md-12 mb-3">
+                                    <label for="eventId" class="form-label">Sự kiện liên quan <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="eventId" name="eventId" required>
+                                        <option value="">-- Chọn sự kiện --</option>
+                                        <c:forEach var="event" items="${clubEvents}">
+                                            <option value="${event.eventID}">${event.eventName}</option>
                                         </c:forEach>
                                     </select>
+                                    <div class="form-text">Chọn sự kiện mà nhiệm vụ này thuộc về</div>
                                 </div>
                                 
-                                <div class="col-md-6 mb-3" id="userField" style="display: none;">
-                                    <label for="userID" class="form-label">Chọn thành viên</label>
-                                    <select class="form-select" id="userID" name="userID">
-                                        <option value="">Chọn thành viên...</option>
-                                        <!-- This will be populated via AJAX based on selected department -->
-                                    </select>
-                                </div>
-                                
-                                <div class="col-md-6 mb-3">
-                                    <label for="startDate" class="form-label">Ngày bắt đầu</label>
-                                    <input type="datetime-local" class="form-control" id="startDate" name="startDate">
-                                </div>
-                                
-                                <div class="col-md-6 mb-3">
-                                    <label for="endDate" class="form-label">Ngày kết thúc</label>
-                                    <input type="datetime-local" class="form-control" id="endDate" name="endDate">
+                                <div class="col-md-12 mb-3">
+                                    <label for="assignedTo" class="form-label">Người phụ trách <span class="text-danger">*</span></label>
+                                    <div class="position-relative">
+                                        <input type="text" class="form-control" id="memberSearchInput" 
+                                               placeholder="Tìm kiếm thành viên theo tên hoặc email..."
+                                               autocomplete="off" required>
+                                        <input type="hidden" id="assignedTo" name="assigneeId" required>
+                                        <div id="memberDropdown" class="dropdown-menu position-absolute w-100" style="display: none; max-height: 250px; overflow-y: auto; z-index: 1050;">
+                                            <!-- Search results will appear here -->
+                                        </div>
+                                        <div id="selectedMemberDisplay" class="mt-2 p-2 border rounded bg-light" style="display: none;">
+                                            <div class="d-flex align-items-center">
+                                                <img id="selectedAvatar" src="" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                                                <div class="flex-grow-1">
+                                                    <div class="fw-semibold" id="selectedName"></div>
+                                                    <small class="text-muted" id="selectedEmail"></small>
+                                                </div>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearSelectedMember()">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-text">Tìm kiếm và chọn thành viên trong ban để giao nhiệm vụ</div>
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Tạo công việc
+                                <i class="fas fa-save"></i> Tạo nhiệm vụ
                             </button>
                         </div>
                     </form>
@@ -406,128 +478,246 @@
 
         <!-- Bootstrap JS -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <!-- Select2 JS -->
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         
         <script>
+            $(document).ready(function() {
+                // Debug: Check if members are available
+                console.log('Initializing Select2...');
+                var memberOptions = $('.member-select option').length;
+                console.log('Found ' + memberOptions + ' member options');
+                
+                // Khởi tạo Select2 cho dropdown thành viên
+                $('.member-select').select2({
+                    placeholder: "Tìm kiếm thành viên...",
+                    allowClear: true,
+                    dropdownParent: $('#createTaskModal'),
+                    templateResult: function (member) {
+                        if (!member.id) {
+                            return member.text;
+                        }
+                        
+                        var avatar = $(member.element).data('avatar');
+                        var email = $(member.element).data('email');
+                        
+                        var $member = $(
+                            '<div class="member-item">' +
+                                '<img class="member-avatar" src="' + (avatar || 'img/Hinh-anh-dai-dien-mac-dinh-Facebook.jpg') + '" alt="Avatar">' +
+                                '<div>' +
+                                    '<div style="font-weight: 500;">' + member.text.split(' (')[0] + '</div>' +
+                                    '<div style="font-size: 0.85em; color: #6c757d;">' + email + '</div>' +
+                                '</div>' +
+                            '</div>'
+                        );
+                        return $member;
+                    },
+                    templateSelection: function (member) {
+                        if (!member.id) {
+                            return member.text;
+                        }
+                        return member.text.split(' (')[0];
+                    }
+                });
+
+                // Set ngày tối thiểu là hôm nay
+                var today = new Date().toISOString().split('T')[0];
+                $('#startDate').attr('min', today);
+                
+                $('#startDate').on('change', function() {
+                    $('#endDate').attr('min', this.value);
+                });
+
+                // Validation ngày
+                $('#startDate, #endDate').on('change', function() {
+                    var startDate = new Date($('#startDate').val());
+                    var endDate = new Date($('#endDate').val());
+                    
+                    if (startDate && endDate && endDate < startDate) {
+                        $('#endDate')[0].setCustomValidity('Ngày kết thúc phải sau ngày bắt đầu');
+                    } else {
+                        $('#endDate')[0].setCustomValidity('');
+                    }
+                });
+            });
+
             // Show create task modal
             function showCreateTaskModal() {
+                console.log('Opening modal...');
+                var eventOptions = $('#eventId option').length;
+                console.log('Event options: ' + eventOptions);
+                
+                // Initialize member autocomplete
+                initializeMemberAutocomplete();
+                
+                console.log('Member autocomplete initialized');
                 new bootstrap.Modal(document.getElementById('createTaskModal')).show();
             }
-
-            // Toggle assignee fields based on type
-            function toggleAssigneeFields() {
-                const assigneeType = document.getElementById('assigneeType').value;
-                const departmentField = document.getElementById('departmentField');
-                const userField = document.getElementById('userField');
+            
+            // Initialize member autocomplete functionality
+            function initializeMemberAutocomplete() {
+                const searchInput = $('#memberSearchInput');
+                const dropdown = $('#memberDropdown');
+                const hiddenInput = $('#assignedTo');
+                let searchTimeout;
                 
-                if (assigneeType === 'Department') {
-                    departmentField.style.display = 'block';
-                    userField.style.display = 'none';
-                    document.getElementById('departmentID').required = true;
-                    document.getElementById('userID').required = false;
-                } else if (assigneeType === 'User') {
-                    departmentField.style.display = 'none';
-                    userField.style.display = 'block';
-                    document.getElementById('departmentID').required = false;
-                    document.getElementById('userID').required = true;
-                } else {
-                    departmentField.style.display = 'none';
-                    userField.style.display = 'none';
-                    document.getElementById('departmentID').required = false;
-                    document.getElementById('userID').required = false;
-                }
+                // Clear previous selection
+                clearSelectedMember();
+                
+                searchInput.on('input', function() {
+                    const query = $(this).val().trim();
+                    
+                    clearTimeout(searchTimeout);
+                    
+                    if (query.length < 2) {
+                        dropdown.hide();
+                        return;
+                    }
+                    
+                    // Debounce search
+                    searchTimeout = setTimeout(() => {
+                        searchMembers(query);
+                    }, 300);
+                });
+                
+                // Hide dropdown when clicking outside
+                $(document).on('click', function(e) {
+                    if (!$(e.target).closest('#memberSearchInput, #memberDropdown').length) {
+                        dropdown.hide();
+                    }
+                });
+                
+                // Show dropdown when input is focused and has value
+                searchInput.on('focus', function() {
+                    if ($(this).val().trim().length >= 2 && dropdown.children().length > 0) {
+                        dropdown.show();
+                    }
+                });
             }
-
-            // View task detail
-            function viewTaskDetail(taskId) {
-                fetch('${pageContext.request.contextPath}/task-detail?taskId=' + taskId)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            displayTaskDetail(data.task);
-                            new bootstrap.Modal(document.getElementById('taskDetailModal')).show();
-                        } else {
-                            showNotification(data.message || 'Không tìm thấy thông tin công việc', 'error');
+            
+            // Search members via Ajax
+            function searchMembers(query) {
+                const dropdown = $('#memberDropdown');
+                const clubID = new URLSearchParams(window.location.search).get('clubID');
+                
+                // Show loading
+                dropdown.html('<div class="dropdown-item text-center"><i class="fas fa-spinner fa-spin"></i> Đang tìm kiếm...</div>').show();
+                
+                $.ajax({
+                    url: '${pageContext.request.contextPath}/department-tasks',
+                    method: 'GET',
+                    data: {
+                        action: 'searchMembers',
+                        clubID: clubID,
+                        q: query
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.error) {
+                            dropdown.html('<div class="dropdown-item text-danger"><i class="fas fa-exclamation-triangle"></i> ' + response.error + '</div>');
+                            return;
                         }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showNotification('Có lỗi xảy ra khi tải chi tiết công việc', 'error');
-                    });
+                        
+                        if (response.results && response.results.length > 0) {
+                            let html = '';
+                            response.results.forEach(function(member) {
+                                const avatar = member.avatar ? 
+                                    '${pageContext.request.contextPath}/img/' + member.avatar : 
+                                    '${pageContext.request.contextPath}/img/Hinh-anh-dai-dien-mac-dinh-Facebook.jpg';
+                                
+                                html += '<div class="dropdown-item member-option" style="cursor: pointer;" ' +
+                                        'data-id="' + member.id + '" ' +
+                                        'data-name="' + member.fullName + '" ' +
+                                        'data-email="' + member.email + '" ' +
+                                        'data-avatar="' + avatar + '">' +
+                                        '<div class="d-flex align-items-center">' +
+                                            '<img src="' + avatar + '" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">' +
+                                            '<div>' +
+                                                '<div class="fw-semibold">' + member.fullName + '</div>' +
+                                                '<small class="text-muted">' + member.email + '</small>' +
+                                            '</div>' +
+                                        '</div>' +
+                                    '</div>';
+                            });
+                            dropdown.html(html);
+                            
+                            // Add click handlers for member options
+                            $('.member-option').on('click', function() {
+                                const memberId = $(this).data('id');
+                                const memberName = $(this).data('name');
+                                const memberEmail = $(this).data('email');
+                                const memberAvatar = $(this).data('avatar');
+                                
+                                selectMember(memberId, memberName, memberEmail, memberAvatar);
+                            });
+                        } else {
+                            dropdown.html('<div class="dropdown-item text-muted"><i class="fas fa-search"></i> Không tìm thấy thành viên nào</div>');
+                        }
+                    },
+                    error: function() {
+                        dropdown.html('<div class="dropdown-item text-danger"><i class="fas fa-exclamation-triangle"></i> Lỗi kết nối</div>');
+                    }
+                });
             }
-
-            // Display task detail in modal
-            function displayTaskDetail(task) {
-                const content = document.getElementById('taskDetailContent');
-                content.innerHTML = `
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <h6>Thông tin cơ bản</h6>
-                            <p><strong>Tên công việc:</strong> \${task.title}</p>
-                            <p><strong>Mô tả:</strong> \${task.description || 'Không có mô tả'}</p>
-                            <p><strong>Trạng thái:</strong> 
-                                <span class="badge bg-primary">\${task.status}</span>
-                            </p>
-                        </div>
-                        <div class="col-md-6">
-                            <h6>Thời gian</h6>
-                            <p><strong>Bắt đầu:</strong> \${task.startDate ? new Date(task.startDate).toLocaleString('vi-VN') : 'Chưa xác định'}</p>
-                            <p><strong>Kết thúc:</strong> \${task.endDate ? new Date(task.endDate).toLocaleString('vi-VN') : 'Chưa xác định'}</p>
-                            <p><strong>Ngày tạo:</strong> \${task.createdAt ? new Date(task.createdAt).toLocaleString('vi-VN') : 'N/A'}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <h6>Phân công</h6>
-                            <p><strong>Người tạo:</strong> \${task.createdBy ? task.createdBy.fullName : 'N/A'}</p>
-                            <p><strong>Phụ trách:</strong> 
-                                \${task.assigneeType === 'Department' ? 
-                                    (task.departmentAssignee ? task.departmentAssignee.departmentName : 'Chưa giao') :
-                                    (task.userAssignee ? task.userAssignee.fullName : 'Chưa giao')
-                                }
-                            </p>
-                        </div>
-                    </div>
-                `;
+            
+            // Select a member
+            function selectMember(id, name, email, avatar) {
+                $('#assignedTo').val(id);
+                $('#memberSearchInput').val(name);
+                $('#memberDropdown').hide();
+                
+                // Show selected member display
+                $('#selectedAvatar').attr('src', avatar);
+                $('#selectedName').text(name);
+                $('#selectedEmail').text(email);
+                $('#selectedMemberDisplay').show();
+                $('#memberSearchInput').hide();
             }
-
-            // Edit task
-            function editTask(taskId) {
-                // Implementation for edit task functionality
-                showNotification('Chức năng chỉnh sửa đang được phát triển', 'info');
+            
+            // Clear selected member
+            function clearSelectedMember() {
+                $('#assignedTo').val('');
+                $('#memberSearchInput').val('').show();
+                $('#selectedMemberDisplay').hide();
+                $('#memberDropdown').hide();
             }
 
             // Handle create task form submission
             document.getElementById('createTaskForm').addEventListener('submit', function(e) {
                 e.preventDefault();
                 
-                const formData = new FormData(this);
-                const submitBtn = this.querySelector('button[type="submit"]');
+                // Validation
+                var title = document.getElementById('taskTitle').value.trim();
+                var description = document.getElementById('taskDescription').value.trim();
+                var startDate = document.getElementById('startDate').value;
+                var endDate = document.getElementById('endDate').value;
+                var eventId = document.getElementById('eventId').value;
+                var assignedTo = document.getElementById('assignedTo').value;
+
+                if (!title || !description || !startDate || !endDate || !eventId || !assignedTo) {
+                    showNotification('Vui lòng điền đầy đủ thông tin bắt buộc!', 'error');
+                    return false;
+                }
+
+                if (new Date(endDate) < new Date(startDate)) {
+                    showNotification('Ngày kết thúc phải sau ngày bắt đầu!', 'error');
+                    return false;
+                }
+                
+                // Use traditional form submission instead of fetch
+                const form = this;
+                const submitBtn = form.querySelector('button[type="submit"]');
                 
                 // Show loading
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tạo...';
                 submitBtn.disabled = true;
                 
-                fetch('${pageContext.request.contextPath}/create-task', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showNotification('Tạo công việc thành công!', 'success');
-                        bootstrap.Modal.getInstance(document.getElementById('createTaskModal')).hide();
-                        setTimeout(() => location.reload(), 1500);
-                    } else {
-                        showNotification(data.message || 'Tạo công việc thất bại', 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showNotification('Có lỗi xảy ra khi tạo công việc', 'error');
-                })
-                .finally(() => {
-                    // Reset button
-                    submitBtn.innerHTML = '<i class="fas fa-save"></i> Tạo công việc';
-                    submitBtn.disabled = false;
-                });
+                // Submit form traditionally
+                form.action = '${pageContext.request.contextPath}/department-tasks';
+                form.method = 'POST';
+                form.submit();
             });
 
             // Sorting function

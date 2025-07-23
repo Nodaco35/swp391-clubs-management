@@ -6,13 +6,21 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.*;
 
 public class TaskDAO {
 
     public boolean addTask(Tasks task) {
-        String sql = "INSERT INTO Tasks (TermID, EventID, ClubID, AssigneeType, DepartmentID, DocumentID, Title, Description, Status, StartDate, EndDate, CreatedBy) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql;
+        if ("User".equals(task.getAssigneeType())) {
+            sql = "INSERT INTO Tasks (TermID, EventID, ClubID, AssigneeType, UserID, DocumentID, Title, Description, Status, StartDate, EndDate, CreatedBy) " +
+                  "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        } else {
+            sql = "INSERT INTO Tasks (TermID, EventID, ClubID, AssigneeType, DepartmentID, DocumentID, Title, Description, Status, StartDate, EndDate, CreatedBy) " +
+                  "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        }
+        
         try {
             Connection connection = DBContext.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -20,7 +28,14 @@ public class TaskDAO {
             ps.setInt(2, task.getEvent().getEventID());
             ps.setInt(3, task.getClub().getClubID());
             ps.setString(4, task.getAssigneeType());
-            ps.setInt(5, task.getDepartmentAssignee().getDepartmentID());
+            
+            // Set assignee based on type
+            if ("User".equals(task.getAssigneeType())) {
+                ps.setString(5, task.getUserAssignee().getUserID());
+            } else {
+                ps.setInt(5, task.getDepartmentAssignee().getDepartmentID());
+            }
+            
             if (task.getDocument() != null) {
                 ps.setInt(6, task.getDocument().getDocumentID());
             } else {
@@ -604,5 +619,51 @@ public class TaskDAO {
         }
         
         return taskList;
+    }
+    
+    /**
+     * Tạo task mới cho cá nhân
+     */
+    public boolean createTask(Tasks task) {
+        String sql = """
+            INSERT INTO Tasks (Title, Description, StartDate, EndDate, AssignedTo, AssigneeType, 
+                              CreatedBy, CreatedAt, UpdatedAt, Status, EventID) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """;
+        
+        Connection connection = null;
+        PreparedStatement ps = null;
+        
+        try {
+            connection = DBContext.getConnection();
+            ps = connection.prepareStatement(sql);
+            
+            ps.setString(1, task.getTitle());
+            ps.setString(2, task.getDescription());
+            ps.setDate(3, new java.sql.Date(task.getStartDate().getTime()));
+            ps.setDate(4, new java.sql.Date(task.getEndDate().getTime()));
+            ps.setString(5, task.getUserAssignee().getUserID());
+            ps.setString(6, task.getAssigneeType());
+            ps.setString(7, task.getCreatedBy().getUserID());
+            ps.setTimestamp(8, new Timestamp(task.getCreatedAt().getTime()));
+            ps.setTimestamp(9, new Timestamp(System.currentTimeMillis()));
+            ps.setString(10, task.getStatus());
+            ps.setInt(11, task.getEvent().getEventID());
+            
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+            
+        } catch (SQLException e) {
+            System.err.println("ERROR TaskDAO - Failed to create task: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (ps != null) ps.close();
+                if (connection != null) connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
