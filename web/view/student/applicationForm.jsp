@@ -4,9 +4,9 @@
 <%-- Import các lớp tiện ích --%>
 <%@ page import="util.StringEscapeUtils" %>
 <%@ page import="util.JsonUtils" %>
-<%@ page import="models.ApplicationFormTemplate" %> <%-- Import model ApplicationFormTemplate --%>
-<%@ page import="org.json.JSONArray" %> <%-- Import JSON library --%>
-<%@ page import="org.json.JSONObject" %> <%-- Import JSON library --%>
+<%@ page import="models.ApplicationFormTemplate" %>
+<%@ page import="org.json.JSONArray" %>
+<%@ page import="org.json.JSONObject" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Comparator" %> <%-- Import để sắp xếp câu hỏi theo displayOrder --%>
@@ -18,9 +18,6 @@ List<ApplicationFormTemplate> questions = (List<ApplicationFormTemplate>) reques
 // Đảm bảo câu hỏi đã được sắp xếp theo displayOrder
 questions.sort(Comparator.comparing(ApplicationFormTemplate::getDisplayOrder)
                .thenComparing(ApplicationFormTemplate::getTemplateId));
-
-// Log thông tin để debug
-System.out.println("ApplicationForm.jsp: Đang hiển thị " + questions.size() + " câu hỏi theo displayOrder");
 %>
 
 <!DOCTYPE html>
@@ -141,8 +138,6 @@ System.out.println("ApplicationForm.jsp: Đang hiển thị " + questions.size()
                                             pageContext.removeAttribute("parsedContent");
                                         }
                                     } catch (Exception e) {
-                                        // Nếu có lỗi xử lý JSON, ghi log và xử lý lỗi
-                                        System.out.println("Lỗi xử lý JSON cho trường Info: " + e.getMessage());
                                         pageContext.removeAttribute("parsedContent");
                                         pageContext.removeAttribute("imageData");
                                     } %>
@@ -180,26 +175,88 @@ System.out.println("ApplicationForm.jsp: Đang hiển thị " + questions.size()
                                 <c:choose>
                                     <%-- Trường văn bản (text) --%>
                                     <c:when test="${question.getFieldType() eq 'Text'}">
+                                        <% 
+                                            ApplicationFormTemplate textQuestion = (ApplicationFormTemplate)pageContext.getAttribute("question");
+                                            String textOptions = textQuestion.getOptions();
+                                            String maxLength = "255"; // Giá trị mặc định
+                                            String placeholder = "Nhập câu trả lời của bạn";
+                                            
+                                            if (textOptions != null && textOptions.trim().startsWith("{")) {
+                                                try {
+                                                    JSONObject jsonObj = new JSONObject(textOptions);
+                                                    if (jsonObj.has("maxLength")) {
+                                                        maxLength = jsonObj.getString("maxLength");
+                                                    }
+                                                    if (jsonObj.has("placeholder")) {
+                                                        placeholder = jsonObj.getString("placeholder");
+                                                    } else if (!textOptions.isEmpty()) {
+                                                        placeholder = textOptions;
+                                                    }
+                                                } catch (Exception e) {
+                                                    if (!textOptions.isEmpty()) {
+                                                        placeholder = textOptions;
+                                                    }
+                                                }
+                                            } else if (textOptions != null && !textOptions.isEmpty()) {
+                                                placeholder = textOptions;
+                                            }
+                                            
+                                            pageContext.setAttribute("maxLength", maxLength);
+                                            pageContext.setAttribute("placeholder", placeholder);
+                                        %>
                                         <input 
                                             type="text" 
                                             class="form-input" 
                                             id="ans_${question.getTemplateId()}" 
                                             name="ans_${question.getTemplateId()}"
-                                            placeholder="${not empty question.getOptions() ? question.getOptions() : 'Nhập câu trả lời của bạn'}"
+                                            placeholder="${placeholder}"
+                                            maxlength="${maxLength}"
                                             ${question.isRequired() ? 'required' : ''}
                                         >
+                                        <div class="char-counter" id="counter_${question.getTemplateId()}">0/${maxLength}</div>
                                     </c:when>
                                     
                                     <%-- Trường văn bản nhiều dòng (textarea) --%>
                                     <c:when test="${question.getFieldType() eq 'Textarea'}">
+                                        <% 
+                                            ApplicationFormTemplate textareaQuestion = (ApplicationFormTemplate)pageContext.getAttribute("question");
+                                            String textareaOptions = textareaQuestion.getOptions();
+                                            String textareaMaxLength = "1000"; // Giá trị mặc định
+                                            String textareaPlaceholder = "Nhập câu trả lời của bạn";
+                                            
+                                            if (textareaOptions != null && textareaOptions.trim().startsWith("{")) {
+                                                try {
+                                                    JSONObject jsonObj = new JSONObject(textareaOptions);
+                                                    if (jsonObj.has("maxLength")) {
+                                                        textareaMaxLength = jsonObj.getString("maxLength");
+                                                    }
+                                                    if (jsonObj.has("placeholder")) {
+                                                        textareaPlaceholder = jsonObj.getString("placeholder");
+                                                    } else if (!textareaOptions.isEmpty()) {
+                                                        textareaPlaceholder = textareaOptions;
+                                                    }
+                                                } catch (Exception e) {
+                                                    if (!textareaOptions.isEmpty()) {
+                                                        textareaPlaceholder = textareaOptions;
+                                                    }
+                                                }
+                                            } else if (textareaOptions != null && !textareaOptions.isEmpty()) {
+                                                textareaPlaceholder = textareaOptions;
+                                            }
+                                            
+                                            pageContext.setAttribute("textareaMaxLength", textareaMaxLength);
+                                            pageContext.setAttribute("textareaPlaceholder", textareaPlaceholder);
+                                        %>
                                         <textarea 
                                             class="form-textarea" 
                                             id="ans_${question.getTemplateId()}" 
                                             name="ans_${question.getTemplateId()}"
-                                            placeholder="${not empty question.getOptions() ? question.getOptions() : 'Nhập câu trả lời của bạn'}"
+                                            placeholder="${textareaPlaceholder}"
                                             rows="4"
+                                            maxlength="${textareaMaxLength}"
                                             ${question.isRequired() ? 'required' : ''}
                                         ></textarea>
+                                        <div class="char-counter" id="counter_${question.getTemplateId()}">0/${textareaMaxLength}</div>
                                     </c:when>
                                     
                                     <%-- Trường ngày tháng (date) --%>
@@ -221,7 +278,7 @@ System.out.println("ApplicationForm.jsp: Đang hiển thị " + questions.size()
                                                         maxDate = jsonObj.getString("maxDate");
                                                     }
                                                 } catch (Exception e) {
-                                                    System.out.println("Lỗi xử lý giới hạn ngày tháng: " + e.getMessage());
+                                                    e.printStackTrace();
                                                 }
                                             }
                                             
@@ -249,11 +306,6 @@ System.out.println("ApplicationForm.jsp: Đang hiển thị " + questions.size()
                                                 
                                                 // Sử dụng phương thức tiện ích mới để xử lý tất cả định dạng tùy chọn
                                                 List<String> checkboxOptionsList = JsonUtils.parseFormBuilderOptions(options);
-                                                
-                                                // Debug log
-                                                System.out.println("Debug - Checkbox ID " + q.getTemplateId() + 
-                                                    " - Options raw: " + options);
-                                                System.out.println("Debug - Checkbox options parsed: " + checkboxOptionsList);
                                                 
                                                 pageContext.setAttribute("checkboxOptionsList", checkboxOptionsList);
                                             %>
@@ -328,7 +380,7 @@ System.out.println("ApplicationForm.jsp: Đang hiển thị " + questions.size()
                                                         step = jsonObj.getString("step");
                                                     }
                                                 } catch (Exception e) {
-                                                    System.out.println("Lỗi xử lý giới hạn số: " + e.getMessage());
+                                                    e.printStackTrace();
                                                 }
                                             }
                                             

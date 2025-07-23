@@ -3,7 +3,7 @@
         <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
             <%-- Import lớp tiện ích StringEscapeUtils --%>
                 <%@ page import="util.StringEscapeUtils" %>
-                    <%@ page import="models.ApplicationFormTemplate" %> <%-- Import model ApplicationFormTemplate --%>
+                    <%@ page import="models.ApplicationFormTemplate" %>
                             <!DOCTYPE html>
                             <html lang="vi">
 
@@ -17,9 +17,9 @@
                                     href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap"
                                     rel="stylesheet">
                                 <link rel="stylesheet"
-                                    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-                                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/formBuilder.css">
+                                      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
                                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+                                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/formBuilder.css">
                                 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
                             </head>
 

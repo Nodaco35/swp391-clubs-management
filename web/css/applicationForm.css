@@ -299,6 +299,19 @@ input[type="radio"] {
     font-weight: 500;
 }
 
+/* CSS cho bộ đếm ký tự */
+.char-counter {
+    font-size: 0.8rem;
+    color: #666;
+    text-align: right;
+    margin-top: 2px;
+}
+
+.char-counter-warning {
+    color: #e74c3c;
+    font-weight: bold;
+}
+
 .required-label {
     font-weight: 600;
 }

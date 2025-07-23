@@ -5,11 +5,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   tabButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      // Remove active class from all buttons and contents
       tabButtons.forEach((btn) => btn.classList.remove("active"))
       tabContents.forEach((content) => content.classList.remove("active"))
 
-      // Add active class to clicked button and corresponding content
       button.classList.add("active")
       const tabId = button.getAttribute("data-tab")
       document.getElementById(`${tabId}-tab`).classList.add("active")
@@ -20,7 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     })
   })
-  // Search and filter functionality
   const formTypeFilter = document.getElementById("formTypeFilter")
   
   // Định nghĩa hàm filterForms ngoài event listener để tránh lỗi
@@ -33,7 +30,6 @@ document.addEventListener("DOMContentLoaded", () => {
     
     console.log("Filtering forms by type:", selectedType);
 
-    // Apply or remove filtered class to the form grids
     formsGrids.forEach(grid => {
       if (selectedType) {
         grid.classList.add('filtered')
