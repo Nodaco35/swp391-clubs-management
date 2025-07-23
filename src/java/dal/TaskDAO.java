@@ -12,8 +12,15 @@ import java.util.*;
 public class TaskDAO {
 
     public boolean addTask(Tasks task) {
-        String sql = "INSERT INTO Tasks (TermID, EventID, ClubID, AssigneeType, DepartmentID, DocumentID, Title, Description, Status, StartDate, EndDate, CreatedBy) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql;
+        if ("User".equals(task.getAssigneeType())) {
+            sql = "INSERT INTO Tasks (TermID, EventID, ClubID, AssigneeType, UserID, DocumentID, Title, Description, Status, StartDate, EndDate, CreatedBy) " +
+                  "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        } else {
+            sql = "INSERT INTO Tasks (TermID, EventID, ClubID, AssigneeType, DepartmentID, DocumentID, Title, Description, Status, StartDate, EndDate, CreatedBy) " +
+                  "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        }
+        
         try {
             Connection connection = DBContext.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -21,7 +28,14 @@ public class TaskDAO {
             ps.setInt(2, task.getEvent().getEventID());
             ps.setInt(3, task.getClub().getClubID());
             ps.setString(4, task.getAssigneeType());
-            ps.setInt(5, task.getDepartmentAssignee().getDepartmentID());
+            
+            // Set assignee based on type
+            if ("User".equals(task.getAssigneeType())) {
+                ps.setString(5, task.getUserAssignee().getUserID());
+            } else {
+                ps.setInt(5, task.getDepartmentAssignee().getDepartmentID());
+            }
+            
             if (task.getDocument() != null) {
                 ps.setInt(6, task.getDocument().getDocumentID());
             } else {

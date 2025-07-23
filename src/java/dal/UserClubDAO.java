@@ -1137,18 +1137,34 @@ public List<Users> getUsersByDepartmentAndRole(int clubDepartmentID, String role
     
     try {
         conn = DBContext.getConnection();
-        String query = """
-            SELECT DISTINCT u.UserID, u.FullName, u.Email, u.Avatar
-            FROM Users u
-            JOIN UserClubs uc ON u.UserID = uc.UserID
-            JOIN Roles r ON uc.RoleID = r.RoleID
-            WHERE uc.ClubDepartmentID = ? AND r.RoleName = ? AND uc.IsActive = 1
-            ORDER BY u.FullName
-        """;
+        String query;
         
-        stmt = conn.prepareStatement(query);
-        stmt.setInt(1, clubDepartmentID);
-        stmt.setString(2, roleName);
+        if (roleName == null || roleName.trim().isEmpty()) {
+            // Get all users in department regardless of role
+            query = """
+                SELECT DISTINCT u.UserID, u.FullName, u.Email
+                FROM Users u
+                JOIN UserClubs uc ON u.UserID = uc.UserID
+                WHERE uc.ClubDepartmentID = ? AND uc.IsActive = 1
+                ORDER BY u.FullName
+            """;
+            stmt = conn.prepareStatement(query);
+            stmt.setInt(1, clubDepartmentID);
+        } else {
+            // Get users by specific role
+            query = """
+                SELECT DISTINCT u.UserID, u.FullName, u.Email
+                FROM Users u
+                JOIN UserClubs uc ON u.UserID = uc.UserID
+                JOIN Roles r ON uc.RoleID = r.RoleID
+                WHERE uc.ClubDepartmentID = ? AND r.RoleName = ? AND uc.IsActive = 1
+                ORDER BY u.FullName
+            """;
+            stmt = conn.prepareStatement(query);
+            stmt.setInt(1, clubDepartmentID);
+            stmt.setString(2, roleName);
+        }
+        
         rs = stmt.executeQuery();
         
         while (rs.next()) {
@@ -1156,10 +1172,15 @@ public List<Users> getUsersByDepartmentAndRole(int clubDepartmentID, String role
             user.setUserID(rs.getString("UserID"));
             user.setFullName(rs.getString("FullName"));
             user.setEmail(rs.getString("Email"));
-            user.setAvatar(rs.getString("Avatar"));
+            // Set default avatar if column doesn't exist
+            user.setAvatar("Hinh-anh-dai-dien-mac-dinh-Facebook.jpg");
             users.add(user);
         }
+        
+        System.out.println("DEBUG DAO: Found " + users.size() + " users for clubDepartmentID=" + clubDepartmentID + ", roleName='" + roleName + "'");
+        
     } catch (SQLException e) {
+        System.err.println("Error in getUsersByDepartmentAndRole: " + e.getMessage());
         e.printStackTrace();
     } finally {
         try {

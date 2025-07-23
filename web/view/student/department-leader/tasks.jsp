@@ -67,6 +67,36 @@
                 margin-right: 10px;
                 object-fit: cover;
             }
+            
+            /* Autocomplete dropdown styling */
+            #memberDropdown {
+                border: 1px solid #ced4da;
+                border-radius: 0.375rem;
+                box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+                background: white;
+            }
+            
+            #memberDropdown .dropdown-item {
+                padding: 8px 12px;
+                border-bottom: 1px solid #f8f9fa;
+            }
+            
+            #memberDropdown .dropdown-item:hover {
+                background-color: #f8f9fa;
+            }
+            
+            #memberDropdown .dropdown-item:last-child {
+                border-bottom: none;
+            }
+            
+            #selectedMemberDisplay {
+                animation: fadeIn 0.3s ease-in-out;
+            }
+            
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(-5px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
         </style>
     </head>
     <body>
@@ -92,7 +122,7 @@
                     </div>
                     <div class="header-right">
                         <button class="btn btn-primary" onclick="showCreateTaskModal()">
-                            <i class="fas fa-plus"></i> Tạo công việc mới
+                            <i class="fas fa-plus"></i> Tạo nhiệm vụ mới
                         </button>
                     </div>
                 </header>
@@ -166,29 +196,23 @@
                             Danh sách công việc (${assignedTasks.size()} công việc)
                         </h5>
                         
-                        <!-- Add Task Button -->
-                        <div class="d-flex gap-2 align-items-center">
-                            <button type="button" class="btn btn-primary btn-sm" onclick="showCreateTaskModal()">
-                                <i class="fas fa-plus me-1"></i>Tạo nhiệm vụ
-                            </button>
-                            
-                            <!-- Current filters display -->
-                            <div class="text-end">
-                                <c:if test="${not empty param.search}">
-                                    <span class="badge bg-info me-1">Tìm kiếm: "${param.search}"</span>
-                                </c:if>
-                                <c:if test="${not empty param.status}">
-                                    <span class="badge bg-secondary me-1">Trạng thái: 
-                                        <c:choose>
-                                            <c:when test="${param.status == 'ToDo'}">Chưa bắt đầu</c:when>
-                                            <c:when test="${param.status == 'InProgress'}">Đang thực hiện</c:when>
-                                            <c:when test="${param.status == 'Review'}">Chờ duyệt</c:when>
-                                            <c:when test="${param.status == 'Done'}">Hoàn thành</c:when>
-                                            <c:when test="${param.status == 'Rejected'}">Từ chối</c:when>
-                                            <c:otherwise>${param.status}</c:otherwise>
-                                        </c:choose>
-                                    </span>
-                                </c:if>
+                        <!-- Current filters display -->
+                        <div class="text-end">
+                            <c:if test="${not empty param.search}">
+                                <span class="badge bg-info me-1">Tìm kiếm: "${param.search}"</span>
+                            </c:if>
+                            <c:if test="${not empty param.status}">
+                                <span class="badge bg-secondary me-1">Trạng thái: 
+                                    <c:choose>
+                                        <c:when test="${param.status == 'ToDo'}">Chưa bắt đầu</c:when>
+                                        <c:when test="${param.status == 'InProgress'}">Đang thực hiện</c:when>
+                                        <c:when test="${param.status == 'Review'}">Chờ duyệt</c:when>
+                                        <c:when test="${param.status == 'Done'}">Hoàn thành</c:when>
+                                        <c:when test="${param.status == 'Rejected'}">Từ chối</c:when>
+                                        <c:otherwise>${param.status}</c:otherwise>
+                                    </c:choose>
+                                </span>
+                            </c:if>
                             <c:if test="${not empty param.sortBy}">
                                 <span class="badge bg-success me-1">Sắp xếp: 
                                     <c:choose>
@@ -360,6 +384,8 @@
                     </div>
                     <form id="createTaskForm">
                         <div class="modal-body">
+                            <input type="hidden" name="action" value="createTask">
+                            <input type="hidden" name="clubID" value="${param.clubID}">
                             <input type="hidden" name="assigneeType" value="User">
                             
                             <div class="row">
@@ -399,17 +425,28 @@
                                 
                                 <div class="col-md-12 mb-3">
                                     <label for="assignedTo" class="form-label">Người phụ trách <span class="text-danger">*</span></label>
-                                    <select class="form-select member-select" id="assignedTo" name="assignedTo" required>
-                                        <option value="">-- Tìm kiếm và chọn thành viên --</option>
-                                        <c:forEach var="member" items="${departmentMembers}">
-                                            <option value="${member.userID}" 
-                                                    data-avatar="${member.avatar}"
-                                                    data-email="${member.email}">
-                                                ${member.fullName} (${member.email})
-                                            </option>
-                                        </c:forEach>
-                                    </select>
-                                    <div class="form-text">Chọn thành viên trong ban để giao nhiệm vụ</div>
+                                    <div class="position-relative">
+                                        <input type="text" class="form-control" id="memberSearchInput" 
+                                               placeholder="Tìm kiếm thành viên theo tên hoặc email..."
+                                               autocomplete="off" required>
+                                        <input type="hidden" id="assignedTo" name="assigneeId" required>
+                                        <div id="memberDropdown" class="dropdown-menu position-absolute w-100" style="display: none; max-height: 250px; overflow-y: auto; z-index: 1050;">
+                                            <!-- Search results will appear here -->
+                                        </div>
+                                        <div id="selectedMemberDisplay" class="mt-2 p-2 border rounded bg-light" style="display: none;">
+                                            <div class="d-flex align-items-center">
+                                                <img id="selectedAvatar" src="" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                                                <div class="flex-grow-1">
+                                                    <div class="fw-semibold" id="selectedName"></div>
+                                                    <small class="text-muted" id="selectedEmail"></small>
+                                                </div>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearSelectedMember()">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-text">Tìm kiếm và chọn thành viên trong ban để giao nhiệm vụ</div>
                                 </div>
                             </div>
                         </div>
@@ -510,10 +547,141 @@
             function showCreateTaskModal() {
                 console.log('Opening modal...');
                 var eventOptions = $('#eventId option').length;
-                var memberOptions = $('#assignedTo option').length;
-                console.log('Event options: ' + eventOptions + ', Member options: ' + memberOptions);
+                console.log('Event options: ' + eventOptions);
                 
+                // Initialize member autocomplete
+                initializeMemberAutocomplete();
+                
+                console.log('Member autocomplete initialized');
                 new bootstrap.Modal(document.getElementById('createTaskModal')).show();
+            }
+            
+            // Initialize member autocomplete functionality
+            function initializeMemberAutocomplete() {
+                const searchInput = $('#memberSearchInput');
+                const dropdown = $('#memberDropdown');
+                const hiddenInput = $('#assignedTo');
+                let searchTimeout;
+                
+                // Clear previous selection
+                clearSelectedMember();
+                
+                searchInput.on('input', function() {
+                    const query = $(this).val().trim();
+                    
+                    clearTimeout(searchTimeout);
+                    
+                    if (query.length < 2) {
+                        dropdown.hide();
+                        return;
+                    }
+                    
+                    // Debounce search
+                    searchTimeout = setTimeout(() => {
+                        searchMembers(query);
+                    }, 300);
+                });
+                
+                // Hide dropdown when clicking outside
+                $(document).on('click', function(e) {
+                    if (!$(e.target).closest('#memberSearchInput, #memberDropdown').length) {
+                        dropdown.hide();
+                    }
+                });
+                
+                // Show dropdown when input is focused and has value
+                searchInput.on('focus', function() {
+                    if ($(this).val().trim().length >= 2 && dropdown.children().length > 0) {
+                        dropdown.show();
+                    }
+                });
+            }
+            
+            // Search members via Ajax
+            function searchMembers(query) {
+                const dropdown = $('#memberDropdown');
+                const clubID = new URLSearchParams(window.location.search).get('clubID');
+                
+                // Show loading
+                dropdown.html('<div class="dropdown-item text-center"><i class="fas fa-spinner fa-spin"></i> Đang tìm kiếm...</div>').show();
+                
+                $.ajax({
+                    url: '${pageContext.request.contextPath}/department-tasks',
+                    method: 'GET',
+                    data: {
+                        action: 'searchMembers',
+                        clubID: clubID,
+                        q: query
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.error) {
+                            dropdown.html('<div class="dropdown-item text-danger"><i class="fas fa-exclamation-triangle"></i> ' + response.error + '</div>');
+                            return;
+                        }
+                        
+                        if (response.results && response.results.length > 0) {
+                            let html = '';
+                            response.results.forEach(function(member) {
+                                const avatar = member.avatar ? 
+                                    '${pageContext.request.contextPath}/img/' + member.avatar : 
+                                    '${pageContext.request.contextPath}/img/Hinh-anh-dai-dien-mac-dinh-Facebook.jpg';
+                                
+                                html += '<div class="dropdown-item member-option" style="cursor: pointer;" ' +
+                                        'data-id="' + member.id + '" ' +
+                                        'data-name="' + member.fullName + '" ' +
+                                        'data-email="' + member.email + '" ' +
+                                        'data-avatar="' + avatar + '">' +
+                                        '<div class="d-flex align-items-center">' +
+                                            '<img src="' + avatar + '" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">' +
+                                            '<div>' +
+                                                '<div class="fw-semibold">' + member.fullName + '</div>' +
+                                                '<small class="text-muted">' + member.email + '</small>' +
+                                            '</div>' +
+                                        '</div>' +
+                                    '</div>';
+                            });
+                            dropdown.html(html);
+                            
+                            // Add click handlers for member options
+                            $('.member-option').on('click', function() {
+                                const memberId = $(this).data('id');
+                                const memberName = $(this).data('name');
+                                const memberEmail = $(this).data('email');
+                                const memberAvatar = $(this).data('avatar');
+                                
+                                selectMember(memberId, memberName, memberEmail, memberAvatar);
+                            });
+                        } else {
+                            dropdown.html('<div class="dropdown-item text-muted"><i class="fas fa-search"></i> Không tìm thấy thành viên nào</div>');
+                        }
+                    },
+                    error: function() {
+                        dropdown.html('<div class="dropdown-item text-danger"><i class="fas fa-exclamation-triangle"></i> Lỗi kết nối</div>');
+                    }
+                });
+            }
+            
+            // Select a member
+            function selectMember(id, name, email, avatar) {
+                $('#assignedTo').val(id);
+                $('#memberSearchInput').val(name);
+                $('#memberDropdown').hide();
+                
+                // Show selected member display
+                $('#selectedAvatar').attr('src', avatar);
+                $('#selectedName').text(name);
+                $('#selectedEmail').text(email);
+                $('#selectedMemberDisplay').show();
+                $('#memberSearchInput').hide();
+            }
+            
+            // Clear selected member
+            function clearSelectedMember() {
+                $('#assignedTo').val('');
+                $('#memberSearchInput').val('').show();
+                $('#selectedMemberDisplay').hide();
+                $('#memberDropdown').hide();
             }
 
             // Handle create task form submission
@@ -538,40 +706,18 @@
                     return false;
                 }
                 
-                const formData = new FormData(this);
-                const submitBtn = this.querySelector('button[type="submit"]');
+                // Use traditional form submission instead of fetch
+                const form = this;
+                const submitBtn = form.querySelector('button[type="submit"]');
                 
                 // Show loading
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tạo...';
                 submitBtn.disabled = true;
                 
-                fetch('${pageContext.request.contextPath}/create-task', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.text())
-                .then(data => {
-                    // Check if response is redirect (success)
-                    if (data.includes('success=') || data.includes('department-tasks')) {
-                        showNotification('Tạo nhiệm vụ thành công!', 'success');
-                        bootstrap.Modal.getInstance(document.getElementById('createTaskModal')).hide();
-                        setTimeout(() => location.reload(), 1500);
-                    } else {
-                        // Try to parse error from response
-                        var errorMatch = data.match(/error=([^&]*)/);
-                        var errorMsg = errorMatch ? decodeURIComponent(errorMatch[1]) : 'Tạo nhiệm vụ thất bại';
-                        showNotification(errorMsg, 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showNotification('Có lỗi xảy ra khi tạo nhiệm vụ', 'error');
-                })
-                .finally(() => {
-                    // Reset button
-                    submitBtn.innerHTML = '<i class="fas fa-save"></i> Tạo nhiệm vụ';
-                    submitBtn.disabled = false;
-                });
+                // Submit form traditionally
+                form.action = '${pageContext.request.contextPath}/department-tasks';
+                form.method = 'POST';
+                form.submit();
             });
 
             // Sorting function

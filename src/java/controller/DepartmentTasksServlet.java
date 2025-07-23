@@ -6,17 +6,24 @@ import dal.DepartmentDAO;
 import dal.DepartmentDashboardDAO;
 import dal.UserClubDAO;
 import dal.EventsDAO;
+import dal.ClubDAO;
 import models.Tasks;
 import models.Users;
 import models.Department;
 import models.Events;
+import models.Clubs;
+import models.EventTerms;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
 
 public class DepartmentTasksServlet extends HttpServlet {
     
@@ -46,6 +53,16 @@ public class DepartmentTasksServlet extends HttpServlet {
         
         if (currentUser == null) {
             response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+        
+        // Check if this is an AJAX request for member search
+        String action = request.getParameter("action");
+        System.out.println("DEBUG GET: action=" + action + ", requestURI=" + request.getRequestURI());
+        
+        if ("searchMembers".equals(action)) {
+            System.out.println("DEBUG GET: Calling handleMemberSearch");
+            handleMemberSearch(request, response, currentUser);
             return;
         }
         
@@ -182,7 +199,7 @@ public class DepartmentTasksServlet extends HttpServlet {
             List<Department> clubDepartments = departmentDAO.getDepartmentsByClubID(clubID);
             
             // Get department members for modal (get current user's department members)
-            List<Users> departmentMembers = userClubDAO.getUsersByDepartmentAndRole(clubDepartmentId, "Member");
+            List<Users> departmentMembers = userClubDAO.getUsersByDepartmentAndRole(clubDepartmentId, "Thành viên");
             System.out.println("DEBUG: Found " + departmentMembers.size() + " department members for clubDepartmentId: " + clubDepartmentId);
             
             // Get club events for modal
@@ -207,6 +224,355 @@ public class DepartmentTasksServlet extends HttpServlet {
             e.printStackTrace();
             request.setAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
             request.getRequestDispatcher("/view/error.jsp").forward(request, response);
+        }
+    }
+    
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        
+        System.out.println("DEBUG POST: Request received - Method: " + request.getMethod());
+        System.out.println("DEBUG POST: Request URI: " + request.getRequestURI());
+        System.out.println("DEBUG POST: Query String: " + request.getQueryString());
+        
+        // Debug all parameters
+        System.out.println("DEBUG POST: All parameters:");
+        request.getParameterMap().forEach((key, values) -> {
+            System.out.println("  " + key + " = " + String.join(", ", values));
+        });
+
+        HttpSession session = request.getSession();
+        Users currentUser = (Users) session.getAttribute("user");
+        
+        if (currentUser == null) {
+            System.err.println("ERROR POST: No user in session");
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+        
+        String action = request.getParameter("action");
+        System.out.println("DEBUG POST: action parameter = " + action);
+        
+        if ("createTask".equals(action)) {
+            handleCreateTask(request, response, currentUser);
+        } else {
+            System.err.println("ERROR POST: Invalid or missing action parameter: " + action);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
+        }
+    }    /**
+     * Handle task creation
+     */
+    private void handleCreateTask(HttpServletRequest request, HttpServletResponse response, Users currentUser)
+            throws ServletException, IOException {
+        
+        HttpSession session = request.getSession();
+        
+        try {
+            // Get parameters
+            String clubIDParam = request.getParameter("clubID");
+            String title = request.getParameter("title");
+            String description = request.getParameter("description");
+            String assigneeType = request.getParameter("assigneeType");
+            String assigneeId = request.getParameter("assigneeId");
+            String eventIdParam = request.getParameter("eventId");
+            String startDateStr = request.getParameter("startDate");
+            String endDateStr = request.getParameter("endDate");
+            
+            // Validate required fields
+            if (clubIDParam == null || clubIDParam.trim().isEmpty()) {
+                System.err.println("ERROR CREATE: Missing clubID parameter");
+                session.setAttribute("error", "Thiếu thông tin câu lạc bộ.");
+                response.sendRedirect(request.getContextPath() + "/department-tasks");
+                return;
+            }
+            
+            if (title == null || title.trim().isEmpty()) {
+                System.err.println("ERROR CREATE: Missing title parameter");
+                session.setAttribute("error", "Vui lòng nhập tiêu đề nhiệm vụ.");
+                response.sendRedirect(request.getContextPath() + "/department-tasks?clubID=" + clubIDParam);
+                return;
+            }
+            
+            if (assigneeType == null || assigneeId == null || assigneeId.trim().isEmpty()) {
+                System.err.println("ERROR CREATE: Missing assignee parameters - type: " + assigneeType + ", id: " + assigneeId);
+                session.setAttribute("error", "Vui lòng chọn người phụ trách.");
+                response.sendRedirect(request.getContextPath() + "/department-tasks?clubID=" + clubIDParam);
+                return;
+            }
+            
+            if (eventIdParam == null || eventIdParam.trim().isEmpty()) {
+                System.err.println("ERROR CREATE: Missing eventId parameter");
+                session.setAttribute("error", "Vui lòng chọn sự kiện liên quan.");
+                response.sendRedirect(request.getContextPath() + "/department-tasks?clubID=" + clubIDParam);
+                return;
+            }
+            
+            int clubID = Integer.parseInt(clubIDParam);
+            
+            // Check if user is department leader
+            if (!departmentDashboardDAO.isDepartmentLeader(currentUser.getUserID())) {
+                session.setAttribute("error", "Bạn không có quyền tạo nhiệm vụ.");
+                response.sendRedirect(request.getContextPath() + "/department-tasks?clubID=" + clubID);
+                return;
+            }
+            
+            // Get department leader's department ID
+            int clubDepartmentId = departmentDashboardDAO.findClubDepartmentId(clubID, currentUser.getUserID());
+            if (clubDepartmentId == 0) {
+                session.setAttribute("error", "Không tìm thấy thông tin ban của bạn.");
+                response.sendRedirect(request.getContextPath() + "/department-tasks?clubID=" + clubID);
+                return;
+            }
+            
+            // Create Tasks object
+            Tasks task = new Tasks();
+            task.setTitle(title.trim());
+            task.setDescription(description != null ? description.trim() : "");
+            task.setStatus("ToDo");
+            task.setCreatedBy(currentUser);
+            
+            // Set Club - REQUIRED field
+            ClubDAO clubDAO = new ClubDAO();
+            Clubs club = clubDAO.getClubById(clubID);
+            if (club == null) {
+                session.setAttribute("error", "Không tìm thấy câu lạc bộ.");
+                response.sendRedirect(request.getContextPath() + "/department-tasks?clubID=" + clubID);
+                return;
+            }
+            task.setClub(club);
+            
+            // Set Event - REQUIRED field from form
+            int eventId = Integer.parseInt(eventIdParam);
+            Events event = eventsDAO.getEventByID(eventId);
+            if (event == null) {
+                session.setAttribute("error", "Không tìm thấy sự kiện được chọn.");
+                response.sendRedirect(request.getContextPath() + "/department-tasks?clubID=" + clubID);
+                return;
+            }
+            task.setEvent(event);
+            
+            // Set Term - get first available term for this event
+            List<EventTerms> eventTerms = taskDAO.getTermsByEventID(eventId);
+            if (eventTerms.isEmpty()) {
+                session.setAttribute("error", "Sự kiện này chưa có giai đoạn nào được định nghĩa.");
+                response.sendRedirect(request.getContextPath() + "/department-tasks?clubID=" + clubID);
+                return;
+            }
+            // Use first term (usually "Trước sự kiện")
+            task.setTerm(eventTerms.get(0));
+            
+            // Set assignee based on type
+            if ("User".equals(assigneeType)) {
+                task.setAssigneeType("User");
+                // Get user object for assignee
+                Users assigneeUser = UserDAO.getUserById(assigneeId);
+                if (assigneeUser != null) {
+                    task.setUserAssignee(assigneeUser);
+                    System.out.println("DEBUG: Assigned task to user: " + assigneeUser.getUserID());
+                } else {
+                    session.setAttribute("error", "Không tìm thấy thành viên được chọn.");
+                    response.sendRedirect(request.getContextPath() + "/department-tasks?clubID=" + clubID);
+                    return;
+                }
+            } else if ("Department".equals(assigneeType)) {
+                task.setAssigneeType("Department");
+                // Get department object
+                Department dept = departmentDAO.getDepartmentByID(Integer.parseInt(assigneeId));
+                if (dept != null) {
+                    task.setDepartmentAssignee(dept);
+                    System.out.println("DEBUG: Assigned task to department: " + dept.getDepartmentID());
+                } else {
+                    session.setAttribute("error", "Không tìm thấy ban được chọn.");
+                    response.sendRedirect(request.getContextPath() + "/department-tasks?clubID=" + clubID);
+                    return;
+                }
+            }
+            
+            // Set dates
+            if (startDateStr != null && !startDateStr.trim().isEmpty()) {
+                try {
+                    java.sql.Date startDate = java.sql.Date.valueOf(startDateStr);
+                    task.setStartDate(startDate);
+                } catch (IllegalArgumentException e) {
+                    session.setAttribute("error", "Ngày bắt đầu không hợp lệ.");
+                    response.sendRedirect(request.getContextPath() + "/department-tasks?clubID=" + clubID);
+                    return;
+                }
+            }
+            
+            if (endDateStr != null && !endDateStr.trim().isEmpty()) {
+                try {
+                    java.sql.Date endDate = java.sql.Date.valueOf(endDateStr);
+                    task.setEndDate(endDate);
+                } catch (IllegalArgumentException e) {
+                    session.setAttribute("error", "Ngày kết thúc không hợp lệ.");
+                    response.sendRedirect(request.getContextPath() + "/department-tasks?clubID=" + clubID);
+                    return;
+                }
+            }
+            
+            // Validate dates
+            if (task.getStartDate() != null && task.getEndDate() != null && 
+                task.getStartDate().after(task.getEndDate())) {
+                session.setAttribute("error", "Ngày bắt đầu không thể sau ngày kết thúc.");
+                response.sendRedirect(request.getContextPath() + "/department-tasks?clubID=" + clubID);
+                return;
+            }
+            
+            // Set timestamps
+            java.util.Date now = new java.util.Date();
+            task.setCreatedAt(now);
+            
+            // Create task
+            boolean success = taskDAO.addTask(task);
+            
+            if (success) {
+                session.setAttribute("success", "Tạo nhiệm vụ thành công!");
+                System.out.println("DEBUG: Task created successfully by user: " + currentUser.getUserID());
+            } else {
+                session.setAttribute("error", "Không thể tạo nhiệm vụ. Vui lòng thử lại.");
+                System.err.println("ERROR: Failed to create task for user: " + currentUser.getUserID());
+            }
+            
+        } catch (NumberFormatException e) {
+            session.setAttribute("error", "Dữ liệu không hợp lệ.");
+            System.err.println("NumberFormatException in createTask: " + e.getMessage());
+        } catch (Exception e) {
+            session.setAttribute("error", "Có lỗi xảy ra khi tạo nhiệm vụ: " + e.getMessage());
+            System.err.println("Exception in createTask: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        // Redirect back to tasks page
+        String clubIDParam = request.getParameter("clubID");
+        response.sendRedirect(request.getContextPath() + "/department-tasks?clubID=" + clubIDParam);
+    }
+    
+    /**
+     * Handle AJAX request for member search
+     */
+    private void handleMemberSearch(HttpServletRequest request, HttpServletResponse response, Users currentUser) 
+            throws ServletException, IOException {
+        
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out = response.getWriter();
+        
+        try {
+            System.out.println("DEBUG Ajax: handleMemberSearch called");
+            String clubIDParam = request.getParameter("clubID");
+            String searchTerm = request.getParameter("q");
+            
+            System.out.println("DEBUG Ajax: clubID=" + clubIDParam + ", searchTerm=" + searchTerm);
+            
+            if (clubIDParam == null || clubIDParam.trim().isEmpty()) {
+                System.err.println("ERROR Ajax: Missing clubID parameter");
+                out.write("{\"error\": \"Missing clubID parameter\"}");
+                return;
+            }
+            
+            int clubID = Integer.parseInt(clubIDParam);
+            System.out.println("DEBUG Ajax: Parsed clubID=" + clubID);
+            
+            // Get department leader's department ID
+            int clubDepartmentId = departmentDashboardDAO.findClubDepartmentId(clubID, currentUser.getUserID());
+            System.out.println("DEBUG Ajax: clubDepartmentId=" + clubDepartmentId + " for user=" + currentUser.getUserID());
+            
+            if (clubDepartmentId == 0) {
+                System.err.println("ERROR Ajax: Department not found for user=" + currentUser.getUserID() + ", clubID=" + clubID);
+                out.write("{\"error\": \"Department not found\"}");
+                return;
+            }
+            
+            // Get department members - try actual role names from database
+            List<Users> departmentMembers = userClubDAO.getUsersByDepartmentAndRole(clubDepartmentId, "Thành viên");
+            System.out.println("DEBUG Ajax: Found " + departmentMembers.size() + " members for clubDepartmentId: " + clubDepartmentId + " with role 'Thành viên'");
+            
+            // If no members found, try getting all users except department leader
+            if (departmentMembers.isEmpty()) {
+                departmentMembers = userClubDAO.getUsersByDepartmentAndRole(clubDepartmentId, "");
+                System.out.println("DEBUG Ajax: Tried empty role (all users) - Found " + departmentMembers.size() + " members");
+                
+                // Filter out department leaders (Trưởng ban)
+                departmentMembers = departmentMembers.stream()
+                    .filter(member -> !member.getUserID().equals(currentUser.getUserID()))
+                    .collect(java.util.stream.Collectors.toList());
+                System.out.println("DEBUG Ajax: After filtering out current user - Found " + departmentMembers.size() + " members");
+            }
+            
+            // Filter by search term if provided
+            if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+                String keyword = searchTerm.toLowerCase().trim();
+                departmentMembers = departmentMembers.stream()
+                    .filter(member -> {
+                        String fullName = member.getFullName() != null ? member.getFullName().toLowerCase() : "";
+                        String email = member.getEmail() != null ? member.getEmail().toLowerCase() : "";
+                        return fullName.contains(keyword) || email.contains(keyword);
+                    })
+                    .collect(java.util.stream.Collectors.toList());
+            }
+            
+            // Convert to JSON
+            Gson gson = new Gson();
+            JsonArray jsonArray = new JsonArray();
+            
+            for (Users member : departmentMembers) {
+                JsonObject memberObj = new JsonObject();
+                memberObj.addProperty("id", member.getUserID());
+                memberObj.addProperty("text", member.getFullName() + " (" + member.getEmail() + ")");
+                memberObj.addProperty("fullName", member.getFullName());
+                memberObj.addProperty("email", member.getEmail());
+                memberObj.addProperty("avatar", member.getAvatar());
+                jsonArray.add(memberObj);
+            }
+            
+            JsonObject result = new JsonObject();
+            result.add("results", jsonArray);
+            
+            out.write(gson.toJson(result));
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            out.write("{\"error\": \"" + e.getMessage() + "\"}");
+        } finally {
+            out.flush();
+            out.close();
+        }
+    }
+    
+    /**
+     * Debug method to check available roles in department
+     */
+    private void debugRolesInDepartment(int clubDepartmentId) {
+        try {
+            // Simple query to see what roles exist in this department
+            String debugQuery = """
+                SELECT DISTINCT r.RoleName, COUNT(*) as count
+                FROM UserClubs uc
+                JOIN Roles r ON uc.RoleID = r.RoleID
+                WHERE uc.ClubDepartmentID = ? AND uc.IsActive = 1
+                GROUP BY r.RoleName
+            """;
+            
+            java.sql.Connection conn = dal.DBContext.getConnection();
+            java.sql.PreparedStatement stmt = conn.prepareStatement(debugQuery);
+            stmt.setInt(1, clubDepartmentId);
+            java.sql.ResultSet rs = stmt.executeQuery();
+            
+            System.out.println("DEBUG: Available roles in clubDepartmentId " + clubDepartmentId + ":");
+            while (rs.next()) {
+                System.out.println("  - Role: '" + rs.getString("RoleName") + "', Count: " + rs.getInt("count"));
+            }
+            
+            rs.close();
+            stmt.close();
+            conn.close();
+            
+        } catch (Exception e) {
+            System.err.println("Error in debugRolesInDepartment: " + e.getMessage());
         }
     }
 }
