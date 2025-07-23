@@ -360,12 +360,18 @@ public class TaskDAO {
     public Tasks getTaskById(int taskId) {
         String sql = """
             SELECT t.*, et.TermName, et.TermStart, et.TermEnd, 
-                   e.EventName, c.ClubName, u.FullName as CreatorName
+                   e.EventName, c.ClubName, 
+                   creator.FullName as CreatorName,
+                   assignee.UserID as AssigneeUserID,
+                   assignee.FullName as AssigneeFullName,
+                   assignee.Email as AssigneeEmail,
+                   assignee.AvatarSrc as AssigneeAvatar
             FROM Tasks t
             LEFT JOIN EventTerms et ON t.TermID = et.TermID
             LEFT JOIN Events e ON t.EventID = e.EventID
             LEFT JOIN Clubs c ON t.ClubID = c.ClubID
-            LEFT JOIN Users u ON t.CreatedBy = u.UserID
+            LEFT JOIN Users creator ON t.CreatedBy = creator.UserID
+            LEFT JOIN Users assignee ON t.UserID = assignee.UserID
             WHERE t.TaskID = ?
             """;
         
@@ -373,9 +379,15 @@ public class TaskDAO {
             Connection connection = DBContext.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setInt(1, taskId);
+            
+            System.out.println("DEBUG TaskDAO.getTaskById: Executing query for taskId=" + taskId);
+            System.out.println("DEBUG TaskDAO.getTaskById: SQL=" + sql);
+            
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
+                System.out.println("DEBUG TaskDAO.getTaskById: Found task with ID=" + rs.getInt("TaskID"));
+                
                 Tasks task = new Tasks();
                 task.setTaskID(rs.getInt("TaskID"));
                 
@@ -388,7 +400,7 @@ public class TaskDAO {
                 task.setStartDate(rs.getTimestamp("StartDate"));
                 task.setEndDate(rs.getTimestamp("EndDate"));
                 task.setCreatedAt(rs.getTimestamp("CreatedAt"));
-                task.setAssigneeType("Department");
+                task.setAssigneeType(rs.getString("AssigneeType"));
                 
                 // Create EventTerms object
                 if (rs.getInt("TermID") > 0) {
@@ -415,14 +427,29 @@ public class TaskDAO {
                 task.setClub(club);
                 
                 // Create Creator object
-                Users creator = new Users();
-                creator.setUserID(rs.getString("CreatedBy"));
-                creator.setFullName(rs.getString("CreatorName"));
-                task.setCreatedBy(creator);
+                if (rs.getString("CreatedBy") != null) {
+                    Users creator = new Users();
+                    creator.setUserID(rs.getString("CreatedBy"));
+                    creator.setFullName(rs.getString("CreatorName"));
+                    task.setCreatedBy(creator);
+                }
+                
+                // Create Assignee object if available
+                if (rs.getString("AssigneeUserID") != null) {
+                    Users assignee = new Users();
+                    assignee.setUserID(rs.getString("AssigneeUserID"));
+                    assignee.setFullName(rs.getString("AssigneeFullName"));
+                    assignee.setEmail(rs.getString("AssigneeEmail"));
+                    assignee.setAvatar(rs.getString("AssigneeAvatar"));
+                    task.setUserAssignee(assignee);
+                }
                 
                 return task;
+            } else {
+                System.out.println("DEBUG TaskDAO.getTaskById: No task found with ID=" + taskId);
             }
         } catch (Exception e) {
+            System.err.println("Error in getTaskById: " + e.getMessage());
             e.printStackTrace();
         }
         return null;

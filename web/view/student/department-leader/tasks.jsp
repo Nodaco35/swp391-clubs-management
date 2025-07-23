@@ -781,6 +781,197 @@
                     }
                 }, 5000);
             }
+
+            // View task detail function
+            function viewTaskDetail(taskId) {
+                console.log('Viewing task detail for ID:', taskId);
+                
+                // Show loading in modal
+                const modal = new bootstrap.Modal(document.getElementById('taskDetailModal'));
+                const content = document.getElementById('taskDetailContent');
+                
+                content.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x"></i><br>Đang tải...</div>';
+                modal.show();
+                
+                // Load task details via AJAX
+                const clubID = new URLSearchParams(window.location.search).get('clubID');
+                
+                $.ajax({
+                    url: '${pageContext.request.contextPath}/department-tasks',
+                    method: 'GET',
+                    data: {
+                        action: 'getTaskDetail',
+                        taskId: taskId,
+                        clubID: clubID
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        console.log('Task detail response:', response); // Debug log
+                        
+                        if (response.error) {
+                            content.innerHTML = `
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    Lỗi: \${response.error}
+                                </div>
+                            `;
+                            return;
+                        }
+                        
+                        // Build task detail content
+                        const statusBadgeClass = getStatusBadgeClass(response.status);
+                        
+                        // Check assignee info with proper null/undefined handling
+                        let assigneeInfo;
+                        if (response.assignee && response.assignee.fullName) {
+                            const avatarSrc = response.assignee.avatar ? 
+                                '${pageContext.request.contextPath}/img/' + response.assignee.avatar : 
+                                '${pageContext.request.contextPath}/img/Hinh-anh-dai-dien-mac-dinh-Facebook.jpg';
+                            
+                            assigneeInfo = `
+                                <div class="d-flex align-items-center">
+                                    <img src="\${avatarSrc}" 
+                                         class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                                    <div>
+                                        <div class="fw-semibold">\${response.assignee.fullName}</div>
+                                        <small class="text-muted">\${response.assignee.email || ''}</small>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            assigneeInfo = '<span class="text-muted">Chưa giao</span>';
+                        }
+                        
+                        content.innerHTML = `
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h5 class="fw-bold mb-3">\${response.title}</h5>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Mô tả:</label>
+                                        <div class="p-3 bg-light rounded">
+                                            \${response.description || '<span class="text-muted">Không có mô tả</span>'}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Người phụ trách:</label>
+                                        <div>
+                                            \${assigneeInfo}
+                                        </div>
+                                    </div>
+                                    
+                                    \${response.event ? `
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold">Sự kiện liên quan:</label>
+                                            <div class="p-2 bg-info bg-opacity-10 rounded">
+                                                <i class="fas fa-calendar-alt me-2"></i>
+                                                \${response.event.eventName}
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Thông tin chi tiết</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="mb-3">
+                                                <label class="form-label fw-semibold">Trạng thái:</label>
+                                                <div>
+                                                    <span class="badge \${statusBadgeClass}">\${response.statusText}</span>
+                                                </div>
+                                            </div>
+                                            
+                                            \${response.startDate ? `
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-semibold">Ngày bắt đầu:</label>
+                                                    <div class="text-muted">
+                                                        <i class="fas fa-calendar-start me-2"></i>
+                                                        \${response.startDate}
+                                                    </div>
+                                                </div>
+                                            ` : ''}
+                                            
+                                            \${response.endDate ? `
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-semibold">Ngày kết thúc:</label>
+                                                    <div class="text-muted">
+                                                        <i class="fas fa-calendar-end me-2"></i>
+                                                        \${response.endDate}
+                                                    </div>
+                                                </div>
+                                            ` : ''}
+                                            
+                                            \${response.creator ? `
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-semibold">Người tạo:</label>
+                                                    <div class="text-muted">
+                                                        <i class="fas fa-user me-2"></i>
+                                                        \${response.creator.fullName}
+                                                    </div>
+                                                </div>
+                                            ` : ''}
+                                            
+                                            \${response.createdAt ? `
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-semibold">Ngày tạo:</label>
+                                                    <div class="text-muted">
+                                                        <i class="fas fa-clock me-2"></i>
+                                                        \${response.createdAt}
+                                                    </div>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 text-center">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                <button type="button" class="btn btn-primary ms-2" onclick="editTask(\${taskId})">
+                                    <i class="fas fa-edit"></i> Chỉnh sửa
+                                </button>
+                            </div>
+                        `;
+                    },
+                    error: function() {
+                        content.innerHTML = `
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Không thể tải thông tin chi tiết. Vui lòng thử lại sau.
+                            </div>
+                        `;
+                    }
+                });
+            }
+            
+            // Helper function to get status badge class
+            function getStatusBadgeClass(status) {
+                switch(status) {
+                    case 'Done': return 'bg-success';
+                    case 'InProgress': return 'bg-primary';
+                    case 'Review': return 'bg-warning';
+                    case 'Rejected': return 'bg-danger';
+                    case 'ToDo':
+                    default: return 'bg-secondary';
+                }
+            }
+
+            // Edit task function
+            function editTask(taskId) {
+                console.log('Editing task ID:', taskId);
+                showNotification('Chức năng chỉnh sửa nhiệm vụ đang được phát triển.', 'info');
+                
+                // TODO: Implement edit task functionality
+                // This would typically:
+                // 1. Load task data via AJAX
+                // 2. Populate edit form
+                // 3. Show edit modal
+                // 4. Handle form submission for updates
+            }
         </script>
     </body>
 </html>
