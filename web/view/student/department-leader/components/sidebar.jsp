@@ -24,13 +24,13 @@
             </a>
         </li>
         <li class="menu-item ${activePage == 'tasks' ? 'active' : ''}">
-            <a href="${pageContext.request.contextPath}/department-tasks" class="menu-link">
+            <a href="${pageContext.request.contextPath}/department-tasks?clubID=${clubID}" class="menu-link">
                 <i class="fas fa-tasks"></i>
                 <span>Quản lý công việc</span>
             </a>
         </li>
         <li class="menu-item ${activePage == 'meeting' ? 'active' : ''}">
-            <a href="${pageContext.request.contextPath}/department-meeting" class="menu-link">
+            <a href="${pageContext.request.contextPath}/department-meeting?clubID=${clubID}" class="menu-link">
                 <i class="fas fa-calendar-alt"></i>
                 <span>Quản lý cuộc họp</span>
             </a>

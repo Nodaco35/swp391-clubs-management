@@ -928,6 +928,15 @@ VALUES
 (NULL, 4, 12, 4, 'Ra đề và chuẩn bị test case', 'Xây dựng đề thi và bộ test case cho cuộc thi Code War.', 'InProgress', '2025-07-20 08:00:00', '2025-07-30 17:00:00', 'U012', 'Department', 1),
 (NULL, 5, 12, 4, 'Quản lý hệ thống thi và hỗ trợ thí sinh', 'Theo dõi hệ thống thi, xử lý lỗi kỹ thuật và hỗ trợ thí sinh khi cần.', 'ToDo', '2025-07-31 08:00:00', '2025-07-31 13:00:00', 'U012', 'Department', 5);
 
+-- Tasks for individual members of Ban Hậu cần (ClubDepartmentID=5) of CLB 1
+INSERT INTO Tasks (ParentTaskID, TermID, EventID, ClubID, Title, Description, Status, StartDate, EndDate, CreatedBy, AssigneeType, UserID)
+VALUES
+(NULL, NULL, NULL, 1, 'Chuẩn bị dụng cụ thể thao', 'Kiểm tra và chuẩn bị bóng đá, áo thi đấu cho hoạt động tuần', 'InProgress', '2025-07-23 08:00:00', '2025-07-25 17:00:00', 'U002', 'User', 'U007'),
+(NULL, NULL, NULL, 1, 'Tổ chức dọn dẹp phòng CLB', 'Dọn dẹp và sắp xếp lại không gian hoạt động của câu lạc bộ', 'ToDo', '2025-07-24 14:00:00', '2025-07-26 16:00:00', 'U002', 'User', 'HS193994'),
+(NULL, NULL, NULL, 1, 'Mua sắm đồ ăn nhẹ cho buổi họp', 'Chuẩn bị đồ ăn nhẹ và nước uống cho buổi họp hàng tuần', 'Done', '2025-07-22 09:00:00', '2025-07-23 12:00:00', 'U002', 'User', 'HA180043'),
+(NULL, NULL, NULL, 1, 'Kiểm tra tình trạng ghế bàn', 'Kiểm tra và sửa chữa bàn ghế hư hỏng trong phòng sinh hoạt', 'Review', '2025-07-23 10:00:00', '2025-07-24 17:00:00', 'U002', 'User', 'HA193827'),
+(NULL, NULL, NULL, 1, 'Chuẩn bị backdrop cho sự kiện', 'Thiết kế và in backdrop cho sự kiện sắp tới của CLB', 'InProgress', '2025-07-25 08:00:00', '2025-07-28 17:00:00', 'U002', 'User', 'HS191748');
+
 
 
 
