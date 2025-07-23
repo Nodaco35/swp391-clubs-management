@@ -4,9 +4,12 @@ import dal.TaskDAO;
 import dal.UserDAO;
 import dal.DepartmentDAO;
 import dal.DepartmentDashboardDAO;
+import dal.UserClubDAO;
+import dal.EventsDAO;
 import models.Tasks;
 import models.Users;
 import models.Department;
+import models.Events;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +24,8 @@ public class DepartmentTasksServlet extends HttpServlet {
     private UserDAO userDAO;
     private DepartmentDAO departmentDAO;
     private DepartmentDashboardDAO departmentDashboardDAO;
+    private UserClubDAO userClubDAO;
+    private EventsDAO eventsDAO;
     
     @Override
     public void init() throws ServletException {
@@ -28,6 +33,8 @@ public class DepartmentTasksServlet extends HttpServlet {
         userDAO = new UserDAO();
         departmentDAO = new DepartmentDAO();
         departmentDashboardDAO = new DepartmentDashboardDAO();
+        userClubDAO = new UserClubDAO();
+        eventsDAO = new EventsDAO();
     }
     
     @Override
@@ -174,9 +181,19 @@ public class DepartmentTasksServlet extends HttpServlet {
             // Get departments for this club
             List<Department> clubDepartments = departmentDAO.getDepartmentsByClubID(clubID);
             
+            // Get department members for modal (get current user's department members)
+            List<Users> departmentMembers = userClubDAO.getUsersByDepartmentAndRole(clubDepartmentId, "Member");
+            System.out.println("DEBUG: Found " + departmentMembers.size() + " department members for clubDepartmentId: " + clubDepartmentId);
+            
+            // Get club events for modal
+            List<Events> clubEvents = eventsDAO.getEventsByClubId(clubID);
+            System.out.println("DEBUG: Found " + clubEvents.size() + " club events for clubID: " + clubID);
+            
             // Set attributes for JSP
             request.setAttribute("assignedTasks", assignedTasks);
             request.setAttribute("clubDepartments", clubDepartments);
+            request.setAttribute("departmentMembers", departmentMembers);
+            request.setAttribute("clubEvents", clubEvents);
             request.setAttribute("currentUser", currentUser);
             request.setAttribute("clubID", clubID);
             

@@ -12,6 +12,8 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <!-- Font Awesome -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <!-- Select2 CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
         <!-- Custom CSS -->
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/department-leader.css">
         <style>
@@ -40,6 +42,30 @@
             }
             .card-header .badge {
                 font-size: 0.7em;
+            }
+            .select2-container .select2-selection--single {
+                height: 38px;
+                border: 1px solid #ced4da;
+                border-radius: 0.375rem;
+            }
+            .select2-container--default .select2-selection--single .select2-selection__rendered {
+                line-height: 36px;
+                padding-left: 12px;
+            }
+            .select2-container--default .select2-selection--single .select2-selection__arrow {
+                height: 36px;
+            }
+            .member-item {
+                display: flex;
+                align-items: center;
+                padding: 8px 0;
+            }
+            .member-avatar {
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                margin-right: 10px;
+                object-fit: cover;
             }
         </style>
     </head>
@@ -140,23 +166,29 @@
                             Danh sách công việc (${assignedTasks.size()} công việc)
                         </h5>
                         
-                        <!-- Current filters display -->
-                        <div class="text-end">
-                            <c:if test="${not empty param.search}">
-                                <span class="badge bg-info me-1">Tìm kiếm: "${param.search}"</span>
-                            </c:if>
-                            <c:if test="${not empty param.status}">
-                                <span class="badge bg-secondary me-1">Trạng thái: 
-                                    <c:choose>
-                                        <c:when test="${param.status == 'ToDo'}">Chưa bắt đầu</c:when>
-                                        <c:when test="${param.status == 'InProgress'}">Đang thực hiện</c:when>
-                                        <c:when test="${param.status == 'Review'}">Chờ duyệt</c:when>
-                                        <c:when test="${param.status == 'Done'}">Hoàn thành</c:when>
-                                        <c:when test="${param.status == 'Rejected'}">Từ chối</c:when>
-                                        <c:otherwise>${param.status}</c:otherwise>
-                                    </c:choose>
-                                </span>
-                            </c:if>
+                        <!-- Add Task Button -->
+                        <div class="d-flex gap-2 align-items-center">
+                            <button type="button" class="btn btn-primary btn-sm" onclick="showCreateTaskModal()">
+                                <i class="fas fa-plus me-1"></i>Tạo nhiệm vụ
+                            </button>
+                            
+                            <!-- Current filters display -->
+                            <div class="text-end">
+                                <c:if test="${not empty param.search}">
+                                    <span class="badge bg-info me-1">Tìm kiếm: "${param.search}"</span>
+                                </c:if>
+                                <c:if test="${not empty param.status}">
+                                    <span class="badge bg-secondary me-1">Trạng thái: 
+                                        <c:choose>
+                                            <c:when test="${param.status == 'ToDo'}">Chưa bắt đầu</c:when>
+                                            <c:when test="${param.status == 'InProgress'}">Đang thực hiện</c:when>
+                                            <c:when test="${param.status == 'Review'}">Chờ duyệt</c:when>
+                                            <c:when test="${param.status == 'Done'}">Hoàn thành</c:when>
+                                            <c:when test="${param.status == 'Rejected'}">Từ chối</c:when>
+                                            <c:otherwise>${param.status}</c:otherwise>
+                                        </c:choose>
+                                    </span>
+                                </c:if>
                             <c:if test="${not empty param.sortBy}">
                                 <span class="badge bg-success me-1">Sắp xếp: 
                                     <c:choose>
@@ -321,67 +353,70 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Tạo công việc mới</h5>
+                        <h5 class="modal-title">
+                            <i class="fas fa-tasks me-2"></i>Tạo nhiệm vụ mới
+                        </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <form id="createTaskForm">
                         <div class="modal-body">
-                            <input type="hidden" name="clubID" value="${clubID}">
-                            <input type="hidden" name="createdBy" value="${currentUser.userID}">
+                            <input type="hidden" name="assigneeType" value="User">
                             
                             <div class="row">
                                 <div class="col-md-12 mb-3">
-                                    <label for="taskTitle" class="form-label">Tên công việc <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="taskTitle" name="title" required>
+                                    <label for="taskTitle" class="form-label">Tiêu đề nhiệm vụ <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="taskTitle" name="title" required maxlength="200" 
+                                           placeholder="Nhập tiêu đề nhiệm vụ...">
                                 </div>
                                 
                                 <div class="col-md-12 mb-3">
-                                    <label for="taskDescription" class="form-label">Mô tả công việc</label>
-                                    <textarea class="form-control" id="taskDescription" name="description" rows="3"></textarea>
+                                    <label for="taskDescription" class="form-label">Mô tả nhiệm vụ <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" id="taskDescription" name="description" rows="4" required 
+                                              maxlength="1000" placeholder="Mô tả chi tiết nhiệm vụ cần thực hiện..."></textarea>
+                                    <div class="form-text">Tối đa 1000 ký tự</div>
                                 </div>
                                 
                                 <div class="col-md-6 mb-3">
-                                    <label for="assigneeType" class="form-label">Giao việc cho <span class="text-danger">*</span></label>
-                                    <select class="form-select" id="assigneeType" name="assigneeType" required onchange="toggleAssigneeFields()">
-                                        <option value="">Chọn...</option>
-                                        <option value="Department">Ban</option>
-                                        <option value="User">Cá nhân</option>
-                                    </select>
+                                    <label for="startDate" class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="startDate" name="startDate" required>
                                 </div>
                                 
-                                <div class="col-md-6 mb-3" id="departmentField" style="display: none;">
-                                    <label for="departmentID" class="form-label">Chọn ban</label>
-                                    <select class="form-select" id="departmentID" name="departmentID">
-                                        <option value="">Chọn ban...</option>
-                                        <c:forEach var="dept" items="${clubDepartments}">
-                                            <option value="${dept.departmentID}">${dept.departmentName}</option>
+                                <div class="col-md-6 mb-3">
+                                    <label for="endDate" class="form-label">Ngày kết thúc <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="endDate" name="endDate" required>
+                                </div>
+
+                                <div class="col-md-12 mb-3">
+                                    <label for="eventId" class="form-label">Sự kiện liên quan <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="eventId" name="eventId" required>
+                                        <option value="">-- Chọn sự kiện --</option>
+                                        <c:forEach var="event" items="${clubEvents}">
+                                            <option value="${event.eventID}">${event.eventName}</option>
                                         </c:forEach>
                                     </select>
+                                    <div class="form-text">Chọn sự kiện mà nhiệm vụ này thuộc về</div>
                                 </div>
                                 
-                                <div class="col-md-6 mb-3" id="userField" style="display: none;">
-                                    <label for="userID" class="form-label">Chọn thành viên</label>
-                                    <select class="form-select" id="userID" name="userID">
-                                        <option value="">Chọn thành viên...</option>
-                                        <!-- This will be populated via AJAX based on selected department -->
+                                <div class="col-md-12 mb-3">
+                                    <label for="assignedTo" class="form-label">Người phụ trách <span class="text-danger">*</span></label>
+                                    <select class="form-select member-select" id="assignedTo" name="assignedTo" required>
+                                        <option value="">-- Tìm kiếm và chọn thành viên --</option>
+                                        <c:forEach var="member" items="${departmentMembers}">
+                                            <option value="${member.userID}" 
+                                                    data-avatar="${member.avatar}"
+                                                    data-email="${member.email}">
+                                                ${member.fullName} (${member.email})
+                                            </option>
+                                        </c:forEach>
                                     </select>
-                                </div>
-                                
-                                <div class="col-md-6 mb-3">
-                                    <label for="startDate" class="form-label">Ngày bắt đầu</label>
-                                    <input type="datetime-local" class="form-control" id="startDate" name="startDate">
-                                </div>
-                                
-                                <div class="col-md-6 mb-3">
-                                    <label for="endDate" class="form-label">Ngày kết thúc</label>
-                                    <input type="datetime-local" class="form-control" id="endDate" name="endDate">
+                                    <div class="form-text">Chọn thành viên trong ban để giao nhiệm vụ</div>
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Tạo công việc
+                                <i class="fas fa-save"></i> Tạo nhiệm vụ
                             </button>
                         </div>
                     </form>
@@ -406,97 +441,102 @@
 
         <!-- Bootstrap JS -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <!-- Select2 JS -->
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         
         <script>
+            $(document).ready(function() {
+                // Debug: Check if members are available
+                console.log('Initializing Select2...');
+                var memberOptions = $('.member-select option').length;
+                console.log('Found ' + memberOptions + ' member options');
+                
+                // Khởi tạo Select2 cho dropdown thành viên
+                $('.member-select').select2({
+                    placeholder: "Tìm kiếm thành viên...",
+                    allowClear: true,
+                    dropdownParent: $('#createTaskModal'),
+                    templateResult: function (member) {
+                        if (!member.id) {
+                            return member.text;
+                        }
+                        
+                        var avatar = $(member.element).data('avatar');
+                        var email = $(member.element).data('email');
+                        
+                        var $member = $(
+                            '<div class="member-item">' +
+                                '<img class="member-avatar" src="' + (avatar || 'img/Hinh-anh-dai-dien-mac-dinh-Facebook.jpg') + '" alt="Avatar">' +
+                                '<div>' +
+                                    '<div style="font-weight: 500;">' + member.text.split(' (')[0] + '</div>' +
+                                    '<div style="font-size: 0.85em; color: #6c757d;">' + email + '</div>' +
+                                '</div>' +
+                            '</div>'
+                        );
+                        return $member;
+                    },
+                    templateSelection: function (member) {
+                        if (!member.id) {
+                            return member.text;
+                        }
+                        return member.text.split(' (')[0];
+                    }
+                });
+
+                // Set ngày tối thiểu là hôm nay
+                var today = new Date().toISOString().split('T')[0];
+                $('#startDate').attr('min', today);
+                
+                $('#startDate').on('change', function() {
+                    $('#endDate').attr('min', this.value);
+                });
+
+                // Validation ngày
+                $('#startDate, #endDate').on('change', function() {
+                    var startDate = new Date($('#startDate').val());
+                    var endDate = new Date($('#endDate').val());
+                    
+                    if (startDate && endDate && endDate < startDate) {
+                        $('#endDate')[0].setCustomValidity('Ngày kết thúc phải sau ngày bắt đầu');
+                    } else {
+                        $('#endDate')[0].setCustomValidity('');
+                    }
+                });
+            });
+
             // Show create task modal
             function showCreateTaskModal() {
-                new bootstrap.Modal(document.getElementById('createTaskModal')).show();
-            }
-
-            // Toggle assignee fields based on type
-            function toggleAssigneeFields() {
-                const assigneeType = document.getElementById('assigneeType').value;
-                const departmentField = document.getElementById('departmentField');
-                const userField = document.getElementById('userField');
+                console.log('Opening modal...');
+                var eventOptions = $('#eventId option').length;
+                var memberOptions = $('#assignedTo option').length;
+                console.log('Event options: ' + eventOptions + ', Member options: ' + memberOptions);
                 
-                if (assigneeType === 'Department') {
-                    departmentField.style.display = 'block';
-                    userField.style.display = 'none';
-                    document.getElementById('departmentID').required = true;
-                    document.getElementById('userID').required = false;
-                } else if (assigneeType === 'User') {
-                    departmentField.style.display = 'none';
-                    userField.style.display = 'block';
-                    document.getElementById('departmentID').required = false;
-                    document.getElementById('userID').required = true;
-                } else {
-                    departmentField.style.display = 'none';
-                    userField.style.display = 'none';
-                    document.getElementById('departmentID').required = false;
-                    document.getElementById('userID').required = false;
-                }
-            }
-
-            // View task detail
-            function viewTaskDetail(taskId) {
-                fetch('${pageContext.request.contextPath}/task-detail?taskId=' + taskId)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            displayTaskDetail(data.task);
-                            new bootstrap.Modal(document.getElementById('taskDetailModal')).show();
-                        } else {
-                            showNotification(data.message || 'Không tìm thấy thông tin công việc', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showNotification('Có lỗi xảy ra khi tải chi tiết công việc', 'error');
-                    });
-            }
-
-            // Display task detail in modal
-            function displayTaskDetail(task) {
-                const content = document.getElementById('taskDetailContent');
-                content.innerHTML = `
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <h6>Thông tin cơ bản</h6>
-                            <p><strong>Tên công việc:</strong> \${task.title}</p>
-                            <p><strong>Mô tả:</strong> \${task.description || 'Không có mô tả'}</p>
-                            <p><strong>Trạng thái:</strong> 
-                                <span class="badge bg-primary">\${task.status}</span>
-                            </p>
-                        </div>
-                        <div class="col-md-6">
-                            <h6>Thời gian</h6>
-                            <p><strong>Bắt đầu:</strong> \${task.startDate ? new Date(task.startDate).toLocaleString('vi-VN') : 'Chưa xác định'}</p>
-                            <p><strong>Kết thúc:</strong> \${task.endDate ? new Date(task.endDate).toLocaleString('vi-VN') : 'Chưa xác định'}</p>
-                            <p><strong>Ngày tạo:</strong> \${task.createdAt ? new Date(task.createdAt).toLocaleString('vi-VN') : 'N/A'}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <h6>Phân công</h6>
-                            <p><strong>Người tạo:</strong> \${task.createdBy ? task.createdBy.fullName : 'N/A'}</p>
-                            <p><strong>Phụ trách:</strong> 
-                                \${task.assigneeType === 'Department' ? 
-                                    (task.departmentAssignee ? task.departmentAssignee.departmentName : 'Chưa giao') :
-                                    (task.userAssignee ? task.userAssignee.fullName : 'Chưa giao')
-                                }
-                            </p>
-                        </div>
-                    </div>
-                `;
-            }
-
-            // Edit task
-            function editTask(taskId) {
-                // Implementation for edit task functionality
-                showNotification('Chức năng chỉnh sửa đang được phát triển', 'info');
+                new bootstrap.Modal(document.getElementById('createTaskModal')).show();
             }
 
             // Handle create task form submission
             document.getElementById('createTaskForm').addEventListener('submit', function(e) {
                 e.preventDefault();
+                
+                // Validation
+                var title = document.getElementById('taskTitle').value.trim();
+                var description = document.getElementById('taskDescription').value.trim();
+                var startDate = document.getElementById('startDate').value;
+                var endDate = document.getElementById('endDate').value;
+                var eventId = document.getElementById('eventId').value;
+                var assignedTo = document.getElementById('assignedTo').value;
+
+                if (!title || !description || !startDate || !endDate || !eventId || !assignedTo) {
+                    showNotification('Vui lòng điền đầy đủ thông tin bắt buộc!', 'error');
+                    return false;
+                }
+
+                if (new Date(endDate) < new Date(startDate)) {
+                    showNotification('Ngày kết thúc phải sau ngày bắt đầu!', 'error');
+                    return false;
+                }
                 
                 const formData = new FormData(this);
                 const submitBtn = this.querySelector('button[type="submit"]');
@@ -509,23 +549,27 @@
                     method: 'POST',
                     body: formData
                 })
-                .then(response => response.json())
+                .then(response => response.text())
                 .then(data => {
-                    if (data.success) {
-                        showNotification('Tạo công việc thành công!', 'success');
+                    // Check if response is redirect (success)
+                    if (data.includes('success=') || data.includes('department-tasks')) {
+                        showNotification('Tạo nhiệm vụ thành công!', 'success');
                         bootstrap.Modal.getInstance(document.getElementById('createTaskModal')).hide();
                         setTimeout(() => location.reload(), 1500);
                     } else {
-                        showNotification(data.message || 'Tạo công việc thất bại', 'error');
+                        // Try to parse error from response
+                        var errorMatch = data.match(/error=([^&]*)/);
+                        var errorMsg = errorMatch ? decodeURIComponent(errorMatch[1]) : 'Tạo nhiệm vụ thất bại';
+                        showNotification(errorMsg, 'error');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    showNotification('Có lỗi xảy ra khi tạo công việc', 'error');
+                    showNotification('Có lỗi xảy ra khi tạo nhiệm vụ', 'error');
                 })
                 .finally(() => {
                     // Reset button
-                    submitBtn.innerHTML = '<i class="fas fa-save"></i> Tạo công việc';
+                    submitBtn.innerHTML = '<i class="fas fa-save"></i> Tạo nhiệm vụ';
                     submitBtn.disabled = false;
                 });
             });

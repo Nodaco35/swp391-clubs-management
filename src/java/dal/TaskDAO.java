@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.*;
 
 public class TaskDAO {
@@ -604,5 +605,51 @@ public class TaskDAO {
         }
         
         return taskList;
+    }
+    
+    /**
+     * Tạo task mới cho cá nhân
+     */
+    public boolean createTask(Tasks task) {
+        String sql = """
+            INSERT INTO Tasks (Title, Description, StartDate, EndDate, AssignedTo, AssigneeType, 
+                              CreatedBy, CreatedAt, UpdatedAt, Status, EventID) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """;
+        
+        Connection connection = null;
+        PreparedStatement ps = null;
+        
+        try {
+            connection = DBContext.getConnection();
+            ps = connection.prepareStatement(sql);
+            
+            ps.setString(1, task.getTitle());
+            ps.setString(2, task.getDescription());
+            ps.setDate(3, new java.sql.Date(task.getStartDate().getTime()));
+            ps.setDate(4, new java.sql.Date(task.getEndDate().getTime()));
+            ps.setString(5, task.getUserAssignee().getUserID());
+            ps.setString(6, task.getAssigneeType());
+            ps.setString(7, task.getCreatedBy().getUserID());
+            ps.setTimestamp(8, new Timestamp(task.getCreatedAt().getTime()));
+            ps.setTimestamp(9, new Timestamp(System.currentTimeMillis()));
+            ps.setString(10, task.getStatus());
+            ps.setInt(11, task.getEvent().getEventID());
+            
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+            
+        } catch (SQLException e) {
+            System.err.println("ERROR TaskDAO - Failed to create task: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (ps != null) ps.close();
+                if (connection != null) connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
