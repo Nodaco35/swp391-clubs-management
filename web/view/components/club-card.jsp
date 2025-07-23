@@ -10,7 +10,7 @@
 
 <div class="club-card" data-category="${displayClub.categoryID}">
     <div class="club-image">
-        <img src="${pageContext.request.contextPath}${displayClub.clubImg != null && not empty displayClub.clubImg ? displayClub.clubImg : 'images/default-club.jpg'}?t=<%= System.currentTimeMillis() %>" 
+        <img src="${pageContext.request.contextPath}/${displayClub.clubImg != null && not empty displayClub.clubImg ? displayClub.clubImg : 'images/default-club.jpg'}?t=<%= System.currentTimeMillis() %>" 
              alt="${displayClub.clubName}">
         <div class="club-badge">
             <c:if test="${displayClub.isRecruiting}">

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import models.ActivedMemberClubs;
 import models.ClubEvent;
+import models.ClubPeriodicReport;
 import models.EventScheduleDetail;
 import models.PeriodicReportEvents;
 import models.PeriodicReport_MemberAchievements;
@@ -403,20 +404,68 @@ public class PeriodicReportDAO extends DBContext {
         }
         return false;
     }
-    
-    public boolean updateReportLastUpdatedByClubAndTerm(int clubID, String termID) {
-    String sql = "UPDATE PeriodicClubReport SET LastUpdated = CURRENT_DATE WHERE ClubID = ? AND Term = ?";
-    try (Connection conn = DBContext.getConnection();
-         PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setInt(1, clubID);
-        ps.setString(2, termID);
-        int rows = ps.executeUpdate();
-        return rows > 0;
-    } catch (Exception e) {
-        e.printStackTrace();
-        return false;
-    }
-}
 
+    public boolean updateReportLastUpdatedByClubAndTerm(int clubID, String termID) {
+        String sql = "UPDATE PeriodicClubReport SET LastUpdated = CURRENT_DATE WHERE ClubID = ? AND Term = ?";
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, clubID);
+            ps.setString(2, termID);
+            int rows = ps.executeUpdate();
+            return rows > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public int getclubIDByReportID(int reportID) {
+        int clubid = -1;
+
+        String sql = """
+        SELECT *
+        FROM PeriodicClubReport p
+        WHERE p.ReportID = ?
+    """;
+
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, reportID);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    clubid = rs.getInt("ClubID");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return clubid;
+    }
+
+    public ClubPeriodicReport getReportById(int reportID) {
+        String sql = "SELECT r.ReportID, r.ClubID, c.ClubName, r.Term, r.SubmissionDate "
+                + "FROM PeriodicReports r "
+                + "JOIN Clubs c ON r.ClubID = c.ClubID "
+                + "WHERE r.ReportID = ?";
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, reportID);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    ClubPeriodicReport report = new ClubPeriodicReport();
+                    report.setReportID(rs.getInt("ReportID"));
+                    report.setClubID(rs.getInt("ClubID"));
+                    report.setClubName(rs.getString("ClubName"));
+                    report.setTerm(rs.getString("Term"));
+                    report.setSubmissionDate(rs.getDate("SubmissionDate"));
+                    return report;
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 }
