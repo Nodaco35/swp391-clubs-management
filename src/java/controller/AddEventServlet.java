@@ -26,8 +26,8 @@ import models.*;
  */
 @MultipartConfig(
         fileSizeThreshold = 1024 * 1024 * 2, // 2MB
-        maxFileSize = 1024 * 1024 * 10,      // 10MB
-        maxRequestSize = 1024 * 1024 * 50    // 50MB
+        maxFileSize = 1024 * 1024 * 10, // 10MB
+        maxRequestSize = 1024 * 1024 * 50 // 50MB
 )
 public class AddEventServlet extends HttpServlet {
 
@@ -162,12 +162,12 @@ public class AddEventServlet extends HttpServlet {
             }
         }
 
-        if (eventName == null || eventName.trim().isEmpty() ||
-                maxParticipantsStr == null || maxParticipantsStr.trim().isEmpty() ||
-                eventDates == null || eventDates.length == 0 ||
-                eventLocationIDs == null || eventLocationIDs.length == 0 ||
-                eventStartTimes == null || eventStartTimes.length == 0 ||
-                eventEndTimes == null || eventEndTimes.length == 0) {
+        if (eventName == null || eventName.trim().isEmpty()
+                || maxParticipantsStr == null || maxParticipantsStr.trim().isEmpty()
+                || eventDates == null || eventDates.length == 0
+                || eventLocationIDs == null || eventLocationIDs.length == 0
+                || eventStartTimes == null || eventStartTimes.length == 0
+                || eventEndTimes == null || eventEndTimes.length == 0) {
             LocationDAO locationDAO = new LocationDAO();
             request.setAttribute("locations", locationDAO.getLocationsByType(locationType != null ? locationType : "OnCampus"));
             request.setAttribute("locationType", locationType);
@@ -197,7 +197,12 @@ public class AddEventServlet extends HttpServlet {
                 request.getRequestDispatcher("/view/student/chairman/add-event.jsp").forward(request, response);
                 return;
             }
-
+            if (eventName.length() > 100) {
+                request.setAttribute("errorMessage", "Tên sự kiện quá dài (tối đa 100 ký tự).");
+                request.setAttribute("locations", locationDAO.getLocationsByType(locationType != null ? locationType : "OnCampus"));
+                request.getRequestDispatcher("/view/student/chairman/add-event.jsp").forward(request, response);
+                return;
+            }
             List<EventSchedule> schedules = new ArrayList<>();
             EventsDAO dao = new EventsDAO();
             for (int i = 0; i < eventDates.length; i++) {
