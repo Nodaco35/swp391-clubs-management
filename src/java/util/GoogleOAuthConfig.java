@@ -130,9 +130,10 @@ public class GoogleOAuthConfig {
         String clientId = getClientId();
         String clientSecret = getClientSecret();
         
-        LOGGER.log(Level.INFO, "OAuth Config Check - ClientID: {0}, ClientSecret: {1}", 
-                new Object[]{clientId.substring(0, Math.min(10, clientId.length())) + "...", 
-                            clientSecret.substring(0, Math.min(10, clientSecret.length())) + "..."});
+        LOGGER.log(Level.INFO, "OAuth Config Check - ClientID: {0}, ClientSecret: {1}, RedirectURI: {2}", 
+                new Object[]{clientId.substring(0, Math.min(20, clientId.length())) + "...", 
+                            clientSecret.substring(0, Math.min(15, clientSecret.length())) + "...",
+                            getRedirectUri()});
         
         // Check if we have actual credentials (not placeholder values)
         boolean configured = !DEFAULT_CLIENT_ID.equals(clientId) && 

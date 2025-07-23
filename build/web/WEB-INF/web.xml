@@ -166,6 +166,10 @@
         <servlet-class>controller.DepartmentMeetingServlet</servlet-class>
     </servlet>
     <servlet>
+        <servlet-name>DepartmentPlanEventsServlet</servlet-name>
+        <servlet-class>controller.DepartmentPlanEventsServlet</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>ForgotPasswordServlet</servlet-name>
         <servlet-class>controller.ForgotPasswordServlet</servlet-class>
     </servlet>
@@ -234,6 +238,10 @@
         <servlet-class>controller.ChairmanClubReportServlet</servlet-class>
     </servlet>
     <servlet>
+        <servlet-name>SemesterServlet</servlet-name>
+        <servlet-class>controller.SemesterServlet</servlet-class>
+</servlet>
+  <servlet>
         <servlet-name>ChairmanEditTasksServlet</servlet-name>
         <servlet-class>controller.ChairmanEditTasksServlet</servlet-class>
     </servlet>
@@ -410,6 +418,10 @@
         <url-pattern>/department-meeting</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
+        <servlet-name>DepartmentPlanEventsServlet</servlet-name>
+        <url-pattern>/department-plan-events</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
         <servlet-name>ForgotPasswordServlet</servlet-name>
         <url-pattern>/forgot-password</url-pattern>
         <url-pattern>/reset-password</url-pattern>
@@ -495,6 +507,10 @@
         <url-pattern>/chairman-page/reports</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
+        <servlet-name>SemesterServlet</servlet-name>
+        <url-pattern>/ic/semester</url-pattern>
+      </servlet-mapping>
+<servlet-mapping>
         <servlet-name>ChairmanEditTasksServlet</servlet-name>
         <url-pattern>/chairman-page/tasks/edit-tasks</url-pattern>
     </servlet-mapping>
