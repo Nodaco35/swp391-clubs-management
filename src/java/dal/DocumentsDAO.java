@@ -119,4 +119,97 @@ public class DocumentsDAO {
         }
         return null;
     }
+
+
+    public Integer addDocument(Documents doc) {
+        String sql = "INSERT INTO Documents (DocumentName, DocumentURL, DocumentType, ClubID, DepartmentID) VALUES (?, ?, ?, ?, ?)";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+            ps.setString(1, doc.getDocumentName());
+            ps.setString(2, doc.getDocumentURL());
+            ps.setString(3, doc.getDocumentType());
+            ps.setInt(4, doc.getClub().getClubID());
+            ps.setInt(5, doc.getDepartment().getDepartmentID());
+            int affectedRows = ps.executeUpdate();
+            if (affectedRows > 0) {
+                ResultSet rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
+    public Documents getDocumentByID(int documentID) {
+        String sql = "SELECT d.*, c.ClubName, dp.DepartmentName " +
+                "FROM Documents d " +
+                "JOIN Clubs c ON d.ClubID = c.ClubID " +
+                "JOIN Departments dp ON d.DepartmentID = dp.DepartmentID " +
+                "WHERE d.DocumentID = ?";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, documentID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                Documents doc = new Documents();
+                doc.setDocumentID(rs.getInt("DocumentID"));
+                doc.setDocumentName(rs.getString("DocumentName"));
+                doc.setDescription(rs.getString("Description"));
+                doc.setDocumentURL(rs.getString("DocumentURL"));
+                doc.setDocumentType(rs.getString("DocumentType"));
+                Clubs club = new Clubs();
+                club.setClubID(rs.getInt("ClubID"));
+                club.setClubName(rs.getString("ClubName"));
+                doc.setClub(club);
+                Department department = new Department();
+                department.setDepartmentID(rs.getInt("DepartmentID"));
+                department.setDepartmentName(rs.getString("DepartmentName"));
+                doc.setDepartment(department);
+                return doc;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
+    public List<Documents> getDocumentsByClubID(int clubID) {
+        List<Documents> documents = new ArrayList<>();
+        String sql = "SELECT d.*, c.ClubName, dp.DepartmentName " +
+                "FROM Documents d " +
+                "JOIN Clubs c ON d.ClubID = c.ClubID " +
+                "JOIN Departments dp ON d.DepartmentID = dp.DepartmentID " +
+                "WHERE d.ClubID = ?";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, clubID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Documents doc = new Documents();
+                doc.setDocumentID(rs.getInt("DocumentID"));
+                doc.setDocumentName(rs.getString("DocumentName"));
+                doc.setDescription(rs.getString("Description"));
+                doc.setDocumentURL(rs.getString("DocumentURL"));
+                doc.setDocumentType(rs.getString("DocumentType"));
+                Clubs club = new Clubs();
+                club.setClubID(rs.getInt("ClubID"));
+                club.setClubName(rs.getString("ClubName"));
+                doc.setClub(club);
+                Department department = new Department();
+                department.setDepartmentID(rs.getInt("DepartmentID"));
+                department.setDepartmentName(rs.getString("DepartmentName"));
+                doc.setDepartment(department);
+                documents.add(doc);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return documents;
+    }
 }

@@ -10,6 +10,83 @@ import java.util.*;
 
 public class TaskDAO {
 
+    public boolean addTask(Tasks task) {
+        String sql = "INSERT INTO Tasks (TermID, EventID, ClubID, AssigneeType, DepartmentID, DocumentID, Title, Description, Status, StartDate, EndDate, CreatedBy) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, task.getTerm().getTermID());
+            ps.setInt(2, task.getEvent().getEventID());
+            ps.setInt(3, task.getClub().getClubID());
+            ps.setString(4, task.getAssigneeType());
+            ps.setInt(5, task.getDepartmentAssignee().getDepartmentID());
+            if (task.getDocument() != null) {
+                ps.setInt(6, task.getDocument().getDocumentID());
+            } else {
+                ps.setNull(6, java.sql.Types.INTEGER);
+            }
+            ps.setString(7, task.getTitle());
+            ps.setString(8, task.getDescription());
+            ps.setString(9, task.getStatus());
+            ps.setTimestamp(10, new java.sql.Timestamp(task.getStartDate().getTime()));
+            ps.setTimestamp(11, new java.sql.Timestamp(task.getEndDate().getTime()));
+            ps.setString(12, task.getCreatedBy().getUserID());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean updateTask(Tasks task) {
+        String sql = "UPDATE Tasks SET TermID = ?, EventID = ?, ClubID = ?, AssigneeType = ?, DepartmentID = ?, DocumentID = ?, Title = ?, Description = ?, Status = ?, StartDate = ?, EndDate = ?, CreatedBy = ? WHERE TaskID = ?";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, task.getTerm().getTermID());
+            ps.setInt(2, task.getEvent().getEventID());
+            ps.setInt(3, task.getClub().getClubID());
+            ps.setString(4, task.getAssigneeType());
+            ps.setInt(5, task.getDepartmentAssignee().getDepartmentID());
+            if (task.getDocument() != null) {
+                ps.setInt(6, task.getDocument().getDocumentID());
+            } else {
+                ps.setNull(6, java.sql.Types.INTEGER);
+            }
+            ps.setString(7, task.getTitle());
+            ps.setString(8, task.getDescription());
+            ps.setString(9, task.getStatus());
+            ps.setTimestamp(10, new java.sql.Timestamp(task.getStartDate().getTime()));
+            ps.setTimestamp(11, new java.sql.Timestamp(task.getEndDate().getTime()));
+            ps.setString(12, task.getCreatedBy().getUserID());
+            ps.setInt(13, task.getTaskID());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public EventTerms getTermById(int termID) {
+        String sql = "SELECT TermID, TermName, TermStart, TermEnd FROM EventTerms WHERE TermID = ?";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, termID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                EventTerms term = new EventTerms();
+                term.setTermID(rs.getInt("TermID"));
+                term.setTermName(rs.getString("TermName"));
+                term.setTermStart(rs.getDate("TermStart"));
+                term.setTermEnd(rs.getDate("TermEnd"));
+                return term;
+            }
+            return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
     public EventTerms getEventTermsByID(int termID) {
         String sql = "SELECT * FROM EventTerms WHERE termID = ?";
         EventsDAO ed = new EventsDAO();
