@@ -56,13 +56,19 @@ public class DepartmentTasksServlet extends HttpServlet {
             return;
         }
         
-        // Check if this is an AJAX request for member search
+        // Check if this is an AJAX request for member search or task detail
         String action = request.getParameter("action");
         System.out.println("DEBUG GET: action=" + action + ", requestURI=" + request.getRequestURI());
         
         if ("searchMembers".equals(action)) {
             System.out.println("DEBUG GET: Calling handleMemberSearch");
             handleMemberSearch(request, response, currentUser);
+            return;
+        }
+        
+        if ("getTaskDetail".equals(action)) {
+            System.out.println("DEBUG GET: Calling handleGetTaskDetail");
+            handleGetTaskDetail(request, response, currentUser);
             return;
         }
         
@@ -540,6 +546,145 @@ public class DepartmentTasksServlet extends HttpServlet {
         } finally {
             out.flush();
             out.close();
+        }
+    }
+    
+    /**
+     * Handle AJAX request to get task detail
+     */
+    private void handleGetTaskDetail(HttpServletRequest request, HttpServletResponse response, Users currentUser) {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        
+        try (PrintWriter out = response.getWriter()) {
+            String taskIdParam = request.getParameter("taskId");
+            
+            if (taskIdParam == null || taskIdParam.trim().isEmpty()) {
+                out.write("{\"error\": \"Task ID is required\"}");
+                return;
+            }
+            
+            int taskId = Integer.parseInt(taskIdParam);
+            
+            System.out.println("DEBUG handleGetTaskDetail: Requesting taskId=" + taskId);
+            
+            // Quick test to see what tasks exist
+            try {
+                java.sql.Connection conn = dal.DBContext.getConnection();
+                java.sql.PreparedStatement testStmt = conn.prepareStatement("SELECT TaskID, Title FROM Tasks LIMIT 5");
+                java.sql.ResultSet testRs = testStmt.executeQuery();
+                System.out.println("DEBUG: Available tasks in database:");
+                while (testRs.next()) {
+                    System.out.println("  - TaskID: " + testRs.getInt("TaskID") + ", Title: " + testRs.getString("Title"));
+                }
+                testRs.close();
+                testStmt.close();
+                conn.close();
+            } catch (Exception e) {
+                System.err.println("DEBUG: Error checking available tasks: " + e.getMessage());
+            }
+            
+            // Get task details from database
+            Tasks task = taskDAO.getTaskById(taskId);
+            
+            if (task == null) {
+                out.write("{\"error\": \"Task not found\"}");
+                return;
+            }
+            
+            // Debug log to check task data
+            System.out.println("DEBUG: Task ID " + taskId + " details:");
+            System.out.println("  - Title: " + task.getTitle());
+            System.out.println("  - AssigneeType: " + task.getAssigneeType());
+            System.out.println("  - UserAssignee: " + (task.getUserAssignee() != null ? task.getUserAssignee().getFullName() : "null"));
+            System.out.println("  - CreatedBy: " + (task.getCreatedBy() != null ? task.getCreatedBy().getFullName() : "null"));
+            
+            // Check if current user has permission to view this task
+            // (Department leader should be able to view tasks from their department)
+            if (!departmentDashboardDAO.isDepartmentLeader(currentUser.getUserID())) {
+                out.write("{\"error\": \"Access denied\"}");
+                return;
+            }
+            
+            // Convert task to JSON
+            Gson gson = new Gson();
+            JsonObject taskJson = new JsonObject();
+            
+            taskJson.addProperty("taskID", task.getTaskID());
+            taskJson.addProperty("title", task.getTitle());
+            taskJson.addProperty("description", task.getDescription());
+            taskJson.addProperty("status", task.getStatus());
+            taskJson.addProperty("statusText", getStatusText(task.getStatus()));
+            
+            // Format dates
+            if (task.getStartDate() != null) {
+                taskJson.addProperty("startDate", new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(task.getStartDate()));
+            }
+            if (task.getEndDate() != null) {
+                taskJson.addProperty("endDate", new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(task.getEndDate()));
+            }
+            if (task.getCreatedAt() != null) {
+                taskJson.addProperty("createdAt", new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(task.getCreatedAt()));
+            }
+            
+            // Add assignee info
+            if (task.getUserAssignee() != null) {
+                JsonObject assigneeJson = new JsonObject();
+                assigneeJson.addProperty("fullName", task.getUserAssignee().getFullName());
+                assigneeJson.addProperty("email", task.getUserAssignee().getEmail());
+                assigneeJson.addProperty("avatar", task.getUserAssignee().getAvatar());
+                taskJson.add("assignee", assigneeJson);
+            }
+            
+            // Add creator info
+            if (task.getCreatedBy() != null) {
+                JsonObject creatorJson = new JsonObject();
+                creatorJson.addProperty("fullName", task.getCreatedBy().getFullName());
+                creatorJson.addProperty("email", task.getCreatedBy().getEmail());
+                taskJson.add("creator", creatorJson);
+            }
+            
+            // Add event info if available
+            if (task.getEvent() != null) {
+                JsonObject eventJson = new JsonObject();
+                eventJson.addProperty("eventName", task.getEvent().getEventName());
+                eventJson.addProperty("eventID", task.getEvent().getEventID());
+                taskJson.add("event", eventJson);
+            }
+            
+            out.write(gson.toJson(taskJson));
+            
+        } catch (NumberFormatException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            try (PrintWriter out = response.getWriter()) {
+                out.write("{\"error\": \"Invalid task ID format\"}");
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            try (PrintWriter out = response.getWriter()) {
+                out.write("{\"error\": \"" + e.getMessage() + "\"}");
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+    
+    /**
+     * Convert status code to Vietnamese text
+     */
+    private String getStatusText(String status) {
+        if (status == null) return "Không xác định";
+        
+        switch (status) {
+            case "ToDo": return "Chưa bắt đầu";
+            case "InProgress": return "Đang thực hiện";
+            case "Review": return "Chờ duyệt";
+            case "Done": return "Hoàn thành";
+            case "Rejected": return "Từ chối";
+            default: return status;
         }
     }
     
