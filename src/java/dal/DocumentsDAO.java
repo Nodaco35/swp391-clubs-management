@@ -145,11 +145,8 @@ public class DocumentsDAO {
     }
 
     public Documents getDocumentByID(int documentID) {
-        String sql = "SELECT d.*, c.ClubName, dp.DepartmentName " +
-                "FROM Documents d " +
-                "JOIN Clubs c ON d.ClubID = c.ClubID " +
-                "JOIN Departments dp ON d.DepartmentID = dp.DepartmentID " +
-                "WHERE d.DocumentID = ?";
+        String sql = "SELECT * FROM Documents WHERE DocumentID = ?";
+        DepartmentDAO deptDAO = new DepartmentDAO();
         try {
             Connection connection = DBContext.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -159,17 +156,13 @@ public class DocumentsDAO {
                 Documents doc = new Documents();
                 doc.setDocumentID(rs.getInt("DocumentID"));
                 doc.setDocumentName(rs.getString("DocumentName"));
-                doc.setDescription(rs.getString("Description"));
                 doc.setDocumentURL(rs.getString("DocumentURL"));
                 doc.setDocumentType(rs.getString("DocumentType"));
                 Clubs club = new Clubs();
                 club.setClubID(rs.getInt("ClubID"));
-                club.setClubName(rs.getString("ClubName"));
                 doc.setClub(club);
-                Department department = new Department();
-                department.setDepartmentID(rs.getInt("DepartmentID"));
-                department.setDepartmentName(rs.getString("DepartmentName"));
-                doc.setDepartment(department);
+                Department dept = deptDAO.getDepartmentByID(rs.getInt("DepartmentID"));
+                doc.setDepartment(dept);
                 return doc;
             }
         } catch (SQLException e) {
