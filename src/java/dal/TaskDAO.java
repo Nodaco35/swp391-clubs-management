@@ -146,37 +146,40 @@ public class TaskDAO {
         EventsDAO ed = new EventsDAO();
         ClubDAO cd = new ClubDAO();
         DepartmentDAO dd = new DepartmentDAO();
+        DocumentsDAO docDAO = new DocumentsDAO();
         try {
             Connection connection = DBContext.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setInt(1, taskID);
             ResultSet rs = ps.executeQuery();
-
             if (rs.next()) {
                 Tasks t = new Tasks();
-
                 t.setTaskID(rs.getInt("TaskID"));
                 int parentId = rs.getInt("ParentTaskID");
-                t.setParentTaskID(rs.wasNull() ? null : parentId); // nullable check
-
+                t.setParentTaskID(rs.wasNull() ? null : parentId);
                 EventTerms et = getEventTermsByID(rs.getInt("TermID"));
                 Events event = ed.getEventByID(rs.getInt("EventID"));
                 Clubs club = cd.getCLubByID(rs.getInt("ClubID"));
-                Users creator = UserDAO.getUserById(rs.getString("CreatedBy"));
+                Users creator = ud.getUserById(rs.getString("CreatedBy"));
 
                 t.setTerm(et);
                 t.setEvent(event);
                 t.setClub(club);
                 t.setCreatedBy(creator);
-
                 t.setTitle(rs.getString("Title"));
                 t.setDescription(rs.getString("Description"));
                 t.setStatus(rs.getString("Status"));
+                t.setRating(rs.getString("Rating"));
+                t.setLastRejectReason(rs.getString("LastRejectReason"));
                 t.setReviewComment(rs.getString("ReviewComment"));
                 t.setStartDate(rs.getTimestamp("StartDate"));
                 t.setEndDate(rs.getTimestamp("EndDate"));
                 t.setCreatedAt(rs.getTimestamp("CreatedAt"));
-
+                int documentID = rs.getInt("DocumentID");
+                if (!rs.wasNull()) {
+                    Documents doc = docDAO.getDocumentByID(documentID);
+                    t.setDocument(doc);
+                }
                 String assigneeType = rs.getString("AssigneeType");
                 t.setAssigneeType(assigneeType);
                 if ("User".equals(assigneeType)) {
@@ -186,11 +189,10 @@ public class TaskDAO {
                     Department dept = dd.getDepartmentByID(rs.getInt("DepartmentID"));
                     t.setDepartmentAssignee(dept);
                 }
-
                 return t;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
         return null;
     }
@@ -251,39 +253,6 @@ public class TaskDAO {
         return taskList;
     }
 
-    public List<TaskAssignees> getAssigneesByTaskID(int taskID) {
-        List<TaskAssignees> assignees = new ArrayList<>();
-        String sql = "SELECT * FROM TaskAssignees WHERE TaskID = ?";
-        DepartmentDAO dd = new DepartmentDAO();
-
-        try {
-            Connection connection = DBContext.getConnection();
-            PreparedStatement ps = connection.prepareStatement(sql);
-            ps.setInt(1, taskID);
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                TaskAssignees ta = new TaskAssignees();
-                ta.setTaskAssigneeID(rs.getInt("TaskAssigneeID"));
-                Tasks t = getTasksByID(rs.getInt("TaskID"));
-                ta.setTask(t);
-                ta.setAssigneeType(rs.getString("AssigneeType"));
-
-                if ("User".equalsIgnoreCase(rs.getString("AssigneeType"))) {
-                    Users u = UserDAO.getUserById(rs.getString("UserID"));
-                    ta.setUser(u);
-                } else if ("Department".equalsIgnoreCase(rs.getString("AssigneeType"))) {
-                    Department d = dd.getDepartmentByID(rs.getInt("DepartmentID"));
-                    ta.setDepartment(d);
-                }
-
-                assignees.add(ta);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return assignees;
-    }
 
     /**
      * Get tasks assigned to a specific department in a club
