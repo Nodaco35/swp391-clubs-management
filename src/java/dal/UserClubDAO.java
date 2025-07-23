@@ -645,7 +645,7 @@ public class UserClubDAO {
                     SELECT cd.DepartmentID, d.DepartmentName 
                     FROM ClubDepartments cd
                     JOIN Departments d ON cd.DepartmentID = d.DepartmentID
-                    WHERE cd.ClubID = ? AND d.DepartmentStatus = 1
+                    WHERE cd.ClubID = ? AND d.`DepartmentStatus` = 1
                     """;
             stmt = conn.prepareStatement(query);
             stmt.setInt(1, clubID);

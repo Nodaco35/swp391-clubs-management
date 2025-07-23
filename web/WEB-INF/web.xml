@@ -162,6 +162,10 @@
         <servlet-class>controller.DepartmentMemberServlet</servlet-class>
     </servlet>
     <servlet>
+        <servlet-name>DepartmentTasksServlet</servlet-name>
+        <servlet-class>controller.DepartmentTasksServlet</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>DepartmentMeetingServlet</servlet-name>
         <servlet-class>controller.DepartmentMeetingServlet</servlet-class>
     </servlet>
@@ -412,6 +416,10 @@
     <servlet-mapping>
         <servlet-name>DepartmentMemberServlet</servlet-name>
         <url-pattern>/department-members</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DepartmentTasksServlet</servlet-name>
+        <url-pattern>/department-tasks</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>DepartmentMeetingServlet</servlet-name>

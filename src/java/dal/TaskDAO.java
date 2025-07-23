@@ -463,4 +463,176 @@ public class TaskDAO {
             return false;
         }
     }
+    
+    /**
+     * Get all tasks by club ID
+     */
+    public List<Tasks> getTasksByClubID(int clubID) {
+        List<Tasks> taskList = new ArrayList<>();
+        String sql = """
+            SELECT t.*, et.TermName, et.TermStart, et.TermEnd, 
+                   e.EventName, c.ClubName, u.FullName as CreatorName,
+                   d.DepartmentName, du.FullName as UserAssigneeName
+            FROM Tasks t
+            LEFT JOIN EventTerms et ON t.TermID = et.TermID
+            LEFT JOIN Events e ON t.EventID = e.EventID
+            LEFT JOIN Clubs c ON t.ClubID = c.ClubID
+            LEFT JOIN Users u ON t.CreatedBy = u.UserID
+            LEFT JOIN Departments d ON t.DepartmentID = d.DepartmentID
+            LEFT JOIN Users du ON t.UserID = du.UserID
+            WHERE t.ClubID = ?
+            ORDER BY t.CreatedAt DESC, t.StartDate DESC
+            """;
+        
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, clubID);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Tasks task = new Tasks();
+                task.setTaskID(rs.getInt("TaskID"));
+                task.setTitle(rs.getString("Title"));
+                task.setDescription(rs.getString("Description"));
+                task.setContent(rs.getString("Content"));
+                task.setStatus(rs.getString("Status"));
+                task.setAssigneeType(rs.getString("AssigneeType"));
+                task.setStartDate(rs.getTimestamp("StartDate"));
+                task.setEndDate(rs.getTimestamp("EndDate"));
+                task.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                task.setRating(rs.getString("Rating"));
+                task.setLastRejectReason(rs.getString("LastRejectReason"));
+                task.setReviewComment(rs.getString("ReviewComment"));
+
+                // Set creator
+                if (rs.getString("CreatedBy") != null) {
+                    Users creator = new Users();
+                    creator.setUserID(rs.getString("CreatedBy"));
+                    creator.setFullName(rs.getString("CreatorName"));
+                    task.setCreatedBy(creator);
+                }
+
+                // Set club
+                if (rs.getInt("ClubID") > 0) {
+                    Clubs club = new Clubs();
+                    club.setClubID(rs.getInt("ClubID"));
+                    club.setClubName(rs.getString("ClubName"));
+                    task.setClub(club);
+                }
+
+                // Set event
+                if (rs.getInt("EventID") > 0) {
+                    Events event = new Events();
+                    event.setEventID(rs.getInt("EventID"));
+                    event.setEventName(rs.getString("EventName"));
+                    task.setEvent(event);
+                }
+
+                // Set term
+                if (rs.getInt("TermID") > 0) {
+                    EventTerms term = new EventTerms();
+                    term.setTermID(rs.getInt("TermID"));
+                    term.setTermName(rs.getString("TermName"));
+                    term.setTermStart(rs.getTimestamp("TermStart"));
+                    term.setTermEnd(rs.getTimestamp("TermEnd"));
+                    task.setTerm(term);
+                }
+
+                // Set assignee based on type
+                String assigneeType = rs.getString("AssigneeType");
+                if ("Department".equals(assigneeType) && rs.getInt("DepartmentID") > 0) {
+                    Department dept = new Department();
+                    dept.setDepartmentID(rs.getInt("DepartmentID"));
+                    dept.setDepartmentName(rs.getString("DepartmentName"));
+                    task.setDepartmentAssignee(dept);
+                } else if ("User".equals(assigneeType) && rs.getString("UserID") != null) {
+                    Users userAssignee = new Users();
+                    userAssignee.setUserID(rs.getString("UserID"));
+                    userAssignee.setFullName(rs.getString("UserAssigneeName"));
+                    task.setUserAssignee(userAssignee);
+                }
+
+                taskList.add(task);
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return taskList;
+    }
+    
+    /**
+     * Get tasks assigned to individual members in a specific department
+     * This returns tasks where AssigneeType = 'User' and the user belongs to the given department
+     */
+    public List<Tasks> getTasksForDepartmentMembers(int clubDepartmentId) {
+        List<Tasks> taskList = new ArrayList<>();
+        String sql = """
+            SELECT t.*, et.TermName, et.TermStart, et.TermEnd, 
+                   e.EventName, c.ClubName, u.FullName as CreatorName,
+                   assignee.FullName as AssigneeName
+            FROM Tasks t
+            LEFT JOIN EventTerms et ON t.TermID = et.TermID
+            LEFT JOIN Events e ON t.EventID = e.EventID
+            LEFT JOIN Clubs c ON t.ClubID = c.ClubID
+            LEFT JOIN Users u ON t.CreatedBy = u.UserID
+            LEFT JOIN Users assignee ON t.UserID = assignee.UserID
+            INNER JOIN UserClubs uc ON t.UserID = uc.UserID 
+            WHERE t.AssigneeType = 'User' 
+              AND uc.ClubDepartmentID = ? 
+              AND uc.IsActive = 1
+            ORDER BY t.StartDate DESC, t.CreatedAt DESC
+            """;
+        
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, clubDepartmentId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Tasks task = new Tasks();
+                task.setTaskID(rs.getInt("TaskID"));
+                task.setParentTaskID(rs.getInt("ParentTaskID"));
+                task.setTitle(rs.getString("Title"));
+                task.setDescription(rs.getString("Description"));
+                task.setContent(rs.getString("Content"));
+                task.setStatus(rs.getString("Status"));
+                task.setRating(rs.getString("Rating"));
+                task.setLastRejectReason(rs.getString("LastRejectReason"));
+                task.setReviewComment(rs.getString("ReviewComment"));
+                task.setStartDate(rs.getTimestamp("StartDate"));
+                task.setEndDate(rs.getTimestamp("EndDate"));
+                task.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                task.setAssigneeType(rs.getString("AssigneeType"));
+
+                // Set user assignee info
+                if (rs.getString("UserID") != null) {
+                    Users userAssignee = new Users();
+                    userAssignee.setUserID(rs.getString("UserID"));
+                    userAssignee.setFullName(rs.getString("AssigneeName"));
+                    task.setUserAssignee(userAssignee);
+                }
+
+                // Set creator info
+                if (rs.getString("CreatedBy") != null) {
+                    Users creator = new Users();
+                    creator.setUserID(rs.getString("CreatedBy"));
+                    creator.setFullName(rs.getString("CreatorName"));
+                    task.setCreatedBy(creator);
+                }
+
+                taskList.add(task);
+            }
+            
+            connection.close();
+        } catch (SQLException e) {
+            System.err.println("ERROR TaskDAO - Failed to get tasks for department members: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return taskList;
+    }
 }

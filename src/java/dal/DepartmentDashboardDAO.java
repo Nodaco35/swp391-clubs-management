@@ -103,38 +103,48 @@ public class DepartmentDashboardDAO {
      * @return DepartmentDashboard with task statistics filled
      */
     public void fillTaskStatistics(DepartmentDashboard dashboard, int clubDepartmentId) {
-        String sql = """
-            SELECT 
-                COUNT(*) as totalTasks,
-                SUM(CASE WHEN t.Status = 'ToDo' THEN 1 ELSE 0 END) as todoTasks,
-                SUM(CASE WHEN t.Status = 'InProgress' THEN 1 ELSE 0 END) as inProgressTasks,
-                SUM(CASE WHEN t.Status = 'Review' THEN 1 ELSE 0 END) as reviewTasks,
-                SUM(CASE WHEN t.Status = 'Done' THEN 1 ELSE 0 END) as doneTasks,
-                AVG(t.ProgressPercent) as averageProgress
-            FROM Tasks t
-            JOIN TaskAssignees ta ON t.TaskID = ta.TaskID
-            JOIN ClubDepartments cd ON ta.DepartmentID = cd.DepartmentID
-            WHERE ta.AssigneeType = 'Department' AND cd.ClubDepartmentID = ?
+        // Lấy ClubID và DepartmentID từ ClubDepartmentID trước
+        String getInfoSql = """
+            SELECT cd.ClubID, cd.DepartmentID 
+            FROM ClubDepartments cd 
+            WHERE cd.ClubDepartmentID = ?
             """;
-
-        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
+        
+        try (Connection conn = DBContext.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(getInfoSql)) {
+            
             ps.setInt(1, clubDepartmentId);
             ResultSet rs = ps.executeQuery();
-
+            
             if (rs.next()) {
-                dashboard.setTotalTasks(rs.getInt("totalTasks"));
-                dashboard.setTodoTasks(rs.getInt("todoTasks"));
-                dashboard.setInProgressTasks(rs.getInt("inProgressTasks"));
-                dashboard.setReviewTasks(rs.getInt("reviewTasks"));
-                dashboard.setDoneTasks(rs.getInt("doneTasks"));
-
-                // Handle null average (when no tasks exist)
-                double avgProgress = rs.getDouble("averageProgress");
-                if (!rs.wasNull()) {
-                    dashboard.setAverageProgress(Math.round(avgProgress * 100.0) / 100.0);
-                } else {
-                    dashboard.setAverageProgress(0.0);
+                int clubId = rs.getInt("ClubID");
+                int departmentId = rs.getInt("DepartmentID");
+                
+                // Bây giờ query Tasks với ClubID và DepartmentID
+                String taskSql = """
+                    SELECT 
+                        COUNT(*) as totalTasks,
+                        SUM(CASE WHEN Status = 'ToDo' THEN 1 ELSE 0 END) as todoTasks,
+                        SUM(CASE WHEN Status = 'InProgress' THEN 1 ELSE 0 END) as inProgressTasks,
+                        SUM(CASE WHEN Status = 'Review' THEN 1 ELSE 0 END) as reviewTasks,
+                        SUM(CASE WHEN Status = 'Done' THEN 1 ELSE 0 END) as doneTasks
+                    FROM Tasks 
+                    WHERE AssigneeType = 'Department' AND ClubID = ? AND DepartmentID = ?
+                    """;
+                
+                try (PreparedStatement taskPs = conn.prepareStatement(taskSql)) {
+                    taskPs.setInt(1, clubId);
+                    taskPs.setInt(2, departmentId);
+                    ResultSet taskRs = taskPs.executeQuery();
+                    
+                    if (taskRs.next()) {
+                        dashboard.setTotalTasks(taskRs.getInt("totalTasks"));
+                        dashboard.setTodoTasks(taskRs.getInt("todoTasks"));
+                        dashboard.setInProgressTasks(taskRs.getInt("inProgressTasks"));
+                        dashboard.setReviewTasks(taskRs.getInt("reviewTasks"));
+                        dashboard.setDoneTasks(taskRs.getInt("doneTasks"));
+                        dashboard.setAverageProgress(0.0);
+                    }
                 }
             }
         } catch (SQLException e) {
@@ -149,27 +159,47 @@ public class DepartmentDashboardDAO {
      * @return DepartmentDashboard with event statistics filled
      */
     public void fillEventStatistics(DepartmentDashboard dashboard, int clubDepartmentId) {
-        String sql = """
-            SELECT 
-                COUNT(DISTINCT t.EventID) as totalEvents,
-                SUM(CASE WHEN e.EventDate > NOW() THEN 1 ELSE 0 END) as upcomingEvents,
-                SUM(CASE WHEN e.Status = 'Completed' THEN 1 ELSE 0 END) as completedEvents
-            FROM Tasks t
-            JOIN TaskAssignees ta ON t.TaskID = ta.TaskID
-            JOIN Events e ON t.EventID = e.EventID
-            JOIN ClubDepartments cd ON ta.DepartmentID = cd.DepartmentID
-            WHERE ta.AssigneeType = 'Department' AND cd.ClubDepartmentID = ?
+        // Lấy ClubID và DepartmentID từ ClubDepartmentID trước
+        String getInfoSql = """
+            SELECT cd.ClubID, cd.DepartmentID 
+            FROM ClubDepartments cd 
+            WHERE cd.ClubDepartmentID = ?
             """;
-
-        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
+        
+        try (Connection conn = DBContext.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(getInfoSql)) {
+            
             ps.setInt(1, clubDepartmentId);
             ResultSet rs = ps.executeQuery();
-
+            
             if (rs.next()) {
-                dashboard.setTotalEvents(rs.getInt("totalEvents"));
-                dashboard.setUpcomingEvents(rs.getInt("upcomingEvents"));
-                dashboard.setCompletedEvents(rs.getInt("completedEvents"));
+                int clubId = rs.getInt("ClubID");
+                int departmentId = rs.getInt("DepartmentID");
+                
+                // Query Events thông qua Tasks
+                String eventSql = """
+                    SELECT 
+                        COUNT(DISTINCT t.EventID) as totalEvents,
+                        SUM(CASE WHEN es.EventDate > CURDATE() THEN 1 ELSE 0 END) as upcomingEvents,
+                        SUM(CASE WHEN e.Status = 'Completed' THEN 1 ELSE 0 END) as completedEvents
+                    FROM Tasks t
+                    LEFT JOIN Events e ON t.EventID = e.EventID
+                    LEFT JOIN EventSchedules es ON e.EventID = es.EventID
+                    WHERE t.AssigneeType = 'Department' AND t.ClubID = ? AND t.DepartmentID = ? 
+                      AND t.EventID IS NOT NULL
+                    """;
+                
+                try (PreparedStatement eventPs = conn.prepareStatement(eventSql)) {
+                    eventPs.setInt(1, clubId);
+                    eventPs.setInt(2, departmentId);
+                    ResultSet eventRs = eventPs.executeQuery();
+                    
+                    if (eventRs.next()) {
+                        dashboard.setTotalEvents(eventRs.getInt("totalEvents"));
+                        dashboard.setUpcomingEvents(eventRs.getInt("upcomingEvents"));
+                        dashboard.setCompletedEvents(eventRs.getInt("completedEvents"));
+                    }
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
