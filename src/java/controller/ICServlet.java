@@ -4,6 +4,7 @@ import dal.ApprovalHistoryDAO;
 import dal.ClubDAO;
 import dal.PeriodicReportDAO;
 import dal.ClubCreationPermissionDAO;
+import dal.ClubPeriodicReportDAO;
 import dal.CreatedClubApplicationsDAO;
 import dal.NotificationDAO;
 import dal.UserDAO;
@@ -17,8 +18,10 @@ import models.Users;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.stream.Collectors;
 import models.ClubApprovalHistory;
 import models.ClubCreationPermissions;
+import models.ClubPeriodicReport;
 import models.Clubs;
 import models.CreatedClubApplications;
 
@@ -44,31 +47,32 @@ public class ICServlet extends HttpServlet {
         String action = request.getParameter("action");
 
         if (action == null) {
-            PeriodicReportDAO reportDAO = new PeriodicReportDAO();
+            ClubPeriodicReportDAO reportDAO = new ClubPeriodicReportDAO();
 
-            // Thống kê
-            int pendingReports = reportDAO.countByStatus("PENDING");
-            int approvedReports = reportDAO.countByStatus("APPROVED");
-            int overdueClubs = reportDAO.countOverdueClubs();
+            // Lấy tất cả báo cáo của tất cả CLB, sắp xếp theo ngày nộp giảm dần
+            List<ClubPeriodicReport> allReports = reportDAO.getAllReportsSortedByDate();
+            for (ClubPeriodicReport report : allReports) {
+                int clubId = report.getClubID();
+                String termId = report.getTerm();
+
+                int memberCount = reportDAO.countMembersByClubAndTerm(clubId, termId);
+                int eventCount = reportDAO.countEventsByClubAndTerm(clubId, termId);
+                
+                
+                report.setMemberCount(memberCount);
+            }
+            List<ClubPeriodicReport> latest3 = allReports.stream().limit(3).toList();
+            request.setAttribute("reportList",latest3);
+
             int totalActiveClubs = clubDAO.getTotalActiveClubs();
 
-            // Danh sách báo cáo theo từng trạng thái
-            List<PeriodicReport> pendingReportsList = reportDAO.getReportsByStatus("PENDING");
-            List<PeriodicReport> approvedReportsList = reportDAO.getReportsByStatus("APPROVED");
-
-            // Truyền dữ liệu sang view
-            request.setAttribute("pendingReports", pendingReports);
-            request.setAttribute("approvedReports", approvedReports);
-            request.setAttribute("overdueClubs", overdueClubs);
             request.setAttribute("totalActiveClubs", totalActiveClubs);
 
-            request.setAttribute("pendingReportsList", pendingReportsList);
-            request.setAttribute("approvedReportsList", approvedReportsList);
 
             request.getRequestDispatcher("/view/ic/dashboard.jsp").forward(request, response);
         } else if (action.equals("grantPermission")) {
             List<Clubs> requests = clubDAO.getRequestClubs();
-            
+
             List<Clubs> approvedRequests = clubDAO.getApproveRequestClubs();
 
             request.setAttribute("requests", requests);
@@ -98,8 +102,7 @@ public class ICServlet extends HttpServlet {
                     approvalHistoryDAO.insertApprovalRecord(requestClubId, "Approved", "Đã duyệt tạo Câu lạc bộ", "Create");
                 }
                 request.setAttribute(success ? "successMessage" : "errorMessage", message);
-            } 
-            else if (action.equals("rejectPermissionRequest")) {
+            } else if (action.equals("rejectPermissionRequest")) {
                 String reason = request.getParameter("reason");        // Lý do từ chối
                 success = approvalHistoryDAO.rejectRequest(requestClubId, reason);
 
@@ -138,20 +141,37 @@ public class ICServlet extends HttpServlet {
             request.setAttribute(success ? "deletedMessage" : "errorMessage", deletedMessage);
 
             request.getRequestDispatcher("view/ic/grantPermission.jsp").forward(request, response);
-        } 
-        
-        else if("viewClubRequest".equals(action)){
+        } else if ("viewClubRequest".equals(action)) {
             ApprovalHistoryDAO approvalHistoryDAO = new ApprovalHistoryDAO();
             int infoClubId = Integer.parseInt(request.getParameter("id"));
             Clubs infoClub = clubDAO.getALLClubById(infoClubId);
             List<ClubApprovalHistory> approvalHistory = approvalHistoryDAO.getHistoryByClubId(infoClubId);
-            
+
             request.setAttribute("approvalHistory", approvalHistory);
             request.setAttribute("club", infoClub);
-            
+
 //            PrintWriter out = response.getWriter();
 //            out.print(approvalHistory.size());
             request.getRequestDispatcher("view/ic/viewClubInfo.jsp").forward(request, response);
+        } else if ("periodicReport".equals(action)) {
+            ClubPeriodicReportDAO reportDAO = new ClubPeriodicReportDAO();
+
+            // Lấy tất cả báo cáo của tất cả CLB, sắp xếp theo ngày nộp giảm dần
+            List<ClubPeriodicReport> allReports = reportDAO.getAllReportsSortedByDate();
+            for (ClubPeriodicReport report : allReports) {
+                int clubId = report.getClubID();
+                String termId = report.getTerm();
+
+                int memberCount = reportDAO.countMembersByClubAndTerm(clubId, termId);
+                int eventCount = reportDAO.countEventsByClubAndTerm(clubId, termId);
+                
+                report.setEventCount(eventCount);
+                report.setMemberCount(memberCount);
+            }
+            // Truyền sang JSP
+            request.setAttribute("reportList", allReports);
+            request.getRequestDispatcher("view/ic/report-overview.jsp").forward(request, response);
+
         }
     }
 
