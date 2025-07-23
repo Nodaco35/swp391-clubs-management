@@ -34,16 +34,23 @@ public class DepartmentDashboardDAO {
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, userId);
+            System.out.println("DEBUG DepartmentDashboardDAO - Checking user: " + userId);
+            System.out.println("DEBUG DepartmentDashboardDAO - SQL: " + sql);
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                return new DepartmentDashboard(
+                DepartmentDashboard result = new DepartmentDashboard(
                         rs.getInt("ClubDepartmentID"),
                         rs.getInt("DepartmentID"),
                         rs.getString("DepartmentName"),
                         rs.getInt("ClubID"),
                         rs.getString("ClubName")
                 );
+                System.out.println("DEBUG DepartmentDashboardDAO - Found department: " + result.getDepartmentName() + 
+                                 ", ClubID: " + result.getClubId() + ", DepartmentID: " + result.getDepartmentId());
+                return result;
+            } else {
+                System.out.println("DEBUG DepartmentDashboardDAO - No department found for user: " + userId);
             }
         } catch (SQLException e) {
             e.printStackTrace();

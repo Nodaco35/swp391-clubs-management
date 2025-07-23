@@ -166,6 +166,10 @@
         <servlet-class>controller.DepartmentMeetingServlet</servlet-class>
     </servlet>
     <servlet>
+        <servlet-name>DepartmentPlanEventsServlet</servlet-name>
+        <servlet-class>controller.DepartmentPlanEventsServlet</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>ForgotPasswordServlet</servlet-name>
         <servlet-class>controller.ForgotPasswordServlet</servlet-class>
     </servlet>
@@ -412,6 +416,10 @@
     <servlet-mapping>
         <servlet-name>DepartmentMeetingServlet</servlet-name>
         <url-pattern>/department-meeting</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DepartmentPlanEventsServlet</servlet-name>
+        <url-pattern>/department-plan-events</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ForgotPasswordServlet</servlet-name>
