@@ -147,6 +147,7 @@ public class TaskDAO {
         ClubDAO cd = new ClubDAO();
         DepartmentDAO dd = new DepartmentDAO();
         DocumentsDAO docDAO = new DocumentsDAO();
+        UserDAO ud = new UserDAO();
         try {
             Connection connection = DBContext.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);

@@ -364,7 +364,6 @@
         </main>
 
         <script>
-            // Lọc theo status
             window.addEventListener("DOMContentLoaded", function () {
                 document.getElementById("eventStatusFilter").value = "upcoming";
                 document.getElementById("eventStatusFilter").dispatchEvent(new Event("change"));
@@ -384,7 +383,6 @@
                 });
             });
 
-            // Xử lý hiển thị modal khi nhấn nút "Giao việc"
             document.querySelectorAll(".btn-action.assign").forEach(button => {
                 button.addEventListener("click", function (e) {
                     e.preventDefault();
@@ -396,12 +394,10 @@
                 });
             });
 
-            // Xử lý đóng modal
-            document.querySelector(".close").addEventListener("click", function () {
+            document.querySelector(".close-term").addEventListener("click", function () {
                 document.getElementById("eventTermModal").style.display = "none";
             });
 
-            // Đóng modal khi nhấn ra ngoài
             window.addEventListener("click", function (event) {
                 const modal = document.getElementById("eventTermModal");
                 if (event.target === modal) {
