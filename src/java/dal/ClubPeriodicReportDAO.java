@@ -46,4 +46,5 @@ public class ClubPeriodicReportDAO {
         return list;
     }
     
+    
 }
