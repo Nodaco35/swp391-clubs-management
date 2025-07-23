@@ -34,16 +34,23 @@ public class DepartmentDashboardDAO {
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, userId);
+            System.out.println("DEBUG DepartmentDashboardDAO - Checking user: " + userId);
+            System.out.println("DEBUG DepartmentDashboardDAO - SQL: " + sql);
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                return new DepartmentDashboard(
+                DepartmentDashboard result = new DepartmentDashboard(
                         rs.getInt("ClubDepartmentID"),
                         rs.getInt("DepartmentID"),
                         rs.getString("DepartmentName"),
                         rs.getInt("ClubID"),
                         rs.getString("ClubName")
                 );
+                System.out.println("DEBUG DepartmentDashboardDAO - Found department: " + result.getDepartmentName() + 
+                                 ", ClubID: " + result.getClubId() + ", DepartmentID: " + result.getDepartmentId());
+                return result;
+            } else {
+                System.out.println("DEBUG DepartmentDashboardDAO - No department found for user: " + userId);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -304,6 +311,47 @@ public class DepartmentDashboardDAO {
             e.printStackTrace();
         }
         return 0;
+    }
+    
+    public boolean isDepartmentLeaderHauCan(String userId, int clubID) {
+        String sql = """
+                     SELECT uc.ClubDepartmentID
+                     FROM UserClubs uc
+                     JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
+                     WHERE uc.UserID = ? AND uc.RoleID = 3 AND uc.IsActive = 1 AND cd.DepartmentID=5 AND cd.ClubID = ?""";
+        
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setString(1, userId);
+            ps.setInt(2, clubID);
+            ResultSet rs = ps.executeQuery();
+            
+            return rs.next(); // Trả về true nếu tìm thấy ít nhất 1 record
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    public String getExternalLeaderID(int clubID) {
+        String sql = """
+                     SELECT uc.UserID
+                     FROM UserClubs uc
+                     JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
+                     WHERE cd.ClubID = ? AND cd.DepartmentID = 6 AND uc.RoleID = 3 AND uc.IsActive = 1
+                     """;
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, clubID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("UserID");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

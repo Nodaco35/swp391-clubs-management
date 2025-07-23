@@ -136,7 +136,7 @@ public class ChairmanMyClubEventsServlet extends HttpServlet {
                 } else {
                     // Có thể xảy ra do lỗi SQL hoặc trigger
                     request.setAttribute("termError", "Không thể thêm giai đoạn: Giai đoạn đã tồn tại hoặc đã đủ 3 giai đoạn.");
-                    request.setAttribute("showTermModal", true); // để mở lại modal
+                    request.setAttribute("showTermModal", true);
                     doGet(request, response);
                 }
 

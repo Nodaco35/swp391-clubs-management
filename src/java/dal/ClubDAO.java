@@ -81,7 +81,9 @@ public class ClubDAO {
                 + "FROM Clubs c "
                 + "LEFT JOIN ClubCategories cc ON c.CategoryID = cc.CategoryID "
                 + "WHERE c.ClubID = ?";
-        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
             ps.setInt(1, clubID);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {

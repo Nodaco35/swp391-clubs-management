@@ -6,15 +6,10 @@ package controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
-import dal.ClubDAO;
-import dal.DepartmentDAO;
-import dal.EventsDAO;
-import dal.TaskDAO;
+import dal.*;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -66,7 +61,6 @@ public class ChairmanTasksServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         HttpSession session = request.getSession();
         Users user = (Users) session.getAttribute("user");
 
@@ -76,9 +70,12 @@ public class ChairmanTasksServlet extends HttpServlet {
             EventsDAO eventDAO = new EventsDAO();
             TaskDAO taskDAO = new TaskDAO();
             DepartmentDAO deptDAO = new DepartmentDAO();
+            DocumentsDAO docDAO = new DocumentsDAO();
 
             ClubInfo club = clubDAO.getClubChairman(userID);
             List<Events> eventList = eventDAO.getEventsByClubIdForTask(club.getClubID());
+            List<Department> departmentList = deptDAO.getDepartmentsByClubID(club.getClubID());
+            List<Documents> documentsList = docDAO.getDocumentsByClubID(club.getClubID());
 
             String eventIDParam = request.getParameter("eventID");
             Map<Events, Map<String, List<Tasks>>> timelineMap = new LinkedHashMap<>();
@@ -96,6 +93,10 @@ public class ChairmanTasksServlet extends HttpServlet {
                         for (Tasks task : allTasks) {
                             Department dept = deptDAO.getDepartmentByID(task.getDepartmentAssignee().getDepartmentID());
                             task.setDepartmentAssignee(dept);
+                            if (task.getDocument() != null) {
+                                Documents doc = docDAO.getDocumentByID(task.getDocument().getDocumentID());
+                                task.setDocument(doc);
+                            }
                         }
 
                         Map<String, List<Tasks>> groupedByTerm = new LinkedHashMap<>();
@@ -116,9 +117,8 @@ public class ChairmanTasksServlet extends HttpServlet {
                         timelineMap.put(selectedEvent, groupedByTerm);
                         request.setAttribute("termInfoMap_" + eventID, termInfoMap);
                     }
-
                 } catch (NumberFormatException e) {
-                    e.printStackTrace();
+                    throw new RuntimeException(e);
                 }
             } else {
                 for (Events event : eventList) {
@@ -130,6 +130,10 @@ public class ChairmanTasksServlet extends HttpServlet {
                         for (Tasks task : allTasks) {
                             Department dept = deptDAO.getDepartmentByID(task.getDepartmentAssignee().getDepartmentID());
                             task.setDepartmentAssignee(dept);
+                            if (task.getDocument() != null) {
+                                Documents doc = docDAO.getDocumentByID(task.getDocument().getDocumentID());
+                                task.setDocument(doc);
+                            }
                         }
 
                         Map<String, List<Tasks>> groupedByTerm = new LinkedHashMap<>();
@@ -156,6 +160,8 @@ public class ChairmanTasksServlet extends HttpServlet {
             request.setAttribute("timelineMap", timelineMap);
             request.setAttribute("eventList", eventList);
             request.setAttribute("club", club);
+            request.setAttribute("departmentList", departmentList);
+            request.setAttribute("documentsList", documentsList);
             request.setAttribute("currentPath", request.getServletPath());
 
             request.getRequestDispatcher("/view/student/chairman/tasks.jsp").forward(request, response);
@@ -164,19 +170,118 @@ public class ChairmanTasksServlet extends HttpServlet {
         }
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        String action = request.getParameter("action");
+        if ("addTask".equals(action)) {
+            try {
+                // Lấy dữ liệu từ form
+                int termID = Integer.parseInt(request.getParameter("termID"));
+                int eventID = Integer.parseInt(request.getParameter("eventID"));
+                int clubID = Integer.parseInt(request.getParameter("clubID"));
+                int departmentID = Integer.parseInt(request.getParameter("departmentID"));
+                String title = request.getParameter("title");
+                String description = request.getParameter("description");
+                String existingDocumentID = request.getParameter("existingDocumentID");
+                String documentName = request.getParameter("documentName");
+                String documentURL = request.getParameter("documentURL");
+                String startDateStr = request.getParameter("startDate");
+                String endDateStr = request.getParameter("endDate");
+                String createdBy = request.getParameter("createdBy");
+                String assigneeType = request.getParameter("assigneeType");
+
+                // Validation
+                if ("new".equals(existingDocumentID) && documentURL != null && !documentURL.isEmpty() && (documentName == null || documentName.isEmpty())) {
+                    request.setAttribute("errorMessage", "Vui lòng nhập tên tài liệu khi cung cấp liên kết tài liệu.");
+                    doGet(request, response);
+                    return;
+                }
+
+                // Chuyển đổi ngày
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                Date startDate = new Date(sdf.parse(startDateStr).getTime());
+                Date endDate = new Date(sdf.parse(endDateStr).getTime());
+
+                // Kiểm tra ngày hợp lệ với EventTerms
+                TaskDAO taskDAO = new TaskDAO();
+                EventTerms term = taskDAO.getEventTermsByID(termID);
+                if (term == null || startDate.before(term.getTermStart()) || endDate.after(term.getTermEnd())) {
+                    request.setAttribute("errorMessage", "Ngày bắt đầu và kết thúc phải nằm trong khoảng thời gian của giai đoạn.");
+                    doGet(request, response);
+                    return;
+                }
+
+                // Xử lý tài liệu
+                Integer documentID = null;
+                if ("new".equals(existingDocumentID) && documentURL != null && !documentURL.isEmpty()) {
+                    DocumentsDAO docDAO = new DocumentsDAO();
+                    Documents doc = new Documents();
+                    doc.setDocumentName(documentName);
+                    doc.setDocumentURL(documentURL);
+                    doc.setDocumentType("Tasks");
+                    Clubs c = new Clubs();
+                    c.setClubID(clubID);
+                    doc.setClub(c);
+                    Department d = new Department();
+                    d.setDepartmentID(departmentID);
+                    doc.setDepartment(d);
+                    documentID = docDAO.addDocument(doc);
+                    if (documentID == null) {
+                        request.setAttribute("errorMessage", "Không thể lưu tài liệu.");
+                        doGet(request, response);
+                        return;
+                    }
+                } else if (!existingDocumentID.isEmpty() && !"new".equals(existingDocumentID)) {
+                    documentID = Integer.parseInt(existingDocumentID);
+                }
+
+                Tasks task = new Tasks();
+                EventTerms et = new EventTerms();
+                et.setTermID(termID);
+                Events e = new Events();
+                e.setEventID(eventID);
+                Clubs c = new Clubs();
+                c.setClubID(clubID);
+                Department d = new Department();
+                d.setDepartmentID(departmentID);
+                Users u = new Users();
+                u.setUserID(createdBy);
+                task.setTerm(et);
+                task.setEvent(e);
+                task.setClub(c);
+                task.setAssigneeType(assigneeType);
+                task.setDepartmentAssignee(d);
+                task.setTitle(title);
+                task.setDescription(description);
+                task.setStatus("ToDo");
+                task.setStartDate(startDate);
+                task.setEndDate(endDate);
+                task.setCreatedBy(u);
+                if (documentID != null) {
+                    Documents doc = new Documents();
+                    doc.setDocumentID(documentID);
+                    task.setDocument(doc);
+                }
+
+                boolean success = taskDAO.addTask(task);
+
+                if (success) {
+                    response.sendRedirect(request.getContextPath() + "/chairman-page/tasks?eventID=" + eventID);
+                } else {
+                    request.setAttribute("errorMessage", "Không thể thêm công việc.");
+                    doGet(request, response);
+                }
+            } catch (Exception e) {
+                request.setAttribute("errorMessage", "Lỗi: " + e.getMessage());
+                doGet(request, response);
+            }
+        } else {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
     }
+
+
 
     /**
      * Returns a short description of the servlet.

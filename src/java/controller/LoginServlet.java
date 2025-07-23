@@ -120,6 +120,7 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("fullName", user_find.getFullName());
             session.setAttribute("permissionID", user_find.getPermissionID());
             session.setAttribute("userID", user_find.getUserID());
+            
             session.setMaxInactiveInterval(30 * 60); // 30 phút
 
             List<Integer> myEventIDs = ud.getEventIDsOfChairman(user_find.getUserID());

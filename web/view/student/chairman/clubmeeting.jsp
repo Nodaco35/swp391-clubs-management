@@ -136,7 +136,7 @@
                     <li>
                         <a href="${pageContext.request.contextPath}/chairman-page/tasks"
                            class="nav-item ${currentPath == '/chairman-page/tasks' ? 'active' : ''}">
-                            <i class="fas fa-clock"></i> Timeline & Công việc
+                            <i class="fas fa-clock"></i> Giai đoạn công việc
                         </a>
                     </li>
 
@@ -150,6 +150,12 @@
                         <a href="${pageContext.request.contextPath}/chairman-page/tasks"
                            class="nav-item ${currentPath == '/chairman-page/reports' ? 'active' : ''}">
                             <i class="fas fa-file-alt"></i> Báo cáo
+                        </a>
+                    </li>
+                    <li>
+                        <a href="${pageContext.request.contextPath}/chairman-page/financial-management"
+                           class="nav-item ${currentPath == '/chairman-page/financial-management' ? 'active' : ''}">
+                            <i class="fas fa-money-bill-wave"></i> Quản lý dòng tiền
                         </a>
                     </li>
                 </ul>

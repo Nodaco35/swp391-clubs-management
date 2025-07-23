@@ -11,7 +11,7 @@
         <li><a href="${pageContext.request.contextPath}/ic/approval-events"><i class="fas fa-calendar-alt"></i> Duyệt sự kiện</a></li>
 
         <li><a href="${pageContext.request.contextPath}/ic/schedule"><i class="fas fa-calendar-check"></i> Lịch báo cáo</a></li>
-
+        <li><a href="${pageContext.request.contextPath}/ic/semester"><i class="fas fa-calendar"></i> Quản lý kỳ học</a></li>
         <li><a href="${pageContext.request.contextPath}/ic/notifications"><i class="fas fa-bell"></i> Thông báo</a></li>
         <li><a href="${pageContext.request.contextPath}/ic/settings"><i class="fas fa-cog"></i> Cài đặt</a></li>
         <li><a href="${pageContext.request.contextPath}/logout"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a></li>
