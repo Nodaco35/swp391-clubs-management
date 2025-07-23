@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-@WebServlet("/api/update-task-status")
+@WebServlet("/update-task-status")
 @MultipartConfig
 public class UpdateTaskStatusApiServlet extends HttpServlet {
     
