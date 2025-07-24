@@ -1,10 +1,10 @@
-
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Filter.java to edit this template
+ */
 package filters;
 
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import dal.DepartmentDashboardDAO;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
@@ -13,13 +13,17 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import models.Users;
 
 /**
  *
- * @author NC PC
+ * @author he181
  */
-public class AuthFilter implements Filter {
+public class ExternalHeadFilter implements Filter {
     
     private static final boolean debug = true;
 
@@ -28,13 +32,13 @@ public class AuthFilter implements Filter {
     // configured. 
     private FilterConfig filterConfig = null;
     
-    public AuthFilter() {
+    public ExternalHeadFilter() {
     }    
     
     private void doBeforeProcessing(ServletRequest request, ServletResponse response)
             throws IOException, ServletException {
         if (debug) {
-            log("AuthFilter:DoBeforeProcessing");
+            log("ExternalHeadFilter:DoBeforeProcessing");
         }
 
         // Write code here to process the request and/or response before
@@ -62,7 +66,7 @@ public class AuthFilter implements Filter {
     private void doAfterProcessing(ServletRequest request, ServletResponse response)
             throws IOException, ServletException {
         if (debug) {
-            log("AuthFilter:DoAfterProcessing");
+            log("ExternalHeadFilter:DoAfterProcessing");
         }
 
         // Write code here to process the request and/or response after
@@ -98,30 +102,25 @@ public class AuthFilter implements Filter {
             throws IOException, ServletException {
         
         if (debug) {
-            log("AuthFilter:doFilter()");
+            log("ExternalHeadFilter:doFilter()");
         }
-         HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse resp = (HttpServletResponse) response;
-        
-        // Kiểm tra user trong session
+        DepartmentDashboardDAO dashboardDAO = new DepartmentDashboardDAO();
         Users user = (Users) req.getSession().getAttribute("user");
         
         
-      
-        
-         
-        if(user == null ){
-            resp.sendRedirect(req.getContextPath() + "/");
-        }
-        if(user.getPermissionID() != 2){
+        Integer clubID = (Integer) req.getSession().getAttribute("clubID");
+        if (clubID == null) {
             resp.sendRedirect(req.getContextPath() + "/");
             return;
         }
-        
-        
-        doBeforeProcessing(request, response);
-        
        
+        if (!dashboardDAO.isDepartmentLeaderIndoingoai(user.getUserID(), clubID)) {
+            resp.sendRedirect(req.getContextPath() + "/");
+            return;
+        }
+        doBeforeProcessing(request, response);
         
         Throwable problem = null;
         try {
@@ -178,7 +177,7 @@ public class AuthFilter implements Filter {
         this.filterConfig = filterConfig;
         if (filterConfig != null) {
             if (debug) {                
-                log("AuthFilter:Initializing filter");
+                log("ExternalHeadFilter:Initializing filter");
             }
         }
     }
@@ -189,9 +188,9 @@ public class AuthFilter implements Filter {
     @Override
     public String toString() {
         if (filterConfig == null) {
-            return ("AuthFilter()");
+            return ("ExternalHeadFilter()");
         }
-        StringBuffer sb = new StringBuffer("AuthFilter(");
+        StringBuffer sb = new StringBuffer("ExternalHeadFilter(");
         sb.append(filterConfig);
         sb.append(")");
         return (sb.toString());

@@ -43,7 +43,7 @@ public class DepartmentFinancialServlet extends HttpServlet {
         }
         
         if (!dashboardDAO.isDepartmentLeaderIndoingoai(user.getUserID(), clubID)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập trang này");
+            response.sendRedirect(request.getContextPath() + "/");
             return;
         }
         

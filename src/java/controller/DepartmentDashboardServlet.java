@@ -11,9 +11,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 public class DepartmentDashboardServlet extends HttpServlet {
-    
+
     private DepartmentDashboardDAO dashboardDAO;
-    
+
     @Override
     public void init() throws ServletException {
         dashboardDAO = new DepartmentDashboardDAO();
@@ -22,7 +22,7 @@ public class DepartmentDashboardServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         HttpSession session = request.getSession();
         Users currentUser = (Users) session.getAttribute("user");        // Kiểm tra đăng nhập
         if (currentUser == null) {
@@ -30,38 +30,38 @@ public class DepartmentDashboardServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-        
+
         try {
             // Kiểm tra quyền trưởng ban
             if (!dashboardDAO.isDepartmentLeader(currentUser.getUserID())) {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập trang này");
+                response.sendRedirect(request.getContextPath() + "/");
                 return;
             }
-      
+
             int clubID = Integer.parseInt(request.getParameter("clubID"));
             session.setAttribute("clubID",clubID);
-            
+
             //Fhuc: Lay ClubDepartmentID -> Set session
             int clubdepartmentId = dashboardDAO.findClubDepartmentId(clubID, currentUser.getUserID());
             session.setAttribute("clubDepartmentId", clubdepartmentId);
-            
+
             // Lấy dữ liệu dashboard
             DepartmentDashboard dashboard = dashboardDAO.getCompleteDashboard(currentUser.getUserID());
-              if (dashboard == null) {
+            if (dashboard == null) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy thông tin ban");
                 return;
             }
-              // Đưa dữ liệu vào request
+            // Đưa dữ liệu vào request
             request.setAttribute("dashboard", dashboard);
             request.setAttribute("currentUser", currentUser);
             request.setAttribute("departmentName", dashboard.getDepartmentName());
-            
-           //mới Fhuc
-           boolean access = false;
+
+            //mới Fhuc
+            boolean access = false;
             if (dashboardDAO.isDepartmentLeaderHauCan(currentUser.getUserID(), clubID)) {
                 access = true;
             }
-            
+
             session.setAttribute("isHauCan", access);
             //mới đức
             boolean accessFinancial = false;
@@ -71,7 +71,7 @@ public class DepartmentDashboardServlet extends HttpServlet {
             session.setAttribute("isAccess", accessFinancial);
             // Forward đến JSP
             request.getRequestDispatcher("view/student/department-leader/dashboard.jsp").forward(request, response);
-            
+
         } catch (Exception e) {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Có lỗi xảy ra: " + e.getMessage());
