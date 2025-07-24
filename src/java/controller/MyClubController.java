@@ -34,6 +34,20 @@ public class MyClubController extends HttpServlet {
             return;
         }
         List<UserClub> userclubs = UserClubDAO.findByUserID(user.getUserID());
+
+        PeriodicReportDAO pr = new PeriodicReportDAO();
+        List<UserClub> userMemberClubs = UserClubDAO.findMemberClubsByUserID(user.getUserID());
+
+        for (UserClub umc : userMemberClubs) {
+            if (pr.isUserActiveInTerm(umc.getUserID(), umc.getClubID())) {
+                umc.setIsActivedCurrentTerm(true);
+            } else {
+                umc.setIsActivedCurrentTerm(false);
+            }
+        }
+
+        String termNow = pr.getActiveTermID();
+
         if (userclubs.isEmpty()) {
             error = "Bạn chưa tham gia bất cứ câu lạc bộ nào!";
             request.setAttribute("error", error);
@@ -65,7 +79,21 @@ public class MyClubController extends HttpServlet {
         request.setAttribute("pendingApplications", pendingApplications);
         request.setAttribute("clubmeetings", clubmeetings);
 
+        request.setAttribute("userMemberClubs", userMemberClubs);
+        request.setAttribute("termNow", termNow);
+
         String action = request.getParameter("action");
+        if ("registerActivity".equals(action)) {
+            String userID = request.getParameter("userID");
+            int clubID = Integer.parseInt(request.getParameter("clubID"));
+            PeriodicReportDAO pd = new PeriodicReportDAO();
+
+            PrintWriter out = response.getWriter();
+            out.print(userID + " " + clubID);
+            boolean success = pd.insertUserToActiveClub(userID, clubID);
+            response.sendRedirect(request.getContextPath() + "/myclub");
+            return;
+        }
         if ("deleteDocument".equals(action)) {
             int documentID = Integer.parseInt(request.getParameter("documentID"));
             int clubID = Integer.parseInt(request.getParameter("clubID"));
@@ -286,6 +314,7 @@ public class MyClubController extends HttpServlet {
         }
         doGet(request, response);
     }
+
     private void submitUpdateMeeting(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Users user = (Users) request.getSession().getAttribute("user");
         if (user == null) {
