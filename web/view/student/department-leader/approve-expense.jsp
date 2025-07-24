@@ -6,7 +6,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Duyệt và Tạo Báo Cáo Chi Phí</title>
+        <title>Duyệt và Tạo Đơn Xin Chi Phí</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/department-leader.css">
@@ -44,72 +44,15 @@
     <body>
         <div class="department-leader-container">
             <!-- Sidebar -->
-            <nav class="sidebar">
-                <div class="sidebar-header">
-                    <div class="logo">
-                        <i class="fas fa-users-gear"></i>
-                        <span>Quản lý Ban</span>
-                    </div>
-                </div>
-                <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/department-dashboard?clubID=${clubID}" class="menu-link">
-                            <i class="fas fa-chart-pie"></i>
-                            <span>Dashboard</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/department-members?clubID=${clubID}" class="menu-link">
-                            <i class="fas fa-users"></i>
-                            <span>Quản lý thành viên</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/department-tasks" class="menu-link">
-                            <i class="fas fa-tasks"></i>
-                            <span>Quản lý công việc</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/department-meeting" class="menu-link">
-                            <i class="fas fa-calendar-alt"></i>
-                            <span>Quản lý cuộc họp</span>
-                        </a>
-                    </li>
-                    <c:if test="${isAccess}">
-                        <li class="menu-item">
-                            <a href="${pageContext.request.contextPath}/department/financial" class="menu-link">
-                                <i class="fa-dollar-sign"></i>
-                                <span>Tài chính</span>
-                            </a>
-                        </li>
-                    </c:if>
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/" class="menu-link">
-                            <i class="fas fa-home"></i>
-                            <span>Về trang chủ</span>
-                        </a>
-                    </li>
-                </ul>
-                <div class="sidebar-footer">
-                    <div class="user-info">
-                        <div class="user-avatar">
-                            <img src="${pageContext.request.contextPath}/${sessionScope.user.avatar != null ? sessionScope.user.avatar : 'img/Hinh-anh-dai-dien-mac-dinh-Facebook.jpg'}" alt="Avatar">
-                        </div>
-                        <div class="user-details">
-                            <div class="user-name">${sessionScope.user.fullName}</div>
-                            <div class="user-role">Trưởng ban Đối Ngoại</div>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+            <c:set var="activePage" value="financial" />
+            <%@ include file="components/sidebar.jsp" %>
 
             <!-- Main Content -->
             <main class="main-content">
                 <header class="header mb-4">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h1 class="h3 mb-1">Duyệt và Tạo Báo Cáo Chi Phí</h1>
+                            <h1 class="h3 mb-1">Duyệt và Xin Chi Phí</h1>
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb mb-0">
                                     <li class="breadcrumb-item">
@@ -128,10 +71,10 @@
                         <div class="card-header">
                             <h2 class="card-title">
                                 <i class="fas fa-file-invoice-dollar" style="color: #8b5cf6;"></i>
-                                Tạo Báo Cáo Chi Phí Mới (Kỳ: ${term.termName})
+                                Tạo Đơn Xin Chi Phí Mới (Kỳ: ${term.termName})
                             </h2>
                             <button class="btn btn-primary btn-sm toggle-form-btn" type="button" data-bs-toggle="collapse" data-bs-target="#expenseForm" aria-expanded="false" aria-controls="expenseForm">
-                                <i class="fas fa-chevron-down"></i> Thêm Báo Cáo
+                                <i class="fas fa-chevron-down"></i> Tạo Đơn
                             </button>
                         </div>
                         <div class="card-body collapse" id="expenseForm">
@@ -166,7 +109,7 @@
                                 </div>
                                 <div class="d-flex justify-content-end gap-2">
                                     <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#expenseForm">Đóng</button>
-                                    <button type="submit" class="btn btn-primary">Gửi Báo Cáo</button>
+                                    <button type="submit" class="btn btn-primary">Gửi Đơn</button>
                                 </div>
                             </form>
                         </div>
@@ -177,7 +120,7 @@
                         <div class="card-header">
                             <h2 class="card-title">
                                 <i class="fas fa-list" style="color: #8b5cf6;"></i>
-                                Danh Sách Báo Cáo Chi Phí (Kỳ: ${term.termName})
+                                Danh Sách Đơn Xin Chi Phí (Kỳ: ${term.termName})
                             </h2>
                         </div>
                         <div class="card-body">
@@ -218,7 +161,7 @@
 
                             <!-- Expense Table -->
                             <c:if test="${empty expenses}">
-                                <p class="text-muted">Không có báo cáo chi phí nào.</p>
+                                <p class="text-muted">Không có đơn xin chi phí nào.</p>
                             </c:if>
                             <c:if test="${not empty expenses}">
                                 <div class="table-responsive">
@@ -258,12 +201,12 @@
                                                             <form action="${pageContext.request.contextPath}/department/financial/approve-expense" method="post" style="display: inline;">
                                                                 <input type="hidden" name="action" value="approve">
                                                                 <input type="hidden" name="expenseID" value="${expense.expenseID}">
-                                                                <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Xác nhận duyệt báo cáo này?')">Duyệt</button>
+                                                                <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Xác nhận duyệt đơn này?')">Duyệt</button>
                                                             </form>
                                                             <form action="${pageContext.request.contextPath}/department/financial/approve-expense" method="post" style="display: inline;">
                                                                 <input type="hidden" name="action" value="reject">
                                                                 <input type="hidden" name="expenseID" value="${expense.expenseID}">
-                                                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Xác nhận từ chối báo cáo này?')">Từ chối</button>
+                                                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Xác nhận từ chối đơn này?')">Từ chối</button>
                                                             </form>
                                                         </c:if>
                                                     </td>

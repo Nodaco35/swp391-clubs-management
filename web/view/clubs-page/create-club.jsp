@@ -30,133 +30,83 @@
             </div>
         </c:if>
 
-        <!-- Permission Check -->
-        <c:if test="${(isEdit && isPresident) || (!isEdit && hasPermission)}">
-            <form id="createClubForm" action="${pageContext.request.contextPath}/create-club${isEdit ? '?action=updateClub' : ''}" method="post" enctype="multipart/form-data" class="space-y-4">
+        <form id="createClubForm" action="${pageContext.request.contextPath}/create-club${isEdit ? '?action=updateClub' : ''}" method="post" enctype="multipart/form-data" class="space-y-4">
+            <c:if test="${isEdit}">
+                <input type="hidden" name="clubID" value="${club.clubID}">
+            </c:if>
+            <div>
+                <label for="clubName" class="block text-sm font-medium text-gray-700">Tên Câu Lạc Bộ: <span class="text-red-500">*</span></label>
+                <input type="text" name="clubName" id="clubName" required
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       value="${isEdit ? club.clubName : approvedClubName}">
+            </div>
+
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700">Mô Tả:</label>
+                <textarea name="description" id="description" rows="5"
+                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">${isEdit ? club.description : param.description}</textarea>
+            </div>
+
+            <div>
+                <label for="category" class="block text-sm font-medium text-gray-700">Danh Mục: <span class="text-red-500">*</span></label>
+                <select name="category" id="category" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="" disabled ${isEdit && club.categoryID == null ? 'selected' : ''}>Chọn danh mục</option>
+                    <c:forEach items="${categories}" var="category">
+                        <option value="${category.categoryID}" 
+                                ${isEdit && club.categoryID == category.categoryID || (!isEdit && approvedCategoryID == category.categoryID) ? 'selected' : ''}>
+                            ${category.categoryName}
+                        </option>
+                    </c:forEach>
+                </select>
+            </div>
+
+            <div>
+                <label for="establishedDate" class="block text-sm font-medium text-gray-700">Ngày Thành Lập:</label>
+                <input type="date" name="establishedDate" id="establishedDate"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       value="${isEdit && club.establishedDate != null ? club.establishedDate.toLocalDate() : param.establishedDate}">
+            </div>
+
+            <div>
+                <label for="clubImg" class="block text-sm font-medium text-gray-700">Hình Ảnh Câu Lạc Bộ: ${isEdit ? '' : '<span class="text-red-500">*</span>'}</label>
+                <div class="avatar-box mb-4">
+                    <img id="clubImgPreview" src="${isEdit && club.clubImg != null && !club.clubImg.isEmpty() ? pageContext.request.contextPath.concat('/').concat(club.clubImg) : pageContext.request.contextPath.concat('/img/default-club-img.png')}" 
+                         alt="Club Image" class="avatar-img w-32 h-32 object-cover rounded-lg">
+                </div>
+                <input type="file" name="clubImg" id="clubImg" accept="image/jpeg,image/png,image/gif,image/webp" ${isEdit ? '' : 'required'}
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <c:if test="${isEdit}">
-                    <input type="hidden" name="clubID" value="${club.clubID}">
+                    <p class="text-sm text-gray-500 mt-1">Để giữ ảnh hiện tại, không chọn file mới.</p>
                 </c:if>
-                <div>
-                    <label for="clubName" class="block text-sm font-medium text-gray-700">Tên Câu Lạc Bộ: <span class="text-red-500">*</span></label>
-                    <input type="text" name="clubName" id="clubName" required
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                           value="${isEdit ? club.clubName : approvedClubName}"
-                           ${isEdit ? '' : 'readonly'}>
-                    <c:if test="${!isEdit}">
-                        <p class="text-sm text-gray-500 mt-1">Tên câu lạc bộ được lấy từ đơn xin quyền và không thể chỉnh sửa.</p>
-                    </c:if>
-                </div>
-
-                <div>
-                    <label for="description" class="block text-sm font-medium text-gray-700">Mô Tả:</label>
-                    <textarea name="description" id="description" rows="5"
-                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">${isEdit ? club.description : param.description}</textarea>
-                </div>
-
-                <div>
-                    <label for="category" class="block text-sm font-medium text-gray-700">Danh Mục: <span class="text-red-500">*</span></label>
-                    <select name="category" id="category" ${isEdit ? '' : 'disabled'} required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="" disabled ${isEdit && club.categoryID == null ? 'selected' : ''}>Chọn danh mục</option>
-                        <c:forEach items="${categories}" var="category">
-                            <option value="${category.categoryID}" 
-                                    ${isEdit && club.categoryID == category.categoryID || (!isEdit && approvedCategoryID == category.categoryID) ? 'selected' : ''}>
-                                ${category.categoryName}
-                            </option>
-                        </c:forEach>
-                    </select>
-                    <c:if test="${!isEdit}">
-                        <p class="text-sm text-gray-500 mt-1">Danh mục được lấy từ đơn xin quyền và không thể chỉnh sửa.</p>
-                    </c:if>
-                </div>
-
-                <div>
-                    <label for="establishedDate" class="block text-sm font-medium text-gray-700">Ngày Thành Lập:</label>
-                    <input type="date" name="establishedDate" id="establishedDate"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                           value="${isEdit && club.establishedDate != null ? club.establishedDate.toLocalDate() : param.establishedDate}">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Các Ban:</label>
-                    <div class="grid grid-cols-1 gap-2 mt-2">
-                        <c:forEach var="dept" items="${departments}">
-                            <label class="flex items-center">
-                                <c:set var="isChecked" value="false"/>
-                                <c:if test="${!isEdit && paramValues.departmentIDs != null}">
-                                    <c:forEach var="paramDeptID" items="${paramValues.departmentIDs}">
-                                        <c:if test="${paramDeptID == dept.departmentID.toString()}">
-                                            <c:set var="isChecked" value="true"/>
-                                        </c:if>
-                                    </c:forEach>
-                                </c:if>
-                                <input type="checkbox" name="departmentIDs" value="${dept.departmentID}"
-                                       <c:choose>
-                                           <c:when test="${isEdit && clubDepartmentIDs != null && clubDepartmentIDs.contains(dept.departmentID)}">checked disabled</c:when>
-                                           <c:when test="${isChecked}">checked</c:when>
-                                       </c:choose>
-                                       class="h-4 w-4 text-blue-500 focus:ring-blue-500 border-gray-300 rounded">
-                                <span class="ml-2 text-sm text-gray-700">${dept.departmentName}</span>
-                            </label>
-                        </c:forEach>
-                    </div>
-                    <p class="text-sm text-gray-500 mt-1">Chọn các ban bạn muốn thêm. Ban Chủ nhiệm sẽ được thêm tự động. ${isEdit ? 'Các ban hiện tại không thể xóa.' : ''}</p>
-                </div>
-
-                <div>
-                    <label for="clubImg" class="block text-sm font-medium text-gray-700">Hình Ảnh Câu Lạc Bộ: ${isEdit ? '' : '<span class="text-red-500">*</span>'}</label>
-                    <div class="avatar-box mb-4">
-                        <img id="clubImgPreview" src="${isEdit && club.clubImg != null && !club.clubImg.isEmpty() ? pageContext.request.contextPath.concat('/').concat(club.clubImg) : pageContext.request.contextPath.concat('/img/default-club-img.png')}" 
-                             alt="Club Image" class="avatar-img w-32 h-32 object-cover rounded-lg">
-                    </div>
-                    <input type="file" name="clubImg" id="clubImg" accept="image/jpeg,image/png,image/gif,image/webp" ${isEdit ? '' : 'required'}
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <c:if test="${isEdit}">
-                        <p class="text-sm text-gray-500 mt-1">Để giữ ảnh hiện tại, không chọn file mới.</p>
-                    </c:if>
-                </div>
-
-                <div>
-                    <label for="contactPhone" class="block text-sm font-medium text-gray-700">Số Điện Thoại Liên Hệ:</label>
-                    <input type="tel" name="contactPhone" id="contactPhone"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                           value="${isEdit ? club.contactPhone : param.contactPhone}">
-                </div>
-
-                <div>
-                    <label for="contactGmail" class="block text-sm font-medium text-gray-700">Email Liên Hệ: <span class="text-red-500">*</span></label>
-                    <input type="email" name="contactGmail" id="contactGmail" required
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                           value="${isEdit ? club.contactGmail : param.contactGmail}">
-                </div>
-
-                <div>
-                    <label for="contactURL" class="block text-sm font-medium text-gray-700">URL Liên Hệ (Website/FB):</label>
-                    <input type="url" name="contactURL" id="contactURL"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                           value="${isEdit ? club.contactURL : param.contactURL}">
-                </div>
-
-                <div class="flex justify-center gap-4">
-                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">${isEdit ? 'Cập Nhật' : 'Tạo Câu Lạc Bộ'}</button>
-                    <a href="${isEdit ? pageContext.request.contextPath.concat('/club-detail?id=').concat(club.clubID) : pageContext.request.contextPath.concat('/clubs')}" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition">Hủy</a>
-                </div>
-            </form>
-        </c:if>
-
-        <!-- No Permission Message -->
-        <c:if test="${!isEdit && !hasPermission}">
-            <div class="text-center text-red-600">
-                <p>Bạn không có quyền tạo câu lạc bộ. Vui lòng liên hệ quản trị viên để được cấp quyền.</p>
-                <a href="${pageContext.request.contextPath}/clubs" class="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">Quay lại danh sách câu lạc bộ</a>
             </div>
-        </c:if>
-        <c:if test="${isEdit && !isPresident}">
-            <div class="text-center text-red-600">
-                <p>Bạn không có quyền chỉnh sửa câu lạc bộ này.</p>
-                <a href="${pageContext.request.contextPath}/club-detail?id=${club.clubID}" class="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">Quay lại chi tiết CLB</a>
+
+            <div>
+                <label for="contactPhone" class="block text-sm font-medium text-gray-700">Số Điện Thoại Liên Hệ:</label>
+                <input type="tel" name="contactPhone" id="contactPhone"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       value="${isEdit ? club.contactPhone : param.contactPhone}">
             </div>
-        </c:if>
+
+            <div>
+                <label for="contactGmail" class="block text-sm font-medium text-gray-700">Email Liên Hệ: <span class="text-red-500">*</span></label>
+                <input type="email" name="contactGmail" id="contactGmail" required
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       value="${isEdit ? club.contactGmail : param.contactGmail}">
+            </div>
+
+            <div>
+                <label for="contactURL" class="block text-sm font-medium text-gray-700">URL Liên Hệ (Website/FB):</label>
+                <input type="url" name="contactURL" id="contactURL"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       value="${isEdit ? club.contactURL : param.contactURL}">
+            </div>
+
+            <div class="flex justify-center gap-4">
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">${isEdit ? 'Cập Nhật' : 'Tạo Câu Lạc Bộ'}</button>
+                <a href="${isEdit ? pageContext.request.contextPath.concat('/club-detail?id=').concat(club.clubID) : pageContext.request.contextPath.concat('/clubs')}" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition">Hủy</a>
+            </div>
+        </form>
     </div>
 
     <script>

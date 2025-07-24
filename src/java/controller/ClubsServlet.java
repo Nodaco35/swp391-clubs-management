@@ -70,10 +70,10 @@ public class ClubsServlet extends HttpServlet {
         // Parse category parameter
         if (categoryParam == null || categoryParam.isEmpty() || categoryParam.equals("all")) {
             categoryID = 0; // 0 represents "all" categories
-        } else if (categoryParam.equals("myClubs")) {
+        } else if (categoryParam.equals("-1")) {
             categoryID = -1; // -1 represents "myClubs"
             selectedCategoryName = "myClubs";
-        } else if (categoryParam.equals("favoriteClubs")) {
+        } else if (categoryParam.equals("-2")) {
             categoryID = -2; // -2 represents "favoriteClubs"
             selectedCategoryName = "favoriteClubs";
         } else {

@@ -826,7 +826,34 @@ public class ClubDAO {
         return departments;
     }
 
-    public int createClub(Clubs club, List<Integer> departmentIDs) throws SQLException {
+    public List<Integer> getAllDepartmentIDs() throws SQLException {
+        List<Integer> departmentIDs = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            conn = DBContext.getConnection();
+            String query = "SELECT DepartmentID FROM Departments";
+            stmt = conn.prepareStatement(query);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                departmentIDs.add(rs.getInt("DepartmentID"));
+            }
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (stmt != null) {
+                stmt.close();
+            }
+            if (conn != null) {
+                DBContext.closeConnection(conn);
+            }
+        }
+        return departmentIDs;
+    }
+
+    public int createClub(Clubs club) throws SQLException {
         Connection conn = null;
         PreparedStatement clubStmt = null;
         PreparedStatement deptStmt = null;
@@ -837,8 +864,8 @@ public class ClubDAO {
             conn = DBContext.getConnection();
             conn.setAutoCommit(false);
 
-            String clubQuery = "INSERT INTO Clubs (ClubName, Description, CategoryID, ClubImg, ContactPhone, ContactGmail, ContactURL, EstablishedDate, ClubStatus, IsRecruiting) "
-                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String clubQuery = "INSERT INTO Clubs (ClubName, Description, CategoryID, ClubImg, ContactPhone, ContactGmail, ContactURL, EstablishedDate, ClubStatus, IsRecruiting, ClubRequestStatus, CurrentRequestType) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending', 'Create')";
             clubStmt = conn.prepareStatement(clubQuery, PreparedStatement.RETURN_GENERATED_KEYS);
             clubStmt.setString(1, club.getClubName());
             clubStmt.setString(2, club.getDescription());
@@ -868,9 +895,10 @@ public class ClubDAO {
                 return -1;
             }
 
+            List<Integer> allDepartmentIDs = getAllDepartmentIDs();
             String deptQuery = "INSERT INTO ClubDepartments (DepartmentID, ClubID) VALUES (?, ?)";
             deptStmt = conn.prepareStatement(deptQuery);
-            for (Integer deptID : departmentIDs) {
+            for (Integer deptID : allDepartmentIDs) {
                 deptStmt.setInt(1, deptID);
                 deptStmt.setInt(2, newClubID);
                 deptStmt.addBatch();
@@ -909,7 +937,7 @@ public class ClubDAO {
         return newClubID;
     }
 
-    public boolean updateClub(Clubs club, List<Integer> newDepartmentIDs) throws SQLException {
+    public boolean updateClub(Clubs club) throws SQLException {
         Connection conn = null;
         PreparedStatement clubStmt = null;
         PreparedStatement checkDeptStmt = null;
@@ -942,13 +970,14 @@ public class ClubDAO {
             }
 
             List<Integer> existingDepartmentIDs = getClubDepartmentIDs(club.getClubID());
+            List<Integer> allDepartmentIDs = getAllDepartmentIDs();
 
             String checkDeptQuery = "SELECT COUNT(*) FROM ClubDepartments WHERE ClubID = ? AND DepartmentID = ?";
             String insertDeptQuery = "INSERT INTO ClubDepartments (DepartmentID, ClubID) VALUES (?, ?)";
             checkDeptStmt = conn.prepareStatement(checkDeptQuery);
             insertDeptStmt = conn.prepareStatement(insertDeptQuery);
 
-            for (Integer deptID : newDepartmentIDs) {
+            for (Integer deptID : allDepartmentIDs) {
                 if (deptID != null && !existingDepartmentIDs.contains(deptID)) {
                     checkDeptStmt.setInt(1, club.getClubID());
                     checkDeptStmt.setInt(2, deptID);
