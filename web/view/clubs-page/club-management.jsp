@@ -47,10 +47,10 @@
                     </c:forEach>
                     <c:if test="${not empty sessionScope.user}">
                         <c:if test="${hasClubs}">
-                            <a href="${pageContext.request.contextPath}/clubs?category=-1" class="filter-option ${selectedCategory == 'myClubs' ? 'active' : ''}" data-category-id="-1">Club của tôi</a>
+                            <a href="${pageContext.request.contextPath}/clubs?category=-1" class="filter-option ${selectedCategory == 'myClubs' ? 'active' : ''}" data-category-id="-1">Câu lạc bộ của tôi</a>
                         </c:if>
                         <c:if test="${hasFavoriteClubs}">
-                            <a href="${pageContext.request.contextPath}/clubs?category=-2" class="filter-option ${selectedCategory == 'favoriteClubs' ? 'active' : ''}" data-category-id="-2">Club yêu thích của tôi</a>
+                            <a href="${pageContext.request.contextPath}/clubs?category=-2" class="filter-option ${selectedCategory == 'favoriteClubs' ? 'active' : ''}" data-category-id="-2">Câu lạc bộ yêu thích của tôi</a>
                         </c:if>
                     </c:if>
                 </div>
@@ -91,73 +91,14 @@
         </section>
 
         <!-- Floating Create Club Button -->
-        <c:if test="${hasPermission}">
+        <c:if test="${not empty sessionScope.user}">
             <a href="${pageContext.request.contextPath}/create-club" class="create-club-btn">
                 <i class="fa-solid fa-pencil-alt"></i>
                 <span class="tooltip">Tạo câu lạc bộ mới</span>
             </a>
         </c:if>
 
-        <!-- Floating Request Permission Button -->
-        <c:if test="${not empty sessionScope.user && !hasPermission && !hasPendingRequest}">
-            <button class="request-permission-btn" onclick="showPermissionForm()">
-                <i class="fa-solid fa-plus"></i>
-                <span class="tooltip">Gửi đơn xin quyền tạo câu lạc bộ</span>
-            </button>
-        </c:if>
-
-        <!-- Overlay -->
-        <div class="overlay" onclick="hidePermissionForm()"></div>
-
-        <!-- Permission Request Popup Form -->
-        <div class="permission-request-popup" id="permissionRequestPopup">
-            <h2>Gửi đơn xin quyền tạo câu lạc bộ</h2>
-            <p>Điền thông tin câu lạc bộ bạn muốn tạo. Đơn sẽ được IC xem xét và phản hồi sớm.</p>
-            <form id="permissionRequestForm" action="${pageContext.request.contextPath}/student?action=sendPermissionRequest" method="POST">
-                <input type="hidden" name="userID" value="${sessionScope.user.userID}">
-                <div class="mb-4">
-                    <label for="clubName" class="block text-sm font-medium text-gray-700">Tên Câu Lạc Bộ: <span class="text-red-500">*</span></label>
-                    <input type="text" name="clubName" id="clubName" required
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                           placeholder="Nhập tên câu lạc bộ">
-                </div>
-                <div class="mb-4">
-                    <label for="category" class="block text-sm font-medium text-gray-700">Danh Mục: <span class="text-red-500">*</span></label>
-                    <select name="category" id="category" required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="" disabled selected>Chọn danh mục</option>
-                        <c:forEach items="${categories}" var="category">
-                            <option value="${category.categoryID}">${category.categoryName}</option>
-                        </c:forEach>
-                    </select>
-                </div>
-                <div class="buttons">
-                    <button type="button" class="btn cancel" onclick="hidePermissionForm()">Hủy</button>
-                    <button type="submit" class="btn submit" id="submitRequestBtn">Gửi đơn</button>
-                </div>
-            </form>
-        </div>
-
-        <script>
-            function showPermissionForm() {
-                document.getElementById('permissionRequestPopup').style.display = 'block';
-                document.querySelector('.overlay').style.display = 'block';
-            }
-
-            function hidePermissionForm() {
-                document.getElementById('permissionRequestPopup').style.display = 'none';
-                document.querySelector('.overlay').style.display = 'none';
-            }
-
-            document.getElementById('permissionRequestForm').addEventListener('submit', function (e) {
-                const clubName = document.getElementById('clubName').value.trim();
-                const category = document.getElementById('category').value;
-                if (!clubName || !category) {
-                    e.preventDefault();
-                    alert('Vui lòng nhập đầy đủ tên câu lạc bộ và chọn danh mục.');
-                }
-            });
-        </script>
+        
 
         <jsp:include page="../components/footer.jsp" />
     </body>

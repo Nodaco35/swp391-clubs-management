@@ -17,7 +17,7 @@
     </head>
     <body>
         <div class="department-leader-container">
-            <c:set var="activePage" value="dashboard" />
+            <c:set var="activePage" value="financial" />
             <%@ include file="components/sidebar.jsp" %>
 
 

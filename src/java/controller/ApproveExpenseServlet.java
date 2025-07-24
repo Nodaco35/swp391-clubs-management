@@ -184,23 +184,23 @@ public class ApproveExpenseServlet extends HttpServlet {
 
                 boolean success = expenseDAO.submitExpense(expense, user.getUserID());
                 if (success) {
-                    request.setAttribute("message", "Báo cáo chi phí đã được gửi thành công!");
+                    request.setAttribute("message", "Đơn xin chi phí đã được gửi thành công!");
                 } else {
-                    request.setAttribute("error", "Không thể gửi báo cáo chi phí. Vui lòng thử lại.");
+                    request.setAttribute("error", "Không thể gửi đơn xin chi phí. Vui lòng thử lại.");
                 }
             } else {
                 int expenseID;
                 try {
                     expenseID = Integer.parseInt(request.getParameter("expenseID"));
                 } catch (NumberFormatException e) {
-                    request.setAttribute("error", "ID báo cáo chi phí không hợp lệ.");
+                    request.setAttribute("error", "ID đơn xin chi phí không hợp lệ.");
                     doGet(request, response);
                     return;
                 }
 
                 Expenses expense = expenseDAO.getExpenseById(expenseID);
                 if (expense == null || expense.getClubID() != clubID) {
-                    request.setAttribute("error", "Báo cáo chi phí không hợp lệ hoặc không thuộc CLB này.");
+                    request.setAttribute("error", "Đơn xin chi phí không hợp lệ hoặc không thuộc CLB này.");
                     doGet(request, response);
                     return;
                 }
@@ -209,7 +209,7 @@ public class ApproveExpenseServlet extends HttpServlet {
                 if (status.equals("Approved")) {
                     BigDecimal balance = expenseDAO.getClubBalance(clubID, term.getTermID());
                     if (balance.compareTo(expense.getAmount()) < 0) {
-                        request.setAttribute("error", "Quỹ không đủ để duyệt báo cáo chi phí này.");
+                        request.setAttribute("error", "Quỹ không đủ để duyệt đơn xin chi phí này.");
                         doGet(request, response);
                         return;
                     }
@@ -223,13 +223,13 @@ public class ApproveExpenseServlet extends HttpServlet {
                     NotificationDAO.sentToPerson1(
                         user.getUserID(),
                         expense.getCreatedBy(),
-                        "Trạng Thái Báo Cáo Chi Phí",
-                        "Báo cáo chi phí của bạn (" + expense.getDescription() + ") đã được " + (status.equals("Approved") ? "duyệt" : "từ chối") + " bởi " + user.getFullName(),
+                        "Trạng Thái Đơn xin Chi Phí",
+                        "Đơn xin chi phí của bạn (" + expense.getDescription() + ") đã được " + (status.equals("Approved") ? "duyệt" : "từ chối") + " bởi " + user.getFullName(),
                         "HIGH"
                     );
-                    request.setAttribute("message", "Báo cáo chi phí đã được " + (status.equals("Approved") ? "duyệt" : "từ chối") + " thành công!");
+                    request.setAttribute("message", "Đơn xin chi phí đã được " + (status.equals("Approved") ? "duyệt" : "từ chối") + " thành công!");
                 } else {
-                    request.setAttribute("error", "Không thể cập nhật trạng thái báo cáo chi phí. Vui lòng thử lại.");
+                    request.setAttribute("error", "Không thể cập nhật trạng thái đơn xin chi phí. Vui lòng thử lại.");
                 }
             }
         } catch (Exception e) {

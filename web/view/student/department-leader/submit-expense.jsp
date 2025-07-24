@@ -6,7 +6,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Gửi Báo Cáo Chi Phí</title>
+        <title>Gửi Đơn Xin Chi Phí</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/department-leader.css">
@@ -44,94 +44,21 @@
     <body>
         <div class="department-leader-container">
             <!-- Sidebar -->
-            <nav class="sidebar">
-                <div class="sidebar-header">
-                    <div class="logo">
-                        <i class="fas fa-users-gear"></i>
-                        <span>Quản lý Ban</span>
-                    </div>
-                </div>
-
-                <ul class="sidebar-menu">
-                    <li class="menu-item active">
-                        <a href="${pageContext.request.contextPath}/department-dashboard?clubID=${clubID}" class="menu-link">
-                            <i class="fas fa-chart-pie"></i>
-                            <span>Dashboard</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/department-members?clubID=${clubID}" class="menu-link">
-                            <i class="fas fa-users"></i>
-                            <span>Quản lý thành viên</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/department-tasks" class="menu-link">
-                            <i class="fas fa-tasks"></i>
-                            <span>Quản lý công việc</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/department-meeting" class="menu-link">
-                            <i class="fas fa-calendar-alt"></i>
-                            <span>Quản lý cuộc họp</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/department-plan-events?clubID=${clubID}" class="menu-link">
-                            <i class="fas fa-calendar-check"></i>
-                            <span>Xem kế hoạch & sự kiện</span>
-                        </a>
-                    </li>
-
-                    <c:if test="${isAccess}">
-                        <li class="menu-item">
-                            <a href="${pageContext.request.contextPath}/department/financial" class="menu-link">
-                                <i class="fa-dollar-sign"></i>
-                                <span>Tài chính</span>
-                            </a>
-                        </li>
-                    </c:if>
-                        <c:if test="${isHauCan}">
-                        <li class="menu-item">
-                            <a href="${pageContext.request.contextPath}/department/submit-expense" class="menu-link">
-                                <i class="fa-dollar-sign"></i>
-                                <span>Báo cáo chi tiêu</span>
-                            </a>
-                        </li>
-                    </c:if>
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/" class="menu-link">
-                            <i class="fas fa-home"></i>
-                            <span>Về trang chủ</span>
-                        </a>
-                    </li>
-                </ul>
-                <div class="sidebar-footer">
-                    <div class="user-info">
-                        <div class="user-avatar">
-                            <img src="${pageContext.request.contextPath}/img/Hinh-anh-dai-dien-mac-dinh-Facebook.jpg" alt="Avatar">
-                        </div>
-                        <div class="user-details">
-                            <div class="user-name">${sessionScope.user.fullName}</div>
-                            <div class="user-role">${isHauCan ? 'Trưởng ban Hậu Cần' : isAccess ? 'Trưởng ban Đối Ngoại' : 'Trưởng ban'}</div>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+            <c:set var="activePage" value="submit-expense" />
+            <%@ include file="components/sidebar.jsp" %>
 
             <!-- Main Content -->
             <main class="main-content">
                 <header class="header mb-4">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h1 class="h3 mb-1">Gửi Báo Cáo Chi Phí</h1>
+                            <h1 class="h3 mb-1">Gửi Đơn Xin Chi Phí</h1>
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb mb-0">
                                     <li class="breadcrumb-item">
                                         <a href="${pageContext.request.contextPath}/department-dashboard?clubID=${clubID}" class="text-decoration-none">Dashboard</a>
                                     </li>
-                                    <li class="breadcrumb-item active" aria-current="page">Gửi Báo Cáo Chi Phí</li>
+                                    <li class="breadcrumb-item active" aria-current="page">Gửi Đơn Xin chi phí</li>
                                 </ol>
                         </div>
                     </div>
@@ -143,10 +70,10 @@
                         <div class="card-header">
                             <h2 class="card-title">
                                 <i class="fas fa-file-invoice-dollar" style="color: #8b5cf6;"></i>
-                                Gửi Báo Cáo Chi Phí Mới (Kỳ: ${term.termName})
+                                Gửi Đơn Xin Chi Phí Mới (Kỳ: ${term.termName})
                             </h2>
                             <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#expenseFormCollapse" aria-expanded="false" aria-controls="expenseFormCollapse">
-                                <i class="fas fa-plus"></i> Thêm Báo Cáo
+                                <i class="fas fa-plus"></i> Tạo Đơn
                             </button>
                         </div>
                         <div class="card-body collapse" id="expenseFormCollapse">
@@ -180,7 +107,7 @@
                                 </div>
                                 <div class="d-flex justify-content-end gap-2">
                                     <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#expenseFormCollapse">Đóng</button>
-                                    <button type="submit" class="btn btn-primary">Gửi Báo Cáo</button>
+                                    <button type="submit" class="btn btn-primary">Gửi Đơn</button>
                                 </div>
 
                             </form>
@@ -192,7 +119,7 @@
                         <div class="card-header">
                             <h2 class="card-title">
                                 <i class="fas fa-list" style="color: #8b5cf6;"></i>
-                                Danh Sách Báo Cáo Chi Phí Đã Gửi (Kỳ: ${term.termName})
+                                Danh Đơn Xin Chi Phí Đã Gửi (Kỳ: ${term.termName})
                             </h2>
                         </div>
                         <div class="card-body">
@@ -230,7 +157,7 @@
                                 </div>
                             </div>
                             <c:if test="${empty submittedExpenses}">
-                                <p class="text-muted">Bạn chưa gửi báo cáo chi phí nào.</p>
+                                <p class="text-muted">Bạn chưa gửi đơn xin chi phí nào.</p>
                             </c:if>
                             <c:if test="${not empty submittedExpenses}">
                                 <div class="table-responsive">

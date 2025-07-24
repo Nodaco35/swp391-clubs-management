@@ -57,7 +57,7 @@
             <li class="menu-item ${activePage == 'submit-expense' ? 'active' : ''}">
                 <a href="${pageContext.request.contextPath}/department/submit-expense" class="menu-link">
                     <i class="fas fa-receipt"></i>
-                    <span>Báo cáo chi tiêu</span>
+                    <span>Xin chi phí</span>
                 </a>
             </li>
         </c:if>
