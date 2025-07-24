@@ -202,7 +202,7 @@ public class ChairmanEditTasksServlet extends HttpServlet {
 
                 if (success) {
                     session.setAttribute("successMsg", "Cập nhật công việc thành công.");
-                    response.sendRedirect(request.getContextPath() + "/edit-tasks?taskID=" + taskID);
+                    response.sendRedirect(request.getContextPath() + "/chairman-page/tasks/edit-tasks?taskID=" + taskID);
                 } else {
                     request.setAttribute("errorMessage", "Không thể cập nhật công việc.");
                     doGet(request, response);

@@ -221,9 +221,7 @@
 	</nav>
 </header>
 <main class="dashboard-content">
-	<c:if test="${not empty errorMessage}">
-	<div class="error-message">${errorMessage}</div>
-	</c:if>
+
 	<section class="timeline-management">
 		<div class="section-header">
 			<div class="section-title">
@@ -401,11 +399,13 @@
 		</c:if>
 	</section>
 
-	<!-- Modal Form for Adding Task -->
 	<div class="modal" id="addTaskModal">
 		<div class="modal-content">
 			<span class="close">×</span>
 			<h2>Giao Công Việc</h2>
+			<c:if test="${not empty errorMessage}">
+				<div class="error-message">${errorMessage}</div>
+			</c:if>
 			<form action="${pageContext.request.contextPath}/chairman-page/tasks" method="post" id="addTaskForm">
 				<input type="hidden" name="action" value="addTask">
 				<input type="hidden" name="termID" id="termID">
@@ -464,7 +464,6 @@
 	</div>
 
 	<script>
-        // Xử lý hiển thị modal khi nhấn nút "Giao công việc"
         document.querySelectorAll(".btn-add-task-to-phase").forEach(button => {
             button.addEventListener("click", function (e) {
                 e.preventDefault();
@@ -476,7 +475,6 @@
                 termIDInput.value = termID;
                 eventIDInput.value = eventID;
                 modal.style.display = "flex";
-                // Reset form
                 document.getElementById("addTaskForm").reset();
                 termIDInput.value = termID;
                 eventIDInput.value = eventID;
@@ -485,12 +483,10 @@
             });
         });
 
-        // Xử lý đóng modal
         document.querySelector(".close").addEventListener("click", function () {
             document.getElementById("addTaskModal").style.display = "none";
         });
 
-        // Đóng modal khi nhấn ra ngoài
         window.addEventListener("click", function (event) {
             const modal = document.getElementById("addTaskModal");
             if (event.target === modal) {
@@ -498,7 +494,6 @@
             }
         });
 
-        // Hiển thị/ẩn các trường nhập tài liệu mới
         function toggleDocumentFields() {
             const documentSelect = document.getElementById("documentSelect");
             const newDocumentFields = document.getElementById("newDocumentFields");
@@ -511,7 +506,6 @@
             }
         }
 
-        // Client-side validation cho DocumentName và DocumentURL
         document.getElementById("addTaskForm").addEventListener("submit", function (e) {
             const documentSelect = document.getElementById("documentSelect").value;
             const documentName = document.getElementById("documentName").value;
@@ -521,6 +515,11 @@
                 alert("Vui lòng nhập tên tài liệu khi cung cấp liên kết tài liệu.");
             }
         });
+        <% if (request.getAttribute("showTermModal") != null) { %>
+        window.addEventListener("load", function () {
+            document.getElementById("addTaskModal").style.display = "flex";
+        });
+        <% } %>
 	</script>
 </body>
 </html>

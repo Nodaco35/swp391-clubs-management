@@ -194,6 +194,7 @@ public class ChairmanTasksServlet extends HttpServlet {
                 // Validation
                 if ("new".equals(existingDocumentID) && documentURL != null && !documentURL.isEmpty() && (documentName == null || documentName.isEmpty())) {
                     request.setAttribute("errorMessage", "Vui lòng nhập tên tài liệu khi cung cấp liên kết tài liệu.");
+                    request.setAttribute("showTermModal", true);
                     doGet(request, response);
                     return;
                 }
@@ -208,6 +209,7 @@ public class ChairmanTasksServlet extends HttpServlet {
                 EventTerms term = taskDAO.getEventTermsByID(termID);
                 if (term == null || startDate.before(term.getTermStart()) || endDate.after(term.getTermEnd())) {
                     request.setAttribute("errorMessage", "Ngày bắt đầu và kết thúc phải nằm trong khoảng thời gian của giai đoạn.");
+                    request.setAttribute("showTermModal", true);
                     doGet(request, response);
                     return;
                 }
@@ -229,6 +231,7 @@ public class ChairmanTasksServlet extends HttpServlet {
                     documentID = docDAO.addDocument(doc);
                     if (documentID == null) {
                         request.setAttribute("errorMessage", "Không thể lưu tài liệu.");
+                        request.setAttribute("showTermModal", true);
                         doGet(request, response);
                         return;
                     }
@@ -270,6 +273,8 @@ public class ChairmanTasksServlet extends HttpServlet {
                     response.sendRedirect(request.getContextPath() + "/chairman-page/tasks?eventID=" + eventID);
                 } else {
                     request.setAttribute("errorMessage", "Không thể thêm công việc.");
+                    request.setAttribute("showTermModal", true);
+
                     doGet(request, response);
                 }
             } catch (Exception e) {
