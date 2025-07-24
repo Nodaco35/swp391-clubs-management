@@ -1,6 +1,7 @@
 package models;
 
 import java.util.Date;
+import java.sql.*;
 
 public class Tasks {
     private int taskID;
@@ -30,8 +31,34 @@ public class Tasks {
 
     private Users createdBy;      // CreatedBy
     private Date createdAt;
+    
+    private Timestamp startedDate, endedDate, createdTime;
 
+    public Timestamp getStartedDate() {
+        return startedDate;
+    }
 
+    public void setStartedDate(Timestamp startedDate) {
+        this.startedDate = startedDate;
+    }
+
+    public Timestamp getEndedDate() {
+        return endedDate;
+    }
+
+    public void setEndedDate(Timestamp endedDate) {
+        this.endedDate = endedDate;
+    }
+
+    public Timestamp getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(Timestamp createdTime) {
+        this.createdTime = createdTime;
+    }
+
+    
     public Tasks() {}
 
 
