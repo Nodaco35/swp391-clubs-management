@@ -85,64 +85,12 @@
         </style>
     </head>
     <body>
+        
+            <!-- Sidebar -->
         <div class="department-leader-container">
-            <nav class="sidebar">
-                <div class="sidebar-header">
-                    <div class="logo">
-                        <i class="fas fa-users-gear"></i>
-                        <span>Quản lý Ban</span>
-                    </div>
-                </div>
-                <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/department-dashboard?clubID=${clubID}" class="menu-link">
-                            <i class="fas fa-chart-pie"></i>
-                            <span>Dashboard</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/department-members?clubID=${clubID}" class="menu-link">
-                            <i class="fas fa-users"></i>
-                            <span>Quản lý thành viên</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/department-tasks" class="menu-link">
-                            <i class="fas fa-tasks"></i>
-                            <span>Quản lý công việc</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/department-meeting" class="menu-link">
-                            <i class="fas fa-calendar-alt"></i>
-                            <span>Quản lý cuộc họp</span>
-                        </a>
-                    </li>
-                    <li class="menu-item active">
-                        <a href="${pageContext.request.contextPath}/department/financial" class="menu-link">
-                            <i class="fas fa-dollar-sign"></i>
-                            <span>Tài chính</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/" class="menu-link">
-                            <i class="fas fa-home"></i>
-                            <span>Về trang chủ</span>
-                        </a>
-                    </li>
-                </ul>
-                <div class="sidebar-footer">
-                    <div class="user-info">
-                        <div class="user-avatar">
-                            <img src="${pageContext.request.contextPath}/${sessionScope.user.avatar != null ? sessionScope.user.avatar : 'Hinh-anh-dai-dien-mac-dinh-Facebook.jpg'}" alt="Avatar">
-                        </div>
-                        <div class="user-details">
-                            <div class="user-name">${sessionScope.user.fullName}</div>
-                            <div class="user-role">Trưởng ban</div>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+            <c:set var="activePage" value="dashboard" />
+            <%@ include file="components/sidebar.jsp" %>
+
 
             <main class="main-content">
                 <header class="header mb-4">

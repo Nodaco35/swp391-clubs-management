@@ -35,12 +35,8 @@ public class DF_TransactionController extends HttpServlet {
             return;
         }
 
-        String clubID_raw = (String) request.getSession().getAttribute("clubID");
-        if (clubID_raw == null || clubID_raw == "") {
-            response.sendRedirect(request.getContextPath() + "/");
-            return;
-        }
-        int clubID = Integer.parseInt(clubID_raw);
+        int clubID = (int) request.getSession().getAttribute("clubID");
+
         Term term = (Term) request.getSession().getAttribute("term");
         if (term.getTermID() == null) {
             request.setAttribute("error", "Hiện chưa có kì nào hoạt động nên không cần quản lý tài chính");
