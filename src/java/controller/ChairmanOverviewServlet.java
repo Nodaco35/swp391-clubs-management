@@ -67,7 +67,7 @@ public class ChairmanOverviewServlet extends HttpServlet {
             String userID = user.getUserID();
             ClubInfo club = clubDAO.getClubChairman(userID);
             int clubID = clubDAO.getClubIDByUserID(userID);
-
+            
             session.setAttribute("club", club);
             request.setAttribute("totalMembers", clubDAO.getTotalClubMembers(clubID));
             request.setAttribute("totalEvents", eventDAO.getTotalEvents(clubID));
