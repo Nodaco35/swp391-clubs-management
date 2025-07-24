@@ -134,7 +134,6 @@ public class ChairmanMyClubEventsServlet extends HttpServlet {
                 if (success) {
                     response.sendRedirect(request.getContextPath() + "/chairman-page/tasks");
                 } else {
-                    // Có thể xảy ra do lỗi SQL hoặc trigger
                     request.setAttribute("termError", "Không thể thêm giai đoạn: Giai đoạn đã tồn tại hoặc đã đủ 3 giai đoạn.");
                     request.setAttribute("showTermModal", true);
                     doGet(request, response);
