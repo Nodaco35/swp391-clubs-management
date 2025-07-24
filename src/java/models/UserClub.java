@@ -16,7 +16,11 @@ public class UserClub {
     private String ClubImg;
     private String ClubName;
     private int gen; // Thêm trường gen
-            
+    
+    //Chức năng đăng ký hoạt động trong kỳ
+        //Trong kỳ này, đã đăng ký hoạt động hay chưa
+    private boolean isActivedCurrentTerm;
+ 
     public UserClub() {
     }
 
@@ -146,6 +150,16 @@ public class UserClub {
     public void setGen(int gen) {
         this.gen = gen;
     }
+
+    public boolean isIsActivedCurrentTerm() {
+        return isActivedCurrentTerm;
+    }
+
+    public void setIsActivedCurrentTerm(boolean isActivedCurrentTerm) {
+        this.isActivedCurrentTerm = isActivedCurrentTerm;
+    }
+    
+    
 
     @Override
     public String toString() {

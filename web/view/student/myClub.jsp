@@ -159,6 +159,43 @@
                         </c:choose>
                     </section>
 
+                    <!-- Club Summaries -->
+                    <section id="club-summaries" class="mb-12">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-6">Đăng ký hoạt động trong kỳ</h2>
+                        <c:choose>
+                            <c:when test="${empty userMemberClubs}">
+                                <div class="card text-center py-10">
+                                    <p class="text-gray-500 text-lg">Hiện chưa có đơn đơn ký hoạt động trong kỳ.</p>
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    <c:forEach items="${userMemberClubs}" var="uc">
+                                        <div class="card p-6">
+                                            <div class="flex items-center gap-6">
+                                                <img src="${pageContext.request.contextPath}${uc.clubImg != null ? uc.clubImg : '/images/default-club.jpg'}" alt="${uc.clubName}" class="w-20 h-20 rounded-full object-cover border-2 border-blue-200 shadow-sm">
+                                                <div>
+                                                    <h3 class="text-xl font-semibold text-gray-900">${uc.clubName}</h3>
+                                                    <p class="text-sm text-gray-500">Vai trò: ${uc.roleName}</p>
+                                                    <p class="text-sm text-gray-500">Ban: ${uc.departmentName}</p>
+                                                    <p class="text-sm text-gray-500">Ngày tham gia: ${uc.joinDate}</p>
+                                                </div>
+                                            </div>
+                                            <c:choose>
+                                                <c:when test="${!uc.isActivedCurrentTerm}">
+                                                    <a href="${pageContext.request.contextPath}/myclub?action=registerActivity&userID=${uc.userID}&clubID=${uc.clubID}" class="mt-4 inline-block text-white bg-blue-600 hover:bg-blue-700 px-5 py-2.5 rounded-lg transition">Đăng ký hoạt động kỳ ${termNow} </a>
+                                                </c:when>
+                                                <c:when test="${uc.isActivedCurrentTerm}">
+                                                    <div class="mt-4 inline-block text-white bg-gray-600 px-5 py-2.5 rounded-lg transition">Đã đăng ký hoạt động kỳ ${termNow}</div>
+                                                </c:when>
+                                            </c:choose>
+                                        </div>
+                                    </c:forEach>
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
+                    </section>
+
                     <!-- Document Management -->
                     <c:if test="${isMember}">
                         <section id="documents" class="mb-12">
@@ -254,9 +291,7 @@
                             </div>
                         </section>
                     </c:if>
-
-
-                    <!-- Recent Notifications -->
+     <!-- Recent Notifications -->
                     <section id="notifications" class="mb-12">
                         <h2 class="text-3xl font-bold text-gray-900 mb-6">Thông Báo Gần Đây</h2>
                         <div class="card p-6">
@@ -413,12 +448,14 @@
                                     </c:when>
                                     <c:otherwise>
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
                                             <c:forEach items="${departmentmeetings}" var="cm" varStatus="loop">
                                                 <div class="card p-6">
                                                     <div class="flex items-center gap-6">
                                                         <img src="${pageContext.request.contextPath}/${cm.clubImg}" alt="${cm.clubName}" class="w-24 h-24 rounded-lg object-cover border-2 border-blue-200 shadow-sm">
                                                         <div>
                                                             <h3 class="text-xl font-semibold text-gray-900">${cm.clubName}</h3>
+
                                                             <p class="text-sm text-gray-600"><i class="fas fa-users mr-2"></i> ${cm.departmentName}</p>
                                                             <p class="text-sm text-gray-600"><i class="fas fa-calendar-alt mr-2"></i> <strong>${cm.startedTime}</strong></p>
                                                             <p class="text-sm text-gray-600">
@@ -436,6 +473,7 @@
                                 </c:choose>
                             </div>
                         </section>
+
 
                         <section id="upcoming-events" class="mb-12">
                             <h2 class="text-3xl font-bold text-gray-900 mb-6">Sự Kiện Sắp Tới</h2>

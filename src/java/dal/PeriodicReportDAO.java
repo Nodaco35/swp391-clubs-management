@@ -468,4 +468,53 @@ public class PeriodicReportDAO extends DBContext {
         return null;
     }
 
+    public boolean isUserActiveInTerm(String userId, int ClubID) {
+        String sql = """
+                     SELECT count(*) as Result FROM ActivedMemberClubs WHERE UserID = ?
+                     AND TermID = (select s.TermID from semesters s where s.Status = 'ACTIVE') AND IsActive = TRUE and ClubID = ? LIMIT 1;
+                     """;
+        int result = 0;
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, userId);
+            ps.setInt(2, ClubID);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    result = rs.getInt("Result");
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        if (result == 1) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean insertUserToActiveClub(String userId, int clubId) {
+        String sql = """
+        INSERT INTO ActivedMemberClubs (UserID, ClubID, ActiveDate, TermID, IsActive)
+        VALUES (?, ?, CURRENT_DATE, 
+            (SELECT TermID FROM semesters WHERE Status = 'ACTIVE' LIMIT 1), 
+            1);
+        """;
+
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, userId);
+            ps.setInt(2, clubId);
+
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }
