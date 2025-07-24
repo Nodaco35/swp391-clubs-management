@@ -11,16 +11,200 @@ import java.util.*;
 
 public class TaskDAO {
 
+    public static List<Tasks> getAllByUser(String userID) {
+        List<Tasks> tasks = new ArrayList<>();
+        String sql = """
+            SELECT 
+                t.TaskID,
+                t.ParentTaskID,
+                t.TermID,
+                t.EventID,
+                t.ClubID,
+                t.DocumentID,
+                t.AssigneeType,
+                t.UserID AS UserAssigneeID,
+                t.DepartmentID AS DepartmentAssigneeID,
+                t.Title,
+                t.Description,
+                t.Content,
+                t.Status,
+                t.Rating,
+                t.LastRejectReason,
+                t.ReviewComment,
+                t.StartDate,
+                t.EndDate,
+                t.CreatedBy AS CreatedByID,
+                c.ClubName,
+                d.DepartmentName,
+                e.EventName,
+                doc.DocumentName,
+                doc.DocumentURL,t.CreatedAt,
+                u1.FullName AS UserAssigneeFullName,
+                u2.FullName AS CreatedByFullName
+            FROM 
+                Tasks t
+            LEFT JOIN 
+                Clubs c ON t.ClubID = c.ClubID
+            LEFT JOIN 
+                Departments d ON t.DepartmentID = d.DepartmentID
+            LEFT JOIN 
+                Events e ON t.EventID = e.EventID
+            LEFT JOIN 
+                Documents doc ON t.DocumentID = doc.DocumentID
+            LEFT JOIN 
+                Users u1 ON t.UserID = u1.UserID
+            LEFT JOIN 
+                Users u2 ON t.CreatedBy = u2.UserID
+            WHERE 
+                (t.AssigneeType = 'User' AND t.UserID = ?)
+                OR 
+                (
+                    t.AssigneeType = 'Department' 
+                    AND t.DepartmentID IN (
+                        SELECT uc.ClubDepartmentID 
+                        FROM UserClubs uc
+                        JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
+                        WHERE uc.UserID = ? AND uc.IsActive = TRUE
+                    )
+                )
+                AND t.EndDate >= CURRENT_TIMESTAMP
+                AND t.Status IN ('ToDo', 'InProgress', 'Review')
+            ORDER BY 
+                t.EndDate ASC
+        """;
+
+        try (PreparedStatement stmt = DBContext.getConnection().prepareStatement(sql)) {
+            stmt.setString(1, userID);
+            stmt.setString(2, userID);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Tasks task = new Tasks();
+                task.setTaskID(rs.getInt("TaskID"));
+                task.setParentTaskID(rs.getObject("ParentTaskID", Integer.class));
+
+                // Set Term (assuming TermID is sufficient for EventTerms)
+                if (rs.getObject("TermID") != null) {
+                    EventTerms term = new EventTerms();
+                    term.setTermID(rs.getInt("TermID"));
+                    task.setTerm(term);
+                }
+
+                // Set Event
+                if (rs.getObject("EventID") != null) {
+                    Events event = new Events();
+                    event.setEventID(rs.getInt("EventID"));
+                    event.setEventName(rs.getString("EventName"));
+                    task.setEvent(event);
+                }
+
+                // Set Club
+                if (rs.getObject("ClubID") != null) {
+                    Clubs club = new Clubs();
+                    club.setClubID(rs.getInt("ClubID"));
+                    club.setClubName(rs.getString("ClubName"));
+                    task.setClub(club);
+                }
+
+                // Set Document
+                if (rs.getObject("DocumentID") != null) {
+                    Documents document = new Documents();
+                    document.setDocumentID(rs.getInt("DocumentID"));
+                    document.setDocumentName(rs.getString("DocumentName"));
+                    document.setDocumentURL(rs.getString("DocumentURL"));
+                    task.setDocument(document);
+                }
+
+                task.setAssigneeType(rs.getString("AssigneeType"));
+
+                // Set UserAssignee
+                if (rs.getObject("UserAssigneeID") != null) {
+                    Users userAssignee = new Users();
+                    userAssignee.setUserID(rs.getString("UserAssigneeID"));
+                    userAssignee.setFullName(rs.getString("UserAssigneeFullName"));
+                    task.setUserAssignee(userAssignee);
+                }
+
+                // Set DepartmentAssignee
+                if (rs.getObject("DepartmentAssigneeID") != null) {
+                    Department department = new Department();
+                    department.setDepartmentID(rs.getInt("DepartmentAssigneeID"));
+                    department.setDepartmentName(rs.getString("DepartmentName"));
+                    task.setDepartmentAssignee(department);
+                }
+
+                task.setTitle(rs.getString("Title"));
+                task.setDescription(rs.getString("Description"));
+                task.setContent(rs.getString("Content"));
+                task.setStatus(rs.getString("Status"));
+                task.setRating(rs.getString("Rating"));
+                task.setLastRejectReason(rs.getString("LastRejectReason"));
+                task.setReviewComment(rs.getString("ReviewComment"));
+                task.setStartedDate(rs.getTimestamp("StartDate"));
+                task.setEndedDate(rs.getTimestamp("EndDate"));
+
+                // Set CreatedBy
+                if (rs.getObject("CreatedByID") != null) {
+                    Users createdBy = new Users();
+                    createdBy.setUserID(rs.getString("CreatedByID"));
+                    createdBy.setFullName(rs.getString("CreatedByFullName"));
+                    task.setCreatedBy(createdBy);
+                }
+
+                task.setCreatedTime(rs.getTimestamp("CreatedAt"));
+                tasks.add(task);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return tasks;
+    }
+
+    public static int countByUser(String userID) {
+        String sql = """
+            SELECT COUNT(*) AS taskCount
+            FROM Tasks t
+            WHERE 
+                (t.AssigneeType = 'User' AND t.UserID = ?)
+                OR 
+                (
+                    t.AssigneeType = 'Department' 
+                    AND t.DepartmentID IN (
+                        SELECT uc.ClubDepartmentID 
+                        FROM UserClubs uc
+                        JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
+                        WHERE uc.UserID = ? AND uc.IsActive = TRUE
+                    )
+                )
+                AND t.EndDate >= CURRENT_TIMESTAMP
+                AND t.Status IN ('ToDo', 'InProgress', 'Review')
+        """;
+
+        try (PreparedStatement stmt = DBContext.getConnection().prepareStatement(sql)) {
+            stmt.setString(1, userID);
+            stmt.setString(2, userID);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("taskCount");
+            }
+            return 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
     public boolean addTask(Tasks task) {
         String sql;
         if ("User".equals(task.getAssigneeType())) {
-            sql = "INSERT INTO Tasks (TermID, EventID, ClubID, AssigneeType, UserID, DocumentID, Title, Description, Status, StartDate, EndDate, CreatedBy) " +
-                  "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            sql = "INSERT INTO Tasks (TermID, EventID, ClubID, AssigneeType, UserID, DocumentID, Title, Description, Status, StartDate, EndDate, CreatedBy) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         } else {
-            sql = "INSERT INTO Tasks (TermID, EventID, ClubID, AssigneeType, DepartmentID, DocumentID, Title, Description, Status, StartDate, EndDate, CreatedBy) " +
-                  "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            sql = "INSERT INTO Tasks (TermID, EventID, ClubID, AssigneeType, DepartmentID, DocumentID, Title, Description, Status, StartDate, EndDate, CreatedBy) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         }
-        
+
         try {
             Connection connection = DBContext.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -28,14 +212,14 @@ public class TaskDAO {
             ps.setInt(2, task.getEvent().getEventID());
             ps.setInt(3, task.getClub().getClubID());
             ps.setString(4, task.getAssigneeType());
-            
+
             // Set assignee based on type
             if ("User".equals(task.getAssigneeType())) {
                 ps.setString(5, task.getUserAssignee().getUserID());
             } else {
                 ps.setInt(5, task.getDepartmentAssignee().getDepartmentID());
             }
-            
+
             if (task.getDocument() != null) {
                 ps.setInt(6, task.getDocument().getDocumentID());
             } else {
@@ -102,6 +286,7 @@ public class TaskDAO {
             return null;
         }
     }
+
     public EventTerms getEventTermsByID(int termID) {
         String sql = "SELECT * FROM EventTerms WHERE termID = ?";
         EventsDAO ed = new EventsDAO();
@@ -269,9 +454,9 @@ public class TaskDAO {
         return taskList;
     }
 
-
     /**
      * Get tasks assigned to a specific department in a club
+     *
      * @param clubId ID of the club
      * @param departmentId ID of the department
      * @return List of tasks assigned to the department
@@ -289,7 +474,7 @@ public class TaskDAO {
             WHERE t.ClubID = ? AND t.DepartmentID = ? AND t.AssigneeType = 'Department'
             ORDER BY t.StartDate DESC, t.CreatedAt DESC
             """;
-        
+
         try {
             Connection connection = DBContext.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -302,10 +487,10 @@ public class TaskDAO {
             while (rs.next()) {
                 Tasks task = new Tasks();
                 task.setTaskID(rs.getInt("TaskID"));
-                
+
                 Integer parentId = rs.getInt("ParentTaskID");
                 task.setParentTaskID(rs.wasNull() ? null : parentId);
-                
+
                 task.setTitle(rs.getString("Title"));
                 task.setDescription(rs.getString("Description"));
                 task.setStatus(rs.getString("Status"));
@@ -313,7 +498,7 @@ public class TaskDAO {
                 task.setEndDate(rs.getTimestamp("EndDate"));
                 task.setCreatedAt(rs.getTimestamp("CreatedAt"));
                 task.setAssigneeType("Department");
-                
+
                 // Create EventTerms object
                 if (rs.getInt("TermID") > 0) {
                     EventTerms et = new EventTerms();
@@ -323,7 +508,7 @@ public class TaskDAO {
                     et.setTermEnd(rs.getDate("TermEnd"));
                     task.setTerm(et);
                 }
-                
+
                 // Create Event object
                 if (rs.getInt("EventID") > 0) {
                     Events event = new Events();
@@ -331,19 +516,19 @@ public class TaskDAO {
                     event.setEventName(rs.getString("EventName"));
                     task.setEvent(event);
                 }
-                
+
                 // Create Club object
                 Clubs club = new Clubs();
                 club.setClubID(rs.getInt("ClubID"));
                 club.setClubName(rs.getString("ClubName"));
                 task.setClub(club);
-                
+
                 // Create Creator object
                 Users creator = new Users();
                 creator.setUserID(rs.getString("CreatedBy"));
                 creator.setFullName(rs.getString("CreatorName"));
                 task.setCreatedBy(creator);
-                
+
                 taskList.add(task);
             }
             System.out.println("DEBUG TaskDAO - Found " + taskList.size() + " tasks");
@@ -353,7 +538,7 @@ public class TaskDAO {
         }
         return taskList;
     }
-    
+
     /**
      * Get task by ID with full details
      */
@@ -374,26 +559,26 @@ public class TaskDAO {
             LEFT JOIN Users assignee ON t.UserID = assignee.UserID
             WHERE t.TaskID = ?
             """;
-        
+
         try {
             Connection connection = DBContext.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setInt(1, taskId);
-            
+
             System.out.println("DEBUG TaskDAO.getTaskById: Executing query for taskId=" + taskId);
             System.out.println("DEBUG TaskDAO.getTaskById: SQL=" + sql);
-            
+
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
                 System.out.println("DEBUG TaskDAO.getTaskById: Found task with ID=" + rs.getInt("TaskID"));
-                
+
                 Tasks task = new Tasks();
                 task.setTaskID(rs.getInt("TaskID"));
-                
+
                 Integer parentId = rs.getInt("ParentTaskID");
                 task.setParentTaskID(rs.wasNull() ? null : parentId);
-                
+
                 task.setTitle(rs.getString("Title"));
                 task.setDescription(rs.getString("Description"));
                 task.setStatus(rs.getString("Status"));
@@ -401,7 +586,7 @@ public class TaskDAO {
                 task.setEndDate(rs.getTimestamp("EndDate"));
                 task.setCreatedAt(rs.getTimestamp("CreatedAt"));
                 task.setAssigneeType(rs.getString("AssigneeType"));
-                
+
                 // Create EventTerms object
                 if (rs.getInt("TermID") > 0) {
                     EventTerms et = new EventTerms();
@@ -411,7 +596,7 @@ public class TaskDAO {
                     et.setTermEnd(rs.getDate("TermEnd"));
                     task.setTerm(et);
                 }
-                
+
                 // Create Event object
                 if (rs.getInt("EventID") > 0) {
                     Events event = new Events();
@@ -419,13 +604,13 @@ public class TaskDAO {
                     event.setEventName(rs.getString("EventName"));
                     task.setEvent(event);
                 }
-                
+
                 // Create Club object
                 Clubs club = new Clubs();
                 club.setClubID(rs.getInt("ClubID"));
                 club.setClubName(rs.getString("ClubName"));
                 task.setClub(club);
-                
+
                 // Create Creator object
                 if (rs.getString("CreatedBy") != null) {
                     Users creator = new Users();
@@ -433,7 +618,7 @@ public class TaskDAO {
                     creator.setFullName(rs.getString("CreatorName"));
                     task.setCreatedBy(creator);
                 }
-                
+
                 // Create Assignee object if available
                 if (rs.getString("AssigneeUserID") != null) {
                     Users assignee = new Users();
@@ -443,7 +628,7 @@ public class TaskDAO {
                     assignee.setAvatar(rs.getString("AssigneeAvatar"));
                     task.setUserAssignee(assignee);
                 }
-                
+
                 return task;
             } else {
                 System.out.println("DEBUG TaskDAO.getTaskById: No task found with ID=" + taskId);
@@ -454,28 +639,28 @@ public class TaskDAO {
         }
         return null;
     }
-    
+
     /**
      * Update task status
      */
     public boolean updateTaskStatus(int taskId, String status) {
         String sql = "UPDATE Tasks SET Status = ? WHERE TaskID = ?";
-        
+
         try {
             Connection connection = DBContext.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, status);
             ps.setInt(2, taskId);
-            
+
             int rowsAffected = ps.executeUpdate();
             return rowsAffected > 0;
-            
+
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
-    
+
     /**
      * Get all tasks by club ID
      */
@@ -495,7 +680,7 @@ public class TaskDAO {
             WHERE t.ClubID = ?
             ORDER BY t.CreatedAt DESC, t.StartDate DESC
             """;
-        
+
         try {
             Connection connection = DBContext.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -567,17 +752,18 @@ public class TaskDAO {
 
                 taskList.add(task);
             }
-            
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
+
         return taskList;
     }
-    
+
     /**
-     * Get tasks assigned to individual members in a specific department
-     * This returns tasks where AssigneeType = 'User' and the user belongs to the given department
+     * Get tasks assigned to individual members in a specific department This
+     * returns tasks where AssigneeType = 'User' and the user belongs to the
+     * given department
      */
     public List<Tasks> getTasksForDepartmentMembers(int clubDepartmentId) {
         List<Tasks> taskList = new ArrayList<>();
@@ -597,7 +783,7 @@ public class TaskDAO {
               AND uc.IsActive = 1
             ORDER BY t.StartDate DESC, t.CreatedAt DESC
             """;
-        
+
         try {
             Connection connection = DBContext.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -638,16 +824,16 @@ public class TaskDAO {
 
                 taskList.add(task);
             }
-            
+
             connection.close();
         } catch (SQLException e) {
             System.err.println("ERROR TaskDAO - Failed to get tasks for department members: " + e.getMessage());
             e.printStackTrace();
         }
-        
+
         return taskList;
     }
-    
+
     /**
      * Tạo task mới cho cá nhân
      */
@@ -657,14 +843,14 @@ public class TaskDAO {
                               CreatedBy, CreatedAt, UpdatedAt, Status, EventID) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """;
-        
+
         Connection connection = null;
         PreparedStatement ps = null;
-        
+
         try {
             connection = DBContext.getConnection();
             ps = connection.prepareStatement(sql);
-            
+
             ps.setString(1, task.getTitle());
             ps.setString(2, task.getDescription());
             ps.setDate(3, new java.sql.Date(task.getStartDate().getTime()));
@@ -676,18 +862,22 @@ public class TaskDAO {
             ps.setTimestamp(9, new Timestamp(System.currentTimeMillis()));
             ps.setString(10, task.getStatus());
             ps.setInt(11, task.getEvent().getEventID());
-            
+
             int rowsAffected = ps.executeUpdate();
             return rowsAffected > 0;
-            
+
         } catch (SQLException e) {
             System.err.println("ERROR TaskDAO - Failed to create task: " + e.getMessage());
             e.printStackTrace();
             return false;
         } finally {
             try {
-                if (ps != null) ps.close();
-                if (connection != null) connection.close();
+                if (ps != null) {
+                    ps.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }

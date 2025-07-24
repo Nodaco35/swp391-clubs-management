@@ -53,7 +53,10 @@ public class MyClubController extends HttpServlet {
         int countUpcomingDepartmentMeeting = DepartmentMeetingDAO.countByUID(user.getUserID());
         List<DepartmentMeeting> departmentmeetings = DepartmentMeetingDAO.findByUserID(user.getUserID());
         List<Clubs> listClubAsChairman = ClubDAO.findByUserIDAndChairman(user.getUserID());
-
+        
+        int countTodoLists = TaskDAO.countByUser(user.getUserID());
+        List<Tasks> departmentTasks = TaskDAO.getAllByUser(user.getUserID());
+         
         request.setAttribute("hasPendingInvoices", hasPendingInvoices);
         request.setAttribute("countUpcomingDepartmentMeeting", countUpcomingDepartmentMeeting);
         request.setAttribute("departmentmeetings", departmentmeetings);
@@ -64,6 +67,8 @@ public class MyClubController extends HttpServlet {
         request.setAttribute("countUpcomingMeeting", countUpcomingMeeting);
         request.setAttribute("pendingApplications", pendingApplications);
         request.setAttribute("clubmeetings", clubmeetings);
+        request.setAttribute("departmentTasks", departmentTasks);
+        request.setAttribute("countTodoLists", countTodoLists);
 
         String action = request.getParameter("action");
         if ("deleteDocument".equals(action)) {
