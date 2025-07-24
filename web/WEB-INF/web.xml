@@ -4,10 +4,57 @@
         <filter-name>AuthFilter</filter-name>
         <filter-class>filters.AuthFilter</filter-class>
     </filter>
+    <filter>
+        <filter-name>ExtentionFileFilter</filter-name>
+        <filter-class>filters.ExtentionFileFilter</filter-class>
+    </filter>
+    <filter>
+        <filter-name>ICFilter</filter-name>
+        <filter-class>filters.ICFilter</filter-class>
+    </filter>
+    <filter>
+        <filter-name>FinancialBillFilter</filter-name>
+        <filter-class>filters.FinancialBillFilter</filter-class>
+    </filter>
+    <filter>
+        <filter-name>ChairmanClubFilter</filter-name>
+        <filter-class>filters.ChairmanClubFilter</filter-class>
+    </filter>
+    <filter>
+        <filter-name>DepartmentLeaderFilter</filter-name>
+        <filter-class>filters.DepartmentLeaderFilter</filter-class>
+    </filter>
+    <filter>
+        <filter-name>ExternalHeadFilter</filter-name>
+        <filter-class>filters.ExternalHeadFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>ExtentionFileFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
     <filter-mapping>
         <filter-name>AuthFilter</filter-name>
         <url-pattern>/admin/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>ICFilter</filter-name>
         <url-pattern>/ic/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>FinancialBillFilter</filter-name>
+        <url-pattern>/financial/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>ChairmanClubFilter</filter-name>
+        <url-pattern>/chairman-page/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>DepartmentLeaderFilter</filter-name>
+        <url-pattern>/department/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>ExternalHeadFilter</filter-name>
+        <url-pattern>/department/financial/*</url-pattern>
     </filter-mapping>
     <servlet>
         <servlet-name>HomepageServlet</servlet-name>
@@ -244,8 +291,8 @@
     <servlet>
         <servlet-name>SemesterServlet</servlet-name>
         <servlet-class>controller.SemesterServlet</servlet-class>
-</servlet>
-  <servlet>
+    </servlet>
+    <servlet>
         <servlet-name>ChairmanEditTasksServlet</servlet-name>
         <servlet-class>controller.ChairmanEditTasksServlet</servlet-class>
     </servlet>
@@ -517,8 +564,8 @@
     <servlet-mapping>
         <servlet-name>SemesterServlet</servlet-name>
         <url-pattern>/ic/semester</url-pattern>
-      </servlet-mapping>
-<servlet-mapping>
+    </servlet-mapping>
+    <servlet-mapping>
         <servlet-name>ChairmanEditTasksServlet</servlet-name>
         <url-pattern>/chairman-page/tasks/edit-tasks</url-pattern>
     </servlet-mapping>

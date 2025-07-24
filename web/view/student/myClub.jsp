@@ -291,9 +291,7 @@
                             </div>
                         </section>
                     </c:if>
-
-
-                    <!-- Recent Notifications -->
+     <!-- Recent Notifications -->
                     <section id="notifications" class="mb-12">
                         <h2 class="text-3xl font-bold text-gray-900 mb-6">Thông Báo Gần Đây</h2>
                         <div class="card p-6">
@@ -322,59 +320,147 @@
 
                     <!-- Department Tasks -->
                     <section id="calendar" class="mb-12">
-                        <h2 class="text-3xl font-bold text-gray-900 mb-6">Nhiệm Vụ Của Ban</h2>
-                        <div class="card p-6">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-6">Nhiệm Vụ</h2>
+                        <div class="card p-6 bg-white shadow-lg rounded-lg">
                             <c:choose>
                                 <c:when test="${empty departmentTasks}">
-                                    <p class="text-gray-500 text-center py-8 text-lg">Không có nhiệm vụ ban nào.</p>
+                                    <p class="text-gray-500 text-center py-8 text-lg">Hiện tại không có nhiệm vụ nào cần làm.</p>
                                 </c:when>
                                 <c:otherwise>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <c:forEach items="${departmentTasks}" var="task" varStatus="loop">
-                                            <div class="p-5 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-                                                <h4 class="text-base font-semibold text-gray-900">${task.taskName}</h4>
-                                                <p class="text-sm text-gray-600"><strong>Hạn chót:</strong> ${task.dueDate}</p>
-                                                <p class="text-sm text-gray-600"><strong>Trạng thái:</strong> ${task.status}</p>
-                                                <p class="text-sm text-gray-600"><strong>Ban:</strong> ${task.departmentName}</p>
-                                                <p class="text-sm text-gray-600"><strong>CLB:</strong> ${task.clubName}</p>
-                                                <p class="text-sm text-gray-600"><strong>Sự kiện:</strong> ${task.eventName}</p>
-                                            </div>
-                                            <c:if test="${loop.count % 2 == 1 and loop.last}">
-                                                <div></div>
-                                            </c:if>
-                                        </c:forEach>
-                                    </div>
-                                </c:otherwise>
-                            </c:choose>
-                        </div>
-                    </section>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        <c:forEach items="${departmentTasks}" var="task">
+                                            <div class="p-5 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all border-l-4
+                                                 ${task.status == 'ToDo' ? 'border-blue-500' : 
+                                                   task.status == 'InProgress' ? 'border-yellow-500' : 
+                                                   'border-green-500'}">
+                                                <h4 class="text-base font-semibold text-gray-900 mb-2">${task.title}</h4>
+                                                <p class="text-sm text-gray-600 mb-1">
+                                                    <strong>Hạn chót:</strong> 
+                                                    <fmt:formatDate value="${task.endedDate}" pattern="dd/MM/yyyy HH:mm"/>
+                                                </p>
+                                                <p class="text-sm mb-1">
+                                                    <strong>Trạng thái:</strong> 
+                                                    <span class="inline-block px-2 py-1 rounded text-xs font-medium
+                                                          ${task.status == 'ToDo' ? 'bg-blue-100 text-blue-800' : 
+                                                            task.status == 'InProgress' ? 'bg-yellow-100 text-yellow-800' : 
+                                                            'bg-green-100 text-green-800'}">
+                                                              ${task.status}
+                                                          </span>
+                                                    </p>
+                                                    <p class="text-sm text-gray-600 mb-1">
+                                                        <strong>Ban:</strong> 
+                                                        ${task.departmentAssignee != null ? task.departmentAssignee.departmentName : 'N/A'}
+                                                    </p>
+                                                    <p class="text-sm text-gray-600 mb-1">
+                                                        <strong>CLB:</strong> 
+                                                        ${task.club != null ? task.club.clubName : 'N/A'}
+                                                    </p>
+                                                    <p class="text-sm text-gray-600 mb-1">
+                                                        <strong>Sự kiện:</strong> 
+                                                        ${task.event != null ? task.event.eventName : 'Không có sự kiện'}
+                                                    </p>
+                                                    <p class="text-sm text-gray-600 mb-1">
+                                                        <strong>Ngày bắt đầu:</strong> 
+                                                        <fmt:formatDate value="${task.startedDate}" pattern="dd/MM/yyyy HH:mm"/>
+                                                    </p>
+                                                    <p class="text-sm text-gray-600 mb-1">
+                                                        <strong>Mô tả:</strong> 
+                                                        ${task.description != null ? task.description : 'Không có mô tả'}
+                                                    </p>
+                                                    <p class="text-sm text-gray-600 mb-1">
+                                                        <strong>Nội dung:</strong> 
+                                                        ${task.content != null ? task.content : 'Không có nội dung'}
+                                                    </p>
+                                                    <p class="text-sm text-gray-600 mb-1">
+                                                        <strong>Đánh giá:</strong> 
+                                                        ${task.rating != null ? task.rating : 'Chưa đánh giá'}
+                                                    </p>
+                                                    <p class="text-sm text-gray-600 mb-1">
+                                                        <strong>Lý do từ chối:</strong> 
+                                                        ${task.lastRejectReason != null ? task.lastRejectReason : 'Không có'}
+                                                    </p>
+                                                    <p class="text-sm text-gray-600 mb-1">
+                                                        <strong>Nhận xét:</strong> 
+                                                        ${task.reviewComment != null ? task.reviewComment : 'Không có nhận xét'}
+                                                    </p>
+                                                    <p class="text-sm text-gray-600 mb-1">
+                                                        <strong>Người tạo:</strong> 
+                                                        ${task.createdBy != null ? task.createdBy.fullName : 'N/A'}
+                                                    </p>
+                                                    <p class="text-sm text-gray-600 mb-3">
+                                                        <strong>Ngày tạo:</strong> 
+                                                        <fmt:formatDate value="${task.createdTime}" pattern="dd/MM/yyyy HH:mm"/>
+                                                    </p>
+                                                </div>
+                                            </c:forEach>
+                                        </div>
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
+                        </section>
 
-                    <c:if test="${isLeader || isDepartment}">
-                        <section id="upcoming-clubmeeting" class="mb-12">
-                            <h2 class="text-3xl font-bold text-gray-900 mb-6">Cuộc Họp Sắp Tới Của CLB</h2>
+                        <c:if test="${isLeader || isDepartment}">
+                            <section id="upcoming-clubmeeting" class="mb-12">
+                                <h2 class="text-3xl font-bold text-gray-900 mb-6">Cuộc Họp Sắp Tới Của CLB</h2>
+                                <div class="card p-6">
+                                    <c:choose>
+                                        <c:when test="${empty clubmeetings}">
+                                            <p class="text-gray-500 text-center py-8 text-lg">Không có cuộc họp nào.</p>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <c:forEach items="${clubmeetings}" var="cm" varStatus="loop">
+                                                    <div class="card p-6">
+                                                        <div class="flex items-center gap-6">
+                                                            <img src="${pageContext.request.contextPath}/${cm.clubImg}" alt="${cm.clubName}" class="w-24 h-24 rounded-lg object-cover border-2 border-blue-200 shadow-sm">
+                                                            <div>
+                                                                <h3 class="text-xl font-semibold text-gray-900">${cm.clubName}</h3>
+                                                                <h4 class="text-base font-medium text-gray-800">${cm.meetingTitle}</h4>
+                                                                <p class="text-sm text-gray-600"><i class="fas fa-calendar-alt mr-2"></i> <strong>${cm.startedTime}</strong></p>
+                                                                <p class="text-sm text-gray-600">
+                                                                    <strong>Link:</strong> <a href="${cm.URLMeeting}" target="_blank" class="text-blue-600 hover:underline">${cm.URLMeeting}</a>
+                                                                </p>
+                                                                <c:if test="${not empty cm.document}">
+                                                                    <p class="text-sm text-gray-600">
+                                                                        <strong>Tài liệu:</strong> <a href="${cm.document}" target="_blank" class="text-blue-600 hover:underline">${cm.document}</a>
+                                                                    </p>
+                                                                </c:if>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <c:if test="${loop.count % 2 == 1 and loop.last}">
+                                                        <div></div>
+                                                    </c:if>
+                                                </c:forEach>
+                                            </div>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+                            </section>
+                        </c:if>
+
+                        <section id="upcoming-departmentmeeting" class="mb-12">
+                            <h2 class="text-3xl font-bold text-gray-900 mb-6">Cuộc Họp Sắp Tới Của Ban</h2>
                             <div class="card p-6">
                                 <c:choose>
-                                    <c:when test="${empty clubmeetings}">
+                                    <c:when test="${empty departmentmeetings}">
                                         <p class="text-gray-500 text-center py-8 text-lg">Không có cuộc họp nào.</p>
                                     </c:when>
                                     <c:otherwise>
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <c:forEach items="${clubmeetings}" var="cm" varStatus="loop">
+
+                                            <c:forEach items="${departmentmeetings}" var="cm" varStatus="loop">
                                                 <div class="card p-6">
                                                     <div class="flex items-center gap-6">
                                                         <img src="${pageContext.request.contextPath}/${cm.clubImg}" alt="${cm.clubName}" class="w-24 h-24 rounded-lg object-cover border-2 border-blue-200 shadow-sm">
                                                         <div>
                                                             <h3 class="text-xl font-semibold text-gray-900">${cm.clubName}</h3>
-                                                            <h4 class="text-base font-medium text-gray-800">${cm.meetingTitle}</h4>
+
+                                                            <p class="text-sm text-gray-600"><i class="fas fa-users mr-2"></i> ${cm.departmentName}</p>
                                                             <p class="text-sm text-gray-600"><i class="fas fa-calendar-alt mr-2"></i> <strong>${cm.startedTime}</strong></p>
                                                             <p class="text-sm text-gray-600">
                                                                 <strong>Link:</strong> <a href="${cm.URLMeeting}" target="_blank" class="text-blue-600 hover:underline">${cm.URLMeeting}</a>
                                                             </p>
-                                                            <c:if test="${not empty cm.document}">
-                                                                <p class="text-sm text-gray-600">
-                                                                    <strong>Tài liệu:</strong> <a href="${cm.document}" target="_blank" class="text-blue-600 hover:underline">${cm.document}</a>
-                                                                </p>
-                                                            </c:if>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -387,409 +473,376 @@
                                 </c:choose>
                             </div>
                         </section>
-                    </c:if>
 
-                    <section id="upcoming-departmentmeeting" class="mb-12">
-                        <h2 class="text-3xl font-bold text-gray-900 mb-6">Cuộc Họp Sắp Tới Của Ban</h2>
-                        <div class="card p-6">
-                            <c:choose>
-                                <c:when test="${empty departmentmeetings}">
-                                    <p class="text-gray-500 text-center py-8 text-lg">Không có cuộc họp nào.</p>
-                                </c:when>
-                                <c:otherwise>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <c:forEach items="${departmentmeetings}" var="cm" varStatus="loop">
-                                            <div class="card p-6">
-                                                <div class="flex items-center gap-6">
-                                                    <img src="${pageContext.request.contextPath}/${cm.clubImg}" alt="${cm.clubName}" class="w-24 h-24 rounded-lg object-cover border-2 border-blue-200 shadow-sm">
-                                                    <div>
-                                                        <h3 class="text-xl font-semibold text-gray-900">${cm.clubName}</h3>
-                                                        <p class="text-sm text-gray-600"><i class="fas fa-users mr-2"></i> ${cm.departmentName}</p>
-                                                        <p class="text-sm text-gray-600"><i class="fas fa-calendar-alt mr-2"></i> <strong>${cm.startedTime}</strong></p>
-                                                        <p class="text-sm text-gray-600">
-                                                            <strong>Link:</strong> <a href="${cm.URLMeeting}" target="_blank" class="text-blue-600 hover:underline">${cm.URLMeeting}</a>
-                                                        </p>
+
+                        <section id="upcoming-events" class="mb-12">
+                            <h2 class="text-3xl font-bold text-gray-900 mb-6">Sự Kiện Sắp Tới</h2>
+                            <div class="card p-6">
+                                <c:choose>
+                                    <c:when test="${empty userclubs and empty upcomingEvents}">
+                                        <p class="text-gray-500 text-center py-8 text-lg">Bạn chưa tham gia câu lạc bộ nào, do đó không có sự kiện sắp tới.</p>
+                                    </c:when>
+                                    <c:when test="${not empty userclubs and empty upcomingEvents}">
+                                        <p class="text-gray-500 text-center py-8 text-lg">Không có sự kiện sắp tới cho các câu lạc bộ bạn đã tham gia.</p>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <c:forEach items="${upcomingEvents}" var="event">
+                                                <div class="card p-6">
+                                                    <div class="flex items-center gap-6">
+                                                        <img src="${pageContext.request.contextPath}/${event.eventImg}" alt="${event.eventName}" class="w-36 h-24 rounded-lg object-cover border-2 border-blue-200 shadow-sm">
+                                                        <div>
+                                                            <h3 class="text-xl font-medium text-gray-800">${event.eventName}</h3>
+                                                            <p class="text-sm text-gray-600">
+                                                                <i class="fas fa-calendar-alt"></i>
+                                                                <c:choose>
+                                                                    <c:when test="${not empty event.schedules}">
+                                                                        <fmt:formatDate value="${event.schedules[0].eventDate}" pattern="dd/MM/yyyy"/>
+                                                                    </c:when>
+                                                                    <c:otherwise>
+                                                                        Chưa có lịch trình
+                                                                    </c:otherwise>
+                                                                </c:choose>
+                                                            </p>
+                                                            <p class="text-sm text-gray-600">
+                                                                <i class="fas fa-clock"></i>
+                                                                <c:choose>
+                                                                    <c:when test="${not empty event.schedules}">
+                                                                        <fmt:formatDate value="${event.schedules[0].startTime}" pattern="HH:mm"/> -
+                                                                        <fmt:formatDate value="${event.schedules[0].endTime}" pattern="HH:mm"/>
+                                                                    </c:when>
+                                                                    <c:otherwise>
+                                                                        Không xác định
+                                                                    </c:otherwise>
+                                                                </c:choose>
+                                                            </p>
+                                                            <p class="text-sm text-gray-600">
+                                                                <i class="fas fa-map-marker-alt"></i>
+                                                                <c:choose>
+                                                                    <c:when test="${not empty event.schedules}">
+                                                                        ${event.schedules[0].location.locationName}
+                                                                    </c:when>
+                                                                    <c:otherwise>
+                                                                        Không xác định
+                                                                    </c:otherwise>
+                                                                </c:choose>
+                                                            </p>
+                                                        </div>
                                                     </div>
+                                                    <a href="${pageContext.request.contextPath}/event-detail?id=${event.eventID}" class="mt-4 inline-block text-white bg-blue-600 hover:bg-blue-700 px-5 py-2.5 rounded-lg transition">Đăng ký ngay</a>
                                                 </div>
-                                            </div>
-                                            <c:if test="${loop.count % 2 == 1 and loop.last}">
-                                                <div></div>
-                                            </c:if>
-                                        </c:forEach>
-                                    </div>
-                                </c:otherwise>
-                            </c:choose>
-                        </div>
-                    </section>
+                                            </c:forEach>
+                                        </div>
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
+                        </section>
 
-                    <section id="upcoming-events" class="mb-12">
-                        <h2 class="text-3xl font-bold text-gray-900 mb-6">Sự Kiện Sắp Tới</h2>
-                        <div class="card p-6">
-                            <c:choose>
-                                <c:when test="${empty userclubs and empty upcomingEvents}">
-                                    <p class="text-gray-500 text-center py-8 text-lg">Bạn chưa tham gia câu lạc bộ nào, do đó không có sự kiện sắp tới.</p>
-                                </c:when>
-                                <c:when test="${not empty userclubs and empty upcomingEvents}">
-                                    <p class="text-gray-500 text-center py-8 text-lg">Không có sự kiện sắp tới cho các câu lạc bộ bạn đã tham gia.</p>
-                                </c:when>
-                                <c:otherwise>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <c:forEach items="${upcomingEvents}" var="event">
-                                            <div class="card p-6">
-                                                <div class="flex items-center gap-6">
-                                                    <img src="${pageContext.request.contextPath}/${event.eventImg}" alt="${event.eventName}" class="w-36 h-24 rounded-lg object-cover border-2 border-blue-200 shadow-sm">
-                                                    <div>
-                                                        <h3 class="text-xl font-medium text-gray-800">${event.eventName}</h3>
-                                                        <p class="text-sm text-gray-600">
-                                                            <i class="fas fa-calendar-alt"></i>
-                                                            <c:choose>
-                                                                <c:when test="${not empty event.schedules}">
-                                                                    <fmt:formatDate value="${event.schedules[0].eventDate}" pattern="dd/MM/yyyy"/>
-                                                                </c:when>
-                                                                <c:otherwise>
-                                                                    Chưa có lịch trình
-                                                                </c:otherwise>
-                                                            </c:choose>
-                                                        </p>
-                                                        <p class="text-sm text-gray-600">
-                                                            <i class="fas fa-clock"></i>
-                                                            <c:choose>
-                                                                <c:when test="${not empty event.schedules}">
-                                                                    <fmt:formatDate value="${event.schedules[0].startTime}" pattern="HH:mm"/> -
-                                                                    <fmt:formatDate value="${event.schedules[0].endTime}" pattern="HH:mm"/>
-                                                                </c:when>
-                                                                <c:otherwise>
-                                                                    Không xác định
-                                                                </c:otherwise>
-                                                            </c:choose>
-                                                        </p>
-                                                        <p class="text-sm text-gray-600">
-                                                            <i class="fas fa-map-marker-alt"></i>
-                                                            <c:choose>
-                                                                <c:when test="${not empty event.schedules}">
-                                                                    ${event.schedules[0].location.locationName}
-                                                                </c:when>
-                                                                <c:otherwise>
-                                                                    Không xác định
-                                                                </c:otherwise>
-                                                            </c:choose>
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <a href="${pageContext.request.contextPath}/event-detail?id=${event.eventID}" class="mt-4 inline-block text-white bg-blue-600 hover:bg-blue-700 px-5 py-2.5 rounded-lg transition">Đăng ký ngay</a>
-                                            </div>
+                        <section id="actions" class="mb-12">
+                            <h2 class="text-3xl font-bold text-gray-900 mb-6">Quản Lý Form và Hoạt Động Tuyển Quân</h2>
+                            <div class="card p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-3">Chọn Câu Lạc Bộ</h3>
+                                <p class="text-sm text-gray-500 mb-4">Vui lòng chọn câu lạc bộ mà bạn muốn quản lý form hoặc hoạt động tuyển quân:</p>
+                                <div class="relative inline-block w-full md:w-80 mb-6">
+                                    <select id="clubSelector" class="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="">-- Chọn câu lạc bộ --</option>
+                                        <c:forEach items="${userclubs}" var="club">
+                                            <option value="${club.clubID}">${club.clubName}</option>
                                         </c:forEach>
+                                    </select>
+                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-600">
+                                        <i class="fas fa-chevron-down"></i>
                                     </div>
-                                </c:otherwise>
-                            </c:choose>
-                        </div>
-                    </section>
-
-                    <section id="actions" class="mb-12">
-                        <h2 class="text-3xl font-bold text-gray-900 mb-6">Quản Lý Form và Hoạt Động Tuyển Quân</h2>
-                        <div class="card p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-3">Chọn Câu Lạc Bộ</h3>
-                            <p class="text-sm text-gray-500 mb-4">Vui lòng chọn câu lạc bộ mà bạn muốn quản lý form hoặc hoạt động tuyển quân:</p>
-                            <div class="relative inline-block w-full md:w-80 mb-6">
-                                <select id="clubSelector" class="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    <option value="">-- Chọn câu lạc bộ --</option>
-                                    <c:forEach items="${userclubs}" var="club">
-                                        <option value="${club.clubID}">${club.clubName}</option>
-                                    </c:forEach>
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-600">
-                                    <i class="fas fa-chevron-down"></i>
                                 </div>
+                                <div id="recruitmentManagementSection" class="mb-6" style="display: none;">
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-3">Quản Lý Tuyển Quân</h3>
+                                    <a href="#" id="recruitmentLink" class="inline-block text-white bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg transition flex items-center gap-2">
+                                        <i class="fas fa-users"></i> Quản Lý Hoạt Động Tuyển Quân
+                                    </a>
+                                </div>
+                                <div id="formManagementButtons" style="display: none;" class="flex flex-wrap gap-4">
+                                    <a href="#" id="formManagementLink" class="inline-block text-white bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg transition flex items-center gap-2">
+                                        <i class="fas fa-list-alt"></i> Quản Lý Các Form
+                                    </a>
+                                    <a href="#" id="formBuilderLink" class="inline-block text-white bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg transition flex items-center gap-2">
+                                        <i class="fas fa-plus"></i> Tạo Form Mới
+                                    </a>
+                                </div>
+                                <p id="noPermissionMessage" class="hidden text-sm text-red-600 mt-3">
+                                    <i class="fas fa-exclamation-circle mr-1"></i> Bạn không có đủ quyền quản lý trong câu lạc bộ này.
+                                </p>
                             </div>
-                            <div id="recruitmentManagementSection" class="mb-6" style="display: none;">
-                                <h3 class="text-lg font-semibold text-gray-900 mb-3">Quản Lý Tuyển Quân</h3>
-                                <a href="#" id="recruitmentLink" class="inline-block text-white bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg transition flex items-center gap-2">
-                                    <i class="fas fa-users"></i> Quản Lý Hoạt Động Tuyển Quân
-                                </a>
-                            </div>
-                            <div id="formManagementButtons" style="display: none;" class="flex flex-wrap gap-4">
-                                <a href="#" id="formManagementLink" class="inline-block text-white bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg transition flex items-center gap-2">
-                                    <i class="fas fa-list-alt"></i> Quản Lý Các Form
-                                </a>
-                                <a href="#" id="formBuilderLink" class="inline-block text-white bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg transition flex items-center gap-2">
-                                    <i class="fas fa-plus"></i> Tạo Form Mới
-                                </a>
-                            </div>
-                            <p id="noPermissionMessage" class="hidden text-sm text-red-600 mt-3">
-                                <i class="fas fa-exclamation-circle mr-1"></i> Bạn không có đủ quyền quản lý trong câu lạc bộ này.
-                            </p>
-                        </div>
-                    </section>
-                </div>
-            </main>
-        </div>
+                        </section>
+                    </div>
+                </main>
+            </div>
 
-        <script>
-            document.querySelectorAll('.sidebar a').forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
-                    const href = this.getAttribute('href');
-                    if (href.startsWith('#')) {
+            <script>
+                document.querySelectorAll('.sidebar a').forEach(anchor => {
+                    anchor.addEventListener('click', function (e) {
+                        const href = this.getAttribute('href');
+                        if (href.startsWith('#')) {
+                            e.preventDefault();
+                            document.querySelector(href).scrollIntoView({behavior: 'smooth'});
+                        }
+                    });
+                });
+
+                // Club selection for form management
+                const clubSelector = document.getElementById('clubSelector');
+                const formManagementButtons = document.getElementById('formManagementButtons');
+                const formManagementLink = document.getElementById('formManagementLink');
+                const formBuilderLink = document.getElementById('formBuilderLink');
+                const noPermissionMessage = document.getElementById('noPermissionMessage');
+                const recruitmentLink = document.getElementById('recruitmentLink');
+                const recruitmentManagementSection = document.getElementById('recruitmentManagementSection');
+
+                // Document management
+                const documentClubSelector = document.getElementById('documentClubSelector');
+                const documentManagementSection = document.getElementById('documentManagementSection');
+                const addDocumentBtn = document.getElementById('addDocumentBtn');
+                const documentForm = document.getElementById('documentForm');
+                const cancelDocumentForm = document.getElementById('cancelDocumentForm');
+                const documentAction = document.getElementById('documentAction');
+                const documentIDInput = document.getElementById('documentID');
+                const documentNameInput = document.getElementById('documentName');
+                const descriptionInput = document.getElementById('description');
+                const documentURLInput = document.getElementById('documentURL');
+                const documentTypeSelect = document.getElementById('documentType');
+                const departmentSelect = document.getElementById('departmentID');
+                const documentClubIDInput = document.getElementById('documentClubID');
+
+                const chairmanClubIds = [
+                <c:forEach items="${userclubs}" var="club" varStatus="status">
+                    <c:if test="${club.roleID == 1}">${club.clubID}<c:if test="${!status.last}">,</c:if></c:if>
+                </c:forEach>
+                ];
+
+                const permittedClubIds = [
+                <c:forEach items="${userclubs}" var="club" varStatus="status">
+                    <c:if test="${club.roleID >= 1 && club.roleID <= 3}">${club.clubID}<c:if test="${!status.last}">,</c:if></c:if>
+                </c:forEach>
+                ];
+
+                if (recruitmentLink) {
+                    recruitmentLink.addEventListener('click', function (e) {
                         e.preventDefault();
-                        document.querySelector(href).scrollIntoView({behavior: 'smooth'});
-                    }
-                });
-            });
+                        const selectedClubId = clubSelector.value;
+                        if (selectedClubId) {
+                            window.location.href = '${pageContext.request.contextPath}/recruitment?clubId=' + selectedClubId;
+                        } else {
+                            alert('Vui lòng chọn câu lạc bộ trước khi truy cập trang quản lý tuyển quân.');
+                        }
+                    });
+                }
 
-            // Club selection for form management
-            const clubSelector = document.getElementById('clubSelector');
-            const formManagementButtons = document.getElementById('formManagementButtons');
-            const formManagementLink = document.getElementById('formManagementLink');
-            const formBuilderLink = document.getElementById('formBuilderLink');
-            const noPermissionMessage = document.getElementById('noPermissionMessage');
-            const recruitmentLink = document.getElementById('recruitmentLink');
-            const recruitmentManagementSection = document.getElementById('recruitmentManagementSection');
-
-            // Document management
-            const documentClubSelector = document.getElementById('documentClubSelector');
-            const documentManagementSection = document.getElementById('documentManagementSection');
-            const addDocumentBtn = document.getElementById('addDocumentBtn');
-            const documentForm = document.getElementById('documentForm');
-            const cancelDocumentForm = document.getElementById('cancelDocumentForm');
-            const documentAction = document.getElementById('documentAction');
-            const documentIDInput = document.getElementById('documentID');
-            const documentNameInput = document.getElementById('documentName');
-            const descriptionInput = document.getElementById('description');
-            const documentURLInput = document.getElementById('documentURL');
-            const documentTypeSelect = document.getElementById('documentType');
-            const departmentSelect = document.getElementById('departmentID');
-            const documentClubIDInput = document.getElementById('documentClubID');
-
-            const chairmanClubIds = [
-            <c:forEach items="${userclubs}" var="club" varStatus="status">
-                <c:if test="${club.roleID == 1}">${club.clubID}<c:if test="${!status.last}">,</c:if></c:if>
-            </c:forEach>
-            ];
-
-            const permittedClubIds = [
-            <c:forEach items="${userclubs}" var="club" varStatus="status">
-                <c:if test="${club.roleID >= 1 && club.roleID <= 3}">${club.clubID}<c:if test="${!status.last}">,</c:if></c:if>
-            </c:forEach>
-            ];
-
-            if (recruitmentLink) {
-                recruitmentLink.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const selectedClubId = clubSelector.value;
-                    if (selectedClubId) {
-                        window.location.href = '${pageContext.request.contextPath}/recruitment?clubId=' + selectedClubId;
-                    } else {
-                        alert('Vui lòng chọn câu lạc bộ trước khi truy cập trang quản lý tuyển quân.');
-                    }
-                });
-            }
-
-            if (clubSelector) {
-                clubSelector.addEventListener('change', function () {
-                    const selectedClubId = this.value;
-                    if (selectedClubId) {
-                        const hasFormPermission = permittedClubIds.includes(parseInt(selectedClubId));
-                        const hasRecruitmentPermission = chairmanClubIds.includes(parseInt(selectedClubId));
-                        if (hasFormPermission) {
-                            formManagementButtons.style.display = 'flex';
-                            noPermissionMessage.classList.add('hidden');
-                            formManagementLink.href = '${pageContext.request.contextPath}/formManagement?clubId=' + selectedClubId;
-                            formBuilderLink.href = '${pageContext.request.contextPath}/formBuilder?clubId=' + selectedClubId;
+                if (clubSelector) {
+                    clubSelector.addEventListener('change', function () {
+                        const selectedClubId = this.value;
+                        if (selectedClubId) {
+                            const hasFormPermission = permittedClubIds.includes(parseInt(selectedClubId));
+                            const hasRecruitmentPermission = chairmanClubIds.includes(parseInt(selectedClubId));
+                            if (hasFormPermission) {
+                                formManagementButtons.style.display = 'flex';
+                                noPermissionMessage.classList.add('hidden');
+                                formManagementLink.href = '${pageContext.request.contextPath}/formManagement?clubId=' + selectedClubId;
+                                formBuilderLink.href = '${pageContext.request.contextPath}/formBuilder?clubId=' + selectedClubId;
+                            } else {
+                                formManagementButtons.style.display = 'none';
+                                noPermissionMessage.classList.remove('hidden');
+                            }
+                            if (hasRecruitmentPermission) {
+                                recruitmentManagementSection.style.display = 'block';
+                            } else {
+                                recruitmentManagementSection.style.display = 'none';
+                            }
                         } else {
                             formManagementButtons.style.display = 'none';
-                            noPermissionMessage.classList.remove('hidden');
-                        }
-                        if (hasRecruitmentPermission) {
-                            recruitmentManagementSection.style.display = 'block';
-                        } else {
+                            noPermissionMessage.classList.add('hidden');
                             recruitmentManagementSection.style.display = 'none';
                         }
-                    } else {
-                        formManagementButtons.style.display = 'none';
-                        noPermissionMessage.classList.add('hidden');
-                        recruitmentManagementSection.style.display = 'none';
-                    }
-                });
-            }
+                    });
+                }
 
-            if (documentClubSelector) {
-                documentClubSelector.addEventListener('change', function () {
-                    const selectedClubId = this.value;
-                    documentClubIDInput.value = selectedClubId;
-                    if (selectedClubId) {
+                if (documentClubSelector) {
+                    documentClubSelector.addEventListener('change', function () {
+                        const selectedClubId = this.value;
+                        documentClubIDInput.value = selectedClubId;
+                        if (selectedClubId) {
+                            const form = document.createElement('form');
+                            form.method = 'post';
+                            form.action = '${pageContext.request.contextPath}/myclub';
+                            const actionInput = document.createElement('input');
+                            actionInput.type = 'hidden';
+                            actionInput.name = 'action';
+                            actionInput.value = 'loadDocuments';
+                            const clubIdInput = document.createElement('input');
+                            clubIdInput.type = 'hidden';
+                            clubIdInput.name = 'clubID';
+                            clubIdInput.value = selectedClubId;
+                            form.appendChild(actionInput);
+                            form.appendChild(clubIdInput);
+                            document.body.appendChild(form);
+                            form.submit();
+                        } else {
+                            documentManagementSection.style.display = 'none';
+                            documentForm.style.display = 'none';
+                            departmentSelect.innerHTML = '<option value="">-- Chọn ban --</option>';
+                        }
+                    });
+                }
+
+                if (addDocumentBtn && documentForm) {
+                    addDocumentBtn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const selectedClubId = documentClubSelector.value;
+                        if (!selectedClubId) {
+                            alert('Vui lòng chọn câu lạc bộ trước.');
+                            return;
+                        }
+                        documentAction.value = 'createDocument';
+                        documentIDInput.value = '';
+                        documentNameInput.value = '';
+                        descriptionInput.value = '';
+                        documentURLInput.value = '';
+                        documentTypeSelect.value = 'Meeting';
+                        documentClubIDInput.value = selectedClubId;
                         const form = document.createElement('form');
                         form.method = 'post';
                         form.action = '${pageContext.request.contextPath}/myclub';
                         const actionInput = document.createElement('input');
                         actionInput.type = 'hidden';
                         actionInput.name = 'action';
-                        actionInput.value = 'loadDocuments';
+                        actionInput.value = 'loadDepartments';
                         const clubIdInput = document.createElement('input');
                         clubIdInput.type = 'hidden';
                         clubIdInput.name = 'clubID';
                         clubIdInput.value = selectedClubId;
+                        const showDocumentFormInput = document.createElement('input');
+                        showDocumentFormInput.type = 'hidden';
+                        showDocumentFormInput.name = 'showDocumentForm';
+                        showDocumentFormInput.value = 'true';
                         form.appendChild(actionInput);
                         form.appendChild(clubIdInput);
+                        form.appendChild(showDocumentFormInput);
                         document.body.appendChild(form);
                         form.submit();
-                    } else {
-                        documentManagementSection.style.display = 'none';
+                    });
+                }
+
+                if (cancelDocumentForm && documentForm) {
+                    cancelDocumentForm.addEventListener('click', function () {
                         documentForm.style.display = 'none';
                         departmentSelect.innerHTML = '<option value="">-- Chọn ban --</option>';
-                    }
-                });
-            }
-
-            if (addDocumentBtn && documentForm) {
-                addDocumentBtn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const selectedClubId = documentClubSelector.value;
-                    if (!selectedClubId) {
-                        alert('Vui lòng chọn câu lạc bộ trước.');
-                        return;
-                    }
-                    documentAction.value = 'createDocument';
-                    documentIDInput.value = '';
-                    documentNameInput.value = '';
-                    descriptionInput.value = '';
-                    documentURLInput.value = '';
-                    documentTypeSelect.value = 'Meeting';
-                    documentClubIDInput.value = selectedClubId;
-                    const form = document.createElement('form');
-                    form.method = 'post';
-                    form.action = '${pageContext.request.contextPath}/myclub';
-                    const actionInput = document.createElement('input');
-                    actionInput.type = 'hidden';
-                    actionInput.name = 'action';
-                    actionInput.value = 'loadDepartments';
-                    const clubIdInput = document.createElement('input');
-                    clubIdInput.type = 'hidden';
-                    clubIdInput.name = 'clubID';
-                    clubIdInput.value = selectedClubId;
-                    const showDocumentFormInput = document.createElement('input');
-                    showDocumentFormInput.type = 'hidden';
-                    showDocumentFormInput.name = 'showDocumentForm';
-                    showDocumentFormInput.value = 'true';
-                    form.appendChild(actionInput);
-                    form.appendChild(clubIdInput);
-                    form.appendChild(showDocumentFormInput);
-                    document.body.appendChild(form);
-                    form.submit();
-                });
-            }
-
-            if (cancelDocumentForm && documentForm) {
-                cancelDocumentForm.addEventListener('click', function () {
-                    documentForm.style.display = 'none';
-                    departmentSelect.innerHTML = '<option value="">-- Chọn ban --</option>';
-                });
-            }
-
-            document.addEventListener('click', function (e) {
-                if (e.target.classList.contains('edit-document-btn')) {
-                    e.preventDefault();
-                    const btn = e.target;
-                    const documentId = btn.getAttribute('data-id');
-                    const documentName = btn.getAttribute('data-name');
-                    const description = btn.getAttribute('data-description');
-                    const documentURL = btn.getAttribute('data-url');
-                    const documentType = btn.getAttribute('data-type');
-                    const departmentId = btn.getAttribute('data-department');
-                    const clubId = btn.getAttribute('data-club');
-                    documentAction.value = 'updateDocument';
-                    documentIDInput.value = documentId;
-                    documentNameInput.value = documentName;
-                    descriptionInput.value = description;
-                    documentURLInput.value = documentURL;
-                    documentTypeSelect.value = documentType;
-                    documentClubIDInput.value = clubId;
-                    documentClubSelector.value = clubId;
-                    const form = document.createElement('form');
-                    form.method = 'post';
-                    form.action = '${pageContext.request.contextPath}/myclub';
-                    const actionInput = document.createElement('input');
-                    actionInput.type = 'hidden';
-                    actionInput.name = 'action';
-                    actionInput.value = 'loadDepartments';
-                    const clubIdInput = document.createElement('input');
-                    clubIdInput.type = 'hidden';
-                    clubIdInput.name = 'clubID';
-                    clubIdInput.value = clubId;
-                    const documentIdInput = document.createElement('input');
-                    documentIdInput.type = 'hidden';
-                    documentIdInput.name = 'documentID';
-                    documentIdInput.value = documentId;
-                    const showDocumentFormInput = document.createElement('input');
-                    showDocumentFormInput.type = 'hidden';
-                    showDocumentFormInput.name = 'showDocumentForm';
-                    showDocumentFormInput.value = 'true';
-                    form.appendChild(actionInput);
-                    form.appendChild(clubIdInput);
-                    form.appendChild(documentIdInput);
-                    form.appendChild(showDocumentFormInput);
-                    document.body.appendChild(form);
-                    form.submit();
-                }
-            });
-
-            document.addEventListener('DOMContentLoaded', () => {
-                const createBtn = document.querySelector('a[href="myclub?action=createClubMeeting"]');
-                const createForm = document.getElementById('createMeetingForm');
-                const cancelBtn = document.getElementById('cancelMeetingForm');
-                const formTitle = document.getElementById('formTitle');
-                const meetingIdInput = document.getElementById('meetingIdInput');
-                const clubSelect = document.getElementById('clubId');
-                const meetingTimeInput = document.getElementById('meetingTime');
-                const meetingLinkInput = document.getElementById('meetingLink');
-                const formElement = createForm?.querySelector('form');
-
-                if (recruitmentManagementSection) {
-                    recruitmentManagementSection.style.display = 'none';
-                }
-
-                if (createBtn && createForm) {
-                    createBtn.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        formTitle.textContent = 'Tạo Cuộc Họp Mới';
-                        formElement.action = '${pageContext.request.contextPath}/myclub?action=submitCreateMeeting';
-                        meetingIdInput.value = '';
-                        meetingTimeInput.value = '';
-                        meetingLinkInput.value = '';
-                        clubSelect.selectedIndex = 0;
-                        createForm.classList.remove('hidden');
-                        createForm.scrollIntoView({behavior: 'smooth', block: 'start'});
                     });
                 }
 
-                if (cancelBtn && createForm) {
-                    cancelBtn.addEventListener('click', () => {
-                        createForm.classList.add('hidden');
-                    });
-                }
-
-                document.querySelectorAll('.edit-meeting-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
+                document.addEventListener('click', function (e) {
+                    if (e.target.classList.contains('edit-document-btn')) {
                         e.preventDefault();
-                        const meetingId = btn.getAttribute('data-id');
-                        const clubId = btn.getAttribute('data-clubid');
-                        const startedTime = btn.getAttribute('data-time');
-                        const meetingURL = btn.getAttribute('data-url');
-                        formTitle.textContent = 'Chỉnh sửa Cuộc Họp';
-                        meetingIdInput.value = meetingId;
-                        meetingTimeInput.value = startedTime;
-                        meetingLinkInput.value = meetingURL;
-                        [...clubSelect.options].forEach(option => {
-                            option.selected = option.value === clubId;
+                        const btn = e.target;
+                        const documentId = btn.getAttribute('data-id');
+                        const documentName = btn.getAttribute('data-name');
+                        const description = btn.getAttribute('data-description');
+                        const documentURL = btn.getAttribute('data-url');
+                        const documentType = btn.getAttribute('data-type');
+                        const departmentId = btn.getAttribute('data-department');
+                        const clubId = btn.getAttribute('data-club');
+                        documentAction.value = 'updateDocument';
+                        documentIDInput.value = documentId;
+                        documentNameInput.value = documentName;
+                        descriptionInput.value = description;
+                        documentURLInput.value = documentURL;
+                        documentTypeSelect.value = documentType;
+                        documentClubIDInput.value = clubId;
+                        documentClubSelector.value = clubId;
+                        const form = document.createElement('form');
+                        form.method = 'post';
+                        form.action = '${pageContext.request.contextPath}/myclub';
+                        const actionInput = document.createElement('input');
+                        actionInput.type = 'hidden';
+                        actionInput.name = 'action';
+                        actionInput.value = 'loadDepartments';
+                        const clubIdInput = document.createElement('input');
+                        clubIdInput.type = 'hidden';
+                        clubIdInput.name = 'clubID';
+                        clubIdInput.value = clubId;
+                        const documentIdInput = document.createElement('input');
+                        documentIdInput.type = 'hidden';
+                        documentIdInput.name = 'documentID';
+                        documentIdInput.value = documentId;
+                        const showDocumentFormInput = document.createElement('input');
+                        showDocumentFormInput.type = 'hidden';
+                        showDocumentFormInput.name = 'showDocumentForm';
+                        showDocumentFormInput.value = 'true';
+                        form.appendChild(actionInput);
+                        form.appendChild(clubIdInput);
+                        form.appendChild(documentIdInput);
+                        form.appendChild(showDocumentFormInput);
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                });
+
+                document.addEventListener('DOMContentLoaded', () => {
+                    const createBtn = document.querySelector('a[href="myclub?action=createClubMeeting"]');
+                    const createForm = document.getElementById('createMeetingForm');
+                    const cancelBtn = document.getElementById('cancelMeetingForm');
+                    const formTitle = document.getElementById('formTitle');
+                    const meetingIdInput = document.getElementById('meetingIdInput');
+                    const clubSelect = document.getElementById('clubId');
+                    const meetingTimeInput = document.getElementById('meetingTime');
+                    const meetingLinkInput = document.getElementById('meetingLink');
+                    const formElement = createForm?.querySelector('form');
+
+                    if (recruitmentManagementSection) {
+                        recruitmentManagementSection.style.display = 'none';
+                    }
+
+                    if (createBtn && createForm) {
+                        createBtn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            formTitle.textContent = 'Tạo Cuộc Họp Mới';
+                            formElement.action = '${pageContext.request.contextPath}/myclub?action=submitCreateMeeting';
+                            meetingIdInput.value = '';
+                            meetingTimeInput.value = '';
+                            meetingLinkInput.value = '';
+                            clubSelect.selectedIndex = 0;
+                            createForm.classList.remove('hidden');
+                            createForm.scrollIntoView({behavior: 'smooth', block: 'start'});
                         });
-                        formElement.action = '${pageContext.request.contextPath}/myclub?action=submitUpdateMeeting';
-                        createForm.classList.remove('hidden');
-                        createForm.scrollIntoView({behavior: 'smooth', block: 'start'});
+                    }
+
+                    if (cancelBtn && createForm) {
+                        cancelBtn.addEventListener('click', () => {
+                            createForm.classList.add('hidden');
+                        });
+                    }
+
+                    document.querySelectorAll('.edit-meeting-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            const meetingId = btn.getAttribute('data-id');
+                            const clubId = btn.getAttribute('data-clubid');
+                            const startedTime = btn.getAttribute('data-time');
+                            const meetingURL = btn.getAttribute('data-url');
+                            formTitle.textContent = 'Chỉnh sửa Cuộc Họp';
+                            meetingIdInput.value = meetingId;
+                            meetingTimeInput.value = startedTime;
+                            meetingLinkInput.value = meetingURL;
+                            [...clubSelect.options].forEach(option => {
+                                option.selected = option.value === clubId;
+                            });
+                            formElement.action = '${pageContext.request.contextPath}/myclub?action=submitUpdateMeeting';
+                            createForm.classList.remove('hidden');
+                            createForm.scrollIntoView({behavior: 'smooth', block: 'start'});
+                        });
                     });
                 });
-            });
 
-            function closeErrorModal() {
-                document.getElementById('errorModal').style.display = 'none';
-            }
-        </script>
-    </body>
-</html>
+                function closeErrorModal() {
+                    document.getElementById('errorModal').style.display = 'none';
+                }
+            </script>
+        </body>
+    </html>

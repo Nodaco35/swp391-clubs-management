@@ -4,6 +4,7 @@
  */
 package controller;
 
+import dal.DepartmentDashboardDAO;
 import dal.FinancialDAO;
 import dal.NotificationDAO;
 import jakarta.servlet.ServletException;
@@ -17,6 +18,13 @@ import models.*;
 
 public class DF_MemberIncomeServlet extends HttpServlet {
 
+    private DepartmentDashboardDAO dashboardDAO;
+
+    @Override
+    public void init() throws ServletException {
+        dashboardDAO = new DepartmentDashboardDAO();
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -29,7 +37,16 @@ public class DF_MemberIncomeServlet extends HttpServlet {
 
         int clubID = (int) request.getSession().getAttribute("clubID");
         Term term = (Term) request.getSession().getAttribute("term");
+        if (term.getTermID() == null) {
+            request.setAttribute("error", "Hiện chưa có kì nào hoạt động nên không cần quản lý tài chính");
+            request.getRequestDispatcher("/myclub").forward(request, response);
+            return;
+        }
 
+        if (!dashboardDAO.isDepartmentLeaderIndoingoai(user.getUserID(), clubID)) {
+            response.sendRedirect(request.getContextPath() + "/");
+            return;
+        }
         // Lấy incomeID đầu tiên nếu chưa truyền tham số
         int incomeID = FinancialDAO.getIncomeIDPending(clubID, term.getTermID());
         String incomeParam = request.getParameter("incomeID");

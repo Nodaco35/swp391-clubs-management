@@ -1,10 +1,9 @@
-
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Filter.java to edit this template
+ */
 package filters;
 
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
@@ -13,13 +12,16 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import models.Users;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  *
- * @author NC PC
+ * @author he181
  */
-public class AuthFilter implements Filter {
+public class ExtentionFileFilter implements Filter {
     
     private static final boolean debug = true;
 
@@ -28,13 +30,13 @@ public class AuthFilter implements Filter {
     // configured. 
     private FilterConfig filterConfig = null;
     
-    public AuthFilter() {
+    public ExtentionFileFilter() {
     }    
     
     private void doBeforeProcessing(ServletRequest request, ServletResponse response)
             throws IOException, ServletException {
         if (debug) {
-            log("AuthFilter:DoBeforeProcessing");
+            log("ExtentionFileFilter:DoBeforeProcessing");
         }
 
         // Write code here to process the request and/or response before
@@ -62,7 +64,7 @@ public class AuthFilter implements Filter {
     private void doAfterProcessing(ServletRequest request, ServletResponse response)
             throws IOException, ServletException {
         if (debug) {
-            log("AuthFilter:DoAfterProcessing");
+            log("ExtentionFileFilter:DoAfterProcessing");
         }
 
         // Write code here to process the request and/or response after
@@ -98,30 +100,18 @@ public class AuthFilter implements Filter {
             throws IOException, ServletException {
         
         if (debug) {
-            log("AuthFilter:doFilter()");
+            log("ExtentionFileFilter:doFilter()");
         }
-         HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse resp = (HttpServletResponse) response;
+        String path = req.getRequestURI();
         
-        // Kiểm tra user trong session
-        Users user = (Users) req.getSession().getAttribute("user");
+        if (path.endsWith(".jsp")) {
+             resp.sendRedirect(req.getContextPath() + "/");
+             return;
         
-        
-      
-        
-         
-        if(user == null ){
-            resp.sendRedirect(req.getContextPath() + "/");
         }
-        if(user.getPermissionID() != 2){
-            resp.sendRedirect(req.getContextPath() + "/");
-            return;
-        }
-        
-        
         doBeforeProcessing(request, response);
-        
-       
         
         Throwable problem = null;
         try {
@@ -178,7 +168,7 @@ public class AuthFilter implements Filter {
         this.filterConfig = filterConfig;
         if (filterConfig != null) {
             if (debug) {                
-                log("AuthFilter:Initializing filter");
+                log("ExtentionFileFilter:Initializing filter");
             }
         }
     }
@@ -189,9 +179,9 @@ public class AuthFilter implements Filter {
     @Override
     public String toString() {
         if (filterConfig == null) {
-            return ("AuthFilter()");
+            return ("ExtentionFileFilter()");
         }
-        StringBuffer sb = new StringBuffer("AuthFilter(");
+        StringBuffer sb = new StringBuffer("ExtentionFileFilter(");
         sb.append(filterConfig);
         sb.append(")");
         return (sb.toString());
