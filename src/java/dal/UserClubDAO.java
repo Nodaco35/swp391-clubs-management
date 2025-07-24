@@ -62,6 +62,44 @@ public class UserClubDAO {
         }
         return findByUserID;
     }
+    
+    public static List<UserClub> findMemberClubsByUserID(String userID) {
+        String sql = """
+                    SELECT uc.*, r.RoleName, d.DepartmentName , c.ClubImg, c.ClubName
+                                        FROM UserClubs uc
+                                        JOIN Clubs c on uc.ClubID = c.ClubID
+                                        JOIN Roles r ON uc.RoleID = r.RoleID
+                                        JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
+                                        JOIN Departments d on cd.DepartmentID = d.DepartmentID
+                                        WHERE uc.UserID = ? AND isActive = 1 and uc.RoleID = 4 """;
+        List<UserClub> findByUserID = new ArrayList<>();
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setObject(1, userID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                UserClub uc = new UserClub();
+                uc.setUserClubID(rs.getInt("UserClubID"));
+                uc.setUserID(rs.getString("UserID"));
+                uc.setClubID(rs.getInt("ClubID"));
+                uc.setClubDepartmentID(rs.getInt("ClubDepartmentID"));
+                uc.setRoleID(rs.getInt("RoleID"));
+                uc.setJoinDate(rs.getDate("JoinDate"));
+                uc.setIsActive(rs.getBoolean("IsActive"));
+                uc.setRoleName(rs.getString("RoleName"));
+                uc.setDepartmentName(rs.getString("DepartmentName"));
+                uc.setClubImg(rs.getString("ClubImg"));
+                uc.setClubName(rs.getString("ClubName"));
+                if (hasColumn(rs, "Gen")) {
+                    uc.setGen(rs.getInt("Gen"));
+                }
+                findByUserID.add(uc);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return findByUserID;
+    }
 
     public static List<UserClub> findByClubID(int clubID) {
         List<UserClub> findByClubID = new ArrayList<>();

@@ -20,7 +20,7 @@
         <!-- Bootstrap 5 JS (ở cuối body) -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
         <!-- CSS -->
-
+        
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-dashboard.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/ic-dashboard.css">
     </head>
@@ -220,7 +220,7 @@
                                                     <i class="fas fa-eye"></i> Xem chi tiết
                                                 </button>
                                                 <button class="btn btn-icon btn-success" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=approvePermissionRequest&id=${request.clubID}&userID=${request.chairmanID}'">
-                                                    <i class="fas fa-check"></i> Đồng ý
+                                                    <i class="fas fa-check"></i>
                                                 </button>
                                                 <button type="button"
                                                         class="btn btn-danger btn-sm"
@@ -259,7 +259,7 @@
                                                     <i class="fas fa-eye"></i> Xem chi tiết
                                                 </button>
                                                 <button class="btn btn-sm btn-success" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=approvePermissionRequest&id=${request.clubID}&userID=${request.chairmanID}'">
-                                                    <i class="fas fa-check"></i> Đồng ý
+                                                    <i class="fas fa-check"></i>
                                                 </button>
                                                 <button class="btn btn-danger btn-sm" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=deletePermissionRequest&id=${request.clubID}&userID=${request.chairmanID}'">
                                                     <i class="fa-solid fa-trash"></i> Xoá
