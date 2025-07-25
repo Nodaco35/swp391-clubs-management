@@ -73,8 +73,6 @@ public class FormManagementServlet extends HttpServlet {
             }
 
             UserClub userClub = userClubDAO.getUserClubManagementRole(userId, clubId);
-            LOGGER.log(Level.INFO, "Kiểm tra quyền truy cập cho user {0} trong club {1}: {2}", 
-                      new Object[]{userId, clubId, userClub != null ? "Có quyền" : "Không có quyền"});
             
             if (userClub == null) {
                 response.sendRedirect(request.getContextPath() + "/myclub?error=access_denied&message=" + URLEncoder.encode("Bạn không có quyền quản lý form.", StandardCharsets.UTF_8.name()));
@@ -82,14 +80,10 @@ public class FormManagementServlet extends HttpServlet {
             }            
             session.setAttribute("userClub", userClub);
             
-            LOGGER.log(Level.INFO, "form for clubId: {0}", clubId);
             
             //Danh sách form đã lưu và đã xuất bản
             List<Map<String, Object>> savedForms = templateDAO.getFormsByClubAndStatus(clubId, false);
-            LOGGER.log(Level.INFO, "Number of savedForms: {0}", savedForms != null ? savedForms.size() : 0);
-            
             List<Map<String, Object>> publishedForms = templateDAO.getFormsByClubAndStatus(clubId, true);
-            LOGGER.log(Level.INFO, "Số lượng publishedForms đã lấy: {0}", publishedForms != null ? publishedForms.size() : 0);
 
         request.setAttribute("savedForms", savedForms);
         request.setAttribute("publishedForms", publishedForms);
@@ -102,8 +96,6 @@ public class FormManagementServlet extends HttpServlet {
         } catch (SQLException e) {
              LOGGER.log(Level.SEVERE, "SQL Exception in FormManagementServlet", e);
              e.printStackTrace();
-            
-             // In chi tiết stack trace để debug
              StringBuilder stackTrace = new StringBuilder();
              for (StackTraceElement element : e.getStackTrace()) {
                  stackTrace.append(element.toString()).append("\n");
