@@ -64,7 +64,7 @@
 
                 <!-- Financial Overview -->
                 <div class="stats-section">
-                    <h2>Tổng quan tài chính</h2>
+                    <h2>Tổng quan tài chính Kì: ${termID}</h2>
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-icon total">
@@ -123,12 +123,6 @@
                                     <option value="all" ${type == 'all' || empty type ? 'selected' : ''}>Tất cả</option>
                                     <option value="Income" ${type == 'Income' ? 'selected' : ''}>Thu nhập</option>
                                     <option value="Expense" ${type == 'Expense' ? 'selected' : ''}>Chi phí</option>
-                                </select>
-                                <select class="filter-select" name="termID" onchange="this.form.submit()">
-
-                                    <c:forEach var="term" items="${termIDs}">
-                                        <option value="${term}" ${termID == term ? 'selected' : ''}>${term}</option>
-                                    </c:forEach>
                                 </select>
                                 <input type="hidden" name="search" value="${search}">
                             </form>
