@@ -260,227 +260,240 @@
                                         <p class="text-muted">Chưa có cuộc họp nào được tạo hoặc không tìm thấy kết quả phù hợp.</p>
                                         <button class="btn btn-primary" onclick="toggleAddForm()">
                                             <i class="fas fa-plus me-2"></i>Tạo cuộc họp đầu tiên
-                                        </button>
+                                        </div>
                                     </div>
                                 </c:if>
                             </div>
                         </div>
-                    </div>
+
+                        <c:if test="${totalPages > 1}">
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <nav aria-label="Meetings pagination">
+                                        <ul class="pagination justify-content-center">
+                                            <c:if test="${currentPage > 1}">
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page=${currentPage - 1}&search=${search}" aria-label="Previous">
+                                                        <span aria-hidden="true">«</span>
+                                                    </a>
+                                                </li>
+                                            </c:if>
+                                            <c:set var="startPage" value="${currentPage - 2 > 0 ? currentPage - 2 : 1}" />
+                                            <c:set var="endPage" value="${currentPage + 2 <= totalPages ? currentPage + 2 : totalPages}" />
+                                            <c:if test="${startPage > 1}">
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page=1&search=${search}">1</a>
+                                                </li>
+                                                <c:if test="${startPage > 2}">
+                                                    <li class="page-item disabled">
+                                                        <span class="page-link">...</span>
+                                                    </li>
+                                                </c:if>
+                                            </c:if>
+                                            <c:forEach begin="${startPage}" end="${endPage}" var="i">
+                                                <li class="page-item ${i == currentPage ? 'active' : ''}">
+                                                    <c:choose>
+                                                        <c:when test="${i == currentPage}">
+                                                            <span class="page-link">${i}</span>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <a class="page-link" href="?page=${i}&search=${search}">${i}</a>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </li>
+                                            </c:forEach>
+                                            <c:if test="${endPage < totalPages}">
+                                                <c:if test="${endPage < totalPages - 1}">
+                                                    <li class="page-item disabled">
+                                                        <span class="page-link">...</span>
+                                                    </li>
+                                                </c:if>
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page=${totalPages}&search=${search}">${totalPages}</a>
+                                                </li>
+                                            </c:if>
+                                            <c:if test="${currentPage < totalPages}">
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page=${currentPage + 1}&search=${search}" aria-label="Next">
+                                                        <span aria-hidden="true">»</span>
+                                                    </a>
+                                                </li>
+                                            </c:if>
+                                        </ul>
+                                    </nav>
+                                    <div class="text-center mt-2">
+                                        <small class="text-muted">
+                                            Hiển thị trang ${currentPage} / ${totalPages} - Tổng ${totalRecords} cuộc họp
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </c:if>
+                    </main>
                 </div>
 
-                <c:if test="${totalPages > 1}">
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            <nav aria-label="Meetings pagination">
-                                <ul class="pagination justify-content-center">
-                                    <c:if test="${currentPage > 1}">
-                                        <li class="page-item">
-                                            <a class="page-link" href="?page=${currentPage - 1}&search=${search}" aria-label="Previous">
-                                                <span aria-hidden="true">«</span>
-                                            </a>
-                                        </li>
-                                    </c:if>
-                                    <c:set var="startPage" value="${currentPage - 2 > 0 ? currentPage - 2 : 1}" />
-                                    <c:set var="endPage" value="${currentPage + 2 <= totalPages ? currentPage + 2 : totalPages}" />
-                                    <c:if test="${startPage > 1}">
-                                        <li class="page-item">
-                                            <a class="page-link" href="?page=1&search=${search}">1</a>
-                                        </li>
-                                        <c:if test="${startPage > 2}">
-                                            <li class="page-item disabled">
-                                                <span class="page-link">...</span>
-                                            </li>
-                                        </c:if>
-                                    </c:if>
-                                    <c:forEach begin="${startPage}" end="${endPage}" var="i">
-                                        <li class="page-item ${i == currentPage ? 'active' : ''}">
-                                            <c:choose>
-                                                <c:when test="${i == currentPage}">
-                                                    <span class="page-link">${i}</span>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <a class="page-link" href="?page=${i}&search=${search}">${i}</a>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </li>
-                                    </c:forEach>
-                                    <c:if test="${endPage < totalPages}">
-                                        <c:if test="${endPage < totalPages - 1}">
-                                            <li class="page-item disabled">
-                                                <span class="page-link">...</span>
-                                            </li>
-                                        </c:if>
-                                        <li class="page-item">
-                                            <a class="page-link" href="?page=${totalPages}&search=${search}">${totalPages}</a>
-                                        </li>
-                                    </c:if>
-                                    <c:if test="${currentPage < totalPages}">
-                                        <li class="page-item">
-                                            <a class="page-link" href="?page=${currentPage + 1}&search=${search}" aria-label="Next">
-                                                <span aria-hidden="true">»</span>
-                                            </a>
-                                        </li>
-                                    </c:if>
-                                </ul>
-                            </nav>
-                            <div class="text-center mt-2">
-                                <small class="text-muted">
-                                    Hiển thị trang ${currentPage} / ${totalPages} - Tổng ${totalRecords} cuộc họp
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-                </c:if>
-            </main>
-        </div>
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+                <script>
+                    let currentEditMeetingId = null;
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script>
-                                            let currentEditMeetingId = null;
+                    document.addEventListener('DOMContentLoaded', function () {
+                        hideForm();
+                        // Set minimum date for datetime-local input to current date and time
+                        const now = new Date();
+                        const offset = now.getTimezoneOffset() * 60000; // Offset in milliseconds
+                        const localISOTime = new Date(now - offset).toISOString().slice(0, 16); // Format: YYYY-MM-DDTHH:mm
+                        document.getElementById('startedTime').setAttribute('min', localISOTime);
 
-                                            document.addEventListener('DOMContentLoaded', function () {
-                                                hideForm();
-            <c:if test="${editMeeting != null}">
-                                                showEditForm(
-                ${editMeeting.departmentMeetingID},
-                                                        '${editMeeting.title}',
-                                                        '${editMeeting.URLMeeting}',
-                                                        '${editMeeting.documentLink}',
-                                                        '<fmt:formatDate value="${editMeeting.startedTime}" pattern="yyyy-MM-dd\'T\'HH:mm"/>'
-                                                        );
-            </c:if>
-            <c:if test="${not empty error}">
-                                                document.getElementById('errorModal').style.display = 'block';
-            </c:if>
-                                            });
+                        <c:if test="${editMeeting != null}">
+                            showEditForm(
+                                ${editMeeting.departmentMeetingID},
+                                '${editMeeting.title}',
+                                '${editMeeting.URLMeeting}',
+                                '${editMeeting.documentLink}',
+                                '<fmt:formatDate value="${editMeeting.startedTime}" pattern="yyyy-MM-dd\'T\'HH:mm"/>'
+                            );
+                        </c:if>
+                        <c:if test="${not empty error}">
+                            document.getElementById('errorModal').style.display = 'block';
+                        </c:if>
+                    });
 
-                                            function toggleAddForm() {
-                                                const form = document.getElementById('meetingForm');
-                                                if (form.classList.contains('d-block') && document.getElementById('formAction').value === 'add') {
-                                                    hideForm();
-                                                } else {
-                                                    showAddForm();
-                                                }
-                                            }
+                    function toggleAddForm() {
+                        const form = document.getElementById('meetingForm');
+                        if (form.classList.contains('d-block') && document.getElementById('formAction').value === 'add') {
+                            hideForm();
+                        } else {
+                            showAddForm();
+                        }
+                    }
 
-                                            function toggleEditForm(meetingId, title, urlMeeting, documentLink, startedTime) {
-                                                const form = document.getElementById('meetingForm');
-                                                if (form.classList.contains('d-block') && currentEditMeetingId === meetingId) {
-                                                    hideForm();
-                                                    currentEditMeetingId = null;
-                                                } else {
-                                                    showEditForm(meetingId, title, urlMeeting, documentLink, startedTime);
-                                                    currentEditMeetingId = meetingId;
-                                                }
-                                            }
+                    function toggleEditForm(meetingId, title, urlMeeting, documentLink, startedTime) {
+                        const form = document.getElementById('meetingForm');
+                        if (form.classList.contains('d-block') && currentEditMeetingId === meetingId) {
+                            hideForm();
+                            currentEditMeetingId = null;
+                        } else {
+                            showEditForm(meetingId, title, urlMeeting, documentLink, startedTime);
+                            currentEditMeetingId = meetingId;
+                        }
+                    }
 
-                                            function showAddForm() {
-                                                const form = document.getElementById('meetingForm');
-                                                const formTitle = document.querySelector('#meetingForm .card-header h5');
-                                                const formAction = document.getElementById('formAction');
-                                                const submitButton = document.getElementById('submitButton');
+                    function showAddForm() {
+                        const form = document.getElementById('meetingForm');
+                        const formTitle = document.querySelector('#meetingForm .card-header h5');
+                        const formAction = document.getElementById('formAction');
+                        const submitButton = document.getElementById('submitButton');
 
-                                                form.classList.remove('d-none');
-                                                form.classList.add('d-block');
-                                                formTitle.textContent = 'Tạo cuộc họp mới';
-                                                formAction.value = 'add';
-                                                submitButton.textContent = 'Tạo';
-                                                document.getElementById('formData').reset();
-                                                document.getElementById('meetingId').value = '';
-                                                document.getElementById('selectAll').checked = false;
-                                                toggleParticipants(document.getElementById('selectAll'));
-                                                currentEditMeetingId = null;
-                                            }
+                        form.classList.remove('d-none');
+                        form.classList.add('d-block');
+                        formTitle.textContent = 'Tạo cuộc họp mới';
+                        formAction.value = 'add';
+                        submitButton.textContent = 'Tạo';
+                        document.getElementById('formData').reset();
+                        document.getElementById('meetingId').value = '';
+                        document.getElementById('selectAll').checked = false;
+                        toggleParticipants(document.getElementById('selectAll'));
+                        currentEditMeetingId = null;
+                    }
 
-                                            function showEditForm(meetingId, title, urlMeeting, documentLink, startedTime) {
-                                                const form = document.getElementById('meetingForm');
-                                                const formTitle = document.querySelector('#meetingForm .card-header h5');
-                                                const formAction = document.getElementById('formAction');
-                                                const submitButton = document.getElementById('submitButton');
+                    function showEditForm(meetingId, title, urlMeeting, documentLink, startedTime) {
+                        const form = document.getElementById('meetingForm');
+                        const formTitle = document.querySelector('#meetingForm .card-header h5');
+                        const formAction = document.getElementById('formAction');
+                        const submitButton = document.getElementById('submitButton');
 
-                                                form.classList.remove('d-none');
-                                                form.classList.add('d-block');
-                                                formTitle.textContent = 'Sửa cuộc họp';
-                                                formAction.value = 'update';
-                                                submitButton.textContent = 'Cập nhật';
+                        form.classList.remove('d-none');
+                        form.classList.add('d-block');
+                        formTitle.textContent = 'Sửa cuộc họp';
+                        formAction.value = 'update';
+                        submitButton.textContent = 'Cập nhật';
 
-                                                document.getElementById('meetingId').value = meetingId;
-                                                document.getElementById('title').value = title;
-                                                document.getElementById('urlMeeting').value = urlMeeting;
-                                                document.getElementById('documentLink').value = documentLink;
-                                                document.getElementById('startedTime').value = startedTime;
-                                            }
+                        document.getElementById('meetingId').value = meetingId;
+                        document.getElementById('title').value = title;
+                        document.getElementById('urlMeeting').value = urlMeeting;
+                        document.getElementById('documentLink').value = documentLink;
+                        document.getElementById('startedTime').value = startedTime;
+                    }
 
-                                            function hideForm() {
-                                                const form = document.getElementById('meetingForm');
-                                                form.classList.add('d-none');
-                                                form.classList.remove('d-block');
-                                                document.getElementById('formData').reset();
-                                                currentEditMeetingId = null;
-                                            }
+                    function hideForm() {
+                        const form = document.getElementById('meetingForm');
+                        form.classList.add('d-none');
+                        form.classList.remove('d-block');
+                        document.getElementById('formData').reset();
+                        currentEditMeetingId = null;
+                    }
 
-                                            function closeErrorModal() {
-                                                document.getElementById('errorModal').style.display = 'none';
-                                            }
+                    function closeErrorModal() {
+                        document.getElementById('errorModal').style.display = 'none';
+                    }
 
-                                            function toggleParticipants(checkbox) {
-                                                const participantsList = document.getElementById('participantsList');
-                                                if (checkbox.checked) {
-                                                    participantsList.classList.add('d-none');
-                                                    participantsList.classList.remove('d-block');
-                                                    document.querySelectorAll('#participantsList input[type=checkbox]').forEach(cb => cb.checked = false);
-                                                } else {
-                                                    participantsList.classList.remove('d-none');
-                                                    participantsList.classList.add('d-block');
-                                                }
-                                            }
+                    function toggleParticipants(checkbox) {
+                        const participantsList = document.getElementById('participantsList');
+                        if (checkbox.checked) {
+                            participantsList.classList.add('d-none');
+                            participantsList.classList.remove('d-block');
+                            document.querySelectorAll('#participantsList input[type=checkbox]').forEach(cb => cb.checked = false);
+                        } else {
+                            participantsList.classList.remove('d-none');
+                            participantsList.classList.add('d-block');
+                        }
+                    }
 
-                                            document.getElementById('formData').addEventListener('submit', function (e) {
-                                                const title = document.getElementById('title').value.trim();
-                                                const urlMeeting = document.getElementById('urlMeeting').value.trim();
-                                                const documentLink = document.getElementById('documentLink').value.trim();
-                                                const startedTime = document.getElementById('startedTime').value;
-                                                const selectAll = document.getElementById('selectAll').checked;
-                                                const participants = document.querySelectorAll('#participantsList input[type=checkbox]:checked');
+                    document.getElementById('formData').addEventListener('submit', function (e) {
+                        const title = document.getElementById('title').value.trim();
+                        const urlMeeting = document.getElementById('urlMeeting').value.trim();
+                        const documentLink = document.getElementById('documentLink').value.trim();
+                        const startedTime = document.getElementById('startedTime').value;
+                        const selectAll = document.getElementById('selectAll').checked;
+                        const participants = document.querySelectorAll('#participantsList input[type=checkbox]:checked');
 
-                                                if (!title) {
-                                                    alert('Tiêu đề cuộc họp không được để trống!');
-                                                    e.preventDefault();
-                                                    return;
-                                                }
+                        if (!title) {
+                            alert('Tiêu đề cuộc họp không được để trống!');
+                            e.preventDefault();
+                            return;
+                        }
 
-                                                if (!urlMeeting) {
-                                                    alert('Liên kết cuộc họp không được để trống!');
-                                                    e.preventDefault();
-                                                    return;
-                                                }
+                        if (!urlMeeting) {
+                            alert('Liên kết cuộc họp không được để trống!');
+                            e.preventDefault();
+                            return;
+                        }
 
-                                                if (!startedTime) {
-                                                    alert('Thời gian bắt đầu không được để trống!');
-                                                    e.preventDefault();
-                                                    return;
-                                                }
+                        if (!startedTime) {
+                            alert('Thời gian bắt đầu không được để trống!');
+                            e.preventDefault();
+                            return;
+                        }
 
-                                                if (!selectAll && participants.length === 0) {
-                                                    alert('Vui lòng chọn ít nhất một người tham gia hoặc chọn tất cả thành viên!');
-                                                    e.preventDefault();
-                                                    return;
-                                                }
+                        // Validate that the selected time is not in the past
+                        const selectedTime = new Date(startedTime);
+                        const now = new Date();
+                        if (selectedTime < now) {
+                            alert('Thời gian bắt đầu không được là thời điểm trong quá khứ!');
+                            e.preventDefault();
+                            return;
+                        }
 
-                                                const googleMeetPattern = /^https:\/\/meet\.google\.com\/[a-z]{3}-[a-z]{4}-[a-z]{3}$/;
-                                                const zoomPattern = /^https:\/\/([a-z0-9-]+\.)?zoom\.us\/j\/[0-9]{9,11}(\?pwd=[a-zA-Z0-9]+)?$/;
-                                                if (!googleMeetPattern.test(urlMeeting) && !zoomPattern.test(urlMeeting)) {
-                                                    alert('Liên kết cuộc họp không hợp lệ! Vui lòng nhập URL Google Meet (VD: https://meet.google.com/abc-defg-hij) hoặc Zoom (VD: https://zoom.us/j/1234567890).');
-                                                    e.preventDefault();
-                                                    return;
-                                                }
+                        if (!selectAll && participants.length === 0) {
+                            alert('Vui lòng chọn ít nhất một người tham gia hoặc chọn tất cả thành viên!');
+                            e.preventDefault();
+                            return;
+                        }
 
-                                                if (documentLink && !/^https:\/\/drive\.google\.com\/.*$/.test(documentLink)) {
-                                                    alert('Liên kết tài liệu không hợp lệ! Vui lòng nhập URL Google Drive hợp lệ.');
-                                                    e.preventDefault();
-                                                    return;
-                                                }
-                                            });
-        </script>
-    </body>
-</html>
+                        const googleMeetPattern = /^https:\/\/meet\.google\.com\/[a-z]{3}-[a-z]{4}-[a-z]{3}$/;
+                        const zoomPattern = /^https:\/\/([a-z0-9-]+\.)?zoom\.us\/j\/[0-9]{9,11}(\?pwd=[a-zA-Z0-9]+)?$/;
+                        if (!googleMeetPattern.test(urlMeeting) && !zoomPattern.test(urlMeeting)) {
+                            alert('Liên kết cuộc họp không hợp lệ! Vui lòng nhập URL Google Meet (VD: https://meet.google.com/abc-defg-hij) hoặc Zoom (VD: https://zoom.us/j/1234567890).');
+                            e.preventDefault();
+                            return;
+                        }
+
+                        if (documentLink && !/^https:\/\/drive\.google\.com\/.*$/.test(documentLink)) {
+                            alert('Liên kết tài liệu không hợp lệ! Vui lòng nhập URL Google Drive hợp lệ.');
+                            e.preventDefault();
+                            return;
+                        }
+                    });
+                </script>
+            </body>
+        </html>
