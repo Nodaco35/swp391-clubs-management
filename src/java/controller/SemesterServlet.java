@@ -112,7 +112,7 @@ public class SemesterServlet extends HttpServlet {
             } else if (!termName.matches("(Spring|Summer|Fall) [0-9]{4}")) {
                 request.setAttribute("error", "Tên kỳ không đúng định dạng (VD: Spring 2025, Summer 2025, Fall 2024)! Nhập: " + termName);
             } else if (!isValidSemesterDates(term.getStartDate(), term.getEndDate())) {
-                request.setAttribute("error", "Ngày kết thúc phải thuộc tháng cách ngày bắt đầu 4 tháng (VD: 2025-09-01 -> 2026-01-XX)!");
+                request.setAttribute("error", "Ngày kết thúc phải thuộc tháng cách ngày bắt đầu 4 tháng (VD: 2025-09-01 -> 2025-12-31)!");
             } else if (termDAO.termExists(termID)) {
                 request.setAttribute("error", "Mã kỳ " + termID + " đã tồn tại!");
             } else {
@@ -158,7 +158,7 @@ public class SemesterServlet extends HttpServlet {
             if (!termName.matches("(Spring|Summer|Fall) [0-9]{4}")) {
                 request.setAttribute("error", "Tên kỳ không đúng định dạng (VD: Spring 2025, Summer 2025, Fall 2024)! Nhập: " + termName);
             } else if (!isValidSemesterDates(term.getStartDate(), term.getEndDate())) {
-                request.setAttribute("error", "Ngày kết thúc phải thuộc tháng cách ngày bắt đầu 4 tháng (VD: 2025-09-01 -> 2026-12-31)!");
+                request.setAttribute("error", "Ngày kết thúc phải thuộc tháng cách ngày bắt đầu 4 tháng (VD: 2025-09-01 -> 2025-12-31)!");
             } else {
                 try {
                     boolean success = termDAO.updateSemester(termID, term);
