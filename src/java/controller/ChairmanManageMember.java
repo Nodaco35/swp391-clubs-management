@@ -212,7 +212,7 @@ public class ChairmanManageMember extends HttpServlet {
                 try {
                     int newUserClubID = userClubDAO.addUserClub(uc);
                     if (newUserClubID != -1) {
-                        request.setAttribute("message", "Thêm thành viên thành công! ID: " + newUserClubID);
+                        request.setAttribute("message", "Thêm thành viên thành công!");
                     } else {
                         request.setAttribute("error", "Thêm thành viên thất bại! Vui lòng kiểm tra dữ liệu đầu vào.");
                     }
