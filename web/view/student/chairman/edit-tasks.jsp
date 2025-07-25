@@ -342,7 +342,7 @@
 
 		<div id="taskEditForm" class="form-section" style="display: none;">
 			<h3>Chỉnh sửa công việc</h3>
-			<form id="editTaskForm" action="${pageContext.request.contextPath}/edit-tasks" method="post">
+			<form id="editTaskForm" action="${pageContext.request.contextPath}/chairman-page/tasks/edit-tasks" method="post">
 				<input type="hidden" name="action" value="updateTask">
 				<input type="hidden" name="taskID" value="${task.taskID}">
 				<input type="hidden" name="termID" value="${task.term.termID}">
