@@ -10,6 +10,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
@@ -67,10 +68,10 @@ public class MyClubController extends HttpServlet {
         int countUpcomingDepartmentMeeting = DepartmentMeetingDAO.countByUID(user.getUserID());
         List<DepartmentMeeting> departmentmeetings = DepartmentMeetingDAO.findByUserID(user.getUserID());
         List<Clubs> listClubAsChairman = ClubDAO.findByUserIDAndChairman(user.getUserID());
-        
+
         int countTodoLists = TaskDAO.countByUser(user.getUserID());
         List<Tasks> departmentTasks = TaskDAO.getAllByUser(user.getUserID());
-         
+
         request.setAttribute("hasPendingInvoices", hasPendingInvoices);
         request.setAttribute("countUpcomingDepartmentMeeting", countUpcomingDepartmentMeeting);
         request.setAttribute("departmentmeetings", departmentmeetings);
@@ -96,6 +97,35 @@ public class MyClubController extends HttpServlet {
             PrintWriter out = response.getWriter();
             out.print(userID + " " + clubID);
             boolean success = pd.insertUserToActiveClub(userID, clubID);
+
+            HttpSession session = request.getSession();
+
+            if (success) {
+                session.setAttribute("messageAvtivedMember", "Đăng ký thành công!");
+            } else {
+                session.setAttribute("errorAvtivedMember", "Thao tác thất bại. Vui lòng thử lại.");
+            }
+
+            response.sendRedirect(request.getContextPath() + "/myclub");
+            return;
+        }
+        if ("deleteActivity".equals(action)) {
+            String userID = request.getParameter("userID");
+            int clubID = Integer.parseInt(request.getParameter("clubID"));
+            PeriodicReportDAO pd = new PeriodicReportDAO();
+
+            PrintWriter out = response.getWriter();
+            out.print(userID + " " + clubID);
+            boolean success = pd.deleteUserToActiveClub(userID, clubID);
+
+            HttpSession session = request.getSession();
+
+            if (success) {
+                session.setAttribute("messageAvtivedMember", "Huỷ thành công!");
+            } else {
+                session.setAttribute("errorAvtivedMember", "Thao tác thất bại. Vui lòng thử lại.");
+            }
+
             response.sendRedirect(request.getContextPath() + "/myclub");
             return;
         }

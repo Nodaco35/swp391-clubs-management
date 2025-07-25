@@ -15,7 +15,7 @@ public class TermDAO {
     public static Term getActiveSemester() {
         Term t = new Term();
         String sql = "SELECT * FROM Semesters\n"
-                + "WHere Status = 'ACTIVE'";
+                + "WHERE Status = 'ACTIVE'";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
@@ -53,6 +53,49 @@ public class TermDAO {
             e.printStackTrace();
         }
         return semesters;
+    }
+
+    public List<Term> getPaginatedSemesters(String search, int page, int pageSize) {
+        List<Term> semesters = new ArrayList<>();
+        String sql = "SELECT * FROM Semesters WHERE TermID LIKE ? OR TermName LIKE ? ORDER BY StartDate DESC LIMIT ? OFFSET ?";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            String searchPattern = search != null ? "%" + search.trim() + "%" : "%";
+            ps.setString(1, searchPattern);
+            ps.setString(2, searchPattern);
+            ps.setInt(3, pageSize);
+            ps.setInt(4, (page - 1) * pageSize);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Term t = new Term();
+                t.setTermID(rs.getString("TermID"));
+                t.setTermName(rs.getString("TermName"));
+                t.setStartDate(rs.getDate("StartDate"));
+                t.setEndDate(rs.getDate("EndDate"));
+                t.setStatus(rs.getString("Status"));
+                semesters.add(t);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return semesters;
+    }
+
+    public int getTotalSemesters(String search) {
+        String sql = "SELECT COUNT(*) FROM Semesters WHERE TermID LIKE ? OR TermName LIKE ?";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            String searchPattern = search != null ? "%" + search.trim() + "%" : "%";
+            ps.setString(1, searchPattern);
+            ps.setString(2, searchPattern);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     public boolean termExists(String termID) {
@@ -110,5 +153,4 @@ public class TermDAO {
             throw new SQLException("Lỗi khi xóa kỳ học: " + e.getMessage());
         }
     }
-    
 }

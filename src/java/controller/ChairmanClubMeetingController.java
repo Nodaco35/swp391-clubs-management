@@ -51,7 +51,7 @@ public class ChairmanClubMeetingController extends HttpServlet {
                 meetingId = Integer.parseInt(request.getParameter("meetingId"));
             } catch (NumberFormatException e) {
                 request.setAttribute("error", "ID cuộc họp không hợp lệ!");
-                request.getRequestDispatcher("view/student/chairman/clubmeeting.jsp").forward(request, response);
+                request.getRequestDispatcher("/view/student/chairman/clubmeeting.jsp").forward(request, response);
                 return;
             }
 

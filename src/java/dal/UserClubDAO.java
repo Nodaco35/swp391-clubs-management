@@ -411,6 +411,9 @@ public class UserClubDAO {
                 uc.setFullName(rs.getString("FullName"));
                 uc.setRoleName(rs.getString("RoleName"));
                 uc.setDepartmentName(rs.getString("DepartmentName"));
+                if (hasColumn(rs, "Gen")) {
+                    uc.setGen(rs.getInt("Gen"));
+                }
                 userClubs.add(uc);
             }
 

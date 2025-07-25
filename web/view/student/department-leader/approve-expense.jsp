@@ -1,6 +1,8 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -9,37 +11,47 @@
         <title>Duyệt và Tạo Đơn Xin Chi Phí</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/department-leader.css">
-        <style>
-            .expense-table th, .expense-table td {
-                vertical-align: middle;
-            }
-            .status-pending {
-                color: #ffc107;
-                font-weight: bold;
-            }
-            .status-approved {
-                color: #28a745;
-                font-weight: bold;
-            }
-            .status-rejected {
-                color: #dc3545;
-                font-weight: bold;
-            }
-            .pagination-container {
-                display: flex;
-                justify-content: center;
-                margin-top: 1rem;
-            }
-            .sortable:hover {
-                background-color: rgba(0, 0, 0, 0.05);
-                cursor: pointer;
-            }
-            .sort-icon {
-                margin-left: 5px;
-                font-size: 0.8em;
-            }
-        </style>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@600&display=swap" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <!-- Bootstrap 5 CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Bootstrap 5 JS (ở cuối body) -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+                <style>
+                    .expense-table th, .expense-table td {
+                        vertical-align: middle;
+                    }
+                    .status-pending {
+                        color: #ffc107;
+                        font-weight: bold;
+                    }
+                    .status-approved {
+                        color: #28a745;
+                        font-weight: bold;
+                    }
+                    .status-rejected {
+                        color: #dc3545;
+                        font-weight: bold;
+                    }
+                    .pagination-container {
+                        display: flex;
+                        justify-content: center;
+                        margin-top: 1rem;
+                    }
+                    .sortable:hover {
+                        background-color: rgba(0, 0, 0, 0.05);
+                        cursor: pointer;
+                    }
+                    .sort-icon {
+                        margin-left: 5px;
+                        font-size: 0.8em;
+                    }
+                </style>
     </head>
     <body>
         <div class="department-leader-container">
@@ -175,6 +187,7 @@
                                                 <th>Mục đích</th>
                                                 <th>Google Docs</th>
                                                 <th>Trạng thái</th>
+                                                <th>Lý do từ chối</th>
                                                 <th>Hành động</th>
                                             </tr>
                                         </thead>
@@ -196,6 +209,7 @@
                                                             ${expense.status == 'Pending' ? 'Chờ duyệt' : expense.status == 'Approved' ? 'Đã duyệt' : 'Đã từ chối'}
                                                         </span>
                                                     </td>
+                                                    <td>${expense.rejectContent}</td>
                                                     <td>
                                                         <c:if test="${expense.status == 'Pending'}">
                                                             <form action="${pageContext.request.contextPath}/department/financial/approve-expense" method="post" style="display: inline;">
@@ -203,11 +217,10 @@
                                                                 <input type="hidden" name="expenseID" value="${expense.expenseID}">
                                                                 <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Xác nhận duyệt đơn này?')">Duyệt</button>
                                                             </form>
-                                                            <form action="${pageContext.request.contextPath}/department/financial/approve-expense" method="post" style="display: inline;">
-                                                                <input type="hidden" name="action" value="reject">
-                                                                <input type="hidden" name="expenseID" value="${expense.expenseID}">
-                                                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Xác nhận từ chối đơn này?')">Từ chối</button>
-                                                            </form>
+
+
+                                                            <button class="btn btn-danger btn-sm" onclick="showRejectModal('${expense.expenseID}', '${expense.createdBy}')">Từ chối</button>
+
                                                         </c:if>
                                                     </td>
                                                 </tr>
@@ -215,6 +228,8 @@
                                         </tbody>
                                     </table>
                                 </div>
+
+                                
 
                                 <!-- Pagination -->
                                 <div class="pagination-container">
@@ -238,61 +253,99 @@
                         </div>
                     </div>
                 </div>
+                                    
+                      <!-- Modal Bootstrap: Nhập lý do từ chối -->
+                                <div class="modal fade" id="rejectReasonModal" tabindex="-1" aria-labelledby="rejectReasonModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <form action="${pageContext.request.contextPath}/department/financial/approve-expense" method="post">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="rejectReasonModalLabel">Lý do từ chối</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <input type="hidden" name="action" value="reject">
+                                                    <input type="hidden" name="expenseID" id="rejectExpenseID">
+                                                    <input type="hidden" name="userID" id="rejectUserID">
+
+                                                    <div class="mb-3">
+                                                        <label for="rejectReasonText" class="form-label">Nhập lý do từ chối:</label>
+                                                        <textarea class="form-control" name="reason" id="rejectReasonText" rows="4" required></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="submit" class="btn btn-danger">Từ chối</button>
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>              
             </main>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-                                                                    window.addEventListener('load', function () {
-                                                                        const cards = document.querySelectorAll('.enhanced-card');
-                                                                        cards.forEach((card, index) => {
-                                                                            setTimeout(() => {
-                                                                                card.classList.add('fade-in');
-                                                                            }, index * 100);
-                                                                        });
-
-                                                                        // Validate form before submission
-                                                                        const form = document.getElementById('expenseForm');
-                                                                        form.addEventListener('submit', function (event) {
-                                                                            const purpose = document.getElementById('purpose').value;
-                                                                            const attachment = document.getElementById('attachment').value;
-                                                                            if (!purpose) {
-                                                                                event.preventDefault();
-                                                                                alert('Vui lòng chọn mục đích.');
-                                                                                return;
-                                                                            }
-                                                                            if (attachment && !attachment.match(/^https:\/\/docs\.google\.com\/.*/)) {
-                                                                                event.preventDefault();
-                                                                                alert('Link Google Docs không hợp lệ. Vui lòng nhập link bắt đầu bằng https://docs.google.com/');
-                                                                            }
-                                                                        });
-
-                                                                        // Search, Filter, and Sort
-                                                                        const searchInput = document.getElementById('searchInput');
-                                                                        const statusFilter = document.getElementById('statusFilter');
-                                                                        const sortBy = document.getElementById('sortBy');
-
-                                                                        function applyFilters() {
-                                                                            const search = searchInput.value.trim();
-                                                                            const status = statusFilter.value;
-                                                                            const sort = sortBy.value;
-                                                                            const url = new URL(window.location);
-                                                                            url.searchParams.set('search', search);
-                                                                            url.searchParams.set('status', status);
-                                                                            url.searchParams.set('sortBy', sort);
-                                                                            url.searchParams.set('page', '1');
-                                                                            url.searchParams.set('clubID', '${clubID}');
-                                                                            window.location = url;
-                                                                        }
-
-                                                                        searchInput.addEventListener('input', () => {
-                                                                            clearTimeout(searchInput.timeout);
-                                                                            searchInput.timeout = setTimeout(applyFilters, 500);
-                                                                        });
-                                                                        statusFilter.addEventListener('change', applyFilters);
-                                                                        sortBy.addEventListener('change', applyFilters);
-
-
+                                                                window.addEventListener('load', function () {
+                                                                    const cards = document.querySelectorAll('.enhanced-card');
+                                                                    cards.forEach((card, index) => {
+                                                                        setTimeout(() => {
+                                                                            card.classList.add('fade-in');
+                                                                        }, index * 100);
                                                                     });
+
+                                                                    // Validate form before submission
+                                                                    const form = document.getElementById('expenseForm');
+                                                                    form.addEventListener('submit', function (event) {
+                                                                        const purpose = document.getElementById('purpose').value;
+                                                                        const attachment = document.getElementById('attachment').value;
+                                                                        if (!purpose) {
+                                                                            event.preventDefault();
+                                                                            alert('Vui lòng chọn mục đích.');
+                                                                            return;
+                                                                        }
+                                                                        if (attachment && !attachment.match(/^https:\/\/docs\.google\.com\/.*/)) {
+                                                                            event.preventDefault();
+                                                                            alert('Link Google Docs không hợp lệ. Vui lòng nhập link bắt đầu bằng https://docs.google.com/');
+                                                                        }
+                                                                    });
+
+                                                                    // Search, Filter, and Sort
+                                                                    const searchInput = document.getElementById('searchInput');
+                                                                    const statusFilter = document.getElementById('statusFilter');
+                                                                    const sortBy = document.getElementById('sortBy');
+
+                                                                    function applyFilters() {
+                                                                        const search = searchInput.value.trim();
+                                                                        const status = statusFilter.value;
+                                                                        const sort = sortBy.value;
+                                                                        const url = new URL(window.location);
+                                                                        url.searchParams.set('search', search);
+                                                                        url.searchParams.set('status', status);
+                                                                        url.searchParams.set('sortBy', sort);
+                                                                        url.searchParams.set('page', '1');
+                                                                        url.searchParams.set('clubID', '${clubID}');
+                                                                        window.location = url;
+                                                                    }
+
+                                                                    searchInput.addEventListener('input', () => {
+                                                                        clearTimeout(searchInput.timeout);
+                                                                        searchInput.timeout = setTimeout(applyFilters, 500);
+                                                                    });
+                                                                    statusFilter.addEventListener('change', applyFilters);
+                                                                    sortBy.addEventListener('change', applyFilters);
+
+
+                                                                });
+
+                                                                function showRejectModal(expenseID, createdBy) {
+                                                                    document.getElementById("rejectExpenseID").value = expenseID;
+                                                                    document.getElementById("rejectUserID").value = createdBy;
+
+                                                                    const modal = new bootstrap.Modal(document.getElementById('rejectReasonModal'));
+                                                                    modal.show();
+                                                                }
+
         </script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     </body>
 </html>

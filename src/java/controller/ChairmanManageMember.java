@@ -1,46 +1,53 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
+ */
 package controller;
 
+import dal.ClubDAO;
 import dal.UserClubDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import models.Users;
-import models.UserClub;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import models.ClubInfo;
 import models.Department;
 import models.Roles;
+import models.UserClub;
+import models.Users;
 
-public class UserClubServlet extends HttpServlet {
+/**
+ *
+ * @author FPT Shop
+ */
+public class ChairmanManageMember extends HttpServlet {
 
     private UserClubDAO userClubDAO;
+    private ClubDAO clubDAO;
 
     @Override
     public void init() throws ServletException {
         userClubDAO = new UserClubDAO();
+        clubDAO = new ClubDAO();
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
         Users user = (Users) session.getAttribute("user");
-
+        
         if (user == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        int clubID;
-        try {
-            clubID = Integer.parseInt(request.getParameter("clubID"));
-        } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid Club ID");
-            return;
-        }
+        ClubInfo club = clubDAO.getClubChairman(user.getUserID());
+        int clubID = club.getClubID();
 
         if (!userClubDAO.isClubPresident(user.getUserID(), clubID)) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "You are not authorized to manage this club");
@@ -93,7 +100,7 @@ public class UserClubServlet extends HttpServlet {
             }
         }
 
-        request.getRequestDispatcher("./view/clubs-page/user-club.jsp").forward(request, response);
+        request.getRequestDispatcher("/view/student/chairman/user-club.jsp").forward(request, response);
     }
 
     @Override
@@ -205,7 +212,7 @@ public class UserClubServlet extends HttpServlet {
                 try {
                     int newUserClubID = userClubDAO.addUserClub(uc);
                     if (newUserClubID != -1) {
-                        request.setAttribute("message", "Thêm thành viên thành công! ID: " + newUserClubID);
+                        request.setAttribute("message", "Thêm thành viên thành công!");
                     } else {
                         request.setAttribute("error", "Thêm thành viên thất bại! Vui lòng kiểm tra dữ liệu đầu vào.");
                     }
@@ -316,4 +323,5 @@ public class UserClubServlet extends HttpServlet {
 
         doGet(request, response);
     }
+
 }

@@ -88,6 +88,7 @@
 	</style>
 </head>
 <body>
+
 <header class="header">
 	<div class="container header-container">
 		<div class="logo">
@@ -220,6 +221,7 @@
 		</ul>
 	</nav>
 </header>
+
 <main class="dashboard-content">
 
 	<section class="timeline-management">

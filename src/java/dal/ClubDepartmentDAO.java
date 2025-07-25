@@ -23,9 +23,9 @@ public class ClubDepartmentDAO {
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, clubID);
-            ResultSet rs  = ps.executeQuery();
-            while (rs.next()) {                
-                 ClubDepartment department = new ClubDepartment();
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                ClubDepartment department = new ClubDepartment();
                 department.setClubDepartmentId(rs.getInt("ClubDepartmentID"));
                 department.setDepartmentId(rs.getInt("DepartmentID"));
                 department.setDepartmentName(rs.getString("DepartmentName"));
@@ -221,25 +221,12 @@ public class ClubDepartmentDAO {
     public List<ActivedMembers> getActiveMembersByClubAndDepartment(int departmentID, String departmentLeaderID) {
         List<ActivedMembers> members = new ArrayList<>();
         String sql = """
-                       SELECT 
-                           amc.UserID,
-                           u.FullName,
-                           u.Email,
-                           amc.ClubID,
-                           amc.ActiveDate,
-                           amc.LeaveDate,
-                           amc.ProgressPoint
-                       FROM ActivedMemberClubs AS amc
-                       JOIN Users AS u
-                         ON amc.UserID = u.UserID
-                       JOIN UserClubs AS uc
-                         ON amc.UserID = uc.UserID
-                        AND amc.ClubID = uc.ClubID
-                       JOIN ClubDepartments AS cd
-                         ON uc.ClubDepartmentID = cd.ClubDepartmentID
-                       WHERE uc.ClubDepartmentID = ?
-                         AND amc.IsActive = TRUE
-                         AND amc.UserID != ? ;
+                       SELECT amc.UserID, u.FullName, u.Email, amc.ClubID, amc.ActiveDate,  amc.ProgressPoint
+                                              FROM ActivedMemberClubs AS amc
+                                              JOIN Users AS u ON amc.UserID = u.UserID
+                                              JOIN UserClubs AS uc ON amc.UserID = uc.UserID AND amc.ClubID = uc.ClubID
+                                              JOIN ClubDepartments AS cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
+                                              WHERE uc.ClubDepartmentID = ? AND amc.IsActive = TRUE AND amc.UserID != ? ;
                      """;
 
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -254,7 +241,6 @@ public class ClubDepartmentDAO {
                     member.setEmail(rs.getString("Email"));
                     member.setClubID(rs.getInt("ClubID"));
                     member.setActiveDate(rs.getDate("ActiveDate"));
-                    member.setLeaveDate(rs.getDate("LeaveDate"));
                     member.setProgressPoint(rs.getInt("ProgressPoint"));
                     members.add(member);
                 }
@@ -358,6 +344,22 @@ public class ClubDepartmentDAO {
         }
 
         return departments;
+    }
+
+    public int getClubIDByClubDepartmentID(int clubDepartmentID_) {
+        String sql = "select ClubID from clubdepartments where ClubDepartmentID = ? ;";
+        
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, clubDepartmentID_);
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("ClubID");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1; 
     }
 
 }

@@ -14,61 +14,7 @@
     <body>
         <div class="department-leader-container">
             <!-- Sidebar -->
-            <nav class="sidebar">
-                <div class="sidebar-header">
-                    <div class="logo">
-                        <i class="fas fa-users-gear"></i>
-                        <span>Quản lý Ban</span>
-                    </div>
-                </div>
-
-                <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/department-dashboard?clubID=${clubID}" class="menu-link">
-                            <i class="fas fa-chart-pie"></i>
-                            <span>Dashboard</span>
-                        </a>
-                    </li>
-                    <li class="menu-item active">
-                        <a href="${pageContext.request.contextPath}/department-members?clubID=${clubID}" class="menu-link">
-                            <i class="fas fa-users"></i>
-                            <span>Quản lý thành viên</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/department-tasks" class="menu-link">
-                            <i class="fas fa-tasks"></i>
-                            <span>Quản lý công việc</span>
-                        </a>
-                    </li>
-                    <li class="menu-item active">
-                        <a href="${pageContext.request.contextPath}/department/financial" class="menu-link">
-                            <i class="fa-dollar-sign"></i>
-                            <span>Tài chính</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/homepage" class="menu-link">
-                            <i class="fas fa-home"></i>
-                            <span>Về trang chủ</span>
-                        </a>
-                    </li>
-                </ul>
-
-                <div class="sidebar-footer">
-                    <div class="user-info">
-                        <div class="user-avatar">
-                            <img src="${pageContext.request.contextPath}/img/${sessionScope.user.avatar != null ? sessionScope.user.avatar : 'Hinh-anh-dai-dien-mac-dinh-Facebook.jpg'}" alt="Avatar">
-                        </div>
-                        <div class="user-details">
-                            <div class="user-name">${sessionScope.user.fullName}</div>
-                            <div class="user-role">Trưởng ban</div>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-
-
+            <%@ include file="components/sidebar.jsp" %>
             <!-- Main Content -->
             <main class="main-content">
                 <header class="header mb-4">
@@ -78,12 +24,12 @@
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb mb-0">
                                     <li class="breadcrumb-item">
-                                        <a href="${pageContext.request.contextPath}/department-dashboard" class="text-decoration-none">
+                                        <a href="${pageContext.request.contextPath}/department-dashboard?clubID=${clubID}" class="text-decoration-none">
                                             Dashboard
                                         </a>
                                     </li>
                                     <li class="breadcrumb-item">
-                                        <a href="${pageContext.request.contextPath}/department-members">
+                                        <a href="${pageContext.request.contextPath}/department-members?clubID=${clubID}">
                                             Thành viên
                                         </a>
                                     </li>
