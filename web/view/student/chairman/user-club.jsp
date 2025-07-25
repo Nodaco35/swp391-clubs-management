@@ -6,14 +6,14 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Quản lý thành viên câu lạc bộ</title>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/chairmanPage.css">
         <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
         <script src="https://cdn.tailwindcss.com"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     </head>
     
     <body class="bg-gray-100 font-sans antialiased">
-        <jsp:include page="../components/header.jsp" />
+        <jsp:include page="components/sidebar.jsp" />
 
         <div style="display: flex; flex-direction: column">
             <div class="container mx-auto max-w-6xl rounded-2xl bg-white shadow-xl p-6 my-8">
@@ -46,7 +46,7 @@
 
                 <!-- Header controls: Form tìm kiếm và nút thêm -->
                 <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                    <form class="flex w-full md:w-auto gap-2" action="${pageContext.request.contextPath}/club-members" method="post">
+                    <form class="flex w-full md:w-auto gap-2" action="${pageContext.request.contextPath}/chairman-page/manageMember" method="post">
                         <input type="hidden" name="clubID" value="${clubID}">
                         <input type="hidden" name="action" value="search">
                         <input type="text" name="search" value="${search}" placeholder="Tìm kiếm theo tên thành viên..." class="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -82,7 +82,7 @@
                                     <td class="p-3 border-b">${uc.isActive ? 'Hoạt động' : 'Không hoạt động'}</td>
                                     <td class="p-3 border-b flex gap-2">
                                         <button class="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition" onclick="toggleEditForm(${uc.userClubID}, '${uc.userID}', ${uc.clubDepartmentID}, ${uc.roleID}, ${uc.isActive}, '${uc.joinDate}')">Sửa</button>
-                                        <form action="${pageContext.request.contextPath}/club-members" method="post" class="inline">
+                                        <form action="${pageContext.request.contextPath}/chairman-page/manageMember" method="post" class="inline">
                                             <input type="hidden" name="clubID" value="${clubID}">
                                             <input type="hidden" name="userClubID" value="${uc.userClubID}">
                                             <input type="hidden" name="action" value="delete">
@@ -98,7 +98,7 @@
                 <!-- Form thêm/sửa thành viên -->
                 <div class="hidden bg-gray-50 p-6 rounded-lg shadow-inner mt-6" id="memberForm">
                     <h3 id="formTitle" class="text-xl font-semibold text-gray-800 mb-4">Thêm thành viên</h3>
-                    <form action="${pageContext.request.contextPath}/club-members" method="post" id="formData" class="space-y-4">
+                    <form action="${pageContext.request.contextPath}/chairman-page/manageMember" method="post" id="formData" class="space-y-4">
                         <input type="hidden" name="clubID" value="${clubID}">
                         <input type="hidden" name="action" id="formAction" value="add">
                         <input type="hidden" name="userClubID" id="userClubID">
@@ -146,24 +146,21 @@
 
                 <!-- Footer controls: Pagination và Nút quay lại -->
                 <div class="flex flex-col md:flex-row justify-between items-center mt-6 gap-4">
-                    <a href="${pageContext.request.contextPath}/club-detail?id=${clubID}" class="text-blue-500 hover:text-blue-600 transition flex items-center gap-2">
-                        <i class="fas fa-arrow-left"></i> Back
-                    </a>
                     <nav>
                         <ul class="flex gap-2">
                             <c:if test="${currentPage > 1}">
                                 <li>
-                                    <a href="${pageContext.request.contextPath}/club-members?clubID=${clubID}&page=${currentPage - 1}&search=${search}" class="px-3 py-1 border border-gray-300 rounded-lg hover:bg-blue-500 hover:text-white transition">« Trước</a>
+                                    <a href="${pageContext.request.contextPath}/chairman-page/manageMember?clubID=${clubID}&page=${currentPage - 1}&search=${search}" class="px-3 py-1 border border-gray-300 rounded-lg hover:bg-blue-500 hover:text-white transition">« Trước</a>
                                 </li>
                             </c:if>
                             <c:forEach begin="1" end="${totalPages}" var="i">
                                 <li>
-                                    <a href="${pageContext.request.contextPath}/club-members?clubID=${clubID}&page=${i}&search=${search}" class="px-3 py-1 border border-gray-300 rounded-lg ${i == currentPage ? 'bg-blue-500 text-white' : 'hover:bg-blue-500 hover:text-white'} transition">${i}</a>
+                                    <a href="${pageContext.request.contextPath}/chairman-page/manageMember?clubID=${clubID}&page=${i}&search=${search}" class="px-3 py-1 border border-gray-300 rounded-lg ${i == currentPage ? 'bg-blue-500 text-white' : 'hover:bg-blue-500 hover:text-white'} transition">${i}</a>
                                 </li>
                             </c:forEach>
                             <c:if test="${currentPage < totalPages}">
                                 <li>
-                                    <a href="${pageContext.request.contextPath}/club-members?clubID=${clubID}&page=${currentPage + 1}&search=${search}" class="px-3 py-1 border border-gray-300 rounded-lg hover:bg-blue-500 hover:text-white transition">Tiếp »</a>
+                                    <a href="${pageContext.request.contextPath}/chairman-page/manageMember?clubID=${clubID}&page=${currentPage + 1}&search=${search}" class="px-3 py-1 border border-gray-300 rounded-lg hover:bg-blue-500 hover:text-white transition">Tiếp »</a>
                                 </li>
                             </c:if>
                         </ul>
@@ -360,7 +357,7 @@
         </script>
         
         <div class="fixed bottom-0 left-0 right-0">
-            <jsp:include page="../components/footer.jsp" />
+            
         </div>
     </body>
 </html>
