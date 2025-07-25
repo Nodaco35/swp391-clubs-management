@@ -204,6 +204,5 @@
         <i class="fas fa-exclamation-circle"></i>
         <span class="toast-message"></span>
     </div>    <script src="${pageContext.request.contextPath}/js/formManagement.js?v=<%= System.currentTimeMillis() %>"></script>
-    <script src="${pageContext.request.contextPath}/js/formResponseCheck.js?v=<%= System.currentTimeMillis() %>"></script>
 </body>
 </html>

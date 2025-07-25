@@ -15,7 +15,6 @@ let contextPath;
 let campaignData;
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Lấy đường dẫn ngữ cảnh để xây dựng URL chính xác
   contextPath = window.location.pathname.substring(0, window.location.pathname.indexOf("/", 2)) || "";
 
   
@@ -28,9 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Kiểm tra trạng thái modal lúc khởi tạo
   const modals = document.querySelectorAll('.modal');
   modals.forEach(modal => {
-    debug("INIT", `Modal ${modal.id} trạng thái ban đầu:`, modal.style.display);
     if (modal.style.display !== 'none' && modal.style.display !== '') {
-      debug("WARNING", `Modal ${modal.id} đang hiển thị khi trang tải!`);
       modal.style.display = 'none';  // Đảm bảo modal ẩn đi lúc khởi tạo
     }
   });
@@ -71,7 +68,6 @@ function initializeTabs() {
 
 // Biểu đồ Chart.js
 function initializeChart() {
-  debug("CHART", "Initializing chart");
   const ctx = document.getElementById("stageProgressChart");
   if (!ctx) {
     debug("CHART", "Chart canvas not found");
@@ -82,11 +78,7 @@ function initializeChart() {
     return;
   }
 
-  // Debug campaign data
-  debug("CHART", "Campaign data:", window.campaignData);
-
   const stages = window.campaignData.stages;
-  debug("CHART", "Stages data for chart:", stages);
 
   // Map data for chart
   const labels = stages.map((stage) => {
@@ -101,20 +93,11 @@ function initializeChart() {
   
   // Debug data points
   const totalData = stages.map((stage) => {
-    debug("CHART", `Stage ${stage.stageName} total:`, stage.stats.total);
     return stage.stats.total || 0;
   });
   const pendingData = stages.map((stage) => stage.stats.pending || 0);
   const approvedData = stages.map((stage) => stage.stats.approved || 0);
   const rejectedData = stages.map((stage) => stage.stats.rejected || 0);
-  
-  debug("CHART", "Chart data points:", {
-    labels,
-    totalData,
-    pendingData, 
-    approvedData,
-    rejectedData
-  });
 
   new Chart(ctx, {
     type: "bar",
@@ -181,9 +164,7 @@ function initializeChart() {
   });
 }
 
-function initializeModals() {
-  debug("INIT", "Khởi tạo các modal và trình xử lý sự kiện");
-  
+function initializeModals() {  
   // Modal thông báo
   const notificationModal = document.getElementById('notificationModal');
   const candidateModal = document.getElementById('candidateModal');
@@ -210,9 +191,7 @@ function initializeModals() {
   const confirmSendBtn = document.getElementById('confirmSendBtn');
   if (confirmSendBtn) {
     confirmSendBtn.addEventListener('click', () => {
-      // Ẩn modal xác nhận
       if (confirmationModal) confirmationModal.style.display = 'none';
-      // Gọi hàm gửi thông báo
       sendBulkNotification();
     });
   }
@@ -263,7 +242,6 @@ function initializeModals() {
       if (selectedTemplateId) {
         loadTemplateContent(selectedTemplateId);
         
-        // Ẩn thông báo lỗi khi chọn mẫu thông báo
         const errorContainer = document.getElementById('notificationFormError');
         if (errorContainer) {
           errorContainer.textContent = '';
@@ -312,17 +290,13 @@ function initializeEventHandlers() {
       
       // Thêm active cho nút được click
       button.classList.add('active');
-      
-      // Áp dụng bộ lọc
       filterRecipients(status);
     }
   });
 }
 
 // Khởi tạo trình xử lý panel thông báo
-function initializeNotificationPanel() {
-  debug("INIT", "Khởi tạo panel thông báo");
-  
+function initializeNotificationPanel() {  
   // Chọn tất cả người nhận
   const selectAllCheckbox = document.getElementById('selectAllRecipients');
   if (selectAllCheckbox) {
@@ -345,9 +319,7 @@ function initializeNotificationPanel() {
 }
 
 // Lọc người nhận theo trạng thái
-function filterRecipients(status) {
-  debug("UI", "Lọc người nhận theo trạng thái", {status});
-  
+function filterRecipients(status) {  
   const recipientItems = document.querySelectorAll('.recipient-item');
   if (!recipientItems || recipientItems.length === 0) return;
   
@@ -361,7 +333,6 @@ function filterRecipients(status) {
     }
   });
   
-  // Cập nhật số lượng được hiển thị
   updateSelectedCount();
 }
 
@@ -384,9 +355,7 @@ function updateSelectedCount() {
   if (countSpan) countSpan.textContent = count;
 }
 //Hiển thị modal xác nhận gửi thông báo
-function confirmSendNotification() {
-  debug("FUNCTION", "Hiển thị modal xác nhận gửi thông báo");
-  
+function confirmSendNotification() {  
   // Kiểm tra các trường bắt buộc
   const title = document.getElementById('notificationTitle').value;
   const content = document.getElementById('notificationContent').value;
@@ -409,7 +378,6 @@ function confirmSendNotification() {
   
   if (selectedRecipients.length === 0) {
     showToast('Vui lòng chọn ít nhất một ứng viên', 'error');
-    
     // Hiển thị thông báo lỗi trong form
     const notificationError = document.getElementById('notificationFormError');
     if (notificationError) {
@@ -508,9 +476,6 @@ function sendBulkNotification() {
   };
   
   // Gửi thông báo
-  // Log dữ liệu trước khi gửi
-  console.log("Dữ liệu gửi thông báo:", notificationData);
-  console.log("JSON data:", JSON.stringify(notificationData));
 
   fetch(`${contextPath}/api/sendBulkNotification`, {
     method: 'POST',
@@ -572,7 +537,6 @@ function loadRecipientsForNotification(stageId, stageType) {
   
   fetch(`${contextPath}/api/stageCandidates?campaignId=${window.campaignData.campaignId}&stageType=${stageTypeParam}`)
     .then(response => {
-      debug("RECIPIENTS", "Phản hồi API nhận được, status:", response.status);
       return response.json();
     })
     .then(candidates => {
@@ -588,11 +552,7 @@ function loadRecipientsForNotification(stageId, stageType) {
         return;
       }
       
-      // Debug dữ liệu ứng viên nhận được
-      debug("RECIPIENTS", "Raw candidates data:", candidates);
-      
       // Lọc ứng viên theo trạng thái
-      // Đảm bảo candidates là một mảng trước khi dùng filter
       const candidatesArray = Array.isArray(candidates) ? candidates : Object.values(candidates);
       
       const filteredCandidates = candidatesArray;
@@ -680,9 +640,7 @@ function viewStageDetails(stageId, stageName) {
   }
 }
 
-function loadCandidatesForActiveTab() {
-  debug("CANDIDATES", "Loading candidates for active tab");
-  
+function loadCandidatesForActiveTab() {  
   const activeTab = document.querySelector('.tab-btn.active');
   if (!activeTab) {
     debug("CANDIDATES", "No active tab found");
@@ -690,22 +648,16 @@ function loadCandidatesForActiveTab() {
   }
   
   const tabId = activeTab.getAttribute('data-tab');
-  debug("CANDIDATES", "Active tab:", tabId);
-  
   if (tabId === 'overview') {
     //dữ liệu đã được tải
-    debug("CANDIDATES", "Overview tab active - no additional data loading needed");
   } else if (tabId === 'application') {
     // Tải danh sách ứng viên cho vòng nộp đơn
-    debug("CANDIDATES", "Loading APPLICATION stage candidates");
     loadStageCandidates('application-candidates', 'APPLICATION');
   } else if (tabId === 'interview') {
     // Tải danh sách ứng viên cho vòng phỏng vấn
-    debug("CANDIDATES", "Loading INTERVIEW stage candidates");
     loadStageCandidates('interview-candidates', 'INTERVIEW');
   } else if (tabId === 'challenge') {
     // Tải danh sách ứng viên cho vòng thử thách
-    debug("CANDIDATES", "Loading CHALLENGE stage candidates");
     loadStageCandidates('challenge-candidates', 'CHALLENGE');
   }
 }
@@ -721,9 +673,7 @@ function loadNotificationTemplates() {
   // Debug thông tin campaignData
   console.log("window.campaignData:", window.campaignData);
   
-  // Kiểm tra và xử lý clubId
   let clubId = window.campaignData?.clubId;
-  console.log("Debug - Extracted clubId:", clubId);
   
   if (!clubId || isNaN(clubId) || clubId <= 0) {
     console.warn("Invalid clubId detected");
@@ -747,7 +697,6 @@ function loadNotificationTemplates() {
       // Lưu templates vào biến toàn cục để sử dụng sau
       window.templates = templates;
       
-      // Xóa tất cả các option hiện tại
       templateSelector.innerHTML = '';
       
       if (!templates || templates.length === 0) {
@@ -808,9 +757,7 @@ function loadTemplateContent(templateId) {
     .then(templates => {
       window.templates = templates; // Lưu vào cache
       
-      const template = templates.find(t => t.templateId === parseInt(templateId));
-      debug("DATA", "Tải nội dung mẫu thông báo", template);
-      
+      const template = templates.find(t => t.templateId === parseInt(templateId));      
       const titleInput = document.getElementById('notificationTitle');
       const contentInput = document.getElementById('notificationContent');
       
@@ -988,9 +935,7 @@ function formatDate(dateString) {
   return date.toLocaleDateString('vi-VN');
 }
 
-function showToast(message, type = 'info') {
-  debug("UI", "Hiển thị toast", {message, type});
-  
+function showToast(message, type = 'info') {  
   // Thêm vào container
   const container = document.getElementById('toastContainer');
   if (!container) {
