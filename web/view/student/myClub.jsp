@@ -162,6 +162,25 @@
                     <!-- Register Active -->
                     <section id="club-summaries" class="mb-12">
                         <h2 class="text-3xl font-bold text-gray-900 mb-6">Đăng ký hoạt động trong kỳ</h2>
+                        <%
+                        String message = (String) session.getAttribute("messageAvtivedMember");
+                        String error = (String) session.getAttribute("errorAvtivedMember");
+                        if (message != null || error != null) {
+                        %>
+                        <div id="alert-box" style="padding: 10px; border-radius: 5px;
+                             <% if (message != null) { %>
+                             background-color: #d4edda; color: #155724;
+                             <% } else { %>
+                             background-color: #f8d7da; color: #721c24;
+                             <% } %>">
+                            <%= message != null ? message : error %>
+                        </div>
+                        <%
+                            // Xoá session ngay sau khi lấy để không hiển thị lại sau reload
+                            session.removeAttribute("messageAvtivedMember");
+                            session.removeAttribute("errorAvtivedMember");
+                            }
+                        %>
                         <c:choose>
                             <c:when test="${empty userMemberClubs}">
                                 <div class="card text-center py-10">
@@ -292,7 +311,7 @@
                             </div>
                         </section>
                     </c:if>
-     <!-- Recent Notifications -->
+                    <!-- Recent Notifications -->
                     <section id="notifications" class="mb-12">
                         <h2 class="text-3xl font-bold text-gray-900 mb-6">Thông Báo Gần Đây</h2>
                         <div class="card p-6">
@@ -845,5 +864,14 @@
                     document.getElementById('errorModal').style.display = 'none';
                 }
             </script>
+            <script>
+                setTimeout(() => {
+                    const alertBox = document.getElementById("alert-box");
+                    if (alertBox) {
+                        alertBox.style.display = "none";
+                    }
+                }, 1500);
+            </script>
+
         </body>
     </html>
