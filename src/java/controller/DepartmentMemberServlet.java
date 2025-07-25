@@ -89,6 +89,10 @@ public class DepartmentMemberServlet extends HttpServlet {
 
                 List<ActivedMembers> members = cd.getActiveMembersByClubAndDepartment(clubDepartmentID_,currentUser.getUserID());
 
+                int clubID = cd.getClubIDByClubDepartmentID(clubDepartmentID_);
+
+                
+                request.setAttribute("clubID", clubID);
                 request.setAttribute("members", members);
                 request.setAttribute("clubDepartmentID", clubDepartmentID_);
 
