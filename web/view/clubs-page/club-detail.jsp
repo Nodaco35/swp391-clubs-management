@@ -75,12 +75,6 @@
                                             <i class="fas fa-edit me-2"></i>Chỉnh sửa
                                         </a>
                                     </c:if>
-                                    <c:if test="${isPresident}">
-                                        <a href="${pageContext.request.contextPath}/club-members?clubID=${displayClub.clubID}" 
-                                           class="btn btn-primary">
-                                            <i class="fas fa-users"></i> Quản lý thành viên
-                                        </a>
-                                    </c:if>
                                     <c:if test="${isDepartmentLeader}">
                                         <a href="${pageContext.request.contextPath}/department-dashboard?clubID=${displayClub.clubID}" 
                                            class="btn btn-primary">
