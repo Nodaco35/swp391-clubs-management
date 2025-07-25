@@ -154,7 +154,6 @@
                                 </span>
                             </div>
                         </div>
-                        
                         <div class="stage-card-dates">
                             <p><i class="fas fa-calendar-start"></i> 
                                 <fmt:formatDate value="${stage.startDate}" pattern="dd/MM/yyyy" /> - 
@@ -163,37 +162,6 @@
                             <c:if test="${stage.stageName == 'INTERVIEW'}">
                                 <p><i class="fas fa-map-marker-alt"></i> ${stage.location != null ? stage.location : 'Chưa xác định'}</p>
                             </c:if>
-                        </div>
-                        
-                        <div class="stage-card-stats">
-                            <div class="stat-row">
-                                <div class="stat-item total">
-                                    <div class="stat-number" data-stage-id="${stage.stageID}" data-stat="total">
-                                        ${stageStats[stage.stageID]['TOTAL'] != null ? stageStats[stage.stageID]['TOTAL'] : 0}
-                                    </div>
-                                    <div class="stat-label">Tổng</div>
-                                </div>
-                                <div class="stat-item pending">
-                                    <div class="stat-number" data-stage-id="${stage.stageID}" data-stat="pending">
-                                        ${stageStats[stage.stageID]['PENDING'] != null ? stageStats[stage.stageID]['PENDING'] : 0}
-                                    </div>
-                                    <div class="stat-label">Đang Chờ</div>
-                                </div>
-                            </div>
-                            <div class="stat-row">
-                                <div class="stat-item approved">
-                                    <div class="stat-number" data-stage-id="${stage.stageID}" data-stat="approved">
-                                        ${stageStats[stage.stageID]['APPROVED'] != null ? stageStats[stage.stageID]['APPROVED'] : 0}
-                                    </div>
-                                    <div class="stat-label">Đã Duyệt</div>
-                                </div>
-                                <div class="stat-item rejected">
-                                    <div class="stat-number" data-stage-id="${stage.stageID}" data-stat="rejected">
-                                        ${stageStats[stage.stageID]['REJECTED'] != null ? stageStats[stage.stageID]['REJECTED'] : 0}
-                                    </div>
-                                    <div class="stat-label">Từ chối</div>
-                                </div>
-                            </div>
                         </div>
                         
                         <div class="stage-card-actions">

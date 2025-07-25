@@ -58,13 +58,6 @@ public class RecruitmentFormServlet extends HttpServlet {
         return userClub != null && userClub.getRoleID() == 1;
     }
 
-    /**
-     * Lấy CLB mà người dùng là chủ nhiệm
-     *
-     * @param userId ID của người dùng
-     * @return UserClub nếu người dùng là chủ nhiệm của bất kỳ CLB nào, ngược
-     * lại null
-     */
     private UserClub getChairmanClub(String userId) throws SQLException {
         UserClub userClub = userClubDAO.getUserClubManagementRole(userId, null);
         if (userClub != null && userClub.getRoleID() == 1) {
@@ -73,19 +66,11 @@ public class RecruitmentFormServlet extends HttpServlet {
         return null;
     }
 
-    /**
-     * Hàm gửi thông báo lỗi và chuyển hướng
-     */
     private void sendErrorRedirect(HttpServletRequest request, HttpServletResponse response,
             String errorCode, String message, String redirectPath) throws IOException {
         if (redirectPath == null) {
             redirectPath = "/myclub";
         }
-
-        // Log thông tin lỗi để debug
-        logger.log(Level.WARNING, "Chuyển hướng với lỗi: {0} - {1}, path: {2}",
-                new Object[]{errorCode, message, redirectPath});
-
         // Log thêm thông tin debug về request parameters để giúp xác định nguyên nhân
         String debugInfo = "";
         Enumeration<String> paramNames = request.getParameterNames();
@@ -98,7 +83,6 @@ public class RecruitmentFormServlet extends HttpServlet {
         logger.log(Level.INFO, "Request parameters: {0}", debugInfo);
 
         try {
-            // Thêm thông tin debug vào thông báo lỗi
             String enhancedMessage = message;
             if (errorCode.equals("missing_parameter")) {
                 enhancedMessage += " [Debug: " + debugInfo + "]";
@@ -107,7 +91,6 @@ public class RecruitmentFormServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + redirectPath + "?error=" + errorCode + "&message="
                     + URLEncoder.encode(enhancedMessage, StandardCharsets.UTF_8.name()));
         } catch (UnsupportedEncodingException e) {
-            // UTF-8 luôn được hỗ trợ nhưng vẫn cần xử lý ngoại lệ
             response.sendRedirect(request.getContextPath() + redirectPath + "?error=" + errorCode);
         }
     }
@@ -115,8 +98,6 @@ public class RecruitmentFormServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        // Đảm bảo charset UTF-8 cho request và response
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
 
@@ -135,8 +116,6 @@ public class RecruitmentFormServlet extends HttpServlet {
         }
 
         try {
-            logger.log(Level.INFO, "DEBUG - doGet với pathInfo: {0}", pathInfo);
-
             if ("/new".equals(pathInfo) || "/".equals(pathInfo)) {
                 // Xử lý hiển thị form tạo mới
                 handleNewForm(request, response, currentUser);
@@ -201,15 +180,10 @@ public class RecruitmentFormServlet extends HttpServlet {
 
             clubId = userClub.getClubID();
             campaign.setClubID(clubId);
-            logger.log(Level.INFO, "User {0} tạo chiến dịch với vai trò chủ nhiệm CLB {1}",
-                    new Object[]{currentUser.getUserID(), clubId});
         }
 
         // Lấy danh sách form đăng ký đã publish của CLB
         List<Map<String, Object>> publishedForms = formTemplateDAO.getPublishedMemberForms(clubId);
-
-        logger.log(Level.INFO, "Tìm thấy {0} forms cho CLB ID: {1}",
-                new Object[]{publishedForms.size(), clubId});
 
         // Nếu không tìm thấy form cho club này, lấy tất cả các form (hiển thị warning)
         if (publishedForms.isEmpty()) {
@@ -254,7 +228,6 @@ public class RecruitmentFormServlet extends HttpServlet {
                 sendErrorRedirect(request, response, "missing_id", "Thiếu ID hoạt động tuyển quân", "/recruitment");
                 return;
             }
-            logger.log(Level.INFO, "Sử dụng tham số id thay vì recruitmentId cho tương thích ngược: {0}", recruitmentIdParam);
         }
 
         int recruitmentId;
@@ -282,10 +255,6 @@ public class RecruitmentFormServlet extends HttpServlet {
         String clubIdParam = request.getParameter("clubId");
         if (clubIdParam != null && !clubIdParam.isEmpty()) {
             try {
-                // Debug: Log thông tin clubId từ parameter và từ campaign
-                logger.log(Level.INFO, "[DEBUG] clubId từ parameter: {0}, clubId từ campaign: {1}",
-                        new Object[]{clubIdParam, clubId});
-
                 int paramClubId = Integer.parseInt(clubIdParam);
                 if (paramClubId != clubId) {
                     logger.log(Level.WARNING, "[DEBUG] clubId từ parameter ({0}) khác với clubId từ campaign ({1})",
@@ -352,11 +321,6 @@ public class RecruitmentFormServlet extends HttpServlet {
         request.setAttribute("mode", "edit");
         request.setAttribute("selectedClubId", clubId);
 
-        logger.log(Level.INFO, "Đang chỉnh sửa chiến dịch ID: {0}, Tiêu đề: {1}",
-                new Object[]{recruitmentId, campaign.getTitle()});
-        logger.log(Level.INFO, "JSON stages để truyền sang client: {0}", stagesJson);
-
-        // Chuyển đến trang form
         request.getRequestDispatcher("/view/student/chairman/recruitmentCampaignForm.jsp").forward(request, response);
     }
 
@@ -415,27 +379,6 @@ public class RecruitmentFormServlet extends HttpServlet {
      */
     private void handleCreateCampaign(HttpServletRequest request, HttpServletResponse response,
             Users currentUser, JsonObject jsonResponse) throws Exception {
-
-        // Log toàn bộ parameters nhận được để debug
-        logger.log(Level.INFO, "DEBUG - handleCreateCampaign: Tất cả parameters từ request:");
-        java.util.Enumeration<String> paramNames = request.getParameterNames();
-        while (paramNames.hasMoreElements()) {
-            String paramName = paramNames.nextElement();
-            String paramValue = request.getParameter(paramName);
-            logger.log(Level.INFO, "DEBUG - Parameter: {0} = {1}", new Object[]{paramName, paramValue});
-        }
-
-        // Kiểm tra và log các parameter cho các vòng tuyển
-        logger.log(Level.INFO, "DEBUG - Kiểm tra thông tin các vòng tuyển từ request:");
-        logger.log(Level.INFO, "Vòng nộp đơn: {0} -> {1}",
-                new Object[]{request.getParameter("applicationStageStart"), request.getParameter("applicationStageEnd")});
-        logger.log(Level.INFO, "Vòng phỏng vấn: {0} -> {1}, địa điểm: {2}",
-                new Object[]{request.getParameter("interviewStageStart"), request.getParameter("interviewStageEnd"),
-                    request.getParameter("interviewLocationId")});
-        logger.log(Level.INFO, "Vòng thử thách: {0} -> {1}, mô tả: {2}",
-                new Object[]{request.getParameter("challengeStageStart"), request.getParameter("challengeStageEnd"),
-                    request.getParameter("challengeDescription")});
-
         // Lấy thông tin clubId từ request
         String clubIdParam = request.getParameter("clubId");
         if (clubIdParam == null || clubIdParam.isEmpty()) {
@@ -455,44 +398,16 @@ public class RecruitmentFormServlet extends HttpServlet {
         RecruitmentCampaign campaign = parseRecruitmentCampaign(request, true);
         campaign.setCreatedBy(currentUser.getUserID());
         // Status will be set by the database based on the start date
-
-        // Kiểm tra lại clubId một lần nữa
         if (campaign.getClubID() <= 0) {
             logger.log(Level.SEVERE, "ClubID không hợp lệ ({0}) sau quá trình xử lý!", campaign.getClubID());
             throw new IllegalArgumentException("CLB không hợp lệ");
         }
 
-        logger.log(Level.INFO, "DEBUG - Gọi recruitmentService.createCampaign với thông tin: ClubID={0}, Gen={1}, Title={2}, StartDate={3}, EndDate={4}",
-                new Object[]{
-                    campaign.getClubID(),
-                    campaign.getGen(),
-                    campaign.getTitle(),
-                    dateFormat.format(campaign.getStartDate()),
-                    dateFormat.format(campaign.getEndDate())
-                });
-
         int result = recruitmentService.createCampaign(campaign);
-
-        logger.log(Level.INFO, "DEBUG - Kết quả tạo chiến dịch: {0}", result);
 
         if (result > 0) {
             // Lấy ID của chiến dịch vừa tạo
             int recruitmentId = result;
-            logger.log(Level.INFO, "DEBUG - Chiến dịch đã được tạo với ID={0}, tiếp tục tạo các vòng tuyển", recruitmentId);
-
-            // DEBUG: Kiểm tra lại một lần nữa các thông tin vòng tuyển
-            logger.log(Level.INFO, "DEBUG - Kiểm tra lại thông tin vòng tuyển từ request trước khi tạo:");
-            logger.log(Level.INFO, "DEBUG - Vòng nộp đơn: {0} -> {1}",
-                    new Object[]{request.getParameter("applicationStageStart"), request.getParameter("applicationStageEnd")});
-            logger.log(Level.INFO, "DEBUG - Vòng phỏng vấn: {0} -> {1}, Địa điểm: {2}",
-                    new Object[]{request.getParameter("interviewStageStart"),
-                        request.getParameter("interviewStageEnd"),
-                        request.getParameter("interviewLocationId")});
-            logger.log(Level.INFO, "DEBUG - Vòng thử thách: {0} -> {1}, Mô tả: {2}",
-                    new Object[]{request.getParameter("challengeStageStart"),
-                        request.getParameter("challengeStageEnd"),
-                        request.getParameter("challengeDescription")});
-
             // Tạo các vòng tuyển cho chiến dịch
             logger.log(Level.INFO, "DEBUG - Bắt đầu gọi createRecruitmentStages()");
             boolean stagesCreated = createRecruitmentStages(request, recruitmentId);
@@ -525,8 +440,6 @@ public class RecruitmentFormServlet extends HttpServlet {
                     // Cập nhật trạng thái tuyển quân cho CLB
                     dal.ClubDAO clubDAO = new dal.ClubDAO();
                     boolean isUpdated = clubDAO.updateIsRecruiting(clubId, true);
-                    logger.log(Level.INFO, "Cập nhật IsRecruiting=true cho CLB ID {0}: {1}",
-                            new Object[]{clubId, isUpdated ? "thành công" : "thất bại"});
                 }
             } else {
                 jsonResponse.addProperty("success", true);
@@ -581,7 +494,6 @@ public class RecruitmentFormServlet extends HttpServlet {
                 logger.log(Level.SEVERE, "DEBUG - Thiếu cả recruitmentId và id trong request");
                 throw new IllegalArgumentException("Thiếu ID hoạt động tuyển quân");
             }
-            logger.log(Level.INFO, "DEBUG - Đã tìm thấy ID trong tham số id thay vì recruitmentId: {0}", recruitmentIdParam);
         } else {
             // Kiểm tra xem id có tồn tại và khác với recruitmentId không
             String idParam = request.getParameter("id");
@@ -591,7 +503,6 @@ public class RecruitmentFormServlet extends HttpServlet {
             }
         }
 
-        logger.log(Level.INFO, "DEBUG - Cập nhật hoạt động với ID: {0}", recruitmentIdParam);
         int recruitmentId = Integer.parseInt(recruitmentIdParam);
 
         // Lấy thông tin hoạt động hiện tại
@@ -609,11 +520,6 @@ public class RecruitmentFormServlet extends HttpServlet {
         // Lấy thông tin từ form và cập nhật đối tượng RecruitmentCampaign
         RecruitmentCampaign updatedCampaign = parseRecruitmentCampaign(request, false);
         updatedCampaign.setRecruitmentID(recruitmentId); // Đảm bảo ID được set đúng
-
-        // Log dữ liệu trước khi cập nhật để debug
-        logger.log(Level.INFO, "Dữ liệu cập nhật campaign: ID={0}, ClubID={1}, Title={2}, FormID={3}",
-                new Object[]{updatedCampaign.getRecruitmentID(), updatedCampaign.getClubID(),
-                    updatedCampaign.getTitle(), updatedCampaign.getFormID()});
 
         try {
             // Gọi service để cập nhật chiến dịch
@@ -666,24 +572,11 @@ public class RecruitmentFormServlet extends HttpServlet {
             // Tạo các đối tượng để lưu trữ dữ liệu của các vòng tuyển
             List<RecruitmentStage> stages = new ArrayList<>();
 
-            // DEBUG: Kiểm tra một lần nữa các giá trị từ request
-            logger.log(Level.INFO, "DEBUG - createRecruitmentStages: Kiểm tra các parameters vòng tuyển:");
-            logger.log(Level.INFO, "applicationStageStart = {0}", request.getParameter("applicationStageStart"));
-            logger.log(Level.INFO, "applicationStageEnd = {0}", request.getParameter("applicationStageEnd"));
-            logger.log(Level.INFO, "interviewStageStart = {0}", request.getParameter("interviewStageStart"));
-            logger.log(Level.INFO, "interviewStageEnd = {0}", request.getParameter("interviewStageEnd"));
-            logger.log(Level.INFO, "interviewLocationId = {0}", request.getParameter("interviewLocationId"));
-            logger.log(Level.INFO, "challengeStageStart = {0}", request.getParameter("challengeStageStart"));
-            logger.log(Level.INFO, "challengeStageEnd = {0}", request.getParameter("challengeStageEnd"));
-            logger.log(Level.INFO, "challengeDescription = {0}", request.getParameter("challengeDescription"));
-
             // 1. Vòng Nộp đơn (Application)
             String appStartStr = request.getParameter("applicationStageStart");
             String appEndStr = request.getParameter("applicationStageEnd");
 
             if (appStartStr != null && !appStartStr.isEmpty() && appEndStr != null && !appEndStr.isEmpty()) {
-                logger.log(Level.INFO, "DEBUG - Xử lý vòng Nộp đơn: {0} - {1}", new Object[]{appStartStr, appEndStr});
-
                 try {
                     Date appStartDate = dateFormat.parse(appStartStr);
                     Date appEndDate = dateFormat.parse(appEndStr);
@@ -691,8 +584,6 @@ public class RecruitmentFormServlet extends HttpServlet {
                     LocationDAO locationDAO = new LocationDAO();
                     List<Locations> locations = locationDAO.getAllLocationsOnCampus();
                     int defaultLocationId = locations.isEmpty() ? 1 : locations.get(0).getLocationID();
-
-                    logger.log(Level.INFO, "DEBUG - Using location ID {0} for APPLICATION stage", defaultLocationId);
 
                     RecruitmentStage appStage = new RecruitmentStage();
                     appStage.setRecruitmentID(recruitmentId);
@@ -704,11 +595,6 @@ public class RecruitmentFormServlet extends HttpServlet {
                     appStage.setDescription("Vòng nộp đơn đăng ký");
                     stages.add(appStage);
 
-                    // Debug log
-                    logger.log(Level.INFO, "DEBUG - Đã tạo vòng APPLICATION với StageName đúng ENUM value");
-
-                    logger.log(Level.INFO, "DEBUG - Đã tạo object Vòng Nộp đơn: {0} -> {1}",
-                            new Object[]{dateFormat.format(appStartDate), dateFormat.format(appEndDate)});
                 } catch (ParseException e) {
                     logger.log(Level.SEVERE, "DEBUG - Lỗi parse date cho vòng Nộp đơn: {0}", e.getMessage());
                 }
@@ -724,18 +610,14 @@ public class RecruitmentFormServlet extends HttpServlet {
             if (interviewStartStr != null && !interviewStartStr.isEmpty()
                     && interviewEndStr != null && !interviewEndStr.isEmpty()) {
 
-                logger.log(Level.INFO, "Xử lý vòng Phỏng vấn: {0} - {1}, địa điểm: {2}",
-                        new Object[]{interviewStartStr, interviewEndStr, interviewLocationIdStr});
-
                 Date interviewStartDate = dateFormat.parse(interviewStartStr);
                 Date interviewEndDate = dateFormat.parse(interviewEndStr);
 
                 RecruitmentStage interviewStage = new RecruitmentStage();
                 interviewStage.setRecruitmentID(recruitmentId);
-                interviewStage.setStageName("INTERVIEW"); // Sử dụng ENUM value thay vì tên tiếng Việt
+                interviewStage.setStageName("INTERVIEW");
                 interviewStage.setStartDate(interviewStartDate);
                 interviewStage.setEndDate(interviewEndDate);
-                // Status sẽ được tính toán dựa trên ngày trong DAO
 
                 // Xử lý locationId nếu có
                 if (interviewLocationIdStr != null && !interviewLocationIdStr.isEmpty()) {
@@ -756,7 +638,6 @@ public class RecruitmentFormServlet extends HttpServlet {
                         }
 
                         if (isValid) {
-                            logger.log(Level.INFO, "DEBUG - Sử dụng locationId hợp lệ: {0} cho vòng Phỏng vấn", locationId);
                             interviewStage.setLocationID(locationId);
                         } else {
                             // Nếu không hợp lệ, sử dụng ID mặc định
@@ -785,9 +666,6 @@ public class RecruitmentFormServlet extends HttpServlet {
 
                 interviewStage.setDescription("Vòng phỏng vấn ứng viên");
                 stages.add(interviewStage);
-
-                // Debug log
-                logger.log(Level.INFO, "DEBUG - Đã tạo vòng INTERVIEW với StageName đúng ENUM value");
             } else {
                 logger.log(Level.WARNING, "Thiếu thông tin vòng Phỏng vấn cho chiến dịch ID {0}", recruitmentId);
             }
@@ -796,9 +674,6 @@ public class RecruitmentFormServlet extends HttpServlet {
             String challengeStartStr = request.getParameter("challengeStageStart");
             String challengeEndStr = request.getParameter("challengeStageEnd");
             String challengeDesc = request.getParameter("challengeDescription");
-
-            logger.log(Level.INFO, "DEBUG - Kiểm tra dữ liệu vòng Thử thách: Start={0}, End={1}, Description={2}",
-                    new Object[]{challengeStartStr, challengeEndStr, challengeDesc});
 
             if (challengeStartStr != null && !challengeStartStr.isEmpty()
                     && challengeEndStr != null && !challengeEndStr.isEmpty()) {
@@ -846,9 +721,6 @@ public class RecruitmentFormServlet extends HttpServlet {
                                     challengeStage.getDescription()});
 
                         stages.add(challengeStage);
-
-                        // Debug log
-                        logger.log(Level.INFO, "DEBUG - Đã tạo vòng CHALLENGE với StageName đúng ENUM value");
                     }
                 } catch (ParseException e) {
                     logger.log(Level.SEVERE, "DEBUG - Lỗi parse date cho vòng Thử thách: {0}", e.getMessage());
@@ -856,25 +728,6 @@ public class RecruitmentFormServlet extends HttpServlet {
             } else {
                 logger.log(Level.INFO, "DEBUG - Không đủ thông tin để tạo vòng Thử thách");
             }
-
-            // Log thông tin các vòng tuyển trước khi lưu
-            logger.log(Level.INFO, "DEBUG - Chuẩn bị lưu {0} vòng tuyển cho chiến dịch ID {1}",
-                    new Object[]{stages.size(), recruitmentId});
-
-            // Debug: hiển thị chi tiết từng vòng tuyển sẽ lưu
-            for (int i = 0; i < stages.size(); i++) {
-                RecruitmentStage stage = stages.get(i);
-                logger.log(Level.INFO, "DEBUG - Vòng tuyển #{0}: {1}, {2} -> {3}, Location: {4}, Description: {5}",
-                        new Object[]{
-                            i + 1,
-                            stage.getStageName(),
-                            dateFormat.format(stage.getStartDate()),
-                            dateFormat.format(stage.getEndDate()),
-                            stage.getLocationID(),
-                            stage.getDescription()
-                        });
-            }
-
             // Sử dụng RecruitmentStageDAO để lưu các vòng tuyển vào database
             dal.RecruitmentStageDAO stageDAO = new dal.RecruitmentStageDAO();
             boolean allSuccess = true;
@@ -913,11 +766,6 @@ public class RecruitmentFormServlet extends HttpServlet {
                         stage.setStatus("UPCOMING");
                     }
 
-                    logger.log(Level.INFO, "DEBUG - Đang lưu vòng {0}: {1} -> {2}",
-                            new Object[]{stage.getStageName(),
-                                dateFormat.format(stage.getStartDate()),
-                                dateFormat.format(stage.getEndDate())});
-
                     int stageId = stageDAO.createRecruitmentStage(stage);
 
                     if (stageId <= 0) {
@@ -938,10 +786,6 @@ public class RecruitmentFormServlet extends HttpServlet {
                     allSuccess = false;
                 }
             }
-
-            logger.log(Level.INFO, "DEBUG - Kết quả lưu vòng tuyển: {0}/{1} vòng thành công",
-                    new Object[]{successCount, stages.size()});
-
             return allSuccess;
 
         } catch (ParseException e) {
@@ -966,14 +810,11 @@ public class RecruitmentFormServlet extends HttpServlet {
         logger.log(Level.INFO, "Bắt đầu cập nhật các vòng tuyển cho chiến dịch ID {0}", recruitmentId);
 
         try {
-            Date currentDate = new Date(); // Current date for checking if stages have started
+            Date currentDate = new Date();
 
             // Lấy danh sách các vòng tuyển hiện tại
             dal.RecruitmentStageDAO stageDAO = new dal.RecruitmentStageDAO();
             List<RecruitmentStage> existingStages = stageDAO.getStagesByRecruitmentId(recruitmentId);
-
-            logger.log(Level.INFO, "Tìm thấy {0} vòng tuyển hiện tại cho chiến dịch ID {1}",
-                    new Object[]{existingStages.size(), recruitmentId});
 
             // Map để lưu trữ các vòng tuyển hiện tại theo tên vòng
             Map<String, RecruitmentStage> stageMap = new java.util.HashMap<>();
@@ -991,8 +832,6 @@ public class RecruitmentFormServlet extends HttpServlet {
                         new Object[]{appStartStr, appEndStr});
                 return false;
             }
-
-            logger.log(Level.INFO, "Xử lý vòng Nộp đơn: {0} - {1}", new Object[]{appStartStr, appEndStr});
 
             try {
                 Date appStartDate = dateFormat.parse(appStartStr);
@@ -1024,7 +863,6 @@ public class RecruitmentFormServlet extends HttpServlet {
                     appStage.setEndDate(appEndDate);
                     appStage.setStageName("APPLICATION"); // Đảm bảo dùng ENUM value
                     stageDAO.updateRecruitmentStage(appStage);
-                    logger.log(Level.INFO, "Đã cập nhật vòng APPLICATION ID {0}", appStage.getStageID());
                 } else {
                     // Tạo mới nếu không tồn tại
                     appStage = new RecruitmentStage();
@@ -1036,7 +874,6 @@ public class RecruitmentFormServlet extends HttpServlet {
                     appStage.setLocationID(0);
                     appStage.setDescription("Vòng nộp đơn đăng ký");
                     int stageId = stageDAO.createRecruitmentStage(appStage);
-                    logger.log(Level.INFO, "Đã tạo mới vòng APPLICATION ID {0}", stageId);
                 }
             } catch (ParseException e) {
                 logger.log(Level.SEVERE, "Lỗi parse ngày tháng vòng nộp đơn: {0}", e.getMessage());
