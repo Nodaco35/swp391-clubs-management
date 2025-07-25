@@ -1,15 +1,17 @@
 <component name="libraryTable">
   <library name="lib2">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/lib/jakarta.servlet.jsp.jstl-api-2.0.0.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/jakarta.activation-2.0.1.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/mysql-connector-j-9.3.0.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/jaxb-api-2.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jakarta.activation-2.0.1.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/sqljdbc42.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/jakarta.mail-2.0.1.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/json-20230227.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/javax.activation-api-1.2.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jakarta.servlet.jsp.jstl-api-2.0.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/json-20230227.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/gson-2.10.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jakarta.mail-2.0.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jakarta.servlet-api-6.1.0.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/jakarta.servlet.jsp.jstl-2.0.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/mysql-connector-j-9.3.0.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

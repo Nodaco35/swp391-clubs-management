@@ -1,0 +1,27 @@
+services:
+  mysql:
+    image: mysql:8.0.42-debian  # Tag hợp lệ, đã sửa từ 8.4.2-debian
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=ClubManagementSystem
+    ports:
+      - "3306:3306"
+    networks:
+      - my-network
+
+  app:
+    image: club-services:0.0.1
+    environment:
+      - DBMS_CONNECTION=jdbc:mysql://mysql:3306/ClubManagementSystem?zeroDateTimeBehavior=CONVERT_TO_NULL
+      - DB_USER=root
+      - DB_PASSWORD=root
+    depends_on:
+      - mysql
+    ports:
+      - "8081:8080"
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    driver: bridge  # Sửa ở đây thành 'bridge'
