@@ -222,6 +222,7 @@ public class ExpenseDAO {
                 expense.setApprovedBy(rs.getString("ApprovedBy"));
                 expense.setApprovedAt(rs.getTimestamp("ApprovedAt"));
                 expense.setCreatedByName(rs.getString("CreatedByName"));
+                expense.setRejectContent(rs.getString("RejectContent"));
                 expenses.add(expense);
             }
         } catch (SQLException e) {
@@ -295,6 +296,7 @@ public class ExpenseDAO {
                 expense.setApprovedBy(rs.getString("ApprovedBy"));
                 expense.setApprovedAt(rs.getTimestamp("ApprovedAt"));
                 expense.setCreatedByName(rs.getString("CreatedByName"));
+                expense.setRejectContent(rs.getString("RejectContent"));
                 expenses.add(expense);
             }
         } catch (SQLException e) {
@@ -333,6 +335,8 @@ public class ExpenseDAO {
                 expense.setApprovedBy(rs.getString("ApprovedBy"));
                 expense.setApprovedAt(rs.getTimestamp("ApprovedAt"));
                 expense.setCreatedByName(rs.getString("CreatedByName"));
+                expense.setRejectContent(rs.getString("RejectContent"));
+                expense.setRejectContent(rs.getString("RejectContent"));
                 expenses.add(expense);
             }
         } catch (SQLException e) {
@@ -414,6 +418,7 @@ public class ExpenseDAO {
                 expense.setApprovedBy(rs.getString("ApprovedBy"));
                 expense.setApprovedAt(rs.getTimestamp("ApprovedAt"));
                 expense.setCreatedByName(rs.getString("CreatedByName"));
+                expense.setRejectContent(rs.getString("RejectContent"));
                 expenses.add(expense);
             }
         } catch (SQLException e) {
@@ -484,6 +489,7 @@ public class ExpenseDAO {
                 expense.setApprovedBy(rs.getString("ApprovedBy"));
                 expense.setApprovedAt(rs.getTimestamp("ApprovedAt"));
                 expense.setCreatedByName(rs.getString("CreatedByName"));
+                expense.setRejectContent(rs.getString("RejectContent"));
                 return expense;
             }
         } catch (SQLException e) {
@@ -492,16 +498,17 @@ public class ExpenseDAO {
         return null;
     }
 
-    public boolean updateExpenseStatus(int expenseID, String status, String approvedBy) {
+    public boolean updateExpenseStatus(int expenseID, String status, String approvedBy, String rejectContent) {
         String sql = """
                      UPDATE Expenses 
-                     SET Status = ?, ApprovedBy = ?, ApprovedAt = CURRENT_TIMESTAMP
+                     SET Status = ? , ApprovedBy = ? ,RejectContent= ?  , ApprovedAt = CURRENT_TIMESTAMP
                      WHERE ExpenseID = ? AND Status = 'Pending'
                      """;
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);
             ps.setString(2, approvedBy);
-            ps.setInt(3, expenseID);
+            ps.setString(3, rejectContent);
+            ps.setInt(4, expenseID);
             int rowsAffected = ps.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {

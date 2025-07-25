@@ -18,6 +18,16 @@ public class Expenses {
     private String approvedBy;
     private Timestamp approvedAt;
     private String createdByName; // For display purposes
+    private String rejectContent;
+
+    public String getRejectContent() {
+        return rejectContent;
+    }
+
+    public void setRejectContent(String rejectContent) {
+        this.rejectContent = rejectContent;
+    }
+    
 
     // Getters and Setters
     public int getExpenseID() { return expenseID; }
