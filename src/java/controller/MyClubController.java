@@ -99,6 +99,17 @@ public class MyClubController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/myclub");
             return;
         }
+        if ("deleteActivity".equals(action)) {
+            String userID = request.getParameter("userID");
+            int clubID = Integer.parseInt(request.getParameter("clubID"));
+            PeriodicReportDAO pd = new PeriodicReportDAO();
+
+            PrintWriter out = response.getWriter();
+            out.print(userID + " " + clubID);
+            boolean success = pd.deleteUserToActiveClub(userID, clubID);
+            response.sendRedirect(request.getContextPath() + "/myclub");
+            return;
+        }
         if ("deleteDocument".equals(action)) {
             int documentID = Integer.parseInt(request.getParameter("documentID"));
             int clubID = Integer.parseInt(request.getParameter("clubID"));
