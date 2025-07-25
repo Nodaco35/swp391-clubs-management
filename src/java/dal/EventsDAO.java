@@ -107,8 +107,9 @@ public class EventsDAO {
                 FROM EventSchedules es
                 JOIN Locations l ON es.LocationID = l.LocationID
                 WHERE es.EventID = ?""";
-        try (Connection connection = DBContext.getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql)) {
+        try  {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
             ps.setInt(1, eventID);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -490,12 +491,14 @@ public class EventsDAO {
 
     public int countOngoingEvents(int clubID) {
         String sql = """
-                    SELECT COUNT(*) 
+                SELECT COUNT(*)
                     FROM Events e
                     WHERE e.ClubID = ? AND EXISTS (
-                        SELECT 1 FROM EventSchedules es 
-                        WHERE es.EventID = e.EventID AND es.EventDate <= NOW() AND es.EndTime >= NOW()
-                    )""";
+                        SELECT 1 FROM EventSchedules es
+                        WHERE es.EventID = e.EventID
+                        AND CONCAT(es.EventDate, ' ', es.StartTime) <= NOW()
+                        AND CONCAT(es.EventDate, ' ', es.EndTime) >= NOW())
+                        """;
         try {
             Connection connection = DBContext.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -515,8 +518,9 @@ public class EventsDAO {
                     SELECT COUNT(*) 
                     FROM Events e
                     WHERE e.ClubID = ? AND EXISTS (
-                        SELECT 1 FROM EventSchedules es WHERE es.EventID = e.EventID AND es.EndTime < NOW()
-                    )""";
+                         SELECT 1 FROM EventSchedules es
+                         WHERE es.EventID = e.EventID
+                         AND CONCAT(es.EventDate, ' ', es.EndTime) < NOW())""";
         try {
             Connection connection = DBContext.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -1308,6 +1312,19 @@ public class EventsDAO {
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void deleteAgendasByScheduleID(int scheduleID) {
+        String sql = "DELETE FROM Agenda WHERE ScheduleID = ?";
+        try {
+            Connection connection = DBContext.getConnection();
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, scheduleID);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi xóa agenda theo scheduleID: " + e.getMessage());
         }
     }
 

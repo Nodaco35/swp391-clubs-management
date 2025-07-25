@@ -227,10 +227,10 @@ public class PeriodicReportDAO extends DBContext {
         SELECT a.ActiveID, a.UserID, u.FullName, u.UserID, a.ProgressPoint, r.RoleName, d.DepartmentName
                 FROM ActivedMemberClubs a
                 JOIN Users u ON a.UserID = u.UserID
-                join userclubs uc on u.UserID = uc.UserID
-                join clubdepartments cd on uc.ClubDepartmentID = cd.ClubDepartmentID
-                join departments d on d.DepartmentID = cd.DepartmentID
-                join roles r on r.RoleID = uc.RoleID
+                join UserClubs uc on u.UserID = uc.UserID
+                join ClubDepartments cd on uc.ClubDepartmentID = cd.ClubDepartmentID
+                join Departments d on d.DepartmentID = cd.DepartmentID
+                join Roles r on r.RoleID = uc.RoleID
                 WHERE a.ClubID = ? AND a.TermID = ? AND a.IsActive = TRUE
                 order by RoleName desc, d.DepartmentName asc;
     """;
@@ -471,7 +471,7 @@ public class PeriodicReportDAO extends DBContext {
     public boolean isUserActiveInTerm(String userId, int ClubID) {
         String sql = """
                      SELECT count(*) as Result FROM ActivedMemberClubs WHERE UserID = ?
-                     AND TermID = (select s.TermID from semesters s where s.Status = 'ACTIVE') AND IsActive = TRUE and ClubID = ? LIMIT 1;
+                     AND TermID = (select s.TermID from Semesters s where s.Status = 'ACTIVE') AND IsActive = TRUE and ClubID = ? LIMIT 1;
                      """;
         int result = 0;
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -499,7 +499,7 @@ public class PeriodicReportDAO extends DBContext {
         String sql = """
         INSERT INTO ActivedMemberClubs (UserID, ClubID, ActiveDate, TermID, IsActive)
         VALUES (?, ?, CURRENT_DATE, 
-            (SELECT TermID FROM semesters WHERE Status = 'ACTIVE' LIMIT 1), 
+            (SELECT TermID FROM Semesters WHERE Status = 'ACTIVE' LIMIT 1), 
             1);
         """;
 
