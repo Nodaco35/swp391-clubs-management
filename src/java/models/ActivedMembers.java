@@ -10,6 +10,12 @@ public class ActivedMembers {
     private Date activeDate;
     private Date leaveDate;
     private int progressPoint;
+    
+    private int taskcount;
+    
+    private int positive;
+    private int neutral;
+    private int negative;
 
     public ActivedMembers() {
     }
@@ -22,6 +28,14 @@ public class ActivedMembers {
         this.activeDate = activeDate;
         this.leaveDate = leaveDate;
         this.progressPoint = progressPoint;
+    }
+
+    public int getTaskcount() {
+        return taskcount;
+    }
+
+    public void setTaskcount(int taskcount) {
+        this.taskcount = taskcount;
     }
 
     public String getUserID() {
@@ -80,6 +94,30 @@ public class ActivedMembers {
         this.progressPoint = progressPoint;
     }
 
+    public int getPositive() {
+        return positive;
+    }
+
+    public void setPositive(int positive) {
+        this.positive = positive;
+    }
+
+    public int getNeutral() {
+        return neutral;
+    }
+
+    public void setNeutral(int neutral) {
+        this.neutral = neutral;
+    }
+
+    public int getNegative() {
+        return negative;
+    }
+
+    public void setNegative(int negative) {
+        this.negative = negative;
+    }
+    
     @Override
     public String toString() {
         return "ActivedMembers{" + "userID=" + userID + ", fullName=" + fullName + ", email=" + email + ", clubID=" + clubID + ", activeDate=" + activeDate + ", leaveDate=" + leaveDate + ", progressPoint=" + progressPoint + '}';

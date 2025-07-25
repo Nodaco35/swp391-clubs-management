@@ -88,7 +88,14 @@ public class DepartmentMemberServlet extends HttpServlet {
                 int clubDepartmentID_ = Integer.parseInt(request.getParameter("clubDepartmentID"));
 
                 List<ActivedMembers> members = cd.getActiveMembersByClubAndDepartment(clubDepartmentID_,currentUser.getUserID());
-
+                
+                for (ActivedMembers member : members) {
+                    member.setTaskcount(cd.getTaskCountByUserID(member.getUserID()));
+                    member.setPositive(cd.getTaskQualityByUserIDAndTaskType(member.getUserID(), "positive"));
+                    member.setNeutral(cd.getTaskQualityByUserIDAndTaskType(member.getUserID(), "neutral"));
+                    member.setNegative(cd.getTaskQualityByUserIDAndTaskType(member.getUserID(), "negative"));
+                }
+                
                 int clubID = cd.getClubIDByClubDepartmentID(clubDepartmentID_);
 
                 

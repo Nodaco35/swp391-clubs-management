@@ -361,5 +361,59 @@ public class ClubDepartmentDAO {
         }
         return -1; 
     }
+    
+    public int getTaskCountByUserID(String UserID) {
+        String sql = """
+                     SELECT COUNT(*) AS TaskCount
+                     FROM Tasks where UserID = ?
+                     GROUP BY UserID 
+                     ORDER BY TaskCount DESC;
+                     """;
+        
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, UserID);
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("TaskCount");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1; 
+    }
+    
+    public int getTaskQualityByUserIDAndTaskType(String UserID, String type) {
+        String sql = """
+                     SELECT 
+                         UserID,
+                         COUNT(CASE WHEN Rating = 'Positive' THEN 1 END) AS PositiveCount,
+                         COUNT(CASE WHEN Rating = 'Neutral' THEN 1 END) AS NeutralCount,
+                         COUNT(CASE WHEN Rating = 'Negative' THEN 1 END) AS NegativeCount
+                     FROM Tasks where UserID = ?
+                     GROUP BY UserID
+                     ORDER BY UserID;
+                     """;
+        
+        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, UserID);
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                if("positive".equals(type)){
+                    return rs.getInt("PositiveCount");
+                }
+                if("neutral".equals(type)){
+                    return rs.getInt("NeutralCount");
+                }
+                if("negative".equals(type)){
+                    return rs.getInt("NegativeCount");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1; 
+    }
 
 }
