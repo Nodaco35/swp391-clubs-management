@@ -214,18 +214,21 @@ public class ApproveExpenseServlet extends HttpServlet {
                         return;
                     }
                 }
-
-                boolean success = expenseDAO.updateExpenseStatus(expenseID, status, user.getUserID());
+                String RejectContent = request.getParameter("reason");
+                boolean success = expenseDAO.updateExpenseStatus(expenseID, status, user.getUserID(), RejectContent);
                 if (success) {
                     if (status.equals("Approved")) {
                         expenseDAO.addTransactionForApprovedExpense(expense, user.getUserID());
                     }
                     NotificationDAO.sentToPerson1(
-                        user.getUserID(),
-                        expense.getCreatedBy(),
-                        "Trạng Thái Đơn xin Chi Phí",
-                        "Đơn xin chi phí của bạn (" + expense.getDescription() + ") đã được " + (status.equals("Approved") ? "duyệt" : "từ chối") + " bởi " + user.getFullName(),
-                        "HIGH"
+                            user.getUserID(),
+                            expense.getCreatedBy(),
+                            "Trạng Thái Đơn xin Chi Phí",
+                            "Đơn xin chi phí của bạn (" + expense.getDescription() + ") đã được "
+                            + (status.equals("Approved") ? "duyệt" : "từ chối")
+                            + (status.equals("Rejected") ? " với lý do: " + "'"+ RejectContent + "'": "")
+                            + " bởi " + user.getFullName(),
+                            "HIGH"
                     );
                     request.setAttribute("message", "Đơn xin chi phí đã được " + (status.equals("Approved") ? "duyệt" : "từ chối") + " thành công!");
                 } else {

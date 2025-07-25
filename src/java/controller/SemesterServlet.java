@@ -35,9 +35,18 @@ public class SemesterServlet extends HttpServlet {
         }
 
         String action = request.getParameter("action");
+        String search = request.getParameter("search");
+        int page = request.getParameter("page") != null ? Integer.parseInt(request.getParameter("page")) : 1;
+        int pageSize = 10; // Number of semesters per page
+
         if (action == null || action.equals("manageSemesters")) {
-            List<Term> semesters = termDAO.getAllSemesters();
+            List<Term> semesters = termDAO.getPaginatedSemesters(search, page, pageSize);
+            int totalSemesters = termDAO.getTotalSemesters(search);
+            int totalPages = (int) Math.ceil((double) totalSemesters / pageSize);
+
             request.setAttribute("semesters", semesters);
+            request.setAttribute("currentPage", page);
+            request.setAttribute("totalPages", totalPages);
             request.getRequestDispatcher("/view/ic/semesters.jsp").forward(request, response);
         } else if (action.equals("deleteSemester")) {
             String termID = request.getParameter("id");
@@ -48,8 +57,13 @@ public class SemesterServlet extends HttpServlet {
                 e.printStackTrace();
                 request.setAttribute("error", "Không thể xóa kỳ học do có dữ liệu liên quan (báo cáo, sự kiện, v.v.)!");
             }
-            List<Term> semesters = termDAO.getAllSemesters();
+            List<Term> semesters = termDAO.getPaginatedSemesters(search, page, pageSize);
+            int totalSemesters = termDAO.getTotalSemesters(search);
+            int totalPages = (int) Math.ceil((double) totalSemesters / pageSize);
+
             request.setAttribute("semesters", semesters);
+            request.setAttribute("currentPage", page);
+            request.setAttribute("totalPages", totalPages);
             request.getRequestDispatcher("/view/ic/semesters.jsp").forward(request, response);
         }
     }
@@ -65,6 +79,10 @@ public class SemesterServlet extends HttpServlet {
         }
 
         String action = request.getParameter("action");
+        String search = request.getParameter("search");
+        int page = request.getParameter("page") != null ? Integer.parseInt(request.getParameter("page")) : 1;
+        int pageSize = 10;
+
         if (action.equals("addSemester")) {
             Term term = new Term();
             String termID = request.getParameter("termID") != null ? request.getParameter("termID").trim() : "";
@@ -78,8 +96,12 @@ public class SemesterServlet extends HttpServlet {
             } catch (Exception e) {
                 e.printStackTrace();
                 request.setAttribute("error", "Định dạng ngày không hợp lệ!");
-                List<Term> semesters = termDAO.getAllSemesters();
+                List<Term> semesters = termDAO.getPaginatedSemesters(search, page, pageSize);
+                int totalSemesters = termDAO.getTotalSemesters(search);
+                int totalPages = (int) Math.ceil((double) totalSemesters / pageSize);
                 request.setAttribute("semesters", semesters);
+                request.setAttribute("currentPage", page);
+                request.setAttribute("totalPages", totalPages);
                 request.getRequestDispatcher("/view/ic/semesters.jsp").forward(request, response);
                 return;
             }
@@ -102,8 +124,12 @@ public class SemesterServlet extends HttpServlet {
                     request.setAttribute("error", "Lỗi khi thêm kỳ học: " + e.getMessage());
                 }
             }
-            List<Term> semesters = termDAO.getAllSemesters();
+            List<Term> semesters = termDAO.getPaginatedSemesters(search, page, pageSize);
+            int totalSemesters = termDAO.getTotalSemesters(search);
+            int totalPages = (int) Math.ceil((double) totalSemesters / pageSize);
             request.setAttribute("semesters", semesters);
+            request.setAttribute("currentPage", page);
+            request.setAttribute("totalPages", totalPages);
             request.getRequestDispatcher("/view/ic/semesters.jsp").forward(request, response);
         } else if (action.equals("editSemester")) {
             Term term = new Term();
@@ -118,8 +144,12 @@ public class SemesterServlet extends HttpServlet {
             } catch (Exception e) {
                 e.printStackTrace();
                 request.setAttribute("error", "Định dạng ngày không hợp lệ!");
-                List<Term> semesters = termDAO.getAllSemesters();
+                List<Term> semesters = termDAO.getPaginatedSemesters(search, page, pageSize);
+                int totalSemesters = termDAO.getTotalSemesters(search);
+                int totalPages = (int) Math.ceil((double) totalSemesters / pageSize);
                 request.setAttribute("semesters", semesters);
+                request.setAttribute("currentPage", page);
+                request.setAttribute("totalPages", totalPages);
                 request.getRequestDispatcher("/view/ic/semesters.jsp").forward(request, response);
                 return;
             }
@@ -138,8 +168,12 @@ public class SemesterServlet extends HttpServlet {
                     request.setAttribute("error", "Lỗi khi cập nhật kỳ học: " + e.getMessage());
                 }
             }
-            List<Term> semesters = termDAO.getAllSemesters();
+            List<Term> semesters = termDAO.getPaginatedSemesters(search, page, pageSize);
+            int totalSemesters = termDAO.getTotalSemesters(search);
+            int totalPages = (int) Math.ceil((double) totalSemesters / pageSize);
             request.setAttribute("semesters", semesters);
+            request.setAttribute("currentPage", page);
+            request.setAttribute("totalPages", totalPages);
             request.getRequestDispatcher("/view/ic/semesters.jsp").forward(request, response);
         }
     }
