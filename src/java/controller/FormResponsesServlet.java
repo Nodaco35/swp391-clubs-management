@@ -44,7 +44,6 @@ public class FormResponsesServlet extends HttpServlet {
                 return;
             }
 
-        // Lấy formId từ request parameter
         String formIdParam = request.getParameter("formId");
         Integer formId = null;
 
@@ -64,7 +63,6 @@ public class FormResponsesServlet extends HttpServlet {
             return;
         }
 
-        // Lấy clubId từ request parameter
         String clubIdParam = request.getParameter("clubId");
         Integer clubId = null;
 
@@ -91,18 +89,19 @@ public class FormResponsesServlet extends HttpServlet {
             return;
         }
 
-        // Xác định loại form (member hoặc event)
+        // Xác định loại form
         String formTypeParam = request.getParameter("formType");
-        String formType = "member"; // Mặc định là member
-
-
+        String formType = "club";
         if (formTypeParam != null && formTypeParam.toLowerCase().equals("event")) {
             formType = "event";
         }
-
-        LOGGER.info("Final formType being used: " + formType);
-
-        // Lấy danh sách đơn đăng ký cho form template và club này
+        //Kiểm tính hợp lệ của form
+        if (!formResponseDAO.isFormValid(formId, clubId, formType)) {
+            response.sendRedirect(request.getContextPath() + "/myclub?error=invalid_form&message=" +
+                    URLEncoder.encode("Form không hợp lệ hoặc không thuộc câu lạc bộ này.", StandardCharsets.UTF_8.name()));
+            return;
+        }
+        // Lấy danh sách đơn đăng ký
         try {
             List<ClubApplicationExtended> applications = formResponseDAO.getApplicationsByFormAndClub(formId, clubId);
             // Chuyển đổi dữ liệu thành JSON để JavaScript có thể sử dụng

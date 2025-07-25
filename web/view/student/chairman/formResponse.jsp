@@ -33,8 +33,8 @@
         
         <div class="container">
             <div style="text-align: center; background-color: aliceblue; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-                <h1>Quản lý đăng ký ${formType eq 'member' ? 'CLB' : 'sự kiện'}</h1>
-                <p>Xem và duyệt các đơn đăng ký tham gia ${formType eq 'member' ? 'câu lạc bộ' : 'sự kiện'}</p>
+                <h1>Quản lý đăng ký ${formType eq 'club' ? 'CLB' : 'sự kiện'}</h1>
+                <p>Xem và duyệt các đơn đăng ký tham gia ${formType eq 'club' ? 'câu lạc bộ' : 'sự kiện'}</p>
             </div>
             
             <div class="dashboard">
@@ -56,7 +56,7 @@
                     <div class="stat-label">Từ chối</div>
                 </div>
                 
-                <c:if test="${formType eq 'member'}">
+                <c:if test="${formType eq 'club'}">
                     <div class="stat-card candidate">
                         <div class="card-icon"><i class="fas fa-user-graduate"></i></div>
                         <div class="stat-number" id="candidateCount">0</div>
@@ -86,7 +86,7 @@
             <div class="filter-tabs">
                 <button class="tab-btn active" data-filter="all">Tất cả (<span id="allCount">0</span>)</button>
                 <button class="tab-btn" data-filter="waiting">Chờ duyệt (<span id="waitingTabCount">0</span>)</button>
-                <c:if test="${formType eq 'member'}">
+                <c:if test="${formType eq 'club'}">
                     <button class="tab-btn" data-filter="candidate">Ứng viên (<span id="candidateTabCount">0</span>)</button>
                     <button class="tab-btn" data-filter="collaborator">Cộng tác viên (<span id="collaboratorTabCount">0</span>)</button>
                 </c:if>

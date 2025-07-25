@@ -629,7 +629,7 @@ public class FormResponseDAO extends DBContext {
                 LOGGER.log(Level.INFO, "ReviewNote column exists: {0}", columnExists);
             }
             
-            // Nếu cột chưa tồn tại, thêm vào
+            // Nếu cột chưa tồn tại
             if (!columnExists) {
                 LOGGER.log(Level.INFO, "ReviewNote column does not exist, adding it now");
                 try (PreparedStatement ps = conn.prepareStatement(
@@ -645,10 +645,8 @@ public class FormResponseDAO extends DBContext {
         }
     }
     
-    /**
-     * Helper method to populate a ClubApplicationExtended object from ResultSet
-     * including the ReviewNote field if it exists
-     */
+
+    // Phương thức để lấy thông tin ứng dụng từ ResultSet
     private void populateApplicationFromResultSet(ClubApplicationExtended application, ResultSet rs) throws SQLException {
         application.setApplicationId(rs.getInt("ApplicationId"));
         application.setUserId(rs.getString("UserId"));
@@ -664,17 +662,36 @@ public class FormResponseDAO extends DBContext {
         application.setFormId(rs.getInt("FormId"));
         application.setFormType(rs.getString("FormType"));
         
-        // Set reviewNote if it exists in the result set
         try {
             String reviewNote = rs.getString("ReviewNote");
             LOGGER.log(Level.INFO, "Retrieved ReviewNote for application {0}: {1}", 
                       new Object[]{application.getApplicationID(), reviewNote});
             application.setReviewNote(reviewNote);
         } catch (SQLException ex) {
-            // Column might not exist yet, which is okay
             LOGGER.log(Level.INFO, "ReviewNote column not found for application {0}", 
                       application.getApplicationID());
             application.setReviewNote(null);
         }
+    }
+    public boolean isFormValid(Integer formId, Integer clubId, String formType) {
+        String sql = """
+                     SELECT COUNT(*) FROM ApplicationForms 
+                     WHERE FormID = ? AND ClubID = ? AND FormType = ?
+                     """;
+
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, formId);
+            ps.setInt(2, clubId);
+            ps.setString(3, formType);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error checking if form is valid", e);
+        }
+        return false;
     }
 }

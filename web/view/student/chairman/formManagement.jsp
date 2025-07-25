@@ -130,7 +130,7 @@
                                                value="${pageContext.request.scheme}://${pageContext.request.serverName}:${pageContext.request.serverPort}${pageContext.request.contextPath}/applicationForm?formId=${form.formId}">
                                     </div>
                                 </div>                                <div class="form-actions">
-                                    <button class="btn btn-info btn-sm view-responses" data-form-id="${form.formId}" data-club-id="${param.clubId}" data-form-type="${form.formType eq 'Event' ? 'event' : 'member'}">
+                                    <button class="btn btn-info btn-sm view-responses" data-form-id="${form.formId}" data-club-id="${param.clubId}" data-form-type="${form.formType eq 'Event' ? 'event' : 'club'}">
                                         <i class="fas fa-chart-bar"></i> Xem phản hồi
                                     </button>
                                     <button class="btn btn-outline btn-sm copy-link" data-form-id="${form.formId}">
