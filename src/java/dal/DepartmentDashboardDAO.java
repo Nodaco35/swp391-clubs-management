@@ -287,7 +287,7 @@ public class DepartmentDashboardDAO {
         String sql = """
                      SELECT  *
                      FROM UserClubs uc
-                     Join clubdepartments cd on uc.ClubDepartmentID = cd.ClubDepartmentID
+                     Join ClubDepartments cd on uc.ClubDepartmentID = cd.ClubDepartmentID
                      WHERE uc.UserID = ? AND uc.RoleID = 3 AND uc.IsActive = 1 AND cd.DepartmentID = 6 and uc.ClubID = ?""";
 
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
