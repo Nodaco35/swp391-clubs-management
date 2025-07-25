@@ -159,7 +159,7 @@
                         </c:choose>
                     </section>
 
-                    <!-- Club Summaries -->
+                    <!-- Register Active -->
                     <section id="club-summaries" class="mb-12">
                         <h2 class="text-3xl font-bold text-gray-900 mb-6">Đăng ký hoạt động trong kỳ</h2>
                         <c:choose>
@@ -187,6 +187,7 @@
                                                 </c:when>
                                                 <c:when test="${uc.isActivedCurrentTerm}">
                                                     <div class="mt-4 inline-block text-white bg-gray-600 px-5 py-2.5 rounded-lg transition">Đã đăng ký hoạt động kỳ ${termNow}</div>
+                                                    <a href="${pageContext.request.contextPath}/myclub?action=deleteActivity&userID=${uc.userID}&clubID=${uc.clubID}" class="mt-4 inline-block text-black bg-yellow-400 hover:bg-red-700 hover:text-white px-5 py-2.5 rounded-lg transition">Huỷ đăng ký hoạt động</a>
                                                 </c:when>
                                             </c:choose>
                                         </div>
