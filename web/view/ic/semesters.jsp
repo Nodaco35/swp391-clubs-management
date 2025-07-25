@@ -122,6 +122,43 @@
             color: #f59e0b;
             border: 1px solid rgba(245, 158, 11, 0.2);
         }
+        .search-container {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .search-container input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .pagination a {
+            padding: 8px 16px;
+            text-decoration: none;
+            color: #007bff;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+        }
+        .pagination a.active {
+            background-color: #007bff;
+            color: white;
+        }
+        .pagination a:hover:not(.active) {
+            background-color: #f1f1f1;
+        }
+        .pagination a.disabled {
+            color: #6c757d;
+            pointer-events: none;
+            cursor: default;
+        }
     </style>
 </head>
 <body>
@@ -159,6 +196,13 @@
                         </button>
                     </div>
                 </div>
+                <div class="search-container">
+                    <form action="${pageContext.request.contextPath}/ic/semester" method="get">
+                        <input type="hidden" name="action" value="manageSemesters">
+                        <input type="text" name="search" placeholder="Tìm kiếm theo mã kỳ hoặc tên kỳ..." value="${param.search}">
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Tìm</button>
+                    </form>
+                </div>
                 <table class="semester-table">
                     <thead>
                         <tr>
@@ -190,6 +234,17 @@
                         </c:forEach>
                     </tbody>
                 </table>
+                <div class="pagination">
+                    <c:if test="${currentPage > 1}">
+                        <a href="${pageContext.request.contextPath}/ic/semester?action=manageSemesters&search=${param.search}&page=${currentPage - 1}">&laquo; Trước</a>
+                    </c:if>
+                    <c:forEach begin="1" end="${totalPages}" var="i">
+                        <a href="${pageContext.request.contextPath}/ic/semester?action=manageSemesters&search=${param.search}&page=${i}" class="${i == currentPage ? 'active' : ''}">${i}</a>
+                    </c:forEach>
+                    <c:if test="${currentPage < totalPages}">
+                        <a href="${pageContext.request.contextPath}/ic/semester?action=manageSemesters&search=${param.search}&page=${currentPage + 1}">Tiếp &raquo;</a>
+                    </c:if>
+                </div>
             </div>
         </main>
     </div>
