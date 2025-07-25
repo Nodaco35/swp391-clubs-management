@@ -50,7 +50,7 @@ public class ClubPeriodicReportDAO {
         try {
             String sql = """
                          SELECT * FROM PeriodicClubReport pr 
-                         			join clubs c on c.ClubID = pr.ClubID
+                         			join Clubs c on c.ClubID = pr.ClubID
                          ORDER BY SubmissionDate DESC;
                          """;
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
@@ -91,8 +91,8 @@ public class ClubPeriodicReportDAO {
         int count = 0;
         String sql = """
         SELECT COUNT(*)
-                FROM events e
-                JOIN semesters s ON e.SemesterID = s.TermID
+                FROM Events e
+                JOIN Semesters s ON e.SemesterID = s.TermID
                 WHERE e.ClubID = ? AND s.TermID = ? and e.Status = 'Completed' and IsPublic = 1;
     """;
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {

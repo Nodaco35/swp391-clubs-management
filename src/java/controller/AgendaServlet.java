@@ -62,8 +62,18 @@ public class AgendaServlet extends HttpServlet {
             eventsDAO.updateEventApprovalStatus(eventID, "PENDING");
         }
 
-        // Xóa tất cả agenda cũ
-        eventsDAO.deleteAllByEventID(eventID);
+        if (scheduleIDs != null) {
+            for (String scheduleIDStr : scheduleIDs) {
+                try {
+                    int scheduleID = Integer.parseInt(scheduleIDStr);
+                    eventsDAO.deleteAgendasByScheduleID(scheduleID);
+                } catch (NumberFormatException e) {
+                    session.setAttribute("errorMessage", "ID lịch trình không hợp lệ.");
+                    response.sendRedirect(request.getContextPath() + "/chairman-page/myclub-events/edit-event?eventID=" + eventID);
+                    return;
+                }
+            }
+        }
 
         if (scheduleIDs != null && startTimes != null && endTimes != null && activities != null && descriptions != null) {
             Events event = eventsDAO.getEventByID(eventID);

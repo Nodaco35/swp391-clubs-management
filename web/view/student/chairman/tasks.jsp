@@ -196,7 +196,7 @@
 			<li>
 				<a href="${pageContext.request.contextPath}/chairman-page/tasks"
 				   class="nav-item ${currentPath == '/chairman-page/tasks' ? 'active' : ''}">
-					<i class="fas fa-clock"></i> Timeline & Công việc
+					<i class="fas fa-clock"></i> Giai đoạn cong việc
 				</a>
 			</li>
 			<li>
@@ -462,7 +462,7 @@
 			</form>
 		</div>
 	</div>
-
+</main>
 	<script>
         document.querySelectorAll(".btn-add-task-to-phase").forEach(button => {
             button.addEventListener("click", function (e) {

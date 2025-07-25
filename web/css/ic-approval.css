@@ -815,7 +815,8 @@ a.close {
     color: #721c24;
 }
 
-#locationFilter {
+#locationFilter,
+#dateFilter {
     width: 100%;
     padding: 10px 14px;
     font-size: 15px;
@@ -832,7 +833,8 @@ a.close {
     background-size: 1em;
 }
 
-#locationFilter:focus {
+#locationFilter:focus,
+#dateFilter:focus {
     border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
