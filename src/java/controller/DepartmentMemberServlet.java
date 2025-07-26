@@ -493,7 +493,9 @@ public class DepartmentMemberServlet extends HttpServlet {
             // Tạo map để chứa kết quả
             Map<String, Object> result = new HashMap<>();
             result.put("member", member);
-            result.put("tasks", tasks);            // Chuyển kết quả sang JSON
+            result.put("tasks", tasks);
+            
+            // Chuyển kết quả sang JSON
             try {
                 String json = gson.toJson(result);
                 response.getWriter().write(json);

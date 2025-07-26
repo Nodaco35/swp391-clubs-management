@@ -84,10 +84,17 @@ public class ChairmanEditTasksServlet extends HttpServlet {
                 ClubDAO clubDAO = new ClubDAO();
                 DepartmentDAO deptDAO = new DepartmentDAO();
                 DocumentsDAO docDAO = new DocumentsDAO();
+                UserDAO userDAO = new UserDAO();
 
                 ClubInfo club = clubDAO.getClubChairman(user.getUserID());
                 List<Department> departmentList = deptDAO.getDepartmentsByClubID(club.getClubID());
                 List<Documents> documentsList = docDAO.getDocumentsByClubID(club.getClubID());
+
+                // Kiểm tra DepartmentAssignee để tránh lỗi
+                if ("Department".equals(task.getAssigneeType()) && task.getDepartmentAssignee() == null) {
+                    System.out.println("Warning: TaskID=" + task.getTaskID() + " has AssigneeType=Department but DepartmentAssignee is null.");
+                    task.setDepartmentAssignee(new Department()); // Gán đối tượng rỗng
+                }
 
                 request.setAttribute("task", task);
                 request.setAttribute("club", club);
@@ -110,13 +117,30 @@ public class ChairmanEditTasksServlet extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = request.getSession();
         String action = request.getParameter("action");
+
         if ("updateTask".equals(action)) {
             try {
                 int taskID = Integer.parseInt(request.getParameter("taskID"));
+                TaskDAO taskDAO = new TaskDAO();
+                Tasks task = taskDAO.getTasksByID(taskID);
+
+                if (task == null) {
+                    request.setAttribute("errorMessage", "Công việc không tồn tại.");
+                    doGet(request, response);
+                    return;
+                }
+
+                // Chỉ cho phép cập nhật khi status là ToDo
+                if (!"ToDo".equals(task.getStatus())) {
+                    request.setAttribute("errorMessage", "Chỉ có thể chỉnh sửa công việc ở trạng thái 'Chưa bắt đầu'.");
+                    doGet(request, response);
+                    return;
+                }
+
                 int termID = Integer.parseInt(request.getParameter("termID"));
                 int eventID = Integer.parseInt(request.getParameter("eventID"));
                 int clubID = Integer.parseInt(request.getParameter("clubID"));
-                int departmentID = Integer.parseInt(request.getParameter("departmentID"));
+                String assigneeType = request.getParameter("assigneeType");
                 String title = request.getParameter("title");
                 String description = request.getParameter("description");
                 String existingDocumentID = request.getParameter("existingDocumentID");
@@ -126,7 +150,6 @@ public class ChairmanEditTasksServlet extends HttpServlet {
                 String endDateStr = request.getParameter("endDate");
                 String createdBy = request.getParameter("createdBy");
                 String status = request.getParameter("status");
-                String assigneeType = request.getParameter("assigneeType");
 
                 if ("new".equals(existingDocumentID) && documentURL != null && !documentURL.isEmpty() && (documentName == null || documentName.isEmpty())) {
                     request.setAttribute("errorMessage", "Vui lòng nhập tên tài liệu khi cung cấp liên kết tài liệu.");
@@ -138,7 +161,6 @@ public class ChairmanEditTasksServlet extends HttpServlet {
                 Date startDate = new Date(sdf.parse(startDateStr).getTime());
                 Date endDate = new Date(sdf.parse(endDateStr).getTime());
 
-                TaskDAO taskDAO = new TaskDAO();
                 EventTerms term = taskDAO.getEventTermsByID(termID);
                 if (term == null || startDate.before(term.getTermStart()) || endDate.after(term.getTermEnd())) {
                     request.setAttribute("errorMessage", "Ngày bắt đầu và kết thúc phải nằm trong khoảng thời gian của giai đoạn.");
@@ -156,9 +178,14 @@ public class ChairmanEditTasksServlet extends HttpServlet {
                     Clubs c = new Clubs();
                     c.setClubID(clubID);
                     doc.setClub(c);
-                    Department d = new Department();
-                    d.setDepartmentID(departmentID);
-                    doc.setDepartment(d);
+                    if ("Department".equals(assigneeType)) {
+                        int departmentID = Integer.parseInt(request.getParameter("departmentID"));
+                        Department d = new Department();
+                        d.setDepartmentID(departmentID);
+                        doc.setDepartment(d);
+                    } else {
+                        doc.setDepartment(null); // Không gán phòng ban nếu AssigneeType là User
+                    }
                     documentID = docDAO.addDocument(doc);
                     if (documentID == null) {
                         request.setAttribute("errorMessage", "Không thể lưu tài liệu.");
@@ -169,7 +196,6 @@ public class ChairmanEditTasksServlet extends HttpServlet {
                     documentID = Integer.parseInt(existingDocumentID);
                 }
 
-                Tasks task = new Tasks();
                 task.setTaskID(taskID);
                 EventTerms et = new EventTerms();
                 et.setTermID(termID);
@@ -177,25 +203,37 @@ public class ChairmanEditTasksServlet extends HttpServlet {
                 e.setEventID(eventID);
                 Clubs c = new Clubs();
                 c.setClubID(clubID);
-                Department d = new Department();
-                d.setDepartmentID(departmentID);
-                Users u = new Users();
-                u.setUserID(createdBy);
                 task.setTerm(et);
                 task.setEvent(e);
                 task.setClub(c);
                 task.setAssigneeType(assigneeType);
-                task.setDepartmentAssignee(d);
+                if ("Department".equals(assigneeType)) {
+                    int departmentID = Integer.parseInt(request.getParameter("departmentID"));
+                    Department d = new Department();
+                    d.setDepartmentID(departmentID);
+                    task.setDepartmentAssignee(d);
+                    task.setUserAssignee(null);
+                } else if ("User".equals(assigneeType)) {
+                    String userID = request.getParameter("userID");
+                    Users uAssignee = new Users();
+                    uAssignee.setUserID(userID);
+                    task.setUserAssignee(uAssignee);
+                    task.setDepartmentAssignee(null);
+                }
                 task.setTitle(title);
                 task.setDescription(description);
                 task.setStatus(status);
                 task.setStartDate(startDate);
                 task.setEndDate(endDate);
+                Users u = new Users();
+                u.setUserID(createdBy);
                 task.setCreatedBy(u);
                 if (documentID != null) {
                     Documents doc = new Documents();
                     doc.setDocumentID(documentID);
                     task.setDocument(doc);
+                } else {
+                    task.setDocument(null);
                 }
 
                 boolean success = taskDAO.updateTask(task);
@@ -211,11 +249,94 @@ public class ChairmanEditTasksServlet extends HttpServlet {
                 request.setAttribute("errorMessage", "Lỗi: " + e.getMessage());
                 doGet(request, response);
             }
+        } else if ("approveTask".equals(action)) {
+            try {
+                int taskID = Integer.parseInt(request.getParameter("taskID"));
+                String rating = request.getParameter("rating");
+
+                if (rating == null || rating.isEmpty()) {
+                    request.setAttribute("errorMessage", "Vui lòng chọn đánh giá.");
+                    doGet(request, response);
+                    return;
+                }
+
+                TaskDAO taskDAO = new TaskDAO();
+                Tasks task = taskDAO.getTasksByID(taskID);
+
+                if (task == null) {
+                    request.setAttribute("errorMessage", "Công việc không tồn tại.");
+                    doGet(request, response);
+                    return;
+                }
+
+                if (!"Review".equals(task.getStatus())) {
+                    request.setAttribute("errorMessage", "Công việc không ở trạng thái chờ duyệt.");
+                    doGet(request, response);
+                    return;
+                }
+
+                task.setStatus("Done");
+                task.setRating(rating);
+                task.setLastRejectReason(null);
+                boolean success = taskDAO.updateTask(task);
+
+                if (success) {
+                    session.setAttribute("successMsg", "Duyệt công việc thành công.");
+                    response.sendRedirect(request.getContextPath() + "/chairman-page/tasks/edit-tasks?taskID=" + taskID);
+                } else {
+                    request.setAttribute("errorMessage", "Không thể duyệt công việc.");
+                    doGet(request, response);
+                }
+            } catch (Exception e) {
+                request.setAttribute("errorMessage", "Lỗi gi: " + e.getMessage());
+                doGet(request, response);
+            }
+        } else if ("rejectTask".equals(action)) {
+            try {
+                int taskID = Integer.parseInt(request.getParameter("taskID"));
+                String lastRejectReason = request.getParameter("lastRejectReason");
+
+                if (lastRejectReason == null || lastRejectReason.trim().isEmpty()) {
+                    request.setAttribute("errorMessage", "Vui lòng nhập lý do từ chối.");
+                    doGet(request, response);
+                    return;
+                }
+
+                TaskDAO taskDAO = new TaskDAO();
+                Tasks task = taskDAO.getTasksByID(taskID);
+
+                if (task == null) {
+                    request.setAttribute("errorMessage", "Công việc không tồn tại.");
+                    doGet(request, response);
+                    return;
+                }
+
+                if (!"Review".equals(task.getStatus())) {
+                    request.setAttribute("errorMessage", "Công việc không ở trạng thái chờ duyệt.");
+                    doGet(request, response);
+                    return;
+                }
+
+                task.setStatus("Rejected");
+                task.setLastRejectReason(lastRejectReason);
+                task.setRating(null);
+                boolean success = taskDAO.updateTask(task);
+
+                if (success) {
+                    session.setAttribute("successMsg", "Từ chối công việc thành công.");
+                    response.sendRedirect(request.getContextPath() + "/chairman-page/tasks/edit-tasks?taskID=" + taskID);
+                } else {
+                    request.setAttribute("errorMessage", "Không thể từ chối công việc.");
+                    doGet(request, response);
+                }
+            } catch (Exception e) {
+                request.setAttribute("errorMessage", "Lỗi: " + e.getMessage());
+                doGet(request, response);
+            }
         } else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
     }
-
     /** 
      * Returns a short description of the servlet.
      * @return a String containing servlet description

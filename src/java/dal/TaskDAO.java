@@ -265,29 +265,70 @@ public class TaskDAO {
     }
 
     public boolean updateTask(Tasks task) {
-        String sql = "UPDATE Tasks SET TermID = ?, EventID = ?, ClubID = ?, AssigneeType = ?, DepartmentID = ?, DocumentID = ?, Title = ?, Description = ?, Status = ?, StartDate = ?, EndDate = ?, CreatedBy = ? WHERE TaskID = ?";
+        String sql = "UPDATE Tasks SET TermID = ?, EventID = ?, ClubID = ?, AssigneeType = ?, DepartmentID = ?, DocumentID = ?, Title = ?, Description = ?, Status = ?, Rating = ?, LastRejectReason = ?, StartDate = ?, EndDate = ?, CreatedBy = ? WHERE TaskID = ?";
         try {
             Connection connection = DBContext.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
+
+            // 1. TermID
             ps.setInt(1, task.getTerm().getTermID());
+
+            // 2. EventID
             ps.setInt(2, task.getEvent().getEventID());
+
+            // 3. ClubID
             ps.setInt(3, task.getClub().getClubID());
+
+            // 4. AssigneeType
             ps.setString(4, task.getAssigneeType());
-            ps.setInt(5, task.getDepartmentAssignee().getDepartmentID());
+
+            // 5. DepartmentID - có thể null nếu AssigneeType là "User"
+            if (task.getDepartmentAssignee() != null) {
+                ps.setInt(5, task.getDepartmentAssignee().getDepartmentID());
+            } else {
+                ps.setNull(5, java.sql.Types.INTEGER);
+            }
+
+            // 6. DocumentID
             if (task.getDocument() != null) {
                 ps.setInt(6, task.getDocument().getDocumentID());
             } else {
                 ps.setNull(6, java.sql.Types.INTEGER);
             }
+
+            // 7. Title
             ps.setString(7, task.getTitle());
+
+            // 8. Description
             ps.setString(8, task.getDescription());
+
+            // 9. Status
             ps.setString(9, task.getStatus());
-            ps.setTimestamp(10, new java.sql.Timestamp(task.getStartDate().getTime()));
-            ps.setTimestamp(11, new java.sql.Timestamp(task.getEndDate().getTime()));
-            ps.setString(12, task.getCreatedBy().getUserID());
-            ps.setInt(13, task.getTaskID());
+
+            // 10. Rating - ĐÚNG VỊ TRÍ
+            ps.setString(10, task.getRating());
+
+            // 11. LastRejectReason - ĐÚNG VỊ TRÍ
+            ps.setString(11, task.getLastRejectReason());
+
+            // 12. StartDate - ĐÚNG VỊ TRÍ
+            ps.setTimestamp(12, new java.sql.Timestamp(task.getStartDate().getTime()));
+
+            // 13. EndDate - ĐÚNG VỊ TRÍ
+            ps.setTimestamp(13, new java.sql.Timestamp(task.getEndDate().getTime()));
+
+            // 14. CreatedBy
+            ps.setString(14, task.getCreatedBy().getUserID());
+
+            // 15. TaskID (WHERE clause)
+            ps.setInt(15, task.getTaskID());
+
             return ps.executeUpdate() > 0;
+
         } catch (SQLException e) {
+            System.err.println("SQL Error in updateTask: " + e.getMessage());
+            System.err.println("Task Rating: " + task.getRating());
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
