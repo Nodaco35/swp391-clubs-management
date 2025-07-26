@@ -149,6 +149,12 @@
                                 </a>
                             </li>
                             <li>
+                                <a href="${pageContext.request.contextPath}/chairman-page/financial-management"
+                                    class="nav-item ${currentPath == '/chairman-page/financial-management' ? 'active' : ''}">
+                                    <i class="fas fa-tachometer-alt"></i> Quản lý dòng tiền
+                                </a>
+                            </li>
+                            <li>
                                 <a href="${pageContext.request.contextPath}/recruitment"
                                     class="nav-item ${currentPath == '/recruitment' ? 'active' : ''}">
                                     <i class="fas fa-money-bill-wave"></i> Quản lý hoạt động tuyển quân
