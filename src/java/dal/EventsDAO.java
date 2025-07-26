@@ -2,6 +2,7 @@ package dal;
 
 import models.*;
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -689,11 +690,78 @@ public class EventsDAO {
         }
     }
 
-    public boolean addEventTerm(EventTerms term) throws SQLException{
-        String sql = "INSERT INTO EventTerms (EventID, TermName, TermStart, TermEnd) VALUES (?, ?, ?, ?)";
+    public boolean addEventTerm(EventTerms term) throws SQLException {
         try {
             Connection connection = DBContext.getConnection();
-            PreparedStatement ps = connection.prepareStatement(sql);
+
+            // Lấy eventDate từ bảng Schedules
+            String getEventDateQuery = "SELECT MIN(eventDate) AS startDate, MAX(eventDate) AS endDate FROM EventSchedules WHERE eventID = ?";
+            PreparedStatement ps = connection.prepareStatement(getEventDateQuery);
+            ps.setInt(1, term.getEvent().getEventID());
+            ResultSet rs = ps.executeQuery();
+
+            Date eventStartDate = null;
+            Date eventEndDate = null;
+            if (rs.next()) {
+                eventStartDate = rs.getDate("startDate");
+                eventEndDate = rs.getDate("endDate");
+                if (eventStartDate == null) {
+                    throw new SQLException("Không tìm thấy lịch trình cho sự kiện.");
+                }
+            } else {
+                throw new SQLException("Không tìm thấy lịch trình cho sự kiện.");
+            }
+
+            // Kiểm tra termStart không sau termEnd
+            if (term.getTermStart().after(term.getTermEnd())) {
+                throw new SQLException("Ngày kết thúc không được sớm hơn ngày bắt đầu.");
+            }
+
+            // Kiểm tra theo loại giai đoạn
+            if (term.getTermName().equals("Trước sự kiện")) {
+                if (!term.getTermEnd().before(eventStartDate)) {
+                    throw new SQLException("Giai đoạn 'Trước sự kiện' phải kết thúc trước ngày sự kiện.");
+                }
+            } else if (term.getTermName().equals("Trong sự kiện")) {
+                // So sánh ngày (bỏ qua giờ)
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                String termStartStr = sdf.format(term.getTermStart());
+                String termEndStr = sdf.format(term.getTermEnd());
+                String eventStartStr = sdf.format(eventStartDate);
+                String eventEndStr = sdf.format(eventEndDate);
+
+                if (term.getTermStart().before(eventStartDate) || term.getTermEnd().after(eventEndDate)) {
+                    throw new SQLException("Giai đoạn 'Trong sự kiện' phải nằm trong khoảng thời gian diễn ra sự kiện.");
+                }
+            } else if (term.getTermName().equals("Sau sự kiện")) {
+                if (!term.getTermStart().after(eventEndDate)) {
+                    throw new SQLException("Giai đoạn 'Sau sự kiện' phải bắt đầu sau ngày kết thúc sự kiện.");
+                }
+            } else {
+                throw new SQLException("Tên giai đoạn không hợp lệ.");
+            }
+// Kiểm tra số lượng giai đoạn tối đa (3)
+            String countQuery = "SELECT COUNT(*) FROM EventTerms WHERE EventID = ?";
+            ps = connection.prepareStatement(countQuery);
+            ps.setInt(1, term.getEvent().getEventID());
+            rs = ps.executeQuery();
+            if (rs.next() && rs.getInt(1) >= 3) {
+                throw new SQLException("Mỗi sự kiện chỉ được có tối đa 3 giai đoạn.");
+            }
+
+            // Kiểm tra giai đoạn đã tồn tại
+            String checkQuery = "SELECT termName FROM EventTerms WHERE EventID = ? AND termName = ?";
+            ps = connection.prepareStatement(checkQuery);
+            ps.setInt(1, term.getEvent().getEventID());
+            ps.setString(2, term.getTermName());
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                throw new SQLException("Giai đoạn này đã tồn tại cho sự kiện.");
+            }
+
+            // Thêm giai đoạn vào database
+            String sql = "INSERT INTO EventTerms (EventID, TermName, TermStart, TermEnd) VALUES (?, ?, ?, ?)";
+            ps = connection.prepareStatement(sql);
             ps.setInt(1, term.getEvent().getEventID());
             ps.setString(2, term.getTermName());
             ps.setDate(3, new java.sql.Date(term.getTermStart().getTime()));
@@ -702,14 +770,14 @@ public class EventsDAO {
         } catch (SQLException e) {
             String errorMessage = e.getMessage();
             if (errorMessage.contains("Mỗi sự kiện chỉ được có tối đa 3 giai đoạn")) {
-                // Có thể hiển thị lỗi rõ cho người dùng
                 System.err.println("Không thể tạo thêm giai đoạn: Đã đủ 3 giai đoạn (Trước, Trong, Sau)");
             } else if (errorMessage.contains("Giai đoạn này đã tồn tại")) {
                 System.err.println("Giai đoạn này đã tồn tại cho sự kiện.");
             } else {
-                e.printStackTrace(); // In lỗi chung
+                System.err.println("Lỗi khi thêm giai đoạn: " + errorMessage);
+                e.printStackTrace();
             }
-            return false;
+            throw e;
         }
     }
 
