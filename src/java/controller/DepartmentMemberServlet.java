@@ -18,7 +18,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.io.PrintWriter;
 import models.ActivedMembers;
 
 public class DepartmentMemberServlet extends HttpServlet {
@@ -63,13 +62,43 @@ public class DepartmentMemberServlet extends HttpServlet {
 
             switch (action) {
                 case "list":
-                    int clubID = Integer.parseInt(request.getParameter("clubID"));
+                    // Session-based clubID management for maintaining state across requests
+                    String clubIDParam = request.getParameter("clubID");
+                    HttpSession sessionForClub = request.getSession();
+                    int clubID;
+                    
+                    if (clubIDParam != null && !clubIDParam.trim().isEmpty()) {
+                        // Parse clubID parameter and save to session for future requests
+                        clubID = Integer.parseInt(clubIDParam);
+                        sessionForClub.setAttribute("currentClubID", clubID);
+                        System.out.println("Saved clubID to session: " + clubID);
+                    } else {
+                        // Retrieve clubID from session if not provided in parameter
+                        Integer sessionClubID = (Integer) sessionForClub.getAttribute("currentClubID");
+                        if (sessionClubID == null) {
+                            System.err.println("ERROR: No clubID in parameter or session");
+                            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Thiếu thông tin Club ID. Vui lòng truy cập từ dashboard.");
+                            return;
+                        }
+                        clubID = sessionClubID;
+                        System.out.println("Retrieved clubID from session: " + clubID);
+                    }
+                    
                     ClubDepartmentDAO cp = new ClubDepartmentDAO();
                     int departmentID = cp.getClubDepartmentID(currentUser.getUserID(), clubID);
 
                     handleListMembers(request, response, departmentID);
                     break;
                 case "search":
+                    // Search action also requires clubID context from session
+                    HttpSession searchSession = request.getSession();
+                    Integer searchClubID = (Integer) searchSession.getAttribute("currentClubID");
+                    if (searchClubID != null) {
+                        System.out.println("Search using clubID from session: " + searchClubID);
+                        // Pass clubID to JSP for context
+                        request.setAttribute("currentClubID", searchClubID);
+                    }
+                    
                     handleSearchMembers(request, response, clubDepartmentID);
                     break;
                 case "searchStudents":
@@ -80,10 +109,10 @@ public class DepartmentMemberServlet extends HttpServlet {
                     break;
             }
 
-            //Evualute Point ( Chấm điểm thành viên )
+            //Evualte Point ( Chấm điểm thành viên )
             if ("evaluatePoint".equals(action)) {
                 ClubDepartmentDAO cd = new ClubDepartmentDAO();
-                PrintWriter out = response.getWriter();
+                // PrintWriter out = response.getWriter(); // REMOVED: unused variable
 
                 int clubDepartmentID_ = Integer.parseInt(request.getParameter("clubDepartmentID"));
 
@@ -196,7 +225,7 @@ public class DepartmentMemberServlet extends HttpServlet {
     private void handleListMembers(HttpServletRequest request, HttpServletResponse response, int clubDepartmentID)
             throws ServletException, IOException {
 
-        // Lấy tham số phân trang
+        // Pagination parameters
         int page = 1;
         int pageSize = 10;
 
@@ -211,28 +240,14 @@ public class DepartmentMemberServlet extends HttpServlet {
                 page = 1;
             }
         }
-
-        String pageSizeParam = request.getParameter("pageSize");
-        if (pageSizeParam != null && !pageSizeParam.isEmpty()) {
-            try {
-                pageSize = Integer.parseInt(pageSizeParam);
-                if (pageSize < 5) {
-                    pageSize = 5;
-                }
-                if (pageSize > 50) {
-                    pageSize = 50;
-                }
-            } catch (NumberFormatException e) {
-                pageSize = 10;
-            }
-        }        // Lấy danh sách thành viên
+        
+        // Force pageSize to 4 for consistent pagination
+        pageSize = 4;        // Retrieve department members with pagination
         List<DepartmentMember> members = memberDAO.getDepartmentMembers(clubDepartmentID, page, pageSize);
-        int totalMembers = memberDAO.getTotalMembersCount(clubDepartmentID);
-        int totalPages = (int) Math.ceil((double) totalMembers / pageSize);
-
-        // Tính toán active/inactive members (tổng số, không chỉ trang hiện tại)
-        int activeMembers = memberDAO.getActiveMembersCount(clubDepartmentID);
-        int inactiveMembers = memberDAO.getInactiveMembersCount(clubDepartmentID);
+        
+        // Get member statistics using single optimized query
+        models.MemberStatistics stats = memberDAO.getMemberStatistics(clubDepartmentID);
+        int totalPages = (int) Math.ceil((double) stats.getTotalMembers() / pageSize);
         // Lấy thông tin user và department để hiển thị sidebar
         HttpSession session = request.getSession();
         Users currentUser = (Users) session.getAttribute("user");
@@ -246,17 +261,24 @@ public class DepartmentMemberServlet extends HttpServlet {
             System.out.println("Error getting department name: " + e.getMessage());
         }
 
-        // Đưa dữ liệu vào request
+        // Prepare request attributes for JSP
         request.setAttribute("members", members);
         request.setAttribute("currentPage", page);
         request.setAttribute("pageSize", pageSize);
-        request.setAttribute("totalMembers", totalMembers);
+        request.setAttribute("totalMembers", stats.getTotalMembers());
         request.setAttribute("totalPages", totalPages);
-        request.setAttribute("activeMembers", activeMembers);
-        request.setAttribute("inactiveMembers", inactiveMembers);
+        request.setAttribute("activeMembers", stats.getActiveMembers());
+        request.setAttribute("inactiveMembers", stats.getInactiveMembers());
         request.setAttribute("clubDepartmentID", clubDepartmentID);
         request.setAttribute("currentUser", currentUser);
         request.setAttribute("departmentName", departmentName);
+        
+        // Pass clubID to JSP for pagination context
+        HttpSession sessionForJSP = request.getSession();
+        Integer currentClubID = (Integer) sessionForJSP.getAttribute("currentClubID");
+        if (currentClubID != null) {
+            request.setAttribute("currentClubID", currentClubID);
+        }
 
         // Forward đến JSP
         request.getRequestDispatcher("view/student/department-leader/members.jsp").forward(request, response);
@@ -271,7 +293,7 @@ public class DepartmentMemberServlet extends HttpServlet {
         }
 
         int page = 1;
-        int pageSize = 10;
+        int pageSize = 4;  // 🔧 ĐỔI từ 10 thành 4
 
         String pageParam = request.getParameter("page");
         if (pageParam != null && !pageParam.isEmpty()) {
@@ -283,7 +305,7 @@ public class DepartmentMemberServlet extends HttpServlet {
             } catch (NumberFormatException e) {
                 page = 1;
             }
-        }        // Tìm kiếm thành viên
+        }        // 🚀 ĐƠN GIẢN HÓA: Tìm kiếm thành viên
         List<DepartmentMember> members;
         int totalMembers;
 
@@ -296,9 +318,8 @@ public class DepartmentMemberServlet extends HttpServlet {
         }
         int totalPages = (int) Math.ceil((double) totalMembers / pageSize);
 
-        // Tính toán active/inactive members (tổng số, không chỉ trang hiện tại)
-        int activeMembers = memberDAO.getActiveMembersCount(clubDepartmentID);
-        int inactiveMembers = memberDAO.getInactiveMembersCount(clubDepartmentID);
+        // 🚀 ĐƠN GIẢN HÓA: Lấy statistics trong 1 query (không phụ thuộc search)
+        models.MemberStatistics stats = memberDAO.getMemberStatistics(clubDepartmentID);
 
         // Lấy thông tin user và department để hiển thị sidebar
         HttpSession session = request.getSession();
@@ -318,8 +339,8 @@ public class DepartmentMemberServlet extends HttpServlet {
         request.setAttribute("pageSize", pageSize);
         request.setAttribute("totalMembers", totalMembers);
         request.setAttribute("totalPages", totalPages);
-        request.setAttribute("activeMembers", activeMembers);
-        request.setAttribute("inactiveMembers", inactiveMembers);
+        request.setAttribute("activeMembers", stats.getActiveMembers());
+        request.setAttribute("inactiveMembers", stats.getInactiveMembers());
         request.setAttribute("clubDepartmentID", clubDepartmentID);
         request.setAttribute("keyword", keyword);
         request.setAttribute("currentUser", currentUser);

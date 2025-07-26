@@ -4,11 +4,20 @@ import models.DepartmentMember;
 import models.Tasks; // Chỉ sử dụng class Tasks
 import models.Users;
 import models.Clubs;
+import models.MemberStatistics; // Import class mới để đơn giản hóa statistics
+import models.MemberPageData; // Import aggregate DTO
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DepartmentMemberDAO {
+    
+    // 🚀 ĐƠN GIẢN HÓA: Simple in-memory cache cho statistics
+    private static final Map<Integer, MemberStatistics> statsCache = new HashMap<>();
+    private static final Map<Integer, Long> cacheTimestamp = new HashMap<>();
+    private static final long CACHE_DURATION = 5 * 60 * 1000; // 5 phút cache
     
     /**
      * Lấy danh sách thành viên trong ban theo phân trang (sử dụng ClubDepartmentID)
@@ -439,6 +448,104 @@ public class DepartmentMemberDAO {
         return 0;
     }
     
+    /**
+     * ĐƠN GIẢN HÓA: Lấy tất cả statistics trong 1 query duy nhất + CACHE
+     * Thay vì 3 queries riêng biệt và có cache để tăng performance
+     */
+    public MemberStatistics getMemberStatistics(int clubDepartmentID) {
+        // 🚀 Check cache trước khi query database
+        Long lastUpdate = cacheTimestamp.get(clubDepartmentID);
+        if (lastUpdate != null && (System.currentTimeMillis() - lastUpdate) < CACHE_DURATION) {
+            MemberStatistics cached = statsCache.get(clubDepartmentID);
+            if (cached != null) {
+                System.out.println("DEBUG: Using cached statistics for clubDepartmentID: " + clubDepartmentID);
+                return cached;
+            }
+        }
+        
+        String sql = """
+            SELECT 
+                COUNT(DISTINCT uc.UserID) as total_members,
+                COUNT(DISTINCT CASE WHEN uc.IsActive = 1 THEN uc.UserID END) as active_members,
+                COUNT(DISTINCT CASE WHEN uc.IsActive = 0 THEN uc.UserID END) as inactive_members
+            FROM UserClubs uc
+            INNER JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
+            WHERE cd.ClubDepartmentID = ?
+            """;
+        
+        try (Connection conn = DBContext.getConnection()) {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, clubDepartmentID);
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                MemberStatistics stats = new MemberStatistics();
+                stats.setTotalMembers(rs.getInt("total_members"));
+                stats.setActiveMembers(rs.getInt("active_members"));
+                stats.setInactiveMembers(rs.getInt("inactive_members"));
+                
+                // 🚀 Cache kết quả
+                statsCache.put(clubDepartmentID, stats);
+                cacheTimestamp.put(clubDepartmentID, System.currentTimeMillis());
+                
+                System.out.println("DEBUG: Cached new statistics for clubDepartmentID: " + clubDepartmentID + " - " + stats);
+                return stats;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        // Return default statistics nếu lỗi
+        return new MemberStatistics(0, 0, 0);
+    }
+    
+    /**
+     * 🚀 ĐƠN GIẢN HÓA TỐI ĐA: Lấy tất cả data cần thiết trong 1 method call
+     * Bao gồm: members + statistics + pagination info
+     */
+    public MemberPageData getMemberPageData(int clubDepartmentID, int page, int pageSize, String searchKeyword) {
+        MemberPageData pageData = new MemberPageData();
+        
+        // 1. Get statistics (với cache)
+        pageData.setStatistics(getMemberStatistics(clubDepartmentID));
+        
+        // 2. Get members based on search
+        if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+            pageData.setMembers(searchMembers(clubDepartmentID, searchKeyword.trim(), page, pageSize));
+            pageData.setTotalMembers(getSearchMembersCount(clubDepartmentID, searchKeyword.trim()));
+            pageData.setSearchKeyword(searchKeyword.trim());
+        } else {
+            pageData.setMembers(getDepartmentMembers(clubDepartmentID, page, pageSize));
+            pageData.setTotalMembers(getTotalMembersCount(clubDepartmentID));
+        }
+        
+        // 3. Calculate pagination
+        pageData.setCurrentPage(page);
+        pageData.setPageSize(pageSize);
+        pageData.setTotalPages((int) Math.ceil((double) pageData.getTotalMembers() / pageSize));
+        
+        return pageData;
+    }
+    
+    /**
+     * 🚀 ĐƠN GIẢN HÓA TỐI ĐA: Clear cache khi có thay đổi members
+     * Gọi method này khi add/remove/update member
+     */
+    public void clearStatisticsCache(int clubDepartmentID) {
+        statsCache.remove(clubDepartmentID);
+        cacheTimestamp.remove(clubDepartmentID);
+        System.out.println("DEBUG: Cleared statistics cache for clubDepartmentID: " + clubDepartmentID);
+    }
+    
+    /**
+     * 🚀 ĐƠN GIẢN HÓA: Clear all cache (có thể gọi định kỳ)
+     */
+    public static void clearAllStatisticsCache() {
+        statsCache.clear();
+        cacheTimestamp.clear();
+        System.out.println("DEBUG: Cleared all statistics cache");
+    }
+
     /**
      * Lấy thông tin chi tiết về một thành viên trong ban
      * Sửa lại để đảm bảo trả về dữ liệu nhất quán
