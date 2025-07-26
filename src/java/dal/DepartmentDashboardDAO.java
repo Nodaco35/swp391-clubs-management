@@ -304,7 +304,7 @@ public class DepartmentDashboardDAO {
     }
 
     public int getClubMemberCount(int clubID) {
-        String sql = "SELECT COUNT(UserID) AS membercount FROM userclubs WHERE clubID = ?";
+        String sql = "SELECT COUNT(UserID) AS membercount FROM userclubs WHERE clubID = ? and isActive =1";
         try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, clubID);

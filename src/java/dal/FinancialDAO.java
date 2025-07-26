@@ -1186,7 +1186,7 @@ public class FinancialDAO {
             if (income.getSource().equals("Phí thành viên") && row > 0) {
                 int in = FinancialDAO.findByIncomeIDNew(income.getClubID());
                 PreparedStatement ps2 = DBContext.getConnection().prepareStatement(sql4);
-                List<UserClub> list = UserClubDAO.findByClubID(income.getClubID());
+                List<UserClub> list = UserClubDAO.findByClubIDAndIsActive(income.getClubID());
 
                 int row2 = 0;
                 DepartmentDashboardDAO dao = new DepartmentDashboardDAO();

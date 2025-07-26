@@ -38,12 +38,13 @@ public class ProfileController extends HttpServlet {
         String action = request.getParameter("action");
         if (action == null) {
             request.getRequestDispatcher("index.jsp").forward(request, response);
-        }
-        else if (action.equals("myProfile")) {
+        } else if (action.equals("myProfile")) {
             request.getRequestDispatcher("view/profile.jsp").forward(request, response);
             return;
         }
-    }    @Override
+    }
+
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getParameter("action");
@@ -54,7 +55,7 @@ public class ProfileController extends HttpServlet {
             default:
                 throw new AssertionError();
         }
-        }
+    }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -149,17 +150,25 @@ public class ProfileController extends HttpServlet {
         }
 
         // Cập nhật thông tin vào DB
-        UserDAO.update(newName, avatarPath,dob, id);
+        boolean check = UserDAO.update(newName, avatarPath, dob, id);
 
         // Cập nhật lại session user
-        Users updatedUser = UserDAO.getUserById(id);
-        session.setAttribute("user", updatedUser);
+        if (check) {
+            Users updatedUser = UserDAO.getUserById(id);
+            session.setAttribute("user", updatedUser);
 
-        request.setAttribute("msg", "Cập nhật thành công");
-        request.setAttribute("msgType", "success");
+            request.setAttribute("msg", "Cập nhật thành công");
+            request.setAttribute("msgType", "success");
+        } else {
+            Users updatedUser = UserDAO.getUserById(id);
+            session.setAttribute("user", updatedUser);
+            request.setAttribute("msg", "Thông tin không hợp lệ");
+            request.setAttribute("msgType", "success");
+        }
+
         request.getRequestDispatcher("view/profile.jsp").forward(request, response);
-    }    
-    
+    }
+
     private void changePassword(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // Chuyển hướng đến trang đổi mật khẩu mới
         response.sendRedirect("change-password");
