@@ -131,24 +131,66 @@ public class ICServlet extends HttpServlet {
 
                 request.setAttribute(success ? "rejectedMessage" : "errorMessage", rejectedMessage);
             } else {
-                success = approvalHistoryDAO.deleteClubRequest(requestClubId);
+                success = approvalHistoryDAO.deleteCreateClubRequest(requestClubId);
 
                 deletedMessage = success ? "Đã xoá đơn thành công!" : "Xoá đơn thất bại. Vui lòng thử lại.";
 
                 request.setAttribute(success ? "deletedMessage" : "errorMessage", deletedMessage);
             }
 
-            List<Clubs> requests = clubDAO.getCreateRequestClubs();
-            List<Clubs> approvedRequests = clubDAO.getApproveRequestClubs();
+            response.sendRedirect("ic?action=grantPermission");
+        } else if (action.equals("approveUpdatePermissionRequest") || action.equals("rejectUpdatePermissionRequest") || action.equals("deleteUpdatePermissionRequest")) {
+            int requestClubId = Integer.parseInt(request.getParameter("id"));
+            boolean success;
+            String message = null, rejectedMessage = null, deletedMessage = null;
+            String userId = request.getParameter("userID");
+            ApprovalHistoryDAO approvalHistoryDAO = new ApprovalHistoryDAO();
+            if (action.equals("approveUpdatePermissionRequest")) {
+                success = approvalHistoryDAO.updateOriginalClubFromPendingUpdate(requestClubId);
 
-            request.setAttribute("requests", requests);
-            request.setAttribute("approvedRequests", approvedRequests);
+                message = success ? "Đã duyệt đơn thành công!" : "Duyệt đơn thất bại. Vui lòng thử lại.";
 
-            request.setAttribute(success ? "successMessage" : "errorMessage", message);
-            request.setAttribute(success ? "rejectedMessage" : "errorMessage", rejectedMessage);
-            request.setAttribute(success ? "deletedMessage" : "errorMessage", deletedMessage);
+                if (success) {
+                    // Gửi thông báo cho người nộp đơn
+                    notificationDAO.sentToPerson1(
+                            user.getUserID(), // IC gửi
+                            userId, // Người nhận
+                            "Đơn xin quyền sửa câu lạc bộ được duyệt",
+                            "Đơn xin quyền sửa câu lạc bộ của bạn đã được duyệt. Câu lạc bộ tạo thành công",
+                            "HIGH"
+                    );
+                    approvalHistoryDAO.insertApprovalRecord(requestClubId, "Approved", "Đã duyệt sửa Câu lạc bộ", "Update");
+                }
+                request.setAttribute(success ? "successMessage" : "errorMessage", message);
+            } else if (action.equals("rejectPermissionRequest")) {
+                String reason = request.getParameter("reason");        // Lý do từ chối
+                success = approvalHistoryDAO.rejectRequest(requestClubId, reason);
 
-            request.getRequestDispatcher("view/ic/grantPermission.jsp").forward(request, response);
+                rejectedMessage = success ? "Đã từ chối đơn thành công!" : "Từ chối đơn thất bại. Vui lòng thử lại.";
+
+                if (success) {
+                    // Gửi thông báo kèm lý do từ chối
+                    notificationDAO.sentToPerson1(
+                            user.getUserID(),
+                            userId,
+                            "Đơn xin quyền tạo câu lạc bộ bị từ chối",
+                            "Đơn xin quyền tạo câu lạc bộ của bạn đã bị từ chối. Lý do: " + reason,
+                            "HIGH"
+                    );
+                    // Ghi lịch sử từ chối
+                    approvalHistoryDAO.insertApprovalRecord(requestClubId, "Rejected", reason, "Update");
+                }
+
+                request.setAttribute(success ? "rejectedMessage" : "errorMessage", rejectedMessage);
+            } else {
+                success = approvalHistoryDAO.deleteUpdateClubRequest(requestClubId);
+
+                deletedMessage = success ? "Đã xoá đơn thành công!" : "Xoá đơn thất bại. Vui lòng thử lại.";
+
+                request.setAttribute(success ? "deletedMessage" : "errorMessage", deletedMessage);
+            }
+
+            response.sendRedirect("ic?action=grantPermission");
         } else if ("viewClubRequest".equals(action)) {
             ApprovalHistoryDAO approvalHistoryDAO = new ApprovalHistoryDAO();
             int infoClubId = Integer.parseInt(request.getParameter("id"));
@@ -161,6 +203,19 @@ public class ICServlet extends HttpServlet {
 //            PrintWriter out = response.getWriter();
 //            out.print(approvalHistory.size());
             request.getRequestDispatcher("view/ic/viewClubInfo.jsp").forward(request, response);
+        } else if ("viewUpdateClubRequest".equals(action)) {
+            ApprovalHistoryDAO approvalHistoryDAO = new ApprovalHistoryDAO();
+            int infoClubId = Integer.parseInt(request.getParameter("id"));
+            Clubs infoClub = clubDAO.getALLClubById(infoClubId);
+            
+            Clubs infoUpdateClub = clubDAO.getUpdateClubById(infoClubId);
+
+            request.setAttribute("club", infoClub);
+            request.setAttribute("updateClub", infoUpdateClub);
+
+//            PrintWriter out = response.getWriter();
+//            out.print(approvalHistory.size());
+            request.getRequestDispatcher("view/ic/viewUpdateClubInfo.jsp").forward(request, response);
         } else if ("periodicReport".equals(action)) {
             ClubPeriodicReportDAO reportDAO = new ClubPeriodicReportDAO();
 

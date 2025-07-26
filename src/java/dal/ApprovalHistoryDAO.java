@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Connection;
 import java.sql.SQLException;
+
 public class ApprovalHistoryDAO {
 
     public ApprovalHistoryDAO() {
@@ -43,6 +44,82 @@ public class ApprovalHistoryDAO {
         return false;
     }
 
+    public boolean approveUpdateRequest(int clubId) {
+        String sql = "UPDATE Clubs "
+                + "SET ClubRequestStatus = 'Approved', "
+                + "    LastRejectReason = NULL "
+                + "WHERE ClubID = ? ";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setInt(1, clubId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean updateOriginalClubFromPendingUpdate(int clubId) {
+        Connection conn = null;
+        PreparedStatement psGetUpdate = null;
+        PreparedStatement psApplyUpdate = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBContext.getConnection();
+
+            String sqlGetUpdate = "SELECT * FROM Clubs WHERE ParentClubID = ?";
+            psGetUpdate = conn.prepareStatement(sqlGetUpdate);
+            psGetUpdate.setInt(1, clubId);
+            rs = psGetUpdate.executeQuery();
+
+            if (rs.next()) {
+                String sqlApplyUpdate = "UPDATE Clubs SET ClubImg = ?, IsRecruiting = ?, ClubName = ?, Description = ?, "
+                        + "CategoryID = ?, EstablishedDate = ?, ContactPhone = ?, ContactGmail = ?, "
+                        + "ContactURL = ?, ClubStatus = ? ,"
+                        + "ClubRequestStatus = 'Approved' ,"
+                        + "LastRejectReason = NULL "
+                        + "WHERE ClubID = ?";
+
+                psApplyUpdate = conn.prepareStatement(sqlApplyUpdate);
+                psApplyUpdate.setString(1, rs.getString("ClubImg"));
+                psApplyUpdate.setBoolean(2, rs.getBoolean("IsRecruiting"));
+                psApplyUpdate.setString(3, rs.getString("ClubName"));
+                psApplyUpdate.setString(4, rs.getString("Description"));
+                psApplyUpdate.setInt(5, rs.getInt("CategoryID"));
+                psApplyUpdate.setDate(6, rs.getDate("EstablishedDate"));
+                psApplyUpdate.setString(7, rs.getString("ContactPhone"));
+                psApplyUpdate.setString(8, rs.getString("ContactGmail"));
+                psApplyUpdate.setString(9, rs.getString("ContactURL"));
+                psApplyUpdate.setBoolean(10, rs.getBoolean("ClubStatus"));
+                psApplyUpdate.setInt(11, clubId);
+
+                return psApplyUpdate.executeUpdate() > 0;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (psGetUpdate != null) {
+                    psGetUpdate.close();
+                }
+                if (psApplyUpdate != null) {
+                    psApplyUpdate.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
+
     public boolean rejectRequest(int clubId, String reason) {
         String sql = """
                      UPDATE Clubs SET ClubRequestStatus = 'Rejected',
@@ -61,7 +138,7 @@ public class ApprovalHistoryDAO {
         return false;
     }
 
-    public boolean deleteClubRequest(int clubId) {
+    public boolean deleteCreateClubRequest(int clubId) {
         String sqlUserClubs = "DELETE FROM UserClubs WHERE ClubID = ?";
         String sqlClubs = "DELETE FROM Clubs WHERE ClubID = ?";
 
@@ -72,6 +149,25 @@ public class ApprovalHistoryDAO {
             PreparedStatement psUserClubs = conn.prepareStatement(sqlUserClubs);
             psUserClubs.setInt(1, clubId);
             psUserClubs.executeUpdate();
+
+            // Xóa trong bảng Clubs sau
+            PreparedStatement psClubs = conn.prepareStatement(sqlClubs);
+            psClubs.setInt(1, clubId);
+            int result = psClubs.executeUpdate();
+
+            return result > 0; // Chỉ cần check bảng chính, hoặc thêm logic tùy bạn
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    public boolean deleteUpdateClubRequest(int clubId) {
+        String sqlClubs = "DELETE FROM Clubs WHERE ParentClubID = ?";
+
+        try {
+            Connection conn = DBContext.getConnection();
+
 
             // Xóa trong bảng Clubs sau
             PreparedStatement psClubs = conn.prepareStatement(sqlClubs);
