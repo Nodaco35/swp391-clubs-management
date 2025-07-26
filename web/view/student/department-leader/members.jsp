@@ -5,19 +5,25 @@
 <html lang="vi">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>Quản lý thành viên - Ban ${departmentName}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Quản lý thành viên - Ban ${departmentName}</title>
 
         <!-- Bootstrap CSS -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-        <!-- Font Aw        <!-- Scripts -->    
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/department-leader.css">
+        
+        <!-- JavaScript Libraries -->
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="${pageContext.request.contextPath}/js/department-members.js"></script>
         
-        <!-- ✅ ĐƠN GIẢN HÓA: Chỉ giữ những JS cần thiết -->
+        <!-- Custom JavaScript -->
         <script>
-            // ✅ 1. Basic search functionality (cần thiết)
+            // 1. Basic search functionality (cần thiết)
             function searchMembers() {
                 const keyword = document.getElementById('searchInput').value.trim();
                 if (keyword) {
@@ -29,7 +35,7 @@
                 window.location.href = '${pageContext.request.contextPath}/department-members?action=list&clubID=${clubID}';
             }
             
-            // ✅ 2. Enter key support cho search (UX improvement)
+            // 2. Event listeners và initialization
             document.addEventListener('DOMContentLoaded', function() {
                 const searchInput = document.getElementById('searchInput');
                 if (searchInput) {
@@ -41,7 +47,7 @@
                 }
             });
             
-            // ✅ 3. Simple modal functions (cần thiết cho member detail)
+            // 3. Simple modal functions (cần thiết cho member detail)
             function viewMemberDetail(userID) {
                 // Load member detail modal
                 const modal = new bootstrap.Modal(document.getElementById('memberDetailModal'));
@@ -186,23 +192,45 @@
                     });
             }
             
-            // ✅ 4. Basic confirm dialog (cần thiết cho delete)
-            function confirmRemoveMember(userID, fullName) {
-                if (confirm('Bạn có chắc chắn muốn xóa thành viên "' + fullName + '" khỏi ban không?')) {
-                    window.location.href = '${pageContext.request.contextPath}/department-members?action=remove&userID=' + userID + '&clubDepartmentID=${clubDepartmentID}';
-                }
+            // Lọc thành viên theo trạng thái
+            function filterMembers() {
+                const statusFilter = document.getElementById('statusFilter').value;
+                const rows = document.querySelectorAll('.member-row');
+                
+                rows.forEach(row => {
+                    const isActive = row.getAttribute('data-active') === 'true';
+                    let shouldShow = true;
+                    
+                    if (statusFilter === 'active' && !isActive) {
+                        shouldShow = false;
+                    } else if (statusFilter === 'inactive' && isActive) {
+                        shouldShow = false;
+                    }
+                    
+                    row.style.display = shouldShow ? '' : 'none';
+                });
+                
+                // Cập nhật số lượng hiển thị
+                updateVisibleCount();
             }
             
-            // ✅ 5. Simple add member modal (cần thiết)
-            function showAddMemberModal() {
-                const modal = new bootstrap.Modal(document.getElementById('addMemberModal'));
-                modal.show();
+            // Cập nhật số lượng thành viên hiển thị
+            function updateVisibleCount() {
+                const visibleRows = document.querySelectorAll('.member-row:not([style*="display: none"])');
+                const totalRows = document.querySelectorAll('.member-row');
+                
+                console.log('Hiển thị: ' + visibleRows.length + '/' + totalRows.length + ' thành viên');
             }
-        </script>me -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
-        <!-- Custom CSS -->
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/department-leader.css">
+            
+            // Sắp xếp theo cột (cơ bản)
+            function sortByColumn(element) {
+                const sortType = element.getAttribute('data-sort');
+                console.log('Sắp xếp theo: ' + sortType);
+                
+                // Có thể implement logic sắp xếp phức tạp hơn ở đây
+                // Hiện tại chỉ log để biết function được gọi
+            }
+        </script>
     </head>
     <body>
         <div class="department-leader-container">
@@ -282,7 +310,7 @@
                         <div class="card shadow-sm">
                             <div class="card-body">
                                 <div class="row align-items-center">
-                                    <div class="col-md-6">
+                                    <div class="col-md-7">
                                         <div class="input-group">
                                             <span class="input-group-text">
                                                 <i class="fas fa-search"></i>
@@ -298,25 +326,16 @@
                                                 </button>
                                             </c:if>
                                         </div>
-                                    </div>                                <div class="col-md-2">
+                                    </div>
+                                    <div class="col-md-2">
                                         <label class="filter-label">Trạng thái</label>
                                         <select id="statusFilter" class="form-select" onchange="filterMembers()">
                                             <option value="">Tất cả trạng thái</option>
                                             <option value="active">Hoạt động</option>
                                             <option value="inactive">Không hoạt động</option>
                                         </select>
-                                    </div>                                <div class="col-md-1">
-                                        <label class="filter-label">&nbsp;</label>
-                                        <button class="btn btn-outline-secondary w-100" type="button" onclick="resetFilters()" title="Đặt lại bộ lọc">
-                                            <i class="fas fa-refresh"></i>
-                                        </button>
                                     </div>
-                                    <div class="col-md-3">
-                                        <button class="btn btn-primary w-100" onclick="showAddMemberModal()">
-                                            <i class="fas fa-plus me-2"></i>Thêm thành viên
-                                        </button>
-                                    </div>
-                                </div>
+                                </div>f
                             </div>
                         </div>
                     </div>
@@ -405,9 +424,6 @@
                                                             <div>
                                                                 <fmt:formatDate value="${member.joinedDate}" pattern="dd/MM/yyyy" />
                                                             </div>
-                                                            <small class="text-muted">
-                                                                <fmt:formatDate value="${member.joinedDate}" pattern="HH:mm" />
-                                                            </small>
                                                         </td>
                                                         <td>
                                                             <div class="d-flex align-items-center">
@@ -434,13 +450,6 @@
                                                                         title="Xem chi tiết">
                                                                     <i class="fas fa-eye"></i>
                                                                 </button>
-                                                                <c:if test="${member.roleName != 'Trưởng ban'}">
-                                                                    <button type="button" class="btn btn-sm btn-outline-danger" 
-                                                                            onclick="confirmRemoveMember('${member.userID}', '${member.fullName}')" 
-                                                                            title="Xóa khỏi ban">
-                                                                        <i class="fas fa-trash"></i>
-                                                                    </button>
-                                                                </c:if>
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -464,9 +473,6 @@
                                             <c:otherwise>
                                                 <h5 class="text-muted">Không có thành viên nào</h5>
                                                 <p class="text-muted">Chưa có thành viên nào trong ban.</p>
-                                                <button class="btn btn-primary" onclick="showAddMemberModal()">
-                                                    <i class="fas fa-plus me-2"></i>Thêm thành viên đầu tiên
-                                                </button>
                                             </c:otherwise>
                                         </c:choose>
                                     </div>
@@ -558,57 +564,9 @@
                     </div>
                 </c:if>
             </main>
-        </div>    <!-- Add Member Modal -->
-        <div class="modal fade" id="addMemberModal" tabindex="-1" aria-labelledby="addMemberModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="addMemberModalLabel">
-                            <i class="fas fa-user-plus me-2"></i>Thêm thành viên mới
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-12">
-                                <label for="studentSearchInput" class="form-label">Tìm kiếm sinh viên</label>
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text">
-                                        <i class="fas fa-search"></i>
-                                    </span>
-                                    <input type="text" id="studentSearchInput" class="form-control" 
-                                           placeholder="Nhập tên hoặc email sinh viên...">
-                                </div>
-                                <div id="studentSearchResults" class="border rounded p-2 mb-3" style="max-height: 200px; overflow-y: auto;"></div>
-                            </div>
+        </div>
 
-                            <div class="col-12" id="selectedStudent" style="display: none;">
-                                <hr>
-                                <h6>Sinh viên được chọn:</h6>
-                                <div class="card bg-light">
-                                    <div class="card-body">
-                                        <div class="student-info"></div>
-
-                                        <div class="mt-3">
-                                            <label for="memberRole" class="form-label">Vai trò trong ban:</label>
-                                            <select id="memberRole" class="form-select">
-                                                <option value="4">Thành viên</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                        <button type="button" class="btn btn-primary" onclick="addMember()" id="addMemberBtn" disabled>
-                            <i class="fas fa-plus me-2"></i>Thêm thành viên
-                        </button>
-                    </div>
-                </div>
-            </div>    
-        </div>    <!-- Member Detail Modal -->
+        <!-- Member Detail Modal -->
 
         <div class="col-md-3" style="margin-left: 300px;padding: 30px">
             <button class="btn btn-warning w-100" onclick="window.location.href = '${pageContext.request.contextPath}/department-members?action=evaluatePoint&clubDepartmentID=${clubDepartmentID}'">
@@ -761,8 +719,6 @@
                     </div>
                 </div>
             </div>
-        </div><!-- Scripts -->    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="${pageContext.request.contextPath}/js/department-members.js"></script>
+        </div>
     </body>
 </html>
