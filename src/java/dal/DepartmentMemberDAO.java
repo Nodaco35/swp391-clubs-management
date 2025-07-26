@@ -458,7 +458,6 @@ public class DepartmentMemberDAO {
         if (lastUpdate != null && (System.currentTimeMillis() - lastUpdate) < CACHE_DURATION) {
             MemberStatistics cached = statsCache.get(clubDepartmentID);
             if (cached != null) {
-                System.out.println("DEBUG: Using cached statistics for clubDepartmentID: " + clubDepartmentID);
                 return cached;
             }
         }
@@ -488,7 +487,6 @@ public class DepartmentMemberDAO {
                 statsCache.put(clubDepartmentID, stats);
                 cacheTimestamp.put(clubDepartmentID, System.currentTimeMillis());
                 
-                System.out.println("DEBUG: Cached new statistics for clubDepartmentID: " + clubDepartmentID + " - " + stats);
                 return stats;
             }
         } catch (SQLException e) {
@@ -534,7 +532,6 @@ public class DepartmentMemberDAO {
     public void clearStatisticsCache(int clubDepartmentID) {
         statsCache.remove(clubDepartmentID);
         cacheTimestamp.remove(clubDepartmentID);
-        System.out.println("DEBUG: Cleared statistics cache for clubDepartmentID: " + clubDepartmentID);
     }
     
     /**
@@ -543,7 +540,6 @@ public class DepartmentMemberDAO {
     public static void clearAllStatisticsCache() {
         statsCache.clear();
         cacheTimestamp.clear();
-        System.out.println("DEBUG: Cleared all statistics cache");
     }
 
     /**
@@ -554,8 +550,8 @@ public class DepartmentMemberDAO {
         DepartmentMember member = null;
         
         String sql = """
-            SELECT DISTINCT u.UserID, u.FullName, u.Email, u.Phone, u.StudentCode, u.Major, u.AvatarSrc,
-                    r.RoleName, uc.JoinDate, uc.IsActive, uc.RoleID, uc.Status,
+            SELECT DISTINCT u.UserID, u.FullName, u.Email, u.AvatarSrc, u.DateOfBirth,
+                    r.RoleName, uc.JoinDate, uc.IsActive, uc.RoleID, uc.Gen,
                     cd.ClubDepartmentID, d.DepartmentName, d.DepartmentID, c.ClubName, c.ClubID
             FROM UserClubs uc
             INNER JOIN Users u ON u.UserID = uc.UserID
@@ -577,14 +573,24 @@ public class DepartmentMemberDAO {
                 member.setUserID(rs.getString("UserID"));
                 member.setFullName(rs.getString("FullName"));
                 member.setEmail(rs.getString("Email"));
-                member.setPhone(rs.getString("Phone") != null ? rs.getString("Phone") : "");
-                member.setStudentCode(rs.getString("StudentCode") != null ? rs.getString("StudentCode") : "");
-                member.setMajor(rs.getString("Major") != null ? rs.getString("Major") : "");
-                member.setAvatar(rs.getString("AvatarSrc") != null ? rs.getString("AvatarSrc") : "");
+                member.setPhone(""); // Set default value since Phone doesn't exist in database
+                member.setStudentCode(""); // Set default value since StudentCode doesn't exist in database
+                member.setMajor(""); // Set default value since Major doesn't exist in database
+                
+                // Get avatar path from database
+                String avatarFromDB = rs.getString("AvatarSrc");
+                member.setAvatar(avatarFromDB != null ? avatarFromDB : "");
+                
+                member.setDateOfBirth(rs.getDate("DateOfBirth")); // Set DateOfBirth
+                member.setGen(rs.getString("Gen")); // Set Gen
                 member.setRoleName(rs.getString("RoleName") != null ? rs.getString("RoleName") : "Thành viên");
                 member.setJoinedDate(rs.getTimestamp("JoinDate"));
-                member.setActive(rs.getBoolean("IsActive"));
-                member.setStatus(rs.getString("Status") != null ? rs.getString("Status") : "");
+                
+                // Set active status from database
+                boolean activeValue = rs.getBoolean("IsActive");
+                member.setActive(activeValue);
+                
+                member.setStatus(""); // Set default status since Status doesn't exist in UserClubs table
                 member.setClubDepartmentID(rs.getInt("ClubDepartmentID"));
                 member.setDepartmentID(rs.getInt("DepartmentID"));
                 member.setDepartmentName(rs.getString("DepartmentName") != null ? rs.getString("DepartmentName") : "");
@@ -617,9 +623,14 @@ public class DepartmentMemberDAO {
         String sql = """
             SELECT COUNT(*) as total
             FROM Tasks t 
-            WHERE t.AssignedTo = ? 
-            AND t.ClubDepartmentID = ?
-            AND t.Status = 'Completed'
+            WHERE t.UserID = ? 
+            AND t.AssigneeType = 'User'
+            AND t.ClubID = (
+                SELECT cd.ClubID 
+                FROM ClubDepartments cd 
+                WHERE cd.ClubDepartmentID = ?
+            )
+            AND t.Status = 'Done'
             """;
         
         try (Connection conn = DBContext.getConnection()) {
@@ -644,8 +655,13 @@ public class DepartmentMemberDAO {
         String sql = """
             SELECT COUNT(*) as total
             FROM Tasks t 
-            WHERE t.AssignedTo = ? 
-            AND t.ClubDepartmentID = ?
+            WHERE t.UserID = ? 
+            AND t.AssigneeType = 'User'
+            AND t.ClubID = (
+                SELECT cd.ClubID 
+                FROM ClubDepartments cd 
+                WHERE cd.ClubDepartmentID = ?
+            )
             """;
         
         try (Connection conn = DBContext.getConnection()) {
@@ -668,10 +684,15 @@ public class DepartmentMemberDAO {
      */
     public Timestamp getLastActivity(String userID, int clubDepartmentID) {
         String sql = """
-            SELECT MAX(UpdatedAt) as lastActivity
+            SELECT MAX(t.CreatedAt) as lastActivity
             FROM Tasks t 
-            WHERE t.AssignedTo = ? 
-            AND t.ClubDepartmentID = ?
+            WHERE t.UserID = ? 
+            AND t.AssigneeType = 'User'
+            AND t.ClubID = (
+                SELECT cd.ClubID 
+                FROM ClubDepartments cd 
+                WHERE cd.ClubDepartmentID = ?
+            )
             """;
         
         try (Connection conn = DBContext.getConnection()) {
@@ -695,15 +716,21 @@ public class DepartmentMemberDAO {
         List<Tasks> tasks = new ArrayList<>();
         
         try {
+            // Query để lấy tasks đúng cách
             String sql = """
-                SELECT t.TaskID, t.Title, t.Description, t.Status, t.Priority, 
-                       t.ProgressPercent, t.StartDate, t.EndDate, t.CreatedAt, 
+                SELECT t.TaskID, t.Title, t.Description, t.Status, 
+                       t.StartDate, t.EndDate, t.CreatedAt, 
                        t.ClubID, c.ClubName, t.CreatedBy, u.FullName as CreatorName
                 FROM Tasks t
                 LEFT JOIN Users u ON t.CreatedBy = u.UserID
                 LEFT JOIN Clubs c ON t.ClubID = c.ClubID
-                WHERE t.AssignedTo = ? 
-                AND t.ClubDepartmentID = ?
+                WHERE t.UserID = ? 
+                AND t.AssigneeType = 'User'
+                AND t.ClubID = (
+                    SELECT cd.ClubID 
+                    FROM ClubDepartments cd 
+                    WHERE cd.ClubDepartmentID = ?
+                )
                 ORDER BY t.EndDate DESC
                 """;
             
@@ -752,6 +779,7 @@ public class DepartmentMemberDAO {
             System.err.println("Unexpected error in getMemberTasks: " + e.getMessage());
             e.printStackTrace();
         }
+        
         return tasks;
     }
 }

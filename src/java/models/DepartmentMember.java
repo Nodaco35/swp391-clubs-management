@@ -1,6 +1,8 @@
 package models;
 
 import java.sql.Timestamp;
+import java.sql.Date;
+import com.google.gson.annotations.SerializedName;
 
 public class DepartmentMember {
     private String userID;
@@ -10,8 +12,13 @@ public class DepartmentMember {
     private String avatar;
     private String roleName;
     private Timestamp joinedDate;
+    
+    @SerializedName("active") // Đảm bảo JSON sử dụng "active" thay vì "isActive"
     private boolean isActive;
+    
     private String status;
+    private Date dateOfBirth; // Added field
+    private String gen; // Added field
       // Department info
     private int clubDepartmentID;  // Khóa chính - ID của ban trong CLB cụ thể
     private int departmentID;      // Reference - ID loại ban (để hiển thị)
@@ -188,6 +195,22 @@ public class DepartmentMember {
 
     public void setLastActivity(Timestamp lastActivity) {
         this.lastActivity = lastActivity;
+    }
+
+    public Date getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(Date dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public String getGen() {
+        return gen;
+    }
+
+    public void setGen(String gen) {
+        this.gen = gen;
     }
 
     @Override

@@ -62,15 +62,124 @@
                         content.style.display = 'block';
                         
                         // Simple data binding - no complex processing
-                        document.getElementById('memberDetailName').textContent = data.fullName || '';
-                        document.getElementById('memberDetailEmail').textContent = data.email || '';
-                        document.getElementById('memberDetailPhone').textContent = data.phone || '-';
+                        const nameElement = document.getElementById('memberDetailName');
+                        const emailElement = document.getElementById('memberDetailEmail');
+                        
+                        if (nameElement) nameElement.textContent = data.member.fullName || '';
+                        if (emailElement) emailElement.textContent = data.member.email || '-';
                         
                         const avatar = document.getElementById('memberDetailAvatar');
-                        avatar.src = '${pageContext.request.contextPath}/img/' + (data.avatar || 'Hinh-anh-dai-dien-mac-dinh-Facebook.jpg');
+                        
+                        // Handle avatar path correctly
+                        if (avatar) {
+                            let avatarPath = data.member.avatar;
+                            if (avatarPath && avatarPath.trim() !== '') {
+                                // If avatar path already includes 'img/', use it directly
+                                if (avatarPath.startsWith('img/')) {
+                                    avatar.src = '${pageContext.request.contextPath}/' + avatarPath;
+                                } else {
+                                    // If avatar path doesn't include 'img/', add it
+                                    avatar.src = '${pageContext.request.contextPath}/img/' + avatarPath;
+                                }
+                            } else {
+                                // Use default avatar
+                                avatar.src = '${pageContext.request.contextPath}/img/Hinh-anh-dai-dien-mac-dinh-Facebook.jpg';
+                            }
+                        }
+                        
+                        // Update member information
+                        const genElement = document.getElementById('memberDetailGen');
+                        if (genElement) genElement.textContent = data.member.gen || '-';
+                        
+                        // Format join date
+                        const joinDateElement = document.getElementById('memberDetailJoinDate');
+                        if (joinDateElement) {
+                            if (data.member.joinedDate) {
+                                const joinDate = new Date(data.member.joinedDate);
+                                joinDateElement.textContent = joinDate.toLocaleDateString('vi-VN');
+                            } else {
+                                joinDateElement.textContent = '-';
+                            }
+                        }
+                        
+                        // Format date of birth
+                        const birthDateElement = document.getElementById('memberDetailDateOfBirth');
+                        if (birthDateElement) {
+                            if (data.member.dateOfBirth) {
+                                const birthDate = new Date(data.member.dateOfBirth);
+                                birthDateElement.textContent = birthDate.toLocaleDateString('vi-VN');
+                            } else {
+                                birthDateElement.textContent = '-';
+                            }
+                        }
+                        
+                        // Update status - kiểm tra cả active và isActive để đảm bảo tương thích
+                        const statusElement = document.getElementById('memberDetailStatusText');
+                        const isActive = data.member.active || data.member.isActive;
+                        
+                        if (statusElement) {
+                            if (isActive) {
+                                statusElement.textContent = 'Hoạt động';
+                                statusElement.className = 'badge bg-success';
+                            } else {
+                                statusElement.textContent = 'Không hoạt động';
+                                statusElement.className = 'badge bg-secondary';
+                            }
+                        }
+                        
+                        // Update task statistics
+                        const assignedTasksElement = document.getElementById('memberDetailAssignedTasks');
+                        const completedTasksElement = document.getElementById('memberDetailCompletedTasks');
+                        
+                        if (assignedTasksElement) assignedTasksElement.textContent = data.member.assignedTasks || 0;
+                        if (completedTasksElement) completedTasksElement.textContent = data.member.completedTasks || 0;
+                        
+                        // Update task list
+                        const tasksBody = document.getElementById('memberDetailTasksBody');
+                        const emptyTasks = document.getElementById('memberDetailEmptyTasks');
+                        const taskList = document.getElementById('memberDetailTaskList');
+                        
+                        if (data.tasks && data.tasks.length > 0) {
+                            // Show task list, hide empty message
+                            taskList.style.display = 'block';
+                            emptyTasks.style.display = 'none';
+                            
+                            // Clear and populate task list
+                            tasksBody.innerHTML = '';
+                            data.tasks.forEach(function(task) {
+                                const row = document.createElement('tr');
+                                
+                                // Status badge
+                                let statusBadge = '';
+                                if (task.status === 'Done') {
+                                    statusBadge = '<span class="badge bg-success">Hoàn thành</span>';
+                                } else if (task.status === 'In Progress') {
+                                    statusBadge = '<span class="badge bg-warning text-dark">Đang thực hiện</span>';
+                                } else {
+                                    statusBadge = '<span class="badge bg-secondary">Chưa bắt đầu</span>';
+                                }
+                                
+                                // Deadline formatting
+                                let deadlineText = '-';
+                                if (task.endDate) {
+                                    const deadline = new Date(task.endDate);
+                                    deadlineText = deadline.toLocaleDateString('vi-VN');
+                                }
+                                
+                                row.innerHTML = 
+                                    '<td>' + (task.title || '') + '</td>' +
+                                    '<td>' + statusBadge + '</td>' +
+                                    '<td>' + deadlineText + '</td>';
+                                
+                                tasksBody.appendChild(row);
+                            });
+                        } else {
+                            // Hide task list, show empty message
+                            taskList.style.display = 'none';
+                            emptyTasks.style.display = 'block';
+                        }
                     })
                     .catch(error => {
-                        console.error('Error loading member detail:', error);
                         loading.innerHTML = '<div class="alert alert-danger">Có lỗi xảy ra khi tải thông tin thành viên.</div>';
                     });
             }
@@ -253,8 +362,24 @@
                                                         <td class="ps-4">
                                                             <div class="d-flex align-items-center">
                                                                 <div class="avatar-container me-3">
-                                                                    <img src="${pageContext.request.contextPath}/img/${member.avatar != null ? member.avatar : 'Hinh-anh-dai-dien-mac-dinh-Facebook.jpg'}" 
-                                                                         alt="Avatar" class="rounded-circle" style="width: 45px; height: 45px; object-fit: cover;">
+                                                                    <c:choose>
+                                                                        <c:when test="${not empty member.avatar}">
+                                                                            <c:choose>
+                                                                                <c:when test="${member.avatar.startsWith('img/')}">
+                                                                                    <img src="${pageContext.request.contextPath}/${member.avatar}" 
+                                                                                         alt="Avatar" class="rounded-circle" style="width: 45px; height: 45px; object-fit: cover;">
+                                                                                </c:when>
+                                                                                <c:otherwise>
+                                                                                    <img src="${pageContext.request.contextPath}/img/${member.avatar}" 
+                                                                                         alt="Avatar" class="rounded-circle" style="width: 45px; height: 45px; object-fit: cover;">
+                                                                                </c:otherwise>
+                                                                            </c:choose>
+                                                                        </c:when>
+                                                                        <c:otherwise>
+                                                                            <img src="${pageContext.request.contextPath}/img/Hinh-anh-dai-dien-mac-dinh-Facebook.jpg" 
+                                                                                 alt="Avatar" class="rounded-circle" style="width: 45px; height: 45px; object-fit: cover;">
+                                                                        </c:otherwise>
+                                                                    </c:choose>
                                                                 </div>
                                                                 <div>
                                                                     <h6 class="mb-1 fw-semibold">${member.fullName}</h6>
@@ -514,39 +639,41 @@
                                         <img id="memberDetailAvatar" src="" alt="Avatar" 
                                              class="rounded-circle img-thumbnail shadow" style="width: 120px; height: 120px; object-fit: cover;">
                                     </div>
-                                    <span id="memberDetailStatus" class="badge bg-success mb-2">Hoạt động</span>
                                 </div>
                                 <div class="col-md-9">
-                                    <h4 id="memberDetailName" class="mb-1 fw-bold">Tên thành viên</h4>
-                                    <div id="memberDetailRole" class="mb-2 role-badge"></div>
+                                    <h4 id="memberDetailName" class="mb-3 fw-bold">Tên thành viên</h4>
 
                                     <div class="member-info">
                                         <div class="row mb-2">
                                             <div class="col-md-6">
                                                 <div class="d-flex align-items-center mb-2">
                                                     <i class="fas fa-envelope text-primary me-2"></i>
-                                                    <span id="memberDetailEmail"></span>
+                                                    <small class="fw-semibold me-2">Email:</small>
+                                                    <span id="memberDetailEmail">-</span>
                                                 </div>
                                                 <div class="d-flex align-items-center mb-2">
-                                                    <i class="fas fa-phone text-primary me-2"></i>
-                                                    <span id="memberDetailPhone">-</span>
+                                                    <i class="fas fa-users text-primary me-2"></i>
+                                                    <small class="fw-semibold me-2">Gen:</small>
+                                                    <span id="memberDetailGen">-</span>
+                                                </div>
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <i class="fas fa-calendar-alt text-primary me-2"></i>
+                                                    <small class="fw-semibold me-2">Ngày tham gia:</small>
+                                                    <span id="memberDetailJoinDate">-</span>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="d-flex align-items-center mb-2">
-                                                    <i class="fas fa-id-card text-primary me-2"></i>
-                                                    <span id="memberDetailStudentCode">-</span>
+                                                    <i class="fas fa-birthday-cake text-primary me-2"></i>
+                                                    <small class="fw-semibold me-2">Ngày sinh:</small>
+                                                    <span id="memberDetailDateOfBirth">-</span>
                                                 </div>
                                                 <div class="d-flex align-items-center mb-2">
-                                                    <i class="fas fa-graduation-cap text-primary me-2"></i>
-                                                    <span id="memberDetailMajor">-</span>
+                                                    <i class="fas fa-info-circle text-primary me-2"></i>
+                                                    <small class="fw-semibold me-2">Trạng thái:</small>
+                                                    <span id="memberDetailStatusText" class="badge bg-success">Hoạt động</span>
                                                 </div>
                                             </div>
-                                        </div>
-
-                                        <div class="mb-2">
-                                            <i class="fas fa-calendar-alt text-primary me-2"></i>
-                                            Tham gia ban từ: <strong id="memberDetailJoinDate"></strong>
                                         </div>
                                     </div>
                                 </div>
@@ -584,21 +711,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            <div class="progress mt-3">
-                                                <div id="memberDetailProgress" class="progress-bar bg-success" style="width: 0%; transition: width 1s ease-in-out;"></div>
-                                            </div>
-                                            <div class="d-flex justify-content-between mt-2">
-                                                <small class="text-muted">Tiến độ hoàn thành công việc</small>
-                                                <small class="fw-bold" id="memberDetailProgressText">0% hoàn thành</small>
-                                            </div>
-
-                                            <div class="mt-3 text-center">
-                                                <small id="memberDetailLastActivity" class="d-inline-block">
-                                                    <i class="fas fa-history me-1"></i>
-                                                    Hoạt động gần nhất: -
-                                                </small>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -626,7 +738,6 @@
                                                         <tr>
                                                             <th>Tiêu đề công việc</th>
                                                             <th>Trạng thái</th>
-                                                            <th>Ưu tiên</th>
                                                             <th>Hạn hoàn thành</th>
                                                         </tr>
                                                     </thead>
