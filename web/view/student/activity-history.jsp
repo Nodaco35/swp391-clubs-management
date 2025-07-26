@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -59,41 +60,59 @@
                             </thead>
                             <tbody>
                                 <c:forEach var="event" items="${events}">
-                                    <tr data-status="${event.participationStatus.toLowerCase()}">
-                                        <td>${event.eventName}</td>
-                                        <td>${event.clubName}</td>
-                                        <td><fmt:formatDate value="${event.eventDate}" pattern="dd/MM/yyyy"/></td>
-                                        <td>${event.location}</td>
+                                    <c:forEach var="schedule" items="${event.scheduleList}" varStatus="status">
+                                        <tr data-status="${event.participationStatus.toLowerCase()}">
+                                            <c:if test="${status.first}">
+                                                <td rowspan="${fn:length(event.scheduleList)}">${event.eventName}</td>
+                                            </c:if>
 
-                                        <td>
-                                            <span class="badge
-                                                  <c:choose>
-                                                      <c:when test="${event.participationStatus == 'REGISTERED'}">badge-registered</c:when>
-                                                      <c:when test="${event.participationStatus == 'ATTENDED'}">badge-attended</c:when>
-                                                      <c:when test="${event.participationStatus == 'ABSENT'}">badge-absent</c:when>
-                                                  </c:choose>">
-                                                <c:choose>
-                                                    <c:when test="${event.participationStatus == 'REGISTERED'}">Đã đăng ký</c:when>
-                                                    <c:when test="${event.participationStatus == 'ATTENDED'}">Đã tham dự</c:when>
-                                                    <c:when test="${event.participationStatus == 'ABSENT'}">Vắng mặt</c:when>
-                                                </c:choose>
-                                            </span>
-                                        </td>
+                                            <c:if test="${status.first}">
+                                                <td rowspan="${fn:length(event.scheduleList)}">${event.clubName}</td>
+                                            </c:if>
 
-                                        <td>
-                                            <span class="badge ${event.eventStatus == 'Completed' ? 'badge-completed' : 'badge-pending'}">
-                                                ${event.eventStatus == 'Completed' ? 'Đã hoàn thành' : 'Sắp diễn ra'}
-                                            </span>
-                                        </td>
+                                            <td><fmt:formatDate value="${schedule.eventDate}" pattern="dd/MM/yyyy"/></td>
+                                            <td>${schedule.locationName}</td>
 
-                                        <td>
-                                            <div class="table-actions">
-                                                <button class="btn btn-outline btn-icon" onclick="window.location.href = '${pageContext.request.contextPath}/event-detail?id=${event.eventID}'"><i class="fas fa-eye"></i></button>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                            <c:if test="${status.first}">
+                                                <td rowspan="${fn:length(event.scheduleList)}">
+                                                    <span class="badge
+                                                          <c:choose>
+                                                              <c:when test="${event.participationStatus == 'REGISTERED'}">badge-registered</c:when>
+                                                              <c:when test="${event.participationStatus == 'ATTENDED'}">badge-attended</c:when>
+                                                              <c:when test="${event.participationStatus == 'ABSENT'}">badge-absent</c:when>
+                                                          </c:choose>">
+                                                        <c:choose>
+                                                            <c:when test="${event.participationStatus == 'REGISTERED'}">Đã đăng ký</c:when>
+                                                            <c:when test="${event.participationStatus == 'ATTENDED'}">Đã tham dự</c:when>
+                                                            <c:when test="${event.participationStatus == 'ABSENT'}">Vắng mặt</c:when>
+                                                        </c:choose>
+                                                    </span>
+                                                </td>
+                                            </c:if>
+
+                                            <c:if test="${status.first}">
+                                                <td rowspan="${fn:length(event.scheduleList)}">
+                                                    <span class="badge ${event.eventStatus == 'Completed' ? 'badge-completed' : 'badge-pending'}">
+                                                        ${event.eventStatus == 'Completed' ? 'Đã hoàn thành' : 'Sắp diễn ra'}
+                                                    </span>
+                                                </td>
+                                            </c:if>
+
+                                            <c:if test="${status.first}">
+                                                <td rowspan="${fn:length(event.scheduleList)}">
+                                                    <div class="table-actions">
+                                                        <button class="btn btn-outline btn-icon"
+                                                                onclick="window.location.href = '${pageContext.request.contextPath}/event-detail?id=${event.eventID}'">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </c:if>
+                                        </tr>
+                                    </c:forEach>
                                 </c:forEach>
                             </tbody>
+
                         </table>
                     </div>
                     <div style="margin-bottom: 50px"></div>

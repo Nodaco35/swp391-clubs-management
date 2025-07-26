@@ -1,17 +1,28 @@
 package models;
 
 import java.util.Date;
+import java.util.List;
 
 public class EventParticipation {
+
     private String eventID;
     private String eventName;
     private String clubName;
-    private Date eventDate;
-    private String location;
     private String participationStatus;
     private String eventStatus;
 
-    public EventParticipation() {}
+    private List<EventScheduleDetail> scheduleList;
+
+    public List<EventScheduleDetail> getScheduleList() {
+        return scheduleList;
+    }
+
+    public void setScheduleList(List<EventScheduleDetail> scheduleList) {
+        this.scheduleList = scheduleList;
+    }
+
+    public EventParticipation() {
+    }
 
     public String getEventID() {
         return eventID;
@@ -20,7 +31,7 @@ public class EventParticipation {
     public void setEventID(String eventID) {
         this.eventID = eventID;
     }
-    
+
     public String getEventName() {
         return eventName;
     }
@@ -35,22 +46,6 @@ public class EventParticipation {
 
     public void setClubName(String clubName) {
         this.clubName = clubName;
-    }
-
-    public Date getEventDate() {
-        return eventDate;
-    }
-
-    public void setEventDate(Date eventDate) {
-        this.eventDate = eventDate;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
     }
 
     public String getParticipationStatus() {

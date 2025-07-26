@@ -10,9 +10,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import models.Users;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import models.ClubApplication;
 import models.EventParticipation;
+import models.EventScheduleDetail;
 
 public class StudentServlet extends HttpServlet {
 
@@ -46,7 +48,7 @@ public class StudentServlet extends HttpServlet {
 
             List<EventParticipation> eventParticipations = eventParticipantDAO.getEventParticipationByUser(user.getUserID());
             request.setAttribute("events", eventParticipations);
-
+            
             request.getRequestDispatcher("view/student/activity-history.jsp").forward(request, response);
             return;
         }
@@ -92,7 +94,7 @@ public class StudentServlet extends HttpServlet {
         } else {
             boolean success = applicationDAO.insertRequest(userId, clubName, categoryID);
             session.setAttribute(success ? "message" : "error",
-                    success ? "Đơn xin quyền tạo câu lạc bộ '" + clubName + "' đã được gửi!" 
+                    success ? "Đơn xin quyền tạo câu lạc bộ '" + clubName + "' đã được gửi!"
                             : "Gửi đơn thất bại. Vui lòng thử lại sau.");
         }
 

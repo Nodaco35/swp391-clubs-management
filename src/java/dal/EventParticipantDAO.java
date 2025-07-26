@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import models.EventParticipant;
 import models.EventParticipation;
+import models.EventScheduleDetail;
 
 public class EventParticipantDAO extends DBContext {
 
@@ -167,39 +168,62 @@ public class EventParticipantDAO extends DBContext {
 
     public List<EventParticipation> getEventParticipationByUser(String userID) {
         List<EventParticipation> list = new ArrayList<>();
-        String sql = """
-            SELECT 
-                e.EventID, 
-                e.EventName, 
-                c.ClubName, 
-                e.EventDate, 
-                l.LocationName AS Location, 
-                ep.Status AS ParticipationStatus, 
-                e.Status AS EventStatus
-            FROM EventParticipants ep
-            JOIN Events e ON ep.EventID = e.EventID
-            JOIN Clubs c ON e.ClubID = c.ClubID
-            JOIN Locations l ON e.LocationID = l.LocationID
-            WHERE ep.UserID = ?
-            ORDER BY e.EventDate DESC
-        """;
 
-        try (Connection conn = DBContext.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, userID);
-            ResultSet rs = ps.executeQuery();
+        String sqlEvent = """
+        SELECT 
+            e.EventID, 
+            e.EventName, 
+            c.ClubName, 
+            ep.Status AS ParticipationStatus, 
+            e.Status AS EventStatus
+        FROM EventParticipants ep
+        JOIN Events e ON ep.EventID = e.EventID
+        JOIN Clubs c ON e.ClubID = c.ClubID
+        WHERE ep.UserID = ?
+    """;
 
-            while (rs.next()) {
+        String sqlSchedule = """
+        SELECT es.EventDate, es.StartTime, es.EndTime, l.LocationName
+        FROM EventSchedules es
+        JOIN Locations l ON es.LocationID = l.LocationID
+        WHERE es.EventID = ?
+        ORDER BY es.EventDate, es.StartTime
+    """;
+
+        try (Connection conn = DBContext.getConnection(); PreparedStatement psEvent = conn.prepareStatement(sqlEvent)) {
+            psEvent.setString(1, userID);
+            ResultSet rsEvent = psEvent.executeQuery();
+
+            while (rsEvent.next()) {
                 EventParticipation ep = new EventParticipation();
-                ep.setEventID(rs.getString("EventID"));
-                ep.setEventName(rs.getString("EventName"));
-                ep.setClubName(rs.getString("ClubName"));
-                ep.setEventDate(rs.getTimestamp("EventDate"));
-                ep.setLocation(rs.getString("Location"));
-                ep.setParticipationStatus(rs.getString("ParticipationStatus"));
-                ep.setEventStatus(rs.getString("EventStatus"));
+                int eventID = rsEvent.getInt("EventID");
+
+                ep.setEventID(String.valueOf(eventID));
+                ep.setEventName(rsEvent.getString("EventName"));
+                ep.setClubName(rsEvent.getString("ClubName"));
+                ep.setParticipationStatus(rsEvent.getString("ParticipationStatus"));
+                ep.setEventStatus(rsEvent.getString("EventStatus"));
+
+                // Truy vấn danh sách lịch trình cho event
+                try (PreparedStatement psSchedule = conn.prepareStatement(sqlSchedule)) {
+                    psSchedule.setInt(1, eventID);
+                    ResultSet rsSchedule = psSchedule.executeQuery();
+
+                    List<EventScheduleDetail> scheduleList = new ArrayList<>();
+                    while (rsSchedule.next()) {
+                        EventScheduleDetail detail = new EventScheduleDetail();
+                        detail.setEventDate(rsSchedule.getDate("EventDate"));
+                        detail.setStartTime(rsSchedule.getString("StartTime"));
+                        detail.setEndTime(rsSchedule.getString("EndTime"));
+                        detail.setLocationName(rsSchedule.getString("LocationName"));
+                        scheduleList.add(detail);
+                    }
+                    ep.setScheduleList(scheduleList);
+                }
 
                 list.add(ep);
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
