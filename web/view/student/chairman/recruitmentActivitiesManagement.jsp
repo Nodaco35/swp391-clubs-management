@@ -15,9 +15,10 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/chairmanPage.css">
 </head>
 <body style="background-color: #d8d7ce;">
-    <jsp:include page="/view/events-page/header.jsp" />
+    <jsp:include page="components/sidebar.jsp" />
     
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>

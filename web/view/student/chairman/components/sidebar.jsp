@@ -145,6 +145,12 @@
                     <i class="fas fa-money-bill-wave"></i> Quản lý dòng tiền
                 </a>
             </li>
+            <li>
+                <a href="${pageContext.request.contextPath}/recruitment/list?clubId=1"
+                   class="nav-item ${currentPath == '/recruitment/list?clubId=1' ? 'active' : ''}">
+                    <i class="fas fa-tachometer-alt"></i> Hoạt động tuyển quân
+                </a>
+            </li>
         </ul>
     </nav>
 </header>

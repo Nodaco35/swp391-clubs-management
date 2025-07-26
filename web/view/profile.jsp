@@ -176,7 +176,6 @@
                 }, 5000); // Hiển thị trong 5 giây
             }
         </script>
-        <jsp:include page="./components/footer.jsp" />
 
         <!-- JavaScript -->
         <script src="${pageContext.request.contextPath}/js/script.js"></script>

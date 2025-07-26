@@ -110,8 +110,8 @@
                                                 <i class="fas fa-check"></i> Duyệt đơn
                                             </a>
 
-                                            <button class="btn btn-danger" onclick="showRejectModal('${updateClub.clubID}', '${club.chairmanID}')">
-                                                <i class="fas fa-times"></i> Từ chối đơn
+                                            <button class="btn btn-danger" onclick="showRejectModal('${club.clubID}', '${club.chairmanID}')">
+                                                <i class="fas fa-times"></i> Từ chối đơn ${club.clubID} - ${club.chairmanID}
                                             </button>
                                         </div>
                                     </c:if>
@@ -140,9 +140,9 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                         </div>
                         <div class="modal-body">
-                            <input type="hidden" name="action" value="rejectPermissionRequest">
-                            <input type="hidden" name="id" id="rejectClubID">
-                            <input type="hidden" name="userID" id="rejectUserID">
+                            <input type="hidden" name="action" value="rejectUpdatePermissionRequest">
+                            <input type="hidden" name="id" id="rejectClubID" value="${club.chairmanID}">
+                            <input type="hidden" name="userID" id="rejectUserID" value="${updateClub.clubID}">
 
                             <div class="mb-3">
                                 <label for="reason" class="form-label">Nhập lý do từ chối:</label>
