@@ -57,6 +57,8 @@
                 fetch('${pageContext.request.contextPath}/department-members?action=getMemberDetail&userID=' + userID + '&clubDepartmentID=${clubDepartmentID}')
                     .then(response => response.json())
                     .then(data => {
+                        console.log('Member detail response:', data);
+                        
                         // Hide loading, show content
                         loading.style.display = 'none';
                         content.style.display = 'block';

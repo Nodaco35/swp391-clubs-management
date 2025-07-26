@@ -34,7 +34,9 @@
             <span>${displayClub.memberCount} thành viên</span>
         </div>
         <div class="club-actions">
-            <a href="${pageContext.request.contextPath}/club-detail?id=${displayClub.clubID}" class="btn btn-primary">Chi Tiết</a>
+
+                <a href="${pageContext.request.contextPath}/club-detail?id=${displayClub.clubID}" class="btn btn-primary">Chi Tiết</a>
+            
             <c:if test="${not empty sessionScope.user}">
                 <c:choose>
                     <c:when test="${displayClub.favorite}">

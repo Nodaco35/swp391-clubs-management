@@ -64,6 +64,7 @@ public class DF_TransactionController extends HttpServlet {
         request.setAttribute("status", status);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
+        
         request.getRequestDispatcher("/view/student/department-leader/financial-transaction-club-history.jsp").forward(request, response);
     }
 

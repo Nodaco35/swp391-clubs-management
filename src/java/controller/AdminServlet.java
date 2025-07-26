@@ -158,6 +158,7 @@ public class AdminServlet extends HttpServlet {
             return;
         }
         UserDAO.insertByAdmin(fullName, email, password, dateOfBirth, permissionID, status);
+        request.setAttribute("msg", "Thêm người dùng thành công");
         showAllUser(request, response);
     }
 

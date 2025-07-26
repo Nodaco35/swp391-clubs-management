@@ -41,7 +41,7 @@
 
                 <div class="card">
                     <div class="card-header">
-                        <h2 class="card-title">Danh sách đơn xin tạo CLB</h2>
+                        <h2 class="card-title">Danh sách đơn xin tạo/sửa CLB</h2>
                         <div class="card-actions">
 
                             <div class="filter-group">
@@ -248,6 +248,73 @@
                                 </tbody>
                             </table>
                         </div>
+                            
+                        <div class="table-container">
+                            <table id="requestsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Người gửi</th>
+                                        <th>Tên CLB</th>
+                                        <th>Danh mục</th>
+                                        <th>Ngày gửi</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Đơn chờ duyệt -->
+                                    <c:forEach var="request" items="${updateRequests}" varStatus="loop">
+                                        <c:if test="${request.clubRequestStatus == 'Pending'}">
+                                            <tr request-status="PENDING">
+                                                <td>
+                                                    <div class="user-info">
+                                                        <div class="user-avatar">${fn:substring(request.chairmanFullName, 0, 1)}</div>
+                                                        <div class="user-details">
+                                                            <div class="user-name">${fn:escapeXml(request.chairmanFullName)}</div>
+                                                            <div class="user-email">${request.chairmanID}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>${fn:escapeXml(request.clubName)}</td>
+                                                <td>${request.categoryName}</td>
+                                                <td><c:out value="${request.establishedDate}"></c:out></td>
+                                                    <td><span class="badge bg-primary text-white"><i class="fas fa-clock"></i> Chờ duyệt</span>
+                                                    </td>
+                                                    <td class="table-actions">
+                                                        <button class="btn btn-outline-secondary btn-sm" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=viewUpdateClubRequest&id=${request.clubID}'">
+                                                        <i class="fas fa-eye"></i> Xem chi tiết
+                                                    </button>
+                                                    <button class="btn btn-icon btn-success" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=approveUpdatePermissionRequest&id=${request.clubID}&userID=${request.chairmanID}'">
+                                                        <i class="fas fa-check"></i> Đồng ý
+                                                    </button>
+                                                    <button type="button"
+                                                            class="btn btn-danger btn-sm"
+                                                            onclick="showUpdateRejectModal('${request.clubID}', '${request.chairmanID}')">
+                                                        <i class="fas fa-times"></i> Từ chối
+                                                    </button>
+
+                                                    <button class="btn btn-danger btn-sm" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=deleteUpdatePermissionRequest&id=${request.clubID}&userID=${request.chairmanID}'">
+                                                        <i class="fa-solid fa-trash"></i> Xoá
+                                                    </button>
+
+                                                </td>
+                                            </tr>
+                                        </c:if>
+                                    </c:forEach>
+
+
+                                    <c:if test="${empty updateRequests and empty approvedRequests}">
+                                        <tr class="original-empty-state">
+                                            <td colspan="7" class="empty-state">
+                                                <i class="fas fa-folder-open empty-icon"></i>
+                                                <div class="empty-title">Không có đơn nào</div>
+                                                <div class="empty-description">Hiện tại không có đơn xin sửa CLB nào.</div>
+                                            </td>
+                                        </tr>
+                                    </c:if>
+                                </tbody>
+                            </table>
+                        </div>
 
                         <!-- Modal xác nhận -->
                         <div id="confirmModal" class="modal">
@@ -272,6 +339,8 @@
                         </div>
                     </div>
                 </div>
+                                        
+                
                 <!-- Modal Bootstrap: Nhập lý do từ chối -->
                 <div class="modal fade" id="rejectReasonModal" tabindex="-1" aria-labelledby="rejectReasonModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
@@ -282,6 +351,32 @@
                             </div>
                             <div class="modal-body">
                                 <input type="hidden" name="action" value="rejectPermissionRequest">
+                                <input type="hidden" name="id" id="rejectClubID">
+                                <input type="hidden" name="userID" id="rejectUserID">
+
+                                <div class="mb-3">
+                                    <label for="reason" class="form-label">Nhập lý do từ chối:</label>
+                                    <textarea class="form-control" name="reason" id="reason" rows="4" required></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-danger">Từ chối</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                            
+                <!-- Modal Bootstrap: Nhập lý do từ chối -->
+                <div class="modal fade" id="rejectUpdateReasonModal" tabindex="-1" aria-labelledby="rejectReasonModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <form action="${pageContext.request.contextPath}/ic" method="get" class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="rejectReasonModalLabel">Lý do từ chối</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                            </div>
+                            <div class="modal-body">
+                                <input type="hidden" name="action" value="rejectUpdatePermissionRequest">
                                 <input type="hidden" name="id" id="rejectClubID">
                                 <input type="hidden" name="userID" id="rejectUserID">
 
@@ -393,6 +488,17 @@
 
                 // Hiện modal Bootstrap
                 const modal = new bootstrap.Modal(document.getElementById('rejectReasonModal'));
+                modal.show();
+            }
+        </script>
+        <script>
+            function showUpdateRejectModal(clubID, userID) {
+                // Gán dữ liệu vào các hidden input
+                document.getElementById("rejectClubID").value = clubID;
+                document.getElementById("rejectUserID").value = userID;
+
+                // Hiện modal Bootstrap
+                const modal = new bootstrap.Modal(document.getElementById('rejectUpdateReasonModal'));
                 modal.show();
             }
         </script>

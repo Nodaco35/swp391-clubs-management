@@ -69,16 +69,28 @@
                             </div>                            
                             <div class="club-buttons-row">
                                 <div class="left-buttons">
-                                    <c:if test="${isPresident}">
+                                    <c:if test="${isPresident && clubStatus}">
                                         <a href="${pageContext.request.contextPath}/create-club?action=editClub&id=${displayClub.clubID}"
                                            class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition btn-edit">
                                             <i class="fas fa-edit me-2"></i>Chỉnh sửa
                                         </a>
                                     </c:if>
+                                    <c:if test="${isPresident && !clubStatus && clubRequestStatus == 'Rejected'}">
+                                        
+
+                                        <a href="${pageContext.request.contextPath}/create-club?action=editRejectClub&id=${displayClub.clubID}"
+                                           class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition btn-edit">
+                                            <i class="fas fa-edit me-2"></i>Chỉnh Đơn
+                                        </a>
+                                           
+                                           <div><strong style="color: red">
+                                                ${rejectReason}
+                                            </strong> </div><br>
+                                    </c:if>
                                     <c:if test="${isDepartmentLeader}">
                                         <a href="${pageContext.request.contextPath}/department-dashboard?clubID=${displayClub.clubID}" 
                                            class="btn btn-primary">
-                                            <i class="fas fa-users-gear"></i> Quản lý Ban
+                                            <i class="fas fa-users-gear"></i>Quản lý Ban
                                         </a>
                                     </c:if>
                                 </div>
@@ -215,7 +227,7 @@
                             <div id="modalCampaignDescription" class="value description">-</div>
                         </div>
                     </div>
-                    
+
                     <!-- Thông tin các vòng tuyển -->
                     <div class="stages-info">
                         <h3 class="section-title">Các vòng tuyển</h3>
@@ -223,7 +235,7 @@
                             <!-- Stages will be dynamically added here -->
                         </div>
                     </div>
-                    
+
                     <!-- Trạng thái hiện tại -->
                     <div class="current-status">
                         <h3 class="section-title">Trạng thái hiện tại</h3>
