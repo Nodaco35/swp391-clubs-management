@@ -139,7 +139,7 @@ public class ICServlet extends HttpServlet {
             }
 
             response.sendRedirect("ic?action=grantPermission");
-        } else if (action.equals("approveUpdatePermissionRequest") || action.equals("rejectUpdatePermissionRequest") || action.equals("deleteUpdatePermissionRequest")) {
+        } else if (action.equals("approveUpdatePermissionRequest") || action.equals("rejectUpdatePermissionRequest")) {
             int requestClubId = Integer.parseInt(request.getParameter("id"));
             boolean success;
             String message = null, rejectedMessage = null, deletedMessage = null;
@@ -162,9 +162,9 @@ public class ICServlet extends HttpServlet {
                     approvalHistoryDAO.insertApprovalRecord(requestClubId, "Approved", "Đã duyệt sửa Câu lạc bộ", "Update");
                 }
                 request.setAttribute(success ? "successMessage" : "errorMessage", message);
-            } else if (action.equals("rejectPermissionRequest")) {
+            } else if (action.equals("rejectUpdatePermissionRequest")) {
                 String reason = request.getParameter("reason");        // Lý do từ chối
-                success = approvalHistoryDAO.rejectRequest(requestClubId, reason);
+                success = approvalHistoryDAO.rejectUpdateRequest(requestClubId);
 
                 rejectedMessage = success ? "Đã từ chối đơn thành công!" : "Từ chối đơn thất bại. Vui lòng thử lại.";
 
@@ -182,13 +182,7 @@ public class ICServlet extends HttpServlet {
                 }
 
                 request.setAttribute(success ? "rejectedMessage" : "errorMessage", rejectedMessage);
-            } else {
-                success = approvalHistoryDAO.deleteUpdateClubRequest(requestClubId);
-
-                deletedMessage = success ? "Đã xoá đơn thành công!" : "Xoá đơn thất bại. Vui lòng thử lại.";
-
-                request.setAttribute(success ? "deletedMessage" : "errorMessage", deletedMessage);
-            }
+            } 
 
             response.sendRedirect("ic?action=grantPermission");
         } else if ("viewClubRequest".equals(action)) {
@@ -200,11 +194,8 @@ public class ICServlet extends HttpServlet {
             request.setAttribute("approvalHistory", approvalHistory);
             request.setAttribute("club", infoClub);
 
-//            PrintWriter out = response.getWriter();
-//            out.print(approvalHistory.size());
             request.getRequestDispatcher("view/ic/viewClubInfo.jsp").forward(request, response);
         } else if ("viewUpdateClubRequest".equals(action)) {
-            ApprovalHistoryDAO approvalHistoryDAO = new ApprovalHistoryDAO();
             int infoClubId = Integer.parseInt(request.getParameter("id"));
             Clubs infoClub = clubDAO.getALLClubById(infoClubId);
             
@@ -213,8 +204,6 @@ public class ICServlet extends HttpServlet {
             request.setAttribute("club", infoClub);
             request.setAttribute("updateClub", infoUpdateClub);
 
-//            PrintWriter out = response.getWriter();
-//            out.print(approvalHistory.size());
             request.getRequestDispatcher("view/ic/viewUpdateClubInfo.jsp").forward(request, response);
         } else if ("periodicReport".equals(action)) {
             ClubPeriodicReportDAO reportDAO = new ClubPeriodicReportDAO();

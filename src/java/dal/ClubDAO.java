@@ -555,7 +555,6 @@ public class ClubDAO {
     }
 
     public List<Clubs> getUpdateRequestClubs() {
-        int isActive = 0;
 
         List<Clubs> clubs = new ArrayList<>();
         String sql = """
@@ -564,11 +563,10 @@ public class ClubDAO {
                                                                LEFT JOIN ClubCategories cc ON c.CategoryID = cc.CategoryID 
                                                                join userclubs uc on c.ClubID = uc.ClubID
                                                                join users u on u.UserID = uc.UserID 
-                                                               WHERE c.ClubStatus = ? AND uc.RoleID = 1 and CurrentRequestType = 'Update'
+                                                               WHERE c.ClubStatus = 1 AND uc.RoleID = 1 and CurrentRequestType = 'Update'
                                                                ORDER BY c.EstablishedDate DESC;
                      """;
         try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, isActive);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Clubs club = new Clubs();
@@ -585,14 +583,12 @@ public class ClubDAO {
                     club.setCategoryID(rs.getInt("CategoryID"));
                     club.setCategoryName(rs.getString("CategoryName"));
 
-                    if (isActive == 0) {
-                        club.setClubRequestStatus(rs.getString("ClubRequestStatus"));
-                        club.setCurrentRequestType(rs.getString("CurrentRequestType"));
-                        club.setUpdateRequestNote(rs.getString("UpdateRequestNote"));
+                    club.setClubRequestStatus(rs.getString("ClubRequestStatus"));
+                    club.setCurrentRequestType(rs.getString("CurrentRequestType"));
+                    club.setUpdateRequestNote(rs.getString("UpdateRequestNote"));
 
-                        club.setChairmanID(rs.getString("UserID"));
-                        club.setChairmanFullName(rs.getString("FullName"));
-                    }
+                    club.setChairmanID(rs.getString("UserID"));
+                    club.setChairmanFullName(rs.getString("FullName"));
 
                     clubs.add(club);
 
@@ -776,15 +772,10 @@ public class ClubDAO {
         }
         return null;
     }
-    
+
     public Clubs getUpdateClubById(int clubID) {
         String query = """
-                       SELECT c.*, cc.CategoryName, u.UserID, u.FullName, uc.RoleID
-                       FROM Clubs c 
-                       LEFT JOIN ClubCategories cc ON c.CategoryID = cc.CategoryID 
-                                       join userclubs uc on c.ClubID = uc.ClubID
-                                       join users u on u.UserID = uc.UserID
-                                       WHERE c.ParentClubID = ? and uc.RoleID = 1
+                       select *, cc.CategoryName from clubs c LEFT JOIN ClubCategories cc ON c.CategoryID = cc.CategoryID  where ParentClubID = ?
                        """;
         try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, clubID);
@@ -808,8 +799,6 @@ public class ClubDAO {
                     club.setCurrentRequestType(rs.getString("CurrentRequestType"));
                     club.setUpdateRequestNote(rs.getString("UpdateRequestNote"));
 
-                    club.setChairmanID(rs.getString("UserID"));
-                    club.setChairmanFullName(rs.getString("FullName"));
 
                     return club;
                 }
