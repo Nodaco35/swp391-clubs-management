@@ -40,7 +40,7 @@ public class SubmitExpenseServlet extends HttpServlet {
         }
         Integer clubID = (Integer) request.getSession().getAttribute("clubID");
         if (clubID == null || !dashboardDAO.isDepartmentLeaderHauCan(user.getUserID(), clubID)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền gửi đơn xin chi phí");
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền gửi yêu cầu chi tiêu");
             return;
         }
 
@@ -98,7 +98,7 @@ public class SubmitExpenseServlet extends HttpServlet {
         }
         Integer clubID = (Integer) request.getSession().getAttribute("clubID");
         if (clubID == null || !dashboardDAO.isDepartmentLeaderHauCan(user.getUserID(), clubID)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền gửi đơn xin chi phí");
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền gửi yêu cầu chi tiêu");
             return;
         }
 
@@ -193,15 +193,15 @@ public class SubmitExpenseServlet extends HttpServlet {
                     NotificationDAO.sentToPerson1(
                         user.getUserID(),
                         externalLeaderID,
-                        "Đơn Xin Chi Phí Mới",
-                        "Một đơn xin chi phí mới đã được gửi từ " + user.getFullName() + " cho CLB " + clubID + ". Vui lòng xem xét và duyệt.",
+                        "Đơn yêu cầu chi tiêu mới",
+                        "Một đơn yêu cầu chi tiêu mới đã được gửi từ " + user.getFullName() + " cho CLB " + clubID + ". Vui lòng xem xét và duyệt.",
                         "HIGH"
                     );
                 }
-                request.setAttribute("message", "Đơn xin chi phí đã được gửi thành công!");
+                request.setAttribute("message", "Đơn yêu cầu chi tiêu đã được gửi thành công!");
                 
             } else {
-                request.setAttribute("error", "Không thể gửi đơn xin chi phí. Vui lòng thử lại.");
+                request.setAttribute("error", "Không thể gửi đơn yêu cầu chi tiêu. Vui lòng thử lại.");
             }
         } catch (Exception e) {
             e.printStackTrace();

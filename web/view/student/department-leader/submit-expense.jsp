@@ -6,7 +6,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Gửi Đơn Xin Chi Phí</title>
+        <title>Yêu Cầu Chi Tiêu</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/department-leader.css">
@@ -52,13 +52,13 @@
                 <header class="header mb-4">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h1 class="h3 mb-1">Gửi Đơn Xin Chi Phí</h1>
+                            <h1 class="h3 mb-1">Gửi đơn yêu cầu chi tiêu</h1>
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb mb-0">
                                     <li class="breadcrumb-item">
                                         <a href="${pageContext.request.contextPath}/department-dashboard?clubID=${clubID}" class="text-decoration-none">Dashboard</a>
                                     </li>
-                                    <li class="breadcrumb-item active" aria-current="page">Gửi Đơn Xin chi phí</li>
+                                    <li class="breadcrumb-item active" aria-current="page">Gửi Yêu Cầu Chi Tiêu</li>
                                 </ol>
                         </div>
                     </div>
@@ -70,7 +70,7 @@
                         <div class="card-header">
                             <h2 class="card-title">
                                 <i class="fas fa-file-invoice-dollar" style="color: #8b5cf6;"></i>
-                                Gửi Đơn Xin Chi Phí Mới (Kỳ: ${term.termName})
+                                Gửi đơn yêu cầu chi tiêu Mới (Kỳ: ${term.termName})
                             </h2>
                             <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#expenseFormCollapse" aria-expanded="false" aria-controls="expenseFormCollapse">
                                 <i class="fas fa-plus"></i> Tạo Đơn
@@ -119,7 +119,7 @@
                         <div class="card-header">
                             <h2 class="card-title">
                                 <i class="fas fa-list" style="color: #8b5cf6;"></i>
-                                Danh Đơn Xin Chi Phí Đã Gửi (Kỳ: ${term.termName})
+                                Danh Sách Yêu Cầu Chi Tiêu Đã Gửi (Kỳ: ${term.termName})
                             </h2>
                         </div>
                         <div class="card-body">
@@ -157,7 +157,7 @@
                                 </div>
                             </div>
                             <c:if test="${empty submittedExpenses}">
-                                <p class="text-muted">Bạn chưa gửi đơn xin chi phí nào.</p>
+                                <p class="text-muted">Bạn chưa gửi yêu cầu chi tiêu nào.</p>
                             </c:if>
                             <c:if test="${not empty submittedExpenses}">
                                 <div class="table-responsive">
