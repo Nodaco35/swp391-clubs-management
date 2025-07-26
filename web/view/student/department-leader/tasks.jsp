@@ -67,7 +67,7 @@
                 margin-right: 10px;
                 object-fit: cover;
             }
-            
+
             /* Autocomplete dropdown styling */
             #memberDropdown {
                 border: 1px solid #ced4da;
@@ -75,34 +75,40 @@
                 box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
                 background: white;
             }
-            
+
             #memberDropdown .dropdown-item {
                 padding: 8px 12px;
                 border-bottom: 1px solid #f8f9fa;
             }
-            
+
             #memberDropdown .dropdown-item:hover {
                 background-color: #f8f9fa;
             }
-            
+
             #memberDropdown .dropdown-item:last-child {
                 border-bottom: none;
             }
-            
+
             #selectedMemberDisplay {
                 animation: fadeIn 0.3s ease-in-out;
             }
-            
+
             @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(-5px); }
-                to { opacity: 1; transform: translateY(0); }
+                from {
+                    opacity: 0;
+                    transform: translateY(-5px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
             }
         </style>
     </head>
     <body>
         <!-- Mobile Menu Toggle -->
         <%@ include file="components/mobile-menu.jsp" %>
-        
+
         <!-- Sidebar -->
         <div class="department-leader-container">
             <c:set var="activePage" value="tasks" />
@@ -132,7 +138,7 @@
                     <div class="card-body">
                         <form method="GET" class="row g-3" id="filterForm">
                             <input type="hidden" name="clubID" value="${clubID}">
-                            
+
                             <!-- Search Box -->
                             <div class="col-md-5">
                                 <label for="searchKeyword" class="form-label">Tìm kiếm:</label>
@@ -142,7 +148,7 @@
                                            value="${param.search}" placeholder="Tìm theo tên công việc hoặc người phụ trách...">
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-2">
                                 <label for="statusFilter" class="form-label">Trạng thái:</label>
                                 <select class="form-select" id="statusFilter" name="status">
@@ -154,7 +160,7 @@
                                     <option value="Rejected" ${param.status == 'Rejected' ? 'selected' : ''}>Từ chối</option>
                                 </select>
                             </div>
-                            
+
                             <div class="col-md-2">
                                 <label for="sortBy" class="form-label">Sắp xếp theo:</label>
                                 <select class="form-select" id="sortBy" name="sortBy">
@@ -165,7 +171,7 @@
                                     <option value="status" ${param.sortBy == 'status' ? 'selected' : ''}>Trạng thái</option>
                                 </select>
                             </div>
-                            
+
                             <div class="col-md-2">
                                 <label for="sortOrder" class="form-label">Thứ tự:</label>
                                 <select class="form-select" id="sortOrder" name="sortOrder">
@@ -173,7 +179,7 @@
                                     <option value="asc" ${param.sortOrder == 'asc' ? 'selected' : ''}>Cũ nhất</option>
                                 </select>
                             </div>
-                            
+
                             <div class="col-12">
                                 <div class="d-flex gap-2">
                                     <button type="submit" class="btn btn-primary">
@@ -195,7 +201,7 @@
                             <i class="fas fa-tasks"></i> 
                             Danh sách công việc (${assignedTasks.size()} công việc)
                         </h5>
-                        
+
                         <!-- Current filters display -->
                         <div class="text-end">
                             <c:if test="${not empty param.search}">
@@ -323,17 +329,17 @@
                                                     </td>
                                                     <td>
                                                         <span class="badge ${task.status == 'Done' ? 'bg-success' : 
-                                                                            task.status == 'InProgress' ? 'bg-primary' : 
-                                                                            task.status == 'Review' ? 'bg-warning' : 
-                                                                            task.status == 'Rejected' ? 'bg-danger' : 'bg-secondary'}">
-                                                            <c:choose>
-                                                                <c:when test="${task.status == 'ToDo'}">Chưa bắt đầu</c:when>
-                                                                <c:when test="${task.status == 'InProgress'}">Đang thực hiện</c:when>
-                                                                <c:when test="${task.status == 'Review'}">Chờ duyệt</c:when>
-                                                                <c:when test="${task.status == 'Done'}">Hoàn thành</c:when>
-                                                                <c:when test="${task.status == 'Rejected'}">Từ chối</c:when>
-                                                                <c:otherwise>${task.status}</c:otherwise>
-                                                            </c:choose>
+                                                                             task.status == 'InProgress' ? 'bg-primary' : 
+                                                                             task.status == 'Review' ? 'bg-warning' : 
+                                                                             task.status == 'Rejected' ? 'bg-danger' : 'bg-secondary'}">
+                                                              <c:choose>
+                                                                  <c:when test="${task.status == 'ToDo'}">Chưa bắt đầu</c:when>
+                                                                  <c:when test="${task.status == 'InProgress'}">Đang thực hiện</c:when>
+                                                                  <c:when test="${task.status == 'Review'}">Chờ duyệt</c:when>
+                                                                  <c:when test="${task.status == 'Done'}">Hoàn thành</c:when>
+                                                                  <c:when test="${task.status == 'Rejected'}">Từ chối</c:when>
+                                                                  <c:otherwise>${task.status}</c:otherwise>
+                                                              </c:choose>
                                                         </span>
                                                     </td>
                                                     <td>
@@ -358,6 +364,21 @@
                                                                     title="Chỉnh sửa">
                                                                 <i class="fas fa-edit"></i>
                                                             </button>
+                                                            <c:choose>
+                                                                <c:when test="${task.status == 'Review'}">
+                                                                    <button type="button"
+                                                                            class="btn btn-danger btn-sm"
+                                                                            onclick="showRejectModal('${task.taskID}')">
+                                                                        <i class="fas fa-times"></i> Từ chối
+                                                                    </button>
+                                                                    <button type="button"
+                                                                            class="btn btn-success btn-sm"
+                                                                            onclick="showApproveModal('${task.taskID}')">
+                                                                        <i class="fas fa-times"></i> Duyệt
+                                                                    </button>
+
+                                                                </c:when>
+                                                            </c:choose>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -371,6 +392,64 @@
                 </div>
             </main>
         </div>
+
+        <!-- Modal Bootstrap: Nhập lý do từ chối -->
+        <div class="modal fade" id="rejectReasonModal" tabindex="-1" aria-labelledby="rejectReasonModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <form action="${pageContext.request.contextPath}/department-tasks" method="get" class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="rejectReasonModalLabel">Lý do từ chối</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="clubID" value="${param.clubID}">
+                        <input type="hidden" name="action" value="rejectTask">
+                        <input type="hidden" name="taskID" id="rejectClubID">
+
+                        <div class="mb-3">
+                            <label for="reason" class="form-label">Nhập lý do từ chối:</label>
+                            <textarea class="form-control" name="reason" id="reason" rows="4" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-danger">Từ chối</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="modal fade" id="approveTaskModal" tabindex="-1" aria-labelledby="approveTaskModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <form action="${pageContext.request.contextPath}/department-tasks" method="get" class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="approveTaskModalLabel">Duyệt Task</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="approveTask">
+                        <input type="hidden" name="taskID" id="approveTaskID">
+
+                        <div class="mb-3">
+                            <label for="rating" class="form-label">Chọn chất lượng:</label>
+                            <select class="form-select form-select-sm" name="rating" id="rating" required>
+                                <option value="">-- Chọn --</option>
+                                <option value="Positive">👍 Tốt</option>
+                                <option value="Neutral">😐 Trung bình</option>
+                                <option value="Negative">👎 Kém</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success">Duyệt</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
 
         <!-- Create Task Modal -->
         <div class="modal fade" id="createTaskModal" tabindex="-1">
@@ -387,26 +466,26 @@
                             <input type="hidden" name="action" value="createTask">
                             <input type="hidden" name="clubID" value="${param.clubID}">
                             <input type="hidden" name="assigneeType" value="User">
-                            
+
                             <div class="row">
                                 <div class="col-md-12 mb-3">
                                     <label for="taskTitle" class="form-label">Tiêu đề nhiệm vụ <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="taskTitle" name="title" required maxlength="200" 
                                            placeholder="Nhập tiêu đề nhiệm vụ...">
                                 </div>
-                                
+
                                 <div class="col-md-12 mb-3">
                                     <label for="taskDescription" class="form-label">Mô tả nhiệm vụ <span class="text-danger">*</span></label>
                                     <textarea class="form-control" id="taskDescription" name="description" rows="4" required 
                                               maxlength="1000" placeholder="Mô tả chi tiết nhiệm vụ cần thực hiện..."></textarea>
                                     <div class="form-text">Tối đa 1000 ký tự</div>
                                 </div>
-                                
+
                                 <div class="col-md-6 mb-3">
                                     <label for="startDate" class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
                                     <input type="date" class="form-control" id="startDate" name="startDate" required>
                                 </div>
-                                
+
                                 <div class="col-md-6 mb-3">
                                     <label for="endDate" class="form-label">Ngày kết thúc <span class="text-danger">*</span></label>
                                     <input type="date" class="form-control" id="endDate" name="endDate" required>
@@ -422,7 +501,7 @@
                                     </select>
                                     <div class="form-text">Chọn sự kiện mà nhiệm vụ này thuộc về</div>
                                 </div>
-                                
+
                                 <div class="col-md-12 mb-3">
                                     <label for="assignedTo" class="form-label">Người phụ trách <span class="text-danger">*</span></label>
                                     <div class="position-relative">
@@ -475,6 +554,25 @@
                 </div>
             </div>
         </div>
+        <script>
+            function showRejectModal(clubID) {
+            // Gán dữ liệu vào các hidden input
+            document.getElementById("rejectClubID").value = clubID;
+            // Hiện modal Bootstrap
+            const modal = new bootstrap.Modal(document.getElementById('rejectReasonModal'));
+            modal.show();
+            }
+        </script>
+        <script>
+            function showApproveModal(taskID) {
+            // Gán dữ liệu vào hidden input
+            document.getElementById("approveTaskID").value = taskID;
+            // Hiện modal Bootstrap
+            const modal = new bootstrap.Modal(document.getElementById('approveTaskModal'));
+            modal.show();
+            }
+        </script>
+
 
         <!-- Bootstrap JS -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -482,353 +580,312 @@
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <!-- Select2 JS -->
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-        
+
         <script>
             $(document).ready(function() {
-                // Debug: Check if members are available
-                console.log('Initializing Select2...');
-                var memberOptions = $('.member-select option').length;
-                console.log('Found ' + memberOptions + ' member options');
-                
-                // Khởi tạo Select2 cho dropdown thành viên
-                $('.member-select').select2({
-                    placeholder: "Tìm kiếm thành viên...",
+            // Debug: Check if members are available
+            console.log('Initializing Select2...');
+            var memberOptions = $('.member-select option').length;
+            console.log('Found ' + memberOptions + ' member options');
+            // Khởi tạo Select2 cho dropdown thành viên
+            $('.member-select').select2({
+            placeholder: "Tìm kiếm thành viên...",
                     allowClear: true,
                     dropdownParent: $('#createTaskModal'),
                     templateResult: function (member) {
-                        if (!member.id) {
-                            return member.text;
-                        }
-                        
-                        var avatar = $(member.element).data('avatar');
-                        var email = $(member.element).data('email');
-                        
-                        var $member = $(
+                    if (!member.id) {
+                    return member.text;
+                    }
+
+                    var avatar = $(member.element).data('avatar');
+                    var email = $(member.element).data('email');
+                    var $member = $(
                             '<div class="member-item">' +
-                                '<img class="member-avatar" src="' + (avatar || 'img/Hinh-anh-dai-dien-mac-dinh-Facebook.jpg') + '" alt="Avatar">' +
-                                '<div>' +
-                                    '<div style="font-weight: 500;">' + member.text.split(' (')[0] + '</div>' +
-                                    '<div style="font-size: 0.85em; color: #6c757d;">' + email + '</div>' +
-                                '</div>' +
+                            '<img class="member-avatar" src="' + (avatar || 'img/Hinh-anh-dai-dien-mac-dinh-Facebook.jpg') + '" alt="Avatar">' +
+                            '<div>' +
+                            '<div style="font-weight: 500;">' + member.text.split(' (')[0] + '</div>' +
+                            '<div style="font-size: 0.85em; color: #6c757d;">' + email + '</div>' +
+                            '</div>' +
                             '</div>'
-                        );
-                        return $member;
+                            );
+                    return $member;
                     },
                     templateSelection: function (member) {
-                        if (!member.id) {
-                            return member.text;
-                        }
-                        return member.text.split(' (')[0];
+                    if (!member.id) {
+                    return member.text;
                     }
-                });
-
-                // Set ngày tối thiểu là hôm nay
-                var today = new Date().toISOString().split('T')[0];
-                $('#startDate').attr('min', today);
-                
-                $('#startDate').on('change', function() {
-                    $('#endDate').attr('min', this.value);
-                });
-
-                // Validation ngày
-                $('#startDate, #endDate').on('change', function() {
-                    var startDate = new Date($('#startDate').val());
-                    var endDate = new Date($('#endDate').val());
-                    
-                    if (startDate && endDate && endDate < startDate) {
-                        $('#endDate')[0].setCustomValidity('Ngày kết thúc phải sau ngày bắt đầu');
-                    } else {
-                        $('#endDate')[0].setCustomValidity('');
+                    return member.text.split(' (')[0];
                     }
-                });
             });
-
+            // Set ngày tối thiểu là hôm nay
+            var today = new Date().toISOString().split('T')[0];
+            $('#startDate').attr('min', today);
+            $('#startDate').on('change', function() {
+            $('#endDate').attr('min', this.value);
+            });
+            // Validation ngày
+            $('#startDate, #endDate').on('change', function() {
+            var startDate = new Date($('#startDate').val());
+            var endDate = new Date($('#endDate').val());
+            if (startDate && endDate && endDate < startDate) {
+            $('#endDate')[0].setCustomValidity('Ngày kết thúc phải sau ngày bắt đầu');
+            } else {
+            $('#endDate')[0].setCustomValidity('');
+            }
+            });
+            });
             // Show create task modal
             function showCreateTaskModal() {
-                console.log('Opening modal...');
-                var eventOptions = $('#eventId option').length;
-                console.log('Event options: ' + eventOptions);
-                
-                // Initialize member autocomplete
-                initializeMemberAutocomplete();
-                
-                console.log('Member autocomplete initialized');
-                new bootstrap.Modal(document.getElementById('createTaskModal')).show();
+            console.log('Opening modal...');
+            var eventOptions = $('#eventId option').length;
+            console.log('Event options: ' + eventOptions);
+            // Initialize member autocomplete
+            initializeMemberAutocomplete();
+            console.log('Member autocomplete initialized');
+            new bootstrap.Modal(document.getElementById('createTaskModal')).show();
             }
-            
+
             // Initialize member autocomplete functionality
             function initializeMemberAutocomplete() {
-                const searchInput = $('#memberSearchInput');
-                const dropdown = $('#memberDropdown');
-                const hiddenInput = $('#assignedTo');
-                let searchTimeout;
-                
-                // Clear previous selection
-                clearSelectedMember();
-                
-                searchInput.on('input', function() {
-                    const query = $(this).val().trim();
-                    
-                    clearTimeout(searchTimeout);
-                    
-                    if (query.length < 2) {
-                        dropdown.hide();
-                        return;
-                    }
-                    
-                    // Debounce search
-                    searchTimeout = setTimeout(() => {
-                        searchMembers(query);
-                    }, 300);
-                });
-                
-                // Hide dropdown when clicking outside
-                $(document).on('click', function(e) {
-                    if (!$(e.target).closest('#memberSearchInput, #memberDropdown').length) {
-                        dropdown.hide();
-                    }
-                });
-                
-                // Show dropdown when input is focused and has value
-                searchInput.on('focus', function() {
-                    if ($(this).val().trim().length >= 2 && dropdown.children().length > 0) {
-                        dropdown.show();
-                    }
-                });
+            const searchInput = $('#memberSearchInput');
+            const dropdown = $('#memberDropdown');
+            const hiddenInput = $('#assignedTo');
+            let searchTimeout;
+            // Clear previous selection
+            clearSelectedMember();
+            searchInput.on('input', function() {
+            const query = $(this).val().trim();
+            clearTimeout(searchTimeout);
+            if (query.length < 2) {
+            dropdown.hide();
+            return;
             }
-            
+
+            // Debounce search
+            searchTimeout = setTimeout(() => {
+            searchMembers(query);
+            }, 300);
+            });
+            // Hide dropdown when clicking outside
+            $(document).on('click', function(e) {
+            if (!$(e.target).closest('#memberSearchInput, #memberDropdown').length) {
+            dropdown.hide();
+            }
+            });
+            // Show dropdown when input is focused and has value
+            searchInput.on('focus', function() {
+            if ($(this).val().trim().length >= 2 && dropdown.children().length > 0) {
+            dropdown.show();
+            }
+            });
+            }
+
             // Search members via Ajax
             function searchMembers(query) {
-                const dropdown = $('#memberDropdown');
-                const clubID = new URLSearchParams(window.location.search).get('clubID');
-                
-                // Show loading
-                dropdown.html('<div class="dropdown-item text-center"><i class="fas fa-spinner fa-spin"></i> Đang tìm kiếm...</div>').show();
-                
-                $.ajax({
-                    url: '${pageContext.request.contextPath}/department-tasks',
+            const dropdown = $('#memberDropdown');
+            const clubID = new URLSearchParams(window.location.search).get('clubID');
+            // Show loading
+            dropdown.html('<div class="dropdown-item text-center"><i class="fas fa-spinner fa-spin"></i> Đang tìm kiếm...</div>').show();
+            $.ajax({
+            url: '${pageContext.request.contextPath}/department-tasks',
                     method: 'GET',
                     data: {
-                        action: 'searchMembers',
-                        clubID: clubID,
-                        q: query
+                    action: 'searchMembers',
+                            clubID: clubID,
+                            q: query
                     },
                     dataType: 'json',
                     success: function(response) {
-                        if (response.error) {
-                            dropdown.html('<div class="dropdown-item text-danger"><i class="fas fa-exclamation-triangle"></i> ' + response.error + '</div>');
-                            return;
-                        }
-                        
-                        if (response.results && response.results.length > 0) {
-                            let html = '';
-                            response.results.forEach(function(member) {
-                                const avatar = member.avatar ? 
-                                    '${pageContext.request.contextPath}/img/' + member.avatar : 
-                                    '${pageContext.request.contextPath}/img/Hinh-anh-dai-dien-mac-dinh-Facebook.jpg';
-                                
-                                html += '<div class="dropdown-item member-option" style="cursor: pointer;" ' +
-                                        'data-id="' + member.id + '" ' +
-                                        'data-name="' + member.fullName + '" ' +
-                                        'data-email="' + member.email + '" ' +
-                                        'data-avatar="' + avatar + '">' +
-                                        '<div class="d-flex align-items-center">' +
-                                            '<img src="' + avatar + '" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">' +
-                                            '<div>' +
-                                                '<div class="fw-semibold">' + member.fullName + '</div>' +
-                                                '<small class="text-muted">' + member.email + '</small>' +
-                                            '</div>' +
-                                        '</div>' +
-                                    '</div>';
-                            });
-                            dropdown.html(html);
-                            
-                            // Add click handlers for member options
-                            $('.member-option').on('click', function() {
-                                const memberId = $(this).data('id');
-                                const memberName = $(this).data('name');
-                                const memberEmail = $(this).data('email');
-                                const memberAvatar = $(this).data('avatar');
-                                
-                                selectMember(memberId, memberName, memberEmail, memberAvatar);
-                            });
-                        } else {
-                            dropdown.html('<div class="dropdown-item text-muted"><i class="fas fa-search"></i> Không tìm thấy thành viên nào</div>');
-                        }
+                    if (response.error) {
+                    dropdown.html('<div class="dropdown-item text-danger"><i class="fas fa-exclamation-triangle"></i> ' + response.error + '</div>');
+                    return;
+                    }
+
+                    if (response.results && response.results.length > 0) {
+                    let html = '';
+                    response.results.forEach(function(member) {
+                    const avatar = member.avatar ?
+                            '${pageContext.request.contextPath}/img/' + member.avatar :
+                            '${pageContext.request.contextPath}/img/Hinh-anh-dai-dien-mac-dinh-Facebook.jpg';
+                    html += '<div class="dropdown-item member-option" style="cursor: pointer;" ' +
+                            'data-id="' + member.id + '" ' +
+                            'data-name="' + member.fullName + '" ' +
+                            'data-email="' + member.email + '" ' +
+                            'data-avatar="' + avatar + '">' +
+                            '<div class="d-flex align-items-center">' +
+                            '<img src="' + avatar + '" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">' +
+                            '<div>' +
+                            '<div class="fw-semibold">' + member.fullName + '</div>' +
+                            '<small class="text-muted">' + member.email + '</small>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>';
+                    });
+                    dropdown.html(html);
+                    // Add click handlers for member options
+                    $('.member-option').on('click', function() {
+                    const memberId = $(this).data('id');
+                    const memberName = $(this).data('name');
+                    const memberEmail = $(this).data('email');
+                    const memberAvatar = $(this).data('avatar');
+                    selectMember(memberId, memberName, memberEmail, memberAvatar);
+                    });
+                    } else {
+                    dropdown.html('<div class="dropdown-item text-muted"><i class="fas fa-search"></i> Không tìm thấy thành viên nào</div>');
+                    }
                     },
                     error: function() {
-                        dropdown.html('<div class="dropdown-item text-danger"><i class="fas fa-exclamation-triangle"></i> Lỗi kết nối</div>');
+                    dropdown.html('<div class="dropdown-item text-danger"><i class="fas fa-exclamation-triangle"></i> Lỗi kết nối</div>');
                     }
-                });
+            });
             }
-            
+
             // Select a member
             function selectMember(id, name, email, avatar) {
-                $('#assignedTo').val(id);
-                $('#memberSearchInput').val(name);
-                $('#memberDropdown').hide();
-                
-                // Show selected member display
-                $('#selectedAvatar').attr('src', avatar);
-                $('#selectedName').text(name);
-                $('#selectedEmail').text(email);
-                $('#selectedMemberDisplay').show();
-                $('#memberSearchInput').hide();
+            $('#assignedTo').val(id);
+            $('#memberSearchInput').val(name);
+            $('#memberDropdown').hide();
+            // Show selected member display
+            $('#selectedAvatar').attr('src', avatar);
+            $('#selectedName').text(name);
+            $('#selectedEmail').text(email);
+            $('#selectedMemberDisplay').show();
+            $('#memberSearchInput').hide();
             }
-            
+
             // Clear selected member
             function clearSelectedMember() {
-                $('#assignedTo').val('');
-                $('#memberSearchInput').val('').show();
-                $('#selectedMemberDisplay').hide();
-                $('#memberDropdown').hide();
+            $('#assignedTo').val('');
+            $('#memberSearchInput').val('').show();
+            $('#selectedMemberDisplay').hide();
+            $('#memberDropdown').hide();
             }
 
             // Handle create task form submission
             document.getElementById('createTaskForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                // Validation
-                var title = document.getElementById('taskTitle').value.trim();
-                var description = document.getElementById('taskDescription').value.trim();
-                var startDate = document.getElementById('startDate').value;
-                var endDate = document.getElementById('endDate').value;
-                var eventId = document.getElementById('eventId').value;
-                var assignedTo = document.getElementById('assignedTo').value;
+            e.preventDefault();
+            // Validation
+            var title = document.getElementById('taskTitle').value.trim();
+            var description = document.getElementById('taskDescription').value.trim();
+            var startDate = document.getElementById('startDate').value;
+            var endDate = document.getElementById('endDate').value;
+            var eventId = document.getElementById('eventId').value;
+            var assignedTo = document.getElementById('assignedTo').value;
+            if (!title || !description || !startDate || !endDate || !eventId || !assignedTo) {
+            showNotification('Vui lòng điền đầy đủ thông tin bắt buộc!', 'error');
+            return false;
+            }
 
-                if (!title || !description || !startDate || !endDate || !eventId || !assignedTo) {
-                    showNotification('Vui lòng điền đầy đủ thông tin bắt buộc!', 'error');
-                    return false;
-                }
+            if (new Date(endDate) < new Date(startDate)) {
+            showNotification('Ngày kết thúc phải sau ngày bắt đầu!', 'error');
+            return false;
+            }
 
-                if (new Date(endDate) < new Date(startDate)) {
-                    showNotification('Ngày kết thúc phải sau ngày bắt đầu!', 'error');
-                    return false;
-                }
-                
-                // Use traditional form submission instead of fetch
-                const form = this;
-                const submitBtn = form.querySelector('button[type="submit"]');
-                
-                // Show loading
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tạo...';
-                submitBtn.disabled = true;
-                
-                // Submit form traditionally
-                form.action = '${pageContext.request.contextPath}/department-tasks';
-                form.method = 'POST';
-                form.submit();
+            // Use traditional form submission instead of fetch
+            const form = this;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            // Show loading
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tạo...';
+            submitBtn.disabled = true;
+            // Submit form traditionally
+            form.action = '${pageContext.request.contextPath}/department-tasks';
+            form.method = 'POST';
+            form.submit();
             });
-
             // Sorting function
             function sortBy(column) {
-                const urlParams = new URLSearchParams(window.location.search);
-                const currentSort = urlParams.get('sortBy');
-                const currentOrder = urlParams.get('sortOrder') || 'desc';
-                
-                // Toggle order if same column, otherwise default to desc
-                const newOrder = (currentSort === column && currentOrder === 'desc') ? 'asc' : 'desc';
-                
-                urlParams.set('sortBy', column);
-                urlParams.set('sortOrder', newOrder);
-                
-                window.location.search = urlParams.toString();
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentSort = urlParams.get('sortBy');
+            const currentOrder = urlParams.get('sortOrder') || 'desc';
+            // Toggle order if same column, otherwise default to desc
+            const newOrder = (currentSort === column && currentOrder === 'desc') ? 'asc' : 'desc';
+            urlParams.set('sortBy', column);
+            urlParams.set('sortOrder', newOrder);
+            window.location.search = urlParams.toString();
             }
 
             // Clear all filters
             function clearFilters() {
-                const clubID = new URLSearchParams(window.location.search).get('clubID');
-                window.location.href = window.location.pathname + '?clubID=' + clubID;
+            const clubID = new URLSearchParams(window.location.search).get('clubID');
+            window.location.href = window.location.pathname + '?clubID=' + clubID;
             }
 
             // Real-time search functionality
             let searchTimeout;
             document.getElementById('searchKeyword').addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    document.getElementById('filterForm').submit();
-                }, 500); // Delay 500ms after user stops typing
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+            document.getElementById('filterForm').submit();
+            }, 500); // Delay 500ms after user stops typing
             });
-
             // Auto-submit form when filter dropdowns change
             document.getElementById('statusFilter').addEventListener('change', function() {
-                document.getElementById('filterForm').submit();
+            document.getElementById('filterForm').submit();
             });
-            
             document.getElementById('sortBy').addEventListener('change', function() {
-                document.getElementById('filterForm').submit();
+            document.getElementById('filterForm').submit();
             });
-            
             document.getElementById('sortOrder').addEventListener('change', function() {
-                document.getElementById('filterForm').submit();
+            document.getElementById('filterForm').submit();
             });
-
             // Notification function
             function showNotification(message, type = 'info') {
-                const notification = document.createElement('div');
-                notification.className = `alert alert-\${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
-                notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-                notification.innerHTML = `
+            const notification = document.createElement('div');
+            notification.className = `alert alert-\${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
                     \${message}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 `;
-                
-                document.body.appendChild(notification);
-                
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        notification.remove();
-                    }
-                }, 5000);
+            document.body.appendChild(notification);
+            setTimeout(() => {
+            if (notification.parentNode) {
+            notification.remove();
+            }
+            }, 5000);
             }
 
             // View task detail function
             function viewTaskDetail(taskId) {
-                console.log('Viewing task detail for ID:', taskId);
-                
-                // Show loading in modal
-                const modal = new bootstrap.Modal(document.getElementById('taskDetailModal'));
-                const content = document.getElementById('taskDetailContent');
-                
-                content.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x"></i><br>Đang tải...</div>';
-                modal.show();
-                
-                // Load task details via AJAX
-                const clubID = new URLSearchParams(window.location.search).get('clubID');
-                
-                $.ajax({
-                    url: '${pageContext.request.contextPath}/department-tasks',
+            console.log('Viewing task detail for ID:', taskId);
+            // Show loading in modal
+            const modal = new bootstrap.Modal(document.getElementById('taskDetailModal'));
+            const content = document.getElementById('taskDetailContent');
+            content.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x"></i><br>Đang tải...</div>';
+            modal.show();
+            // Load task details via AJAX
+            const clubID = new URLSearchParams(window.location.search).get('clubID');
+            $.ajax({
+            url: '${pageContext.request.contextPath}/department-tasks',
                     method: 'GET',
                     data: {
-                        action: 'getTaskDetail',
-                        taskId: taskId,
-                        clubID: clubID
+                    action: 'getTaskDetail',
+                            taskId: taskId,
+                            clubID: clubID
                     },
                     dataType: 'json',
                     success: function(response) {
-                        console.log('Task detail response:', response); // Debug log
-                        
-                        if (response.error) {
-                            content.innerHTML = `
+                    console.log('Task detail response:', response); // Debug log
+
+                    if (response.error) {
+                    content.innerHTML = `
                                 <div class="alert alert-danger">
                                     <i class="fas fa-exclamation-triangle"></i>
                                     Lỗi: \${response.error}
                                 </div>
                             `;
-                            return;
-                        }
-                        
-                        // Build task detail content
-                        const statusBadgeClass = getStatusBadgeClass(response.status);
-                        
-                        // Check assignee info with proper null/undefined handling
-                        let assigneeInfo;
-                        if (response.assignee && response.assignee.fullName) {
-                            const avatarSrc = response.assignee.avatar ? 
-                                '${pageContext.request.contextPath}/img/' + response.assignee.avatar : 
-                                '${pageContext.request.contextPath}/img/Hinh-anh-dai-dien-mac-dinh-Facebook.jpg';
-                            
-                            assigneeInfo = `
+                    return;
+                    }
+
+                    // Build task detail content
+                    const statusBadgeClass = getStatusBadgeClass(response.status);
+                    // Check assignee info with proper null/undefined handling
+                    let assigneeInfo;
+                    if (response.assignee && response.assignee.fullName) {
+                    const avatarSrc = response.assignee.avatar ?
+                            '${pageContext.request.contextPath}/img/' + response.assignee.avatar :
+                            '${pageContext.request.contextPath}/img/Hinh-anh-dai-dien-mac-dinh-Facebook.jpg';
+                    assigneeInfo = `
                                 <div class="d-flex align-items-center">
                                     <img src="\${avatarSrc}" 
                                          class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
@@ -838,11 +895,11 @@
                                     </div>
                                 </div>
                             `;
-                        } else {
-                            assigneeInfo = '<span class="text-muted">Chưa giao</span>';
-                        }
-                        
-                        content.innerHTML = `
+                    } else {
+                    assigneeInfo = '<span class="text-muted">Chưa giao</span>';
+                    }
+
+                    content.innerHTML = `
                             <div class="row">
                                 <div class="col-md-8">
                                     <h5 class="fw-bold mb-3">\${response.title}</h5>
@@ -862,14 +919,14 @@
                                     </div>
                                     
                                     \${response.event ? `
-                                        <div class="mb-3">
-                                            <label class="form-label fw-semibold">Sự kiện liên quan:</label>
-                                            <div class="p-2 bg-info bg-opacity-10 rounded">
-                                                <i class="fas fa-calendar-alt me-2"></i>
-                                                \${response.event.eventName}
-                                            </div>
-                                        </div>
-                                    ` : ''}
+                            <div class="mb-3">
+                                                            <label class="form-label fw-semibold">Sự kiện liên quan:</label>
+                                                                <div class="p-2 bg-info bg-opacity-10 rounded">
+                                                                    <i class="fas fa-calendar-alt me-2"></i>
+                                                                    \${response.event.eventName}
+        </div>
+                                                                    </div>
+                            ` : ''}
                                 </div>
                                 
                                 <div class="col-md-4">
@@ -886,44 +943,44 @@
                                             </div>
                                             
                                             \${response.startDate ? `
-                                                <div class="mb-3">
-                                                    <label class="form-label fw-semibold">Ngày bắt đầu:</label>
-                                                    <div class="text-muted">
-                                                        <i class="fas fa-calendar-start me-2"></i>
-                                                        \${response.startDate}
-                                                    </div>
-                                                </div>
-                                            ` : ''}
+                            <div class="mb-3">
+                                                                             <label class="form-label fw-semibold">Ngày bắt đầu:</label>
+                                                                             <div class="text-muted">
+                                                                             <i class="fas fa-calendar-start me-2"></i>
+                                                                  \${response.startDate}
+                                                                  </div>
+                                                                  </div>
+                            ` : ''}
                                             
                                             \${response.endDate ? `
-                                                <div class="mb-3">
-                                                    <label class="form-label fw-semibold">Ngày kết thúc:</label>
-                                                    <div class="text-muted">
-                                                        <i class="fas fa-calendar-end me-2"></i>
-                                                        \${response.endDate}
+                            <div class="mb-3">
+                                                                  <label class="form-label fw-semibold">Ngày kết thúc:</label>
+                                                                  <div class="text-muted">
+                                                                  <i class="fas fa-calendar-end me-2"></i>
+                                                              \${response.endDate}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            ` : ''}
+                            ` : ''}
                                             
                                             \${response.creator ? `
-                                                <div class="mb-3">
-                                                    <label class="form-label fw-semibold">Người tạo:</label>
-                                                    <div class="text-muted">
-                                                        <i class="fas fa-user me-2"></i>
-                                                        \${response.creator.fullName}
-                                                    </div>
-                                                </div>
-                                            ` : ''}
+                            <div class="mb-3">
+                                                            <label class="form-label fw-semibold">Người tạo:</label>
+                                                        <div class="text-muted">
+                                                            <i class="fas fa-user me-2"></i>
+                                                                \${response.creator.fullName}
+                                                                </div>
+                                                            </div>
+                            ` : ''}
                                             
                                             \${response.createdAt ? `
-                                                <div class="mb-3">
-                                                    <label class="form-label fw-semibold">Ngày tạo:</label>
-                                                    <div class="text-muted">
-                                                        <i class="fas fa-clock me-2"></i>
-                                                        \${response.createdAt}
-                                                    </div>
-                                                </div>
-                                            ` : ''}
+                            <div class="mb-3">
+        <label class="form-label fw-semibold">Ngày tạo:</label>
+        <div class="text-muted">
+                                                                    <i class="fas fa-clock me-2"></i>
+                                                                    \${response.createdAt}
+        </div>
+                                                            </div>
+                            ` : ''}
                                         </div>
                                     </div>
                                 </div>
@@ -938,40 +995,52 @@
                         `;
                     },
                     error: function() {
-                        content.innerHTML = `
+                    content.innerHTML = `
                             <div class="alert alert-danger">
                                 <i class="fas fa-exclamation-triangle"></i>
                                 Không thể tải thông tin chi tiết. Vui lòng thử lại sau.
                             </div>
                         `;
                     }
-                });
+            });
             }
-            
+
             // Helper function to get status badge class
             function getStatusBadgeClass(status) {
-                switch(status) {
-                    case 'Done': return 'bg-success';
-                    case 'InProgress': return 'bg-primary';
-                    case 'Review': return 'bg-warning';
-                    case 'Rejected': return 'bg-danger';
-                    case 'ToDo':
+            switch (status) {
+            case 'Done': return 'bg-success';
+            case 'InProgress': return 'bg-primary';
+            case 'Review': return 'bg-warning';
+            case 'Rejected': return 'bg-danger';
+            case 'ToDo':
                     default: return 'bg-secondary';
-                }
+            }
             }
 
             // Edit task function
             function editTask(taskId) {
-                console.log('Editing task ID:', taskId);
-                showNotification('Chức năng chỉnh sửa nhiệm vụ đang được phát triển.', 'info');
-                
-                // TODO: Implement edit task functionality
-                // This would typically:
-                // 1. Load task data via AJAX
-                // 2. Populate edit form
-                // 3. Show edit modal
-                // 4. Handle form submission for updates
+            console.log('Editing task ID:', taskId);
+            showNotification('Chức năng chỉnh sửa nhiệm vụ đang được phát triển.', 'info');
+            // TODO: Implement edit task functionality
+            // This would typically:
+            // 1. Load task data via AJAX
+            // 2. Populate edit form
+            // 3. Show edit modal
+            // 4. Handle form submission for updates
             }
         </script>
-    </body>
+        
+        <script>
+            function showApprove(taskId) {
+            document.getElementById(`approve-${taskId}`).classList.add('show');
+            document.getElementById(`reject-${taskId}`).classList.remove('show');
+            }
+
+            function showReject(taskId) {
+            document.getElementById(`reject-${taskId}`).classList.add('show');
+            document.getElementById(`approve-${taskId}`).classList.remove('show');
+            }
+</script>
+
+</body>
 </html>
