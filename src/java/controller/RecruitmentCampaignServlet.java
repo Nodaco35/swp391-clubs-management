@@ -18,6 +18,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import dal.ClubDAO;
 import models.RecruitmentCampaign;
 import models.RecruitmentStage;
 import models.ApplicationStage;
@@ -48,7 +49,7 @@ public class RecruitmentCampaignServlet extends HttpServlet {
         // Kiểm tra người dùng đã đăng nhập
         HttpSession session = request.getSession();
         Users currentUser = (Users) session.getAttribute("user");
-
+        ClubDAO clubDAO = new ClubDAO();
         if (currentUser == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
@@ -58,12 +59,29 @@ public class RecruitmentCampaignServlet extends HttpServlet {
 
         // Kiểm tra null trước khi gọi equals() để tránh NullPointerException
         if (pathInfo == null) {
-            // Lấy clubId từ request parameter
-            String redirectClubId = request.getParameter("clubId");
+            // Lấy thông tin clubId từ thông tin chủ nhiệm
+            String redirectClubId = null;
+            try {
+                models.ClubInfo clubInfo = clubDAO.getClubChairman(currentUser.getUserID());
+                if (clubInfo != null) {
+                    redirectClubId = String.valueOf(clubInfo.getClubID());
+                    logger.log(Level.INFO, "Lấy clubId từ thông tin chủ nhiệm: {0}", redirectClubId);
+                }
+            } catch (Exception e) {
+                logger.log(Level.WARNING, "Không thể lấy thông tin clubId từ chủ nhiệm: {0}", e.getMessage());
+            }
+
+            // Kiểm tra lại nếu không lấy được clubId từ thông tin chủ nhiệm, thử lấy từ request parameter
             if (redirectClubId == null || redirectClubId.isEmpty()) {
-                // Nếu không có clubId, chuyển hướng về myclub với thông báo lỗi
+                redirectClubId = request.getParameter("clubId");
+                logger.log(Level.INFO, "Lấy clubId từ request parameter: {0}", redirectClubId);
+            }
+
+            // Kiểm tra cuối cùng sau khi đã thử các cách lấy clubId
+            if (redirectClubId == null || redirectClubId.isEmpty()) {
+                // Nếu vẫn không có clubId, chuyển hướng về myclub với thông báo lỗi
                 response.sendRedirect(request.getContextPath() + "/myclub?error=missing_parameter&message="
-                        + URLEncoder.encode("Thiếu thông tin câu lạc bộ", StandardCharsets.UTF_8.name()));
+                        + URLEncoder.encode("Không tìm thấy thông tin câu lạc bộ của bạn", StandardCharsets.UTF_8.name()));
             } else {
                 response.sendRedirect(request.getContextPath() + "/recruitment/list?clubId=" + redirectClubId);
             }
@@ -76,11 +94,24 @@ public class RecruitmentCampaignServlet extends HttpServlet {
             if ("/list".equals(pathInfo)) {
                 String clubIdParam = request.getParameter("clubId");
 
-                // Kiểm tra và chuyển đổi clubId
+                // Nếu không có clubId trong request, lấy từ thông tin chủ nhiệm
                 if (clubIdParam == null || clubIdParam.trim().isEmpty()) {
-                    // Nếu không có clubId, chuyển hướng về myclub với thông báo lỗi
+                    try {
+                        models.ClubInfo clubInfo = clubDAO.getClubChairman(currentUser.getUserID());
+                        if (clubInfo != null) {
+                            clubIdParam = String.valueOf(clubInfo.getClubID());
+                            logger.log(Level.INFO, "Đường dẫn /list: Lấy clubId từ thông tin chủ nhiệm: {0}", clubIdParam);
+                        }
+                    } catch (Exception e) {
+                        logger.log(Level.WARNING, "Đường dẫn /list: Không thể lấy thông tin clubId từ chủ nhiệm: {0}", e.getMessage());
+                    }
+                }
+
+                // Kiểm tra lại sau khi cố gắng lấy clubId
+                if (clubIdParam == null || clubIdParam.trim().isEmpty()) {
+                    // Nếu vẫn không có clubId, chuyển hướng về myclub với thông báo lỗi
                     response.sendRedirect(request.getContextPath() + "/myclub?error=access_denied&message="
-                            + URLEncoder.encode("Thiếu thông tin câu lạc bộ", StandardCharsets.UTF_8.name()));
+                            + URLEncoder.encode("Không tìm thấy thông tin câu lạc bộ của bạn", StandardCharsets.UTF_8.name()));
                     return;
                 }
 
@@ -412,7 +443,6 @@ public class RecruitmentCampaignServlet extends HttpServlet {
 
                             if (updateSuccess) {
                                 // Update the club's recruiting status to false
-                                dal.ClubDAO clubDAO = new dal.ClubDAO();
                                 boolean clubUpdated = clubDAO.updateIsRecruiting(campaign.getClubID(), false);
 
                                 // Add to closed campaigns list
@@ -594,7 +624,6 @@ public class RecruitmentCampaignServlet extends HttpServlet {
                             jsonResponse.addProperty("success", true);
                             jsonResponse.addProperty("message", "Đã kết thúc hoạt động thành công");
                             // Cập nhật trạng thái tuyển quân của câu lạc bộ
-                            dal.ClubDAO clubDAO = new dal.ClubDAO();
                         } else {
                             jsonResponse.addProperty("success", false);
                             jsonResponse.addProperty("message", "Không thể kết thúc hoạt động. Vui lòng thử lại sau.");
