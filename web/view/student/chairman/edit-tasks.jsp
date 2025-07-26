@@ -109,11 +109,89 @@
         .btn-cancel:hover {
             background-color: #5a6268;
         }
+
+
         .error-message {
             margin-bottom: 15px;
+            color: #dc3545;
+            font-weight: 500;
         }
         #newDocumentFields {
             display: none;
+        }
+
+        .review-modal-content {
+            background-color: #fff;
+            padding: 24px;
+            border-radius: 8px;
+            max-width: 100%;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.3s ease;
+            position: relative;
+        }
+        .review-modal-content h3 {
+            margin: 0 0 20px;
+            font-size: 22px;
+            color: #333;
+        }
+        .close-modal {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-size: 24px;
+            color: #666;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        .close-modal:hover {
+            color: #333;
+        }
+        .form-section h4 {
+            margin: 0 0 15px;
+            font-size: 16px;
+            color: #444;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+
+        .btn-approve {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .btn-approve:hover {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .btn-reject {
+	        padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .btn-reject:hover {
+            background-color: #ef4444;
+            color: white;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 	</style>
 </head>
@@ -284,6 +362,51 @@
 			</form>
 		</div>
 	</div>
+	<c:if test="${task.status == 'Review'}">
+		<div id="reviewModal" class="review-modal">
+			<div class="review-modal-content">
+				<span class="close-modal" onclick="closeReviewModal()">&times;</span>
+				<h3>Duyệt công việc</h3>
+				<div class="form-section">
+					<h4>Duyệt công việc</h4>
+					<form id="approveForm" action="${pageContext.request.contextPath}/chairman-page/tasks/edit-tasks" method="post">
+						<input type="hidden" name="action" value="approveTask">
+						<input type="hidden" name="taskID" value="${task.taskID}">
+						<div class="form-group">
+							<label for="rating"><i class="fas fa-star"></i> Đánh giá *</label>
+							<select name="rating" id="rating" required>
+								<option value="">Chọn đánh giá</option>
+								<option value="Positive">Tốt</option>
+								<option value="Neutral">Khá</option>
+								<option value="Negative">Trung bình</option>
+							</select>
+						</div>
+						<div class="form-actions">
+							<button type="submit" class="btn-approve">
+								<i class="fas fa-check"></i> Duyệt
+							</button>
+						</div>
+					</form>
+				</div>
+				<div class="form-section">
+					<h4>Từ chối công việc</h4>
+					<form id="rejectForm" action="${pageContext.request.contextPath}/chairman-page/tasks/edit-tasks" method="post">
+						<input type="hidden" name="action" value="rejectTask">
+						<input type="hidden" name="taskID" value="${task.taskID}">
+						<div class="form-group full-width">
+							<label for="lastRejectReason"><i class="fas fa-comment-alt"></i> Lý do từ chối *</label>
+							<textarea name="lastRejectReason" id="lastRejectReason" rows="4" required></textarea>
+						</div>
+						<div class="form-actions">
+							<button type="submit" class="btn-reject">
+								<i class="fas fa-times"></i> Từ chối
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</c:if>
 </main>
 <script>
     // Hiển thị/ẩn form chỉnh sửa
@@ -313,7 +436,7 @@
     }
 
     // Client-side validation
-    document.getElementById("editTaskForm").addEventListener("submit", function (e) {
+    document.getElementById("editTaskForm")?.addEventListener("submit", function (e) {
         const documentSelect = document.getElementById("documentSelect").value;
         const documentName = document.getElementById("documentName").value;
         const documentURL = document.getElementById("documentURL").value;
@@ -328,6 +451,16 @@
             alert("Ngày kết thúc phải sau ngày bắt đầu.");
         }
     });
+
+    // Hiển thị/ẩn modal duyệt
+    function openReviewModal() {
+        document.getElementById("reviewModal").style.display = "flex";
+    }
+
+    function closeReviewModal() {
+        document.getElementById("reviewModal").style.display = "none";
+    }
+
 
     // Kích hoạt toggleDocumentFields khi tải trang
     window.onload = function() {
