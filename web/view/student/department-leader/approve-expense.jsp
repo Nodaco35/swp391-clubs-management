@@ -8,7 +8,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Duyệt và Tạo Đơn Xin Chi Phí</title>
+        <title>Duyệt Chi Tiêu</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         
@@ -64,7 +64,7 @@
                 <header class="header mb-4">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h1 class="h3 mb-1">Duyệt và Xin Chi Phí</h1>
+                            <h1 class="h3 mb-1">Duyệt Chi Tiêu</h1>
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb mb-0">
                                     <li class="breadcrumb-item">
@@ -83,7 +83,7 @@
                         <div class="card-header">
                             <h2 class="card-title">
                                 <i class="fas fa-file-invoice-dollar" style="color: #8b5cf6;"></i>
-                                Tạo Đơn Xin Chi Phí Mới (Kỳ: ${term.termName})
+                                Tạo Đơn chi tiêu mới (Kỳ: ${term.termName})
                             </h2>
                             <button class="btn btn-primary btn-sm toggle-form-btn" type="button" data-bs-toggle="collapse" data-bs-target="#expenseForm" aria-expanded="false" aria-controls="expenseForm">
                                 <i class="fas fa-chevron-down"></i> Tạo Đơn
@@ -132,7 +132,7 @@
                         <div class="card-header">
                             <h2 class="card-title">
                                 <i class="fas fa-list" style="color: #8b5cf6;"></i>
-                                Danh Sách Đơn Xin Chi Phí (Kỳ: ${term.termName})
+                                Danh Sách Đơn Chi Tiêu (Kỳ: ${term.termName})
                             </h2>
                         </div>
                         <div class="card-body">
@@ -173,7 +173,7 @@
 
                             <!-- Expense Table -->
                             <c:if test="${empty expenses}">
-                                <p class="text-muted">Không có đơn xin chi phí nào.</p>
+                                <p class="text-muted">Không có đơn yêu cầu chi tiêu nào.</p>
                             </c:if>
                             <c:if test="${not empty expenses}">
                                 <div class="table-responsive">
