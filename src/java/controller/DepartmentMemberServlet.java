@@ -168,9 +168,6 @@ public class DepartmentMemberServlet extends HttpServlet {
                 case "updateStatus":
                     handleUpdateStatus(request, response, clubDepartmentID);
                     break;
-                case "removeMember":
-                    handleRemoveMember(request, response, clubDepartmentID);
-                    break;
                 case "addMember":
                     handleAddMember(request, response, clubDepartmentID);
                     break;
@@ -293,7 +290,7 @@ public class DepartmentMemberServlet extends HttpServlet {
         }
 
         int page = 1;
-        int pageSize = 10;  // 🔧 ĐỔI từ 10 thành 4
+        int pageSize = 10;  // ĐỔI từ 10 thành 4
 
         String pageParam = request.getParameter("page");
         if (pageParam != null && !pageParam.isEmpty()) {
@@ -305,7 +302,7 @@ public class DepartmentMemberServlet extends HttpServlet {
             } catch (NumberFormatException e) {
                 page = 1;
             }
-        }        // 🚀 ĐƠN GIẢN HÓA: Tìm kiếm thành viên
+        }        // ĐƠN GIẢN HÓA: Tìm kiếm thành viên
         List<DepartmentMember> members;
         int totalMembers;
 
@@ -318,7 +315,7 @@ public class DepartmentMemberServlet extends HttpServlet {
         }
         int totalPages = (int) Math.ceil((double) totalMembers / pageSize);
 
-        // 🚀 ĐƠN GIẢN HÓA: Lấy statistics trong 1 query (không phụ thuộc search)
+        // ĐƠN GIẢN HÓA: Lấy statistics trong 1 query (không phụ thuộc search)
         models.MemberStatistics stats = memberDAO.getMemberStatistics(clubDepartmentID);
 
         // Lấy thông tin user và department để hiển thị sidebar
@@ -405,24 +402,6 @@ public class DepartmentMemberServlet extends HttpServlet {
         } catch (Exception e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Có lỗi xảy ra");
         }
-    }
-
-    private void handleRemoveMember(HttpServletRequest request, HttpServletResponse response, int clubDepartmentID)
-            throws IOException {
-
-        String userID = request.getParameter("userID");
-
-        if (userID == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Thiếu ID người dùng");
-            return;
-        }
-        boolean success = memberDAO.removeMemberFromDepartment(userID, clubDepartmentID);
-
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-
-        String json = "{\"success\":" + success + "}";
-        response.getWriter().write(json);
     }
 
     private void handleAddMember(HttpServletRequest request, HttpServletResponse response, int clubDepartmentID)

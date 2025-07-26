@@ -15,9 +15,9 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script src="${pageContext.request.contextPath}/js/department-members.js"></script>
         
-        <!-- ✅ ĐƠN GIẢN HÓA: Chỉ giữ những JS cần thiết -->
+        <!-- ĐƠN GIẢN HÓA: Chỉ giữ những JS cần thiết -->
         <script>
-            // ✅ 1. Basic search functionality (cần thiết)
+            // 1. Basic search functionality (cần thiết)
             function searchMembers() {
                 const keyword = document.getElementById('searchInput').value.trim();
                 if (keyword) {
@@ -29,7 +29,7 @@
                 window.location.href = '${pageContext.request.contextPath}/department-members?action=list&clubID=${clubID}';
             }
             
-            // ✅ 2. Enter key support cho search (UX improvement)
+            // 2. Enter key support cho search (UX improvement)
             document.addEventListener('DOMContentLoaded', function() {
                 const searchInput = document.getElementById('searchInput');
                 if (searchInput) {
@@ -41,7 +41,7 @@
                 }
             });
             
-            // ✅ 3. Simple modal functions (cần thiết cho member detail)
+            // 3. Simple modal functions (cần thiết cho member detail)
             function viewMemberDetail(userID) {
                 // Load member detail modal
                 const modal = new bootstrap.Modal(document.getElementById('memberDetailModal'));
@@ -186,14 +186,7 @@
                     });
             }
             
-            // ✅ 4. Basic confirm dialog (cần thiết cho delete)
-            function confirmRemoveMember(userID, fullName) {
-                if (confirm('Bạn có chắc chắn muốn xóa thành viên "' + fullName + '" khỏi ban không?')) {
-                    window.location.href = '${pageContext.request.contextPath}/department-members?action=remove&userID=' + userID + '&clubDepartmentID=${clubDepartmentID}';
-                }
-            }
-            
-            // ✅ 5. Simple add member modal (cần thiết)
+            // Simple add member modal (cần thiết)
             function showAddMemberModal() {
                 const modal = new bootstrap.Modal(document.getElementById('addMemberModal'));
                 modal.show();
@@ -405,9 +398,6 @@
                                                             <div>
                                                                 <fmt:formatDate value="${member.joinedDate}" pattern="dd/MM/yyyy" />
                                                             </div>
-                                                            <small class="text-muted">
-                                                                <fmt:formatDate value="${member.joinedDate}" pattern="HH:mm" />
-                                                            </small>
                                                         </td>
                                                         <td>
                                                             <div class="d-flex align-items-center">
@@ -434,13 +424,6 @@
                                                                         title="Xem chi tiết">
                                                                     <i class="fas fa-eye"></i>
                                                                 </button>
-                                                                <c:if test="${member.roleName != 'Trưởng ban'}">
-                                                                    <button type="button" class="btn btn-sm btn-outline-danger" 
-                                                                            onclick="confirmRemoveMember('${member.userID}', '${member.fullName}')" 
-                                                                            title="Xóa khỏi ban">
-                                                                        <i class="fas fa-trash"></i>
-                                                                    </button>
-                                                                </c:if>
                                                             </div>
                                                         </td>
                                                     </tr>
