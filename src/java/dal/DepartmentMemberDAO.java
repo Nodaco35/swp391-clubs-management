@@ -720,8 +720,6 @@ public class DepartmentMemberDAO {
             String sql = """
                 SELECT t.TaskID, t.Title, t.Description, t.Status, 
                        t.StartDate, t.EndDate, t.CreatedAt, 
-                SELECT t.TaskID, t.Title, t.Description, t.Status, 
-                       t.StartDate, t.EndDate, t.CreatedAt, 
                        t.ClubID, c.ClubName, t.CreatedBy, u.FullName as CreatorName
                 FROM Tasks t
                 LEFT JOIN Users u ON t.CreatedBy = u.UserID
@@ -740,6 +738,9 @@ public class DepartmentMemberDAO {
                 PreparedStatement ps = conn.prepareStatement(sql);
                 ps.setString(1, userID);
                 ps.setInt(2, clubDepartmentID);
+                
+                System.out.println("DEBUG getMemberTasks: userID=" + userID + ", clubDepartmentID=" + clubDepartmentID);
+                System.out.println("DEBUG getMemberTasks SQL: " + sql);
                 
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
@@ -771,6 +772,7 @@ public class DepartmentMemberDAO {
                         System.err.println("Error processing task row: " + e.getMessage());
                     }
                 }
+                System.out.println("DEBUG getMemberTasks: Found " + tasks.size() + " tasks for user " + userID);
             }
         } catch (SQLException e) {
             System.err.println("Database error in getMemberTasks: " + e.getMessage());
