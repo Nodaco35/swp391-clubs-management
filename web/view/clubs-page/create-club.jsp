@@ -80,7 +80,7 @@
                         <img id="clubImgPreview" src="${(isEdit || isEditRejectClub ) && club.clubImg != null && !club.clubImg.isEmpty() ? pageContext.request.contextPath.concat('/').concat(club.clubImg) : pageContext.request.contextPath.concat('/img/default-club-img.png')}" 
                              alt="Club Image" class="avatar-img w-32 h-32 object-cover rounded-lg">
                     </div>
-                    <input type="file" name="clubImg" id="clubImg" accept="image/jpeg,image/png,image/gif,image/webp" ${isEdit ? '' : 'required'}
+                    <input type="file" name="clubImg" id="clubImg" accept="image/jpeg,image/png,image/gif,image/webp" ${(isEdit || isEditRejectClub ) ? '' : 'required'}
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <c:if test="${(isEdit || isEditRejectClub )}">
                         <p class="text-sm text-gray-500 mt-1">Để giữ ảnh hiện tại, không chọn file mới.</p>

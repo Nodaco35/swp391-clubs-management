@@ -109,7 +109,6 @@
                             </div>
                         </div>
                     </c:if>
-
                     <nav class="dashboard-nav">
                         <ul>
                             <li>

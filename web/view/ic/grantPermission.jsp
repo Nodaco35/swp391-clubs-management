@@ -262,7 +262,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <!-- Đơn chờ duyệt -->
+                                    <!-- Đơn chờ duyệt tạo -->
                                     <c:forEach var="request" items="${updateRequests}" varStatus="loop">
                                         <c:if test="${request.clubRequestStatus == 'Pending'}">
                                             <tr request-status="PENDING">
@@ -290,13 +290,8 @@
                                                     <button type="button"
                                                             class="btn btn-danger btn-sm"
                                                             onclick="showUpdateRejectModal('${request.clubID}', '${request.chairmanID}')">
-                                                        <i class="fas fa-times"></i> Từ chối
+                                                        <i class="fas fa-times"></i> Từ chối ${request.clubID} - ${request.chairmanID}
                                                     </button>
-
-                                                    <button class="btn btn-danger btn-sm" onclick="window.location.href = '${pageContext.request.contextPath}/ic?action=deleteUpdatePermissionRequest&id=${request.clubID}&userID=${request.chairmanID}'">
-                                                        <i class="fa-solid fa-trash"></i> Xoá
-                                                    </button>
-
                                                 </td>
                                             </tr>
                                         </c:if>
@@ -377,8 +372,8 @@
                             </div>
                             <div class="modal-body">
                                 <input type="hidden" name="action" value="rejectUpdatePermissionRequest">
-                                <input type="hidden" name="id" id="rejectClubID">
-                                <input type="hidden" name="userID" id="rejectUserID">
+                                <input type="hidden" name="id" id="rejectClubID_update">
+                                <input type="hidden" name="userID" id="rejectUserID_update">
 
                                 <div class="mb-3">
                                     <label for="reason" class="form-label">Nhập lý do từ chối:</label>
@@ -494,8 +489,8 @@
         <script>
             function showUpdateRejectModal(clubID, userID) {
                 // Gán dữ liệu vào các hidden input
-                document.getElementById("rejectClubID").value = clubID;
-                document.getElementById("rejectUserID").value = userID;
+                document.getElementById("rejectClubID_update").value = clubID;
+                document.getElementById("rejectUserID_update").value = userID;
 
                 // Hiện modal Bootstrap
                 const modal = new bootstrap.Modal(document.getElementById('rejectUpdateReasonModal'));

@@ -8,6 +8,7 @@
         <title>Lịch sử hoạt động</title>
         <link rel="stylesheet" href="css/activity-history.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/eventsPage.css"/>
+        <link rel="stylesheet" href="./css/profileStyle.css"/>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     </head>
@@ -98,6 +99,5 @@
                     <div style="margin-bottom: 50px"></div>
                 </div>
             </div>
-            <jsp:include page="/view/components/footer.jsp" />
         </body>
     </html>

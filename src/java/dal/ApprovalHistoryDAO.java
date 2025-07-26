@@ -139,12 +139,30 @@ public class ApprovalHistoryDAO {
 
     public boolean rejectUpdateRequest(int clubId) {
         String sql = """
-                     Delete from Clubs WHERE ParentClubID = ?
+                     delete from Clubs WHERE ParentClubID = ?
                      """;
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setInt(1, clubId);
             return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean rejectUpdateClubRequest(int clubId, String reason) {
+        String sql = "UPDATE Clubs SET ClubRequestStatus = 'Rejected', LastRejectReason = ? "
+                + "WHERE ClubID = ? AND CurrentRequestType = 'Update' AND ClubRequestStatus = 'Pending'";
+
+        try {
+            Connection conn = DBContext.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, reason);
+            ps.setInt(2, clubId);
+
+            int result = ps.executeUpdate();
+            return result > 0;
         } catch (SQLException e) {
             e.printStackTrace();
         }

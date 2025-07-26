@@ -656,7 +656,7 @@ public class ClubDAO {
                             LEFT JOIN ClubCategories cc ON c.CategoryID = cc.CategoryID 
                             join userclubs uc on c.ClubID = uc.ClubID
                             join users u on u.UserID = uc.UserID 
-                            WHERE c.ClubStatus = 1 AND uc.RoleID = 1 and ClubRequestStatus = 'Approved'
+                            WHERE c.ClubStatus = 1 AND uc.RoleID = 1 and ClubRequestStatus = 'Approved' and CurrentRequestType = 'Create'
                             ORDER BY c.EstablishedDate DESC;
                      """;
         try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {

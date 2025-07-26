@@ -156,7 +156,7 @@ public class ICServlet extends HttpServlet {
                             user.getUserID(), // IC gửi
                             userId, // Người nhận
                             "Đơn xin quyền sửa câu lạc bộ được duyệt",
-                            "Đơn xin quyền sửa câu lạc bộ của bạn đã được duyệt. Câu lạc bộ tạo thành công",
+                            "Đơn xin quyền sửa câu lạc bộ của bạn đã được duyệt. Câu lạc bộ sửa thành công",
                             "HIGH"
                     );
                     approvalHistoryDAO.insertApprovalRecord(requestClubId, "Approved", "Đã duyệt sửa Câu lạc bộ", "Update");
@@ -164,27 +164,27 @@ public class ICServlet extends HttpServlet {
                 request.setAttribute(success ? "successMessage" : "errorMessage", message);
             } else if (action.equals("rejectUpdatePermissionRequest")) {
                 String reason = request.getParameter("reason");        // Lý do từ chối
-                success = approvalHistoryDAO.rejectUpdateRequest(requestClubId);
-
+                int clubID = Integer.parseInt(request.getParameter("id")); 
+                success = approvalHistoryDAO.rejectUpdateRequest(clubID);
+                success = approvalHistoryDAO.rejectUpdateClubRequest(clubID, reason);
                 rejectedMessage = success ? "Đã từ chối đơn thành công!" : "Từ chối đơn thất bại. Vui lòng thử lại.";
-
+                
                 if (success) {
                     // Gửi thông báo kèm lý do từ chối
                     notificationDAO.sentToPerson1(
                             user.getUserID(),
                             userId,
-                            "Đơn xin quyền tạo câu lạc bộ bị từ chối",
-                            "Đơn xin quyền tạo câu lạc bộ của bạn đã bị từ chối. Lý do: " + reason,
+                            "Đơn xin quyền sửa câu lạc bộ bị từ chối",
+                            "Đơn xin quyền sửa câu lạc bộ của bạn đã bị từ chối. Lý do: " + reason,
                             "HIGH"
                     );
                     // Ghi lịch sử từ chối
                     approvalHistoryDAO.insertApprovalRecord(requestClubId, "Rejected", reason, "Update");
                 }
-
                 request.setAttribute(success ? "rejectedMessage" : "errorMessage", rejectedMessage);
+                 response.sendRedirect("ic?action=grantPermission");
             } 
 
-            response.sendRedirect("ic?action=grantPermission");
         } else if ("viewClubRequest".equals(action)) {
             ApprovalHistoryDAO approvalHistoryDAO = new ApprovalHistoryDAO();
             int infoClubId = Integer.parseInt(request.getParameter("id"));
