@@ -1,13 +1,12 @@
 package dal;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import models.ClubApprovalHistory;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Connection;
 import java.sql.SQLException;
-
 public class ApprovalHistoryDAO {
 
     public ApprovalHistoryDAO() {
@@ -63,11 +62,23 @@ public class ApprovalHistoryDAO {
     }
 
     public boolean deleteClubRequest(int clubId) {
-        String sql = "DELETE FROM Clubs WHERE ClubID = ?";
+        String sqlUserClubs = "DELETE FROM UserClubs WHERE ClubID = ?";
+        String sqlClubs = "DELETE FROM Clubs WHERE ClubID = ?";
+
         try {
-            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
-            ps.setInt(1, clubId);
-            return ps.executeUpdate() > 0;
+            Connection conn = DBContext.getConnection();
+
+            // Xóa trong bảng UserClubs trước
+            PreparedStatement psUserClubs = conn.prepareStatement(sqlUserClubs);
+            psUserClubs.setInt(1, clubId);
+            psUserClubs.executeUpdate();
+
+            // Xóa trong bảng Clubs sau
+            PreparedStatement psClubs = conn.prepareStatement(sqlClubs);
+            psClubs.setInt(1, clubId);
+            int result = psClubs.executeUpdate();
+
+            return result > 0; // Chỉ cần check bảng chính, hoặc thêm logic tùy bạn
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -78,7 +89,7 @@ public class ApprovalHistoryDAO {
         List<ClubApprovalHistory> list = new ArrayList<>();
         String sql = "SELECT * FROM ClubApprovalHistory WHERE ClubID = ? ORDER BY ActionAt ASC";
 
-        try  {
+        try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setInt(1, clubId);
             ResultSet rs = ps.executeQuery();
@@ -99,6 +110,30 @@ public class ApprovalHistoryDAO {
         }
 
         return list;
+    }
+
+    public void approveTask(int taskId, String rating) {
+        String sql = "UPDATE Tasks SET Status = 'Done', Rating = ? WHERE TaskID = ?";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setString(1, rating);
+            ps.setInt(2, taskId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void rejectTask(int taskId, String rejectReason) {
+        String sql = "UPDATE Tasks SET Status = 'Rejected', LastRejectReason = ? WHERE TaskID = ?";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setString(1, rejectReason);
+            ps.setInt(2, taskId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
 }

@@ -191,7 +191,6 @@ public class ChairmanTasksServlet extends HttpServlet {
                 String createdBy = request.getParameter("createdBy");
                 String assigneeType = request.getParameter("assigneeType");
 
-                // Validation
                 if ("new".equals(existingDocumentID) && documentURL != null && !documentURL.isEmpty() && (documentName == null || documentName.isEmpty())) {
                     request.setAttribute("errorMessage", "Vui lòng nhập tên tài liệu khi cung cấp liên kết tài liệu.");
                     request.setAttribute("showTermModal", true);
@@ -199,7 +198,6 @@ public class ChairmanTasksServlet extends HttpServlet {
                     return;
                 }
 
-                // Chuyển đổi ngày
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 Date startDate = new Date(sdf.parse(startDateStr).getTime());
                 Date endDate = new Date(sdf.parse(endDateStr).getTime());

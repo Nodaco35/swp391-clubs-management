@@ -101,6 +101,8 @@
                                             <th scope="col">Thành viên</th>
                                             <th scope="col">Email</th>
                                             <th scope="col">Ngày tham gia</th>
+                                            <th scope="col">Nhiệm vụ đã làm trong kỳ</th>
+                                            <th scope="col">Chất lượng nhiệm vụ (P - N - N)</th>
                                             <th scope="col">Điểm rèn luyện</th>
                                             <th scope="col">Hành động</th>
                                         </tr>
@@ -120,6 +122,8 @@
                                             </td>
                                             <td>${member.email}</td>
                                             <td><fmt:formatDate value="${member.activeDate}" pattern="dd/MM/yyyy" /></td>
+                                            <td>${member.taskcount}</td>
+                                            <td>${member.positive} - ${member.neutral} - ${member.negative}</td>
                                             <td>
                                                 <input type="text" name="points" class="form-control" 
                                                        pattern="^(100|[1-9]?[0-9])$" title="Vui lòng nhập từ 0-100"

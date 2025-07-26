@@ -5,7 +5,6 @@ import dal.ClubDAO;
 import dal.PeriodicReportDAO;
 import dal.ClubCreationPermissionDAO;
 import dal.ClubPeriodicReportDAO;
-import dal.CreatedClubApplicationsDAO;
 import dal.NotificationDAO;
 import dal.UserDAO;
 import jakarta.servlet.ServletException;
@@ -13,19 +12,15 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import models.PeriodicReport;
 import models.Users;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
-import java.util.stream.Collectors;
 import models.ActivedMemberClubs;
 import models.ClubApprovalHistory;
-import models.ClubCreationPermissions;
 import models.ClubEvent;
 import models.ClubPeriodicReport;
 import models.Clubs;
-import models.CreatedClubApplications;
 import models.EventScheduleDetail;
 import models.Semesters;
 
@@ -55,7 +50,7 @@ public class ICServlet extends HttpServlet {
 
             // Lấy tất cả báo cáo của tất cả CLB, sắp xếp theo ngày nộp giảm dần
             List<ClubPeriodicReport> allReports = reportDAO.getAllReportsSortedByDate();
-            List<Clubs> requests = clubDAO.getRequestClubs();
+            List<Clubs> requests = clubDAO.getCreateRequestClubs();
 
             List<Clubs> approvedRequests = clubDAO.getApproveRequestClubs();
 
@@ -82,10 +77,12 @@ public class ICServlet extends HttpServlet {
 
             request.getRequestDispatcher("/view/ic/dashboard.jsp").forward(request, response);
         } else if (action.equals("grantPermission")) {
-            List<Clubs> requests = clubDAO.getRequestClubs();
+            List<Clubs> requests = clubDAO.getCreateRequestClubs();
+            List<Clubs> updateRequests = clubDAO.getUpdateRequestClubs();
 
             List<Clubs> approvedRequests = clubDAO.getApproveRequestClubs();
 
+            request.setAttribute("updateRequests", updateRequests);
             request.setAttribute("requests", requests);
             request.setAttribute("approvedRequests", approvedRequests);
 
@@ -141,7 +138,7 @@ public class ICServlet extends HttpServlet {
                 request.setAttribute(success ? "deletedMessage" : "errorMessage", deletedMessage);
             }
 
-            List<Clubs> requests = clubDAO.getRequestClubs();
+            List<Clubs> requests = clubDAO.getCreateRequestClubs();
             List<Clubs> approvedRequests = clubDAO.getApproveRequestClubs();
 
             request.setAttribute("requests", requests);

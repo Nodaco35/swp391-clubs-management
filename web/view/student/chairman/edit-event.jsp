@@ -349,38 +349,65 @@
         }
     });
 
+    function updateAgendaScheduleOptions() {
+        const agendaContainer = document.getElementById('agendaContainer');
+        const scheduleItems = document.getElementsByClassName('schedule-item');
+        const schedules = Array.from(scheduleItems).map((item, index) => {
+            const date = item.querySelector('input[name="eventDate[]"]').value;
+            const location = item.querySelector('select[name="eventLocation[]"]').selectedOptions[0].text;
+            return { scheduleID: `temp_${index}`, label: `${date} - ${location}` };
+        });
+
+        const agendaItems = agendaContainer.getElementsByClassName('agenda-item');
+        Array.from(agendaItems).forEach(agendaItem => {
+            const select = agendaItem.querySelector('select[name="scheduleID[]"]');
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">Chọn lịch trình...</option>';
+            schedules.forEach(schedule => {
+                const option = document.createElement('option');
+                option.value = schedule.scheduleID;
+                option.text = schedule.label;
+                if (schedule.scheduleID === currentValue) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+        });
+    }
+
+    // Gọi hàm này sau khi thêm hoặc xóa schedule
     function addScheduleItem() {
         const container = document.getElementById('scheduleContainer');
         const item = document.createElement('div');
         item.classList.add('schedule-item');
         item.innerHTML = `
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="eventDate[]">Ngày tổ chức *</label>
-                    <input type="date" name="eventDate[]" required>
-                </div>
-                <div class="form-group">
-                    <label for="eventLocation[]">Địa điểm *</label>
-                    <select name="eventLocation[]" required>
-                        <option value="">Chọn địa điểm...</option>
-                        <c:forEach var="location" items="${locations}">
-                            <option value="${location.locationID}">${location.locationName}</option>
-                        </c:forEach>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="eventTime[]">Giờ bắt đầu *</label>
-                    <input type="time" name="eventTime[]" required>
-                </div>
-                <div class="form-group">
-                    <label for="eventEndTime[]">Giờ kết thúc *</label>
-                    <input type="time" name="eventEndTime[]" required>
-                    <button type="button" class="btn-remove-schedule" onclick="removeScheduleItem(this)" style="margin-left: 10px;">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="eventDate[]">Ngày tổ chức *</label>
+                <input type="date" name="eventDate[]" required>
             </div>
-        `;
+            <div class="form-group">
+                <label for="eventLocation[]">Địa điểm *</label>
+                <select name="eventLocation[]" required>
+                    <option value="">Chọn địa điểm...</option>
+                    <c:forEach var="location" items="${locations}">
+                        <option value="${location.locationID}">${location.locationName}</option>
+                    </c:forEach>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="eventTime[]">Giờ bắt đầu *</label>
+                <input type="time" name="eventTime[]" required>
+            </div>
+            <div class="form-group">
+                <label for="eventEndTime[]">Giờ kết thúc *</label>
+                <input type="time" name="eventEndTime[]" required>
+                <button type="button" class="btn-remove-schedule" onclick="removeScheduleItem(this)" style="margin-left: 10px;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    `;
         container.appendChild(item);
         const today = new Date();
         today.setDate(today.getDate() + 7);
@@ -388,12 +415,15 @@
         const month = String(today.getMonth() + 1).padStart(2, '0');
         const day = String(today.getDate()).padStart(2, '0');
         item.querySelector('input[type="date"]').min = `${year}-${month}-${day}`;
+        updateAgendaScheduleOptions(); // Cập nhật danh sách schedule trong agenda
     }
 
     function removeScheduleItem(button) {
+        const scheduleItem = button.closest('.schedule-item');
         const scheduleItems = document.getElementsByClassName('schedule-item');
         if (scheduleItems.length > 1) {
-            button.parentElement.parentElement.parentElement.remove();
+            scheduleItem.remove();
+            updateAgendaScheduleOptions(); // Cập nhật danh sách schedule trong agenda
         } else {
             alert('Phải có ít nhất một lịch trình.');
         }

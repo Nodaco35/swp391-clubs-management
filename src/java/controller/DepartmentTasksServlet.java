@@ -24,6 +24,7 @@ import java.util.List;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
+import dal.ApprovalHistoryDAO;
 
 public class DepartmentTasksServlet extends HttpServlet {
     
@@ -69,6 +70,38 @@ public class DepartmentTasksServlet extends HttpServlet {
         if ("getTaskDetail".equals(action)) {
             System.out.println("DEBUG GET: Calling handleGetTaskDetail");
             handleGetTaskDetail(request, response, currentUser);
+            return;
+        }
+        if("rejectTask".equals(action)){
+            ApprovalHistoryDAO ah = new ApprovalHistoryDAO();
+            String reason = request.getParameter("reason");  
+            String taskID_raw = request.getParameter("taskID"); 
+            String clubID_raw = request.getParameter("clubID"); 
+            int taskID = -1;
+            if(taskID_raw != null){
+                taskID = Integer.parseInt(taskID_raw);
+            }
+            if(taskID!= - 1){
+                ah.rejectTask(taskID, reason);
+            }
+            String url = "/department-tasks?clubID="+clubID_raw;
+            response.sendRedirect(url);
+            return;
+        }
+        if("approveTask".equals(action)){
+            ApprovalHistoryDAO ah = new ApprovalHistoryDAO();
+            String rating = request.getParameter("rating");  
+            String taskID_raw = request.getParameter("taskID"); 
+            String clubID_raw = request.getParameter("clubID"); 
+            int taskID = -1;
+            if(taskID_raw != null){
+                taskID = Integer.parseInt(taskID_raw);
+            }
+            if(taskID!= - 1){
+                ah.approveTask(taskID, rating);
+            }
+            String url = "/department-tasks?clubID="+clubID_raw;
+            response.sendRedirect(url);
             return;
         }
         

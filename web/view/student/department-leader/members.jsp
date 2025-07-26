@@ -10,7 +10,84 @@
         <!-- Bootstrap CSS -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-        <!-- Font Awesome -->
+        <!-- Font Aw        <!-- Scripts -->    
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="${pageContext.request.contextPath}/js/department-members.js"></script>
+        
+        <!-- ✅ ĐƠN GIẢN HÓA: Chỉ giữ những JS cần thiết -->
+        <script>
+            // ✅ 1. Basic search functionality (cần thiết)
+            function searchMembers() {
+                const keyword = document.getElementById('searchInput').value.trim();
+                if (keyword) {
+                    window.location.href = '${pageContext.request.contextPath}/department-members?action=search&keyword=' + encodeURIComponent(keyword) + '&clubID=${clubID}';
+                }
+            }
+            
+            function clearSearch() {
+                window.location.href = '${pageContext.request.contextPath}/department-members?action=list&clubID=${clubID}';
+            }
+            
+            // ✅ 2. Enter key support cho search (UX improvement)
+            document.addEventListener('DOMContentLoaded', function() {
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) {
+                    searchInput.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            searchMembers();
+                        }
+                    });
+                }
+            });
+            
+            // ✅ 3. Simple modal functions (cần thiết cho member detail)
+            function viewMemberDetail(userID) {
+                // Load member detail modal
+                const modal = new bootstrap.Modal(document.getElementById('memberDetailModal'));
+                modal.show();
+                
+                // Basic loading state
+                const content = document.getElementById('memberDetailContent');
+                const loading = document.getElementById('memberDetailLoading');
+                content.style.display = 'none';
+                loading.style.display = 'block';
+                
+                // Simple AJAX call - no complex caching
+                fetch('${pageContext.request.contextPath}/department-members?action=getMemberDetail&userID=' + userID + '&clubDepartmentID=${clubDepartmentID}')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Hide loading, show content
+                        loading.style.display = 'none';
+                        content.style.display = 'block';
+                        
+                        // Simple data binding - no complex processing
+                        document.getElementById('memberDetailName').textContent = data.fullName || '';
+                        document.getElementById('memberDetailEmail').textContent = data.email || '';
+                        document.getElementById('memberDetailPhone').textContent = data.phone || '-';
+                        
+                        const avatar = document.getElementById('memberDetailAvatar');
+                        avatar.src = '${pageContext.request.contextPath}/img/' + (data.avatar || 'Hinh-anh-dai-dien-mac-dinh-Facebook.jpg');
+                    })
+                    .catch(error => {
+                        console.error('Error loading member detail:', error);
+                        loading.innerHTML = '<div class="alert alert-danger">Có lỗi xảy ra khi tải thông tin thành viên.</div>';
+                    });
+            }
+            
+            // ✅ 4. Basic confirm dialog (cần thiết cho delete)
+            function confirmRemoveMember(userID, fullName) {
+                if (confirm('Bạn có chắc chắn muốn xóa thành viên "' + fullName + '" khỏi ban không?')) {
+                    window.location.href = '${pageContext.request.contextPath}/department-members?action=remove&userID=' + userID + '&clubDepartmentID=${clubDepartmentID}';
+                }
+            }
+            
+            // ✅ 5. Simple add member modal (cần thiết)
+            function showAddMemberModal() {
+                const modal = new bootstrap.Modal(document.getElementById('addMemberModal'));
+                modal.show();
+            }
+        </script>me -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
         <!-- Custom CSS -->

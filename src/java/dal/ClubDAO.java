@@ -504,8 +504,104 @@ public class ClubDAO {
         return getClubsByStatus(1);
     }
 
-    public List<Clubs> getRequestClubs() {
-        return getClubsByStatus(0);
+    public List<Clubs> getCreateRequestClubs() {
+        int isActive = 0;
+
+        List<Clubs> clubs = new ArrayList<>();
+        String sql = """
+                     SELECT c.*, cc.CategoryName, u.UserID, u.FullName, uc.RoleID
+                                                               FROM Clubs c 
+                                                               LEFT JOIN ClubCategories cc ON c.CategoryID = cc.CategoryID 
+                                                               join userclubs uc on c.ClubID = uc.ClubID
+                                                               join users u on u.UserID = uc.UserID 
+                                                               WHERE c.ClubStatus = ? AND uc.RoleID = 1 and CurrentRequestType = 'Create'
+                                                               ORDER BY c.EstablishedDate DESC;
+                     """;
+        try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, isActive);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Clubs club = new Clubs();
+                    club.setClubID(rs.getInt("ClubID"));
+                    club.setClubImg(rs.getString("ClubImg"));
+                    club.setIsRecruiting(rs.getBoolean("IsRecruiting"));
+                    club.setClubName(rs.getString("ClubName"));
+                    club.setDescription(rs.getString("Description"));
+                    club.setEstablishedDate(rs.getDate("EstablishedDate"));
+                    club.setContactPhone(rs.getString("ContactPhone"));
+                    club.setContactGmail(rs.getString("ContactGmail"));
+                    club.setContactURL(rs.getString("ContactURL"));
+                    club.setClubStatus(rs.getBoolean("ClubStatus"));
+                    club.setCategoryID(rs.getInt("CategoryID"));
+                    club.setCategoryName(rs.getString("CategoryName"));
+
+                    if (isActive == 0) {
+                        club.setClubRequestStatus(rs.getString("ClubRequestStatus"));
+                        club.setCurrentRequestType(rs.getString("CurrentRequestType"));
+                        club.setUpdateRequestNote(rs.getString("UpdateRequestNote"));
+
+                        club.setChairmanID(rs.getString("UserID"));
+                        club.setChairmanFullName(rs.getString("FullName"));
+                    }
+
+                    clubs.add(club);
+
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting clubs: " + e.getMessage());
+        }
+        return clubs;
+    }
+
+    public List<Clubs> getUpdateRequestClubs() {
+        int isActive = 0;
+
+        List<Clubs> clubs = new ArrayList<>();
+        String sql = """
+                     SELECT c.*, cc.CategoryName, u.UserID, u.FullName, uc.RoleID
+                                                               FROM Clubs c 
+                                                               LEFT JOIN ClubCategories cc ON c.CategoryID = cc.CategoryID 
+                                                               join userclubs uc on c.ClubID = uc.ClubID
+                                                               join users u on u.UserID = uc.UserID 
+                                                               WHERE c.ClubStatus = ? AND uc.RoleID = 1 and CurrentRequestType = 'Update'
+                                                               ORDER BY c.EstablishedDate DESC;
+                     """;
+        try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, isActive);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Clubs club = new Clubs();
+                    club.setClubID(rs.getInt("ClubID"));
+                    club.setClubImg(rs.getString("ClubImg"));
+                    club.setIsRecruiting(rs.getBoolean("IsRecruiting"));
+                    club.setClubName(rs.getString("ClubName"));
+                    club.setDescription(rs.getString("Description"));
+                    club.setEstablishedDate(rs.getDate("EstablishedDate"));
+                    club.setContactPhone(rs.getString("ContactPhone"));
+                    club.setContactGmail(rs.getString("ContactGmail"));
+                    club.setContactURL(rs.getString("ContactURL"));
+                    club.setClubStatus(rs.getBoolean("ClubStatus"));
+                    club.setCategoryID(rs.getInt("CategoryID"));
+                    club.setCategoryName(rs.getString("CategoryName"));
+
+                    if (isActive == 0) {
+                        club.setClubRequestStatus(rs.getString("ClubRequestStatus"));
+                        club.setCurrentRequestType(rs.getString("CurrentRequestType"));
+                        club.setUpdateRequestNote(rs.getString("UpdateRequestNote"));
+
+                        club.setChairmanID(rs.getString("UserID"));
+                        club.setChairmanFullName(rs.getString("FullName"));
+                    }
+
+                    clubs.add(club);
+
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting clubs: " + e.getMessage());
+        }
+        return clubs;
     }
 
     private List<Clubs> getClubsByStatus(int isActive) {
