@@ -33,7 +33,7 @@ public class UserClubDAO {
                                         JOIN Roles r ON uc.RoleID = r.RoleID
                                         JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
                                         JOIN Departments d on cd.DepartmentID = d.DepartmentID
-                                        WHERE uc.UserID = ? AND isActive = 1 """;
+                                        WHERE uc.UserID = ? AND isActive = 1 AND ClubStatus = 1 """;
         List<UserClub> findByUserID = new ArrayList<>();
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);

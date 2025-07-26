@@ -16,6 +16,7 @@ import models.Users;
 import models.UserClub;
 import models.ClubCategory;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import models.Events;
 
@@ -61,7 +62,7 @@ public class ClubsServlet extends HttpServlet {
             throws ServletException, IOException {
         String categoryParam = request.getParameter("category");
         int categoryID;
-        String selectedCategoryName = "all"; // Default for display purposes
+        String selectedCategoryName = "all";
 
         // Fetch all categories
         List<ClubCategory> categories = clubCategoryDAO.getAllCategories();
@@ -69,17 +70,20 @@ public class ClubsServlet extends HttpServlet {
 
         // Parse category parameter
         if (categoryParam == null || categoryParam.isEmpty() || categoryParam.equals("all")) {
-            categoryID = 0; // 0 represents "all" categories
+            categoryID = 0;
         } else if (categoryParam.equals("-1")) {
-            categoryID = -1; // -1 represents "myClubs"
+            categoryID = -1;
             selectedCategoryName = "myClubs";
         } else if (categoryParam.equals("-2")) {
-            categoryID = -2; // -2 represents "favoriteClubs"
+            categoryID = -2;
             selectedCategoryName = "favoriteClubs";
-        } else {
+        } else if(categoryParam.equals("-3")){
+            categoryID = -3;
+            selectedCategoryName = "requestClub";
+        }
+        else {
             try {
                 categoryID = Integer.parseInt(categoryParam);
-                // Find CategoryName for display
                 for (ClubCategory category : categories) {
                     if (category.getCategoryID() == categoryID) {
                         selectedCategoryName = category.getCategoryName();
@@ -87,7 +91,7 @@ public class ClubsServlet extends HttpServlet {
                     }
                 }
             } catch (NumberFormatException e) {
-                categoryID = 0; // Fallback to "all" if invalid
+                categoryID = 0;
             }
         }
 
@@ -113,12 +117,17 @@ public class ClubsServlet extends HttpServlet {
         boolean hasClubs = false;
         boolean hasFavoriteClubs = false;
         boolean hasPendingRequest = false;
+        boolean hasRequestClub = false;
         if (userID != null) {
             int userClubCount = clubDAO.getTotalClubsByCategory(-1, userID); // -1 for myClubs
             hasClubs = userClubCount > 0;
+            
             int favoriteClubCount = clubDAO.getTotalFavoriteClubs(userID);
             hasFavoriteClubs = favoriteClubCount > 0;
             hasPendingRequest = permissionDAO.hasPendingRequest(userID);
+            
+            int requestClubCount = clubDAO.getTotalRequestClub(userID);
+            hasRequestClub = requestClubCount > 0;
         }
 
         // Handle favoriteClubs category
@@ -132,7 +141,7 @@ public class ClubsServlet extends HttpServlet {
                 clubs = clubDAO.getFavoriteClubs(userID, page, pageSize);
                 totalClubs = clubDAO.getTotalFavoriteClubs(userID);
             }
-        } else if (categoryID == -1) { // myClubs
+        } else if (categoryID == -1) {
             if (user == null || userID == null) {
                 clubs = clubDAO.getClubsByCategory(0, page, pageSize); // Fallback to all
                 totalClubs = clubDAO.getTotalClubsByCategory(0, null);
@@ -142,7 +151,11 @@ public class ClubsServlet extends HttpServlet {
                 clubs = clubDAO.getUserClubs(userID, page, pageSize);
                 totalClubs = clubDAO.getTotalClubsByCategory(-1, userID);
             }
-        } else {
+        }else if(categoryID == -3){
+            clubs = clubDAO.getRequestClub(userID, page, pageSize);
+            totalClubs = clubDAO.getTotalRequestClub(userID);
+        } 
+        else {
             clubs = clubDAO.getClubsByCategory(categoryID, page, pageSize);
             totalClubs = clubDAO.getTotalClubsByCategory(categoryID, userID);
         }
@@ -168,6 +181,7 @@ public class ClubsServlet extends HttpServlet {
         request.setAttribute("pageSize", pageSize);
         request.setAttribute("hasClubs", hasClubs);
         request.setAttribute("hasFavoriteClubs", hasFavoriteClubs);
+        request.setAttribute("hasRequestClub", hasRequestClub);
         request.setAttribute("hasPermission", hasPermission);
         request.setAttribute("hasPendingRequest", hasPendingRequest);
 
@@ -185,6 +199,10 @@ public class ClubsServlet extends HttpServlet {
         }
 
         Clubs club = clubDAO.getClubById(clubID);
+        boolean clubStatus = club.isClubStatus();
+        String clubRequestStatus = club.getClubRequestStatus();
+        String rejectReason = club.getLastRejectReason();
+                
         if (club == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "Club not found");
             return;
@@ -227,7 +245,9 @@ public class ClubsServlet extends HttpServlet {
         }
         List<Events> events = eventsDAO.getEventsByClubID(clubID);
         request.setAttribute("clubEvents", events);
-
+        request.setAttribute("clubStatus", clubStatus);
+        request.setAttribute("clubRequestStatus", clubRequestStatus);
+        request.setAttribute("rejectReason", rejectReason);
         // Check for club creation permission
         boolean hasPermission = user != null && permissionDAO.hasActivePermission(user.getUserID());
         request.setAttribute("club", club);
@@ -236,7 +256,6 @@ public class ClubsServlet extends HttpServlet {
         request.setAttribute("isDepartmentLeader", isDepartmentLeader);
         request.setAttribute("userClub", userClub);
         request.setAttribute("hasPermission", hasPermission);
-
         request.getRequestDispatcher("/view/clubs-page/club-detail.jsp").forward(request, response);
     }
 
