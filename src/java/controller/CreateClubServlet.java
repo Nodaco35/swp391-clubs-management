@@ -1,5 +1,6 @@
 package controller;
 
+import dal.ApprovalHistoryDAO;
 import dal.ClubCategoryDAO;
 import dal.ClubDAO;
 import dal.UserClubDAO;
@@ -452,6 +453,8 @@ public class CreateClubServlet extends HttpServlet {
                 boolean updateForm = clubDAO.updateClub(newClub);
                 if (updateForm) {
                     session.setAttribute("message", "Yêu cầu cập nhật đơn tạo câu lạc bộ đã được gửi và đang chờ duyệt.");
+                    ApprovalHistoryDAO ap = new ApprovalHistoryDAO();
+                    ap.insertApprovalRecord(clubID, "Pending", "Nộp lại đơn xét duyệt", "Create");
                     response.sendRedirect(request.getContextPath() + "/club-detail?id=" + clubID);
                     return;
                 } else {
