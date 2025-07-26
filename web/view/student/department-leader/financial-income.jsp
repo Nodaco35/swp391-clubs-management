@@ -104,7 +104,7 @@
     </head>
     <body>
         <div class="department-leader-container">
-           <c:set var="activePage" value="dashboard" />
+            <c:set var="activePage" value="financial" />
             <%@ include file="components/sidebar.jsp" %>
 
             <main class="main-content">
@@ -125,17 +125,17 @@
                                             Phí thành viên
                                         </a>
                                     </li>
-                                     
+
                                     <li class="breadcrumb-item active" aria-current="page">Nguồn thu</li>
                                     <li class="breadcrumb-item">
                                         <a href="${pageContext.request.contextPath}/department/financial/club-transaction?type=&status=" class="text-decoration-none">
-                                           Lịch sử giao dịch của clb
+                                            Lịch sử giao dịch của clb
                                         </a>
                                     </li>
                                 </ol>
                             </nav>
                         </div>
-                        
+
                     </div>
                 </header>
 
@@ -179,7 +179,7 @@
                                 </div>
                                 <button type="submit" class="btn btn-primary">Lọc</button>
                             </form>
-                            
+
                             <form class="create-form" id="create-income-form" action="${pageContext.request.contextPath}/department/financial/income?action=insert" method="post" style="display: hidden">
                                 <input type="hidden" name="clubID" value="${clubID}">
                                 <input type="hidden" name="termID" value="${termID}">
@@ -196,7 +196,7 @@
                                     <label for="amount">Số tiền:</label>
                                     <input type="number" name="amount" id="amount" class="form-control" step="0.01" required>
                                 </div>
-                                
+
                                 <div class="form-group" id="dueDateGroup" style="display: none;">
                                     <label for="dueDate">Hạn chót nộp:</label>
                                     <input type="datetime-local" name="dueDate" id="dueDate" class="form-control">
@@ -322,6 +322,33 @@
                     createForm.removeClass('active');
                     createForm[0].reset(); // Reset form fields
                     $('#source-insert').trigger('change'); // Reset status dropdown
+                });
+                
+                // Set min for dueDate to prevent past dates (starting from today 00:00)
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const minDateTime = `${year}-${month}-${day}T00:00`;
+                $('#dueDate').attr('min', minDateTime);
+
+                // Validate on submit to ensure due date is not a past day (ignoring time within the day)
+                $('#create-income-form').on('submit', function (e) {
+                    const sourceVal = $('#source-insert').val();
+                    if (sourceVal === 'Phí thành viên') {
+                        const dueDateValue = $('#dueDate').val();
+                        if (dueDateValue) {
+                            const dueDate = new Date(dueDateValue);
+                            const currentDate = new Date();
+                            // Reset time to compare only dates
+                            dueDate.setHours(0, 0, 0, 0);
+                            currentDate.setHours(0, 0, 0, 0);
+                            if (dueDate < currentDate) {
+                                alert('Hạn chót nộp không được là ngày quá khứ.');
+                                e.preventDefault();
+                            }
+                        }
+                    }
                 });
             });
         </script>

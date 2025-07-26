@@ -76,7 +76,7 @@ public class ApprovalHistoryDAO {
             if (rs.next()) {
                 String sqlApplyUpdate = "UPDATE Clubs SET ClubImg = ?, IsRecruiting = ?, ClubName = ?, Description = ?, "
                         + "CategoryID = ?, EstablishedDate = ?, ContactPhone = ?, ContactGmail = ?, "
-                        + "ContactURL = ?, ClubStatus = ? ,"
+                        + "ContactURL = ?, ClubStatus = 1 ,"
                         + "ClubRequestStatus = 'Approved' ,"
                         + "LastRejectReason = NULL "
                         + "WHERE ClubID = ?";
@@ -91,8 +91,7 @@ public class ApprovalHistoryDAO {
                 psApplyUpdate.setString(7, rs.getString("ContactPhone"));
                 psApplyUpdate.setString(8, rs.getString("ContactGmail"));
                 psApplyUpdate.setString(9, rs.getString("ContactURL"));
-                psApplyUpdate.setBoolean(10, rs.getBoolean("ClubStatus"));
-                psApplyUpdate.setInt(11, clubId);
+                psApplyUpdate.setInt(10, clubId);
 
                 return psApplyUpdate.executeUpdate() > 0;
             }
@@ -138,6 +137,20 @@ public class ApprovalHistoryDAO {
         return false;
     }
 
+    public boolean rejectUpdateRequest(int clubId) {
+        String sql = """
+                     Delete from Clubs WHERE ParentClubID = ?
+                     """;
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setInt(1, clubId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public boolean deleteCreateClubRequest(int clubId) {
         String sqlUserClubs = "DELETE FROM UserClubs WHERE ClubID = ?";
         String sqlClubs = "DELETE FROM Clubs WHERE ClubID = ?";
@@ -161,13 +174,12 @@ public class ApprovalHistoryDAO {
         }
         return false;
     }
-    
+
     public boolean deleteUpdateClubRequest(int clubId) {
         String sqlClubs = "DELETE FROM Clubs WHERE ParentClubID = ?";
 
         try {
             Connection conn = DBContext.getConnection();
-
 
             // Xóa trong bảng Clubs sau
             PreparedStatement psClubs = conn.prepareStatement(sqlClubs);

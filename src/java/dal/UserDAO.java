@@ -377,7 +377,7 @@ public class UserDAO {
         return null;
     }
 
-    public static void update(String newName, String avatarPath, String dob, String id) {
+    public static boolean update(String newName, String avatarPath, String dob, String id) {
         String sql = "UPDATE `clubmanagementsystem`.`users`\n"
                 + "SET\n"
                 + "  `FullName` = ?,\n"
@@ -391,10 +391,11 @@ public class UserDAO {
             ps.setObject(2, avatarPath);
             ps.setObject(3, dob);
             ps.setObject(4, id);
-            ps.executeUpdate();
-
+            int row = ps.executeUpdate();
+            return row>0;
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
     }
 

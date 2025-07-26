@@ -1,9 +1,3 @@
-<%-- 
-    Document   : chairman-page
-    Created on : Jun 14, 2025, 8:42:59 PM
-    Author     : LE VAN THUAN
---%>
-
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -92,6 +86,7 @@
                             <form action="${pageContext.request.contextPath}/chairman-page/clubmeeting" method="post" id="formData">
                                 <input type="hidden" name="action" id="formAction" value="${editMeeting != null ? 'update' : 'add'}">
                                 <input type="hidden" name="meetingId" id="meetingId" value="${editMeeting != null ? editMeeting.clubMeetingID : ''}">
+                                <input type="hidden" id="originalStartedTime" value="">
 
                                 <div class="mb-3">
                                     <label for="title" class="form-label">Tiêu đề cuộc họp</label>
@@ -354,7 +349,20 @@
         <c:if test="${not empty error}">
         document.getElementById('errorModal').style.display = 'block';
         </c:if>
+        setMinDateTime();
     });
+
+    function setMinDateTime() {
+        const startedTimeInput = document.getElementById('startedTime');
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = ('0' + (now.getMonth() + 1)).slice(-2);
+        const day = ('0' + now.getDate()).slice(-2);
+        const hours = ('0' + now.getHours()).slice(-2);
+        const minutes = ('0' + now.getMinutes()).slice(-2);
+        const minDateTime = year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+        startedTimeInput.min = minDateTime;
+    }
 
     function toggleAddForm() {
         const form = document.getElementById('meetingForm');
@@ -389,9 +397,11 @@
         submitButton.textContent = 'Tạo';
         document.getElementById('formData').reset();
         document.getElementById('meetingId').value = '';
+        document.getElementById('originalStartedTime').value = '';
         document.getElementById('selectAll').checked = false;
         toggleParticipants(document.getElementById('selectAll'));
         currentEditMeetingId = null;
+        setMinDateTime(); // Ensure min is set for add
     }
 
     function showEditForm(meetingId, title, urlMeeting, documentLink, startedTime) {
@@ -411,6 +421,17 @@
         document.getElementById('urlMeeting').value = urlMeeting;
         document.getElementById('documentLink').value = documentLink;
         document.getElementById('startedTime').value = startedTime;
+        document.getElementById('originalStartedTime').value = startedTime;
+
+        // For edit, if the existing time is in the past, set min to that time to allow keeping it, but prevent selecting earlier
+        const startedTimeInput = document.getElementById('startedTime');
+        const existingTime = new Date(startedTime);
+        const now = new Date();
+        if (existingTime < now) {
+            startedTimeInput.min = startedTime; // Allow keeping past time but not earlier
+        } else {
+            setMinDateTime(); // For future meetings, prevent past
+        }
     }
 
     function hideForm() {
@@ -480,6 +501,23 @@
             alert('Liên kết tài liệu không hợp lệ! Vui lòng nhập URL Google Drive hợp lệ.');
             e.preventDefault();
             return;
+        }
+
+        // Validation for started time
+        if (startedTime) {
+            const selectedDate = new Date(startedTime);
+            const now = new Date();
+            const action = document.getElementById('formAction').value;
+            const originalStartedTime = document.getElementById('originalStartedTime').value;
+            let isInvalid = selectedDate < now;
+            if (action === 'update' && startedTime === originalStartedTime) {
+                isInvalid = false;
+            }
+            if (isInvalid) {
+                alert('Thời gian bắt đầu không được là ngày quá khứ!');
+                e.preventDefault();
+                return;
+            }
         }
     });
 </script>

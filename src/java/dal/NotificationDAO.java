@@ -4,7 +4,6 @@
  */
 package dal;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import models.Notification;
@@ -18,7 +17,7 @@ public class NotificationDAO {
 
     public static List<Notification> findByUserId(String userID) {
         List<Notification> findByUserId = new ArrayList<>();
-        
+
         String sql = """
                      SELECT * FROM Notifications
                      where ReceiverID = ?
@@ -48,7 +47,7 @@ public class NotificationDAO {
     }
 
     public static void delete(int id) {
-        
+
         String sql = """
                      DELETE FROM `clubmanagementsystem`.`notifications`
                      WHERE NotificationID = ?;""";
@@ -62,7 +61,7 @@ public class NotificationDAO {
     }
 
     public static void markAsRead(Integer id) {
-        
+
         String sql = """
                      UPDATE Notifications
                      SET
@@ -79,7 +78,7 @@ public class NotificationDAO {
     }
 
     public static Notification findByNotificationID(Integer id) {
-        
+
         String sql = """
                 SELECT n.NotificationID, n.Title, n.Content, n.CreatedDate,
                             n.ReceiverID, n.Priority, n.Status, n.SenderID
@@ -110,7 +109,6 @@ public class NotificationDAO {
     public static List<Notification> findByUserIdAndStatus(String userID, String status) {
         List<Notification> findByUserId = new ArrayList<>();
 
-        
         String sql = """
                      SELECT * FROM clubmanagementsystem.notifications
                      where ReceiverID = ? and status = ?
@@ -140,8 +138,37 @@ public class NotificationDAO {
         return findByUserId != null ? findByUserId : null;
     }
 
+    public static boolean sentToPerson2(String senderID, String receiverID, String title, String content) {
+
+        String sql = """
+                     INSERT INTO `clubmanagementsystem`.`notifications`
+                     (
+                     `Title`,
+                     `Content`,
+                     `ReceiverID`,
+                     `SenderID`)
+                     VALUES
+                     (
+                     ?,
+                     ?,
+                     ?,
+                     ?);""";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setObject(1, title);
+            ps.setObject(2, content);
+            ps.setObject(3, receiverID);
+            ps.setObject(4, senderID);
+            int row = ps.executeUpdate();
+            return row>0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public static void sentToPerson(String senderID, String receiverID, String title, String content) {
-        
+
         String sql = """
                      INSERT INTO `clubmanagementsystem`.`notifications`
                      (
@@ -166,10 +193,10 @@ public class NotificationDAO {
             e.printStackTrace();
         }
     }
-    
+
     public static void sentToPerson1(String senderID, String receiverID, String title, String content, String priority) {
-        String sql = "INSERT INTO clubmanagementsystem.notifications (Title, Content, ReceiverID, SenderID, Priority) " +
-                     "VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO clubmanagementsystem.notifications (Title, Content, ReceiverID, SenderID, Priority) "
+                + "VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement ps = DBContext.getConnection().prepareStatement(sql)) {
             ps.setString(1, title);
             ps.setString(2, content);
@@ -181,12 +208,10 @@ public class NotificationDAO {
             e.printStackTrace();
         }
     }
-    
-    
+
     public static List<Notification> findByUserIdAndImpotant(String userID, String prioity) {
         List<Notification> findByUserId = new ArrayList<>();
 
-        
         String sql = """
                      SELECT * FROM clubmanagementsystem.notifications
                      where ReceiverID = ? and Priority = ?
@@ -219,7 +244,6 @@ public class NotificationDAO {
     public static List<Notification> findByUserSenderID(String userID) {
         List<Notification> findByUserId = new ArrayList<>();
 
-       
         String sql = """
                      SELECT * FROM clubmanagementsystem.notifications
                      where SenderID = ?
@@ -268,7 +292,7 @@ public class NotificationDAO {
                             `Content` LIKE CONCAT('%', ?, '%')
                        )
                      ORDER BY `CreatedDate` DESC""";
-        
+
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, userID);
@@ -300,7 +324,7 @@ public class NotificationDAO {
                      FROM Notifications WHERE CreatedDate >= DATE_SUB(NOW(), INTERVAL 7 DAY) AND ReceiverID = ?
                      ORDER BY CreatedDate DESC""";
         try {
-           PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, userID);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -312,7 +336,7 @@ public class NotificationDAO {
                 notification.setReceiverID(rs.getString("ReceiverID"));
                 notification.setPrioity(rs.getString("Priority"));
                 notification.setStatus(rs.getString("Status"));
-                
+
                 findRecentByUserID.add(notification);
             }
         } catch (Exception e) {

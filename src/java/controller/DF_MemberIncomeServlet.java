@@ -124,6 +124,7 @@ public class DF_MemberIncomeServlet extends HttpServlet {
         request.setAttribute("incomeIDs", incomeIDs);
         request.setAttribute("allPaid", allPaid);
         request.setAttribute("hasPending", hasPending);
+        
         request.getRequestDispatcher("/view/student/department-leader/financial-income-member.jsp").forward(request, response);
     }
 

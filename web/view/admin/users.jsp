@@ -431,7 +431,12 @@
                         </form>
 
                     </div>
+                               
+                               
                     <div class="table-container">
+                        <c:if test="${not empty msg}">
+                            <div class="modal-content">${msg}</div>
+                        </c:if>
                         <table>
                             <thead>
                                 <tr>
