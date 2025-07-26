@@ -70,34 +70,6 @@
                                         <p class="card-text"><strong>Liên kết mạng xã hội:</strong> 
                                             <a href="${club.contactURL}" target="_blank">${club.contactURL}</a>
                                         </p>
-                                        <c:if test="${club.clubRequestStatus == 'Pending'}">
-                                            <div class="mt-3">
-                                                <a href="${pageContext.request.contextPath}/ic?action=approvePermissionRequest&id=${club.clubID}&userID=${club.chairmanID}" 
-                                                   class="btn btn-success me-2">
-                                                    <i class="fas fa-check"></i> Duyệt đơn
-                                                </a>
-
-                                                <button class="btn btn-danger" onclick="showRejectModal('${club.clubID}', '${club.chairmanID}')">
-                                                    <i class="fas fa-times"></i> Từ chối đơn
-                                                </button>
-                                            </div>
-                                        </c:if>
-                                        <c:if test="${club.clubRequestStatus == 'Approved'}">
-                                            <div class="mt-3">
-                                                <button class="btn btn-danger" onclick="showRejectModal('${club.clubID}', '${club.chairmanID}')">
-                                                    <i class="fas fa-times"></i> Từ chối đơn
-                                                </button>
-                                            </div>
-                                        </c:if>
-                                        <c:if test="${club.clubRequestStatus == 'Rejected'}">
-                                            <div class="mt-3">
-                                                <a href="${pageContext.request.contextPath}/ic?action=approvePermissionRequest&id=${club.clubID}&userID=${club.chairmanID}" 
-                                                   class="btn btn-success me-2">
-                                                    <i class="fas fa-check"></i> Duyệt đơn
-                                                </a>
-
-                                            </div>
-                                        </c:if>
                                     </div>
                                 </div>
                             </div>
@@ -129,19 +101,20 @@
                                         <p class="card-text"><strong>Liên kết mạng xã hội:</strong> 
                                             <a href="${updateClub.contactURL}" target="_blank">${updateClub.contactURL}</a>
                                         </p>
-                                        <c:if test="${club.clubRequestStatus == 'Pending'}">
-                                            <div class="mt-3">
-                                                <a href="${pageContext.request.contextPath}/ic?action=approvePermissionRequest&id=${updateClub.clubID}&userID=${club.chairmanID}" 
-                                                   class="btn btn-success me-2">
-                                                    <i class="fas fa-check"></i> Duyệt đơn
-                                                </a>
 
-                                                <button class="btn btn-danger" onclick="showRejectModal('${updateClub.clubID}', '${club.chairmanID}')">
-                                                    <i class="fas fa-times"></i> Từ chối đơn
-                                                </button>
-                                            </div>
-                                        </c:if>
                                     </div>
+                                    <c:if test="${club.clubRequestStatus == 'Pending'}">
+                                        <div class="mt-3">
+                                            <a href="${pageContext.request.contextPath}/ic?action=approveUpdatePermissionRequest&id=${updateClub.clubID}&userID=${club.chairmanID}" 
+                                               class="btn btn-success me-2">
+                                                <i class="fas fa-check"></i> Duyệt đơn
+                                            </a>
+
+                                            <button class="btn btn-danger" onclick="showRejectModal('${updateClub.clubID}', '${club.chairmanID}')">
+                                                <i class="fas fa-times"></i> Từ chối đơn
+                                            </button>
+                                        </div>
+                                    </c:if>
                                 </div>
                             </div>
                         </div>
