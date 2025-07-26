@@ -17,6 +17,8 @@ import models.UserClub;
 import models.ClubCategory;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import models.Events;
 
@@ -77,11 +79,10 @@ public class ClubsServlet extends HttpServlet {
         } else if (categoryParam.equals("-2")) {
             categoryID = -2;
             selectedCategoryName = "favoriteClubs";
-        } else if(categoryParam.equals("-3")){
+        } else if (categoryParam.equals("-3")) {
             categoryID = -3;
             selectedCategoryName = "requestClub";
-        }
-        else {
+        } else {
             try {
                 categoryID = Integer.parseInt(categoryParam);
                 for (ClubCategory category : categories) {
@@ -121,11 +122,11 @@ public class ClubsServlet extends HttpServlet {
         if (userID != null) {
             int userClubCount = clubDAO.getTotalClubsByCategory(-1, userID); // -1 for myClubs
             hasClubs = userClubCount > 0;
-            
+
             int favoriteClubCount = clubDAO.getTotalFavoriteClubs(userID);
             hasFavoriteClubs = favoriteClubCount > 0;
             hasPendingRequest = permissionDAO.hasPendingRequest(userID);
-            
+
             int requestClubCount = clubDAO.getTotalRequestClub(userID);
             hasRequestClub = requestClubCount > 0;
         }
@@ -151,11 +152,10 @@ public class ClubsServlet extends HttpServlet {
                 clubs = clubDAO.getUserClubs(userID, page, pageSize);
                 totalClubs = clubDAO.getTotalClubsByCategory(-1, userID);
             }
-        }else if(categoryID == -3){
+        } else if (categoryID == -3) {
             clubs = clubDAO.getRequestClub(userID, page, pageSize);
             totalClubs = clubDAO.getTotalRequestClub(userID);
-        } 
-        else {
+        } else {
             clubs = clubDAO.getClubsByCategory(categoryID, page, pageSize);
             totalClubs = clubDAO.getTotalClubsByCategory(categoryID, userID);
         }
@@ -194,7 +194,7 @@ public class ClubsServlet extends HttpServlet {
         try {
             clubID = Integer.parseInt(request.getParameter("id"));
         } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid club ID");
+            response.sendRedirect(request.getContextPath() + "/clubs?error=access_denied&message=" + URLEncoder.encode("ID CLB không hợp lệ.", StandardCharsets.UTF_8.name()));
             return;
         }
 
@@ -202,7 +202,7 @@ public class ClubsServlet extends HttpServlet {
         boolean clubStatus = club.isClubStatus();
         String clubRequestStatus = club.getClubRequestStatus();
         String rejectReason = club.getLastRejectReason();
-                
+
         if (club == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "Club not found");
             return;
