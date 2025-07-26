@@ -171,6 +171,10 @@ INSERT INTO ClubApprovalHistory (
     'CLB thử nghiệm để test chức năng duyệt',
     'Create'
 );
+INSERT INTO Clubs 
+(ClubName, ClubImg, Description, ClubStatus, CurrentRequestType , ClubRequestStatus, ContactGmail,  ContactPhone, ContactURL )
+VALUES 
+( 'CLB Sáng Tạo Trẻ', '/img/clb_sangtaotre.png', 'Câu lạc bộ dành cho sinh viên đam mê sáng tạo và đổi mới.', 0, 'Create', 'Pending', 'clbsangtaotre@gmail.com', '0912345678', 'https://www.facebook.com/clbsangtaotre');
 
 
 CREATE TABLE Departments (
@@ -191,7 +195,7 @@ CREATE TABLE ClubDepartments (
     ClubDepartmentID INT PRIMARY KEY AUTO_INCREMENT,
     DepartmentID INT NOT NULL,
     ClubID INT,
-    FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID),
+    FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID) ON DELETE CASCADE,
     FOREIGN KEY (DepartmentID) REFERENCES Departments(DepartmentID)
 );
 
@@ -215,8 +219,8 @@ INSERT INTO ClubDepartments (DepartmentID, ClubID) VALUES
 (5, 4),  -- ClubDepartmentID = 17 → Ban Hậu cần của CLB 4
 (6, 4),  -- ClubDepartmentID = 18 → Ban Đối ngoại của CLB 4
 (2, 3),  -- ClubDepartmentID = 19 → Ban Truyền thông cho CLB 3
-(4, 6);  -- ClubDepartmentID = 20 → Ban Chuyên môn của CLB 6
-
+(4, 6),  -- ClubDepartmentID = 20 → Ban Chuyên môn của CLB 6
+(3, 9); 
 CREATE TABLE UserClubs (
     UserClubID INT PRIMARY KEY AUTO_INCREMENT,
     UserID VARCHAR(10) NOT NULL,
@@ -227,15 +231,15 @@ CREATE TABLE UserClubs (
     IsActive BOOLEAN DEFAULT 1,
     Gen INT,  -- Thêm trường gen kiểu INT ở đây
     FOREIGN KEY (UserID) REFERENCES Users(UserID),
-    FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID),
-    FOREIGN KEY (ClubDepartmentID) REFERENCES ClubDepartments(ClubDepartmentID),
+    FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID) ON DELETE CASCADE,
+    FOREIGN KEY (ClubDepartmentID) REFERENCES       ClubDepartments(ClubDepartmentID),
     FOREIGN KEY (RoleID) REFERENCES Roles(RoleID)
 );
 INSERT INTO UserClubs (UserID, ClubID, ClubDepartmentID, RoleID, JoinDate, IsActive) VALUES
 ('U001', 1, 1, 1, '2020-09-01', 1),
+('U002', 1, 5, 3, '2020-09-01', 1),
 ('U001', 4, 14, 4, '2022-09-01', 1),
 ('U001', 3, 19, 3, '2022-10-01', 1),
-('U002', 1, 5, 3, '2021-01-15', 1),
 ('U003', 2, 4, 3, '2021-02-20', 1),
 ('U004', 1, 2, 3, '2021-03-25', 1),
 ('U005', 2, 6, 3, '2021-04-30', 1),
@@ -343,7 +347,7 @@ INSERT INTO UserClubs (UserID, ClubID, ClubDepartmentID, RoleID, JoinDate, IsAct
 ('HA197461', 5, 16, 4, '2023-10-16', 1),
 ('HA197461', 1, 1, 4, '2024-02-05', 1),
 ('HS173913', 6, 10, 4, '2023-04-01', 1),
-('HS173913', 1, 5, 3, '2023-06-25', 1),
+('HS173913', 1, 5, 4, '2023-06-25', 1),
 ('HA193827', 1, 5, 4, '2022-12-04', 1),
 ('HS165214', 2, 6, 4, '2025-01-28', 1),
 ('HA196247', 6, 10, 4, '2024-10-02', 1),
@@ -497,10 +501,11 @@ CREATE TABLE Events (
     ApprovalStatus ENUM('PENDING', 'APPROVED', 'REJECTED') DEFAULT 'PENDING',
     RejectionReason TEXT,
     SemesterID VARCHAR(10),
-    FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID),
+    FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID) ON DELETE CASCADE,
     FOREIGN KEY (FormID) REFERENCES ApplicationForms(FormID),
     FOREIGN KEY (SemesterID) REFERENCES Semesters(TermID)
 );
+
 DELIMITER $$
 CREATE TRIGGER trg_auto_approve_private_event_insert
 BEFORE INSERT ON Events
@@ -574,8 +579,8 @@ INSERT INTO Events (EventName, EventImg, Description, ClubID, IsPublic, Capacity
 ('Ngày Hội Âm Nhạc FPTU 2025', 'images/events/musicday2025.jpg', 'Ngày hội âm nhạc với các ban nhạc sinh viên.', 6, FALSE, 250, 'PENDING', 'SU25', 'PENDING', NULL),
 ('Hackathon Đổi Mới AI', 'images/events/aihackathon2025.jpg', 'Cuộc thi lập trình AI trong 2 ngày.', 4, TRUE, 45, 'PENDING', 'SU25', 'PENDING', NULL),
 ('Cuộc thi Code War: Thử thách thuật toán', 'images/events/codewar.jpg', 'Cuộc thi giải thuật toán.', 4, TRUE, 120, 'PENDING', 'SU25', 'PENDING', NULL),
-('Hội Thảo Công Nghệ Blockchain 2025', 'images/events/blockchain2025.jpg', 'Hội thảo về công nghệ blockchain với lý thuyết và thực hành.', 4, TRUE, 80, 'PENDING', 'SU25', 'PENDING', NULL),
-('Cuộc Thi Thiết Kế Đồ Họa 2025', 'images/events/designcontest2025.jpg', 'Cuộc thi thiết kế đồ họa với các vòng thi.', 7, TRUE, 60, 'PENDING', 'SU25', 'PENDING', NULL),
+('Giải Bóng Đá Sinh Viên Mở Rộng 2025', 'images/events/university_cup2025.jpg', 'Giải Bóng Đá Sinh Viên Mở Rộng 2025 là giải đấu thường niên.', 1, TRUE, 120, 'PENDING', 'SU25', 'PENDING', NULL),
+('Hội Thảo Kỹ Thuật Bóng Đá Hiện Đại', 'images/events/football_workshop2025.jpg', 'Hội Thảo Kỹ Thuật Bóng Đá Hiện Đại 2025 là chương trình đào tạo chuyên sâu dành.', 1, TRUE, 50, 'PENDING', 'SU25', 'PENDING', NULL),
 -- Spring 2024
 ('Lễ Hội Làng Tết 2024', 'images/events/villagefest2024.jpg', 'Lễ hội truyền thống Tết 2024.', 6, TRUE, 500, 'COMPLETED', 'SP24', 'APPROVED', NULL),
 -- Summer 2024
@@ -589,6 +594,14 @@ INSERT INTO Events (EventName, EventImg, Description, ClubID, IsPublic, Capacity
 ('Hội Thảo Phát Triển Web 2024', 'images/events/webdev2024.jpg', 'Hội thảo phát triển web.', 4, TRUE, 50, 'COMPLETED', 'FA24', 'APPROVED', NULL),
 ('FPTU Dance Battle 2024', 'images/events/dancebattle2024.jpg', 'Cuộc thi nhảy đối kháng.', 7, TRUE, 150, 'COMPLETED', 'FA24', 'APPROVED', NULL),
 ('Cuộc Thi Tranh Biện 2024', 'images/events/debate2024.jpg', 'Cuộc thi tranh biện.', 8, TRUE, 65, 'COMPLETED', 'FA24', 'APPROVED', NULL);
+
+
+INSERT INTO Events (EventName, EventImg , Description, ClubID, IsPublic, Capacity , Status, SemesterID, ApprovalStatus)
+VALUES
+('Giải Giao Hữu Bóng Đá Mùa Hè 2025', 'images/events/summerfootball2025.jpg', 'Giải giao hữu bóng đá giữa các đội trong CLB, tạo sân chơi rèn luyện thể lực mùa hè.', 1, TRUE, 80, 'COMPLETED', 'SU25', 'APPROVED'),
+('Hội Thảo Chiến Thuật Bóng Đá Hiện Đại', 'images/events/footballtactics2025.jpg', 'Hội thảo chia sẻ về các chiến thuật bóng đá hiện đại và cách áp dụng trong thi đấu.', 1, FALSE, 50, 'COMPLETED', 'SU25', 'APPROVED'),
+('Ngày Hội Bóng Đá Phong Trào 2025', 'images/events/footballfestival2025.jpg', 'Ngày hội bóng đá phong trào với nhiều trò chơi và mini game liên quan đến bóng đá.', 1, TRUE, 100, 'COMPLETED', 'SU25', 'APPROVED');
+
 
 
 UPDATE Events 
@@ -628,11 +641,12 @@ UPDATE Events
 SET Description = 'Cuộc thi Code War: Thử thách thuật toán là sân chơi công nghệ dành cho các lập trình viên trẻ đam mê giải thuật và lập trình thi đấu. Các thí sinh sẽ đối mặt với các bài toán phức tạp về cấu trúc dữ liệu, tối ưu hóa thuật toán, và tư duy logic. Cuộc thi không chỉ kiểm tra kỹ năng coding mà còn khuyến khích sự sáng tạo và khả năng làm việc dưới áp lực. Các workshop từ chuyên gia và giải thưởng hấp dẫn sẽ là động lực lớn cho người tham gia.' 
 WHERE EventName = 'Cuộc thi Code War: Thử thách thuật toán' AND SemesterID = 'SU25';
 UPDATE Events 
-SET Description = 'Hội Thảo Công Nghệ Blockchain 2025 là sự kiện chuyên sâu dành cho sinh viên yêu thích công nghệ chuỗi khối. Chương trình gồm các phiên thảo luận về ứng dụng thực tiễn của blockchain trong tài chính, giáo dục, và quản lý dữ liệu. Diễn giả là chuyên gia đến từ các công ty công nghệ hàng đầu sẽ chia sẻ kiến thức nền tảng, phân tích xu hướng tương lai, và trình diễn các giải pháp blockchain hiện đại. Người tham dự có cơ hội thực hành qua các workshop, kết nối mạng lưới chuyên môn, và định hướng nghề nghiệp trong lĩnh vực tiềm năng này.'
-WHERE EventName = 'Hội Thảo Công Nghệ Blockchain 2025' AND SemesterID = 'SU25';
+SET Description = 'Hội Thảo Kỹ Thuật Bóng Đá Hiện Đại 2025 là chương trình đào tạo chuyên sâu dành cho các cầu thủ và huấn luyện viên trẻ. Sự kiện tập trung vào các kỹ thuật tiên tiến như chiến thuật pressing, cách xây dựng lối chơi tấn công tổng lực, và phương pháp phân tích trận đấu bằng công nghệ. Các chuyên gia từ Học viện Bóng đá sẽ trực tiếp hướng dẫn qua các bài tập thực hành, phân tích video trận đấu chuyên nghiệp, và chia sẻ kinh nghiệm huấn luyện. Đây là cơ hội vàng để nâng cao trình độ và tiếp cận phương pháp đào tạo đẳng cấp quốc tế.'
+WHERE EventName = 'Hội Thảo Kỹ Thuật Bóng Đá Hiện Đại' AND SemesterID = 'SU25';
 UPDATE Events 
-SET Description = 'Cuộc Thi Thiết Kế Đồ Họa 2025 là sân chơi sáng tạo dành cho sinh viên đam mê mỹ thuật số và thiết kế truyền thông. Thí sinh sẽ tranh tài qua nhiều vòng thi như thiết kế poster, giao diện ứng dụng, và nhận diện thương hiệu. Ban giám khảo là các chuyên gia thiết kế sẽ đánh giá dựa trên tính sáng tạo, kỹ thuật và khả năng truyền tải thông điệp. Bên cạnh cuộc thi, còn có các workshop hướng dẫn sử dụng công cụ thiết kế hiện đại và chia sẻ kinh nghiệm nghề nghiệp, tạo điều kiện phát triển kỹ năng chuyên môn và xây dựng portfolio.'
-WHERE EventName = 'Cuộc Thi Thiết Kế Đồ Họa 2025' AND SemesterID = 'SU25';
+SET Description = 'Giải Bóng Đá Sinh Viên Mở Rộng 2025 là giải đấu thường niên quy tụ các đội bóng đến từ nhiều trường đại học trong khu vực. Giải đấu áp dụng thể thức thi đấu vòng tròn kết hợp loại trực tiếp, với các trận đấu hấp dẫn diễn ra trong 2 tuần. Ngoài ý nghĩa thể thao, giải đấu còn là sân chơi giao lưu, kết nối sinh viên yêu bóng đá. Đội vô địch sẽ nhận được cúp vàng, huy chương cùng suất tham dự giải đấu cấp quốc gia.'
+WHERE EventName = 'Giải Bóng Đá Sinh Viên Mở Rộng 2025' AND SemesterID = 'SU25';
+
 
 UPDATE Events 
 SET Description = 'Lễ Hội Làng Tết 2024 tái hiện không gian Tết truyền thống Việt Nam với các gian hàng thủ công, trò chơi dân gian, và trình diễn nghệ thuật đặc sắc như múa lân, hát chèo, và biểu diễn áo dài. Sự kiện mang đến cơ hội trải nghiệm văn hóa vùng miền, thưởng thức ẩm thực Tết như bánh chưng, bánh tét, và giao lưu cùng sinh viên từ các câu lạc bộ văn hóa. Đây là dịp để sinh viên FPTU hòa mình vào không khí Tết cổ truyền, lan tỏa niềm vui và kết nối cộng đồng.' 
@@ -664,8 +678,6 @@ WHERE EventName = 'FPTU Dance Battle 2024' AND SemesterID = 'FA24';
 UPDATE Events 
 SET Description = 'Cuộc Thi Tranh Biện 2024 là diễn đàn trí tuệ nơi sinh viên FPTU thể hiện khả năng lập luận, phản biện, và thuyết trình về các vấn đề xã hội, kinh tế, và giáo dục. Với format tranh biện chuyên nghiệp, các đội thi sẽ đối đầu qua các vòng thi căng thẳng, được chấm điểm bởi ban giám khảo là các chuyên gia và giảng viên. Sự kiện không chỉ nâng cao kỹ năng tư duy logic mà còn khuyến khích sinh viên bày tỏ quan điểm và kết nối với cộng đồng.' 
 WHERE EventName = 'Cuộc Thi Tranh Biện 2024' AND SemesterID = 'FA24';
-
-
 
 CREATE TABLE EventSchedules (
     ScheduleID INT PRIMARY KEY AUTO_INCREMENT,
@@ -704,12 +716,25 @@ INSERT INTO EventSchedules (EventID, EventDate, LocationID, StartTime, EndTime) 
 ((SELECT EventID FROM Events WHERE EventName = 'Hackathon Đổi Mới AI' AND SemesterID = 'SU25'), '2025-08-13', 25, '08:00:00', '14:00:00'),
 -- Cuộc thi Code War: Thử thách thuật toán: 1 ngày, 1 địa điểm
 ((SELECT EventID FROM Events WHERE EventName = 'Cuộc thi Code War: Thử thách thuật toán' AND SemesterID = 'SU25'), '2025-07-31', 27, '09:00:00', '17:00:00'),
--- Hội Thảo Công Nghệ Blockchain 2025: 1 ngày, 2 địa điểm
-((SELECT EventID FROM Events WHERE EventName = 'Hội Thảo Công Nghệ Blockchain 2025' AND SemesterID = 'SU25'), '2025-08-15', 3, '09:00:00', '11:00:00'), -- Hội trường tầng 5 tòa Gamma
-((SELECT EventID FROM Events WHERE EventName = 'Hội Thảo Công Nghệ Blockchain 2025' AND SemesterID = 'SU25'), '2025-08-15', 25, '11:30:00', '13:30:00'), -- Phòng BE-101
--- Cuộc Thi Thiết Kế Đồ Họa 2025: 2 ngày, 2 địa điểm
-((SELECT EventID FROM Events WHERE EventName = 'Cuộc Thi Thiết Kế Đồ Họa 2025' AND SemesterID = 'SU25'), '2025-08-20', 9, '09:00:00', '17:00:00'), -- Phòng AL-L101
-((SELECT EventID FROM Events WHERE EventName = 'Cuộc Thi Thiết Kế Đồ Họa 2025' AND SemesterID = 'SU25'), '2025-08-21', 10, '09:00:00', '14:00:00'), -- Phòng AL-L201
+-- Giải Bóng Đá Sinh Viên Mở Rộng 2025: 2 ngày tại sân bóng đá trong trường
+((SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên Mở Rộng 2025'), '2025-08-15', 5, '07:00:00', '12:00:00'), -- Sân bóng đá cạnh hồ cá Koi
+((SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên Mở Rộng 2025'), '2025-08-16', 5, '07:00:00', '12:00:00'), -- Sân bóng đá cạnh hồ cá Koi
+-- Hội Thảo Kỹ Thuật Bóng Đá Hiện Đại: 1 ngày, 2 địa điểm trong trường
+((SELECT EventID FROM Events WHERE EventName = 'Hội Thảo Kỹ Thuật Bóng Đá Hiện Đại'), '2025-08-20', 3, '08:00:00', '10:00:00'), -- Hội trường tầng 5 tòa Gamma
+((SELECT EventID FROM Events WHERE EventName = 'Hội Thảo Kỹ Thuật Bóng Đá Hiện Đại'), '2025-08-20', 25, '10:30:00', '12:30:00'), -- BE-101
+
+-- Giải Giao Hữu Bóng Đá Mùa Hè 2025 (2 ngày thi đấu)
+((SELECT EventID FROM Events WHERE EventName = 'Giải Giao Hữu Bóng Đá Mùa Hè 2025' AND SemesterID = 'SU25'), '2025-05-15', 5, '07:00:00', '11:00:00'),
+((SELECT EventID FROM Events WHERE EventName = 'Giải Giao Hữu Bóng Đá Mùa Hè 2025' AND SemesterID = 'SU25'), '2025-05-16', 5, '07:00:00', '11:00:00'),
+-- Hội Thảo Chiến Thuật Bóng Đá Hiện Đại (1 buổi)
+((SELECT EventID FROM Events WHERE EventName = 'Hội Thảo Chiến Thuật Bóng Đá Hiện Đại' AND SemesterID = 'SU25'), '2025-06-10', 3, '14:00:00', '17:00:00'),
+-- Ngày Hội Bóng Đá Phong Trào 2025 (1 ngày)
+((SELECT EventID FROM Events WHERE EventName = 'Ngày Hội Bóng Đá Phong Trào 2025' AND SemesterID = 'SU25'), '2025-07-03', 5, '08:00:00', '16:00:00'),
+
+
+
+
+
 -- Spring 2024
 ((SELECT EventID FROM Events WHERE EventName = 'Lễ Hội Làng Tết 2024' AND SemesterID = 'SP24'), '2024-01-20', 36, '10:00:00', '22:00:00'),
 -- Summer 2024
@@ -769,7 +794,6 @@ BEGIN
     END IF;
 END$$
 DELIMITER ;
--- Insert vào Agenda
 -- Spring 2025: Lễ Hội Âm Nhạc Tết 2025 (1 ngày, 1 địa điểm)
 INSERT INTO Agenda (ScheduleID, Title, Description, StartTime, EndTime, Status) VALUES
 ((SELECT ScheduleID FROM EventSchedules WHERE EventID = (SELECT EventID FROM Events WHERE EventName = 'Lễ Hội Âm Nhạc Tết 2025' AND SemesterID = 'SP25') AND LocationID = 2), 'Khai mạc lễ hội', 'Phát biểu khai mạc và giới thiệu chương trình', '2025-02-01 19:00:00', '2025-02-01 19:30:00', 'APPROVED'),
@@ -811,23 +835,50 @@ INSERT INTO Agenda (ScheduleID, Title, Description, StartTime, EndTime, Status) 
 ((SELECT ScheduleID FROM EventSchedules WHERE EventID = (SELECT EventID FROM Events WHERE EventName = 'Hackathon Đổi Mới AI' AND SemesterID = 'SU25') AND EventDate = '2025-08-12'), 'Lập trình và phát triển sản phẩm', 'Các đội thực hiện phát triển sản phẩm', '2025-08-12 08:30:00', '2025-08-12 20:00:00', 'PENDING'),
 ((SELECT ScheduleID FROM EventSchedules WHERE EventID = (SELECT EventID FROM Events WHERE EventName = 'Hackathon Đổi Mới AI' AND SemesterID = 'SU25') AND EventDate = '2025-08-13'), 'Hoàn thiện sản phẩm', 'Các đội hoàn thiện và chuẩn bị trình bày', '2025-08-13 08:00:00', '2025-08-13 11:00:00', 'PENDING'),
 ((SELECT ScheduleID FROM EventSchedules WHERE EventID = (SELECT EventID FROM Events WHERE EventName = 'Hackathon Đổi Mới AI' AND SemesterID = 'SU25') AND EventDate = '2025-08-13'), 'Trình bày sản phẩm và trao giải', 'Các đội trình bày sản phẩm và nhận giải thưởng', '2025-08-13 11:00:00', '2025-08-13 14:00:00', 'PENDING');
-
--- Summer 2025: Hội Thảo Công Nghệ Blockchain 2025 (1 ngày, 2 địa điểm)
+-- Giải Bóng Đá Sinh Viên Mở Rộng 2025 (2 ngày)
 INSERT INTO Agenda (ScheduleID, Title, Description, StartTime, EndTime, Status) VALUES
-((SELECT ScheduleID FROM EventSchedules WHERE EventID = (SELECT EventID FROM Events WHERE EventName = 'Hội Thảo Công Nghệ Blockchain 2025' AND SemesterID = 'SU25') AND LocationID = 3), 'Khai mạc và giới thiệu', 'Phát biểu khai mạc và giới thiệu về blockchain', '2025-08-15 09:00:00', '2025-08-15 09:30:00', 'PENDING'),
-((SELECT ScheduleID FROM EventSchedules WHERE EventID = (SELECT EventID FROM Events WHERE EventName = 'Hội Thảo Công Nghệ Blockchain 2025' AND SemesterID = 'SU25') AND LocationID = 3), 'Phần lý thuyết: Ứng dụng blockchain', 'Giới thiệu ứng dụng blockchain trong thực tế', '2025-08-15 09:30:00', '2025-08-15 10:30:00', 'PENDING'),
-((SELECT ScheduleID FROM EventSchedules WHERE EventID = (SELECT EventID FROM Events WHERE EventName = 'Hội Thảo Công Nghệ Blockchain 2025' AND SemesterID = 'SU25') AND LocationID = 3), 'Q&A lý thuyết', 'Hỏi đáp về nội dung lý thuyết', '2025-08-15 10:30:00', '2025-08-15 11:00:00', 'PENDING'),
-((SELECT ScheduleID FROM EventSchedules WHERE EventID = (SELECT EventID FROM Events WHERE EventName = 'Hội Thảo Công Nghệ Blockchain 2025' AND SemesterID = 'SU25') AND LocationID = 25), 'Thực hành: Xây dựng smart contract', 'Thực hành lập trình smart contract cơ bản', '2025-08-15 11:30:00', '2025-08-15 12:30:00', 'PENDING'),
-((SELECT ScheduleID FROM EventSchedules WHERE EventID = (SELECT EventID FROM Events WHERE EventName = 'Hội Thảo Công Nghệ Blockchain 2025' AND SemesterID = 'SU25') AND LocationID = 25), 'Trình bày kết quả thực hành', 'Các nhóm trình bày smart contract đã xây dựng', '2025-08-15 12:30:00', '2025-08-15 13:00:00', 'PENDING'),
-((SELECT ScheduleID FROM EventSchedules WHERE EventID = (SELECT EventID FROM Events WHERE EventName = 'Hội Thảo Công Nghệ Blockchain 2025' AND SemesterID = 'SU25') AND LocationID = 25), 'Tổng kết và chụp ảnh', 'Tổng kết hội thảo, chụp ảnh lưu niệm', '2025-08-15 13:00:00', '2025-08-15 13:30:00', 'PENDING');
+((SELECT ScheduleID FROM EventSchedules WHERE EventID = (SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên Mở Rộng 2025') AND EventDate = '2025-08-15'), 
+ 'Lễ bốc thăm và khai mạc giải', 
+ 'Lễ khai mạc long trọng với phần bốc thăm chia bảng, giới thiệu các đội tham dự', 
+ '2025-08-15 07:00:00', '2025-08-15 07:30:00', 'PENDING'),
 
--- Summer 2025: Cuộc Thi Thiết Kế Đồ Họa 2025 (2 ngày, 2 địa điểm)
+((SELECT ScheduleID FROM EventSchedules WHERE EventID = (SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên Mở Rộng 2025') AND EventDate = '2025-08-15'), 
+ 'Vòng bảng - Lượt đi', 
+ 'Các trận đấu đầu tiên của vòng bảng với sự tham gia của 16 đội', 
+ '2025-08-15 08:00:00', '2025-08-15 12:00:00', 'PENDING'),
+
+((SELECT ScheduleID FROM EventSchedules WHERE EventID = (SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên Mở Rộng 2025') AND EventDate = '2025-08-16'), 
+ 'Vòng bảng - Lượt về', 
+ 'Các trận đấu lượt về vòng bảng, quyết định các đội vào vòng knock-out', 
+ '2025-08-16 07:00:00', '2025-08-16 10:00:00', 'PENDING'),
+
+((SELECT ScheduleID FROM EventSchedules WHERE EventID = (SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên Mở Rộng 2025') AND EventDate = '2025-08-16'), 
+ 'Chung kết và lễ bế mạc', 
+ 'Trận chung kết và lễ trao giải cho các đội xuất sắc nhất', 
+ '2025-08-16 10:30:00', '2025-08-16 12:00:00', 'PENDING');
+
+-- Hội Thảo Kỹ Thuật Bóng Đá Hiện Đại (1 ngày, 2 địa điểm)
 INSERT INTO Agenda (ScheduleID, Title, Description, StartTime, EndTime, Status) VALUES
-((SELECT ScheduleID FROM EventSchedules WHERE EventID = (SELECT EventID FROM Events WHERE EventName = 'Cuộc Thi Thiết Kế Đồ Họa 2025' AND SemesterID = 'SU25') AND EventDate = '2025-08-20'), 'Khai mạc và phổ biến thể lệ', 'Giới thiệu cuộc thi và quy định', '2025-08-20 09:00:00', '2025-08-20 09:30:00', 'PENDING'),
-((SELECT ScheduleID FROM EventSchedules WHERE EventID = (SELECT EventID FROM Events WHERE EventName = 'Cuộc Thi Thiết Kế Đồ Họa 2025' AND SemesterID = 'SU25') AND EventDate = '2025-08-20'), 'Thiết kế vòng sơ loại', 'Thí sinh thực hiện bài thiết kế sơ loại', '2025-08-20 09:30:00', '2025-08-20 12:00:00', 'PENDING'),
-((SELECT ScheduleID FROM EventSchedules WHERE EventID = (SELECT EventID FROM Events WHERE EventName = 'Cuộc Thi Thiết Kế Đồ Họa 2025' AND SemesterID = 'SU25') AND EventDate = '2025-08-20'), 'Đánh giá vòng sơ loại', 'Ban giám khảo đánh giá và chọn đội vào chung kết', '2025-08-20 13:00:00', '2025-08-20 17:00:00', 'PENDING'),
-((SELECT ScheduleID FROM EventSchedules WHERE EventID = (SELECT EventID FROM Events WHERE EventName = 'Cuộc Thi Thiết Kế Đồ Họa 2025' AND SemesterID = 'SU25') AND EventDate = '2025-08-21'), 'Thiết kế vòng chung kết', 'Thí sinh thực hiện bài thiết kế chung kết', '2025-08-21 09:00:00', '2025-08-21 11:30:00', 'PENDING'),
-((SELECT ScheduleID FROM EventSchedules WHERE EventID = (SELECT EventID FROM Events WHERE EventName = 'Cuộc Thi Thiết Kế Đồ Họa 2025' AND SemesterID = 'SU25') AND EventDate = '2025-08-21'), 'Trình bày và trao giải', 'Thí sinh trình bày sản phẩm và nhận giải', '2025-08-21 11:30:00', '2025-08-21 14:00:00', 'PENDING');
+((SELECT ScheduleID FROM EventSchedules WHERE EventID = (SELECT EventID FROM Events WHERE EventName = 'Hội Thảo Kỹ Thuật Bóng Đá Hiện Đại') AND LocationID = 3), 
+ 'Khai mạc và giới thiệu chương trình', 
+ 'Phát biểu khai mạc và giới thiệu nội dung hội thảo', 
+ '2025-08-20 08:00:00', '2025-08-20 08:30:00', 'PENDING'),
+
+((SELECT ScheduleID FROM EventSchedules WHERE EventID = (SELECT EventID FROM Events WHERE EventName = 'Hội Thảo Kỹ Thuật Bóng Đá Hiện Đại') AND LocationID = 3), 
+ 'Chiến thuật phòng ngự hiện đại', 
+ 'Chia sẻ về các chiến thuật phòng ngự tiên tiến trong bóng đá', 
+ '2025-08-20 08:30:00', '2025-08-20 10:00:00', 'PENDING'),
+
+((SELECT ScheduleID FROM EventSchedules WHERE EventID = (SELECT EventID FROM Events WHERE EventName = 'Hội Thảo Kỹ Thuật Bóng Đá Hiện Đại') AND LocationID = 25), 
+ 'Kỹ thuật tấn công hiệu quả', 
+ 'Hướng dẫn các kỹ thuật tấn công và phối hợp trong bóng đá', 
+ '2025-08-20 10:30:00', '2025-08-20 11:30:00', 'PENDING'),
+
+((SELECT ScheduleID FROM EventSchedules WHERE EventID = (SELECT EventID FROM Events WHERE EventName = 'Hội Thảo Kỹ Thuật Bóng Đá Hiện Đại') AND LocationID = 25), 
+ 'Q&A và tổng kết hội thảo', 
+ 'Hỏi đáp với chuyên gia và tổng kết nội dung đã thảo luận', 
+ '2025-08-20 11:30:00', '2025-08-20 12:30:00', 'PENDING');
+
 
 
 CREATE TABLE EventParticipants (
@@ -847,11 +898,89 @@ INSERT INTO EventParticipants (EventID, UserID, Status) VALUES
 (3, 'U003', 'REGISTERED'),
 (4, 'U002', 'REGISTERED'),
 (4, 'U004', 'REGISTERED'),
-(15,'U002','REGISTERED'),
-(15,'U005','REGISTERED'),
-(15,'U006','REGISTERED'),
-(15,'U007','REGISTERED'),
-(15,'U008','REGISTERED');
+(20,'U002','REGISTERED'),
+(20,'U005','REGISTERED'),
+(20,'U006','REGISTERED'),
+(20,'U007','REGISTERED'),
+(20,'U008','REGISTERED');
+INSERT INTO EventParticipants (EventID, UserID, Status) VALUES
+-- FPTU Showcase 2025 Chung Kết (EventID = 5, ClubID = 7 - CLB Nhảy)
+(5, 'U016', 'REGISTERED'),  -- Thành viên CLB Nhảy
+(5, 'U026', 'REGISTERED'),  -- Thành viên CLB Nhảy
+(5, 'U001', 'REGISTERED'),  
+
+-- Thử Thách Lập Trình FPTU 2025 (EventID = 6, ClubID = 4 - CLB Lập trình)
+(6, 'U019', 'REGISTERED'),  -- Thành viên CLB Lập trình
+(6, 'U020', 'REGISTERED'),  -- Thành viên CLB Lập trình
+(6, 'U021', 'REGISTERED'),  -- Thành viên CLB Lập trình
+(6, 'U001', 'REGISTERED'),  
+
+-- Giải Bóng Đá Sinh Viên FPTU 2025 (EventID = 7, ClubID = 1 - CLB Bóng đá)
+(7, 'U002', 'REGISTERED'),  -- Phó chủ nhiệm CLB Bóng đá
+(7, 'U004', 'REGISTERED'),  -- Thành viên CLB Bóng đá
+(7, 'U007', 'REGISTERED'),  -- Thành viên CLB Bóng đá
+(7, 'U029', 'REGISTERED'), 
+
+-- Chiến Dịch Tình Nguyện Xanh 2025 (EventID = 8, ClubID = 5 - CLB Tình nguyện)
+(8, 'U027', 'REGISTERED'),  -- Thành viên CLB Tình nguyện
+(8, 'U028', 'REGISTERED'),  -- Thành viên CLB Tình nguyện
+(8, 'U001', 'REGISTERED'),
+
+-- Giải Bóng Rổ 3x3 FPTU (EventID = 9, ClubID = 2 - CLB Bóng rổ)
+(9, 'U005', 'REGISTERED'),  -- Thành viên CLB Bóng rổ
+(9, 'U008', 'REGISTERED'),  -- Thành viên CLB Bóng rổ
+(9, 'U001', 'REGISTERED'), 
+-- Ngày Hội Âm Nhạc FPTU 2025 (EventID = 10, ClubID = 6 - CLB Âm nhạc)
+(10, 'U023', 'REGISTERED'),  -- Thành viên CLB Âm nhạc
+(10, 'U024', 'REGISTERED'),  -- Thành viên CLB Âm nhạc
+(10, 'U025', 'REGISTERED'),  -- Thành viên CLB Âm nhạc
+(10, 'U001', 'REGISTERED'),  
+
+-- Hackathon Đổi Mới AI (EventID = 11, ClubID = 4 - CLB Lập trình)
+(11, 'U019', 'REGISTERED'),  -- Thành viên CLB Lập trình
+(11, 'U020', 'REGISTERED'),  -- Thành viên CLB Lập trình
+(11, 'U021', 'REGISTERED'),  -- Thành viên CLB Lập trình
+(11, 'U001', 'REGISTERED'),
+(11, 'U006', 'REGISTERED'), 
+
+-- Cuộc thi Code War: Thử thách thuật toán (EventID = 12, ClubID = 4 - CLB Lập trình)
+(12, 'U019', 'REGISTERED'),  -- Thành viên CLB Lập trình
+(12, 'U020', 'REGISTERED'),  -- Thành viên CLB Lập trình
+(12, 'U001', 'REGISTERED'), 
+(12, 'U014', 'REGISTERED'), 
+
+-- Hội Thảo Công Nghệ Blockchain 2025 (EventID = 13, ClubID = 4 - CLB Lập trình)
+(13, 'U019', 'REGISTERED'),  -- Thành viên CLB Lập trình
+(13, 'U020', 'REGISTERED'),  -- Thành viên CLB Lập trình
+(13, 'U021', 'REGISTERED'),  -- Thành viên CLB Lập trình
+(13, 'U001', 'REGISTERED'),  
+(13, 'U006', 'REGISTERED'),  
+
+-- Cuộc Thi Thiết Kế Đồ Họa 2025 (EventID = 14, ClubID = 7 - CLB Nhảy)
+(14, 'U016', 'REGISTERED'),  -- Thành viên CLB Nhảy
+(14, 'U026', 'REGISTERED'),  -- Thành viên CLB Nhảy
+(14, 'U001', 'REGISTERED'),  
+(14, 'U012', 'REGISTERED'), 
+
+-- Giải Giao Hữu Bóng Đá Mùa Hè 2025 (EventID = 15, ClubID = 1 - CLB Bóng đá)
+(15, 'U004', 'REGISTERED'),  -- Thành viên CLB Bóng đá
+(15, 'U007', 'REGISTERED'),  -- Thành viên CLB Bóng đá
+(15, 'U029', 'REGISTERED'),  -- Thành viên CLB Bóng đá
+(15, 'U012', 'REGISTERED'),  
+
+-- Hội Thảo Chiến Thuật Bóng Đá Hiện Đại (EventID = 16, ClubID = 1 - CLB Bóng đá)
+(16, 'U004', 'REGISTERED'),  -- Thành viên CLB Bóng đá
+(16, 'U029', 'REGISTERED'),  -- Thành viên CLB Bóng đá
+(16, 'U012', 'REGISTERED'),  
+
+-- Ngày Hội Bóng Đá Phong Trào 2025 (EventID = 17, ClubID = 1 - CLB Bóng đá)
+(17, 'U004', 'REGISTERED'),  -- Thành viên CLB Bóng đá
+(17, 'U007', 'REGISTERED'),  -- Thành viên CLB Bóng đá
+(17, 'U008', 'REGISTERED'),  -- Thành viên CLB Bóng đá
+(17, 'U029', 'REGISTERED'),  -- Thành viên CLB Bóng đá
+(17, 'U012', 'REGISTERED'), 
+(17, 'U014', 'REGISTERED'); 
+
 
 update EventParticipants set Status = 'ATTENDED' where UserID = 'U002';
 
@@ -859,6 +988,64 @@ update EventParticipants set Status = 'ATTENDED' where UserID = 'U002';
 -- ========================================
 -- TASK ASSIGNMENTS
 -- ========================================
+CREATE TABLE Documents (
+    DocumentID INT PRIMARY KEY AUTO_INCREMENT,
+    DocumentName VARCHAR(100),
+    Description TEXT,
+    DocumentURL VARCHAR(255), 
+    DocumentType ENUM('Meeting', 'Tasks'),
+    ClubID INT,
+    DepartmentID INT,
+    FOREIGN KEY (DepartmentID) REFERENCES Departments(DepartmentID),
+    FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID) ON DELETE CASCADE
+);
+-- 3 tài liệu cho Câu Lạc Bộ Lập Trình (ClubID = 4)
+INSERT INTO Documents (DocumentName, Description, DocumentURL, DocumentType, ClubID, DepartmentID) VALUES
+('Kế hoạch tổ chức Code War', 
+ 'Chi tiết các bước tổ chức cuộc thi lập trình Code War.', 
+ 'https://drive.google.com/file/d/LINK_DRIVE_CODEWAR/view?usp=sharing', 
+ 'Tasks', 4, 1),
+
+('Checklist truyền thông Hackathon AI', 
+ 'Các bước truyền thông và chuẩn bị nội dung marketing cho sự kiện Hackathon AI.', 
+ 'https://drive.google.com/file/d/LINK_DRIVE_HACKATHON/view?usp=sharing', 
+ 'Tasks', 4, 2),
+
+('Biên bản họp định kỳ tháng 7', 
+ 'Nội dung cuộc họp định kỳ về kế hoạch hoạt động tháng tới.', 
+ 'https://drive.google.com/file/d/LINK_DRIVE_MEETING_JULY/view?usp=sharing', 
+ 'Meeting', 4, 3);
+
+-- 2 tài liệu cho Câu Lạc Bộ Bóng Đá (ClubID = 1)
+INSERT INTO Documents (DocumentName, Description, DocumentURL, DocumentType, ClubID, DepartmentID) VALUES
+('Lịch thi đấu giải nội bộ tháng 8', 
+ 'Tài liệu phân công lịch thi đấu, trọng tài và địa điểm cho giải đấu tháng 8.', 
+ 'https://drive.google.com/file/d/LINK_DRIVE_FOOTBALL_SCHEDULE/view?usp=sharing', 
+ 'Tasks', 1, 4),
+
+('Biên bản họp chiến thuật trước giải đấu', 
+ 'Thảo luận chiến thuật và phân tích đối thủ cho giải đấu sắp tới.', 
+ 'https://drive.google.com/file/d/LINK_DRIVE_FOOTBALL_MEETING/view?usp=sharing', 
+ 'Meeting', 1, 1);
+
+-- Tài liệu cuộc họp của các Ban Chủ nhiệm
+INSERT INTO Documents (DocumentName, Description, DocumentURL, DocumentType, ClubID, DepartmentID) VALUES
+('Biên bản họp tuần CLB 2', 
+ 'Cuộc họp đồng bộ hàng tuần của Ban Chủ nhiệm CLB 2.', 
+ 'https://drive.google.com/file/d/LINK_DRIVE_WEEKLY_CLUB2/view?usp=sharing', 
+ 'Meeting', 2, 3),
+
+('Biên bản kickoff dự án CLB 1', 
+ 'Họp khởi động dự án mới của Ban Chủ nhiệm CLB 1.', 
+ 'https://drive.google.com/file/d/LINK_DRIVE_KICKOFF_CLUB1/view?usp=sharing', 
+ 'Meeting', 1, 3),
+
+('Kế hoạch chiến lược Ban Hậu cần CLB 1', 
+ 'Lên kế hoạch hoạt động hậu cần cho các sự kiện sắp tới.', 
+ 'https://drive.google.com/file/d/LINK_DRIVE_LOGISTICS_CLUB1/view?usp=sharing', 
+ 'Tasks', 1, 5);
+
+
 
 
 CREATE TABLE EventTerms (
@@ -869,6 +1056,40 @@ CREATE TABLE EventTerms (
     TermEnd DATE,
     FOREIGN KEY (EventID) REFERENCES Events(EventID)
 );
+DELIMITER $$
+
+CREATE TRIGGER trg_limit_event_terms
+BEFORE INSERT ON EventTerms
+FOR EACH ROW
+BEGIN
+    DECLARE term_exists INT;
+    DECLARE total_terms INT;
+
+    -- Kiểm tra xem giai đoạn (TermName) đã tồn tại cho EventID chưa
+    SELECT COUNT(*) INTO term_exists
+    FROM EventTerms
+    WHERE EventID = NEW.EventID AND TermName = NEW.TermName;
+
+    -- Nếu TermName đã tồn tại cho EventID này
+    IF term_exists > 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Giai đoạn này đã tồn tại cho sự kiện.';
+    END IF;
+
+    -- Kiểm tra tổng số giai đoạn đã có cho EventID
+    SELECT COUNT(*) INTO total_terms
+    FROM EventTerms
+    WHERE EventID = NEW.EventID;
+
+    -- Nếu đã có đủ 3 giai đoạn thì không cho thêm nữa
+    IF total_terms >= 3 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Mỗi sự kiện chỉ được có tối đa 3 giai đoạn (Trước, Trong, Sau).';
+    END IF;
+END;
+$$
+DELIMITER ;
+
 -- Giai đoạn cho Hackathon AI
 INSERT INTO EventTerms (EventID, TermName, TermStart, TermEnd) VALUES
 (11, 'Trước sự kiện', '2025-08-01', '2025-08-11'),
@@ -878,6 +1099,19 @@ INSERT INTO EventTerms (EventID, TermName, TermStart, TermEnd) VALUES
 (12, 'Trước sự kiện', '2025-07-20', '2025-07-30'),
 (12, 'Trong sự kiện', '2025-07-31', '2025-07-31'),
 (12, 'Sau sự kiện', '2025-08-01', '2025-08-02');
+
+-- For Giải Bóng Đá Sinh Viên Mở Rộng 2025 (EventID 13)
+INSERT INTO EventTerms (EventID, TermName, TermStart, TermEnd) VALUES
+(13, 'Trước sự kiện', '2025-08-01', '2025-08-14'),  -- Preparation period (2 weeks)
+(13, 'Trong sự kiện', '2025-08-15', '2025-08-16');  -- Tournament days
+
+
+-- For Hội Thảo Kỹ Thuật Bóng Đá Hiện Đại (EventID 14)
+INSERT INTO EventTerms (EventID, TermName, TermStart, TermEnd) VALUES
+(14, 'Trước sự kiện', '2025-08-10', '2025-08-19'),  -- Preparation (10 days)
+(14, 'Trong sự kiện', '2025-08-20', '2025-08-20'),  -- Workshop day
+(14, 'Sau sự kiện', '2025-08-21', '2025-08-23');   -- Follow-up (3 days)
+
 
 CREATE TABLE Tasks (
     TaskID INT PRIMARY KEY AUTO_INCREMENT,
@@ -889,6 +1123,7 @@ CREATE TABLE Tasks (
     UserID VARCHAR(10),
     DepartmentID INT,
     ClubID INT,
+    DocumentID INT,
 
     Title VARCHAR(100) NOT NULL,
     Description TEXT,
@@ -903,11 +1138,12 @@ CREATE TABLE Tasks (
     EndDate DATETIME,
     CreatedBy VARCHAR(10),
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    
     FOREIGN KEY (EventID) REFERENCES Events(EventID),
-    FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID),
+    FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID) ON DELETE CASCADE,
     FOREIGN KEY (CreatedBy) REFERENCES Users(UserID),
     FOREIGN KEY (TermID) REFERENCES EventTerms(TermID),
-
+    FOREIGN KEY (DocumentID) REFERENCES Documents(DocumentID),
     FOREIGN KEY (UserID) REFERENCES Users(UserID),
     FOREIGN KEY (DepartmentID) REFERENCES Departments(DepartmentID),
 
@@ -916,26 +1152,82 @@ CREATE TABLE Tasks (
         (AssigneeType = 'Department' AND DepartmentID IS NOT NULL AND UserID IS NULL)
     )
 );
-INSERT INTO Tasks (ParentTaskID, TermID, EventID, ClubID, Title, Description, Status, StartDate, EndDate, CreatedBy, AssigneeType, DepartmentID)
-VALUES
-(NULL, 1, 11, 4, 'Thiết kế poster sự kiện', 'Thiết kế và duyệt poster truyền thông cho sự kiện Hackathon AI.', 'Done', '2025-07-05 08:00:00', '2025-07-10 17:00:00', 'U012', 'Department', 2),
-(NULL, 1, 11, 4, 'Chuẩn bị đề bài Hackathon', 'Xây dựng bộ đề thi cho Hackathon AI', 'Review', '2025-07-01 09:00:00', '2025-07-14 17:00:00', 'U012', 'Department', 1),
-(NULL, 2, 11, 4, 'Hỗ trợ kỹ thuật tại sự kiện', 'Giải quyết các sự cố kỹ thuật trong suốt sự kiện', 'ToDo', '2025-07-15 07:30:00', '2025-07-15 14:00:00', 'U012', 'Department', 5),
-(NULL, 2, 11, 4, 'Ghi hình & Livestream sự kiện', 'Phụ trách quay video và livestream trên fanpage CLB.', 'Rejected', '2025-07-15 07:45:00', '2025-07-15 14:00:00', 'U012', 'Department', 2),
-(NULL, 3, 11, 4, 'Tổng kết kết quả và gửi email cảm ơn', 'Tổng hợp kết quả thi, gửi thư cảm ơn đến người tham gia', 'ToDo', '2025-07-16 09:00:00', '2025-07-17 17:00:00', 'U012', 'Department', 1),
+-- Tasks Hackathon AI (EventID = 11)
+INSERT INTO Tasks (ParentTaskID, TermID, EventID, ClubID, Title, Description, Status, Rating, LastRejectReason, StartDate, EndDate, CreatedBy, AssigneeType, DepartmentID, DocumentID) VALUES
+(NULL, 1, 11, 4, 'Thiết kế poster sự kiện', 'Thiết kế và duyệt poster truyền thông cho sự kiện Hackathon AI.', 'Done', NULL, NULL, '2025-07-05 08:00:00', '2025-07-10 17:00:00', 'U012', 'Department', 2, 2),
+(NULL, 1, 11, 4, 'Chuẩn bị đề bài Hackathon', 'Xây dựng bộ đề thi cho Hackathon AI', 'Review', NULL, NULL, '2025-07-01 09:00:00', '2025-07-14 17:00:00', 'U012', 'Department', 1, NULL),
+(NULL, 2, 11, 4, 'Hỗ trợ kỹ thuật tại sự kiện', 'Giải quyết các sự cố kỹ thuật trong suốt sự kiện', 'ToDo', NULL, NULL, '2025-07-15 07:30:00', '2025-07-15 14:00:00', 'U012', 'Department', 5, NULL),
+(NULL, 2, 11, 4, 'Ghi hình & Livestream sự kiện', 'Phụ trách quay video và livestream trên fanpage CLB.', 'Rejected', NULL, NULL, '2025-07-15 07:45:00', '2025-07-15 14:00:00', 'U012', 'Department', 2, NULL),
+(NULL, 3, 11, 4, 'Tổng kết kết quả và gửi email cảm ơn', 'Tổng hợp kết quả thi, gửi thư cảm ơn đến người tham gia', 'ToDo', NULL, NULL, '2025-07-16 09:00:00', '2025-07-17 17:00:00', 'U012', 'Department', 1, NULL);
 
--- Code War
-(NULL, 4, 12, 4, 'Ra đề và chuẩn bị test case', 'Xây dựng đề thi và bộ test case cho cuộc thi Code War.', 'InProgress', '2025-07-20 08:00:00', '2025-07-30 17:00:00', 'U012', 'Department', 1),
-(NULL, 5, 12, 4, 'Quản lý hệ thống thi và hỗ trợ thí sinh', 'Theo dõi hệ thống thi, xử lý lỗi kỹ thuật và hỗ trợ thí sinh khi cần.', 'ToDo', '2025-07-31 08:00:00', '2025-07-31 13:00:00', 'U012', 'Department', 5);
+-- Tasks Code War (EventID = 12)
+INSERT INTO Tasks (ParentTaskID, TermID, EventID, ClubID, Title, Description, Status, Rating, LastRejectReason, StartDate, EndDate, CreatedBy, AssigneeType, DepartmentID, DocumentID) VALUES
+(NULL, 4, 12, 4, 'Ra đề và chuẩn bị test case', 'Xây dựng đề thi và bộ test case cho cuộc thi Code War.', 'InProgress', NULL, NULL, '2025-07-20 08:00:00', '2025-07-30 17:00:00', 'U012', 'Department', 1, 1),
+(NULL, 5, 12, 4, 'Quản lý hệ thống thi và hỗ trợ thí sinh', 'Theo dõi hệ thống thi, xử lý lỗi kỹ thuật và hỗ trợ thí sinh khi cần.', 'ToDo', NULL, NULL, '2025-07-31 08:00:00', '2025-07-31 13:00:00', 'U012', 'Department', 5, NULL);
 
--- Tasks for individual members of Ban Hậu cần (ClubDepartmentID=5) of CLB 1
-INSERT INTO Tasks (ParentTaskID, TermID, EventID, ClubID, Title, Description, Status, StartDate, EndDate, CreatedBy, AssigneeType, UserID)
-VALUES
-(NULL, NULL, NULL, 1, 'Chuẩn bị dụng cụ thể thao', 'Kiểm tra và chuẩn bị bóng đá, áo thi đấu cho hoạt động tuần', 'InProgress', '2025-07-23 08:00:00', '2025-07-25 17:00:00', 'U002', 'User', 'U007'),
-(NULL, NULL, NULL, 1, 'Tổ chức dọn dẹp phòng CLB', 'Dọn dẹp và sắp xếp lại không gian hoạt động của câu lạc bộ', 'ToDo', '2025-07-24 14:00:00', '2025-07-26 16:00:00', 'U002', 'User', 'HS193994'),
-(NULL, NULL, NULL, 1, 'Mua sắm đồ ăn nhẹ cho buổi họp', 'Chuẩn bị đồ ăn nhẹ và nước uống cho buổi họp hàng tuần', 'Done', '2025-07-22 09:00:00', '2025-07-23 12:00:00', 'U002', 'User', 'HA180043'),
-(NULL, NULL, NULL, 1, 'Kiểm tra tình trạng ghế bàn', 'Kiểm tra và sửa chữa bàn ghế hư hỏng trong phòng sinh hoạt', 'Review', '2025-07-23 10:00:00', '2025-07-24 17:00:00', 'U002', 'User', 'HA193827'),
-(NULL, NULL, NULL, 1, 'Chuẩn bị backdrop cho sự kiện', 'Thiết kế và in backdrop cho sự kiện sắp tới của CLB', 'InProgress', '2025-07-25 08:00:00', '2025-07-28 17:00:00', 'U002', 'User', 'HS191748');
+-- Insert Tasks for Giải Bóng Đá Sinh Viên Mở Rộng 2025 (EventID 13)
+INSERT INTO Tasks (ParentTaskID, TermID, EventID, ClubID, Title, Description, Status, Rating, LastRejectReason, StartDate, EndDate, CreatedBy, AssigneeType, DepartmentID, DocumentID) VALUES
+(NULL, 7, 13, 1, 'Chuẩn bị sân bãi và dụng cụ', 'Kiểm tra sân bóng, chuẩn bị bóng, lưới, trang phục trọng tài', 'ToDo', NULL, NULL, '2025-08-05 08:00:00', '2025-08-10 17:00:00', 'U001', 'Department', 3, NULL),
+(NULL, 7, 13, 1, 'Thiết kế áo đấu và giải thưởng', 'Thiết kế áo đấu cho các đội và chuẩn bị cúp, huy chương', 'Review', NULL, NULL, '2025-08-03 09:00:00', '2025-08-12 17:00:00', 'U001', 'Department', 2, NULL),
+(NULL, 8, 13, 1, 'Chụp ảnh và quay phim', 'Ghi hình các trận đấu quan trọng và lễ trao giải', 'ToDo', NULL, NULL, '2025-08-15 07:00:00', '2025-08-16 12:00:00', 'U001', 'Department', 2, NULL);
+
+-- Insert Tasks for Hội Thảo Kỹ Thuật Bóng Đá Hiện Đại (EventID 14)
+INSERT INTO Tasks (ParentTaskID, TermID, EventID, ClubID, Title, Description, Status, Rating, LastRejectReason, StartDate, EndDate, CreatedBy, AssigneeType, DepartmentID, DocumentID) VALUES
+(NULL, 9, 14, 1, 'Mời diễn giả', 'Liên hệ và xác nhận với các chuyên gia bóng đá', 'InProgress', NULL, NULL, '2025-08-10 09:00:00', '2025-08-15 17:00:00', 'U001', 'Department', 1, NULL),
+-- during
+
+-- sau
+(NULL, 11, 14, 1, 'Gửi tài liệu cho người tham dự', 'Tổng hợp và gửi tài liệu, slide cho người tham dự', 'ToDo', NULL, NULL, '2025-08-21 09:00:00', '2025-08-22 17:00:00', 'U001', 'Department', 1, NULL);
+
+
+
+
+
+
+--  Task mẫu cho chức năng
+INSERT INTO Tasks (ParentTaskID, TermID, EventID, ClubID, Title, Description, Status, Rating, StartDate, EndDate, CreatedBy, AssigneeType, DepartmentID)
+VALUES (NULL, 2, 25, 4, 'Chuẩn bị khu vực thi đấu', 'Dọn dẹp, kê bàn ghế, chuẩn bị sân thi đấu cho giải bóng đá.', 'Done', 'Neutral', '2025-07-20 07:00:00', '2025-07-20 09:00:00', 'U012', 'Department', 5);
+INSERT INTO Tasks (ParentTaskID, TermID, EventID, ClubID, Title, Description, Status, Rating, StartDate, EndDate, CreatedBy, AssigneeType, DepartmentID)
+VALUES (NULL, 2, 25, 4, 'Chuẩn bị nước uống và dụng cụ y tế', 'Đảm bảo có nước uống và hộp y tế trong suốt thời gian thi đấu.', 'Done', 'Neutral', '2025-07-20 08:00:00', '2025-07-20 10:00:00', 'U012', 'Department', 5);
+INSERT INTO Tasks (ParentTaskID, TermID, EventID, ClubID, Title, Description, Status, Rating, StartDate, EndDate, CreatedBy, AssigneeType, DepartmentID)
+VALUES (NULL, 2, 25, 4, 'Phụ trách hậu cần cho trọng tài', 'Chuẩn bị ghế, nước và hỗ trợ trọng tài trong suốt trận đấu.', 'Done', 'Neutral', '2025-07-20 08:30:00', '2025-07-20 10:30:00', 'U012', 'Department', 5);
+INSERT INTO Tasks (ParentTaskID, TermID, EventID, ClubID, Title, Description, Status, Rating, StartDate, EndDate, CreatedBy, AssigneeType, DepartmentID)
+VALUES (NULL, 2, 25, 4, 'Dọn vệ sinh sau sự kiện', 'Dọn rác, sắp xếp lại sân thi đấu sau giải đấu.', 'Done', 'Positive', '2025-07-20 11:00:00', '2025-07-20 12:00:00', 'U012', 'Department', 5);
+INSERT INTO Tasks (ParentTaskID, TermID, EventID, ClubID, Title, Description, Status, Rating, StartDate, EndDate, CreatedBy, AssigneeType, DepartmentID)
+VALUES (NULL, 2, 25, 4, 'Hỗ trợ kỹ thuật âm thanh loa đài', 'Chuẩn bị và kiểm tra loa đài, âm thanh sân thi đấu.', 'Done', 'Negative', '2025-07-20 06:30:00', '2025-07-20 08:00:00', 'U012', 'Department', 5);
+-- Nhiệm vụ con của TaskID = 8: Chuẩn bị khu vực thi đấu
+INSERT INTO Tasks (ParentTaskID, TermID, EventID, ClubID, Title, Description, Status, Rating, StartDate, EndDate, CreatedBy, AssigneeType, UserID, DepartmentID)
+VALUES 
+(8, 2, 25, 1, 'Kiểm tra mặt sân trước sự kiện', 'Xem xét mặt sân, đảm bảo sạch sẽ và an toàn.', 'Done', 'Neutral', '2025-07-19 16:00:00', '2025-07-19 17:00:00', 'U012', 'User', 'HS193994', NULL),
+(8, 2, 25, 1, 'Bố trí bàn ghế xung quanh sân', 'Sắp xếp bàn ghế theo sơ đồ đã thống nhất.', 'Done', 'Positive', '2025-07-19 17:15:00', '2025-07-19 18:00:00', 'U012', 'User', 'HA193827', NULL),
+(8, 2, 25, 1, 'Kẻ vạch, phân khu vực thi đấu', 'Dùng sơn hoặc băng đánh dấu khu vực.', 'Done', 'Neutral', '2025-07-19 18:15:00', '2025-07-19 19:00:00', 'U012', 'User', 'HA180043', NULL);
+-- TaskID = 9: Chuẩn bị nước uống và dụng cụ y tế
+INSERT INTO Tasks (ParentTaskID, TermID, EventID, ClubID, Title, Description, Status, Rating, StartDate, EndDate, CreatedBy, AssigneeType, UserID, DepartmentID)
+VALUES 
+(9, 2, 25, 1, 'Chuẩn bị thùng nước uống cho VĐV', 'Mua và chia nước theo đội.', 'Done', 'Neutral', '2025-07-19 14:00:00', '2025-07-19 15:00:00', 'U012', 'User', 'HS191748', NULL),
+(9, 2, 25, 1, 'Kiểm tra hộp y tế và bổ sung thiếu', 'Đảm bảo đầy đủ bông băng, sát khuẩn.', 'Done', 'Neutral', '2025-07-19 15:15:00', '2025-07-19 16:00:00', 'U012', 'User', 'HS173913', NULL),
+(9, 2, 25, 1, 'Đặt bàn y tế cạnh sân thi đấu', 'Chuẩn bị bàn, ghế và tủ thuốc.', 'Done', 'Negative', '2025-07-19 16:30:00', '2025-07-19 17:00:00', 'U012', 'User', 'HA180043', NULL);
+-- TaskID = 10: Phụ trách hậu cần cho trọng tài
+INSERT INTO Tasks (ParentTaskID, TermID, EventID, ClubID, Title, Description, Status, Rating, StartDate, EndDate, CreatedBy, AssigneeType, UserID, DepartmentID)
+VALUES 
+(10, 2, 25, 1, 'Đặt chỗ ngồi cho trọng tài', 'Chuẩn bị ghế riêng gần sân thi đấu.', 'Done', 'Neutral', '2025-07-20 06:45:00', '2025-07-20 07:30:00', 'U012', 'User', 'HA193827', NULL),
+(10, 2, 25, 1, 'Đảm bảo có nước và khăn lạnh', 'Phân chia nước và khăn vào từng túi.', 'Done', 'Positive', '2025-07-20 07:30:00', '2025-07-20 08:00:00', 'U012', 'User', 'HS173913', NULL),
+(10, 2, 25, 1, 'Hỗ trợ trọng tài khi cần', 'Luôn có người hỗ trợ sát sân.', 'Done', 'Neutral', '2025-07-20 08:00:00', '2025-07-20 10:00:00', 'U012', 'User', 'HS191748', NULL);
+-- TaskID = 11: Dọn vệ sinh sau sự kiện
+INSERT INTO Tasks (ParentTaskID, TermID, EventID, ClubID, Title, Description, Status, Rating, StartDate, EndDate, CreatedBy, AssigneeType, UserID, DepartmentID)
+VALUES 
+(11, 2, 25, 1, 'Thu gom rác quanh sân', 'Dùng bao và găng tay để gom rác.', 'Done', 'Neutral', '2025-07-20 12:15:00', '2025-07-20 12:45:00', 'U012', 'User', 'HS193994', NULL),
+(11, 2, 25, 1, 'Lau dọn khu vực ngồi', 'Dùng khăn lau sạch bàn ghế.', 'Done', 'Negative', '2025-07-20 12:45:00', '2025-07-20 13:30:00', 'U012', 'User', 'HA180043', NULL),
+(11, 2, 25, 1, 'Tổng dọn nhà vệ sinh', 'Đảm bảo nhà vệ sinh sạch sẽ.', 'Done', 'Neutral', '2025-07-20 13:30:00', '2025-07-20 14:00:00', 'U012', 'User', 'HA193827', NULL);
+-- TaskID = 12: Hỗ trợ kỹ thuật âm thanh loa đài
+INSERT INTO Tasks (ParentTaskID, TermID, EventID, ClubID, Title, Description, Status, Rating, StartDate, EndDate, CreatedBy, AssigneeType, UserID, DepartmentID)
+VALUES 
+(12, 2, 25, 1, 'Test loa chính, mic và mixer', 'Kiểm tra từng thiết bị trước sự kiện.', 'Done', 'Neutral', '2025-07-20 05:30:00', '2025-07-20 06:00:00', 'U012', 'User', 'HS173913', NULL),
+(12, 2, 25, 1, 'Theo dõi kỹ thuật khi thi đấu', 'Canh âm lượng, khắc phục sự cố.', 'Done', 'Positive', '2025-07-20 06:30:00', '2025-07-20 08:00:00', 'U012', 'User', 'HA180043', NULL),
+(12, 2, 25, 1, 'Tháo và cất loa sau chương trình', 'Cẩn thận khi đóng gói thiết bị.', 'Done', 'Neutral', '2025-07-20 08:15:00', '2025-07-20 09:00:00', 'U012', 'User', 'HS191748', NULL);
+INSERT INTO Tasks (ParentTaskID, TermID, EventID, ClubID, Title, Description, Status, Rating, StartDate, EndDate, CreatedBy, AssigneeType, UserID, DepartmentID)
+VALUES 
+(8, 2, 25, 1, 'TEST_Task', 'TEST_Task_Review', 'Review', null, '2025-07-19 16:00:00', '2025-07-19 17:00:00', 'U012', 'User', 'HS193994', NULL);
 
 
 
@@ -986,7 +1278,7 @@ CREATE TABLE ClubApplications (
     SubmitDate DATETIME,
     ReviewNote TEXT NULL,
     FOREIGN KEY (UserID) REFERENCES Users(UserID),
-    FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID),
+    FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID) ON DELETE CASCADE,
     FOREIGN KEY (EventID) REFERENCES Events(EventID),
     FOREIGN KEY (ResponseID) REFERENCES ApplicationResponses(ResponseID)
 );
@@ -1008,7 +1300,7 @@ CREATE TABLE ClubMeeting (
     StartedTime DATETIME NOT NULL,
     EndTime DATETIME,
     Document VARCHAR(255),
-FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID)
+FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID) ON DELETE CASCADE
 );
 INSERT INTO ClubMeeting (
     ClubID,
@@ -1095,35 +1387,18 @@ INSERT INTO Notifications (Title, Content, CreatedDate, ReceiverID, Priority, St
 CREATE TABLE PeriodicClubReport (
     ReportID INT PRIMARY KEY AUTO_INCREMENT,
     ClubID INT NOT NULL,
-    SubmittedBy VARCHAR(10),
     Term VARCHAR(10),
-    SubmissionDate DATETIME,
-    Status ENUM('PENDING', 'APPROVED') DEFAULT 'PENDING',
-    FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID),
-    FOREIGN KEY (SubmittedBy) REFERENCES Users(UserID),
+    SubmissionDate DATE DEFAULT (CURRENT_DATE),
+    LastUpdated DATE,
+    FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID) ON DELETE CASCADE,
    FOREIGN KEY (Term) REFERENCES Semesters(TermID)
 );
-
-CREATE TABLE PeriodicReport_MemberAchievements (
-    AchievementID INT PRIMARY KEY AUTO_INCREMENT,
-    ReportID INT,
-    MemberID VARCHAR(10),
-    Role VARCHAR(100), -- ví dụ: Chủ nhiệm, Trưởng ban,...
-    ProgressPoint INT,
-    FOREIGN KEY (ReportID) REFERENCES PeriodicClubReport(ReportID),
-    FOREIGN KEY (MemberID) REFERENCES Users(UserID)
-);
-
-CREATE TABLE PeriodicReportEvents (
-    ReportEventID INT PRIMARY KEY AUTO_INCREMENT,
-    ReportID INT,
-    EventName VARCHAR(100),
-    EventDate DATETIME,
-    EventType ENUM('Internal', 'Public'),
-    ParticipantCount INT,
-    ProofLink VARCHAR(100),
-    FOREIGN KEY (ReportID) REFERENCES PeriodicClubReport(ReportID)
-);
+INSERT INTO PeriodicClubReport (ClubID, Term, SubmissionDate)
+VALUES 
+(1, 'SP24', '2024-01-16'),
+(1, 'SU24', '2024-05-16'),
+(1, 'FA24', '2024-09-16'),
+(1, 'SP25', '2025-01-16');
 
 CREATE TABLE ClubCreationPermissions  (
     ID INT AUTO_INCREMENT PRIMARY KEY,
@@ -1153,8 +1428,7 @@ VALUES
   ('U005', 'CLB Lập Trình',1, 'PENDING', '2025-06-21 10:00:00', NULL, NULL),
   ('U001', 'CLB Nhiếp Ảnh', 2, 'APPROVED', '2025-06-15 10:00:00', 'U004', '2025-06-16 10:00:00'),
   ('U002', 'CLB Môi Trường',2,  'REJECTED', '2025-06-10 10:00:00', 'U004', '2025-06-11 10:00:00');
-
-
+ 
 
 CREATE TABLE ActivedMemberClubs (
     ActiveID INT PRIMARY KEY AUTO_INCREMENT,
@@ -1166,7 +1440,7 @@ CREATE TABLE ActivedMemberClubs (
     ProgressPoint INT DEFAULT NULL, -- Điểm rèn luyện, cho phép NULL
     FOREIGN KEY (TermID) REFERENCES Semesters(TermID),
     FOREIGN KEY (UserID) REFERENCES Users(UserID),
-    FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID)
+    FOREIGN KEY (ClubID) REFERENCES Clubs(ClubID) ON DELETE CASCADE
 );
 
 -- ================================================================================
@@ -1310,10 +1584,10 @@ CREATE TABLE Feedbacks (
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 INSERT INTO Feedbacks VALUES 
-(1,15,'U005',0,4,'Sự kiện khá vui và thú vị',5,3,4,5,4,3,5,3,4,'2025-06-20 22:48:28'),
-(2,15,'U006',1,2,'Tôi không thích sự kiện lắm, trải nghiệm của tôi khá tệ',2,1,3,2,1,3,2,4,3,'2025-06-21 00:58:14'),
-(3,15,'U007',0,1,'Sự kiện không vui như tôi nghĩ',2,3,4,3,1,2,3,1,2,'2025-06-21 00:58:54'),
-(4,15,'U008',0,3,'SỰ kiện ok',5,3,4,3,3,4,3,5,3,'2025-06-21 01:00:14');
+(1,20,'U005',0,4,'Sự kiện khá vui và thú vị',5,3,4,5,4,3,5,3,4,'2025-06-20 22:48:28'),
+(2,20,'U006',1,2,'Tôi không thích sự kiện lắm, trải nghiệm của tôi khá tệ',2,1,3,2,1,3,2,4,3,'2025-06-21 00:58:14'),
+(3,20,'U007',0,1,'Sự kiện không vui như tôi nghĩ',2,3,4,3,1,2,3,1,2,'2025-06-21 00:58:54'),
+(4,20,'U008',0,3,'Sự kiện khá ổn, cần cải thiện khâu hậu cần',5,3,4,3,3,4,3,5,3,'2025-06-21 01:00:14');
 
 
 INSERT INTO Notifications (Title, Content, CreatedDate, ReceiverID, Priority, Status) VALUES
@@ -1322,83 +1596,81 @@ INSERT INTO Notifications (Title, Content, CreatedDate, ReceiverID, Priority, St
 ('Thông báo đăng ký thành công', 'Bạn đã đăng ký tham gia sự kiện Giải Bóng Đá Sinh Viên 2025 thành công', '2025-06-23 10:00:00', 'U002', 'MEDIUM', 'UNREAD'),
 ('Thông báo sự kiện mới', 'Câu lạc bộ Âm Nhạc vừa tạo sự kiện mới: Đêm Nhạc Acoustic', '2025-06-26 09:00:00', 'U002', 'LOW', 'UNREAD');
 
-
-
-INSERT INTO ActivedMemberClubs (UserID, ClubID, ActiveDate, IsActive) VALUES
-('HA178166', 5, '2025-05-01', TRUE),
-('HA178166', 6, '2025-05-01', TRUE),
-('HA188338', 5, '2025-05-01', TRUE),
-('HA188338', 7, '2025-05-01', TRUE),
-('HA186808', 2, '2025-05-01', TRUE),
-('HS193994', 1, '2025-05-01', TRUE),
-('HS193994', 5, '2025-05-01', TRUE),
-('HS202370', 4, '2025-05-01', TRUE),
-('HS179821', 3, '2025-05-01', TRUE),
-('HS179821', 8, '2025-05-01', TRUE),
-('HA171144', 3, '2025-05-01', TRUE),
-('HS195569', 2, '2025-05-01', TRUE),
-('HS195569', 7, '2025-05-01', TRUE),
-('HA180043', 6, '2025-05-01', TRUE),
-('HA180043', 1, '2025-05-01', TRUE),
-('HS189617', 8, '2025-05-01', TRUE),
-('HA192435', 1, '2025-05-01', TRUE),
-('HS207936', 2, '2025-05-01', TRUE),
-('HS189043', 8, '2025-05-01', TRUE),
-('HS189043', 3, '2025-05-01', TRUE),
-('HA197461', 5, '2025-05-01', TRUE),
-('HA197461', 1, '2025-05-01', TRUE),
-('HS173913', 6, '2025-05-01', TRUE),
-('HS173913', 1, '2025-05-01', TRUE),
-('HA193827', 1, '2025-05-01', TRUE),
-('HS165214', 2, '2025-05-01', TRUE),
-('HA196247', 6, '2025-05-01', TRUE),
-('HS178116', 3, '2025-05-01', TRUE),
-('HS178116', 2, '2025-05-01', TRUE),
-('HE178230', 6, '2025-05-01', TRUE),
-('HA181645', 5, '2025-05-01', TRUE),
-('HS168618', 2, '2025-05-01', TRUE),
-('HS162362', 8, '2025-05-01', TRUE),
-('HS171226', 8, '2025-05-01', TRUE),
-('HS171226', 6, '2025-05-01', TRUE),
-('HS185547', 8, '2025-05-01', TRUE),
-('HS185547', 1, '2025-05-01', TRUE),
-('HA191316', 7, '2025-05-01', TRUE),
-('HA191316', 5, '2025-05-01', TRUE),
-('HS206227', 7, '2025-05-01', TRUE),
-('HS198865', 8, '2025-05-01', TRUE),
-('HS198865', 4, '2025-05-01', TRUE),
-('HE201122', 3, '2025-05-01', TRUE),
-('HE201122', 6, '2025-05-01', TRUE),
-('HE183728', 1, '2025-05-01', TRUE),
-('HA167111', 2, '2025-05-01', TRUE),
-('HA167111', 4, '2025-05-01', TRUE),
-('HE167270', 2, '2025-05-01', TRUE),
-('HE167270', 5, '2025-05-01', TRUE),
-('HE180475', 2, '2025-05-01', TRUE),
-('HE180475', 7, '2025-05-01', TRUE),
-('HE180920', 3, '2025-05-01', TRUE),
-('HS186142', 6, '2025-05-01', TRUE),
-('HS186142', 1, '2025-05-01', TRUE),
-('HS174001', 4, '2025-05-01', TRUE),
-('HA199273', 6, '2025-05-01', TRUE),
-('HA172786', 3, '2025-05-01', TRUE),
-('HE169986', 5, '2025-05-01', TRUE),
-('HS203946', 7, '2025-05-01', TRUE),
-('HS203946', 3, '2025-05-01', TRUE),
-('HS202345', 5, '2025-05-01', TRUE),
-('HS202345', 1, '2025-05-01', TRUE),
-('HE194162', 5, '2025-05-01', TRUE),
-('HS180154', 7, '2025-05-01', TRUE),
-('HS180154', 2, '2025-05-01', TRUE),
-('HS188956', 7, '2025-05-01', TRUE),
-('HE167238', 6, '2025-05-01', TRUE),
-('HS204902', 2, '2025-05-01', TRUE),
-('HS204902', 4, '2025-05-01', TRUE),
-('HA194098', 7, '2025-05-01', TRUE),
-('HS183264', 7, '2025-05-01', TRUE),
-('HS191748', 3, '2025-05-01', TRUE),
-('HS191748', 1, '2025-05-01', TRUE),
-('HE199371', 2, '2025-05-01', TRUE);
+INSERT INTO ActivedMemberClubs (UserID, ClubID, ActiveDate, TermID, IsActive, ProgressPoint) VALUES
+('HA178166', 5, '2025-05-01', 'SU25', TRUE, 50),
+('HA178166', 6, '2025-05-01', 'SU25', TRUE, 50),
+('HA188338', 5, '2025-05-01', 'SU25', TRUE, 50),
+('HA188338', 7, '2025-05-01', 'SU25', TRUE, 50),
+('HA186808', 2, '2025-05-01', 'SU25', TRUE, 50),
+('HS193994', 1, '2025-05-01', 'SU25', TRUE, 50),
+('HS193994', 5, '2025-05-01', 'SU25', TRUE, 50),
+('HS202370', 4, '2025-05-01', 'SU25', TRUE, 50),
+('HS179821', 3, '2025-05-01', 'SU25', TRUE, 50),
+('HS179821', 8, '2025-05-01', 'SU25', TRUE, 50),
+('HA171144', 3, '2025-05-01', 'SU25', TRUE, 50),
+('HS195569', 2, '2025-05-01', 'SU25', TRUE, 50),
+('HS195569', 7, '2025-05-01', 'SU25', TRUE, 50),
+('HA180043', 6, '2025-05-01', 'SU25', TRUE, 50),
+('HA180043', 1, '2025-05-01', 'SU25', TRUE, 50),
+('HS189617', 8, '2025-05-01', 'SU25', TRUE, 50),
+('HA192435', 1, '2025-05-01', 'SU25', TRUE, 50),
+('HS207936', 2, '2025-05-01', 'SU25', TRUE, 50),
+('HS189043', 8, '2025-05-01', 'SU25', TRUE, 50),
+('HS189043', 3, '2025-05-01', 'SU25', TRUE, 50),
+('HA197461', 5, '2025-05-01', 'SU25', TRUE, 50),
+('HA197461', 1, '2025-05-01', 'SU25', TRUE, 50),
+('HS173913', 6, '2025-05-01', 'SU25', TRUE, 50),
+('HS173913', 1, '2025-05-01', 'SU25', TRUE, 50),
+('HA193827', 1, '2025-05-01', 'SU25', TRUE, 50),
+('HS165214', 2, '2025-05-01', 'SU25', TRUE, 50),
+('HA196247', 6, '2025-05-01', 'SU25', TRUE, 50),
+('HS178116', 3, '2025-05-01', 'SU25', TRUE, 50),
+('HS178116', 2, '2025-05-01', 'SU25', TRUE, 50),
+('HE178230', 6, '2025-05-01', 'SU25', TRUE, 50),
+('HA181645', 5, '2025-05-01', 'SU25', TRUE, 50),
+('HS168618', 2, '2025-05-01', 'SU25', TRUE, 50),
+('HS162362', 8, '2025-05-01', 'SU25', TRUE, 50),
+('HS171226', 8, '2025-05-01', 'SU25', TRUE, 50),
+('HS171226', 6, '2025-05-01', 'SU25', TRUE, 50),
+('HS185547', 8, '2025-05-01', 'SU25', TRUE, 50),
+('HS185547', 1, '2025-05-01', 'SU25', TRUE, 50),
+('HA191316', 7, '2025-05-01', 'SU25', TRUE, 50),
+('HA191316', 5, '2025-05-01', 'SU25', TRUE, 50),
+('HS206227', 7, '2025-05-01', 'SU25', TRUE, 50),
+('HS198865', 8, '2025-05-01', 'SU25', TRUE, 50),
+('HS198865', 4, '2025-05-01', 'SU25', TRUE, 50),
+('HE201122', 3, '2025-05-01', 'SU25', TRUE, 50),
+('HE201122', 6, '2025-05-01', 'SU25', TRUE, 50),
+('HE183728', 1, '2025-05-01', 'SU25', TRUE, 50),
+('HA167111', 2, '2025-05-01', 'SU25', TRUE, 50),
+('HA167111', 4, '2025-05-01', 'SU25', TRUE, 50),
+('HE167270', 2, '2025-05-01', 'SU25', TRUE, 50),
+('HE167270', 5, '2025-05-01', 'SU25', TRUE, 50),
+('HE180475', 2, '2025-05-01', 'SU25', TRUE, 50),
+('HE180475', 7, '2025-05-01', 'SU25', TRUE, 50),
+('HE180920', 3, '2025-05-01', 'SU25', TRUE, 50),
+('HS186142', 6, '2025-05-01', 'SU25', TRUE, 50),
+('HS186142', 1, '2025-05-01', 'SU25', TRUE, 50),
+('HS174001', 4, '2025-05-01', 'SU25', TRUE, 50),
+('HA199273', 6, '2025-05-01', 'SU25', TRUE, 50),
+('HA172786', 3, '2025-05-01', 'SU25', TRUE, 50),
+('HE169986', 5, '2025-05-01', 'SU25', TRUE, 50),
+('HS203946', 7, '2025-05-01', 'SU25', TRUE, 50),
+('HS203946', 3, '2025-05-01', 'SU25', TRUE, 50),
+('HS202345', 5, '2025-05-01', 'SU25', TRUE, 50),
+('HS202345', 1, '2025-05-01', 'SU25', TRUE, 50),
+('HE194162', 5, '2025-05-01', 'SU25', TRUE, 50),
+('HS180154', 7, '2025-05-01', 'SU25', TRUE, 50),
+('HS180154', 2, '2025-05-01', 'SU25', TRUE, 50),
+('HS188956', 7, '2025-05-01', 'SU25', TRUE, 50),
+('HE167238', 6, '2025-05-01', 'SU25', TRUE, 50),
+('HS204902', 2, '2025-05-01', 'SU25', TRUE, 50),
+('HS204902', 4, '2025-05-01', 'SU25', TRUE, 50),
+('HA194098', 7, '2025-05-01', 'SU25', TRUE, 50),
+('HS183264', 7, '2025-05-01', 'SU25', TRUE, 50),
+('HS191748', 3, '2025-05-01', 'SU25', TRUE, 50),
+('HS191748', 1, '2025-05-01', 'SU25', TRUE, 50),
+('HE199371', 2, '2025-05-01', 'SU25', TRUE, 50);
 
 -- ========================================
 -- Thêm thông tin cuộc họp câu lạc bộ (ClubMeeting)
@@ -1455,30 +1727,9 @@ INSERT INTO ClubApplications (UserID, ClubID, Email, Status, SubmitDate) VALUES
 ('U045', 1, 'oo@fpt.edu.vn', 'APPROVED', '2025-07-05 10:00:00');
 
 -- ========================================
--- Thêm phản hồi cho sự kiện (Feedbacks)
--- Đảm bảo không trùng EventID và UserID
--- ========================================
-INSERT INTO Feedbacks (EventID, UserID, IsAnonymous, Rating, Content, Q1_Organization, Q2_Communication, Q3_Support, Q4_Relevance, Q5_Welcoming, Q6_Value, Q7_Timing, Q8_Participation, Q9_WillingnessToReturn, CreatedAt) VALUES
-((SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên FPTU 2025'), 'U041', 0, 4, 'Sự kiện rất sôi động, cần cải thiện khâu hậu cần', 4, 4, 3, 5, 4, 4, 4, 4, 4, '2025-08-06 10:00:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên FPTU 2025'), 'U042', 0, 5, 'Tuyệt vời, mọi thứ được tổ chức tốt', 5, 5, 5, 5, 5, 5, 5, 5, 5, '2025-08-06 10:05:00'),
-((SELECT EventID FROM Events WHERE EventName = 'Giải Bóng Đá Sinh Viên FPTU 2025'), 'U043', 1, 3, 'Cần chuẩn bị kỹ hơn về nước uống', 3, 3, 2, 4, 3, 3, 3, 3, 3, '2025-08-06 10:10:00');
-
--- ========================================
 -- Thêm thành viên hoạt động (ActivedMemberClubs)
 -- Đảm bảo không trùng UserID và ClubID
 -- ========================================
-INSERT INTO ActivedMemberClubs (UserID, ClubID, ActiveDate, IsActive) VALUES
-('U036', 1, '2025-07-01', TRUE),
-('U037', 2, '2025-07-01', TRUE),
-('U038', 3, '2025-07-01', TRUE),
-('U039', 4, '2025-07-01', TRUE),
-('U040', 1, '2025-07-01', TRUE),
-('U041', 1, '2025-07-10', TRUE),
-('U042', 1, '2025-07-10', TRUE),
-('U043', 1, '2025-07-10', TRUE),
-('U044', 1, '2025-07-10', TRUE),
-('U045', 1, '2025-07-10', TRUE);
-
 
 -- ========================================
 -- RECRUITMENT ACTIVITY
@@ -1551,7 +1802,7 @@ CREATE TABLE IF NOT EXISTS ApplicationStages (
     FOREIGN KEY (UpdatedBy) REFERENCES Users(UserID) ON DELETE SET NULL
 );
 
-INSERT INTO `applicationstages` VALUES 
+INSERT INTO ApplicationStages VALUES 
 (1,16,7,'APPROVED','2025-07-12 00:11:46',NULL),
 (2,17,7,'REJECTED','2025-07-12 00:12:13',NULL),(3,18,7,'APPROVED','2025-07-12 00:12:54',NULL),
 (9,18,8,'APPROVED','2025-07-14 00:28:20',NULL),(10,16,8,'PENDING','2025-07-14 00:38:20',NULL);
