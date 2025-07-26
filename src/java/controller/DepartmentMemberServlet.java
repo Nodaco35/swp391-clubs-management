@@ -102,7 +102,8 @@ public class DepartmentMemberServlet extends HttpServlet {
                     handleSearchMembers(request, response, clubDepartmentID);
                     break;
                 case "searchStudents":
-                    handleSearchStudents(request, response, clubDepartmentID);
+                    // Function removed - no longer adding members
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "Function not available");
                     break;
                 case "getMemberDetail":
                     handleMemberDetail(request, response, clubDepartmentID);
@@ -167,9 +168,6 @@ public class DepartmentMemberServlet extends HttpServlet {
             switch (action) {
                 case "updateStatus":
                     handleUpdateStatus(request, response, clubDepartmentID);
-                    break;
-                case "addMember":
-                    handleAddMember(request, response, clubDepartmentID);
                     break;
             }
 
@@ -346,24 +344,6 @@ public class DepartmentMemberServlet extends HttpServlet {
         request.getRequestDispatcher("view/student/department-leader/members.jsp").forward(request, response);
     }
 
-    private void handleSearchStudents(HttpServletRequest request, HttpServletResponse response, int clubDepartmentID)
-            throws IOException {
-        String keyword = request.getParameter("keyword");
-        if (keyword == null) {
-            keyword = "";
-        }
-
-        List<Users> students = memberDAO.searchStudentsNotInDepartment(clubDepartmentID, keyword.trim(), 10);
-
-        // Trả về JSON
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-
-        Gson gson = new Gson();
-        String json = gson.toJson(students);
-        response.getWriter().write(json);
-    }
-
     private void handleUpdateStatus(HttpServletRequest request, HttpServletResponse response, int clubDepartmentID)
             throws IOException {
 
@@ -401,32 +381,6 @@ public class DepartmentMemberServlet extends HttpServlet {
 
         } catch (Exception e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Có lỗi xảy ra");
-        }
-    }
-
-    private void handleAddMember(HttpServletRequest request, HttpServletResponse response, int clubDepartmentID)
-            throws IOException {
-        String userID = request.getParameter("userID");
-        String roleIDParam = request.getParameter("roleID");
-
-        if (userID == null || roleIDParam == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Thiếu thông tin cần thiết");
-            return;
-        }
-
-        try {
-            int roleID = Integer.parseInt(roleIDParam);
-
-            boolean success = memberDAO.addMemberToClubDepartment(userID, clubDepartmentID, roleID);
-
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-
-            String json = "{\"success\":" + success + "}";
-            response.getWriter().write(json);
-
-        } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Thông tin không hợp lệ");
         }
     }
 

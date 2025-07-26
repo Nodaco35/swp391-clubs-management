@@ -5,17 +5,23 @@
 <html lang="vi">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>Quản lý thành viên - Ban ${departmentName}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Quản lý thành viên - Ban ${departmentName}</title>
 
         <!-- Bootstrap CSS -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-        <!-- Font Aw        <!-- Scripts -->    
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/department-leader.css">
+        
+        <!-- JavaScript Libraries -->
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="${pageContext.request.contextPath}/js/department-members.js"></script>
         
-        <!-- ĐƠN GIẢN HÓA: Chỉ giữ những JS cần thiết -->
+        <!-- Custom JavaScript -->
         <script>
             // 1. Basic search functionality (cần thiết)
             function searchMembers() {
@@ -37,31 +43,6 @@
                         if (e.key === 'Enter') {
                             searchMembers();
                         }
-                    });
-                }
-                
-                const studentSearchInput = document.getElementById('studentSearchInput');
-                if (studentSearchInput) {
-                    studentSearchInput.addEventListener('input', function() {
-                        const keyword = this.value.trim();
-                        if (keyword.length >= 2) {
-                            searchStudentsForAdd(keyword);
-                        } else {
-                            document.getElementById('studentSearchResults').innerHTML = '';
-                        }
-                    });
-                }
-                
-                // Reset modal khi đóng
-                const addMemberModal = document.getElementById('addMemberModal');
-                if (addMemberModal) {
-                    addMemberModal.addEventListener('hidden.bs.modal', function() {
-                        // Reset form
-                        document.getElementById('studentSearchInput').value = '';
-                        document.getElementById('studentSearchResults').innerHTML = '';
-                        document.getElementById('selectedStudent').style.display = 'none';
-                        document.getElementById('addMemberBtn').disabled = true;
-                        selectedStudentData = null;
                     });
                 }
             });
@@ -211,12 +192,6 @@
                     });
             }
             
-            // Simple add member modal (cần thiết)
-            function showAddMemberModal() {
-                const modal = new bootstrap.Modal(document.getElementById('addMemberModal'));
-                modal.show();
-            }
-            
             // Lọc thành viên theo trạng thái
             function filterMembers() {
                 const statusFilter = document.getElementById('statusFilter').value;
@@ -239,21 +214,6 @@
                 updateVisibleCount();
             }
             
-            // Reset bộ lọc
-            function resetFilters() {
-                document.getElementById('statusFilter').value = '';
-                document.getElementById('searchInput').value = '';
-                
-                // Hiển thị lại tất cả các hàng
-                const rows = document.querySelectorAll('.member-row');
-                rows.forEach(row => {
-                    row.style.display = '';
-                });
-                
-                // Reset URL về trang danh sách
-                window.location.href = '${pageContext.request.contextPath}/department-members?action=list&clubID=${currentClubID}';
-            }
-            
             // Cập nhật số lượng thành viên hiển thị
             function updateVisibleCount() {
                 const visibleRows = document.querySelectorAll('.member-row:not([style*="display: none"])');
@@ -270,104 +230,7 @@
                 // Có thể implement logic sắp xếp phức tạp hơn ở đây
                 // Hiện tại chỉ log để biết function được gọi
             }
-            
-            // Tìm kiếm sinh viên để thêm vào ban
-            let selectedStudentData = null;
-            
-            
-            function searchStudentsForAdd(keyword) {
-                fetch('${pageContext.request.contextPath}/department-members?action=searchStudents&keyword=' + encodeURIComponent(keyword) + '&clubDepartmentID=${clubDepartmentID}')
-                    .then(response => response.json())
-                    .then(students => {
-                        const resultsDiv = document.getElementById('studentSearchResults');
-                        
-                        if (students.length > 0) {
-                            let html = '<div class="list-group">';
-                            students.forEach(student => {
-                                html += '<a href="#" class="list-group-item list-group-item-action" onclick="selectStudent(\'' + student.userID + '\', \'' + student.fullName + '\', \'' + student.email + '\')">';
-                                html += '<div class="d-flex w-100 justify-content-between">';
-                                html += '<h6 class="mb-1">' + student.fullName + '</h6>';
-                                html += '<small>' + student.userID + '</small>';
-                                html += '</div>';
-                                html += '<p class="mb-1">' + student.email + '</p>';
-                                html += '</a>';
-                            });
-                            html += '</div>';
-                            resultsDiv.innerHTML = html;
-                        } else {
-                            resultsDiv.innerHTML = '<p class="text-muted">Không tìm thấy sinh viên nào.</p>';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Lỗi tìm kiếm:', error);
-                        document.getElementById('studentSearchResults').innerHTML = '<p class="text-danger">Có lỗi xảy ra khi tìm kiếm.</p>';
-                    });
-            }
-            
-            function selectStudent(userID, fullName, email) {
-                selectedStudentData = {
-                    userID: userID,
-                    fullName: fullName,
-                    email: email
-                };
-                
-                // Hiển thị thông tin sinh viên được chọn
-                document.getElementById('selectedStudent').style.display = 'block';
-                document.querySelector('#selectedStudent .student-info').innerHTML = 
-                    '<div class="d-flex align-items-center">' +
-                    '<div>' +
-                    '<h6 class="mb-0">' + fullName + '</h6>' +
-                    '<small class="text-muted">' + email + ' (' + userID + ')</small>' +
-                    '</div>' +
-                    '</div>';
-                
-                // Enable nút thêm thành viên
-                document.getElementById('addMemberBtn').disabled = false;
-                
-                // Xóa kết quả tìm kiếm
-                document.getElementById('studentSearchResults').innerHTML = '';
-                document.getElementById('studentSearchInput').value = '';
-            }
-            
-            function addMember() {
-                if (!selectedStudentData) {
-                    alert('Vui lòng chọn sinh viên để thêm vào ban.');
-                    return;
-                }
-                
-                const roleID = document.getElementById('memberRole').value;
-                
-                // Gửi request thêm thành viên
-                const formData = new FormData();
-                formData.append('action', 'addMember');
-                formData.append('userID', selectedStudentData.userID);
-                formData.append('roleID', roleID);
-                
-                fetch('${pageContext.request.contextPath}/department-members', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Thêm thành viên thành công!');
-                        // Đóng modal và reload trang
-                        bootstrap.Modal.getInstance(document.getElementById('addMemberModal')).hide();
-                        window.location.reload();
-                    } else {
-                        alert('Có lỗi xảy ra khi thêm thành viên: ' + (data.message || 'Lỗi không xác định'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Lỗi:', error);
-                    alert('Có lỗi xảy ra khi thêm thành viên.');
-                });
-            }
-        </script>me -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
-        <!-- Custom CSS -->
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/department-leader.css">
+        </script>
     </head>
     <body>
         <div class="department-leader-container">
@@ -447,7 +310,7 @@
                         <div class="card shadow-sm">
                             <div class="card-body">
                                 <div class="row align-items-center">
-                                    <div class="col-md-6">
+                                    <div class="col-md-7">
                                         <div class="input-group">
                                             <span class="input-group-text">
                                                 <i class="fas fa-search"></i>
@@ -463,25 +326,16 @@
                                                 </button>
                                             </c:if>
                                         </div>
-                                    </div>                                <div class="col-md-2">
+                                    </div>
+                                    <div class="col-md-2">
                                         <label class="filter-label">Trạng thái</label>
                                         <select id="statusFilter" class="form-select" onchange="filterMembers()">
                                             <option value="">Tất cả trạng thái</option>
                                             <option value="active">Hoạt động</option>
                                             <option value="inactive">Không hoạt động</option>
                                         </select>
-                                    </div>                                <div class="col-md-1">
-                                        <label class="filter-label">&nbsp;</label>
-                                        <button class="btn btn-outline-secondary w-100" type="button" onclick="resetFilters()" title="Đặt lại bộ lọc">
-                                            <i class="fas fa-refresh"></i>
-                                        </button>
                                     </div>
-                                    <div class="col-md-3">
-                                        <button class="btn btn-primary w-100" onclick="showAddMemberModal()">
-                                            <i class="fas fa-plus me-2"></i>Thêm thành viên
-                                        </button>
-                                    </div>
-                                </div>
+                                </div>f
                             </div>
                         </div>
                     </div>
@@ -619,9 +473,6 @@
                                             <c:otherwise>
                                                 <h5 class="text-muted">Không có thành viên nào</h5>
                                                 <p class="text-muted">Chưa có thành viên nào trong ban.</p>
-                                                <button class="btn btn-primary" onclick="showAddMemberModal()">
-                                                    <i class="fas fa-plus me-2"></i>Thêm thành viên đầu tiên
-                                                </button>
                                             </c:otherwise>
                                         </c:choose>
                                     </div>
@@ -713,57 +564,9 @@
                     </div>
                 </c:if>
             </main>
-        </div>    <!-- Add Member Modal -->
-        <div class="modal fade" id="addMemberModal" tabindex="-1" aria-labelledby="addMemberModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="addMemberModalLabel">
-                            <i class="fas fa-user-plus me-2"></i>Thêm thành viên mới
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-12">
-                                <label for="studentSearchInput" class="form-label">Tìm kiếm sinh viên</label>
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text">
-                                        <i class="fas fa-search"></i>
-                                    </span>
-                                    <input type="text" id="studentSearchInput" class="form-control" 
-                                           placeholder="Nhập tên hoặc email sinh viên...">
-                                </div>
-                                <div id="studentSearchResults" class="border rounded p-2 mb-3" style="max-height: 200px; overflow-y: auto;"></div>
-                            </div>
+        </div>
 
-                            <div class="col-12" id="selectedStudent" style="display: none;">
-                                <hr>
-                                <h6>Sinh viên được chọn:</h6>
-                                <div class="card bg-light">
-                                    <div class="card-body">
-                                        <div class="student-info"></div>
-
-                                        <div class="mt-3">
-                                            <label for="memberRole" class="form-label">Vai trò trong ban:</label>
-                                            <select id="memberRole" class="form-select">
-                                                <option value="4">Thành viên</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                        <button type="button" class="btn btn-primary" onclick="addMember()" id="addMemberBtn" disabled>
-                            <i class="fas fa-plus me-2"></i>Thêm thành viên
-                        </button>
-                    </div>
-                </div>
-            </div>    
-        </div>    <!-- Member Detail Modal -->
+        <!-- Member Detail Modal -->
 
         <div class="col-md-3" style="margin-left: 300px;padding: 30px">
             <button class="btn btn-warning w-100" onclick="window.location.href = '${pageContext.request.contextPath}/department-members?action=evaluatePoint&clubDepartmentID=${clubDepartmentID}'">
@@ -916,8 +719,6 @@
                     </div>
                 </div>
             </div>
-        </div><!-- Scripts -->    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="${pageContext.request.contextPath}/js/department-members.js"></script>
+        </div>
     </body>
 </html>
