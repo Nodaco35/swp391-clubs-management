@@ -776,6 +776,49 @@ public class ClubDAO {
         }
         return null;
     }
+    
+    public Clubs getUpdateClubById(int clubID) {
+        String query = """
+                       SELECT c.*, cc.CategoryName, u.UserID, u.FullName, uc.RoleID
+                       FROM Clubs c 
+                       LEFT JOIN ClubCategories cc ON c.CategoryID = cc.CategoryID 
+                                       join userclubs uc on c.ClubID = uc.ClubID
+                                       join users u on u.UserID = uc.UserID
+                                       WHERE c.ParentClubID = ? and uc.RoleID = 1
+                       """;
+        try (Connection conn = DBContext.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, clubID);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Clubs club = new Clubs();
+                    club.setClubID(rs.getInt("ParentClubID"));
+                    club.setClubImg(rs.getString("ClubImg"));
+                    club.setIsRecruiting(rs.getBoolean("IsRecruiting"));
+                    club.setClubName(rs.getString("ClubName"));
+                    club.setDescription(rs.getString("Description"));
+                    club.setEstablishedDate(rs.getDate("EstablishedDate"));
+                    club.setContactPhone(rs.getString("ContactPhone"));
+                    club.setContactGmail(rs.getString("ContactGmail"));
+                    club.setContactURL(rs.getString("ContactURL"));
+                    club.setClubStatus(rs.getBoolean("ClubStatus"));
+                    club.setCategoryID(rs.getInt("CategoryID"));
+                    club.setCategoryName(rs.getString("CategoryName"));
+
+                    club.setClubRequestStatus(rs.getString("ClubRequestStatus"));
+                    club.setCurrentRequestType(rs.getString("CurrentRequestType"));
+                    club.setUpdateRequestNote(rs.getString("UpdateRequestNote"));
+
+                    club.setChairmanID(rs.getString("UserID"));
+                    club.setChairmanFullName(rs.getString("FullName"));
+
+                    return club;
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting club by ID: " + e.getMessage());
+        }
+        return null;
+    }
 
     public int getMemberCount(int clubID) {
         String query = "SELECT COUNT(*) FROM UserClubs WHERE ClubID = ? AND IsActive = 1";
