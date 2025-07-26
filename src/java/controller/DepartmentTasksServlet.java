@@ -72,6 +72,12 @@ public class DepartmentTasksServlet extends HttpServlet {
             handleGetTaskDetail(request, response, currentUser);
             return;
         }
+        
+        if ("getDepartmentTasks".equals(action)) {
+            System.out.println("DEBUG GET: Calling handleGetDepartmentTasks");
+            handleGetDepartmentTasks(request, response, currentUser);
+            return;
+        }
         if("rejectTask".equals(action)){
             ApprovalHistoryDAO ah = new ApprovalHistoryDAO();
             String reason = request.getParameter("reason");  
@@ -317,6 +323,7 @@ public class DepartmentTasksServlet extends HttpServlet {
             String assigneeType = request.getParameter("assigneeType");
             String assigneeId = request.getParameter("assigneeId");
             String eventIdParam = request.getParameter("eventId");
+            String parentTaskIdParam = request.getParameter("parentTaskId"); // New parameter
             String startDateStr = request.getParameter("startDate");
             String endDateStr = request.getParameter("endDate");
             
@@ -342,12 +349,13 @@ public class DepartmentTasksServlet extends HttpServlet {
                 return;
             }
             
-            if (eventIdParam == null || eventIdParam.trim().isEmpty()) {
-                System.err.println("ERROR CREATE: Missing eventId parameter");
-                session.setAttribute("error", "Vui lòng chọn sự kiện liên quan.");
-                response.sendRedirect(request.getContextPath() + "/department-tasks?clubID=" + clubIDParam);
-                return;
-            }
+            // Event is now optional - remove the required check
+            // if (eventIdParam == null || eventIdParam.trim().isEmpty()) {
+            //     System.err.println("ERROR CREATE: Missing eventId parameter");
+            //     session.setAttribute("error", "Vui lòng chọn sự kiện liên quan.");
+            //     response.sendRedirect(request.getContextPath() + "/department-tasks?clubID=" + clubIDParam);
+            //     return;
+            // }
             
             int clubID = Integer.parseInt(clubIDParam);
             
@@ -383,25 +391,51 @@ public class DepartmentTasksServlet extends HttpServlet {
             }
             task.setClub(club);
             
-            // Set Event - REQUIRED field from form
-            int eventId = Integer.parseInt(eventIdParam);
-            Events event = eventsDAO.getEventByID(eventId);
-            if (event == null) {
-                session.setAttribute("error", "Không tìm thấy sự kiện được chọn.");
-                response.sendRedirect(request.getContextPath() + "/department-tasks?clubID=" + clubID);
-                return;
+            // Set Event - now optional, can be null
+            if (eventIdParam != null && !eventIdParam.trim().isEmpty()) {
+                int eventId = Integer.parseInt(eventIdParam);
+                Events event = eventsDAO.getEventByID(eventId);
+                if (event == null) {
+                    session.setAttribute("error", "Không tìm thấy sự kiện được chọn.");
+                    response.sendRedirect(request.getContextPath() + "/department-tasks?clubID=" + clubID);
+                    return;
+                }
+                task.setEvent(event);
+                
+                // Set Term - get first available term for this event if event exists
+                List<EventTerms> eventTerms = taskDAO.getTermsByEventID(eventId);
+                if (!eventTerms.isEmpty()) {
+                    // Use first term (usually "Trước sự kiện")
+                    task.setTerm(eventTerms.get(0));
+                }
+                // If no terms found, term will remain null which is now acceptable
             }
-            task.setEvent(event);
             
-            // Set Term - get first available term for this event
-            List<EventTerms> eventTerms = taskDAO.getTermsByEventID(eventId);
-            if (eventTerms.isEmpty()) {
-                session.setAttribute("error", "Sự kiện này chưa có giai đoạn nào được định nghĩa.");
-                response.sendRedirect(request.getContextPath() + "/department-tasks?clubID=" + clubID);
-                return;
+            // Set Parent Task - inherit event and term from parent if specified
+            if (parentTaskIdParam != null && !parentTaskIdParam.trim().isEmpty()) {
+                int parentTaskId = Integer.parseInt(parentTaskIdParam);
+                Tasks parentTask = taskDAO.getTaskById(parentTaskId);
+                if (parentTask != null) {
+                    task.setParentTaskID(parentTaskId);
+                    
+                    // Inherit event and term from parent task
+                    if (parentTask.getEvent() != null) {
+                        task.setEvent(parentTask.getEvent());
+                    }
+                    if (parentTask.getTerm() != null) {
+                        task.setTerm(parentTask.getTerm());
+                    }
+                    
+                    System.out.println("DEBUG: Set parent task ID: " + parentTaskId + 
+                        ", inherited Event: " + (parentTask.getEvent() != null ? parentTask.getEvent().getEventID() : "null") +
+                        ", Term: " + (parentTask.getTerm() != null ? parentTask.getTerm().getTermID() : "null"));
+                } else {
+                    session.setAttribute("error", "Không tìm thấy nhiệm vụ ban được chọn.");
+                    response.sendRedirect(request.getContextPath() + "/department-tasks?clubID=" + clubID);
+                    return;
+                }
             }
-            // Use first term (usually "Trước sự kiện")
-            task.setTerm(eventTerms.get(0));
+            // If no event and no parent task selected, both event and term will be null
             
             // Set assignee based on type
             if ("User".equals(assigneeType)) {
@@ -691,6 +725,80 @@ public class DepartmentTasksServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             try (PrintWriter out = response.getWriter()) {
                 out.write("{\"error\": \"Invalid task ID format\"}");
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            try (PrintWriter out = response.getWriter()) {
+                out.write("{\"error\": \"" + e.getMessage() + "\"}");
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+    
+    /**
+     * Handle AJAX request to get department tasks by event ID
+     */
+    private void handleGetDepartmentTasks(HttpServletRequest request, HttpServletResponse response, Users currentUser) {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        
+        try (PrintWriter out = response.getWriter()) {
+            String clubIDParam = request.getParameter("clubID");
+            String eventIdParam = request.getParameter("eventId");
+            
+            if (clubIDParam == null || clubIDParam.trim().isEmpty()) {
+                out.write("{\"error\": \"Club ID is required\"}");
+                return;
+            }
+            
+            if (eventIdParam == null || eventIdParam.trim().isEmpty()) {
+                out.write("{\"error\": \"Event ID is required\"}");
+                return;
+            }
+            
+            int clubID = Integer.parseInt(clubIDParam);
+            int eventId = Integer.parseInt(eventIdParam);
+            
+            // Get department tasks for the specified event
+            List<Tasks> departmentTasks = taskDAO.getDepartmentTasksByClubAndEvent(clubID, eventId);
+            
+            // Convert to JSON
+            Gson gson = new Gson();
+            JsonArray tasksArray = new JsonArray();
+            
+            for (Tasks task : departmentTasks) {
+                JsonObject taskJson = new JsonObject();
+                taskJson.addProperty("taskID", task.getTaskID());
+                taskJson.addProperty("title", task.getTitle());
+                taskJson.addProperty("description", task.getDescription());
+                taskJson.addProperty("status", task.getStatus());
+                
+                if (task.getDepartmentAssignee() != null) {
+                    taskJson.addProperty("departmentName", task.getDepartmentAssignee().getDepartmentName());
+                }
+                
+                if (task.getTerm() != null) {
+                    taskJson.addProperty("termName", task.getTerm().getTermName());
+                    taskJson.addProperty("termID", task.getTerm().getTermID());
+                }
+                
+                tasksArray.add(taskJson);
+            }
+            
+            JsonObject result = new JsonObject();
+            result.add("tasks", tasksArray);
+            result.addProperty("count", departmentTasks.size());
+            
+            out.write(gson.toJson(result));
+            
+        } catch (NumberFormatException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            try (PrintWriter out = response.getWriter()) {
+                out.write("{\"error\": \"Invalid parameter format\"}");
             } catch (IOException ex) {
                 ex.printStackTrace();
             }

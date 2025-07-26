@@ -242,7 +242,7 @@ public class DepartmentMemberServlet extends HttpServlet {
         }
         
         // Force pageSize to 4 for consistent pagination
-        pageSize = 4;        // Retrieve department members with pagination
+        // Retrieve department members with pagination
         List<DepartmentMember> members = memberDAO.getDepartmentMembers(clubDepartmentID, page, pageSize);
         
         // Get member statistics using single optimized query
@@ -293,7 +293,7 @@ public class DepartmentMemberServlet extends HttpServlet {
         }
 
         int page = 1;
-        int pageSize = 4;  // 🔧 ĐỔI từ 10 thành 4
+        int pageSize = 10;  // 🔧 ĐỔI từ 10 thành 4
 
         String pageParam = request.getParameter("page");
         if (pageParam != null && !pageParam.isEmpty()) {
