@@ -492,14 +492,22 @@
                                 </div>
 
                                 <div class="col-md-12 mb-3">
-                                    <label for="eventId" class="form-label">Sự kiện liên quan <span class="text-danger">*</span></label>
-                                    <select class="form-select" id="eventId" name="eventId" required>
-                                        <option value="">-- Chọn sự kiện --</option>
+                                    <label for="eventId" class="form-label">Sự kiện liên quan</label>
+                                    <select class="form-select" id="eventId" name="eventId" onchange="loadDepartmentTasks()">
+                                        <option value="">-- Không liên quan đến sự kiện cụ thể --</option>
                                         <c:forEach var="event" items="${clubEvents}">
                                             <option value="${event.eventID}">${event.eventName}</option>
                                         </c:forEach>
                                     </select>
-                                    <div class="form-text">Chọn sự kiện mà nhiệm vụ này thuộc về</div>
+                                    <div class="form-text">Có thể để trống nếu công việc không thuộc về sự kiện cụ thể nào</div>
+                                </div>
+
+                                <div class="col-md-12 mb-3">
+                                    <label for="parentTaskId" class="form-label">Nhiệm vụ Ban</label>
+                                    <select class="form-select" id="parentTaskId" name="parentTaskId" disabled>
+                                        <option value="">-- Chọn sự kiện trước để xem nhiệm vụ ban --</option>
+                                    </select>
+                                    <div class="form-text">Chọn nhiệm vụ ban để tạo nhiệm vụ con cho thành viên thực hiện</div>
                                 </div>
 
                                 <div class="col-md-12 mb-3">
@@ -642,7 +650,79 @@
             // Initialize member autocomplete
             initializeMemberAutocomplete();
             console.log('Member autocomplete initialized');
+            
+            // Reset form
+            document.getElementById('createTaskForm').reset();
+            clearSelectedMember();
+            
+            // Reset department tasks dropdown
+            const parentTaskSelect = document.getElementById('parentTaskId');
+            parentTaskSelect.innerHTML = '<option value="">-- Chọn sự kiện trước để xem nhiệm vụ ban --</option>';
+            parentTaskSelect.disabled = true;
+            
             new bootstrap.Modal(document.getElementById('createTaskModal')).show();
+            }
+
+            // Load department tasks based on selected event
+            function loadDepartmentTasks() {
+            const eventId = document.getElementById('eventId').value;
+            const parentTaskSelect = document.getElementById('parentTaskId');
+            const clubID = new URLSearchParams(window.location.search).get('clubID');
+            
+            if (!eventId) {
+            parentTaskSelect.innerHTML = '<option value="">-- Chọn sự kiện trước để xem nhiệm vụ ban --</option>';
+            parentTaskSelect.disabled = true;
+            return;
+            }
+            
+            // Show loading
+            parentTaskSelect.innerHTML = '<option value="">-- Đang tải nhiệm vụ ban... --</option>';
+            parentTaskSelect.disabled = true;
+            
+            // Fetch department tasks
+            fetch('${pageContext.request.contextPath}/department-tasks?action=getDepartmentTasks&clubID=' + clubID + '&eventId=' + eventId)
+            .then(response => response.json())
+            .then(data => {
+            if (data.error) {
+            parentTaskSelect.innerHTML = '<option value="">-- Lỗi: ' + data.error + ' --</option>';
+            return;
+            }
+            
+            // Populate options
+            let html = '<option value="">-- Không chọn nhiệm vụ ban (tạo nhiệm vụ độc lập) --</option>';
+            
+            if (data.tasks && data.tasks.length > 0) {
+            data.tasks.forEach(task => {
+            const statusText = getStatusText(task.status);
+            const termInfo = task.termName ? ' (' + task.termName + ')' : '';
+            const deptInfo = task.departmentName ? ' - ' + task.departmentName : '';
+            
+            html += `<option value="\${task.taskID}">
+            \${task.title} [\${statusText}]\${termInfo}\${deptInfo}
+            </option>`;
+            });
+            } else {
+            html += '<option value="" disabled>-- Chưa có nhiệm vụ ban nào cho sự kiện này --</option>';
+            }
+            
+            parentTaskSelect.innerHTML = html;
+            parentTaskSelect.disabled = false;
+            })
+            .catch(error => {
+            console.error('Error loading department tasks:', error);
+            parentTaskSelect.innerHTML = '<option value="">-- Lỗi kết nối --</option>';
+            });
+            }
+
+            // Helper function to get status text
+            function getStatusText(status) {
+            switch(status) {
+            case 'pending': return 'Chờ xử lý';
+            case 'in_progress': return 'Đang thực hiện';
+            case 'completed': return 'Hoàn thành';
+            case 'cancelled': return 'Đã hủy';
+            default: return 'Không xác định';
+            }
             }
 
             // Initialize member autocomplete functionality
@@ -769,9 +849,16 @@
             var description = document.getElementById('taskDescription').value.trim();
             var startDate = document.getElementById('startDate').value;
             var endDate = document.getElementById('endDate').value;
-            var eventId = document.getElementById('eventId').value;
+            var eventId = document.getElementById('eventId').value; // Event is now optional
             var assignedTo = document.getElementById('assignedTo').value;
-            if (!title || !description || !startDate || !endDate || !eventId || !assignedTo) {
+            var parentTaskId = document.getElementById('parentTaskId').value; // Get parent task ID
+            
+            // Debug log
+            console.log('Form submission data:', {
+                title, description, startDate, endDate, eventId, assignedTo, parentTaskId
+            });
+            
+            if (!title || !description || !startDate || !endDate || !assignedTo) {
             showNotification('Vui lòng điền đầy đủ thông tin bắt buộc!', 'error');
             return false;
             }

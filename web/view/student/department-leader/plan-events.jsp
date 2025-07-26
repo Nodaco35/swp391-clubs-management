@@ -36,20 +36,6 @@
                                         </c:if>
                                     </p>
                                 </div>
-                                <div class="text-end">
-                                    <div class="small text-muted">
-                                        <i class="fas fa-clock"></i>
-                                        <span id="currentTime"></span>
-                                    </div>
-                                    <div class="d-flex gap-2 mt-2">
-                                        <button class="btn btn-outline-primary btn-sm" onclick="location.reload()">
-                                            <i class="fas fa-sync-alt"></i> Làm mới
-                                        </button>
-                                        <button class="btn btn-primary btn-sm" onclick="exportData()">
-                                            <i class="fas fa-download"></i> Xuất file
-                                        </button>
-                                    </div>
-                                </div>
                             </div>
                         </div>
 
@@ -177,11 +163,11 @@
                                                                         <i class="fas fa-ellipsis-v"></i>
                                                                     </button>
                                                                     <ul class="dropdown-menu">
-                                                                        <li><a class="dropdown-item" href="#" onclick="viewTaskDetail(${task.taskID})"><i class="fas fa-eye"></i> Xem chi tiết</a></li>
+                                                                        <li><a class="dropdown-item" href="#" onclick="viewTaskDetailModal(${task.taskID}, '${task.title}', '${task.description}', '${task.status}')"><i class="fas fa-eye"></i> Xem chi tiết</a></li>
                                                                         <li><a class="dropdown-item" href="#" onclick="openDiscussion(${task.taskID})"><i class="fas fa-comments"></i> Thảo luận</a></li>
                                                                         <c:if test="${task.status != 'Done'}">
                                                                             <li><hr class="dropdown-divider"></li>
-                                                                        <li><a class="dropdown-item" href="#" onclick="updateProgress(${task.taskID})"><i class="fas fa-edit"></i> Cập nhật trạng thái</a></li>
+                                                                        <li><a class="dropdown-item" href="#" onclick="updateProgressModal(${task.taskID}, '${task.status}')"><i class="fas fa-edit"></i> Cập nhật trạng thái</a></li>
                                                                         </c:if>
                                                                     </ul>
                                                                 </div>
@@ -346,16 +332,11 @@
                 });
             }
             
-            // Export data functionality
-            function exportData() {
-                alert('Tính năng xuất file đang được phát triển!');
-            }
-
-            // View task detail
-            function viewTaskDetail(taskId) {
+            // View task detail in modal (with API call)
+            function viewTaskDetailModal(taskId, title, description, status) {
                 const modal = new bootstrap.Modal(document.getElementById('taskDetailModal'));
                 
-                // Show loading
+                // Show loading first
                 document.getElementById('taskDetailContent').innerHTML = `
                     <div class="text-center py-4">
                         <div class="spinner-border text-primary" role="status">
@@ -363,130 +344,140 @@
                         </div>
                     </div>
                 `;
-                
                 modal.show();
                 
-                // Fetch task details
-                fetch('${pageContext.request.contextPath}/task-detail?taskId=' + taskId)
+                // Fetch task details from API
+                fetch('plan-events?action=task-detail&taskId=' + taskId)
                     .then(response => response.json())
                     .then(data => {
-                        if (data.success && data.task) {
-                            displayTaskDetail(data.task);
-                        } else {
-                            document.getElementById('taskDetailContent').innerHTML = 
-                                `<div class="alert alert-warning">${data.message || 'Không thể tải thông tin nhiệm vụ.'}</div>`;
+                        if (data.error) {
+                            throw new Error(data.error);
                         }
+                        
+                        // Display task details
+                        const content = `
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h6 class="text-primary mb-3"><i class="fas fa-info-circle"></i> Thông tin cơ bản</h6>
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <td class="fw-bold" width="30%">Tên nhiệm vụ:</td>
+                                            <td>\${data.title}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Mô tả:</td>
+                                            <td>\${data.description || 'Không có mô tả'}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Trạng thái:</td>
+                                            <td><span class="badge \${getStatusBadgeClass(data.status)}">\${getStatusText(data.status)}</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Thời gian bắt đầu:</td>
+                                            <td>\${formatDateTime(data.startDate)}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Thời gian kết thúc:</td>
+                                            <td>\${formatDateTime(data.endDate)}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Ngày tạo:</td>
+                                            <td>\${formatDateTime(data.createdAt)}</td>
+                                        </tr>
+                                        \${data.createdBy ? `
+                                        <tr>
+                                            <td class="fw-bold">Người tạo:</td>
+                                            <td>\${data.createdBy}</td>
+                                        </tr>
+                                        ` : ''}
+                                        \${data.eventName ? `
+                                        <tr>
+                                            <td class="fw-bold">Sự kiện liên quan:</td>
+                                            <td>\${data.eventName}</td>
+                                        </tr>
+                                        ` : ''}
+                                        <tr>
+                                            <td class="fw-bold">Task ID:</td>
+                                            <td>\${data.taskId}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        `;
+                        
+                        document.getElementById('taskDetailContent').innerHTML = content;
                     })
                     .catch(error => {
-                        console.error('Error:', error);
-                        document.getElementById('taskDetailContent').innerHTML = 
-                            '<div class="alert alert-danger">Có lỗi xảy ra khi tải dữ liệu.</div>';
+                        console.error('Error fetching task details:', error);
+                        document.getElementById('taskDetailContent').innerHTML = `
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Có lỗi xảy ra khi tải chi tiết nhiệm vụ: \${error.message}
+                            </div>
+                        `;
                     });
             }
 
-            // Display task detail in modal
-            function displayTaskDetail(task) {
-                const content = `
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h6 class="text-primary mb-3"><i class="fas fa-info-circle"></i> Thông tin cơ bản</h6>
-                            <table class="table table-borderless">
-                                <tr>
-                                    <td class="fw-bold" width="30%">Tên nhiệm vụ:</td>
-                                    <td>\${task.title}</td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-bold">Mô tả:</td>
-                                    <td>\${task.description || 'Không có mô tả'}</td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-bold">Trạng thái:</td>
-                                    <td><span class="badge \${getStatusBadgeClass(task.status)}">\${getStatusText(task.status)}</span></td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-bold">Thời gian:</td>
-                                    <td>
-                                        <i class="fas fa-calendar"></i> 
-                                        \${formatDate(task.startDate)} - \${formatDate(task.endDate)}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-bold">Giao bởi:</td>
-                                    <td><i class="fas fa-user"></i> \${task.createdBy && task.createdBy.fullName ? task.createdBy.fullName : 'N/A'}</td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-bold">Sự kiện:</td>
-                                    <td><i class="fas fa-calendar-alt"></i> \${task.event && task.event.eventName ? task.event.eventName : 'Không có'}</td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-                `;
-                
-                document.getElementById('taskDetailContent').innerHTML = content;
-            }
-
-            // Update task progress
-            function updateProgress(taskId) {
+            // Update task progress in modal (no API call)
+            function updateProgressModal(taskId, currentStatus) {
                 document.getElementById('updateTaskId').value = taskId;
-                
-                // Reset form
-                document.getElementById('updateProgressForm').reset();
-                document.getElementById('updateTaskId').value = taskId;
-                
-                // Fetch current task data to pre-fill form
-                fetch('${pageContext.request.contextPath}/task-detail?taskId=' + taskId)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success && data.task) {
-                            document.getElementById('taskStatus').value = data.task.status || '';
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
+                document.getElementById('taskStatus').value = currentStatus || '';
                 
                 const modal = new bootstrap.Modal(document.getElementById('updateProgressModal'));
                 modal.show();
             }
 
-            // Handle progress update form submission
+            // Handle progress update form submission (with API call)
             document.getElementById('updateProgressForm').addEventListener('submit', function(e) {
                 e.preventDefault();
                 
-                const formData = new FormData(this);
-                const submitBtn = this.querySelector('button[type="submit"]');
+                const taskId = document.getElementById('updateTaskId').value;
+                const newStatus = document.getElementById('taskStatus').value;
                 
-                // Show loading
+                if (!taskId || !newStatus) {
+                    showNotification('Vui lòng chọn trạng thái mới', 'warning');
+                    return;
+                }
+                
+                // Show loading state
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang cập nhật...';
                 submitBtn.disabled = true;
                 
-                fetch('${pageContext.request.contextPath}/update-task-status', {
+                // Send update request
+                const formData = new FormData();
+                formData.append('action', 'update-task-status');
+                formData.append('taskId', taskId);
+                formData.append('status', newStatus);
+                
+                fetch('plan-events', {
                     method: 'POST',
                     body: formData
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
+                        showNotification(`Task ${taskId} đã được cập nhật trạng thái thành: ${getStatusText(newStatus)}`, 'success');
+                        
                         // Close modal
                         bootstrap.Modal.getInstance(document.getElementById('updateProgressModal')).hide();
                         
-                        // Show success message
-                        showNotification('Cập nhật trạng thái thành công!', 'success');
-                        
-                        // Reload page to show updates
+                        // Reload page to show updated status
                         setTimeout(() => {
                             location.reload();
                         }, 1500);
                     } else {
-                        showNotification('Có lỗi xảy ra: ' + (data.message || 'Unknown error'), 'error');
+                        throw new Error(data.error || 'Có lỗi xảy ra');
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    showNotification('Có lỗi xảy ra khi cập nhật trạng thái.', 'error');
+                    console.error('Error updating task status:', error);
+                    showNotification('Có lỗi xảy ra khi cập nhật trạng thái: ' + error.message, 'danger');
                 })
                 .finally(() => {
-                    // Reset button
-                    submitBtn.innerHTML = '<i class="fas fa-save"></i> Cập nhật trạng thái';
+                    // Restore button state
+                    submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
                 });
             });
