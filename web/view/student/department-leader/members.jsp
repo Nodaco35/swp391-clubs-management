@@ -29,7 +29,7 @@
                 window.location.href = '${pageContext.request.contextPath}/department-members?action=list&clubID=${clubID}';
             }
             
-            // 2. Enter key support cho search (UX improvement)
+            // 2. Event listeners và initialization
             document.addEventListener('DOMContentLoaded', function() {
                 const searchInput = document.getElementById('searchInput');
                 if (searchInput) {
@@ -37,6 +37,31 @@
                         if (e.key === 'Enter') {
                             searchMembers();
                         }
+                    });
+                }
+                
+                const studentSearchInput = document.getElementById('studentSearchInput');
+                if (studentSearchInput) {
+                    studentSearchInput.addEventListener('input', function() {
+                        const keyword = this.value.trim();
+                        if (keyword.length >= 2) {
+                            searchStudentsForAdd(keyword);
+                        } else {
+                            document.getElementById('studentSearchResults').innerHTML = '';
+                        }
+                    });
+                }
+                
+                // Reset modal khi đóng
+                const addMemberModal = document.getElementById('addMemberModal');
+                if (addMemberModal) {
+                    addMemberModal.addEventListener('hidden.bs.modal', function() {
+                        // Reset form
+                        document.getElementById('studentSearchInput').value = '';
+                        document.getElementById('studentSearchResults').innerHTML = '';
+                        document.getElementById('selectedStudent').style.display = 'none';
+                        document.getElementById('addMemberBtn').disabled = true;
+                        selectedStudentData = null;
                     });
                 }
             });
@@ -190,6 +215,153 @@
             function showAddMemberModal() {
                 const modal = new bootstrap.Modal(document.getElementById('addMemberModal'));
                 modal.show();
+            }
+            
+            // Lọc thành viên theo trạng thái
+            function filterMembers() {
+                const statusFilter = document.getElementById('statusFilter').value;
+                const rows = document.querySelectorAll('.member-row');
+                
+                rows.forEach(row => {
+                    const isActive = row.getAttribute('data-active') === 'true';
+                    let shouldShow = true;
+                    
+                    if (statusFilter === 'active' && !isActive) {
+                        shouldShow = false;
+                    } else if (statusFilter === 'inactive' && isActive) {
+                        shouldShow = false;
+                    }
+                    
+                    row.style.display = shouldShow ? '' : 'none';
+                });
+                
+                // Cập nhật số lượng hiển thị
+                updateVisibleCount();
+            }
+            
+            // Reset bộ lọc
+            function resetFilters() {
+                document.getElementById('statusFilter').value = '';
+                document.getElementById('searchInput').value = '';
+                
+                // Hiển thị lại tất cả các hàng
+                const rows = document.querySelectorAll('.member-row');
+                rows.forEach(row => {
+                    row.style.display = '';
+                });
+                
+                // Reset URL về trang danh sách
+                window.location.href = '${pageContext.request.contextPath}/department-members?action=list&clubID=${currentClubID}';
+            }
+            
+            // Cập nhật số lượng thành viên hiển thị
+            function updateVisibleCount() {
+                const visibleRows = document.querySelectorAll('.member-row:not([style*="display: none"])');
+                const totalRows = document.querySelectorAll('.member-row');
+                
+                console.log('Hiển thị: ' + visibleRows.length + '/' + totalRows.length + ' thành viên');
+            }
+            
+            // Sắp xếp theo cột (cơ bản)
+            function sortByColumn(element) {
+                const sortType = element.getAttribute('data-sort');
+                console.log('Sắp xếp theo: ' + sortType);
+                
+                // Có thể implement logic sắp xếp phức tạp hơn ở đây
+                // Hiện tại chỉ log để biết function được gọi
+            }
+            
+            // Tìm kiếm sinh viên để thêm vào ban
+            let selectedStudentData = null;
+            
+            
+            function searchStudentsForAdd(keyword) {
+                fetch('${pageContext.request.contextPath}/department-members?action=searchStudents&keyword=' + encodeURIComponent(keyword) + '&clubDepartmentID=${clubDepartmentID}')
+                    .then(response => response.json())
+                    .then(students => {
+                        const resultsDiv = document.getElementById('studentSearchResults');
+                        
+                        if (students.length > 0) {
+                            let html = '<div class="list-group">';
+                            students.forEach(student => {
+                                html += '<a href="#" class="list-group-item list-group-item-action" onclick="selectStudent(\'' + student.userID + '\', \'' + student.fullName + '\', \'' + student.email + '\')">';
+                                html += '<div class="d-flex w-100 justify-content-between">';
+                                html += '<h6 class="mb-1">' + student.fullName + '</h6>';
+                                html += '<small>' + student.userID + '</small>';
+                                html += '</div>';
+                                html += '<p class="mb-1">' + student.email + '</p>';
+                                html += '</a>';
+                            });
+                            html += '</div>';
+                            resultsDiv.innerHTML = html;
+                        } else {
+                            resultsDiv.innerHTML = '<p class="text-muted">Không tìm thấy sinh viên nào.</p>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Lỗi tìm kiếm:', error);
+                        document.getElementById('studentSearchResults').innerHTML = '<p class="text-danger">Có lỗi xảy ra khi tìm kiếm.</p>';
+                    });
+            }
+            
+            function selectStudent(userID, fullName, email) {
+                selectedStudentData = {
+                    userID: userID,
+                    fullName: fullName,
+                    email: email
+                };
+                
+                // Hiển thị thông tin sinh viên được chọn
+                document.getElementById('selectedStudent').style.display = 'block';
+                document.querySelector('#selectedStudent .student-info').innerHTML = 
+                    '<div class="d-flex align-items-center">' +
+                    '<div>' +
+                    '<h6 class="mb-0">' + fullName + '</h6>' +
+                    '<small class="text-muted">' + email + ' (' + userID + ')</small>' +
+                    '</div>' +
+                    '</div>';
+                
+                // Enable nút thêm thành viên
+                document.getElementById('addMemberBtn').disabled = false;
+                
+                // Xóa kết quả tìm kiếm
+                document.getElementById('studentSearchResults').innerHTML = '';
+                document.getElementById('studentSearchInput').value = '';
+            }
+            
+            function addMember() {
+                if (!selectedStudentData) {
+                    alert('Vui lòng chọn sinh viên để thêm vào ban.');
+                    return;
+                }
+                
+                const roleID = document.getElementById('memberRole').value;
+                
+                // Gửi request thêm thành viên
+                const formData = new FormData();
+                formData.append('action', 'addMember');
+                formData.append('userID', selectedStudentData.userID);
+                formData.append('roleID', roleID);
+                
+                fetch('${pageContext.request.contextPath}/department-members', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Thêm thành viên thành công!');
+                        // Đóng modal và reload trang
+                        bootstrap.Modal.getInstance(document.getElementById('addMemberModal')).hide();
+                        window.location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra khi thêm thành viên: ' + (data.message || 'Lỗi không xác định'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi:', error);
+                    alert('Có lỗi xảy ra khi thêm thành viên.');
+                });
             }
         </script>me -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
