@@ -10,7 +10,7 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/club-management.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     </head>
-    
+
     <body>
         <jsp:include page="../components/header.jsp" />
         <section class="section" style="background-color: #f5f5f5;">
@@ -51,6 +51,9 @@
                         </c:if>
                         <c:if test="${hasFavoriteClubs}">
                             <a href="${pageContext.request.contextPath}/clubs?category=-2" class="filter-option ${selectedCategory == 'favoriteClubs' ? 'active' : ''}" data-category-id="-2">Câu lạc bộ yêu thích của tôi</a>
+                        </c:if>
+                        <c:if test="${hasRequestClub}">
+                            <a href="${pageContext.request.contextPath}/clubs?category=-3" class="filter-option ${selectedCategory == 'requestClub' ? 'active' : ''}" data-category-id="-2">Đơn yêu cầu</a>
                         </c:if>
                     </c:if>
                 </div>
@@ -98,7 +101,7 @@
             </a>
         </c:if>
 
-        
+
 
         <jsp:include page="../components/footer.jsp" />
     </body>

@@ -3,13 +3,13 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/E:/Kì_5/SWP391/FixApproveExpense/swp391-clubs-management/src/java/controller/UserClubServlet.java</file>
-            <file>file:/E:/Kì_5/SWP391/FixApproveExpense/swp391-clubs-management/web/view/clubs-page/user-club.jsp</file>
-            <file>file:/E:/Kì_5/SWP391/FixApproveExpense/swp391-clubs-management/src/java/dal/UserClubDAO.java</file>
-            <file>file:/E:/Kì_5/SWP391/FixApproveExpense/swp391-clubs-management/src/java/controller/SemesterServlet.java</file>
-            <file>file:/E:/Kì_5/SWP391/FixApproveExpense/swp391-clubs-management/web/view/ic/semesters.jsp</file>
-            <file>file:/E:/Kì_5/SWP391/FixApproveExpense/swp391-clubs-management/web/view/clubs-page/club-detail.jsp</file>
-            <file>file:/E:/Kì_5/SWP391/FixApproveExpense/swp391-clubs-management/src/java/dal/TermDAO.java</file>
+            <file>file:/E:/Kì_5/SWP391/UpdateCLubFix/swp391-clubs-management/src/java/dal/ClubCategoryDAO.java</file>
+            <file>file:/E:/Kì_5/SWP391/UpdateCLubFix/swp391-clubs-management/web/view/clubs-page/create-club.jsp</file>
+            <file>file:/E:/Kì_5/SWP391/UpdateCLubFix/swp391-clubs-management/web/view/clubs-page/club-management.jsp</file>
+            <file>file:/E:/Kì_5/SWP391/UpdateCLubFix/swp391-clubs-management/src/java/controller/ClubsServlet.java</file>
+            <file>file:/E:/Kì_5/SWP391/UpdateCLubFix/swp391-clubs-management/src/java/controller/CreateClubServlet.java</file>
+            <file>file:/E:/Kì_5/SWP391/UpdateCLubFix/swp391-clubs-management/src/java/dal/ClubDAO.java</file>
+            <file>file:/E:/Kì_5/SWP391/UpdateCLubFix/swp391-clubs-management/web/view/clubs-page/club-detail.jsp</file>
         </group>
     </open-files>
 </project-private>

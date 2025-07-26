@@ -224,6 +224,11 @@ public class Clubs {
     public void setChairmanFullName(String chairmanFullName) {
         this.chairmanFullName = chairmanFullName;
     }
+
+    @Override
+    public String toString() {
+        return "Clubs{" + "clubID=" + clubID + ", clubImg=" + clubImg + ", isRecruiting=" + isRecruiting + ", clubName=" + clubName + ", description=" + description + ", establishedDate=" + establishedDate + ", contactPhone=" + contactPhone + ", contactGmail=" + contactGmail + ", contactURL=" + contactURL + ", clubStatus=" + clubStatus + ", categoryID=" + categoryID + ", categoryName=" + categoryName + ", memberCount=" + memberCount + ", isFavorite=" + isFavorite + ", clubRequestStatus=" + clubRequestStatus + ", currentRequestType=" + currentRequestType + ", parentClubID=" + parentClubID + ", lastRejectReason=" + lastRejectReason + ", updateRequestNote=" + updateRequestNote + ", chairmanID=" + chairmanID + ", chairmanFullName=" + chairmanFullName + '}';
+    }
     
     
 }
