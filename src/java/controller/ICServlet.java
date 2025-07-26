@@ -50,7 +50,7 @@ public class ICServlet extends HttpServlet {
 
             // Lấy tất cả báo cáo của tất cả CLB, sắp xếp theo ngày nộp giảm dần
             List<ClubPeriodicReport> allReports = reportDAO.getAllReportsSortedByDate();
-            List<Clubs> requests = clubDAO.getRequestClubs();
+            List<Clubs> requests = clubDAO.getCreateRequestClubs();
 
             List<Clubs> approvedRequests = clubDAO.getApproveRequestClubs();
 
@@ -77,10 +77,12 @@ public class ICServlet extends HttpServlet {
 
             request.getRequestDispatcher("/view/ic/dashboard.jsp").forward(request, response);
         } else if (action.equals("grantPermission")) {
-            List<Clubs> requests = clubDAO.getRequestClubs();
+            List<Clubs> requests = clubDAO.getCreateRequestClubs();
+            List<Clubs> updateRequests = clubDAO.getUpdateRequestClubs();
 
             List<Clubs> approvedRequests = clubDAO.getApproveRequestClubs();
 
+            request.setAttribute("updateRequests", updateRequests);
             request.setAttribute("requests", requests);
             request.setAttribute("approvedRequests", approvedRequests);
 
@@ -136,7 +138,7 @@ public class ICServlet extends HttpServlet {
                 request.setAttribute(success ? "deletedMessage" : "errorMessage", deletedMessage);
             }
 
-            List<Clubs> requests = clubDAO.getRequestClubs();
+            List<Clubs> requests = clubDAO.getCreateRequestClubs();
             List<Clubs> approvedRequests = clubDAO.getApproveRequestClubs();
 
             request.setAttribute("requests", requests);
