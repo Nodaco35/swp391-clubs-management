@@ -13,11 +13,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/recruitmentActivitiesManagement.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/chairmanPage.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 </head>
 <body style="background-color: #d8d7ce;">
-    <jsp:include page="/view/events-page/header.jsp" />
+    <jsp:include page="components/sidebar.jsp" />
     
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
