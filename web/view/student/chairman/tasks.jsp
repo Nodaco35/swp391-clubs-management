@@ -189,6 +189,12 @@
 				</a>
 			</li>
 			<li>
+				<a href="${pageContext.request.contextPath}/chairman-page/manageMember"
+				   class="nav-item ${currentPath == '/chairman-page/manageMember' ? 'active' : ''}">
+					<i class="fas fa-tachometer-alt"></i> Quản lý thành viên
+				</a>
+			</li>
+			<li>
 				<a href="${pageContext.request.contextPath}/chairman-page/myclub-events"
 				   class="nav-item ${currentPath == '/chairman-page/myclub-events' ? 'active' : ''}">
 					<i class="fas fa-calendar-alt"></i> Sự kiện
@@ -197,7 +203,7 @@
 			<li>
 				<a href="${pageContext.request.contextPath}/chairman-page/tasks"
 				   class="nav-item ${currentPath == '/chairman-page/tasks' ? 'active' : ''}">
-					<i class="fas fa-clock"></i> Giai đoạn cong việc
+					<i class="fas fa-clock"></i> Giai đoạn công việc
 				</a>
 			</li>
 			<li>
