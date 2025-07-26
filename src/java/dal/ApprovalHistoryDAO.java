@@ -1,6 +1,5 @@
 package dal;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import models.ClubApprovalHistory;
@@ -78,7 +77,7 @@ public class ApprovalHistoryDAO {
         List<ClubApprovalHistory> list = new ArrayList<>();
         String sql = "SELECT * FROM ClubApprovalHistory WHERE ClubID = ? ORDER BY ActionAt ASC";
 
-        try  {
+        try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setInt(1, clubId);
             ResultSet rs = ps.executeQuery();
@@ -99,6 +98,30 @@ public class ApprovalHistoryDAO {
         }
 
         return list;
+    }
+
+    public void approveTask(int taskId, String rating) {
+        String sql = "UPDATE Tasks SET Status = 'Done', Rating = ? WHERE TaskID = ?";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setString(1, rating);
+            ps.setInt(2, taskId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void rejectTask(int taskId, String rejectReason) {
+        String sql = "UPDATE Tasks SET Status = 'Rejected', LastRejectReason = ? WHERE TaskID = ?";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setString(1, rejectReason);
+            ps.setInt(2, taskId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
 }
