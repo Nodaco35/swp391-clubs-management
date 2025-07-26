@@ -57,17 +57,108 @@
                 fetch('${pageContext.request.contextPath}/department-members?action=getMemberDetail&userID=' + userID + '&clubDepartmentID=${clubDepartmentID}')
                     .then(response => response.json())
                     .then(data => {
+                        console.log('Member detail response:', data);
+                        
                         // Hide loading, show content
                         loading.style.display = 'none';
                         content.style.display = 'block';
                         
-                        // Simple data binding - no complex processing
-                        document.getElementById('memberDetailName').textContent = data.fullName || '';
-                        document.getElementById('memberDetailEmail').textContent = data.email || '';
-                        document.getElementById('memberDetailPhone').textContent = data.phone || '-';
+                        // Bind member basic info
+                        if (data.member) {
+                            document.getElementById('memberDetailName').textContent = data.member.fullName || '';
+                            document.getElementById('memberDetailEmail').textContent = data.member.email || '';
+                            document.getElementById('memberDetailPhone').textContent = data.member.phone || '-';
+                            document.getElementById('memberDetailStudentCode').textContent = data.member.studentCode || '-';
+                            document.getElementById('memberDetailMajor').textContent = data.member.major || '-';
+                            
+                            const avatar = document.getElementById('memberDetailAvatar');
+                            avatar.src = '${pageContext.request.contextPath}/img/' + (data.member.avatar || 'Hinh-anh-dai-dien-mac-dinh-Facebook.jpg');
+                            
+                            // Format join date
+                            if (data.member.joinDate) {
+                                const joinDate = new Date(data.member.joinDate);
+                                document.getElementById('memberDetailJoinDate').textContent = joinDate.toLocaleDateString('vi-VN');
+                            }
+                        }
                         
-                        const avatar = document.getElementById('memberDetailAvatar');
-                        avatar.src = '${pageContext.request.contextPath}/img/' + (data.avatar || 'Hinh-anh-dai-dien-mac-dinh-Facebook.jpg');
+                        // Bind task statistics and list
+                        if (data.tasks) {
+                            const tasks = data.tasks;
+                            const completedTasks = tasks.filter(task => task.status === 'Done').length;
+                            const totalTasks = tasks.length;
+                            const progressPercent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+                            
+                            // Update statistics
+                            document.getElementById('memberDetailAssignedTasks').textContent = totalTasks;
+                            document.getElementById('memberDetailCompletedTasks').textContent = completedTasks;
+                            document.getElementById('memberDetailProgress').style.width = progressPercent + '%';
+                            document.getElementById('memberDetailProgressText').textContent = progressPercent + '% hoàn thành';
+                            
+                            // Populate task list
+                            const taskTableBody = document.getElementById('memberDetailTasksBody');
+                            const emptyTasksDiv = document.getElementById('memberDetailEmptyTasks');
+                            const taskListDiv = document.getElementById('memberDetailTaskList');
+                            
+                            if (tasks.length === 0) {
+                                emptyTasksDiv.style.display = 'block';
+                                taskListDiv.style.display = 'none';
+                            } else {
+                                emptyTasksDiv.style.display = 'none';
+                                taskListDiv.style.display = 'block';
+                                
+                                taskTableBody.innerHTML = '';
+                                tasks.forEach(task => {
+                                    const row = document.createElement('tr');
+                                    
+                                    // Status badge
+                                    let statusBadge = '';
+                                    switch(task.status) {
+                                        case 'ToDo':
+                                            statusBadge = '<span class="badge bg-secondary">Chưa bắt đầu</span>';
+                                            break;
+                                        case 'InProgress':
+                                            statusBadge = '<span class="badge bg-primary">Đang thực hiện</span>';
+                                            break;
+                                        case 'Review':
+                                            statusBadge = '<span class="badge bg-warning">Chờ duyệt</span>';
+                                            break;
+                                        case 'Done':
+                                            statusBadge = '<span class="badge bg-success">Hoàn thành</span>';
+                                            break;
+                                        case 'Rejected':
+                                            statusBadge = '<span class="badge bg-danger">Từ chối</span>';
+                                            break;
+                                        default:
+                                            statusBadge = '<span class="badge bg-light text-dark">' + task.status + '</span>';
+                                    }
+                                    
+                                    // Format end date
+                                    let endDateText = '-';
+                                    if (task.endDate) {
+                                        const endDate = new Date(task.endDate);
+                                        endDateText = endDate.toLocaleDateString('vi-VN');
+                                        
+                                        // Check if overdue
+                                        const now = new Date();
+                                        if (endDate < now && task.status !== 'Done') {
+                                            endDateText = '<span class="text-danger fw-bold">' + endDateText + ' (Quá hạn)</span>';
+                                        }
+                                    }
+                                    
+                                    row.innerHTML = `
+                                        <td>
+                                            <div class="fw-semibold">\${task.title}</div>
+                                            <small class="text-muted">\${task.description ? task.description.substring(0, 50) + '...' : ''}</small>
+                                        </td>
+                                        <td>\${statusBadge}</td>
+                                        <td><span class="badge bg-info">Thường</span></td>
+                                        <td>\${endDateText}</td>
+                                    `;
+                                    
+                                    taskTableBody.appendChild(row);
+                                });
+                            }
+                        }
                     })
                     .catch(error => {
                         console.error('Error loading member detail:', error);

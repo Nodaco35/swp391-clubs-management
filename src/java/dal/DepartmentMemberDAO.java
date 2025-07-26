@@ -696,14 +696,17 @@ public class DepartmentMemberDAO {
         
         try {
             String sql = """
-                SELECT t.TaskID, t.Title, t.Description, t.Status, t.Priority, 
-                       t.ProgressPercent, t.StartDate, t.EndDate, t.CreatedAt, 
+                SELECT t.TaskID, t.Title, t.Description, t.Status, 
+                       t.StartDate, t.EndDate, t.CreatedAt, 
                        t.ClubID, c.ClubName, t.CreatedBy, u.FullName as CreatorName
                 FROM Tasks t
                 LEFT JOIN Users u ON t.CreatedBy = u.UserID
                 LEFT JOIN Clubs c ON t.ClubID = c.ClubID
-                WHERE t.AssignedTo = ? 
-                AND t.ClubDepartmentID = ?
+                INNER JOIN UserClubs uc ON t.UserID = uc.UserID
+                WHERE t.UserID = ? 
+                AND t.AssigneeType = 'User'
+                AND uc.ClubDepartmentID = ?
+                AND uc.IsActive = 1
                 ORDER BY t.EndDate DESC
                 """;
             
@@ -720,11 +723,9 @@ public class DepartmentMemberDAO {
                         task.setTitle(rs.getString("Title") != null ? rs.getString("Title") : "");
                         task.setDescription(rs.getString("Description") != null ? rs.getString("Description") : "");
                         task.setStatus(rs.getString("Status") != null ? rs.getString("Status") : "");
-                        //task.setPriority(rs.getString("Priority") != null ? rs.getString("Priority") : "");
-                        //task.setProgressPercent(rs.getInt("ProgressPercent"));
-                        task.setStartDate(rs.getDate("StartDate"));
-                        task.setEndDate(rs.getDate("EndDate"));
-                        task.setCreatedAt(rs.getDate("CreatedAt"));
+                        task.setStartDate(rs.getTimestamp("StartDate"));
+                        task.setEndDate(rs.getTimestamp("EndDate"));
+                        task.setCreatedAt(rs.getTimestamp("CreatedAt"));
                         
                         // Tạo object Clubs với thuộc tính cần thiết
                         Clubs club = new Clubs();
