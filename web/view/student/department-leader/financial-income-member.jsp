@@ -88,7 +88,8 @@
         
             <!-- Sidebar -->
         <div class="department-leader-container">
-            <c:set var="activePage" value="dashboard" />
+            <div class="department-leader-container">
+            <c:set var="activePage" value="financial" />
             <%@ include file="components/sidebar.jsp" %>
 
 

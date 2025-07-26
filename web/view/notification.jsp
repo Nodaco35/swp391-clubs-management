@@ -12,8 +12,6 @@
         <!-- Font Awesome for icons -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/notification.css"/>
-
-
     </head>
     <body>
         <jsp:include page="./events-page/header.jsp" />
@@ -24,8 +22,6 @@
                 <p id="errorMessage"><c:out value="${error}" /></p>
                 <button class="ok-btn" onclick="hideError()">OK</button>
             </div>
-
-
 
             <script>
                 document.addEventListener("DOMContentLoaded", function () {
@@ -55,60 +51,73 @@
                     }
                 });
             </script>
+        </c:if>
+        <c:if test="${not empty success}">
+            <div class="success-popup" id="successPopup">
+                <p><c:out value="${success}" /></p>
+            </div>
 
-            <style>
-                .success-popup {
-                    display: none;
-                    position: fixed;
-                    top: 20px;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    z-index: 9999;
-                    background-color: #d4edda;
-                    color: #155724;
-                    padding: 12px 20px;
-                    border: 1px solid #c3e6cb;
-                    border-radius: 6px;
-                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-                    animation: fadeSlideDown 0.3s ease-out;
-                    font-size: 15px;
-                }
-
-                @keyframes fadeSlideDown {
-                    from {
-                        opacity: 0;
-                        transform: translate(-50%, 0);
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const popup = document.getElementById("successPopup");
+                    if (popup) {
+                        popup.style.display = "block";
+                        setTimeout(() => {
+                            popup.style.display = "none";
+                        }, 3000); // 3 giây
                     }
-                    to {
-                        opacity: 1;
-                        transform: translate(-50%, 20px);
-                    }
-                }
-            </style>
+                });
+            </script>
         </c:if>
 
-        <main>
+        <style>
+            .success-popup {
+                display: none;
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 9999;
+                background-color: #d4edda;
+                color: #155724;
+                padding: 12px 20px;
+                border: 1px solid #c3e6cb;
+                border-radius: 6px;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+                animation: fadeSlideDown 0.3s ease-out;
+                font-size: 15px;
+            }
 
+            @keyframes fadeSlideDown {
+                from {
+                    opacity: 0;
+                    transform: translate(-50%, 0);
+                }
+                to {
+                    opacity: 1;
+                    transform: translate(-50%, 20px);
+                }
+            }
+        </style>
+
+        <main>
             <div class="container-thongbao">
                 <!-- Search Bar -->
-                <div class="container-thongbao">
-                    <div class="search-box">
-                        <form action="notification?action=search" method="POST">
-                            <i class="fas fa-search search-icon"></i>
-                            <input type="text" id="searchInput" name="key" placeholder="Tìm kiếm thông báo..."
-                                   class="search-input" value="${param.key != null ? param.key : ''}">
-                            <button type="submit" class="search-btn">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </form>
-                    </div>
+                <div class="search-box">
+                    <form action="notification?action=search" method="POST">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchInput" name="key" placeholder="Tìm kiếm thông báo..."
+                               class="search-input" value="${param.key != null ? param.key : ''}">
+                        <button type="submit" class="search-btn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
                 </div>
                 <div class="tabs">
                     <a href="notification">Tất cả</a>
                     <a href="notification?action=unreadNotifications">Chưa đọc</a>
                     <a href="notification?action=highNotifications">Quan trọng</a>
                     <a href="notification?action=sendNotifications">Đã gửi</a>
-
                 </div>
 
                 <%-- Notification list --%>

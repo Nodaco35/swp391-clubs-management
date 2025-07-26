@@ -72,7 +72,7 @@
                             <div class="mb-3">
                                 <label for="dob" class="form-label">Ngày sinh</label>
                                 <input type="date" class="form-control" id="dob" name="dob" 
-                                       value="<%=(user.getDateOfBirth() != null) ? user.getDateOfBirth() : ""%>" required>
+                                       value="<%=(user.getDateOfBirth() != null) ? user.getDateOfBirth() : ""%>">
                             </div>
 
                             <%  int perId = user.getPermissionID();

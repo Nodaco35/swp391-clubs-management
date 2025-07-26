@@ -14,7 +14,11 @@
 
         <!-- Custom CSS -->
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/financial.css">
+        <style>
+            
+        </style>
     </head>
+
     <body>
         <div class="department-leader-container">
             <c:set var="activePage" value="financial" />
@@ -34,7 +38,7 @@
                                         </a>
                                     </li>
                                     <li class="breadcrumb-item active" aria-current="page">Tài chính</li>
-                                     <li class="breadcrumb-item">
+                                    <li class="breadcrumb-item">
                                         <a href="${pageContext.request.contextPath}/department/financial/income.member" class="text-decoration-none">
                                             Phí thành viên
                                         </a>
@@ -46,7 +50,7 @@
                                     </li>
                                     <li class="breadcrumb-item">
                                         <a href="${pageContext.request.contextPath}/department/financial/club-transaction?type=&status" class="text-decoration-none">
-                                           Lịch sử giao dịch của clb
+                                            Lịch sử giao dịch của clb
                                         </a>
                                     </li>
                                 </ol>
@@ -179,7 +183,7 @@
                             </div>
                             <div class="card-body">
                                 <div class="quick-actions-grid">
-                                    
+
 
 
                                     <form action="${pageContext.request.contextPath}/department/financial/income" >
@@ -220,7 +224,7 @@
                                         Quản lý
                                     </button>
                                 </form>
-                                
+
                             </div>
                             <div class="card-body">
                                 <div class="member-stats">
@@ -230,11 +234,11 @@
                                     </div>
                                     <div class="member-stat">
                                         <div class="member-stat-value paid">${totalPaidMember}</div>
-                                        <div class="member-stat-label">Đã chan</div>
+                                        <div class="member-stat-label">Đã Thanh Toán</div>
                                     </div>
                                     <div class="member-stat">
                                         <div class="member-stat-value unpaid">${memberPendingIncome}</div>
-                                        <div class="member-stat-label">Chưa chan</div>
+                                        <div class="member-stat-label">Chưa Thanh Toán</div>
                                     </div>
                                 </div>
 

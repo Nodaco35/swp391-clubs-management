@@ -197,10 +197,19 @@ public class NotificationController extends HttpServlet {
         if (receiverUser != null) {
             if (receiverUser.getUserID() == senderID) {
                 String error = "Không thể tự gửi mail cho bản thân";
+                
                 myNotification(request, response);
             }
-            NotificationDAO.sentToPerson(senderID, receiverUser.getUserID(), title, content);
-            sendNotifications(request, response);
+            boolean check = NotificationDAO.sentToPerson2(senderID, receiverUser.getUserID(), title, content);
+            
+            if (check) {
+                request.setAttribute("success", "Gửi tin nhắn thành công");
+                sendNotifications(request, response);
+            }else{
+                request.setAttribute("error", "Gửi tin nhắn thất bại");
+                myNotification(request, response);
+            }
+            
         } else {
             String error = "Không tìm thấy người nhận";
             request.setAttribute("error", error);

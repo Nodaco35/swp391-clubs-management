@@ -100,7 +100,27 @@ public class UserClubDAO {
         }
         return findByUserID;
     }
-
+     public static List<UserClub> findByClubIDAndIsActive(int clubID) {
+        List<UserClub> findByClubID = new ArrayList<>();
+        String sql = """
+                     Select *
+                     from Userclubs uc
+                     join Clubs c on uc.ClubID = c.ClubID
+                     where c.ClubID = ? and uc.Isactive = 1""";
+        try {
+            PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+            ps.setObject(1, clubID);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                UserClub uc = new UserClub();
+                uc.setUserID(rs.getString("UserID"));
+                findByClubID.add(uc);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return findByClubID;
+    }
     public static List<UserClub> findByClubID(int clubID) {
         List<UserClub> findByClubID = new ArrayList<>();
         String sql = """
