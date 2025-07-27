@@ -79,17 +79,17 @@
                                             <small class="text-muted">Xem nhiệm vụ được giao cho ban và lộ trình thực hiện</small>
                                         </div>
                                         <div class="col-md-6 text-end">
-                                            <div class="btn-group" role="group">
-                                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="filterTimeline('all')">
-                                                    <i class="fas fa-list"></i> Tất cả
-                                                </button>
-                                                <button type="button" class="btn btn-outline-success btn-sm" onclick="filterTimeline('confirmed')">
-                                                    <i class="fas fa-check-circle"></i> Đã xác nhận
-                                                </button>
-                                                <button type="button" class="btn btn-outline-warning btn-sm" onclick="filterTimeline('planning')">
-                                                    <i class="fas fa-clock"></i> Đang lên kế hoạch
-                                                </button>
-                                            </div>
+<%--                                            <div class="btn-group" role="group">--%>
+<%--                                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="filterTimeline('all')">--%>
+<%--                                                    <i class="fas fa-list"></i> Tất cả--%>
+<%--                                                </button>--%>
+<%--                                                <button type="button" class="btn btn-outline-success btn-sm" onclick="filterTimeline('confirmed')">--%>
+<%--                                                    <i class="fas fa-check-circle"></i> Đã xác nhận--%>
+<%--                                                </button>--%>
+<%--                                                <button type="button" class="btn btn-outline-warning btn-sm" onclick="filterTimeline('planning')">--%>
+<%--                                                    <i class="fas fa-clock"></i> Đang lên kế hoạch--%>
+<%--                                                </button>--%>
+<%--                                            </div>--%>
                                         </div>
                                     </div>
                                 </div>
@@ -158,19 +158,19 @@
                                                                 </c:if>
                                                             </div>
                                                             <div class="text-end">
-                                                                <div class="dropdown">
-                                                                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                                                        <i class="fas fa-ellipsis-v"></i>
-                                                                    </button>
-                                                                    <ul class="dropdown-menu">
-                                                                        <li><a class="dropdown-item" href="#" onclick="viewTaskDetailModal(${task.taskID}, '${task.title}', '${task.description}', '${task.status}')"><i class="fas fa-eye"></i> Xem chi tiết</a></li>
-                                                                        <li><a class="dropdown-item" href="#" onclick="openDiscussion(${task.taskID})"><i class="fas fa-comments"></i> Thảo luận</a></li>
-                                                                        <c:if test="${task.status != 'Done'}">
-                                                                            <li><hr class="dropdown-divider"></li>
-                                                                        <li><a class="dropdown-item" href="#" onclick="updateProgressModal(${task.taskID}, '${task.status}')"><i class="fas fa-edit"></i> Cập nhật trạng thái</a></li>
-                                                                        </c:if>
-                                                                    </ul>
-                                                                </div>
+<%--                                                                <div class="dropdown">--%>
+<%--                                                                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">--%>
+<%--                                                                        <i class="fas fa-ellipsis-v"></i>--%>
+<%--                                                                    </button>--%>
+<%--                                                                    <ul class="dropdown-menu">--%>
+<%--                                                                        <li><a class="dropdown-item" href="#" onclick="viewTaskDetailModal(${task.taskID}, '${task.title}', '${task.description}', '${task.status}')"><i class="fas fa-eye"></i> Xem chi tiết</a></li>--%>
+<%--                                                                        <li><a class="dropdown-item" href="#" onclick="openDiscussion(${task.taskID})"><i class="fas fa-comments"></i> Thảo luận</a></li>--%>
+<%--                                                                        <c:if test="${task.status != 'Done'}">--%>
+<%--                                                                            <li><hr class="dropdown-divider"></li>--%>
+<%--                                                                        <li><a class="dropdown-item" href="#" onclick="updateProgressModal(${task.taskID}, '${task.status}')"><i class="fas fa-edit"></i> Cập nhật trạng thái</a></li>--%>
+<%--                                                                        </c:if>--%>
+<%--                                                                    </ul>--%>
+<%--                                                                </div>--%>
                                                             </div>
                                                         </div>
                                                     </div>

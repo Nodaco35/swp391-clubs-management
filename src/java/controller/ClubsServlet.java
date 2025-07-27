@@ -17,6 +17,8 @@ import models.UserClub;
 import models.ClubCategory;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import models.Events;
 
@@ -194,7 +196,7 @@ public class ClubsServlet extends HttpServlet {
         try {
             clubID = Integer.parseInt(request.getParameter("id"));
         } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid club ID");
+            response.sendRedirect(request.getContextPath() + "/clubs?error=access_denied&message=" + URLEncoder.encode("ID CLB không hợp lệ.", StandardCharsets.UTF_8.name()));
             return;
         }
 

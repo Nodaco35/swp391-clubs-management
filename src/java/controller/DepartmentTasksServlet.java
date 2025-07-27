@@ -90,7 +90,7 @@ public class DepartmentTasksServlet extends HttpServlet {
             if(taskID!= - 1){
                 ah.rejectTask(taskID, reason);
             }
-            String url = "/department-tasks?clubID="+clubID_raw;
+            String url = "/clubs/department-tasks?clubID="+clubID_raw;
             response.sendRedirect(url);
             return;
         }
@@ -106,7 +106,7 @@ public class DepartmentTasksServlet extends HttpServlet {
             if(taskID!= - 1){
                 ah.approveTask(taskID, rating);
             }
-            String url = "/department-tasks?clubID="+clubID_raw;
+            String url = "/clubs/department-tasks?clubID="+clubID_raw;
             response.sendRedirect(url);
             return;
         }
@@ -250,8 +250,8 @@ public class DepartmentTasksServlet extends HttpServlet {
             // Get club events for modal
             List<Events> clubEvents = eventsDAO.getEventsByClubId(clubID);
             System.out.println("DEBUG: Found " + clubEvents.size() + " club events for clubID: " + clubID);
-            
-            // Set attributes for JSP
+
+
             request.setAttribute("assignedTasks", assignedTasks);
             request.setAttribute("clubDepartments", clubDepartments);
             request.setAttribute("departmentMembers", departmentMembers);
@@ -259,9 +259,7 @@ public class DepartmentTasksServlet extends HttpServlet {
             request.setAttribute("currentUser", currentUser);
             request.setAttribute("clubID", clubID);
             
-            // For sidebar navigation
-            request.setAttribute("isHauCan", false); // Can set based on user's department
-            request.setAttribute("isAccess", false); // Can set based on user's department
+
             
             request.getRequestDispatcher("/view/student/department-leader/tasks.jsp").forward(request, response);
             
