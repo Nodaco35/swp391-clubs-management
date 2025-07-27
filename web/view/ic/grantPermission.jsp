@@ -290,7 +290,7 @@
                                                     <button type="button"
                                                             class="btn btn-danger btn-sm"
                                                             onclick="showUpdateRejectModal('${request.clubID}', '${request.chairmanID}')">
-                                                        <i class="fas fa-times"></i> Từ chối ${request.clubID} - ${request.chairmanID}
+                                                        <i class="fas fa-times"></i> Từ chối
                                                     </button>
                                                 </td>
                                             </tr>

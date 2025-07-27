@@ -1160,22 +1160,27 @@ public class FinancialDAO {
                       ?,
                       ?);""";
         try {
+            DepartmentDashboardDAO dao = new DepartmentDashboardDAO();
+            int membercount = dao.getClubMemberCount(income.getClubID());
             Connection conn = DBContext.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql2);
             ps.setObject(1, income.getClubID());
             ps.setObject(2, income.getTermID());
             ps.setObject(3, income.getSource());
-            ps.setObject(4, income.getAmount());
+            ps.setObject(4, income.getAmount().divide(
+                    BigDecimal.valueOf(membercount)));
             ps.setObject(5, income.getDescription());
             ps.setObject(6, income.getStatus());
             int row = ps.executeUpdate();
             if (income.getStatus().equals("Đã nhận") && row > 0) {
+
                 int in = FinancialDAO.findByIncomeIDNew(income.getClubID());
                 PreparedStatement ps2 = DBContext.getConnection().prepareStatement(sql3);
                 ps2.setObject(1, income.getClubID());
                 ps2.setObject(2, income.getTermID());
                 ps2.setObject(3, "income");
-                ps2.setObject(4, income.getAmount());
+                ps2.setObject(4, income.getAmount().divide(
+                        BigDecimal.valueOf(membercount)));
                 ps2.setObject(5, income.getDescription());
                 ps2.setObject(6, userID);
                 ps2.setObject(7, "Approved");
@@ -1189,8 +1194,7 @@ public class FinancialDAO {
                 List<UserClub> list = UserClubDAO.findByClubIDAndIsActive(income.getClubID());
 
                 int row2 = 0;
-                DepartmentDashboardDAO dao = new DepartmentDashboardDAO();
-                int membercount = dao.getClubMemberCount(income.getClubID());
+                
 
                 for (UserClub uc : list) {
                     ps2.setObject(1, in);

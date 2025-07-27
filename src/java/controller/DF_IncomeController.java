@@ -118,6 +118,7 @@ public class DF_IncomeController extends HttpServlet {
                     doGet(request, response);
                     return;
                 }
+
                 String formattedStartedTime = "";
                 // Validate amount for "Phí thành viên"
                 if (source.equals("Phí thành viên")) {

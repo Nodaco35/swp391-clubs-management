@@ -162,6 +162,8 @@ public class ICServlet extends HttpServlet {
                     approvalHistoryDAO.insertApprovalRecord(requestClubId, "Approved", "Đã duyệt sửa Câu lạc bộ", "Update");
                 }
                 request.setAttribute(success ? "successMessage" : "errorMessage", message);
+                response.sendRedirect("ic?action=grantPermission");
+                return;
             } else if (action.equals("rejectUpdatePermissionRequest")) {
                 String reason = request.getParameter("reason");        // Lý do từ chối
                 int clubID = Integer.parseInt(request.getParameter("id")); 
@@ -183,6 +185,7 @@ public class ICServlet extends HttpServlet {
                 }
                 request.setAttribute(success ? "rejectedMessage" : "errorMessage", rejectedMessage);
                  response.sendRedirect("ic?action=grantPermission");
+                 return;
             } 
 
         } else if ("viewClubRequest".equals(action)) {

@@ -111,7 +111,7 @@
                                             </a>
 
                                             <button class="btn btn-danger" onclick="showRejectModal('${club.clubID}', '${club.chairmanID}')">
-                                                <i class="fas fa-times"></i> Từ chối đơn ${club.clubID} - ${club.chairmanID}
+                                                <i class="fas fa-times"></i> Từ chối đơn
                                             </button>
                                         </div>
                                     </c:if>
