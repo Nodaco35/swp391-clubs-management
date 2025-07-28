@@ -10,7 +10,7 @@ services:
       - my-network
 
   app:
-    image: club-services:0.0.1
+    image: duclinh0203/club-services:0.6.2
     environment:
       - DBMS_CONNECTION=jdbc:mysql://mysql:3306/ClubManagementSystem?zeroDateTimeBehavior=CONVERT_TO_NULL
       - DB_USER=root

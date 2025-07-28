@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/swp391-clubs-management.iml" filepath="$PROJECT_DIR$/swp391-clubs-management.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../../deploy/V1/swp391-clubs-management/swp391-clubs-management2.iml" filepath="$PROJECT_DIR$/../../../deploy/V1/swp391-clubs-management/swp391-clubs-management2.iml" />
     </modules>
   </component>
 </project>
