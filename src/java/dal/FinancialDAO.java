@@ -919,19 +919,19 @@ public class FinancialDAO {
 
     public static boolean updateMemberInvoices(MemberIncomeContributions invoice, Transaction trans) {
         String sql1 = """
-                      UPDATE `clubmanagementsystem`.`memberincomecontributions`
+                      UPDATE memberincomecontributions
                       SET
                       
-                      `ContributionStatus` = ?,
-                      `PaidDate` = ?
+                      ContributionStatus = ?,
+                      PaidDate = ?
                       
-                      WHERE `ContributionID` = ?;""";
+                      WHERE ContributionID = ?;""";
         String sql2 = """
-                      UPDATE `clubmanagementsystem`.`transactions`
+                      UPDATE transactions
                       SET
-                      `TransactionDate` = ?,
-                      `Status` = ?
-                      WHERE `TransactionID` = ?;""";
+                      TransactionDate = ?,
+                      Status = ?
+                      WHERE TransactionID = ?;""";
         try {
             PreparedStatement ps1 = DBContext.getConnection().prepareStatement(sql1);
             PreparedStatement ps2 = DBContext.getConnection().prepareStatement(sql2);
@@ -1040,24 +1040,24 @@ public class FinancialDAO {
 
     public static boolean updateIncomeStatus(int incomeID, String userID) {
         String sql1 = """
-                      UPDATE `clubmanagementsystem`.`income`
+                      UPDATE income
                       SET
                       
-                      `Status` = "Đã nhận"
-                      WHERE `IncomeID` = ?;""";
+                      Status = "Đã nhận"
+                      WHERE IncomeID = ?;""";
         Income income = FinancialDAO.findByIncomeID(incomeID);
         String sql2 = """
-                      INSERT INTO `clubmanagementsystem`.`transactions`
+                      INSERT INTO transactions
                       (
-                      `ClubID`,
-                      `TermID`,
-                      `Type`,
-                      `Amount`,
-                      `TransactionDate`,
-                      `Description`,
-                      `CreatedBy`,
-                      `Status`,
-                      `ReferenceID`)
+                      ClubID,
+                      TermID,
+                      Type,
+                      Amount,
+                      TransactionDate,
+                      Description,
+                      CreatedBy,
+                      Status,
+                      ReferenceID)
                       VALUES
                       (
                       ?,
@@ -1099,14 +1099,14 @@ public class FinancialDAO {
     public static boolean insertIncome(Income income, String formattedStartedTime, String userID) {
 
         String sql2 = """
-                      INSERT INTO `clubmanagementsystem`.`income`
+                      INSERT INTO income
                                             (
-                                            `ClubID`,
-                                            `TermID`,
-                                            `Source`,
-                                            `Amount`,
-                                            `IncomeDate`,
-                                            `Description`, 
+                                            ClubID,
+                                            TermID,
+                                            Source,
+                                            Amount,
+                                            IncomeDate,
+                                            Description, 
                                             status)
                                             VALUES
                                             (
@@ -1119,16 +1119,16 @@ public class FinancialDAO {
                                             ?)""";
 
         String sql3 = """
-                      INSERT INTO `clubmanagementsystem`.`transactions`
+                      INSERT INTO transactions
                       (
-                      `ClubID`,
-                      `TermID`,
-                      `Type`,
-                      `Amount`, 
-                      `Description`,
-                      `CreatedBy`,
-                      `Status`,
-                      `ReferenceID`,
+                      ClubID,
+                      TermID,
+                      Type,
+                      Amount, 
+                      Description,
+                      CreatedBy,
+                      Status ,
+                      ReferenceID,
                       TransactionDate
                       )
                       VALUES
@@ -1143,14 +1143,14 @@ public class FinancialDAO {
                       ?,
                       current_timestamp);""";
         String sql4 = """
-                      INSERT INTO `clubmanagementsystem`.`memberincomecontributions`
+                      INSERT INTO memberincomecontributions
                       (
-                      `IncomeID`,
-                      `UserID`,
-                      `ClubID`,
-                      `TermID`,
-                      `Amount`,
-                      `DueDate`)
+                      IncomeID,
+                      UserID,
+                      ClubID,
+                      TermID,
+                      Amount,
+                      DueDate)
                       VALUES
                       (
                       ?,

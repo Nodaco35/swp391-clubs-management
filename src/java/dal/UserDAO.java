@@ -130,7 +130,7 @@ public class UserDAO {
     public static void insertByAdmin(String fullName, String email, String password, String dateOfBirth, int permissionID, String status) {
         
         String sql = """
-                     INSERT INTO `clubmanagementsystem`.`users`
+                     INSERT INTO users
                      (`UserID`,
                      `FullName`,
                      `Email`,
@@ -186,7 +186,7 @@ public class UserDAO {
 
     public static boolean updateAccountByAdmin(String userID, String new_name, String new_email, String new_password, String new_dob, int new_permissionID, int status) {
         String sql = """
-                     UPDATE `clubmanagementsystem`.`users`
+                     UPDATE Users
                      SET
                      
                      `FullName` = ?,
@@ -218,7 +218,8 @@ public class UserDAO {
 
     public static void changeActiveAccountByAdmin(String userID) {
         String sql = """
-                     UPDATE `clubmanagementsystem`.`users`
+                     UPDATE users
+                     
                      SET
                      
                      `Status` = 0
@@ -378,7 +379,7 @@ public class UserDAO {
     }
 
     public static boolean update(String newName, String avatarPath, String dob, String id) {
-        String sql = "UPDATE `clubmanagementsystem`.`users`\n"
+        String sql = "UPDATE users \n"
                 + "SET\n"
                 + "  `FullName` = ?,\n"
                 + "  `AvatarSrc` = ? , `DateOfBirth` = ?\n"

@@ -13,7 +13,7 @@ public class DBContext {
     public static Connection getConnection() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver"); // chú ý driver mới của MySQL
-            String url = "jdbc:mysql://localhost:3306/ClubManagementSystem?zeroDateTimeBehavior=CONVERT_TO_NULL";
+            String url = "jdbc:mysql://127.0.0.1:3306/ClubManagementSystem?zeroDateTimeBehavior=CONVERT_TO_NULL";
             String user = "root";
             String password = "root";            return DriverManager.getConnection(url, user, password);
         } catch (Exception e) {

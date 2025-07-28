@@ -435,7 +435,7 @@ public class ClubDAO {
             conn = DBContext.getConnection();
             String query = "SELECT COUNT(*) FROM ClubDepartments cd "
                     + "JOIN Departments d ON cd.DepartmentID = d.DepartmentID "
-                    + "WHERE d.`DepartmentStatus` = 1";
+                    + "WHERE d.DepartmentStatus = 1";
             stmt = conn.prepareStatement(query);
             rs = stmt.executeQuery();
 
@@ -991,7 +991,7 @@ public class ClubDAO {
 
         try {
             conn = DBContext.getConnection();
-            String query = "SELECT DepartmentID, DepartmentName FROM Departments WHERE `DepartmentStatus` = 1";
+            String query = "SELECT DepartmentID, DepartmentName FROM Departments WHERE DepartmentStatus = 1";
             stmt = conn.prepareStatement(query);
             rs = stmt.executeQuery();
 

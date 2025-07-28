@@ -91,13 +91,13 @@ public class ClubMeetingDAO {
 
     public static void update(int clubID, String startedTime, String URLMeeting, int clubMeetingID) {
         String sql = """
-                     UPDATE `clubmanagementsystem`.`clubmeeting`
+                     UPDATE clubmeeting
                      SET
                      
-                     `ClubID` = ?,
-                     `URLMeeting` = ?,
-                     `StartedTime` = ?
-                     WHERE `ClubMeetingID` = ?;""";
+                     ClubID = ?,
+                     URLMeeting = ?,
+                     StartedTime = ?
+                     WHERE ClubMeetingID = ?;""";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ps.setObject(1, clubID);
@@ -113,7 +113,7 @@ public class ClubMeetingDAO {
 
     public static void delete(int clubMeetingID) {
         String sql = """
-                     DELETE FROM `clubmanagementsystem`.`clubmeeting`
+                     DELETE FROM clubmeeting
                      WHERE ClubMeetingID = ?;""";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
@@ -194,7 +194,7 @@ public class ClubMeetingDAO {
         String sql = """
                      SELECT cmp.ClubMeetingID,
                                              cmp.ClubDepartmentID, cd.DepartmentID, d.DepartmentName
-                                          FROM `clubmanagementsystem`.`clubmeetingparticipants` cmp
+                                          FROM clubmanagementsystem.clubmeetingparticipants cmp
                                           join clubdepartments cd on cmp.ClubDepartmentID = cd.ClubDepartmentID
                                           join departments d on cd.DepartmentID = d.DepartmentID
                                           where cmp.ClubMeetingID =  ?""";
@@ -260,9 +260,9 @@ public class ClubMeetingDAO {
 
     public static void insertParticipants(int clubMeetingId, int parseInt) {
         String sql = """
-                     INSERT INTO `clubmanagementsystem`.`clubmeetingparticipants`
-                     (`ClubMeetingID`,
-                     `ClubDepartmentID`)
+                     INSERT INTO clubmanagementsystem.clubmeetingparticipants
+                     (ClubMeetingID,
+                     ClubDepartmentID)
                      VALUES
                      (?,
                      ?);""";
@@ -279,23 +279,23 @@ public class ClubMeetingDAO {
 
     public static boolean updateMeeting(ClubMeeting meeting, List<String> participants) {
         String sqlUpdatemeeting = """
-                                  UPDATE `clubmanagementsystem`.`clubmeeting`
+                                  UPDATE clubmeeting
                                   SET
                                   
                                   
-                                  `MeetingTitle` =?,
+                                  MeetingTitle =?,
                                   
-                                  `URLMeeting` = ?,
-                                  `StartedTime` = ?,
-                                  `Document` = ?
-                                  WHERE `ClubMeetingID` = ?;""";
+                                  URLMeeting = ?,
+                                  StartedTime = ?,
+                                  Document = ?
+                                  WHERE ClubMeetingID = ?;""";
         String sqlDlOldPar = """
-                             DELETE FROM `clubmanagementsystem`.`clubmeetingparticipants`
+                             DELETE FROM clubmanagementsystem.clubmeetingparticipants
                              WHERE ClubMeetingID=?;""";
         String sqlNewPar = """
-                           INSERT INTO `clubmanagementsystem`.`clubmeetingparticipants`
-                                                (`ClubMeetingID`,
-                                                `ClubDepartmentID`)
+                           INSERT INTO clubmanagementsystem.clubmeetingparticipants
+                                                (ClubMeetingID,
+                                                ClubDepartmentID)
                                                 VALUES
                                                 (?,
                                                 ?);""";
@@ -332,10 +332,10 @@ public class ClubMeetingDAO {
 
     public static boolean deleteMeeting(int meetingId) {
         String sql1 = """
-                      DELETE FROM `clubmanagementsystem`.`clubmeeting`
+                      DELETE FROM clubmeeting
                       WHERE ClubMeetingID = ?;""";
         String sql2 = """
-                      DELETE FROM `clubmanagementsystem`.`clubmeetingparticipants`
+                      DELETE FROM clubmanagementsystem.clubmeetingparticipants
                       WHERE ClubMeetingID = ?;""";
 
         try {

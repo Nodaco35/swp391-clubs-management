@@ -49,7 +49,7 @@ public class NotificationDAO {
     public static void delete(int id) {
 
         String sql = """
-                     DELETE FROM `clubmanagementsystem`.`notifications`
+                     DELETE FROM notifications
                      WHERE NotificationID = ?;""";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
@@ -141,12 +141,12 @@ public class NotificationDAO {
     public static boolean sentToPerson2(String senderID, String receiverID, String title, String content) {
 
         String sql = """
-                     INSERT INTO `clubmanagementsystem`.`notifications`
+                     INSERT INTO notifications
                      (
-                     `Title`,
-                     `Content`,
-                     `ReceiverID`,
-                     `SenderID`)
+                     Title,
+                     Content,
+                     ReceiverID,
+                     SenderID)
                      VALUES
                      (
                      ?,
@@ -170,12 +170,12 @@ public class NotificationDAO {
     public static void sentToPerson(String senderID, String receiverID, String title, String content) {
 
         String sql = """
-                     INSERT INTO `clubmanagementsystem`.`notifications`
+                     INSERT INTO notifications
                      (
-                     `Title`,
-                     `Content`,
-                     `ReceiverID`,
-                     `SenderID`)
+                     Title,
+                     Content,
+                     ReceiverID,
+                     SenderID)
                      VALUES
                      (
                      ?,
@@ -277,21 +277,21 @@ public class NotificationDAO {
     public static List<Notification> search(String userID, String keywords) {
         List<Notification> search = new ArrayList<>();
         String sql = """
-                     SELECT `notifications`.`NotificationID`,
-                            `notifications`.`Title`,
-                            `notifications`.`Content`,
-                            `notifications`.`CreatedDate`,
-                            `notifications`.`ReceiverID`,
-                            `notifications`.`SenderID`,
-                            `notifications`.`Priority`,
-                            `notifications`.`Status`
-                     FROM `clubmanagementsystem`.`notifications`
-                     WHERE `ReceiverID` = ?
+                     SELECT NotificationID,
+                            Title,
+                            Content,
+                           CreatedDate,
+                            ReceiverID,
+                            SenderID,
+                            Priority,
+                           Status
+                     FROM notifications
+                     WHERE ReceiverID = ?
                        AND (
-                            `Title` LIKE CONCAT('%', ?, '%') OR
-                            `Content` LIKE CONCAT('%', ?, '%')
+                            Title LIKE CONCAT('%', ?, '%') OR
+                            Content LIKE CONCAT('%', ?, '%')
                        )
-                     ORDER BY `CreatedDate` DESC""";
+                     ORDER BY CreatedDate DESC""";
 
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
