@@ -21,7 +21,7 @@ public class FinancialDAO {
         BigDecimal getTotalAmount = BigDecimal.ZERO;
         String sql = """
                      SELECT SUM(amount) AS total
-                                          FROM transactions
+                                          
                                           WHERE ClubID = ? AND TermID = ? and status = 'Approved' and type = 'income'""";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
@@ -67,7 +67,7 @@ public class FinancialDAO {
         BigDecimal getTotalAmount = BigDecimal.ZERO;
         String sql = """
                      SELECT SUM(amount) AS total
-                                          FROM transactions
+                                          FROM Transactions
                                           WHERE ClubID = ? AND TermID = ? and status = 'Approved' and type = 'expense'""";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
@@ -148,9 +148,11 @@ public class FinancialDAO {
     public static List<MemberIncomeContributions> getPreviewIncomeMemberSrc(int clubID, String termID) {
         List<MemberIncomeContributions> getPreviewIncomeMemberSrc = new ArrayList<>();
         String sql = """
-                     SELECT mic.*, u.FullName, u.Email, u.AvatarSrc FROM memberincomecontributions mic
+                     SELECT mic.*, u.FullName, u.Email, u.AvatarSrc FROM 
+                                                                        
+                                                                        MemberIncomeContributions mic
                      
-                     join users u on mic.UserID = u.UserID 
+                     join Users u on mic.UserID = u.UserID 
                      Where mic.ClubID = ? and mic.TermID = ?
                      limit 2
                      ;""";
@@ -185,8 +187,8 @@ public class FinancialDAO {
     public static List<Transaction> getRecentTransactions(int clubID, String termID) {
         List<Transaction> getRecentTransactions = new ArrayList<>();
         String sql = """
-                    SELECT t.*, u.FullName FROM transactions t
-                                     join users u on t.CreatedBy = u.UserID
+                    SELECT t.*, u.FullName FROM Transactions t
+                                     join Users u on t.CreatedBy = u.UserID
                                           where t.Status = 'Approved' and ClubID = ? and  TermID = ? 
                                           order by CreatedAt desc 
                      limit 8;""";
@@ -223,7 +225,7 @@ public class FinancialDAO {
         int incomeIDfirst = 0;
         String sql = """
                      SELECT *
-                     FROM income
+                     FROM Income
                      WHERE ClubID = ? AND TermID = ? and Source = 'Phí thành viên' and status = 'Đang chờ'
                      limit 1""";
         try {
@@ -244,8 +246,8 @@ public class FinancialDAO {
         List<MemberIncomeContributions> list = new ArrayList<>();
         String sql = """
                      SELECT mic.*, u.FullName, u.Email, u.AvatarSrc 
-                     FROM memberincomecontributions mic
-                     JOIN users u ON mic.UserID = u.UserID
+                     FROM MemberIncomeContributions mic
+                     join Users u ON mic.UserID = u.UserID
                      WHERE mic.IncomeID = ? AND u.Status = 1""";
         if (keyword != null && !keyword.trim().isEmpty()) {
             sql += " AND (u.FullName LIKE ? OR u.Email LIKE ?)";
@@ -295,8 +297,8 @@ public class FinancialDAO {
         int totalRecords = 0;
         String sql = """
                      SELECT COUNT(*) AS total 
-                     FROM memberincomecontributions mic
-                     JOIN users u ON mic.UserID = u.UserID
+                     FROM MemberIncomeContributions mic
+                     join Users u ON mic.UserID = u.UserID
                      WHERE mic.IncomeID = ? AND u.Status = 1""";
         if (keyword != null && !keyword.trim().isEmpty()) {
             sql += " AND (u.FullName LIKE ? OR u.Email LIKE ?)";
@@ -331,7 +333,7 @@ public class FinancialDAO {
     public static List<Income> getIncomeMemberPendings(int clubID, String termID) {
         String sql = """
                      SELECT *
-                                          FROM income
+                                          FROM Income
                                           WHERE ClubID = ? AND TermID = ? and Source = 'Phí thành viên' and status = 'Đang chờ'
                                           """;
         List<Income> getIncomeMemberPendings = new ArrayList<>();
@@ -353,7 +355,7 @@ public class FinancialDAO {
 
     public static boolean markContributionPaid(int contributionID) {
         String sql = """
-                     UPDATE memberincomecontributions 
+                     UPDATE MemberIncomeContributions 
                      SET ContributionStatus = 'Paid', PaidDate = CURRENT_TIMESTAMP 
                      WHERE ContributionID = ? AND ContributionStatus = 'Pending'""";
 
@@ -401,8 +403,8 @@ public class FinancialDAO {
     public static boolean remindAllPending(int incomeID) {
         String sql = """
                      SELECT u.Email 
-                     FROM memberincomecontributions mic
-                     JOIN users u ON mic.UserID = u.UserID
+                     FROM MemberIncomeContributions mic
+                     join Users u ON mic.UserID = u.UserID
                      WHERE mic.IncomeID = ? AND mic.ContributionStatus = 'Pending' AND u.Status = 1""";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
@@ -425,7 +427,7 @@ public class FinancialDAO {
 
     public static boolean completeIncome(int incomeID, String termID, int clubID, Income income, String userID) {
         String sql = """
-                     UPDATE income 
+                     UPDATE Income 
                      SET status = 'Đã nhận' 
                      WHERE IncomeID = ? AND status = 'Đang chờ'""";
 
@@ -448,7 +450,7 @@ public class FinancialDAO {
     public static boolean areAllContributionsPaid(int incomeID) {
         String sql = """
                      SELECT COUNT(*) AS pendingCount 
-                     FROM memberincomecontributions 
+                     FROM MemberIncomeContributions 
                      WHERE IncomeID = ? AND ContributionStatus = 'Pending'""";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
@@ -467,7 +469,7 @@ public class FinancialDAO {
     public static boolean hasPendingContributions(int incomeID) {
         String sql = """
                      SELECT COUNT(*) AS pendingCount 
-                     FROM memberincomecontributions 
+                     FROM MemberIncomeContributions 
                      WHERE IncomeID = ? AND ContributionStatus = 'Pending'""";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
@@ -487,7 +489,7 @@ public class FinancialDAO {
         String sql = """
                      SELECT *
                                           FROM MemberIncomeContributions mic
-                                          Join users  u on mic.UserID = u.UserID
+                                          join Users  u on mic.UserID = u.UserID
                                           WHERE 
                                           mic.ContributionStatus = 'Pending' and mic.incomeID = ?""";
         List<MemberIncomeContributions> l = new ArrayList<>();
@@ -551,9 +553,9 @@ public class FinancialDAO {
         String sql = """
                      SELECT mic.*, u.FullName, u.Email, u.AvatarSrc, c.ClubName , i.Source, i.Description
                                      FROM MemberIncomeContributions mic 
-                                     JOIN Users u ON mic.UserID = u.UserID 
+                                     join Users u ON mic.UserID = u.UserID 
                                      JOIN Clubs c ON mic.ClubID = c.ClubID 
-                                     Join income i on mic.IncomeID = i.IncomeID
+                                     Join Income i on mic.IncomeID = i.IncomeID
                                      WHERE mic.UserID = ?""";
         if (status != null && !status.isEmpty()) {
             sql += " AND mic.ContributionStatus = ?";
@@ -668,9 +670,9 @@ public class FinancialDAO {
         String sql = """
                      SELECT mic.*, u.FullName, u.Email, u.AvatarSrc, c.ClubName , i.Source, i.Description
                                                           FROM MemberIncomeContributions mic 
-                                                          JOIN Users u ON mic.UserID = u.UserID 
+                                                          join Users u ON mic.UserID = u.UserID 
                                                           JOIN Clubs c ON mic.ClubID = c.ClubID 
-                                                          Join income i on mic.IncomeID = i.IncomeID
+                                                          Join Income i on mic.IncomeID = i.IncomeID
                                                           WHERE mic.contributionID = ?""";
 
         try {
@@ -734,7 +736,7 @@ public class FinancialDAO {
 
     public static Transaction getTransactionByID(String type, String userID, int referenceID) {
         String sql = """
-                     SELECT * FROM clubmanagementsystem.transactions
+                     SELECT * FROM Transactions
                      where type = ? and createdBy = ? and referenceID = ?
                      order by TransactionID desc
                      limit 1""";
@@ -771,7 +773,7 @@ public class FinancialDAO {
         int offset = (page - 1) * 10;
 
         StringBuilder sql = new StringBuilder("""
-            SELECT * FROM clubmanagementsystem.transactions
+            SELECT * FROM Transactions
             WHERE createdBy = ?
         """);
 
@@ -832,7 +834,7 @@ public class FinancialDAO {
 
     public static int getTotalTransactionCount(String userID, String transResult, String termID, String clubID) {
         int totalRecords = 0;
-        StringBuilder countSql = new StringBuilder("SELECT COUNT(*) as total FROM clubmanagementsystem.transactions WHERE createdBy = ?");
+        StringBuilder countSql = new StringBuilder("SELECT COUNT(*) as total FROM Transactions WHERE createdBy = ?");
 
         if (transResult != null && !transResult.isEmpty()) {
             countSql.append(" AND Status = ?");
@@ -873,7 +875,7 @@ public class FinancialDAO {
 
     public static List<Term> getAllTerms() {
         List<Term> terms = new ArrayList<>();
-        String sql = "SELECT TermID, TermName FROM clubmanagementsystem.semesters ORDER BY TermName";
+        String sql = "SELECT TermID, TermName FROM Semesters ORDER BY TermName";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
@@ -895,8 +897,8 @@ public class FinancialDAO {
         List<Clubs> clubs = new ArrayList<>();
         String sql = """
                      SELECT DISTINCT c.ClubID, c.ClubName 
-                                 FROM clubmanagementsystem.clubs c
-                                 join userclubs uc on c.ClubID = uc.ClubID
+                                 FROM Clubs c
+                                 join UserClubs uc on c.ClubID = uc.ClubID
                                  WHERE uc.UserID = ?
                                  ORDER BY c.ClubName""";
         try {
@@ -919,7 +921,7 @@ public class FinancialDAO {
 
     public static boolean updateMemberInvoices(MemberIncomeContributions invoice, Transaction trans) {
         String sql1 = """
-                      UPDATE memberincomecontributions
+                      UPDATE MemberIncomeContributions
                       SET
                       
                       ContributionStatus = ?,
@@ -927,7 +929,7 @@ public class FinancialDAO {
                       
                       WHERE ContributionID = ?;""";
         String sql2 = """
-                      UPDATE transactions
+                      UPDATE Transactions
                       SET
                       TransactionDate = ?,
                       Status = ?
@@ -1040,14 +1042,14 @@ public class FinancialDAO {
 
     public static boolean updateIncomeStatus(int incomeID, String userID) {
         String sql1 = """
-                      UPDATE income
+                      UPDATE Income
                       SET
                       
                       Status = "Đã nhận"
                       WHERE IncomeID = ?;""";
         Income income = FinancialDAO.findByIncomeID(incomeID);
         String sql2 = """
-                      INSERT INTO transactions
+                      INSERT INTO Transactions
                       (
                       ClubID,
                       TermID,
@@ -1099,7 +1101,7 @@ public class FinancialDAO {
     public static boolean insertIncome(Income income, String formattedStartedTime, String userID) {
 
         String sql2 = """
-                      INSERT INTO income
+                      INSERT INTO Income
                                             (
                                             ClubID,
                                             TermID,
@@ -1119,7 +1121,7 @@ public class FinancialDAO {
                                             ?)""";
 
         String sql3 = """
-                      INSERT INTO transactions
+                      INSERT INTO Transactions
                       (
                       ClubID,
                       TermID,
@@ -1143,7 +1145,7 @@ public class FinancialDAO {
                       ?,
                       current_timestamp);""";
         String sql4 = """
-                      INSERT INTO memberincomecontributions
+                      INSERT INTO MemberIncomeContributions
                       (
                       IncomeID,
                       UserID,
@@ -1167,8 +1169,7 @@ public class FinancialDAO {
             ps.setObject(1, income.getClubID());
             ps.setObject(2, income.getTermID());
             ps.setObject(3, income.getSource());
-            ps.setObject(4, income.getAmount().divide(
-                    BigDecimal.valueOf(membercount)));
+            ps.setObject(4, income.getAmount());
             ps.setObject(5, income.getDescription());
             ps.setObject(6, income.getStatus());
             int row = ps.executeUpdate();
@@ -1371,7 +1372,7 @@ public class FinancialDAO {
         List<Transaction> transactions = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
             "SELECT t.*, u.FullName AS createdName FROM Transactions t " +
-            "JOIN Users u ON t.CreatedBy = u.UserID WHERE t.ClubID = ? AND t.Status = 'Approved'"
+            "join Users u ON t.CreatedBy = u.UserID WHERE t.ClubID = ? AND t.Status = 'Approved'"
         );
         if (search != null && !search.trim().isEmpty()) {
             sql.append(" AND (t.Description LIKE ? OR u.FullName LIKE ?)");
@@ -1426,7 +1427,7 @@ public class FinancialDAO {
     // Count completed transactions for pagination
     public int countCompletedTransactions(int clubID, String search, String termID, String type) {
         StringBuilder sql = new StringBuilder(
-            "SELECT COUNT(*) FROM Transactions t JOIN Users u ON t.CreatedBy = u.UserID " +
+            "SELECT COUNT(*) FROM Transactions t join Users u ON t.CreatedBy = u.UserID " +
             "WHERE t.ClubID = ? AND t.Status = 'Approved'"
         );
         if (search != null && !search.trim().isEmpty()) {

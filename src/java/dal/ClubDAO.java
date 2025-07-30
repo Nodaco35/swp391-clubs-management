@@ -512,8 +512,8 @@ public class ClubDAO {
                      SELECT c.*, cc.CategoryName, u.UserID, u.FullName, uc.RoleID
                                                                FROM Clubs c 
                                                                LEFT JOIN ClubCategories cc ON c.CategoryID = cc.CategoryID 
-                                                               join userclubs uc on c.ClubID = uc.ClubID
-                                                               join users u on u.UserID = uc.UserID 
+                                                               join Userclubs uc on c.ClubID = uc.ClubID
+                                                               join Users u on u.UserID = uc.UserID 
                                                                WHERE c.ClubStatus = ? AND uc.RoleID = 1 and CurrentRequestType = 'Create'
                                                                ORDER BY c.EstablishedDate DESC;
                      """;
@@ -561,8 +561,8 @@ public class ClubDAO {
                      SELECT c.*, cc.CategoryName, u.UserID, u.FullName, uc.RoleID
                                                                FROM Clubs c 
                                                                LEFT JOIN ClubCategories cc ON c.CategoryID = cc.CategoryID 
-                                                               join userclubs uc on c.ClubID = uc.ClubID
-                                                               join users u on u.UserID = uc.UserID 
+                                                               join Userclubs uc on c.ClubID = uc.ClubID
+                                                               join Users u on u.UserID = uc.UserID 
                                                                WHERE c.ClubStatus = 1 AND uc.RoleID = 1 and CurrentRequestType = 'Update'
                                                                ORDER BY c.EstablishedDate DESC;
                      """;
@@ -606,8 +606,8 @@ public class ClubDAO {
                      SELECT c.*, cc.CategoryName, u.UserID, u.FullName, uc.RoleID
                                                                FROM Clubs c 
                                                                LEFT JOIN ClubCategories cc ON c.CategoryID = cc.CategoryID 
-                                                               join userclubs uc on c.ClubID = uc.ClubID
-                                                               join users u on u.UserID = uc.UserID 
+                                                               join Userclubs uc on c.ClubID = uc.ClubID
+                                                               join Users u on u.UserID = uc.UserID 
                                                                WHERE c.ClubStatus = ? AND uc.RoleID = 1
                                                                ORDER BY c.EstablishedDate DESC;
                      """;
@@ -654,8 +654,8 @@ public class ClubDAO {
                      SELECT c.*, cc.CategoryName, u.UserID, u.FullName, uc.RoleID
                             FROM Clubs c 
                             LEFT JOIN ClubCategories cc ON c.CategoryID = cc.CategoryID 
-                            join userclubs uc on c.ClubID = uc.ClubID
-                            join users u on u.UserID = uc.UserID 
+                            join Userclubs uc on c.ClubID = uc.ClubID
+                            join Users u on u.UserID = uc.UserID 
                             WHERE c.ClubStatus = 1 AND uc.RoleID = 1 and ClubRequestStatus = 'Approved' and CurrentRequestType = 'Create'
                             ORDER BY c.EstablishedDate DESC;
                      """;

@@ -130,15 +130,15 @@ public class UserDAO {
     public static void insertByAdmin(String fullName, String email, String password, String dateOfBirth, int permissionID, String status) {
         
         String sql = """
-                     INSERT INTO users
-                     (`UserID`,
-                     `FullName`,
-                     `Email`,
-                     `Password`,
-                     `AvatarSrc`,
-                     `DateOfBirth`,
-                     `PermissionID`,
-                     `Status`)
+                     INSERT INTO Users
+                     (UserID,
+                     FullName,
+                     Email,
+                     Password,
+                     AvatarSrc,
+                     DateOfBirth,
+                     PermissionID,
+                     Status)
                      VALUES
                      (?,
                      ?,
@@ -189,15 +189,15 @@ public class UserDAO {
                      UPDATE Users
                      SET
                      
-                     `FullName` = ?,
-                     `Email` = ?,
-                     `Password` = ?,
+                     FullName = ?,
+                     Email = ?,
+                     Password = ?,
                      
-                     `DateOfBirth` = ?,
-                     `PermissionID` = ?,
-                     `Status` = ?   
+                     DateOfBirth = ?,
+                     PermissionID = ?,
+                     Status = ?   
                      
-                     WHERE `UserID` = ?;""";
+                     WHERE UserID = ?;""";
         
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
@@ -218,13 +218,13 @@ public class UserDAO {
 
     public static void changeActiveAccountByAdmin(String userID) {
         String sql = """
-                     UPDATE users
+                     UPDATE Users
                      
                      SET
                      
-                     `Status` = 0
+                     Status = 0
                      
-                     WHERE `UserID` = ?;""";
+                     WHERE UserID = ?;""";
         
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
@@ -379,11 +379,11 @@ public class UserDAO {
     }
 
     public static boolean update(String newName, String avatarPath, String dob, String id) {
-        String sql = "UPDATE users \n"
+        String sql = "UPDATE Users \n"
                 + "SET\n"
-                + "  `FullName` = ?,\n"
-                + "  `AvatarSrc` = ? , `DateOfBirth` = ?\n"
-                + "WHERE `UserID` = ?;";
+                + "  FullName = ?,\n"
+                + "  AvatarSrc = ? , DateOfBirth = ?\n"
+                + "WHERE UserID = ?;";
         
 
         try {

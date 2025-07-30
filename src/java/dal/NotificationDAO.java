@@ -49,7 +49,7 @@ public class NotificationDAO {
     public static void delete(int id) {
 
         String sql = """
-                     DELETE FROM notifications
+                     DELETE FROM Notifications
                      WHERE NotificationID = ?;""";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
@@ -110,7 +110,7 @@ public class NotificationDAO {
         List<Notification> findByUserId = new ArrayList<>();
 
         String sql = """
-                     SELECT * FROM clubmanagementsystem.notifications
+                     SELECT * FROM Notifications
                      where ReceiverID = ? and status = ?
                      AND CreatedDate >= NOW() - INTERVAL 30 DAY
                      order by CreatedDate desc;
@@ -141,7 +141,7 @@ public class NotificationDAO {
     public static boolean sentToPerson2(String senderID, String receiverID, String title, String content) {
 
         String sql = """
-                     INSERT INTO notifications
+                     INSERT INTO Notifications
                      (
                      Title,
                      Content,
@@ -170,7 +170,7 @@ public class NotificationDAO {
     public static void sentToPerson(String senderID, String receiverID, String title, String content) {
 
         String sql = """
-                     INSERT INTO notifications
+                     INSERT INTO Notifications
                      (
                      Title,
                      Content,
@@ -195,7 +195,7 @@ public class NotificationDAO {
     }
 
     public static void sentToPerson1(String senderID, String receiverID, String title, String content, String priority) {
-        String sql = "INSERT INTO clubmanagementsystem.notifications (Title, Content, ReceiverID, SenderID, Priority) "
+        String sql = "INSERT INTO Notifications (Title, Content, ReceiverID, SenderID, Priority) "
                 + "VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement ps = DBContext.getConnection().prepareStatement(sql)) {
             ps.setString(1, title);
@@ -213,7 +213,7 @@ public class NotificationDAO {
         List<Notification> findByUserId = new ArrayList<>();
 
         String sql = """
-                     SELECT * FROM clubmanagementsystem.notifications
+                     SELECT * FROM Notifications
                      where ReceiverID = ? and Priority = ?
                      AND CreatedDate >= NOW() - INTERVAL 30 DAY
                      order by CreatedDate desc;
@@ -245,7 +245,7 @@ public class NotificationDAO {
         List<Notification> findByUserId = new ArrayList<>();
 
         String sql = """
-                     SELECT * FROM clubmanagementsystem.notifications
+                     SELECT * FROM Notifications
                      where SenderID = ?
                      AND CreatedDate >= NOW() - INTERVAL 30 DAY
                      order by CreatedDate desc;

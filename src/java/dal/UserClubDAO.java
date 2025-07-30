@@ -28,7 +28,7 @@ public class UserClubDAO {
     public static List<UserClub> findByUserID(String userID) {
         String sql = """
                     SELECT uc.*, r.RoleName, d.DepartmentName , c.ClubImg, c.ClubName
-                                        FROM UserClubs uc
+                                        from UserClubs uc
                                         JOIN Clubs c on uc.ClubID = c.ClubID
                                         JOIN Roles r ON uc.RoleID = r.RoleID
                                         JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
@@ -66,7 +66,7 @@ public class UserClubDAO {
     public static List<UserClub> findMemberClubsByUserID(String userID) {
         String sql = """
                     SELECT uc.*, r.RoleName, d.DepartmentName , c.ClubImg, c.ClubName
-                                        FROM UserClubs uc
+                                        from UserClubs uc
                                         JOIN Clubs c on uc.ClubID = c.ClubID
                                         JOIN Roles r ON uc.RoleID = r.RoleID
                                         JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
@@ -104,7 +104,7 @@ public class UserClubDAO {
         List<UserClub> findByClubID = new ArrayList<>();
         String sql = """
                      Select *
-                     from Userclubs uc
+                     from UserClubs uc
                      join Clubs c on uc.ClubID = c.ClubID
                      where c.ClubID = ? and uc.Isactive = 1""";
         try {
@@ -125,7 +125,7 @@ public class UserClubDAO {
         List<UserClub> findByClubID = new ArrayList<>();
         String sql = """
                      Select *
-                     from Userclubs uc
+                     from UserClubs uc
                      join Clubs c on uc.ClubID = c.ClubID
                      where c.ClubID = ?""";
         try {
@@ -147,7 +147,7 @@ public class UserClubDAO {
         List<UserClub> findByClubID = new ArrayList<>();
         String sql = """
                      Select *
-                     from Userclubs uc
+                     from UserClubs uc
                      join Clubs c on uc.ClubID = c.ClubID
                      where c.ClubID = ? and uc.RoleID = 3""";
         try {
@@ -169,7 +169,7 @@ public class UserClubDAO {
     
 
     public boolean isUserMemberOfClub(int clubID, String userID) {
-        String sql = "SELECT 1 FROM UserClubs WHERE ClubID = ? AND UserID = ? AND IsActive = 1";
+        String sql = "SELECT 1 from UserClubs WHERE ClubID = ? AND UserID = ? AND IsActive = 1";
         try {
             Connection connection = DBContext.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -190,7 +190,7 @@ public class UserClubDAO {
 
         try {
             conn = DBContext.getConnection();
-            String query = "SELECT RoleID FROM UserClubs WHERE UserID = ? AND ClubID = ? AND IsActive = 1";
+            String query = "SELECT RoleID from UserClubs WHERE UserID = ? AND ClubID = ? AND IsActive = 1";
             stmt = conn.prepareStatement(query);
             stmt.setString(1, userID);
             stmt.setInt(2, clubID);
@@ -227,7 +227,7 @@ public class UserClubDAO {
 
         try {
             conn = DBContext.getConnection();
-            String query = "SELECT COUNT(*) FROM UserClubs WHERE UserID = ? AND ClubID = ?";
+            String query = "SELECT COUNT(*) from UserClubs WHERE UserID = ? AND ClubID = ?";
             stmt = conn.prepareStatement(query);
             stmt.setString(1, userID);
             stmt.setInt(2, clubID);
@@ -263,7 +263,7 @@ public class UserClubDAO {
 
         try {
             conn = DBContext.getConnection();
-            String query = "SELECT COUNT(*) FROM UserClubs WHERE ClubID = ? AND RoleID = 1 AND IsActive = 1";
+            String query = "SELECT COUNT(*) from UserClubs WHERE ClubID = ? AND RoleID = 1 AND IsActive = 1";
             stmt = conn.prepareStatement(query);
             stmt.setInt(1, clubID);
             rs = stmt.executeQuery();
@@ -299,7 +299,7 @@ public class UserClubDAO {
         try {
             conn = DBContext.getConnection();
             String query = "SELECT COUNT(*) \n"
-                    + "FROM UserClubs uc\n"
+                    + "from UserClubs uc\n"
                     + "JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID\n"
                     + "WHERE uc.ClubID = ? \n"
                     + "AND cd.DepartmentID = ? \n"
@@ -337,7 +337,7 @@ public class UserClubDAO {
         List<UserClub> userClubs = new ArrayList<>();
         String query = """
         SELECT uc.*, u.FullName, r.RoleName, d.DepartmentName 
-        FROM UserClubs uc
+        from UserClubs uc
         JOIN Users u ON uc.UserID = u.UserID
         JOIN Roles r ON uc.RoleID = r.RoleID
         JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
@@ -399,7 +399,7 @@ public class UserClubDAO {
         List<UserClub> userClubs = new ArrayList<>();
         String query = """
         SELECT uc.*, u.FullName, r.RoleName, d.DepartmentName 
-        FROM UserClubs uc
+        from UserClubs uc
         JOIN Users u ON uc.UserID = u.UserID
         JOIN Roles r ON uc.RoleID = r.RoleID
         JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
@@ -469,7 +469,7 @@ public class UserClubDAO {
             conn = DBContext.getConnection();
             String query = """
                 SELECT COUNT(*) 
-                FROM UserClubs uc
+                from UserClubs uc
                 JOIN Users u ON uc.UserID = u.UserID
                 WHERE uc.ClubID = ? AND uc.IsActive = 1
                 AND (u.FullName LIKE ? OR uc.UserID LIKE ?)
@@ -513,7 +513,7 @@ public class UserClubDAO {
             conn = DBContext.getConnection();
             String query = """
                 SELECT uc.*, u.FullName, r.RoleName, d.DepartmentName 
-                FROM UserClubs uc
+                from UserClubs uc
                 JOIN Users u ON uc.UserID = u.UserID
                 JOIN Roles r ON uc.RoleID = r.RoleID
                 JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
@@ -671,7 +671,7 @@ public class UserClubDAO {
         PreparedStatement stmt = null;
         try {
             conn = DBContext.getConnection();
-            String query = "DELETE FROM UserClubs WHERE UserClubID = ?";
+            String query = "DELETE from UserClubs WHERE UserClubID = ?";
             stmt = conn.prepareStatement(query);
             stmt.setInt(1, userClubID);
             int rows = stmt.executeUpdate();
@@ -785,7 +785,7 @@ public class UserClubDAO {
             conn = DBContext.getConnection();
             String query = """
                 SELECT uc.*, u.FullName, r.RoleName, d.DepartmentName , d.DepartmentID
-                FROM UserClubs uc
+                from UserClubs uc
                 JOIN Users u ON uc.UserID = u.UserID
                 JOIN Roles r ON uc.RoleID = r.RoleID
                 JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
@@ -843,7 +843,7 @@ public class UserClubDAO {
                u.FullName,
                r.RoleName,
                d.DepartmentName
-        FROM UserClubs uc
+        from UserClubs uc
         JOIN Users u ON uc.UserID = u.UserID
         JOIN Roles r ON uc.RoleID = r.RoleID
         JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
@@ -893,7 +893,7 @@ public class UserClubDAO {
             String query = """
                 SELECT uc.UserClubID, uc.UserID, uc.ClubID, uc.ClubDepartmentID, uc.RoleID, 
                        uc.JoinDate, uc.IsActive, u.FullName, r.RoleName, d.DepartmentName
-                FROM UserClubs uc
+                from UserClubs uc
                 JOIN Users u ON uc.UserID = u.UserID
                 JOIN Roles r ON uc.RoleID = r.RoleID
                 JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
@@ -948,7 +948,7 @@ public class UserClubDAO {
             conn = DBContext.getConnection();
             String query = """
                 SELECT COUNT(*) as count
-                FROM UserClubs uc
+                from UserClubs uc
                 WHERE uc.UserID = ? AND uc.RoleID BETWEEN 1 AND 5 AND uc.IsActive = 1
             """;
             stmt = conn.prepareStatement(query);
@@ -997,7 +997,7 @@ public class UserClubDAO {
                 query = """
                     SELECT uc.UserClubID, uc.UserID, uc.ClubID, uc.ClubDepartmentID, uc.RoleID, 
                            uc.JoinDate, uc.IsActive, u.FullName, r.RoleName, d.DepartmentName
-                    FROM UserClubs uc
+                    from UserClubs uc
                     JOIN Users u ON uc.UserID = u.UserID
                     JOIN Roles r ON uc.RoleID = r.RoleID
                     JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
@@ -1089,7 +1089,7 @@ public class UserClubDAO {
     public static List<UserClub> findByCDID(int clubDepartmentID) {
         List<UserClub> findByCDID = new ArrayList<>();
         String sql = """
-                     select * from userclubs uc
+                     select * from UserClubs uc
                      JOIN clubdepartments cd on uc.ClubDepartmentID = cd.ClubDepartmentID
                      Join departments d on cd.DepartmentID = d.DepartmentID
                      where uc.ClubDepartmentID = ?""";
@@ -1111,7 +1111,7 @@ public class UserClubDAO {
     }
     public Users getClubLeader(int clubId) {
     String sql = """
-        SELECT u.* FROM UserClubs uc 
+        SELECT u.* from UserClubs uc 
         JOIN Users u ON uc.UserID = u.UserID 
         WHERE uc.ClubID = ? AND uc.RoleID = 1 AND uc.IsActive = 1
         """;
@@ -1147,7 +1147,7 @@ public UserClub getUserClubByUserIdAndRole(String userID, String roleName) {
         String query = """
             SELECT uc.UserClubID, uc.UserID, uc.ClubID, uc.ClubDepartmentID, uc.RoleID, 
                    uc.JoinDate, uc.IsActive, r.RoleName, d.DepartmentName
-            FROM UserClubs uc
+            from UserClubs uc
             JOIN Roles r ON uc.RoleID = r.RoleID
             JOIN ClubDepartments cd ON uc.ClubDepartmentID = cd.ClubDepartmentID
             JOIN Departments d ON cd.DepartmentID = d.DepartmentID

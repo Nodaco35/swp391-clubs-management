@@ -1,15 +1,14 @@
-
 package dal;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DBContext {
     private static final Logger logger = Logger.getLogger(DBContext.class.getName());
-    
+
     public static Connection getConnection() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver"); // chú ý driver mới của MySQL
@@ -21,7 +20,7 @@ public class DBContext {
             return null;
         }
     }
-    
+
     public static void closeConnection(Connection conn) {
         if (conn != null) {            try {
                 conn.close();

@@ -91,7 +91,7 @@ public class ClubMeetingDAO {
 
     public static void update(int clubID, String startedTime, String URLMeeting, int clubMeetingID) {
         String sql = """
-                     UPDATE clubmeeting
+                     UPDATE Clubmeeting
                      SET
                      
                      ClubID = ?,
@@ -113,7 +113,7 @@ public class ClubMeetingDAO {
 
     public static void delete(int clubMeetingID) {
         String sql = """
-                     DELETE FROM clubmeeting
+                     DELETE FROM Clubmeeting
                      WHERE ClubMeetingID = ?;""";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
@@ -194,9 +194,9 @@ public class ClubMeetingDAO {
         String sql = """
                      SELECT cmp.ClubMeetingID,
                                              cmp.ClubDepartmentID, cd.DepartmentID, d.DepartmentName
-                                          FROM clubmanagementsystem.clubmeetingparticipants cmp
-                                          join clubdepartments cd on cmp.ClubDepartmentID = cd.ClubDepartmentID
-                                          join departments d on cd.DepartmentID = d.DepartmentID
+                                          FROM Clubmeetingparticipants cmp
+                                          join Clubdepartments cd on cmp.ClubDepartmentID = cd.ClubDepartmentID
+                                          join Departments d on cd.DepartmentID = d.DepartmentID
                                           where cmp.ClubMeetingID =  ?""";
         try {
             PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
@@ -241,7 +241,7 @@ public class ClubMeetingDAO {
         ClubMeeting cm = new ClubMeeting();
         String sql = """
                      SELECT * 
-                                          FROM clubmanagementsystem.clubmeeting 
+                                          FROM Clubmeeting 
                                           Where ClubID = ?
                                           ORDER BY ClubMeetingID DESC 
                                           LIMIT 1;""";
@@ -260,7 +260,7 @@ public class ClubMeetingDAO {
 
     public static void insertParticipants(int clubMeetingId, int parseInt) {
         String sql = """
-                     INSERT INTO clubmanagementsystem.clubmeetingparticipants
+                     INSERT INTO Clubmeetingparticipants
                      (ClubMeetingID,
                      ClubDepartmentID)
                      VALUES
@@ -279,7 +279,7 @@ public class ClubMeetingDAO {
 
     public static boolean updateMeeting(ClubMeeting meeting, List<String> participants) {
         String sqlUpdatemeeting = """
-                                  UPDATE clubmeeting
+                                  UPDATE Clubmeeting
                                   SET
                                   
                                   
@@ -290,10 +290,10 @@ public class ClubMeetingDAO {
                                   Document = ?
                                   WHERE ClubMeetingID = ?;""";
         String sqlDlOldPar = """
-                             DELETE FROM clubmanagementsystem.clubmeetingparticipants
+                             DELETE FROM Clubmeetingparticipants
                              WHERE ClubMeetingID=?;""";
         String sqlNewPar = """
-                           INSERT INTO clubmanagementsystem.clubmeetingparticipants
+                           INSERT INTO Clubmeetingparticipants
                                                 (ClubMeetingID,
                                                 ClubDepartmentID)
                                                 VALUES
@@ -332,10 +332,10 @@ public class ClubMeetingDAO {
 
     public static boolean deleteMeeting(int meetingId) {
         String sql1 = """
-                      DELETE FROM clubmeeting
+                      DELETE FROM Clubmeeting
                       WHERE ClubMeetingID = ?;""";
         String sql2 = """
-                      DELETE FROM clubmanagementsystem.clubmeetingparticipants
+                      DELETE FROM Clubmeetingparticipants
                       WHERE ClubMeetingID = ?;""";
 
         try {
